@@ -6,13 +6,15 @@
  */
 
 import React, { useRef, VFC } from 'react';
-import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
+import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { generateDataProvider } from '../../lib/data_provider';
 import { ComponentType } from '../../../../../common/types/component_type';
-import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
@@ -61,27 +63,11 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, type, as, 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!value || value === EMPTY_VALUE || !key) {
+  if (!fieldAndValueValid(key, value)) {
     return <></>;
   }
 
-  const operator = ':' as QueryOperator;
-
-  const dataProvider: DataProvider[] = [
-    {
-      and: [],
-      enabled: true,
-      id: `timeline-indicator-${key}-${value}`,
-      name: value,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: key,
-        value,
-        operator,
-      },
-    },
-  ];
+  const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
 
   const addToTimelineProps: AddToTimelineButtonProps = {
     dataProvider,
@@ -105,7 +91,10 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, type, as, 
           onClick={() => contextMenuRef.current?.click()}
           {...props}
         >
-          Add to Timeline
+          <FormattedMessage
+            id="xpack.threatIntelligence.addToTimelineContextMenu"
+            defaultMessage="Add to Timeline"
+          />
         </EuiContextMenuItem>
       </>
     );
@@ -114,8 +103,12 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, type, as, 
   if (as) addToTimelineProps.Component = as;
 
   return (
-    <div {...props} css={styles.inlineFlex}>
-      {addToTimelineButton(addToTimelineProps)}
-    </div>
+    <EuiToolTip
+      content={i18n.translate('xpack.threatIntelligence.addToTimelineIconButton', {
+        defaultMessage: 'Add to Timeline',
+      })}
+    >
+      <EuiFlexItem {...props}>{addToTimelineButton(addToTimelineProps)}</EuiFlexItem>
+    </EuiToolTip>
   );
 };
