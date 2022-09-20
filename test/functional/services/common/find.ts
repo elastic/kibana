@@ -91,7 +91,7 @@ export class FindService extends FtrService {
   }
 
   public async setValueByClass(selector: string, text: string, topOffset?: number): Promise<void> {
-    this.log.debug(`Find.setValue('${selector}', '${text}')`);
+    this.log.debug(`Find.setValueByClass('${selector}', '${text}')`);
     return await this.retry.try(async () => {
       const element = await this.byClassName(selector);
       await element.click(topOffset);
