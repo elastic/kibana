@@ -16,9 +16,9 @@ import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -27,12 +27,10 @@ import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types'
 import {
   State,
   visualizationTypes,
-  XYSuggestion,
   XYLayerConfig,
   XYDataLayerConfig,
-  YConfig,
-  YAxisMode,
   SeriesType,
+  XYSuggestion,
   PersistedState,
 } from './types';
 import { layerTypes } from '../../../common';
@@ -96,6 +94,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
+  unifiedSearch,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -105,6 +104,7 @@ export const getXyVisualization = ({
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
@@ -396,90 +396,6 @@ export const getXyVisualization = ({
     };
   },
 
-  updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
-    const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
-    if (!foundLayer || !isDataLayer(foundLayer)) {
-      return prevState;
-    }
-    const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
-    const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<YConfig>((metric, idx) => {
-      return {
-        color: metric.color,
-        forAccessor: metric.accessor ?? foundLayer.accessors[idx],
-        ...(axisMode && { axisMode }),
-        ...(isReferenceLine && { fill: chartType === 'area' ? 'below' : ('none' as FillStyle) }),
-      };
-    });
-    const newLayer = {
-      ...foundLayer,
-      ...(chartType && { seriesType: chartType as SeriesType }),
-      ...(palette && { palette }),
-      collapseFn,
-      yConfig,
-      layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
-    } as XYLayerConfig;
-
-    const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
-
-    return {
-      ...prevState,
-      layers: newLayers,
-    };
-  },
-
-  getVisualizationSuggestionFromContext({ suggestions, context }) {
-    const visualizationStateLayers = [];
-    let datasourceStateLayers = {};
-    const fillOpacity = context.configuration.fill ? Number(context.configuration.fill) : undefined;
-    for (let suggestionIdx = 0; suggestionIdx < suggestions.length; suggestionIdx++) {
-      const currentSuggestion = suggestions[suggestionIdx] as XYSuggestion;
-      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
-      const contextLayer = context.layers.find(
-        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
-      );
-      if (this.updateLayersConfigurationFromContext && contextLayer) {
-        const updatedSuggestionState = this.updateLayersConfigurationFromContext({
-          prevState: currentSuggestion.visualizationState as unknown as State,
-          layerId: currentSuggestionsLayers[0].layerId as string,
-          context: contextLayer,
-        });
-
-        visualizationStateLayers.push(...updatedSuggestionState.layers);
-        datasourceStateLayers = {
-          ...datasourceStateLayers,
-          ...currentSuggestion.datasourceState.layers,
-        };
-      }
-    }
-    let suggestion = suggestions[0] as XYSuggestion;
-    suggestion = {
-      ...suggestion,
-      datasourceState: {
-        ...suggestion.datasourceState,
-        layers: {
-          ...suggestion.datasourceState.layers,
-          ...datasourceStateLayers,
-        },
-      },
-      visualizationState: {
-        ...suggestion.visualizationState,
-        fillOpacity,
-        yRightExtent: context.configuration.extents?.yRightExtent,
-        yLeftExtent: context.configuration.extents?.yLeftExtent,
-        legend: context.configuration.legend,
-        gridlinesVisibilitySettings: context.configuration.gridLinesVisibility,
-        tickLabelsVisibilitySettings: context.configuration.tickLabelsVisibility,
-        axisTitlesVisibilitySettings: context.configuration.axisTitlesVisibility,
-        valuesInLegend: true,
-        valueLabels: context.configuration.valueLabels ? 'show' : 'hide',
-        layers: visualizationStateLayers,
-      },
-    };
-    return suggestion;
-  },
-
   removeDimension({ prevState, layerId, columnId, frame }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
@@ -609,6 +525,7 @@ export const getXyVisualization = ({
               savedObjects: core.savedObjects,
               docLinks: core.docLinks,
               http: core.http,
+              unifiedSearch,
             }}
           >
             {dimensionEditor}
@@ -820,6 +737,27 @@ export const getXyVisualization = ({
       );
     }
     return null;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as XYSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 });
 
