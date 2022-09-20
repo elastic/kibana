@@ -40,7 +40,7 @@ const changePointGroups: ChangePointGroup[] = [
   },
 ];
 
-describe('get_simple_hierarchicaltree', () => {
+describe('get_simple_hierarchical_tree', () => {
   describe('getFieldValuePairCounts', () => {
     it('returns a nested record with field/value pair counts', () => {
       const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
@@ -77,6 +77,7 @@ describe('get_simple_hierarchicaltree', () => {
             },
           ],
           docCount: 101,
+          pValue: 0.01,
         },
         {
           group: [
@@ -92,6 +93,7 @@ describe('get_simple_hierarchicaltree', () => {
             },
           ],
           docCount: 49,
+          pValue: 0.001,
         },
       ]);
     });
