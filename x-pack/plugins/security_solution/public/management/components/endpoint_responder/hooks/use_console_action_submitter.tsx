@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useGetActionDetails } from '../../../hooks/endpoint/use_get_action_details';
@@ -16,24 +16,9 @@ import { useIsMounted } from '../../../hooks/use_is_mounted';
 import type {
   ActionDetails,
   Immutable,
-  MaybeImmutable,
   ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
-
-const getApiActionState = (
-  store: MaybeImmutable<CommandResponseActionApiState>
-): Immutable<Required<CommandResponseActionApiState>['actionApiState']> => {
-  return (
-    store.actionApiState ?? {
-      actionRequestSent: false,
-      actionRequestError: undefined,
-      actionId: undefined,
-      actionDetails: undefined,
-      actionDetailsError: undefined,
-    }
-  );
-};
 
 interface ConsoleActionSubmitter {
   /**
@@ -77,15 +62,23 @@ export const useConsoleActionSubmitter = ({
   const isMounted = useIsMounted();
   const isPending = status === 'pending';
 
-  // const {
-  //   mutate: apiCreateActionRequest,
-  //   data: apiActionRequestResponse,
-  //   isSuccess: apiIsActionRequestSuccess,
-  //   error: apiActionRequestError,
-  // } = actionCreator;
+  const currentActionState = useMemo<
+    Immutable<Required<CommandResponseActionApiState>['actionApiState']>
+  >(
+    () =>
+      store.actionApiState ?? {
+        request: {
+          sent: false,
+          error: undefined,
+          actionId: undefined,
+        },
+        actionDetails: undefined,
+        actionDetailsError: undefined,
+      },
+    [store.actionApiState]
+  );
 
-  const currentActionState = getApiActionState(store);
-  const { actionId, actionRequestSent } = currentActionState.request;
+  const { actionId, sent: actionRequestSent } = currentActionState.request;
 
   const { data: apiActionDetails, error: apiActionDetailsError } = useGetActionDetails(
     actionId ?? '-',
@@ -102,26 +95,31 @@ export const useConsoleActionSubmitter = ({
         {
           ...(currentActionState as Required<CommandResponseActionApiState>['actionApiState'])
             .request,
+          sent: true,
         };
 
-      actionCreator.mutateAsync(actionRequestBody).then((response) => {
-        // We mutate the request state here just in case the component is no longer mounted.
-        // This ensures that the next time the console is opened, that the actionId is not lost.
-        updatedRequestState.actionId = response.data.id;
-
-        // If the component is mounted, then set the store with the updated data (causes a rerender)
-        if (isMounted) {
-          setStore((prevState) => {
-            return {
-              ...prevState,
-              actionApiState: {
-                ...(prevState.actionApiState ?? currentActionState),
-                request: { ...updatedRequestState },
-              },
-            };
-          });
-        }
-      });
+      actionCreator
+        .mutateAsync(actionRequestBody)
+        .then((response) => {
+          updatedRequestState.actionId = response.data.id;
+        })
+        .catch((err) => {
+          updatedRequestState.error = err;
+        })
+        .finally(() => {
+          // If the component is mounted, then set the store with the updated data (causes a rerender)
+          if (isMounted) {
+            setStore((prevState) => {
+              return {
+                ...prevState,
+                actionApiState: {
+                  ...(prevState.actionApiState ?? currentActionState),
+                  request: { ...updatedRequestState },
+                },
+              };
+            });
+          }
+        });
 
       setStore((prevState) => {
         return {
