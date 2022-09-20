@@ -30,6 +30,8 @@ import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
+import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
+
 import { SpikeAnalysisTable } from './spike_analysis_table';
 
 const NARROW_COLUMN_WIDTH = '120px';
@@ -222,6 +224,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnGroup',
@@ -272,6 +275,17 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       },
       sortable: false,
       textOnly: true,
+      valign: 'top',
+    },
+    {
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'docCount',
+      name: i18n.translate('xpack.aiops.correlations.spikeAnalysisTableGroups.docCountLabel', {
+        defaultMessage: 'Doc count',
+      }),
+      sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnPValue',
@@ -299,15 +313,38 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       ),
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
+      valign: 'top',
     },
     {
-      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
-      field: 'docCount',
-      name: i18n.translate('xpack.aiops.correlations.spikeAnalysisTableGroups.docCountLabel', {
-        defaultMessage: 'Doc count',
-      }),
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnImpact',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
+            {
+              defaultMessage: 'The level of impact of the field on the message rate difference',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabel"
+              defaultMessage="Impact"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (_, { pValue }) => {
+        if (!pValue) return NOT_AVAILABLE;
+        const label = getFailedTransactionsCorrelationImpactLabel(pValue);
+        return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
+      },
       sortable: true,
-      width: '20%',
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
@@ -333,6 +370,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         },
       ],
       width: ACTIONS_COLUMN_WIDTH,
+      valign: 'top',
     },
   ];
 
