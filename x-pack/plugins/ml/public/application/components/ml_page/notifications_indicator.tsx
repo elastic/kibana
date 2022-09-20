@@ -82,7 +82,7 @@ export const NotificationsIndicator: FC = () => {
             content={
               <FormattedMessage
                 id="xpack.ml.notificationsIndicator.errorsAndWarningLabel"
-                defaultMessage="There {count, plural, one {is # notification} other {are # notification}} with the error or warning level"
+                defaultMessage="There {count, plural, one {is # notification} other {are # notification}} with error or warning level"
                 values={{ count: errorsAndWarningCount }}
               />
             }
