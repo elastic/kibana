@@ -5,35 +5,20 @@
  * 2.0.
  */
 
-import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
-import { createCustomRule, createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { createCustomRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
+import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addExceptionConditions,
-  addExceptionFlyoutFromViewerHeader,
   addExceptionFlyoutItemName,
-  goToAlertsTab,
   goToEndpointExceptionsTab,
-  goToExceptionsTab,
   openExceptionFlyoutFromEmptyViewerPrompt,
-  removeException,
   searchForExceptionItem,
-  selectAddToRuleRadio,
-  selectBulkCloseAlerts,
   selectOs,
-  selectSharedListToAddExceptionTo,
   submitNewExceptionItem,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -44,15 +29,10 @@ import {
   NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
-  ADD_TO_SHARED_LIST_RADIO_INPUT,
   ADD_TO_RULE_OR_LIST_SECTION,
   CLOSE_SINGLE_ALERT_CHECKBOX,
-  OS_SELECTION_SECTION,
 } from '../../../screens/exceptions';
-import {
-  createEndpointExceptionList,
-} from '../../../tasks/api_calls/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
 describe('Add endpoint exception from rule details', () => {
   before(() => {
