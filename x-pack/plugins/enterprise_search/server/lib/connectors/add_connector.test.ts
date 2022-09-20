@@ -86,6 +86,7 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        description: null,
         error: null,
         index_name: 'index_name',
         is_native: false,
@@ -216,6 +217,7 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        description: null,
         error: null,
         index_name: 'index_name',
         is_native: true,
@@ -268,6 +270,7 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        description: null,
         error: null,
         index_name: 'search-index_name',
         is_native: false,

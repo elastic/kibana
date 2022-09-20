@@ -10992,7 +10992,6 @@
     "xpack.enterpriseSearch.appSearch.tokens.search.name": "公開検索キー",
     "xpack.enterpriseSearch.appSearch.tokens.update": "APIキー'{name}'が更新されました",
     "xpack.enterpriseSearch.automaticCrawlSchedule.title": "自動クローリングスケジュール",
-    "xpack.enterpriseSearch.connector.connectorNamePanel.title": "名前",
     "xpack.enterpriseSearch.connector.connectorTypePanel.title": "コネクタータイプ",
     "xpack.enterpriseSearch.connector.connectorTypePanel.unknown.label": "不明",
     "xpack.enterpriseSearch.connector.ingestionStatus.title": "インジェスチョンステータス",

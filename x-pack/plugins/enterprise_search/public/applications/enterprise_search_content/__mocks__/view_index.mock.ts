@@ -36,6 +36,7 @@ export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
+    description: null,
     error: null,
     id: '2',
     index_name: 'connector',
@@ -91,6 +92,7 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
+    description: null,
     error: null,
     id: '4',
     index_name: 'connector-crawler',
