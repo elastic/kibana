@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 import {
   isMobileAgentName,
   isJavaAgentName,
@@ -35,7 +36,6 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
-import { EuiBetaBadge } from '@elastic/eui';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
