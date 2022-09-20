@@ -9,6 +9,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   type AppContextTestRender,
   createAppRootMockRenderer,
@@ -22,7 +23,7 @@ import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_l
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;
-  error?: null;
+  error?: Partial<IHttpFetchError> | null;
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
@@ -158,6 +159,32 @@ describe('Action history page', () => {
       ...baseMockedActionList,
     };
     jest.clearAllMocks();
+  });
+
+  describe('Hide/Show header', () => {
+    it('should show header when data is in', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/administration/action_history?page=3&pageSize=20');
+      });
+      render();
+      const { getByTestId } = renderResult;
+      expect(getByTestId('responseActionsPage-header')).toBeTruthy();
+    });
+
+    it('should not show header when there is no actions index', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/administration/action_history?page=3&pageSize=20');
+      });
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        error: {
+          body: { statusCode: 404, message: 'index_not_found_exception' },
+        },
+      };
+      render();
+      const { queryByTestId } = renderResult;
+      expect(queryByTestId('responseActionsPage-header')).toBeNull();
+    });
   });
 
   describe('Read from URL params', () => {
