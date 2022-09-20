@@ -86,8 +86,6 @@ const FindingsByResourceTableComponent = ({
       />
     );
 
-  console.log(items);
-
   return (
     <EuiBasicTable
       loading={loading}
