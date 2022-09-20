@@ -47,6 +47,7 @@ export const useStyles = () => {
       top: 0,
       pointerEvents: 'none',
       marginLeft: '-3.5px',
+      transition: 'left .5s ease-in-out .3s',
     });
 
     const playHeadThumb: CSSObject = {
