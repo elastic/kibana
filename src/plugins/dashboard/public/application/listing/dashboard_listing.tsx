@@ -18,10 +18,9 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import type { SavedObjectReference } from '@kbn/core/types';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
@@ -41,6 +40,7 @@ import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DashboardAttributes } from '../embeddable';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -54,17 +54,18 @@ interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
 }
 
 const toTableListViewSavedObject = (
-  savedObject: Record<string, unknown>
+  savedObject: SimpleSavedObject<DashboardAttributes>
 ): DashboardSavedObjectUserContent => {
+  const { title, description, timeRestore } = savedObject.attributes;
   return {
-    id: savedObject.id as string,
-    updatedAt: savedObject.updatedAt! as string,
-    references: savedObject.references as SavedObjectReference[],
     type: 'dashboard',
+    id: savedObject.id,
+    updatedAt: savedObject.updatedAt!,
+    references: savedObject.references,
     attributes: {
-      title: (savedObject.title as string) ?? '',
-      description: savedObject.description as string,
-      timeRestore: savedObject.timeRestore as boolean,
+      title,
+      description,
+      timeRestore,
     },
   };
 };
@@ -84,15 +85,14 @@ export const DashboardListing = ({
 }: DashboardListingProps) => {
   const {
     application,
+    data: { query },
+    dashboardSessionStorage,
+    settings: { uiSettings },
+    notifications: { toasts },
     chrome: { setBreadcrumbs },
     coreContext: { executionContext },
     dashboardCapabilities: { showWriteControls },
-    dashboardSessionStorage,
-    data: { query },
-    notifications: { toasts },
     dashboardSavedObject: { findDashboards, savedObjectsClient },
-    savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
-    settings: { uiSettings, theme },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -301,7 +301,7 @@ export const DashboardListing = ({
     [redirectTo]
   );
 
-  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTable;
+  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
   return (
     <>
       {showNoDataPage && (

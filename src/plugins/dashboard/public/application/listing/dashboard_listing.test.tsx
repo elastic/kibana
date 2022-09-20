@@ -120,6 +120,9 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
+    ).mockResolvedValue(undefined);
     const { component } = mountWith({ props });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

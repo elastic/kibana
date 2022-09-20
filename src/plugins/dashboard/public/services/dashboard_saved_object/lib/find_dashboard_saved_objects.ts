@@ -25,7 +25,7 @@ export interface FindDashboardSavedObjectsArgs {
 
 export interface FindDashboardSavedObjectsResponse {
   total: number;
-  hits: Array<DashboardAttributes & Pick<SimpleSavedObject, 'references' | 'updatedAt' | 'id'>>;
+  hits: Array<SimpleSavedObject<DashboardAttributes>>;
 }
 
 export async function findDashboardSavedObjects({
@@ -43,15 +43,9 @@ export async function findDashboardSavedObjects({
     hasReference,
     page: 1,
   });
-
   return {
     total,
-    hits: savedObjects.map(({ updatedAt, references, id, attributes: dashboardAttributes }) => ({
-      ...dashboardAttributes,
-      references,
-      updatedAt,
-      id,
-    })),
+    hits: savedObjects,
   };
 }
 
