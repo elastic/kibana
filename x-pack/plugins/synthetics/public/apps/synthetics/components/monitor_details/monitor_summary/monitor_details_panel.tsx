@@ -39,7 +39,7 @@ export const MonitorDetailsPanel = () => {
   const { monitor, loading } = useSelectedMonitor();
 
   if (
-    (latestPing && latestPing.monitor?.id !== monitorId) ||
+    (latestPing && latestPing?.config_id !== monitorId) ||
     (monitor && monitor.id !== monitorId)
   ) {
     return <EuiLoadingContent lines={6} />;
