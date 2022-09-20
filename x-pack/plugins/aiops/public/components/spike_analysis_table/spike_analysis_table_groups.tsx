@@ -318,6 +318,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         />
       ),
       sortable: false,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
