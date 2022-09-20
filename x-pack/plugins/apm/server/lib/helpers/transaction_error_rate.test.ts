@@ -8,22 +8,22 @@
 import { calculateFailedTransactionRateFromServiceMetrics } from './transaction_error_rate';
 
 describe('calculateFailedTransactionRateFromServiceMetrics', () => {
-  it('should return null when all params are null', () => {
+  it('should return 0 when all params are null', () => {
     expect(
       calculateFailedTransactionRateFromServiceMetrics({
         failedTransactions: null,
         successfulTransactions: null,
       })
-    ).toBeNull();
+    ).toBe(0);
   });
 
-  it('should return null when failedTransactions:null', () => {
+  it('should return 9 when failedTransactions:null', () => {
     expect(
       calculateFailedTransactionRateFromServiceMetrics({
         failedTransactions: null,
         successfulTransactions: 2,
       })
-    ).toBeNull();
+    ).toBe(0);
   });
 
   it('should return 0 when failedTransactions:0', () => {

@@ -9,7 +9,7 @@ import type {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '@kbn/es-types';
-import { isNil } from 'lodash';
+import { isNull } from 'lodash';
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 
@@ -58,12 +58,8 @@ export function calculateFailedTransactionRateFromServiceMetrics({
   failedTransactions: number | null;
   successfulTransactions: number | null;
 }) {
-  if (failedTransactions === 0) {
+  if (isNull(failedTransactions) || failedTransactions === 0) {
     return 0;
-  }
-
-  if (isNil(failedTransactions)) {
-    return null;
   }
 
   successfulTransactions = successfulTransactions ?? 0;
