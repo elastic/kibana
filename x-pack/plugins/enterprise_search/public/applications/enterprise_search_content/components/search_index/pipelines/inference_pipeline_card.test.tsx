@@ -38,10 +38,4 @@ describe('InfererencePipelineCard', () => {
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Deployed');
   });
-
-  it('renders an undeployed item', () => {
-    const wrapper = shallow(<InferencePipelineCard {...mockValues} isDeployed={false} />);
-    const health = wrapper.find(EuiHealth);
-    expect(health.prop('children')).toEqual('Not deployed');
-  });
 });
