@@ -24,7 +24,7 @@ export const configureClient = (
     scoped = false,
     getExecutionContext = noop,
     agentManager,
-    kibanaVersion
+    kibanaVersion,
   }: {
     logger: Logger;
     type: string;

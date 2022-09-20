@@ -21,7 +21,7 @@ export const PRODUCT_ORIGIN_HEADER = 'x-elastic-product-origin';
 /**
  * @internal
  */
-export const USER_AGENT_HEADER = 'user-agent'
+export const USER_AGENT_HEADER = 'user-agent';
 
 /**
  * @internal

@@ -32,7 +32,7 @@ export function parseClientOptions(
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {
       ...DEFAULT_HEADERS,
-      ...{[USER_AGENT_HEADER]: `Kibana/${kibanaVersion}`},
+      ...{ [USER_AGENT_HEADER]: `Kibana/${kibanaVersion}` },
       ...config.customHeaders,
     },
     // do not make assumption on user-supplied data content
