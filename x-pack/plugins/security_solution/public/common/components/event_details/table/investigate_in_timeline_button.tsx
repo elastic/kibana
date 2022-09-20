@@ -63,7 +63,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }
-  }, [dispatch, clearTimeline, dataProviders]);
+  }, [dataProviders, clearTimeline, dispatch, defaultDataView.id, signalIndexName]);
 
   return asEmptyButton ? (
     <EuiButtonEmpty
