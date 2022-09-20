@@ -121,6 +121,15 @@ const baseColumns = [
     sortable: true,
   },
   {
+    field: 'rule.benchmark.name',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+      { defaultMessage: 'Benchmark' }
+    ),
+    sortable: true,
+    truncateText: true,
+  },
+  {
     field: 'rule.section',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
