@@ -35,7 +35,7 @@ const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
-export interface GroupTableItem {
+export  interface GroupTableItem {
   id: number;
   docCount: number;
   pValue: number | null;

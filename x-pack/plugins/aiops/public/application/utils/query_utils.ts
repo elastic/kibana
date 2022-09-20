@@ -74,6 +74,13 @@ export function buildBaseFilterCriteria(
           {
             term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
           },
+        ],
+      },
+    });
+  } else if (selectedGroup && !includeSelectedChangePoint) {
+    filterCriteria.push({
+      bool: {
+        must_not: [
           ...groupFilter,
         ],
       },

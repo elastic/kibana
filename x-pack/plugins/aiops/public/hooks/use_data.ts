@@ -111,9 +111,9 @@ export const useData = (
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest
-      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      ? { ...fieldStatsRequest, selectedChangePoint, selectedGroup, includeSelectedChangePoint: false }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint]);
+  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
     return fieldStatsRequest && (selectedChangePoint || selectedGroup)
