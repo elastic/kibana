@@ -25,6 +25,7 @@ import {
   amountAndUnitToObject,
 } from '../../../../../../../common/agent_configuration/amount_and_unit';
 import { SelectWithPlaceholder } from '../../../../../shared/select_with_placeholder';
+import { EuiMarkdownFormat } from '@elastic/eui';
 
 function FormRow({
   setting,
@@ -163,7 +164,7 @@ export function SettingFormRow({
       }
       description={
         <>
-          {setting.description}
+          <EuiMarkdownFormat>{setting.description}</EuiMarkdownFormat>
 
           {setting.defaultValue && (
             <>
