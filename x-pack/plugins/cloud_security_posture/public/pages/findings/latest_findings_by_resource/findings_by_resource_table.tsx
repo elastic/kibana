@@ -62,6 +62,7 @@ const FindingsByResourceTableComponent = ({
       findingsByResourceColumns.resource_id,
       createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
       findingsByResourceColumns['rule.section'],
       createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
       findingsByResourceColumns.failed_findings,
@@ -136,6 +137,16 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       <FormattedMessage
         id="xpack.csp.findings.findingsByResourceTable.resourceNameColumnLabel"
         defaultMessage="Resource Name"
+      />
+    ),
+  },
+  {
+    field: 'rule.benchmark.name',
+    truncateText: true,
+    name: (
+      <FormattedMessage
+        id="xpack.csp.findings.findingsByResourceTable.ruleBenchmarkColumnLabel"
+        defaultMessage="Benchmark"
       />
     ),
   },
