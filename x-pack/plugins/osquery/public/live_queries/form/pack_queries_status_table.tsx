@@ -541,10 +541,12 @@ interface PackQueriesStatusTableProps {
     actionId,
     isIcon,
     isDisabled,
+    queryId,
   }: {
     actionId?: string;
     isIcon?: boolean;
     isDisabled?: boolean;
+    queryId?: string;
   }) => ReactElement;
   showResultsHeader?: boolean;
 }
@@ -618,11 +620,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
   const handleAddToCase = useCallback(
-    (payload: { actionId: string; isIcon?: boolean }) =>
+    (payload: { actionId?: string; isIcon?: boolean; queryId: string }) =>
       // eslint-disable-next-line react/display-name
       () => {
         if (addToCase) {
-          return addToCase({ actionId: payload.actionId, isIcon: payload?.isIcon });
+          return addToCase({
+            actionId: payload.actionId,
+            isIcon: payload.isIcon,
+            queryId: payload.queryId,
+          });
         }
 
         return <></>;
@@ -647,7 +653,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   addToTimeline={addToTimeline}
-                  addToCase={addToCase && handleAddToCase({ actionId: item.action_id })}
+                  addToCase={addToCase && handleAddToCase({ queryId: item.action_id, actionId })}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -657,7 +663,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [startDate, expirationDate, agentIds, addToTimeline, addToCase, handleAddToCase]
+    [startDate, expirationDate, agentIds, addToTimeline, addToCase, handleAddToCase, actionId]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -688,7 +694,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         available: () => !!addToCase,
         render: (item: { action_id: string }) =>
           addToCase &&
-          addToCase({ actionId: item.action_id, isIcon: true, isDisabled: !item.action_id }),
+          addToCase({
+            actionId,
+            queryId: item.action_id,
+            isIcon: true,
+            isDisabled: !item.action_id,
+          }),
       },
       {
         available: () => addToTimeline && timelines && appName === SECURITY_APP_NAME,
@@ -756,6 +767,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     renderAgentsColumn,
     renderToggleResultsAction,
     addToCase,
+    actionId,
     addToTimeline,
     timelines,
     appName,
