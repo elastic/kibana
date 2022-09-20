@@ -188,6 +188,8 @@ export function getRuleType(
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
+    const isGroupAgg = !!queryParams.termField;
+
     const unmetGroupValues: Record<string, number> = {};
     const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
 
@@ -208,7 +210,10 @@ export function getRuleType(
         continue;
       }
 
-      const met = compareFn(value, params.threshold);
+      // group aggregations use the bucket selector agg to compare conditions
+      // within the ES query, so only 'met' results are returned, therefore we don't need
+      // to use the compareFn
+      const met = isGroupAgg ? true : compareFn(value, params.threshold);
 
       if (!met) {
         unmetGroupValues[alertId] = value;

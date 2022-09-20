@@ -228,9 +228,6 @@ export function getResultFromEs({
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],
     };
-    aggregations.groupCardinalityAgg = {
-      value: 0,
-    };
 
     delete aggregations.dateAgg;
   }
