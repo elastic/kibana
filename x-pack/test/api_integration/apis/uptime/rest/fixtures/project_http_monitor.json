@@ -1,6 +1,6 @@
 {
-  "project": "bbb",
-  "keep_stale": true,
+  "project": "test-suite",
+  "keep_stale": false,
   "monitors": [
     {
       "locations": ["localhost"],

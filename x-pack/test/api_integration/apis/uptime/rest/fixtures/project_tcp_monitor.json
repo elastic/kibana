@@ -1,5 +1,5 @@
 {
-  "project": "bbb",
+  "project": "test-suite",
   "keep_stale": true,
   "monitors": [
     {
