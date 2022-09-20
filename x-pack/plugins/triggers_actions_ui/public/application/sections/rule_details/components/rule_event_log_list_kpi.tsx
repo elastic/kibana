@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIconTip, EuiStat, EuiSpacer } from '@elastic/eui';
+import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -63,7 +64,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   const isInitialized = useRef(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [kpi, setKpi] = useState<any>(null);
+  const [kpi, setKpi] = useState<IExecutionKPIResult>();
 
   const loadKPIFn = useMemo(() => {
     if (ruleId === '*') {

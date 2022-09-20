@@ -12,7 +12,7 @@ import { flatMap, get } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
-import { IExecutionLog, IExecutionLogResult } from '../../common';
+import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
@@ -44,17 +44,6 @@ const Millis2Nanos = 1000 * 1000;
 export const EMPTY_EXECUTION_LOG_RESULT = {
   total: 0,
   data: [],
-};
-
-export const EMPTY_EXECUTION_KPI_RESULT = {
-  success: 0,
-  unknown: 0,
-  failure: 0,
-  activeAlerts: 0,
-  newAlerts: 0,
-  recoveredAlerts: 0,
-  erroredActions: 0,
-  triggeredActions: 0,
 };
 
 interface IActionExecution
@@ -148,7 +137,12 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
       },
       aggs: {
         actionExecution: {
-          filter: getProviderAndActionFilter('actions', 'execute'),
+          filter: {
+            bool: {
+              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+              must: [getProviderAndActionFilter('alerting', 'execute')],
+            },
+          },
           aggs: {
             actionOutcomes: {
               terms: {
@@ -527,7 +521,7 @@ function formatExecutionKPIAggBuckets(aggs: ExcludeExecuteStartKpiAggResult) {
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
   const { aggregations } = results;
   if (!aggregations || !aggregations.excludeExecuteStart) {
-    return EMPTY_EXECUTION_LOG_RESULT;
+    return EMPTY_EXECUTION_KPI_RESULT;
   }
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult;
 
