@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { createSHA256Hash } from '@kbn/crypto';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
-import { CloudConfigType } from './config';
+import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from './utils';
 import { registerFullstoryRoute } from './routes/fullstory';
-import { registerChatRoute } from './routes/chat';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
-  usageCollection?: UsageCollectionSetup;
-  security?: SecurityPluginSetup;
   cloudExperiments?: CloudExperimentsPluginSetup;
+  security?: SecurityPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface CloudSetup {
@@ -39,12 +38,10 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
   private readonly config: CloudConfigType;
-  private readonly isDev: boolean;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config = this.context.config.get<CloudConfigType>();
-    this.isDev = this.context.env.mode.dev;
   }
 
   public setup(
@@ -71,15 +68,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       registerFullstoryRoute({
         httpResources: core.http.resources,
         packageInfo: this.context.env.packageInfo,
-      });
-    }
-
-    if (this.config.chat.enabled && this.config.chatIdentitySecret) {
-      registerChatRoute({
-        router: core.http.createRouter(),
-        chatIdentitySecret: this.config.chatIdentitySecret,
-        security,
-        isDev: this.isDev,
       });
     }
 

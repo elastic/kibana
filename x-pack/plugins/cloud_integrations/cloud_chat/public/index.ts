@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { CloudPlugin } from './plugin';
-
-export type { CloudSetup, CloudConfigType, CloudStart } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { CloudChatPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new CloudPlugin(initializerContext);
+  return new CloudChatPlugin(initializerContext);
 }
+
+export { Chat } from './components';

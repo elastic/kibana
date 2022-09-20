@@ -19,19 +19,12 @@ function createSetupMock() {
     deploymentUrl: 'deployment-url',
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
+    registerCloudService: jest.fn(),
   };
 }
 
 const config = {
-  chat: {
-    enabled: true,
-    chatURL: 'chat-url',
-    user: {
-      id: 'user-id',
-      email: 'test-user@elastic.co',
-      jwt: 'identity-jwt',
-    },
-  },
+  isCloudEnabled: true,
 };
 
 const getContextProvider: () => React.FC =

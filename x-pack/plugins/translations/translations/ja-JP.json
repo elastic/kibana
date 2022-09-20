@@ -33797,8 +33797,6 @@
     "visTypeTagCloud.visParams.orientationsLabel": "方向",
     "visTypeTagCloud.visParams.showLabelToggleLabel": "ラベルを表示",
     "visTypeTagCloud.visParams.textScaleLabel": "テキストスケール",
-    "xpack.cloud.chat.chatFrameTitle": "チャット",
-    "xpack.cloud.chat.hideChatButtonLabel": "グラフを非表示",
     "xpack.cloud.deploymentLinkLabel": "このデプロイの管理",
     "xpack.cloud.userMenuLinks.accountLinkText": "会計・請求",
     "xpack.cloud.userMenuLinks.profileLinkText": "プロフィールを編集",

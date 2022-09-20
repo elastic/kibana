@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { DecoratorFn } from '@storybook/react';
-import { ServicesProvider, CloudServices } from '../public/services';
+import { ServicesProvider, CloudChatServices } from '../public/services';
 
 // TODO: move to a storybook implementation of the service using parameters.
-const services: CloudServices = {
+const services: CloudChatServices = {
   chat: {
-    enabled: true,
     chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
     user: {
       id: 'user-id',

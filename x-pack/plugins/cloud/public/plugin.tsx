@@ -16,8 +16,7 @@ import type {
   AnalyticsServiceSetup,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
+import { catchError, from, map, of } from 'rxjs';
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -25,15 +24,10 @@ import { Sha256 } from '@kbn/crypto-browser';
 import type { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import {
-  ELASTIC_SUPPORT_LINK,
-  CLOUD_SNAPSHOTS_PATH,
-  GET_CHAT_USER_DATA_ROUTE_PATH,
-} from '../common/constants';
-import type { GetChatUserDataResponseBody } from '../common/types';
+import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
-import { ChatConfig, ServicesProvider } from './services';
+import { ServicesProvider } from './services';
 
 export interface CloudConfigType {
   id?: string;
@@ -46,13 +40,6 @@ export interface CloudConfigType {
     enabled: boolean;
     org_id?: string;
     eventTypesAllowlist?: string[];
-  };
-  /** Configuration to enable live chat in Cloud-enabled instances of Kibana. */
-  chat: {
-    /** Determines if chat is enabled. */
-    enabled: boolean;
-    /** The URL to the remotely-hosted chat application. */
-    chatURL: string;
   };
 }
 
@@ -82,6 +69,7 @@ export interface CloudSetup {
   organizationUrl?: string;
   snapshotsUrl?: string;
   isCloudEnabled: boolean;
+  registerCloudService: (contextProvider: FC) => void;
 }
 
 interface SetupFullStoryDeps {
@@ -89,21 +77,20 @@ interface SetupFullStoryDeps {
   basePath: IBasePath;
 }
 
-interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
-  http: CoreSetup['http'];
-}
-
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
-  private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
+  private readonly contextProviders: FC[] = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
   }
 
-  public setup(core: CoreSetup, { cloudExperiments, home, security }: CloudSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    { cloudExperiments, home, security }: CloudSetupDependencies
+  ): CloudSetup {
     this.setupTelemetryContext(core.analytics, security, this.config.id);
 
     this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
@@ -127,11 +114,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       });
     }
 
-    this.setupChat({ http: core.http, security }).catch((e) =>
-      // eslint-disable-next-line no-console
-      console.debug(`Error setting up Chat: ${e.toString()}`)
-    );
-
     if (home) {
       home.environment.update({ cloud: this.isCloudEnabled });
       if (this.isCloudEnabled) {
@@ -153,6 +135,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
       isCloudEnabled: this.isCloudEnabled,
+      registerCloudService: (contextProvider) => {
+        this.contextProviders.push(contextProvider);
+      },
     };
   }
 
@@ -185,11 +170,19 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // Cloud admin console will always perform the actual authorization checks.
       .catch(() => setLinks(true));
 
-    // There's a risk that the request for chat config will take too much time to complete, and the provider
-    // will maintain a stale value.  To avoid this, we'll use an Observable.
+    // Nest all the registered context providers under the Cloud Services Provider.
+    // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
     const CloudContextProvider: FC = ({ children }) => {
-      const chatConfig = useObservable(this.chatConfig$, { enabled: false });
-      return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
+      return (
+        <ServicesProvider isCloudEnabled={this.isCloudEnabled}>
+          {this.contextProviders.reduce(
+            (acc, ContextProvider) => (
+              <ContextProvider> {acc} </ContextProvider>
+            ),
+            children
+          )}
+        </ServicesProvider>
+      );
     };
 
     return {
@@ -303,43 +296,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
           },
         },
       });
-    }
-  }
-
-  private async setupChat({ http, security }: SetupChatDeps) {
-    if (!this.isCloudEnabled) {
-      return;
-    }
-
-    const { enabled, chatURL } = this.config.chat;
-
-    if (!security || !enabled || !chatURL) {
-      return;
-    }
-
-    try {
-      const {
-        email,
-        id,
-        token: jwt,
-      } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
-
-      if (!email || !id || !jwt) {
-        return;
-      }
-
-      this.chatConfig$.next({
-        enabled,
-        chatURL,
-        user: {
-          email,
-          id,
-          jwt,
-        },
-      });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.debug(`[cloud.chat] Could not retrieve chat config: ${e.res.status} ${e.message}`, e);
     }
   }
 }

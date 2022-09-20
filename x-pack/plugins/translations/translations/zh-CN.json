@@ -33834,8 +33834,6 @@
     "visTypeTagCloud.visParams.orientationsLabel": "方向",
     "visTypeTagCloud.visParams.showLabelToggleLabel": "显示标签",
     "visTypeTagCloud.visParams.textScaleLabel": "文本比例",
-    "xpack.cloud.chat.chatFrameTitle": "聊天",
-    "xpack.cloud.chat.hideChatButtonLabel": "隐藏聊天",
     "xpack.cloud.deploymentLinkLabel": "管理此部署",
     "xpack.cloud.userMenuLinks.accountLinkText": "帐户和帐单",
     "xpack.cloud.userMenuLinks.profileLinkText": "编辑配置文件",

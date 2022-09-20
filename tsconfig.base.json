@@ -313,6 +313,8 @@
       "@kbn/canvas-plugin/*": ["x-pack/plugins/canvas/*"],
       "@kbn/cases-plugin": ["x-pack/plugins/cases"],
       "@kbn/cases-plugin/*": ["x-pack/plugins/cases/*"],
+      "@kbn/cloud-chat-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat"],
+      "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
       "@kbn/cloud-experiments-plugin": ["x-pack/plugins/cloud_integrations/cloud_experiments"],
       "@kbn/cloud-experiments-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_experiments/*"],
       "@kbn/cloud-security-posture-plugin": ["x-pack/plugins/cloud_security_posture"],

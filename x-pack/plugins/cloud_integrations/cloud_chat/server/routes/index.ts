@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export const ELASTIC_SUPPORT_LINK = 'https://cloud.elastic.co/support';
-
-/**
- * This is the page for managing your snapshots on Cloud.
- */
-export const CLOUD_SNAPSHOTS_PATH = 'elasticsearch/snapshots/';
+export { registerChatRoute } from './chat';

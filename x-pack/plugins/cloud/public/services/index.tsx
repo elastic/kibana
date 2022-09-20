@@ -7,27 +7,11 @@
 
 import React, { FC, createContext, useContext } from 'react';
 
-interface WithoutChat {
-  enabled: false;
-}
-
-interface WithChat {
-  enabled: true;
-  chatURL: string;
-  user: {
-    jwt: string;
-    id: string;
-    email: string;
-  };
-}
-
-export type ChatConfig = WithChat | WithoutChat;
-
 export interface CloudServices {
-  chat: ChatConfig;
+  isCloudEnabled: boolean;
 }
 
-const ServicesContext = createContext<CloudServices>({ chat: { enabled: false } });
+const ServicesContext = createContext<CloudServices>({ isCloudEnabled: false });
 
 export const ServicesProvider: FC<CloudServices> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
@@ -38,9 +22,4 @@ export const ServicesProvider: FC<CloudServices> = ({ children, ...services }) =
  */
 export function useServices() {
   return useContext(ServicesContext);
-}
-
-export function useChat(): ChatConfig {
-  const { chat } = useServices();
-  return chat;
 }

@@ -23,9 +23,6 @@ const baseConfig = {
   full_story: {
     enabled: false,
   },
-  chat: {
-    enabled: false,
-  },
 };
 
 describe('Cloud Plugin', () => {
@@ -221,92 +218,6 @@ describe('Cloud Plugin', () => {
       });
     });
 
-    describe('setupChat', () => {
-      let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
-
-      beforeEach(() => {
-        consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
-      });
-
-      afterEach(() => {
-        consoleMock.mockRestore();
-      });
-
-      const setupPlugin = async ({
-        config = {},
-        securityEnabled = true,
-        currentUserProps = {},
-        isCloudEnabled = true,
-        failHttp = false,
-      }: {
-        config?: Partial<CloudConfigType>;
-        securityEnabled?: boolean;
-        currentUserProps?: Record<string, any>;
-        isCloudEnabled?: boolean;
-        failHttp?: boolean;
-      }) => {
-        const initContext = coreMock.createPluginInitializerContext({
-          ...baseConfig,
-          id: isCloudEnabled ? 'cloud-id' : null,
-          ...config,
-        });
-
-        const plugin = new CloudPlugin(initContext);
-
-        const coreSetup = coreMock.createSetup();
-        const coreStart = coreMock.createStart();
-
-        if (failHttp) {
-          coreSetup.http.get.mockImplementation(() => {
-            throw new Error('HTTP request failed');
-          });
-        }
-
-        coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
-
-        const securitySetup = securityMock.createSetup();
-        securitySetup.authc.getCurrentUser.mockResolvedValue(
-          securityMock.createMockAuthenticatedUser(currentUserProps)
-        );
-
-        const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
-
-        return { initContext, plugin, setup, coreSetup };
-      };
-
-      it('chatConfig is not retrieved if cloud is not enabled', async () => {
-        const { coreSetup } = await setupPlugin({ isCloudEnabled: false });
-        expect(coreSetup.http.get).not.toHaveBeenCalled();
-      });
-
-      it('chatConfig is not retrieved if security is not enabled', async () => {
-        const { coreSetup } = await setupPlugin({ securityEnabled: false });
-        expect(coreSetup.http.get).not.toHaveBeenCalled();
-      });
-
-      it('chatConfig is not retrieved if chat is enabled but url is not provided', async () => {
-        // @ts-expect-error 2741
-        const { coreSetup } = await setupPlugin({ config: { chat: { enabled: true } } });
-        expect(coreSetup.http.get).not.toHaveBeenCalled();
-      });
-
-      it('chatConfig is not retrieved if internal API fails', async () => {
-        const { coreSetup } = await setupPlugin({
-          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
-          failHttp: true,
-        });
-        expect(coreSetup.http.get).toHaveBeenCalled();
-        expect(consoleMock).toHaveBeenCalled();
-      });
-
-      it('chatConfig is retrieved if chat is enabled and url is provided', async () => {
-        const { coreSetup } = await setupPlugin({
-          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
-        });
-        expect(coreSetup.http.get).toHaveBeenCalled();
-      });
-    });
-
     describe('interface', () => {
       const setupPlugin = () => {
         const initContext = coreMock.createPluginInitializerContext({
@@ -360,6 +271,11 @@ describe('Cloud Plugin', () => {
       it('exposes cname', () => {
         const { setup } = setupPlugin();
         expect(setup.cname).toBe('cloud.elastic.co');
+      });
+
+      it('exposes registerCloudService', () => {
+        const { setup } = setupPlugin();
+        expect(setup.registerCloudService).toBeDefined();
       });
     });
 
