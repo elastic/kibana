@@ -17,7 +17,9 @@ jest.mock('../services', () => ({
 }));
 
 jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
+  convertToLensModule: Promise.resolve({
+    getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
+  }),
 }));
 
 jest.mock('./configurations', () => ({

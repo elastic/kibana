@@ -7,7 +7,7 @@
  */
 
 import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
-import { getColumnsFromVis } from '@kbn/visualizations-plugin/public';
+import { convertToLensModule } from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
@@ -47,6 +47,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
+  const { getColumnsFromVis } = await convertToLensModule;
   const result = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: [],
     splits: ['segment'],
