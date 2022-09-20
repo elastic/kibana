@@ -106,5 +106,6 @@ export interface ChangePointGroup {
   id: string;
   group: ChangePointGroupItem[];
   docCount: number;
+  pValue: number | null;
   histogram?: ChangePointHistogramItem[];
 }

@@ -74,7 +74,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
-  const [groupResults, setGroupResults] = useState<boolean>(true);
+  const [groupResults, setGroupResults] = useState<boolean>(false);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
@@ -106,6 +106,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
   function startHandler() {
+    // Reset grouping to false when restarting the analysis.
+    setGroupResults(false);
+
     if (onPinnedChangePoint) {
       onPinnedChangePoint(null);
     }
@@ -124,30 +127,33 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(({ group, docCount, histogram }, index) => {
-      const sortedGroup = group.sort((a, b) =>
-        a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
-      );
-      const dedupedGroup: Record<string, any> = {};
-      const repeatedValues: Record<string, any> = {};
+    const tableItems = data.changePointsGroups.map(
+      ({ group, docCount, histogram, pValue }, index) => {
+        const sortedGroup = group.sort((a, b) =>
+          a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
+        );
+        const dedupedGroup: Record<string, any> = {};
+        const repeatedValues: Record<string, any> = {};
 
-      sortedGroup.forEach((pair) => {
-        const { fieldName, fieldValue } = pair;
-        if (pair.duplicate === false) {
-          dedupedGroup[fieldName] = fieldValue;
-        } else {
-          repeatedValues[fieldName] = fieldValue;
-        }
-      });
+        sortedGroup.forEach((pair) => {
+          const { fieldName, fieldValue } = pair;
+          if (pair.duplicate === false) {
+            dedupedGroup[fieldName] = fieldValue;
+          } else {
+            repeatedValues[fieldName] = fieldValue;
+          }
+        });
 
-      return {
-        id: index,
-        docCount,
-        group: dedupedGroup,
-        repeatedValues,
-        histogram,
-      };
-    });
+        return {
+          id: index,
+          docCount,
+          pValue,
+          group: dedupedGroup,
+          repeatedValues,
+          histogram,
+        };
+      }
+    );
 
     return tableItems;
   }, [data.changePointsGroups]);
@@ -163,8 +169,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const groupItemCount = groupTableItems.reduce((p, c) => {
     return p + Object.keys(c.group).length;
   }, 0);
-  const foundGroups =
-    groupTableItems.length === 0 || (groupTableItems.length > 0 && groupItemCount > 0);
+  const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
@@ -179,6 +184,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       {showSpikeAnalysisTable && foundGroups && (
         <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
           <EuiSwitch
+            data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${groupResults ? ' checked' : ''}`}
             showLabel={false}
             label={''}
             checked={groupResults}
