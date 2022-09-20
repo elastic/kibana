@@ -9,7 +9,7 @@ import React, { useContext, VFC } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { InvestigateInTimelineButtonIcon } from '../../../timeline/components/investigate_in_timeline_button_icon';
 import { Indicator } from '../../../../../common/types/indicator';
-import { OpenIndicatorFlyoutButton } from '../open_indicator_flyout_button/open_indicator_flyout_button';
+import { OpenIndicatorFlyoutButton } from '../open_flyout_button';
 import { IndicatorsTableContext } from './context';
 
 const INVESTIGATE_TEST_ID = 'tiIndicatorTableInvestigateInTimelineButtonIcon';
