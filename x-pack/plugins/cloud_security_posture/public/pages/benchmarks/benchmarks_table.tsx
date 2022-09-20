@@ -52,7 +52,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'package_policy.name',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
-      defaultMessage: 'Integration',
+      defaultMessage: 'Integration Name',
     }),
     render: (packageName, benchmark) => (
       <Link
@@ -75,7 +75,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'rules.enabled',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
-      defaultMessage: 'Active Rules',
+      defaultMessage: 'Rules',
     }),
     truncateText: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
@@ -167,7 +167,7 @@ export const BenchmarksTable = ({
   const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
     setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
-
+  console.log(benchmarks);
   return (
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
