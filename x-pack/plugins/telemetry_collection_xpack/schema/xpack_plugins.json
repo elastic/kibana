@@ -4917,6 +4917,62 @@
         }
       }
     },
+    "cloud_security_posture": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "score": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
