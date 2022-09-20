@@ -19,10 +19,12 @@ export const navTabsHostDetails = ({
   hasMlUserPermissions,
   isRiskyHostsEnabled,
   hostName,
+  isEnterprise,
 }: {
   hostName: string;
   hasMlUserPermissions: boolean;
   isRiskyHostsEnabled: boolean;
+  isEnterprise?: boolean;
 }): HostDetailsNavTab => {
   const hiddenTabs = [];
 
@@ -66,7 +68,7 @@ export const navTabsHostDetails = ({
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.sessions),
       disabled: false,
-      isBeta: true,
+      isBeta: false,
     },
   };
 
@@ -76,6 +78,10 @@ export const navTabsHostDetails = ({
 
   if (!isRiskyHostsEnabled) {
     hiddenTabs.push(HostsTableType.risk);
+  }
+
+  if (!isEnterprise) {
+    hiddenTabs.push(HostsTableType.sessions);
   }
 
   return omit(hiddenTabs, hostDetailsNavTabs);
