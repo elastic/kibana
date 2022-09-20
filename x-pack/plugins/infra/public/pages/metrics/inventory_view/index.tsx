@@ -8,7 +8,6 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { css } from '@emotion/react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FilterBar } from './components/filter_bar';
@@ -27,6 +26,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 export const SnapshotPage = () => {
   const {
@@ -77,15 +77,7 @@ export const SnapshotPage = () => {
                 }}
                 pageSectionProps={{
                   contentProps: {
-                    // This is added to facilitate a full height layout whereby the
-                    // inner container will set its own height and be scrollable.
-                    css: css`
-                      display: flex;
-                      flex-direction: column;
-                      flex: 1 0 auto;
-                      width: 100%;
-                      height: 100%;
-                    `,
+                    css: fullHeightContentStyles,
                   },
                 }}
               >
