@@ -149,7 +149,7 @@ function FlameGraphTooltip({
 
 export interface FlameGraphProps {
   id: string;
-  height: number;
+  height: number | string;
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
@@ -256,7 +256,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
         <EuiFlexGroup direction="row">
           {columnarData.viewModel.label.length > 0 && (
             <EuiFlexItem grow>
-              <Chart size={['100%', height]} key={columnarData.key}>
+              <Chart key={columnarData.key}>
                 <Settings
                   theme={chartTheme}
                   onElementClick={(elements) => {

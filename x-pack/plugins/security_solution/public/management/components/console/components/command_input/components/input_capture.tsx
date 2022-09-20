@@ -130,6 +130,7 @@ export const InputCapture = memo<InputCaptureProps>(
 
     const handleOnKeyDown = useCallback<KeyboardEventHandler>(
       (ev) => {
+<<<<<<< HEAD
         // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
           if (ev.key === 'a') {
