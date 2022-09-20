@@ -40,7 +40,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     references,
     attributes: { title, description },
   } = item;
-  const { navigateToUrl, currentAppId$, TagList } = useServices();
+  const { navigateToUrl, currentAppId$, TagList, itemHasTags } = useServices();
 
   const redirectAppLinksCoreStart = useMemo(
     () => ({
@@ -100,6 +100,8 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     title,
   ]);
 
+  const hasTags = itemHasTags(references);
+
   return (
     <div>
       <EuiTitle size="xs">{renderTitle()}</EuiTitle>
@@ -112,8 +114,12 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           </p>
         </EuiText>
       )}
-      <EuiSpacer size="s" />
-      {Boolean(references) && <TagList references={references} />}
+      {hasTags && (
+        <>
+          <EuiSpacer size="s" />
+          <TagList references={references} />
+        </>
+      )}
     </div>
   );
 }

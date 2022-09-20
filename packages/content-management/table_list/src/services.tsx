@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useContext, useMemo, useCallback } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
@@ -45,6 +45,8 @@ export interface Services {
   getSearchBarFilters?: () => SearchFilterConfig[];
   DateFormatterComp?: DateFormatter;
   TagList: FC<{ references: SavedObjectsReference[]; onClick?: (tag: { name: string }) => void }>;
+  /** Predicate function to indicate if the saved object references include tags */
+  itemHasTags: (references: SavedObjectsReference[]) => boolean;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -122,6 +124,7 @@ export interface TableListViewKibanaDependencies {
         useName?: boolean;
         tagField?: string;
       }) => SearchFilterConfig;
+      getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
   };
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
@@ -167,6 +170,17 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     return Comp;
   }, [savedObjectsTagging?.ui.components.TagList]);
 
+  const itemHasTags = useCallback(
+    (references: SavedObjectsReference[]) => {
+      if (!savedObjectsTagging?.ui.getTagIdsFromReferences) {
+        return false;
+      }
+
+      return savedObjectsTagging.ui.getTagIdsFromReferences(references).length > 0;
+    },
+    [savedObjectsTagging?.ui]
+  );
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <TableListViewProvider
@@ -185,6 +199,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         currentAppId$={core.application.currentAppId$}
         navigateToUrl={core.application.navigateToUrl}
         TagList={TagList}
+        itemHasTags={itemHasTags}
       >
         {children}
       </TableListViewProvider>

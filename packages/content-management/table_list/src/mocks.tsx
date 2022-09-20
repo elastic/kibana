@@ -67,6 +67,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,
     TagList,
+    itemHasTags: () => true,
     ...params,
   };
 
