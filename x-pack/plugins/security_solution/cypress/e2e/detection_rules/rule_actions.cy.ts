@@ -14,6 +14,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import {
   cleanKibana,
   deleteAlertsAndRules,
+  deleteConnectors,
   deleteDataView,
   postDataView,
 } from '../../tasks/common';
@@ -53,6 +54,7 @@ describe('Rule actions', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
+    deleteConnectors();
     createTimeline(rule.timeline).then((response) => {
       cy.wrap({
         ...rule,

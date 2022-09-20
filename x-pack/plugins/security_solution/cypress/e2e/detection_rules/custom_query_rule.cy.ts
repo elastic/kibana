@@ -46,6 +46,7 @@ import {
   FROM_VALIDATION_ERROR,
   EMAIL_ACTION_TO_INPUT,
   EMAIL_ACTION_SUBJECT_INPUT,
+  SCHEDULE_CONTINUE_BUTTON,
 } from '../../screens/create_new_rule';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -144,6 +145,7 @@ describe('Custom query rules', () => {
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', this.rule.name);
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
       cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
+      cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 
       createAndEnableRule();
 

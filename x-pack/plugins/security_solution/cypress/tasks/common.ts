@@ -60,7 +60,6 @@ export const cleanKibana = () => {
   deleteAlertsAndRules();
   deleteCases();
   deleteTimelines();
-  deleteConnectors();
 };
 
 export const cleanPackages = () => {
