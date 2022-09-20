@@ -322,6 +322,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       compressed
       columns={columns}
       items={pageOfItems}
+      itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
       pagination={pagination}
