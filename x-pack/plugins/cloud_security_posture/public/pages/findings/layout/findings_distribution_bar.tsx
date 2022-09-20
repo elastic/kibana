@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
-import { Evaluation } from '../../../../common/types';
+import type { Evaluation } from '../../../../common/types';
 
 interface Props {
   total: number;

@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBottomBar, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Evaluation } from '../../../../common/types';
+import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';

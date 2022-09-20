@@ -10,7 +10,7 @@ import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { Evaluation } from '../../../../../common/types';
+import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';

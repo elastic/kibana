@@ -8,7 +8,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Evaluation } from '../../../../common/types';
+import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -82,7 +82,6 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const error = findingsGroupByResource.error || baseEsQuery.error;
 
   const handleDistributionClick = (evaluation: Evaluation) => {
-    console.log(evaluation);
     setUrlQuery({
       pageIndex: 0,
       filters: getFilters({
