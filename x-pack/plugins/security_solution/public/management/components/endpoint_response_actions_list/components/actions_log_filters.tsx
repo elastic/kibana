@@ -16,6 +16,7 @@ import {
   ActionLogDateRangePicker,
 } from './actions_log_date_range_picker';
 import { ActionsLogFilter } from './actions_log_filter';
+import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilters = memo(
@@ -27,6 +28,7 @@ export const ActionsLogFilters = memo(
     onChangeHostsFilter,
     onChangeCommandsFilter,
     onChangeStatusesFilter,
+    onChangeUsersFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -38,6 +40,7 @@ export const ActionsLogFilters = memo(
     onChangeHostsFilter: (selectedCommands: string[]) => void;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
+    onChangeUsersFilter: (selectedUsers: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
@@ -79,10 +82,13 @@ export const ActionsLogFilters = memo(
 
     return (
       <EuiFlexGroup responsive gutterSize="s">
-        <EuiFlexItem>
+        <EuiFlexItem grow={isFlyout ? 1 : 2}>
+          <ActionsLogUsersFilter isFlyout={isFlyout} onChangeUsersFilter={onChangeUsersFilter} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={isFlyout ? 1 : 1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={isFlyout ? 1 : 2}>
           <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
