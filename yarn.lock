@@ -3040,6 +3040,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -7074,6 +7082,14 @@
   uid ""
 
 "@types/kbn__core-integrations-browser-mocks@link:bazel-bin/packages/core/integrations/core-integrations-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser/npm_module_types":
   version "0.0.0"
   uid ""
 

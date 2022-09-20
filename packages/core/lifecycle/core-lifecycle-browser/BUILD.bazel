@@ -42,6 +42,21 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/core/injected-metadata/core-injected-metadata-browser:npm_module_types",
+  "//packages/core/theme/core-theme-browser:npm_module_types",
+  "//packages/core/analytics/core-analytics-browser:npm_module_types",
+  "//packages/core/execution-context/core-execution-context-browser:npm_module_types",
+  "//packages/core/http/core-http-browser:npm_module_types",
+  "//packages/core/fatal-errors/core-fatal-errors-browser:npm_module_types",
+  "//packages/core/ui-settings/core-ui-settings-browser:npm_module_types",
+  "//packages/core/notifications/core-notifications-browser:npm_module_types",
+  "//packages/core/application/core-application-browser:npm_module_types",
+  "//packages/core/doc-links/core-doc-links-browser:npm_module_types",
+  "//packages/core/i18n/core-i18n-browser:npm_module_types",
+  "//packages/core/deprecations/core-deprecations-browser:npm_module_types",
+  "//packages/core/overlays/core-overlays-browser:npm_module_types",
+  "//packages/core/saved-objects/core-saved-objects-browser:npm_module_types",
+  "//packages/core/chrome/core-chrome-browser:npm_module_types",
 ]
 
 jsts_transpiler(
