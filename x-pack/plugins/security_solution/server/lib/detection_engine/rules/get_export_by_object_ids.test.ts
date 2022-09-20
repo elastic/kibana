@@ -197,6 +197,7 @@ describe('get_export_by_object_ids', () => {
             references: ['http://example.com', 'https://example.com'],
             related_integrations: [],
             required_fields: [],
+            response_actions: undefined,
             setup: '',
             timeline_id: 'some-timeline-id',
             timeline_title: 'some-timeline-title',

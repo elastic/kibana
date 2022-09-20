@@ -13,8 +13,8 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiBetaBadge,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -39,7 +39,7 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
-import { BETA, REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
+import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.
@@ -258,9 +258,6 @@ export const SessionView = ({
     <div css={styles.sessionViewerComponent}>
       <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:sessionViewProcessEventsSearch">
             <SessionViewSearchBar
               searchQuery={searchQuery}
@@ -273,15 +270,27 @@ export const SessionView = ({
 
           {hasTTYOutput && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                isSelected={showTTY}
-                display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
-                onClick={onToggleTTY}
-                size="m"
-                aria-label={TOGGLE_TTY_PLAYER}
-                data-test-subj="sessionView:TTYPlayerToggle"
-              />
+              <EuiToolTip
+                title={
+                  <FormattedMessage
+                    id="xpack.sessionView.ttyToggle"
+                    defaultMessage="{kb}Kb of tty output"
+                    values={{
+                      kb: Math.round(totalTTYOutputBytes.total / 1024),
+                    }}
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  isSelected={showTTY}
+                  display={showTTY ? 'fill' : 'empty'}
+                  iconType="apmTrace"
+                  onClick={onToggleTTY}
+                  size="m"
+                  aria-label={TOGGLE_TTY_PLAYER}
+                  data-test-subj="sessionView:TTYPlayerToggle"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
 

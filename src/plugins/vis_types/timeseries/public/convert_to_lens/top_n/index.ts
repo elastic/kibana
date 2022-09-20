@@ -79,9 +79,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     };
   }
 
+  const configLayers = await getLayers(extendedLayers, model, dataViews);
+
   return {
     type: 'lnsXY',
     layers: Object.values(excludeMetaFromLayers(extendedLayers)),
-    configuration: getConfiguration(model, getLayers(extendedLayers, model)),
+    configuration: getConfiguration(model, configLayers),
   };
 };

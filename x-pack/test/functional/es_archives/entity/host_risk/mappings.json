@@ -1,0 +1,35 @@
+{
+  
+  "type": "index",
+  "value": {
+    "index": "ml_host_risk_score_latest_default",
+    "mappings": {
+      "properties": {
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
