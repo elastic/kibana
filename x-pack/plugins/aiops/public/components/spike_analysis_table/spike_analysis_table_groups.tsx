@@ -29,7 +29,7 @@ import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 import { MiniHistogram } from '../mini_histogram';
 
-import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
+import { SpikeAnalysisTable } from './spike_analysis_table';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
@@ -105,7 +105,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       }
 
       itemIdToExpandedRowMapValues[item.id] = (
-        <SpikeAnalysisTableExpandedRow
+        <SpikeAnalysisTable
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
           onPinnedChangePoint={onPinnedChangePoint}
@@ -132,7 +132,21 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiButtonIcon
           data-test-subj={'aiopsSpikeAnalysisGroupsTableRowExpansionButton'}
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          aria-label={
+            itemIdToExpandedRowMap[item.id]
+              ? i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.collapseAriaLabel',
+                  {
+                    defaultMessage: 'Collapse',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.expandAriaLabel',
+                  {
+                    defaultMessage: 'Expand',
+                  }
+                )
+          }
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
