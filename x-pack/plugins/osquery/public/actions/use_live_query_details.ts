@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
+import type { EcsMappingFormField } from '../packs/queries/ecs_mapping_editor_field';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -19,6 +20,18 @@ interface UseLiveQueryDetails {
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
   queryIds?: string[];
+}
+
+export interface PackQueriesQuery {
+  action_id: string;
+  id: string;
+  query: string;
+  agents: string[];
+  ecs_mapping?: EcsMappingFormField[];
+  version?: string;
+  platform?: string;
+  saved_query_id?: string;
+  expiration?: string;
 }
 
 export interface LiveQueryDetailsItem {
@@ -35,17 +48,7 @@ export interface LiveQueryDetailsItem {
   pack_name?: string;
   pack_prebuilt?: boolean;
   status?: string;
-  queries?: Array<{
-    action_id: string;
-    id: string;
-    query: string;
-    agents: string[];
-    ecs_mapping?: unknown;
-    version?: string;
-    platform?: string;
-    saved_query_id?: string;
-    expiration?: string;
-  }>;
+  queries?: PackQueriesQuery[];
 }
 
 export const useLiveQueryDetails = ({
