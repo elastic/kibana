@@ -7,7 +7,7 @@ import AdmZip from 'adm-zip';
 
 
 export interface IArtifact {
-  start(receiver: ITelemetryReceiver, logger: Logger): Promise<void>;
+  start(receiver: ITelemetryReceiver): Promise<void>;
   getArtifact(name: string): Promise<unknown>;
 }
 
@@ -27,26 +27,21 @@ class Artifact implements IArtifact {
 
 
   public async getArtifact(name: string): Promise<unknown> {
-    try {
-      if (this.manifestUrl) {
-        const response = await axios.get(this.manifestUrl, { timeout: this.AXIOS_TIMEOUT_MS, responseType: 'arraybuffer' });
-        const zip = new AdmZip(response.data);
-        const entries = zip.getEntries();
-        const manifest = JSON.parse(entries[0].getData().toString());
-        const relativeUrl = manifest['artifacts'][name]['relative_url'];
-        if (relativeUrl) {
-          const url = `${this.CDN_URL}/${relativeUrl}`;
-          const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
-          return artifactResponse.data;
-        } else {
-          throw Error(`No artifact for name ${name}`);
-        }
+    if (this.manifestUrl) {
+      const response = await axios.get(this.manifestUrl, { timeout: this.AXIOS_TIMEOUT_MS, responseType: 'arraybuffer' });
+      const zip = new AdmZip(response.data);
+      const entries = zip.getEntries();
+      const manifest = JSON.parse(entries[0].getData().toString());
+      const relativeUrl = manifest['artifacts'][name]['relative_url'];
+      if (relativeUrl) {
+        const url = `${this.CDN_URL}${relativeUrl}`;
+        const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
+        return artifactResponse.data;
       } else {
-        throw Error('No manifest url');
+        throw Error(`No artifact for name ${name}`);
       }
-    } catch (err) {
-      console.error(err);
-      throw err;
+    } else {
+      throw Error('No manifest url');
     }
   }
 

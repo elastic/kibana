@@ -6,22 +6,21 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
+import { tlog } from '../helpers';
 
 export function createTelemetryConfigurationTaskConfig() {
   return {
-    type: 'security:endpoint-configuration',
+    type: 'security:telemetry-configuration',
     title: 'Security Solution Telemetry Configuration task',
-    interval: '30m',
+    interval: '30s',
     timeout: '1m',
     version: '1.0.0',
-    getLastExecutionTime: getPreviousDiagTaskTimestamp,
     runTask: async (
       taskId: string,
       logger: Logger,
@@ -29,17 +28,21 @@ export function createTelemetryConfigurationTaskConfig() {
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const artifactName = 'diagnostic-configuration-v1';
-      const configArtifact = artifactService.getArtifact(artifactName) as unknown as TelemetryConfiguration;
-      telemetryConfiguration.max_detection_alerts_batch = configArtifact.max_detection_alerts_batch;
-      telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
-      telemetryConfiguration.max_detection_rule_telemetry_batch =
-        configArtifact.max_detection_rule_telemetry_batch;
-      telemetryConfiguration.max_endpoint_telemetry_batch =
-        configArtifact.max_endpoint_telemetry_batch;
-      telemetryConfiguration.max_security_list_telemetry_batch =
-        configArtifact.max_security_list_telemetry_batch;
-      return 0;
+      try {
+        const artifactName = 'telemetry-configuration-v1';
+        const configArtifact = await artifactService.getArtifact(artifactName) as unknown as TelemetryConfiguration;
+        telemetryConfiguration.max_detection_alerts_batch = configArtifact.max_detection_alerts_batch;
+        telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
+        telemetryConfiguration.max_detection_rule_telemetry_batch =
+          configArtifact.max_detection_rule_telemetry_batch;
+        telemetryConfiguration.max_endpoint_telemetry_batch =
+          configArtifact.max_endpoint_telemetry_batch;
+        telemetryConfiguration.max_security_list_telemetry_batch =
+          configArtifact.max_security_list_telemetry_batch;
+        return 0;
+      } catch (err) {
+        tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
+      }
     },
   };
 }

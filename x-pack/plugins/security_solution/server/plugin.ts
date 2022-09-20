@@ -101,6 +101,7 @@ import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
+import { artifactService } from '../server/lib/telemetry/artifact';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -472,6 +473,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
     });
 
+
     this.telemetryReceiver.start(
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -480,6 +482,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointAppContextService,
       exceptionListClient
     );
+
+    artifactService.start(this.telemetryReceiver);
 
     this.telemetryEventsSender.start(
       plugins.telemetry,
