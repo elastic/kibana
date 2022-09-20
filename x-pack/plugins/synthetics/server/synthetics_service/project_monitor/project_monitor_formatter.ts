@@ -32,6 +32,7 @@ import {
   syntheticsMonitorType,
   syntheticsMonitor,
 } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import { syncEditedMonitor } from '../../routes/monitor_cruds/edit_monitor';
 import {
