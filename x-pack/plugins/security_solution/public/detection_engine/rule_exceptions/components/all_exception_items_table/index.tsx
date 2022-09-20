@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import type {
@@ -57,6 +57,8 @@ const initialState: State = {
   exceptionToEdit: null,
   currenFlyout: null,
   viewerState: 'loading',
+  isReadOnly: true,
+  lastUpdated: Date.now(),
 };
 
 export interface GetExceptionItemProps {
@@ -79,8 +81,6 @@ const ExceptionsViewerComponent = ({
   const { services } = useKibana();
   const toasts = useToasts();
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
-  const [isReadOnly, setReadOnly] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -90,12 +90,24 @@ const ExceptionsViewerComponent = ({
   );
 
   // Reducer state
-  const [{ exceptions, pagination, currenFlyout, exceptionToEdit, viewerState }, dispatch] =
-    useReducer(allExceptionItemsReducer(), {
-      ...initialState,
-    });
+  const [
+    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isReadOnly, lastUpdated },
+    dispatch,
+  ] = useReducer(allExceptionItemsReducer(), {
+    ...initialState,
+  });
 
   // Reducer actions
+  const setLastUpdated = useCallback(
+    (lastUpdate: string | number): void => {
+      dispatch({
+        type: 'setLastUpdateTime',
+        lastUpdate,
+      });
+    },
+    [dispatch]
+  );
+
   const setExceptions = useCallback(
     ({
       exceptions: newExceptions,
@@ -109,7 +121,7 @@ const ExceptionsViewerComponent = ({
         pagination: newPagination,
       });
     },
-    [dispatch]
+    [dispatch, setLastUpdated]
   );
 
   const setViewerState = useCallback(
@@ -127,6 +139,16 @@ const ExceptionsViewerComponent = ({
       dispatch({
         type: 'updateFlyoutOpen',
         flyoutType,
+      });
+    },
+    [dispatch]
+  );
+
+  const setReadOnly = useCallback(
+    (readOnly: boolean): void => {
+      dispatch({
+        type: 'setIsReadOnly',
+        readOnly,
       });
     },
     [dispatch]
@@ -173,7 +195,7 @@ const ExceptionsViewerComponent = ({
         signal: abortCtrl.signal,
       });
 
-      // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+      // Please see `kbn-securitysolution-list-hooks/src/transforms/index.test.ts` doc notes
       // for context around the temporary `id`
       const transformedData = data.map((item) => transformInput(item));
 
