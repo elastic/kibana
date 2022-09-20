@@ -8,8 +8,9 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { ExceptionsViewerItems } from '../../../../../../detection_engine/rule_exceptions/components/all_exception_items_table/all_items';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import { ExceptionsViewerItems } from '../../../../../../detection_engine/rule_exceptions/components/all_exception_items_table/all_items';
 import type { ExceptionListInfo } from './use_all_exception_lists';
 
 interface ExceptionsListCardProps {
@@ -116,13 +117,18 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(({ exceptionsLis
               {
                 <ExceptionsViewerItems
                   disableActions={!true} // !canUserCRUD
-                  showEmpty={loadingList}
-                  showNoResults={false}
-                  isInitLoading={false}
-                  exceptions={exceptionItems}
-                  loadingItemIds={[]}
+                  // showEmpty={loadingList}
+                  // exceptions={exceptionItems}
                   onDeleteException={() => ''}
                   onEditExceptionItem={() => ''}
+                  isReadOnly={false}
+                  exceptions={[]}
+                  listType={ExceptionListTypeEnum.DETECTION}
+                  ruleReferences={null}
+                  viewerState={null}
+                  onCreateExceptionListItem={function (): void {
+                    throw new Error('Function not implemented.');
+                  }}
                 />
               }
             </EuiFlexItem>

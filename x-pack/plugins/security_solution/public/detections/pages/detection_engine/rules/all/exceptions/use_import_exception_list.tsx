@@ -7,7 +7,7 @@
 
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { importExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ImportExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { HttpStart } from '@kbn/core/public';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
@@ -29,20 +29,17 @@ export const importExceptionList = async ({
   overwrite: boolean;
   overwriteExceptions: boolean;
   asNewList: boolean;
-}): Promise<typeof importExceptionsResponseSchema> => {
+}): Promise<ImportExceptionsResponseSchema> => {
   const formData = new FormData();
   formData.append('file', file as Blob);
 
-  const res = await http.post<typeof importExceptionsResponseSchema>(
-    `${EXCEPTION_LIST_URL}/_import`,
-    {
-      body: formData,
-      query: { overwrite, overwrite_exceptions: overwriteExceptions, as_new_list: asNewList },
-      headers: { 'Content-Type': undefined },
-      method: 'POST',
-      signal,
-    }
-  );
+  const res = await http.post<ImportExceptionsResponseSchema>(`${EXCEPTION_LIST_URL}/_import`, {
+    body: formData,
+    query: { overwrite, overwrite_exceptions: overwriteExceptions, as_new_list: asNewList },
+    headers: { 'Content-Type': undefined },
+    method: 'POST',
+    signal,
+  });
   return res;
 };
 

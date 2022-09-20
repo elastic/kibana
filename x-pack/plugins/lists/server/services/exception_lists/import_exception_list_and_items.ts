@@ -92,6 +92,7 @@ export const importExceptionsAsStream = async ({
 
   return importExceptions({
     exceptions: parsedObjects,
+    generateNewListId: false,
     overwrite,
     savedObjectsClient,
     user,
@@ -131,7 +132,7 @@ export const importExceptions = async ({
           lists: [...acc.lists, { ...exceptionList, list_id: newListId }],
         };
       },
-      { items: [], lists: [] }
+      { items: [], lists: [] } as PromiseFromStreams
     );
   }
   // removal of duplicates
@@ -154,7 +155,6 @@ export const importExceptions = async ({
     user,
   });
   const importExceptionListItemsResponse = await importExceptionListItems({
-    generateNewListId,
     isOverwrite: overwrite,
     itemsChunks: chunkParsedItemsObjects,
     savedObjectsClient,

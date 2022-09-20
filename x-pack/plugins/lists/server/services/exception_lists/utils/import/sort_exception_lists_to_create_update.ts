@@ -105,11 +105,16 @@ export const sortExceptionListsToUpdateOrCreate = ({
         },
       ];
     } else if (existingLists[listId] != null && generateNewListId) {
-      const attributes = {
+      const attributes: ExceptionListSoSchema = {
         ...existingLists[listId],
+        comments: undefined,
         created_at: dateNow,
         created_by: user,
         description,
+        entries: undefined,
+        immutable: false,
+        item_id: undefined,
+        list_type: 'list',
         tie_breaker_id: uuid.v4(),
         updated_by: user,
       };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
-import type { CriteriaWithPagination, EuiSearchBarProps } from '@elastic/eui';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
+import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
   EuiFlyout,
@@ -18,7 +18,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
@@ -28,7 +27,12 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  NamespaceType,
+  ExceptionListFilter,
+  BulkErrorSchema,
+  ImportExceptionsResponseSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
@@ -38,8 +42,6 @@ import { Loader } from '../../../../../../common/components/loader';
 
 import * as i18n from './translations';
 import { ExceptionsTableUtilityBar } from './exceptions_table_utility_bar';
-import type { AllExceptionListsColumns } from './columns';
-import { getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../../../components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
@@ -47,9 +49,7 @@ import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
 import { SecurityPageName } from '../../../../../../../common/constants';
 import { useUserData } from '../../../../../components/user_info';
-import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
-import type { ExceptionsTableItem } from './types';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 import { ExceptionsListCard } from './exceptions_list_card';
@@ -73,12 +73,9 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-const validFileTypes = ['text/json', 'application/json'];
-
 export const ExceptionListsTable = React.memo(() => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
-  const hasPermissions = userHasPermissions(canUserCRUD);
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
@@ -212,18 +209,6 @@ export const ExceptionListsTable = React.memo(() => {
     [exportExceptionList, handleExportError, handleExportSuccess]
   );
 
-  const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-    // Defaulting to true to default to the lower privilege first
-    const isKibanaReadOnly = (canUserREAD && !canUserCRUD) ?? true;
-    return getAllExceptionListsColumns(
-      handleExport,
-      handleDelete,
-      formatUrl,
-      navigateToUrl,
-      isKibanaReadOnly
-    );
-  }, [handleExport, handleDelete, formatUrl, navigateToUrl, canUserREAD, canUserCRUD]);
-
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
       setLastUpdated(Date.now());
@@ -236,16 +221,6 @@ export const ExceptionListsTable = React.memo(() => {
       setInitLoading(false);
     }
   }, [initLoading, loading, loadingExceptions, loadingTableInfo]);
-
-  const emptyPrompt = useMemo((): JSX.Element => {
-    return (
-      <EuiEmptyPrompt
-        title={<h3>{i18n.NO_EXCEPTION_LISTS}</h3>}
-        titleSize="xs"
-        body={i18n.NO_LISTS_BODY}
-      />
-    );
-  }, []);
 
   const handleSearch = useCallback(
     async ({
@@ -331,45 +306,12 @@ export const ExceptionListsTable = React.memo(() => {
     refreshExceptions,
   ]);
 
-  const paginationMemo = useMemo(
-    () => ({
-      pageIndex: pagination.page - 1,
-      pageSize: pagination.perPage,
-      totalItemCount: pagination.total || 0,
-      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-    }),
-    [pagination]
-  );
-
   const handleOnDownload = useCallback(() => {
     setExportDownload({});
   }, []);
 
-  const tableItems = useMemo<ExceptionsTableItem[]>(
-    () =>
-      (exceptionListsWithRuleRefs ?? []).map((item) => ({
-        ...item,
-        isDeleting: deletingListIds.includes(item.id),
-        isExporting: exportingListIds.includes(item.id),
-      })),
-    [deletingListIds, exceptionListsWithRuleRefs, exportingListIds]
-  );
-
-  const handlePaginationChange = useCallback(
-    (criteria: CriteriaWithPagination<ExceptionsTableItem>) => {
-      const { index, size } = criteria.page;
-      setPagination((currentPagination) => ({
-        ...currentPagination,
-        perPage: size,
-        page: index + 1,
-      }));
-    },
-    [setPagination]
-  );
-
   const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
   const [file, setFile] = useState<File | null>(null);
-  const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
   const [overwrite, setOverwrite] = useState(false);
   const [asNewList, setAsNewList] = useState(false);
 
@@ -402,19 +344,22 @@ export const ExceptionListsTable = React.memo(() => {
   }, [asNewList, file, http, importExceptionList, importExceptionListState.loading, overwrite]);
 
   const handleImportSuccess = useCallback(
-    (response: ListSchema) => {
+    (response: ImportExceptionsResponseSchema) => {
       resetForm();
       addSuccess({
-        text: i18n.uploadSuccessMessage(response.name),
+        text: i18n.uploadSuccessMessage(file?.name ?? ''),
         title: i18n.UPLOAD_SUCCESS_TITLE,
       });
+      handleRefresh();
     },
-    [resetForm, addSuccess]
+    // looking for file.name but we don't wan't to render success every time file name changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [resetForm, addSuccess, handleRefresh]
   );
   const handleImportError = useCallback(
-    (errors: Error[]) => {
+    (errors: BulkErrorSchema[]) => {
       errors.forEach((error) => {
-        if (error.name !== 'AbortError') {
+        if (!error.error.message.includes('AbortError')) {
           addError(error, { title: i18n.UPLOAD_ERROR });
         }
       });
@@ -424,10 +369,10 @@ export const ExceptionListsTable = React.memo(() => {
   const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
   useEffect(() => {
-    if (!importExceptionListState.loading && importExceptionListState.result?.success) {
-      handleImportSuccess(importExceptionListState.result);
+    if (!importExceptionListState.loading && importExceptionListState?.result?.success) {
+      handleImportSuccess(importExceptionListState?.result);
     } else if (!importExceptionListState.loading && importExceptionListState.result?.errors) {
-      handleImportError(importExceptionListState.result.errors);
+      handleImportError(importExceptionListState?.result?.errors);
       setAlreadyExistingItem(true);
     }
   }, [
