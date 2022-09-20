@@ -31,19 +31,19 @@ import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { guidesConfig } from '../constants';
-import type { GuideConfig, StepStatus, SetupGuideState, StepConfig } from '../types';
+import type { GuideConfig, StepStatus, GuidedOnboardingState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 
-import { SetupGuideStep } from './setup_guide_panel_step';
-import { setupGuidePanelStyles } from './setup_guide_panel.styles';
+import { GuideStep } from './guide_panel_step';
+import { getGuidePanelStyles } from './guide_panel.styles';
 
-interface Props {
+interface GuidePanelProps {
   api: ApiService;
   application: ApplicationStart;
   http: HttpStart;
 }
 
-const getConfig = (state?: SetupGuideState): GuideConfig | undefined => {
+const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
   if (state?.activeGuide && state.activeGuide !== 'unset') {
     return guidesConfig[state.activeGuide];
   }
@@ -51,7 +51,10 @@ const getConfig = (state?: SetupGuideState): GuideConfig | undefined => {
   return undefined;
 };
 
-const getCurrentStep = (steps?: StepConfig[], state?: SetupGuideState): number | undefined => {
+const getCurrentStep = (
+  steps?: StepConfig[],
+  state?: GuidedOnboardingState
+): number | undefined => {
   if (steps && state?.activeStep) {
     const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === state.activeStep);
     if (activeStepIndex > -1) {
@@ -76,13 +79,13 @@ const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: stri
   return 'complete';
 };
 
-export const SetupGuidePanel = ({ api, application }: Props) => {
+export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [setupGuideState, setSetupGuideState] = useState<SetupGuideState | undefined>(undefined);
+  const [guideState, setGuideState] = useState<GuidedOnboardingState | undefined>(undefined);
   const isFirstRender = useRef(true);
 
-  const styles = setupGuidePanelStyles(euiTheme);
+  const styles = getGuidePanelStyles(euiTheme);
 
   const toggleGuide = () => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
@@ -103,8 +106,8 @@ export const SetupGuidePanel = ({ api, application }: Props) => {
   useEffect(() => {
     const subscription = api.fetchGuideState$().subscribe((newState) => {
       if (
-        setupGuideState?.activeGuide !== newState.activeGuide ||
-        setupGuideState?.activeStep !== newState.activeStep
+        guideState?.activeGuide !== newState.activeGuide ||
+        guideState?.activeStep !== newState.activeStep
       ) {
         if (isFirstRender.current) {
           isFirstRender.current = false;
@@ -112,12 +115,12 @@ export const SetupGuidePanel = ({ api, application }: Props) => {
           setIsGuideOpen(true);
         }
       }
-      setSetupGuideState(newState);
+      setGuideState(newState);
     });
     return () => subscription.unsubscribe();
-  }, [api, setupGuideState?.activeGuide, setupGuideState?.activeStep]);
+  }, [api, guideState?.activeGuide, guideState?.activeStep]);
 
-  const guideConfig = getConfig(setupGuideState);
+  const guideConfig = getConfig(guideState);
 
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
@@ -131,7 +134,7 @@ export const SetupGuidePanel = ({ api, application }: Props) => {
     );
   }
 
-  const currentStep = getCurrentStep(guideConfig.steps, setupGuideState);
+  const currentStep = getCurrentStep(guideConfig.steps, guideState);
 
   return (
     <>
@@ -221,10 +224,10 @@ export const SetupGuidePanel = ({ api, application }: Props) => {
 
               {guideConfig?.steps.map((step, index, steps) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
-                const stepStatus = getStepStatus(steps, index, setupGuideState?.activeStep);
+                const stepStatus = getStepStatus(steps, index, guideState?.activeStep);
 
                 return (
-                  <SetupGuideStep
+                  <GuideStep
                     accordionId={accordionId}
                     stepStatus={stepStatus}
                     stepConfig={step}

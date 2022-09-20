@@ -21,9 +21,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { StepStatus, StepConfig } from '../types';
-import { setupGuidePanelStepStyles } from './setup_guide_panel_step.styles';
+import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
-interface SetupGuideStepProps {
+interface GuideStepProps {
   accordionId: string;
   stepStatus: StepStatus;
   stepConfig: StepConfig;
@@ -31,15 +31,15 @@ interface SetupGuideStepProps {
   navigateToStep: (step: StepConfig) => void;
 }
 
-export const SetupGuideStep = ({
+export const GuideStep = ({
   accordionId,
   stepStatus,
   stepNumber,
   stepConfig,
   navigateToStep,
-}: SetupGuideStepProps) => {
+}: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
-  const styles = setupGuidePanelStepStyles(euiTheme);
+  const styles = getGuidePanelStepStyles(euiTheme);
 
   const buttonContent = (
     <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">

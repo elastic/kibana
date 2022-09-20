@@ -10,15 +10,15 @@ import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common';
-import { SetupGuideState } from '../types';
+import { GuidedOnboardingState } from '../types';
 
 export class ApiService {
   private client: HttpSetup | undefined;
-  private onboardingGuideState$!: BehaviorSubject<SetupGuideState | undefined>;
+  private onboardingGuideState$!: BehaviorSubject<GuidedOnboardingState | undefined>;
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
-    this.onboardingGuideState$ = new BehaviorSubject<SetupGuideState | undefined>(undefined);
+    this.onboardingGuideState$ = new BehaviorSubject<GuidedOnboardingState | undefined>(undefined);
   }
 
   public fetchGuideState$() {
@@ -26,7 +26,7 @@ export class ApiService {
     return this.onboardingGuideState$.pipe(
       concatMap((state) =>
         state === undefined
-          ? from(this.client!.get<{ state: SetupGuideState }>(`${API_BASE_PATH}/state`)).pipe(
+          ? from(this.client!.get<{ state: GuidedOnboardingState }>(`${API_BASE_PATH}/state`)).pipe(
               map((response) => response.state)
             )
           : of(state)
@@ -34,15 +34,18 @@ export class ApiService {
     );
   }
 
-  public async updateGuideState(newState: SetupGuideState) {
+  public async updateGuideState(newState: GuidedOnboardingState) {
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
 
     try {
-      const response = await this.client.put<{ state: SetupGuideState }>(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(newState),
-      });
+      const response = await this.client.put<{ state: GuidedOnboardingState }>(
+        `${API_BASE_PATH}/state`,
+        {
+          body: JSON.stringify(newState),
+        }
+      );
       this.onboardingGuideState$.next(newState);
       return response;
     } catch (error) {

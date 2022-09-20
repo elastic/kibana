@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import {
   GuidedOnboardingPluginStart,
-  SetupGuideState,
+  GuidedOnboardingState,
   UseCase,
 } from '@kbn/guided-onboarding-plugin/public';
 import { CoreStart } from '@kbn/core/public';
@@ -41,12 +41,12 @@ export const Main = (props: MainProps) => {
     notifications,
   } = props;
   const history = useHistory();
-  const [guideState, setGuideState] = useState<SetupGuideState | undefined>(undefined);
+  const [guideState, setGuideState] = useState<GuidedOnboardingState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<SetupGuideState['activeGuide'] | undefined>(
-    undefined
-  );
-  const [selectedStep, setSelectedStep] = useState<SetupGuideState['activeStep'] | undefined>(
+  const [selectedGuide, setSelectedGuide] = useState<
+    GuidedOnboardingState['activeGuide'] | undefined
+  >(undefined);
+  const [selectedStep, setSelectedStep] = useState<GuidedOnboardingState['activeStep'] | undefined>(
     undefined
   );
 

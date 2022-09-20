@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
  * In order to leverage a11y features, we are using the EuiFlyout and applying customizations
  * See https://github.com/elastic/eui/issues/6241 for more details
  */
-export const setupGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
+export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
   flyoutOverrides: {
     flyoutContainer: css`
       top: 55px !important;

@@ -9,7 +9,7 @@
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const setupGuidePanelStepStyles = (euiTheme: EuiThemeComputed) => ({
+export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed) => ({
   stepNumber: css`
     width: 24px;
     height: 24px;
