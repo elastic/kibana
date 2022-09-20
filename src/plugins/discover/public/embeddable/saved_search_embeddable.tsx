@@ -153,7 +153,7 @@ export class SavedSearchEmbeddable
         this.searchProps &&
         (titleChanged ||
           this.isFetchRequired(this.searchProps) ||
-          this.isInputChangedAndRerenderRequired(this.searchProps))
+          this.isRerenderRequired(this.searchProps))
       ) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
@@ -420,11 +420,14 @@ export class SavedSearchEmbeddable
     );
   }
 
-  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+  private isRerenderRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
     }
-    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+    return (
+      this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
+    );
   }
 
   private async pushContainerStateParamsToProps(

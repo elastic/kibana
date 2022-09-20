@@ -254,30 +254,36 @@ export class DataGridService extends FtrService {
     });
   }
 
-  public async clickDocSortAsc(field?: string, sortText = 'Sort Old-New') {
+  private async clickColumnMenuField(field?: string) {
     if (field) {
       await this.openColMenuByField(field);
     } else {
       await this.find.clickByCssSelector('.euiDataGridHeaderCell__button');
     }
+  }
+
+  public async clickDocSortAsc(field?: string, sortText = 'Sort Old-New') {
+    await this.clickColumnMenuField(field);
     await this.find.clickByButtonText(sortText);
   }
 
   public async clickDocSortDesc(field?: string, sortText = 'Sort New-Old') {
-    if (field) {
-      await this.openColMenuByField(field);
-    } else {
-      await this.find.clickByCssSelector('.euiDataGridHeaderCell__button');
-    }
+    await this.clickColumnMenuField(field);
     await this.find.clickByButtonText(sortText);
   }
 
+  public async clickMoveColumnRight(field?: string) {
+    await this.clickColumnMenuField(field);
+    await this.find.clickByButtonText('Move right');
+  }
+
+  public async clickMoveColumnLeft(field?: string) {
+    await this.clickColumnMenuField(field);
+    await this.find.clickByButtonText('Move left');
+  }
+
   public async clickRemoveColumn(field?: string) {
-    if (field) {
-      await this.openColMenuByField(field);
-    } else {
-      await this.find.clickByCssSelector('.euiDataGridHeaderCell__button');
-    }
+    await this.clickColumnMenuField(field);
     await this.find.clickByButtonText('Remove column');
   }
 
