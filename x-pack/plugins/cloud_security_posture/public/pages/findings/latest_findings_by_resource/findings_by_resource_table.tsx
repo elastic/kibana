@@ -23,7 +23,11 @@ import { ColumnNameWithTooltip } from '../../../components/column_name_with_tool
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
-import { createColumnWithFilters, type OnAddFilter } from '../layout/findings_layout';
+import {
+  createColumnWithFilters,
+  type OnAddFilter,
+  baseFindingsColumns,
+} from '../layout/findings_layout';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -59,7 +63,7 @@ const FindingsByResourceTableComponent = ({
 
   const columns = useMemo(
     () => [
-      findingsByResourceColumns.resource_id,
+      findingsByResourceColumns['resource_id'],
       createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
@@ -101,19 +105,8 @@ const FindingsByResourceTableComponent = ({
 
 const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
+    ...baseFindingsColumns['resource.id'],
     field: 'resource_id',
-    name: (
-      <ColumnNameWithTooltip
-        columnName={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnLabel',
-          { defaultMessage: 'Resource ID' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnTooltipLabel',
-          { defaultMessage: 'Custom Elastic Resource ID' }
-        )}
-      />
-    ),
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link
         to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
@@ -124,41 +117,9 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       </Link>
     ),
   },
-  {
-    field: 'resource.sub_type',
-    truncateText: true,
-    name: (
-      <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.resourceTypeColumnLabel"
-        defaultMessage="Resource Type"
-      />
-    ),
-  },
-  {
-    field: 'resource.name',
-    truncateText: true,
-    name: (
-      <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.resourceNameColumnLabel"
-        defaultMessage="Resource Name"
-      />
-    ),
-    render: (name: string) => (
-      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
-        <>{name}</>
-      </EuiToolTip>
-    ),
-  },
-  {
-    field: 'rule.benchmark.name',
-    truncateText: true,
-    name: (
-      <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.ruleBenchmarkColumnLabel"
-        defaultMessage="Benchmark"
-      />
-    ),
-  },
+  baseFindingsColumns['resource.sub_type'],
+  baseFindingsColumns['resource.name'],
+  baseFindingsColumns['rule.benchmark.name'],
   {
     field: 'rule.section',
     truncateText: true,
@@ -177,22 +138,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       );
     },
   },
-  {
-    field: 'cluster_id',
-    name: (
-      <ColumnNameWithTooltip
-        columnName={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Cluster ID' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kube-System Namespace ID' }
-        )}
-      />
-    ),
-    truncateText: true,
-  },
+  baseFindingsColumns['cluster_id'],
   {
     field: 'failed_findings',
     width: '150px',

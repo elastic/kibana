@@ -76,7 +76,7 @@ const baseColumns = [
       />
     ),
     truncateText: true,
-    width: '10%',
+    width: '150px',
     sortable: true,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
@@ -103,6 +103,7 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
+    width: '10%',
   },
   {
     field: 'resource.name',
@@ -136,6 +137,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
       { defaultMessage: 'Benchmark' }
     ),
+    width: '10%',
     sortable: true,
     truncateText: true,
   },
@@ -145,7 +147,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
-    width: '10%',
+    width: '7%',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
@@ -160,7 +162,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
       { defaultMessage: 'Rule Tags' }
     ),
-    width: '200px',
+    width: '13%',
     sortable: false,
     truncateText: true,
     render: (tags: string[]) => {
@@ -182,13 +184,18 @@ const baseColumns = [
         )}
       />
     ),
-    width: '10%',
-    truncateText: true,
+    width: '150px',
     sortable: true,
+    truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: '@timestamp',
-    width: '150px',
+    width: '10%',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
       { defaultMessage: 'Last Checked' }
