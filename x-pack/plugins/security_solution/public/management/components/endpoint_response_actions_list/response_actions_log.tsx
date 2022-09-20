@@ -50,6 +50,8 @@ import {
 import { StatusBadge } from './components/status_badge';
 import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
+import { ManagementPageLoader } from '../management_page_loader';
+import { ActionsLogEmptyState } from './components/actions_log_empty_state';
 
 const emptyValue = getEmptyValue();
 
@@ -111,8 +113,12 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsLog = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds'> & { showHostNames?: boolean; isFlyout?: boolean }
->(({ agentIds, showHostNames = false, isFlyout = true }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds'> & {
+    showHostNames?: boolean;
+    isFlyout?: boolean;
+    setIsDataCallback?: (isData: boolean) => void;
+  }
+>(({ agentIds, showHostNames = false, isFlyout = true, setIsDataCallback }) => {
   const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
     useUrlPagination();
   const {
@@ -127,6 +133,8 @@ export const ResponseActionsLog = memo<
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
+
+  const [isFirstAttempt, setIsFirstAttempt] = useState(true);
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
     page: isFlyout ? 1 : paginationFromUrlParams.page,
@@ -163,11 +171,14 @@ export const ResponseActionsLog = memo<
     isFetching,
     isFetched,
     refetch: reFetchEndpointActionList,
-  } = useGetEndpointActionList({
-    ...queryParams,
-    startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-    endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
-  });
+  } = useGetEndpointActionList(
+    {
+      ...queryParams,
+      startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
+      endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+    },
+    { retry: false }
+  );
 
   // handle auto refresh data
   const onRefresh = useCallback(() => {
@@ -575,6 +586,28 @@ export const ResponseActionsLog = memo<
     [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
   );
 
+  useEffect(() => {
+    if (
+      !isFetching &&
+      error?.body?.statusCode === 404 &&
+      error?.body?.message === 'index_not_found_exception'
+    ) {
+      if (setIsDataCallback) {
+        setIsDataCallback(false);
+      }
+    } else if (!isFetching && actionList) {
+      setIsFirstAttempt(false);
+      if (setIsDataCallback) {
+        setIsDataCallback(true);
+      }
+    }
+  }, [actionList, error, isFetching, setIsDataCallback]);
+
+  if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
+    return <ActionsLogEmptyState />;
+  } else if (isFetching && isFirstAttempt) {
+    return <ManagementPageLoader />;
+  }
   return (
     <>
       <ActionsLogFilters

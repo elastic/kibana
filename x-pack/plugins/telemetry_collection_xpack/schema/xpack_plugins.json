@@ -4888,57 +4888,30 @@
         }
       }
     },
-    "cloud_security_posture": {
+    "cloudExperiments": {
       "properties": {
-        "indices": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
           "properties": {
-            "findings": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
+            "DYNAMIC_KEY": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Flags received by the client"
               }
-            },
-            "latest_findings": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "score": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
+            }
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
             }
           }
         }
