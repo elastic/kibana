@@ -2623,6 +2623,216 @@
         }
       }
     },
+    "canvas": {
+      "properties": {
+        "workpads": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Canvas Workpads in the cluster"
+              }
+            }
+          }
+        },
+        "pages": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of pages across all Canvas Workpads"
+              }
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of pages across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of pages found in a Canvas Workpad"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of pages found in a Canvas Workpad"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "elements": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of elements across all Canvas Workpads"
+              }
+            },
+            "per_page": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements per page across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements on a page across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements on a page across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "functions": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of functions in use across all Canvas Workpads"
+              }
+            },
+            "in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in any Canvas Workpad"
+                }
+              }
+            },
+            "in_use_30d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 30 days"
+                }
+              }
+            },
+            "in_use_90d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 90 days"
+                }
+              }
+            },
+            "per_element": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average number of functions used per element across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of functions used in an element across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of functions used in an element across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "variables": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of variables defined across all Canvas Workpads"
+              }
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of variables set per Canvas Workpad"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number variables set across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of variables set across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "custom_elements": {
+          "properties": {
+            "count": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of custom Canvas elements"
+              }
+            },
+            "elements": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements used across all Canvas Custom Elements"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements used across all Canvas Custom Elements"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements used in Canvas Custom Element"
+                  }
+                }
+              }
+            },
+            "functions_in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The functions in use by Canvas Custom Elements"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "cases": {
       "properties": {
         "cases": {
@@ -2896,216 +3106,6 @@
         }
       }
     },
-    "canvas": {
-      "properties": {
-        "workpads": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of Canvas Workpads in the cluster"
-              }
-            }
-          }
-        },
-        "pages": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of pages across all Canvas Workpads"
-              }
-            },
-            "per_workpad": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of pages across all Canvas Workpads"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of pages found in a Canvas Workpad"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of pages found in a Canvas Workpad"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "elements": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of elements across all Canvas Workpads"
-              }
-            },
-            "per_page": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of elements per page across all Canvas Workpads"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of elements on a page across all Canvas Workpads"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of elements on a page across all Canvas Workpads"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "functions": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of functions in use across all Canvas Workpads"
-              }
-            },
-            "in_use": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "A function in use in any Canvas Workpad"
-                }
-              }
-            },
-            "in_use_30d": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "A function in use in a Canvas Workpad that has been modified in the last 30 days"
-                }
-              }
-            },
-            "in_use_90d": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "A function in use in a Canvas Workpad that has been modified in the last 90 days"
-                }
-              }
-            },
-            "per_element": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "Average number of functions used per element across all Canvas Workpads"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of functions used in an element across all Canvas Workpads"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of functions used in an element across all Canvas Workpads"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "variables": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of variables defined across all Canvas Workpads"
-              }
-            },
-            "per_workpad": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of variables set per Canvas Workpad"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number variables set across all Canvas Workpads"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of variables set across all Canvas Workpads"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "custom_elements": {
-          "properties": {
-            "count": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of custom Canvas elements"
-              }
-            },
-            "elements": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of elements used across all Canvas Custom Elements"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of elements used across all Canvas Custom Elements"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of elements used in Canvas Custom Element"
-                  }
-                }
-              }
-            },
-            "functions_in_use": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The functions in use by Canvas Custom Elements"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "cloud": {
       "properties": {
         "isCloudEnabled": {
@@ -3119,6 +3119,83 @@
           "properties": {
             "index_creation_count": {
               "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "files": {
+      "properties": {
+        "countByExtension": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "extension": {
+                "type": "keyword"
+              },
+              "count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "countByStatus": {
+          "properties": {
+            "AWAITING_UPLOAD": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files awaiting upload"
+              }
+            },
+            "DELETED": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are marked as deleted"
+              }
+            },
+            "READY": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are ready for download"
+              }
+            },
+            "UPLOADING": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are currently uploading"
+              }
+            },
+            "UPLOAD_ERROR": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that failed to upload"
+              }
+            }
+          }
+        },
+        "storage": {
+          "properties": {
+            "esFixedSizeIndex": {
+              "properties": {
+                "capacity": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Capacity of the fixed size index"
+                  }
+                },
+                "available": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Available storage in bytes"
+                  }
+                },
+                "used": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Used storage in bytes"
+                  }
+                }
+              }
             }
           }
         }
@@ -3227,83 +3304,6 @@
               },
               "enabled": {
                 "type": "boolean"
-              }
-            }
-          }
-        }
-      }
-    },
-    "files": {
-      "properties": {
-        "countByExtension": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "extension": {
-                "type": "keyword"
-              },
-              "count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "countByStatus": {
-          "properties": {
-            "AWAITING_UPLOAD": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files awaiting upload"
-              }
-            },
-            "DELETED": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are marked as deleted"
-              }
-            },
-            "READY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are ready for download"
-              }
-            },
-            "UPLOADING": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are currently uploading"
-              }
-            },
-            "UPLOAD_ERROR": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that failed to upload"
-              }
-            }
-          }
-        },
-        "storage": {
-          "properties": {
-            "esFixedSizeIndex": {
-              "properties": {
-                "capacity": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Capacity of the fixed size index"
-                  }
-                },
-                "available": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Available storage in bytes"
-                  }
-                },
-                "used": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Used storage in bytes"
-                  }
-                }
               }
             }
           }
@@ -6390,6 +6390,76 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "security": {
+      "properties": {
+        "auditLoggingEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if audit logging is both enabled and supported by the current license."
+          }
+        },
+        "loginSelectorEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the login selector UI is enabled."
+          }
+        },
+        "accessAgreementEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the access agreement UI is both enabled and supported by the current license."
+          }
+        },
+        "authProviderCount": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of configured auth providers (including disabled auth providers)."
+          }
+        },
+        "enabledAuthProviders": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "The types of enabled auth providers (such as `saml`, `basic`, `pki`, etc)."
+            }
+          }
+        },
+        "httpAuthSchemes": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
+            }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "anonymousCredentialType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The credential type that is configured for the anonymous authentication provider."
           }
         }
       }
@@ -9604,76 +9674,6 @@
         }
       }
     },
-    "security": {
-      "properties": {
-        "auditLoggingEnabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if audit logging is both enabled and supported by the current license."
-          }
-        },
-        "loginSelectorEnabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if the login selector UI is enabled."
-          }
-        },
-        "accessAgreementEnabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if the access agreement UI is both enabled and supported by the current license."
-          }
-        },
-        "authProviderCount": {
-          "type": "long",
-          "_meta": {
-            "description": "The number of configured auth providers (including disabled auth providers)."
-          }
-        },
-        "enabledAuthProviders": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "The types of enabled auth providers (such as `saml`, `basic`, `pki`, etc)."
-            }
-          }
-        },
-        "httpAuthSchemes": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
-            }
-          }
-        },
-        "sessionIdleTimeoutInMinutes": {
-          "type": "long",
-          "_meta": {
-            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
-          }
-        },
-        "sessionLifespanInMinutes": {
-          "type": "long",
-          "_meta": {
-            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
-          }
-        },
-        "sessionCleanupInMinutes": {
-          "type": "long",
-          "_meta": {
-            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
-          }
-        },
-        "anonymousCredentialType": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The credential type that is configured for the anonymous authentication provider."
-          }
-        }
-      }
-    },
     "spaces": {
       "properties": {
         "usesFeatureControls": {
@@ -11695,6 +11695,37 @@
         }
       }
     },
+    "enterprise_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "overview": {
+              "type": "long"
+            },
+            "setup_guide": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "app_search": {
+              "type": "long"
+            },
+            "workplace_search": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "app_search": {
       "properties": {
         "ui_viewed": {
@@ -11723,37 +11754,6 @@
               "type": "long"
             },
             "engine_table_link": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "enterprise_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "overview": {
-              "type": "long"
-            },
-            "setup_guide": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "app_search": {
-              "type": "long"
-            },
-            "workplace_search": {
               "type": "long"
             }
           }
@@ -12807,7 +12807,7 @@
                 "size_in_bytes": {
                   "type": "long"
                 },
-                "latest_doc_timestamp": {
+                "last_doc_timestamp": {
                   "type": "date"
                 }
               }
@@ -12823,7 +12823,7 @@
                 "size_in_bytes": {
                   "type": "long"
                 },
-                "latest_doc_timestamp": {
+                "last_doc_timestamp": {
                   "type": "date"
                 }
               }
@@ -12839,7 +12839,7 @@
                 "size_in_bytes": {
                   "type": "long"
                 },
-                "latest_doc_timestamp": {
+                "last_doc_timestamp": {
                   "type": "date"
                 }
               }
