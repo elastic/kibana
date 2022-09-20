@@ -14,13 +14,17 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState, useCallback } from 'react';
+
+import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useLocations } from '../../hooks';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export const MonitorDetailsLocation: React.FC = () => {
   const { monitor } = useSelectedMonitor();
+  const { services } = useKibana();
   const { locations } = useLocations();
 
   const selectedLocation = useSelectedLocation();
@@ -30,7 +34,7 @@ export const MonitorDetailsLocation: React.FC = () => {
   const closeLocationList = useCallback(() => setIsLocationListOpen(false), []);
 
   const locationList = useMemo(() => {
-    if (!selectedLocation) {
+    if (!selectedLocation || !monitor) {
       return '';
     }
 
@@ -51,7 +55,12 @@ export const MonitorDetailsLocation: React.FC = () => {
             <EuiContextMenuItem
               key={fullLocation.label}
               icon={<EuiHealth color="success" />} // FIXME: get health for monitor at location
-              onClick={() => {}} // FIXME: navigate to monitor
+              onClick={() => {
+                closeLocationList();
+                services.application!.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
+                  path: `/monitor/${monitor.id}?locationId=${fullLocation.id}`,
+                });
+              }}
             >
               {fullLocation.label}
             </EuiContextMenuItem>
@@ -79,9 +88,10 @@ export const MonitorDetailsLocation: React.FC = () => {
     monitor,
     openLocationList,
     selectedLocation,
+    services.application,
   ]);
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitor) {
     return null;
   }
 
