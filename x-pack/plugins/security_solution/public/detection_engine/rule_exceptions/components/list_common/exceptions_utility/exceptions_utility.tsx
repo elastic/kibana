@@ -60,7 +60,7 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
             <UtilityBarGroup>
               <UtilityBarText dataTestSubj={showingTextDataTestSubj}>
                 <FormattedMessage
-                  id="xpack.securitySolution.exceptions.viewer.paginationDetails"
+                  id="xpack.securitySolution.exceptions.utility.paginationDetails"
                   defaultMessage="Showing {partOne} of {partTwo}"
                   values={{
                     partOne: <StyledText>{`1-${Math.min(pageSize, totalItemCount)}`}</StyledText>,
@@ -80,7 +80,7 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj={lastUpdatedTextDataTestSubj}>
           <FormattedMessage
-            id="xpack.securitySolution.exceptions.viewer.lastUpdated"
+            id="xpack.securitySolution.exceptions.utility.lastUpdated"
             defaultMessage="Updated {updated}"
             values={{
               updated: (
