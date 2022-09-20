@@ -40,7 +40,7 @@ const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface GroupTableItem {
-  id: number;
+  id: string;
   docCount: number;
   pValue: number | null;
   group: Record<string, any>;

@@ -127,33 +127,31 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(
-      ({ group, docCount, histogram, pValue }, index) => {
-        const sortedGroup = group.sort((a, b) =>
-          a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
-        );
-        const dedupedGroup: Record<string, any> = {};
-        const repeatedValues: Record<string, any> = {};
+    const tableItems = data.changePointsGroups.map(({ id, group, docCount, histogram, pValue }) => {
+      const sortedGroup = group.sort((a, b) =>
+        a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
+      );
+      const dedupedGroup: Record<string, any> = {};
+      const repeatedValues: Record<string, any> = {};
 
-        sortedGroup.forEach((pair) => {
-          const { fieldName, fieldValue } = pair;
-          if (pair.duplicate === false) {
-            dedupedGroup[fieldName] = fieldValue;
-          } else {
-            repeatedValues[fieldName] = fieldValue;
-          }
-        });
+      sortedGroup.forEach((pair) => {
+        const { fieldName, fieldValue } = pair;
+        if (pair.duplicate === false) {
+          dedupedGroup[fieldName] = fieldValue;
+        } else {
+          repeatedValues[fieldName] = fieldValue;
+        }
+      });
 
-        return {
-          id: index,
-          docCount,
-          pValue,
-          group: dedupedGroup,
-          repeatedValues,
-          histogram,
-        };
-      }
-    );
+      return {
+        id,
+        docCount,
+        pValue,
+        group: dedupedGroup,
+        repeatedValues,
+        histogram,
+      };
+    });
 
     return tableItems;
   }, [data.changePointsGroups]);
