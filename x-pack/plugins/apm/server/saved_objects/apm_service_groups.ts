@@ -18,7 +18,7 @@ interface ApmServiceGroupsPre850 {
   color: string;
 }
 
-interface ApmServiceGroups850 {
+interface ApmServiceGroups {
   groupName: string;
   kuery: string;
   description: string;
@@ -27,7 +27,7 @@ interface ApmServiceGroups850 {
 
 const migrateApmServiceGroups850: SavedObjectMigrationFn<
   ApmServiceGroupsPre850,
-  ApmServiceGroups850
+  ApmServiceGroups
 > = (doc) => {
   const { serviceNames, ...rest } = doc.attributes;
   return {

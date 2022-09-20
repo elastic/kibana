@@ -39,7 +39,7 @@ const serviceGroupsRoute = createApmServerRoute({
 });
 
 const serviceGroupsWithServiceCountRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-groups-services-count',
+  endpoint: 'GET /internal/apm/service_groups/services_count',
   params: t.type({
     query: rangeRt,
   }),

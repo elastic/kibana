@@ -51,7 +51,7 @@ export function ServiceGroupsList() {
   const { data: servicesCountData = { servicesCounts: {} } } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi('GET /internal/apm/service-groups-services-count', {
+        return callApmApi('GET /internal/apm/service_groups/services_count', {
           params: {
             query: {
               start,
