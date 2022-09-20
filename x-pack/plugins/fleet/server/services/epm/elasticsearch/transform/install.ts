@@ -10,7 +10,10 @@ import { errors } from '@elastic/elasticsearch';
 import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { USER_SETTINGS_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+import {
+  PACKAGE_TEMPLATE_SUFFIX,
+  USER_SETTINGS_TEMPLATE_SUFFIX,
+} from '../../../../../common/constants';
 import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
@@ -156,10 +159,10 @@ const processTransformAssetsPerModule = (
       content._meta = getESAssetMetadata({ packageName: installablePackage.name });
       transforms.push({
         transformModuleId,
-        installationName: getTransformNameForInstallation(
+        installationName: getTransformAssetNameForInstallation(
           installablePackage,
           transformModuleId,
-          installNameSuffix
+          `default-${installNameSuffix}`
         ),
         content,
       });
@@ -181,10 +184,9 @@ const processTransformAssetsPerModule = (
         destinationIndexTemplates.push({
           transformModuleId,
           _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-          installationName: getTransformNameForInstallation(
+          installationName: getTransformAssetNameForInstallation(
             installablePackage,
             transformModuleId,
-            installNameSuffix,
             'template'
           ),
           template: destinationIndexTemplate,
@@ -198,10 +200,16 @@ const processTransformAssetsPerModule = (
     id: template.installationName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
-  const componentTemplatesRefs = destinationIndexTemplates.map((template) => ({
-    id: `${template.installationName}${USER_SETTINGS_TEMPLATE_SUFFIX}`,
-    type: ElasticsearchAssetType.componentTemplate,
-  }));
+  const componentTemplatesRefs = [
+    ...destinationIndexTemplates.map((template) => ({
+      id: `${template.installationName}${USER_SETTINGS_TEMPLATE_SUFFIX}`,
+      type: ElasticsearchAssetType.componentTemplate,
+    })),
+    ...destinationIndexTemplates.map((template) => ({
+      id: `${template.installationName}${PACKAGE_TEMPLATE_SUFFIX}`,
+      type: ElasticsearchAssetType.componentTemplate,
+    })),
+  ];
 
   const transformRefs = transforms.map((t) => ({
     id: t.installationName,
@@ -269,7 +277,7 @@ const installTransformsAssets = async (
             defaultSettings: {},
           });
 
-          if (destinationIndexTemplate !== undefined || customMappings !== undefined) {
+          if (destinationIndexTemplate || customMappings) {
             return installComponentAndIndexTemplateForDataStream({
               esClient,
               logger,
@@ -459,15 +467,12 @@ const getLegacyTransformNameForInstallation = (
   return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
 };
 
-const getTransformNameForInstallation = (
+const getTransformAssetNameForInstallation = (
   installablePackage: InstallablePackage,
   transformModuleId: string,
-  suffix: string,
-  assetType?: string
+  suffix?: string
 ) => {
-  return `logs-${installablePackage.name}.${transformModuleId}-${
-    assetType === undefined ? 'default' : assetType
-  }-${suffix}`;
+  return `logs-${installablePackage.name}.${transformModuleId}${suffix ? '-' + suffix : ''}`;
 };
 
 const getTransformFolderAndFileNames = (installablePackage: InstallablePackage, path: string) => {
