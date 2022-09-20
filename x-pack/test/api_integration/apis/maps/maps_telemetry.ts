@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
             max: 6,
             min: 1,
           },
-        }
+        },
       });
     });
   });
