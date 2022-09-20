@@ -52,7 +52,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasPermissionError, setHasPermissionError] = useState<boolean>(true);
+  const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
