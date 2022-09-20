@@ -6,8 +6,7 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import React, { type FunctionComponent, useState, useRef, useEffect, useMemo } from 'react';
-import { FileKind } from '../../../common';
+import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
 import { FilesClient } from '../../types';
 
 import { useFilesContext } from '../context';
@@ -81,7 +80,7 @@ export interface Props<Kind extends string = string> {
  *
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
-export const UploadFile: FunctionComponent<Props> = ({
+export const UploadFile = <Kind extends string = string>({
   meta,
   client,
   onDone,
@@ -90,20 +89,22 @@ export const UploadFile: FunctionComponent<Props> = ({
   kind: kindId,
   immediate = false,
   allowRepeatedUploads = false,
-}) => {
+}: Props<Kind>): ReturnType<FunctionComponent> => {
   const { registry } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
-  const [kind] = useState<FileKind>(() => registry.get(kindId));
   const uploadState = useMemo(
     () =>
       createUploadState({
         client,
-        fileKind: kind,
+        fileKind: registry.get(kindId),
         allowRepeatedUploads,
       }),
-    [client, kind, allowRepeatedUploads]
+    [client, kindId, allowRepeatedUploads, registry]
   );
 
+  /**
+   * Hook state into component callbacks
+   */
   useEffect(() => {
     const subs = [
       uploadState.clear$.subscribe(() => {
