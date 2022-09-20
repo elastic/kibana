@@ -92,7 +92,19 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
                         <p>
                           <FormattedMessage
                             id="xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.content"
-                            defaultMessage="Using our built-in connectors, you’ll be able to ingest data into your Elasticsearch index easily and swiftly using a number of Elastic-developed connectors."
+                            defaultMessage="Choose from our catalog of native connectors to start extracting searchable content from supported data sources like MongoDB. If you need to customize a connector’s behavior, you can always deploy the self-managed connector client version and register it via the {buildAConnectorLabel} workflow."
+                            values={{
+                              buildAConnectorLabel: (
+                                <strong>
+                                  {i18n.translate(
+                                    'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
+                                    {
+                                      defaultMessage: 'Build a connector',
+                                    }
+                                  )}
+                                </strong>
+                              ),
+                            }}
                           />
                         </p>
                       </EuiText>
@@ -107,24 +119,7 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
                     titleSize: 'xs',
                   }
                 : {
-                    children: isNative ? (
-                      <EuiText size="s">
-                        <p>
-                          <FormattedMessage
-                            id="xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.content"
-                            defaultMessage="Choose from our catalog of native connectors to start extracting searchable content from supported data sources like MongoDB. If you need to customize a connector’s behavior, you can always deploy the self-managed connector client version and register it via the {buildAConnectorLabel} workflow."
-                            values={{
-                              buildAConnectorLabel: i18n.translate(
-                                'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
-                                {
-                                  defaultMessage: 'Build a connector',
-                                }
-                              ),
-                            }}
-                          />
-                        </p>
-                      </EuiText>
-                    ) : (
+                    children: (
                       <EuiText size="s">
                         <p>
                           <FormattedMessage
