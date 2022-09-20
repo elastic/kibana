@@ -884,7 +884,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           }
           // the following check should be redundant since we're retrieving the docs from elasticsearch but we check just to make sure
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
+          if (!this.rawDocExistsInNamespace(actualResult, namespace)) {
             return {
               tag: 'Left',
               value: {
@@ -900,10 +900,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           ];
           const useForce = force && force === true ? true : false;
           // the document is shared to more than one space and can only be deleted by force.
-          if (
-            useForce === false &&
-            (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))
-          ) {
+          if (!useForce && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
             return {
               tag: 'Left',
               value: {
