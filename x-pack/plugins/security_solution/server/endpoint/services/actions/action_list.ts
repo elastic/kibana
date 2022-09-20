@@ -205,9 +205,10 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  if (!actionRequests?.body?.hits?.hits)
+  if (!actionRequests?.body?.hits?.hits) {
     // return empty details array
     return { actionDetails: [], totalRecords: 0 };
+  }
 
   // format endpoint actions into { type, item } structure
   const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
