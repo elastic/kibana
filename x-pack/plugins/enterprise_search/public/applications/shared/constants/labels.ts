@@ -26,3 +26,10 @@ export const TYPE_LABEL = i18n.translate('xpack.enterpriseSearch.typeLabel', {
 export const EMAIL_LABEL = i18n.translate('xpack.enterpriseSearch.emailLabel', {
   defaultMessage: 'Email',
 });
+
+export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview', // title case specifically requested
+  }
+);
