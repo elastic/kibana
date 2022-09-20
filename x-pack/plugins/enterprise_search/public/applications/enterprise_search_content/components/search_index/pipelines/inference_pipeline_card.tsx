@@ -136,7 +136,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
                   </EuiFlexItem>
                 )}
                 {types.map((type) => (
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} key={type}>
                     <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem>
                         <EuiBadge color="hollow">{type}</EuiBadge>
