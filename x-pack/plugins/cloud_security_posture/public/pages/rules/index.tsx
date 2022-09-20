@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { truthy } from '../../../common/utils/helpers';
 import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import type { BreadcrumbEntry } from '../../common/navigation/types';
@@ -52,45 +51,47 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
-const assertPolicyTemplate = (
-  policyTemplate: unknown
-): policyTemplate is keyof CloudPostureIntegrations => {
-  if (typeof policyTemplate !== 'string') return false;
+const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
+  typeof name === 'string' && name in cloudPostureIntegrations;
 
-  return cloudPostureIntegrations.hasOwnProperty(policyTemplate);
-};
+const getRulesSharedValues = (
+  packageInfo?: PackagePolicy
+): NonNullable<EuiDescriptionListProps['listItems']> => {
+  const enabledInput = packageInfo?.inputs.find((input) => input.enabled);
+  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return [];
 
-const getRulesSharedValues = (packageInfo: PackagePolicy): EuiDescriptionListProps['listItems'] => {
-  const enabledPackage = packageInfo.inputs?.find((input) => input.enabled);
-  if (!enabledPackage || !assertPolicyTemplate(enabledPackage.policy_template)) return;
-
-  const integration = cloudPostureIntegrations[enabledPackage.policy_template];
-  if (!integration) return;
-
+  const integration = cloudPostureIntegrations[enabledInput.policy_template];
   const enabledIntegrationOption = integration.options.find(
-    (option) => option.type === enabledPackage.type
+    (option) => option.type === enabledInput.type
   );
 
-  return [
+  const values = [
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
         defaultMessage: 'Integration',
       }),
       description: integration.shortName,
     },
-    !!enabledIntegrationOption?.name && {
+  ];
+
+  if (!enabledIntegrationOption) return values;
+
+  values.push(
+    {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
         defaultMessage: 'Deployment Type',
       }),
       description: enabledIntegrationOption.name,
     },
-    !!enabledIntegrationOption?.benchmark && {
+    {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
         defaultMessage: 'Benchmark',
       }),
       description: enabledIntegrationOption.benchmark,
-    },
-  ].filter(truthy);
+    }
+  );
+
+  return values;
 };
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
@@ -107,6 +108,8 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   );
 
   useCspBreadcrumbs(breadcrumbs);
+
+  const sharedValues = getRulesSharedValues(packageInfo);
 
   return (
     <CloudPosturePage query={integrationInfo}>
@@ -146,9 +149,9 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
           </EuiFlexGroup>
         }
         description={
-          packageInfo && (
+          sharedValues.length && (
             <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
-              <CspInlineDescriptionList listItems={getRulesSharedValues(packageInfo)} />
+              <CspInlineDescriptionList listItems={sharedValues} />
             </div>
           )
         }

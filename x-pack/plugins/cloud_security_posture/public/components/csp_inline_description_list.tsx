@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list_types';
+import { EuiDescriptionList, useEuiTheme, type EuiDescriptionListProps } from '@elastic/eui';
 
 const getModifiedTitlesListItems = (listItems: EuiDescriptionListProps['listItems']) =>
   listItems

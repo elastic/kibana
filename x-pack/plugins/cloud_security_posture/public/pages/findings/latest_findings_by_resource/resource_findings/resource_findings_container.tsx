@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiSpacer,
   EuiButtonEmpty,
@@ -21,11 +21,7 @@ import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
-import {
-  ResourceFindingsQuery,
-  ResourceFindingsResponseAggs,
-  useResourceFindings,
-} from './use_resource_findings';
+import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
@@ -51,8 +47,6 @@ const getDefaultQuery = ({
   pageIndex: 0,
   pageSize: 10,
 });
-
-type ResourceFindingSharedValues = 'clusterId' | 'resourceId' | 'resourceSubType' | 'resourceName';
 
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
@@ -91,26 +85,6 @@ const getResourceFindingSharedValues = (sharedValues: {
   },
 ];
 
-const getSharedValues = (
-  resourceFindingsAggs?: ResourceFindingsResponseAggs<ResourceFindingSharedValues>
-) => {
-  if (
-    !resourceFindingsAggs ||
-    !Array.isArray(resourceFindingsAggs?.clusterId.buckets) ||
-    !Array.isArray(resourceFindingsAggs?.resourceId.buckets) ||
-    !Array.isArray(resourceFindingsAggs?.resourceSubType.buckets) ||
-    !Array.isArray(resourceFindingsAggs?.resourceName.buckets)
-  )
-    return;
-
-  return {
-    clusterId: resourceFindingsAggs.clusterId.buckets[0].key,
-    resourceId: resourceFindingsAggs.resourceId.buckets[0].key,
-    resourceSubType: resourceFindingsAggs.resourceSubType.buckets[0].key,
-    resourceName: resourceFindingsAggs.resourceName.buckets[0].key,
-  };
-};
-
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -137,26 +111,8 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     query: baseEsQuery.query,
     resourceId: params.resourceId,
     enabled: !baseEsQuery.error,
-    aggs: {
-      resourceId: {
-        terms: { field: 'resource.id' },
-      },
-      clusterId: {
-        terms: { field: 'cluster_id' },
-      },
-      resourceSubType: {
-        terms: { field: 'resource.sub_type' },
-      },
-      resourceName: {
-        terms: { field: 'resource.name' },
-      },
-    },
   });
 
-  const sharedValues = useMemo(
-    () => getSharedValues(resourceFindings.data?.aggs),
-    [resourceFindings.data?.aggs]
-  );
   const error = resourceFindings.error || baseEsQuery.error;
 
   return (
@@ -178,7 +134,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
                   defaultMessage: '{resourceName} - Findings',
-                  values: { resourceName: sharedValues?.resourceName },
+                  values: { resourceName: resourceFindings.data?.resourceName },
                 }
               )}
             />
@@ -187,8 +143,15 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       </PageTitle>
       <EuiPageHeader
         description={
-          sharedValues && (
-            <CspInlineDescriptionList listItems={getResourceFindingSharedValues(sharedValues)} />
+          resourceFindings.data && (
+            <CspInlineDescriptionList
+              listItems={getResourceFindingSharedValues({
+                resourceId: params.resourceId,
+                resourceName: resourceFindings.data.resourceName,
+                resourceSubType: resourceFindings.data.resourceSubType,
+                clusterId: resourceFindings.data.clusterId,
+              })}
+            />
           )
         }
       />

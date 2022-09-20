@@ -19,13 +19,12 @@ import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../../types';
 
-interface UseResourceFindingsOptions<TAggs extends string> extends FindingsBaseEsQuery {
+interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
-  aggs: Record<TAggs, estypes.AggregationsAggregationContainer>;
 }
 
 export interface ResourceFindingsQuery {
@@ -35,12 +34,12 @@ export interface ResourceFindingsQuery {
 }
 
 type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type ResourceFindingsResponse<TAggs extends string> = IKibanaSearchResponse<
-  estypes.SearchResponse<CspFinding, ResourceFindingsResponseAggs<TAggs>>
+type ResourceFindingsResponse = IKibanaSearchResponse<
+  estypes.SearchResponse<CspFinding, ResourceFindingsResponseAggs>
 >;
 
-export type ResourceFindingsResponseAggs<TAggs extends string> = Record<
-  'count' | TAggs,
+export type ResourceFindingsResponseAggs = Record<
+  'count' | 'clusterId' | 'resourceSubType' | 'resourceName',
   estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>
 >;
 
@@ -51,8 +50,7 @@ const getResourceFindingsQuery = ({
   size,
   pitId,
   sort,
-  aggs,
-}: UseResourceFindingsOptions<string> & { pitId: string }): estypes.SearchRequest => ({
+}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   from,
   size,
   body: {
@@ -65,14 +63,23 @@ const getResourceFindingsQuery = ({
     },
     sort: [{ [sort.field]: sort.direction }],
     pit: { id: pitId },
-    aggs: { ...getFindingsCountAggQuery(), ...aggs },
+    aggs: {
+      ...getFindingsCountAggQuery(),
+      clusterId: {
+        terms: { field: 'cluster_id' },
+      },
+      resourceSubType: {
+        terms: { field: 'resource.sub_type' },
+      },
+      resourceName: {
+        terms: { field: 'resource.name' },
+      },
+    },
   },
   ignore_unavailable: false,
 });
 
-export const useResourceFindings = <TAggs extends string>(
-  options: UseResourceFindingsOptions<TAggs>
-) => {
+export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -85,7 +92,7 @@ export const useResourceFindings = <TAggs extends string>(
     ['csp_resource_findings', { params }],
     () =>
       lastValueFrom(
-        data.search.search<ResourceFindingsRequest, ResourceFindingsResponse<TAggs>>({
+        data.search.search<ResourceFindingsRequest, ResourceFindingsResponse>({
           params: getResourceFindingsQuery(params),
         })
       ),
@@ -94,17 +101,21 @@ export const useResourceFindings = <TAggs extends string>(
       keepPreviousData: true,
       select: ({
         rawResponse: { hits, pit_id: newPitId, aggregations },
-      }: ResourceFindingsResponse<TAggs>) => {
+      }: ResourceFindingsResponse) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
 
-        if (!Array.isArray(aggregations?.count.buckets))
-          throw new Error('expected buckets to be an array');
+        assertNonEmptyArray(aggregations.count.buckets);
+        assertNonEmptyArray(aggregations.clusterId.buckets);
+        assertNonEmptyArray(aggregations.resourceSubType.buckets);
+        assertNonEmptyArray(aggregations.resourceName.buckets);
 
         return {
           page: hits.hits.map((hit) => hit._source!),
           total: number.is(hits.total) ? hits.total : 0,
           count: getAggregationCount(aggregations.count.buckets),
-          aggs: aggregations,
+          clusterId: getFirstBucketKey(aggregations.clusterId.buckets),
+          resourceSubType: getFirstBucketKey(aggregations.resourceSubType.buckets),
+          resourceName: getFirstBucketKey(aggregations.resourceName.buckets),
           newPitId: newPitId!,
         };
       },
@@ -118,3 +129,12 @@ export const useResourceFindings = <TAggs extends string>(
     }
   );
 };
+
+function assertNonEmptyArray<T>(arr: unknown): asserts arr is T[] {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    throw new Error('expected a non empty array');
+  }
+}
+
+const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) =>
+  buckets[0].key;
