@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { isEmpty, findIndex, forEach, pullAt, pullAllBy, pickBy } from 'lodash';
+import { isEmpty, findIndex, indexOf, pickBy, uniq, map } from 'lodash';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import { useController, useFormContext, useWatch } from 'react-hook-form';
+import { useController, useFormContext, useWatch, useFieldArray } from 'react-hook-form';
 
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
@@ -26,11 +26,15 @@ interface QueriesFieldProps {
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
   const {
-    field: { onChange, value: fieldValue },
+    field: { value: fieldValue },
   } = useController<{ queries: PackQueryFormData[] }, 'queries'>({
     name: 'queries',
     defaultValue: [],
     rules: {},
+  });
+
+  const { append, remove, update, replace } = useFieldArray({
+    name: 'queries',
   });
 
   const { setValue } = useFormContext();
@@ -55,16 +59,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       if (streamIndex > -1) {
-        onChange(
-          produce((draft: PackQueryFormData[]) => {
-            pullAt(draft, [streamIndex]);
-
-            return draft;
-          })
-        );
+        remove(streamIndex);
       }
     },
-    [fieldValue, onChange]
+    [fieldValue, remove]
   );
 
   const handleEditClick = useCallback(
@@ -80,40 +78,29 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     (updatedQuery) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
-          onChange(
-            produce((draft: PackQueryFormData[]) => {
-              draft[showEditQueryFlyout].id = updatedQuery.id;
-              draft[showEditQueryFlyout].interval = updatedQuery.interval;
-              draft[showEditQueryFlyout].query = updatedQuery.query;
+          update(
+            showEditQueryFlyout,
+            produce({}, (draft: PackQueryFormData) => {
+              draft.id = updatedQuery.id;
+              draft.interval = updatedQuery.interval;
+              draft.query = updatedQuery.query;
 
               if (updatedQuery.platform?.length) {
-                draft[showEditQueryFlyout].platform = updatedQuery.platform;
-              } else {
-                delete draft[showEditQueryFlyout].platform;
+                draft.platform = updatedQuery.platform;
               }
 
               if (updatedQuery.version?.length) {
-                draft[showEditQueryFlyout].version = updatedQuery.version;
-              } else {
-                delete draft[showEditQueryFlyout].version;
+                draft.version = updatedQuery.version;
               }
 
               if (updatedQuery.ecs_mapping) {
-                draft[showEditQueryFlyout].ecs_mapping = updatedQuery.ecs_mapping;
-              } else {
-                // @ts-expect-error update types
-                delete draft[showEditQueryFlyout].ecs_mapping;
+                draft.ecs_mapping = updatedQuery.ecs_mapping;
               }
 
-              if (updatedQuery.snapshot) {
-                delete draft[showEditQueryFlyout].snapshot;
-                delete draft[showEditQueryFlyout].removed;
-              } else {
-                if (updatedQuery.snapshot === false) {
-                  draft[showEditQueryFlyout].snapshot = updatedQuery.snapshot;
-                  if (updatedQuery.removed !== undefined) {
-                    draft[showEditQueryFlyout].removed = updatedQuery.removed;
-                  }
+              if (updatedQuery.snapshot === false) {
+                draft.snapshot = updatedQuery.snapshot;
+                if (updatedQuery.removed !== undefined) {
+                  draft.removed = updatedQuery.removed;
                 }
               }
 
@@ -125,82 +112,53 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
         handleHideEditFlyout();
         resolve();
       }),
-    [handleHideEditFlyout, onChange, showEditQueryFlyout]
+    [handleHideEditFlyout, update, showEditQueryFlyout]
   );
 
   const handleAddQuery = useCallback(
     (newQuery) =>
       new Promise<void>((resolve) => {
-        onChange(
-          produce((draft: PackQueryFormData[]) => {
-            draft.push(newQuery);
-
-            return draft;
-          })
-        );
+        append(newQuery);
         handleHideAddFlyout();
         resolve();
       }),
-    [handleHideAddFlyout, onChange]
+    [handleHideAddFlyout, append]
   );
 
   const handleDeleteQueries = useCallback(() => {
-    onChange(
-      produce((draft: PackQueryFormData[]) => {
-        pullAllBy(draft, tableSelectedItems, 'id');
-
-        return draft;
-      })
+    const idsToRemove = map(tableSelectedItems, (selectedItem) =>
+      indexOf(fieldValue, selectedItem)
     );
+    remove(idsToRemove);
     setTableSelectedItems([]);
-  }, [onChange, tableSelectedItems]);
+  }, [fieldValue, remove, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
     (parsedContent, uploadedPackName) => {
-      onChange(
-        produce((draft: PackQueryFormData[]) => {
-          forEach(parsedContent.queries, (newQuery, newQueryId) => {
-            draft.push(
-              // @ts-expect-error update types
-              pickBy(
-                {
-                  id: newQueryId,
-                  interval: newQuery.interval ?? parsedContent.interval ?? '3600',
-                  query: newQuery.query,
-                  version: newQuery.version ?? parsedContent.version,
-                  snapshot: newQuery.snapshot ?? parsedContent.snapshot,
-                  removed: newQuery.removed ?? parsedContent.removed,
-                  platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
-                },
-                (value) => !isEmpty(value) || value === false
-              )
-            );
-          });
-
-          return draft;
-        })
+      replace(
+        map(parsedContent.queries, (newQuery, newQueryId) =>
+          pickBy(
+            {
+              id: newQueryId,
+              interval: newQuery.interval ?? parsedContent.interval ?? '3600',
+              query: newQuery.query,
+              version: newQuery.version ?? parsedContent.version,
+              snapshot: newQuery.snapshot ?? parsedContent.snapshot,
+              removed: newQuery.removed ?? parsedContent.removed,
+              platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
+            },
+            (value) => !isEmpty(value) || value === false
+          )
+        )
       );
 
       handleNameChange(uploadedPackName);
     },
-    [handleNameChange, onChange]
+    [handleNameChange, replace]
   );
 
   const tableData = useMemo(() => (fieldValue?.length ? fieldValue : []), [fieldValue]);
-
-  const uniqueQueryIds = useMemo<string[]>(
-    () =>
-      fieldValue && fieldValue.length
-        ? fieldValue.reduce((acc, query) => {
-            if (query?.id) {
-              acc.push(query.id);
-            }
-
-            return acc;
-          }, [] as string[])
-        : [],
-    [fieldValue]
-  );
+  const uniqueQueryIds = useMemo<string[]>(() => uniq(map(fieldValue, 'id')), [fieldValue]);
 
   return (
     <>
@@ -255,7 +213,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
           // @ts-expect-error update types
-          defaultValue={value[showEditQueryFlyout]}
+          defaultValue={fieldValue[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />

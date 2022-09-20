@@ -66,9 +66,11 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     snapshot: {
       type: 'keyword',
+      index: false,
     },
     removed: {
       type: 'keyword',
+      index: false,
     },
     ecs_mapping: {
       type: 'object',
@@ -144,9 +146,11 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         snapshot: {
           type: 'keyword',
+          index: false,
         },
         removed: {
           type: 'keyword',
+          index: false,
         },
         platform: {
           type: 'keyword',
@@ -218,9 +222,11 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         snapshot: {
           type: 'keyword',
+          index: false,
         },
         removed: {
           type: 'keyword',
+          index: false,
         },
         platform: {
           type: 'keyword',
