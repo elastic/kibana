@@ -85,3 +85,9 @@ export type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 export const createSLOParamsSchema = t.type({
   body: createSLOBodySchema,
 });
+
+export const deleteSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
+});

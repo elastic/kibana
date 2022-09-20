@@ -31,7 +31,11 @@ const i18nTexts = {
 };
 
 export const WarmPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
+  const {
+    isUsingSearchableSnapshotInHotPhase,
+    isUsingDownsampleInHotPhase,
+    isUsingDownsampleInWarmPhase,
+  } = useConfiguration();
 
   return (
     <Phase phase="warm">
@@ -41,9 +45,11 @@ export const WarmPhase: FunctionComponent = () => {
 
       {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
 
-      {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="warm" />}
-
       {!isUsingSearchableSnapshotInHotPhase && <DownsampleField phase="warm" />}
+
+      {!isUsingSearchableSnapshotInHotPhase &&
+        !isUsingDownsampleInHotPhase &&
+        !isUsingDownsampleInWarmPhase && <ReadonlyField phase="warm" />}
 
       {/* Data tier allocation section */}
       <DataTierAllocationField
