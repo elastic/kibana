@@ -155,7 +155,7 @@ export function OverviewPage() {
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <SectionContainer
-              initialIsOpen={hasAnyData}
+              initialIsOpen={true}
               title={i18n.translate('xpack.observability.overview.alerts.title', {
                 defaultMessage: 'Alerts',
               })}
