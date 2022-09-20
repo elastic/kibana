@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('classic table in window 900x700', function () {
+    describe('classic table in window 900x700', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await browser.setWindowSize(900, 700);
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('classic table in window 600x700', function () {
+    describe('classic table in window 600x700', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await browser.setWindowSize(600, 700);
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('legacy', function () {
+    describe('legacy', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await PageObjects.common.navigateToApp('discover');
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(skipButtonText === activeElementText).to.be(true);
       });
 
-      describe('expand a document row', function () {
+      describe('expand a document row', async function () {
         const rowToInspect = 1;
         beforeEach(async function () {
           // close the toggle if open
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('add and remove columns', function () {
+      describe('add and remove columns', async function () {
         const extraColumns = ['phpmemory', 'ip'];
 
         afterEach(async function () {
