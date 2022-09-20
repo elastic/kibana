@@ -282,13 +282,6 @@
               }
             }
           }
-        },
-        "avg_actions_run_duration_by_connector_type_per_day": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long"
-            }
-          }
         }
       }
     },
