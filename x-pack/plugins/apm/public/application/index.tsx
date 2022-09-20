@@ -64,7 +64,15 @@ export const renderApp = ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaThemeProvider
+      theme$={theme$}
+      modify={{
+        breakpoint: {
+          xxl: 1600,
+          xxxl: 2000,
+        },
+      }}
+    >
       <ApmAppRoot
         apmPluginContextValue={apmPluginContextValue}
         pluginsStart={pluginsStart}

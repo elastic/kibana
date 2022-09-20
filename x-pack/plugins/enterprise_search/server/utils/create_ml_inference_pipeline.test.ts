@@ -11,13 +11,17 @@ import {
   createMlInferencePipeline,
   addSubPipelineToIndexSpecificMlPipeline,
 } from './create_ml_inference_pipeline';
+import {
+  getInferencePipelineNameFromIndexName,
+  getPrefixedInferencePipelineProcessorName,
+} from './ml_inference_pipeline_utils';
 
 describe('createMlInferencePipeline util function', () => {
   const pipelineName = 'my-pipeline';
   const modelId = 'my-model-id';
   const sourceField = 'my-source-field';
   const destinationField = 'my-dest-field';
-  const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
+  const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
 
   const mockClient = {
     ingest: {
@@ -87,7 +91,7 @@ describe('createMlInferencePipeline util function', () => {
 
 describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
   const indexName = 'my-index';
-  const parentPipelineId = `${indexName}@ml-inference`;
+  const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
   const pipelineName = 'ml-inference-my-pipeline';
 
   const mockClient = {

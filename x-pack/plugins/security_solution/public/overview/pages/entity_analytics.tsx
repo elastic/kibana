@@ -34,15 +34,7 @@ const EntityAnalyticsComponent = () => {
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage
-              title={ENTITY_ANALYTICS}
-              badgeOptions={{
-                text: i18n.TECHNICAL_PREVIEW,
-                color: 'white',
-                size: 's',
-                beta: true,
-              }}
-            >
+            <HeaderPage title={ENTITY_ANALYTICS}>
               {isPlatinumOrTrialLicense && (
                 <SiemSearchBar
                   id={InputsModelId.global}
