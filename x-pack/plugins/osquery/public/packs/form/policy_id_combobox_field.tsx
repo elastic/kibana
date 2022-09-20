@@ -7,14 +7,13 @@
 
 import { castArray, reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-
+import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
-import type { ComboBoxField } from '../../shared_imports';
 import { useAgentPolicies } from '../../agent_policies';
 
 // Custom styling for drop down list items due to:
@@ -31,9 +30,9 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-type ComboBoxFieldProps = Parameters<typeof ComboBoxField>[0];
-
-type PolicyIdComboBoxFieldProps = Pick<ComboBoxFieldProps, 'euiFieldProps'>;
+interface PolicyIdComboBoxFieldProps {
+  euiFieldProps?: EuiComboBoxProps<string>;
+}
 
 const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   euiFieldProps,
@@ -142,16 +141,9 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
 
   return (
     <EuiFormRow
-      label={
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.osquery.pack.form.agentPoliciesFieldLabel"
-              defaultMessage="Scheduled agent policies (optional)"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      label={i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
+        defaultMessage: 'Scheduled agent policies (optional)',
+      })}
       helpText={helpText}
       error={error?.message}
       isInvalid={hasError}
