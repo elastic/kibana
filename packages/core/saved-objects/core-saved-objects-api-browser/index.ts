@@ -22,4 +22,7 @@ export type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResolveResponse,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponseItem,
+  SavedObjectsBulkDeleteResponse,
 } from './src/apis';
