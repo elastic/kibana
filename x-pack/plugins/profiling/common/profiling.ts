@@ -203,12 +203,6 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
   return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
 }
 
-export interface LazyStackFrameMetadata {
-  FrameGroup: FrameGroup;
-  FrameGroupID: FrameGroupID;
-  StackTraceIndex: number;
-}
-
 export function groupStackFrameMetadataByStackTrace(
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
@@ -240,6 +234,12 @@ export function groupStackFrameMetadataByStackTrace(
     stackTraceMap[stackTraceID] = frameMetadata;
   }
   return stackTraceMap;
+}
+
+export interface LazyStackFrameMetadata {
+  FrameGroup: FrameGroup;
+  FrameGroupID: FrameGroupID;
+  StackTraceIndex: number;
 }
 
 // createLazyStackTraceMap collects all of the per-stack-frame metadata for a
