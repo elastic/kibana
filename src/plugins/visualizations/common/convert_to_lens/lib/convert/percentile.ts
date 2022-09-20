@@ -53,7 +53,7 @@ export const convertToPercentileColumn = (
     agg,
     dataView,
   }: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILES | METRIC_TYPES.SINGLE_PERCENTILE>,
-  { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
+  { reducedTimeRange }: { reducedTimeRange?: string } = {}
 ): PercentileColumn | null => {
   const { aggParams, aggId } = agg;
   if (!aggParams || !aggId) {
