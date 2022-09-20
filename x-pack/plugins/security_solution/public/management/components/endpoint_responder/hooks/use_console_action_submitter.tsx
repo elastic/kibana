@@ -82,7 +82,12 @@ export const useConsoleActionSubmitter = ({
     [store.actionApiState]
   );
 
-  const { actionId, sent: actionRequestSent } = currentActionState.request;
+  const { actionDetails, actionDetailsError } = currentActionState;
+  const {
+    actionId,
+    sent: actionRequestSent,
+    error: actionRequestError,
+  } = currentActionState.request;
 
   const { data: apiActionDetails, error: apiActionDetailsError } = useGetActionDetails(
     actionId ?? '-',
@@ -147,10 +152,10 @@ export const useConsoleActionSubmitter = ({
   // If an error was returned while attempting to create the action request,
   // then set command status to error
   useEffect(() => {
-    if (currentActionState.request.error && isPending) {
+    if (actionRequestError && isPending) {
       setStatus('error');
     }
-  }, [currentActionState.request.error, isPending, setStatus]);
+  }, [actionRequestError, isPending, setStatus]);
 
   // If an error was return by the Action Details API, then store it and set the status to error
   useEffect(() => {
@@ -185,12 +190,13 @@ export const useConsoleActionSubmitter = ({
     }
   }, [apiActionDetails, currentActionState, isPending, setStatus, setStore]);
 
+  // Calculate the action's UI result based on the different API responses
   const result = useMemo(() => {
     if (isPending) {
       return <ResultComponent showAs="pending" />;
     }
 
-    const apiError = currentActionState.request.error || currentActionState.actionDetailsError;
+    const apiError = actionRequestError || actionDetailsError;
 
     if (apiError) {
       return (
@@ -204,37 +210,29 @@ export const useConsoleActionSubmitter = ({
       );
     }
 
-    const actionDetails = currentActionState.actionDetails;
-
     if (actionDetails) {
       // Response action failures
       if (actionDetails.errors) {
         return (
           <ActionError
-            dataTestSubj={'responseActionExecError'}
-            action={actionDetails}
             ResultComponent={ResultComponent}
+            action={actionDetails}
+            dataTestSubj={'responseActionExecError'}
           />
         );
       }
 
       return (
         <ActionSuccess
-          action={actionDetails}
           ResultComponent={ResultComponent}
+          action={actionDetails}
           data-test-subj="responseActionSuccess"
         />
       );
     }
 
     return <></>;
-  }, [
-    ResultComponent,
-    currentActionState.actionDetails,
-    currentActionState.actionDetailsError,
-    currentActionState.request.error,
-    isPending,
-  ]);
+  }, [isPending, actionRequestError, actionDetailsError, actionDetails, ResultComponent]);
 
   return {
     result,
