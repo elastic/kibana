@@ -7,6 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import {
+  createDownsampleActions,
   createForceMergeActions,
   createMinAgeActions,
   createReadonlyActions,
@@ -41,16 +42,19 @@ export const setupSearchableSnapshotsTestBed = async (
         ...createSearchableSnapshotActions(testBed, 'hot'),
         ...createForceMergeActions(testBed, 'hot'),
         ...createShrinkActions(testBed, 'hot'),
+        ...createDownsampleActions(testBed, 'hot'),
       },
       warm: {
         ...createForceMergeActions(testBed, 'warm'),
         ...createShrinkActions(testBed, 'warm'),
         ...createReadonlyActions(testBed, 'warm'),
+        ...createDownsampleActions(testBed, 'warm'),
       },
       cold: {
         ...createMinAgeActions(testBed, 'cold'),
         ...createSearchableSnapshotActions(testBed, 'cold'),
         ...createReadonlyActions(testBed, 'cold'),
+        ...createDownsampleActions(testBed, 'cold'),
       },
       frozen: {
         ...createMinAgeActions(testBed, 'frozen'),
