@@ -97,7 +97,7 @@ export function ResolverTreeFetcher(
               firstNonNullValue(event.data['@timestamp'])
             );
             const oldestTimestamp = timestamps[0];
-            const newestTimestamp = timestamps.length > 1 ? timestamps.slice(-1) : oldestTimestamp;
+            const newestTimestamp = timestamps.slice(-1);
             api.dispatch({
               type: 'serverReturnedResolverData',
               payload: {
