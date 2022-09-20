@@ -10,6 +10,7 @@ import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
+import { alertType as alwaysFiringRuleType } from './always_firing';
 interface RegisterAlertTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
@@ -21,4 +22,6 @@ export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {
   registerIndexThreshold(params);
   registerGeoContainment(params);
   registerEsQuery(params);
+
+  params.alerting.registerType(alwaysFiringRuleType);
 }

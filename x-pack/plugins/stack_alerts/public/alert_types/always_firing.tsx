@@ -29,11 +29,11 @@ import {
   AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
   DEFAULT_INSTANCES_TO_GENERATE,
-} from '../../common/constants';
+} from '../../common';
 
 export function getAlertType(): RuleTypeModel {
   return {
-    id: 'example.always-firing',
+    id: '.always-firing',
     description: 'Alert when called',
     iconClass: 'bolt',
     documentationUrl: null,

@@ -13,7 +13,7 @@ import {
   ALERTING_EXAMPLE_APP_ID,
   AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
-} from '../../common/constants';
+} from '../../common';
 
 type ActionGroups = 'small' | 'medium' | 'large';
 const DEFAULT_ACTION_GROUP: ActionGroups = 'small';
@@ -45,7 +45,7 @@ export const alertType: RuleType<
   { ttl: number },
   AlwaysFiringActionGroupIds
 > = {
-  id: 'example.always-firing',
+  id: '.always-firing',
   name: 'Always firing',
   actionGroups: [
     { id: 'small', name: 'Small t-shirt' },
@@ -72,13 +72,13 @@ export const alertType: RuleType<
       range(instances - activeAlerts.length)
         .map(() => uuid.v4())
         .forEach((id: string) => {
-          activeAlerts.push({ id, ttl: shouldPersist ? Math.floor(Math.random() * 10) : 0 });
+          activeAlerts.push({ id, ttl: shouldPersist ? Math.floor(Math.random() * 100) : 0 });
         });
     }
 
     const instancesToRetains = activeAlerts
       .map(({ id, ttl }) => {
-        if (!shouldFlapp || ttl % 2 === 0) {
+        if (!shouldFlapp || ttl % 3 === 0 || ttl % 5 === 0) {
           services.alertFactory
             .create(id)
             .replaceState({ triggerdOnCycle: count })

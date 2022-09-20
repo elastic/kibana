@@ -23,14 +23,3 @@ export interface AlwaysFiringParams extends RuleTypeParams {
   shouldPersist?: boolean;
 }
 export type AlwaysFiringActionGroupIds = keyof AlwaysFiringThresholds;
-
-// Astros
-export enum Craft {
-  OuterSpace = 'Outer Space',
-  ISS = 'ISS',
-}
-export enum Operator {
-  AreAbove = 'Are above',
-  AreBelow = 'Are below',
-  AreExactly = 'Are exactly',
-}
