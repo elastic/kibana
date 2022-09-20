@@ -16,7 +16,7 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
-  editException,
+  openEditException,
 } from '../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
@@ -278,7 +278,7 @@ describe('Exceptions flyout', () => {
   });
 
   describe('flyout errors', () => {
-    before(() => {
+    beforeEach(() => {
       // create exception item via api
       createExceptionListItem(getExceptionList().list_id, {
         list_id: getExceptionList().list_id,
@@ -303,9 +303,9 @@ describe('Exceptions flyout', () => {
       goToExceptionsTab();
     });
 
-    context.skip('When updating an item with version conflict', () => {
+    context('When updating an item with version conflict', () => {
       it('Displays version conflict error', () => {
-        editException();
+        openEditException();
 
         // update exception item via api
         updateExceptionListItem('simple_list_item', {
@@ -334,9 +334,9 @@ describe('Exceptions flyout', () => {
       });
     });
 
-    context.skip('When updating an item for a list that has since been deleted', () => {
+    context('When updating an item for a list that has since been deleted', () => {
       it('Displays missing exception list error', () => {
-        editException();
+        openEditException();
 
         // delete exception list via api
         deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);

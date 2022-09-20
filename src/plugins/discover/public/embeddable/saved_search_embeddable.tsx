@@ -15,7 +15,7 @@ import {
   FilterStateStore,
 } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -76,7 +76,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
-interface SearchEmbeddableConfig {
+export interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
@@ -153,9 +153,9 @@ export class SavedSearchEmbeddable
         this.searchProps &&
         (titleChanged ||
           this.isFetchRequired(this.searchProps) ||
-          this.isInputChangedAndRerenderRequired(this.searchProps))
+          this.isRerenderRequired(this.searchProps))
       ) {
-        this.pushContainerStateParamsToProps(this.searchProps);
+        this.reload();
       }
     });
   }
@@ -387,7 +387,7 @@ export class SavedSearchEmbeddable
 
     searchSource.setParent(this.filtersSearchSource);
 
-    this.pushContainerStateParamsToProps(props);
+    this.load(props);
 
     props.isLoading = true;
 
@@ -420,11 +420,14 @@ export class SavedSearchEmbeddable
     );
   }
 
-  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+  private isRerenderRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
     }
-    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+    return (
+      this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
+    );
   }
 
   private async pushContainerStateParamsToProps(
@@ -466,10 +469,6 @@ export class SavedSearchEmbeddable
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
     }
-
-    if (this.node) {
-      this.renderReactComponent(this.node, this.searchProps!);
-    }
   }
 
   /**
@@ -480,9 +479,7 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
+
     this.node = domNode;
 
     this.renderReactComponent(this.node, this.searchProps!);
@@ -545,9 +542,17 @@ export class SavedSearchEmbeddable
     });
   }
 
+  private async load(searchProps: SearchProps, forceFetch = false) {
+    await this.pushContainerStateParamsToProps(searchProps, { forceFetch });
+
+    if (this.node) {
+      this.render(this.node);
+    }
+  }
+
   public reload() {
     if (this.searchProps) {
-      this.pushContainerStateParamsToProps(this.searchProps, { forceFetch: true });
+      this.load(this.searchProps, true);
     }
   }
 
@@ -583,6 +588,9 @@ export class SavedSearchEmbeddable
     super.destroy();
     if (this.searchProps) {
       delete this.searchProps;
+    }
+    if (this.node) {
+      unmountComponentAtNode(this.node);
     }
     this.subscription?.unsubscribe();
 
