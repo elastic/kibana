@@ -801,6 +801,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: packagePolicy!.package!.name,
         pkgVersion: pkgVersion ?? '',
+        skipArchive: true,
       });
     }
 
@@ -1693,6 +1694,15 @@ export function updatePackageInputs(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
 
+        // this handles the input only pkg case where the new stream cannot have a dataset name
+        // so will never match. Input only packages only ever have one stream.
+        if (!originalStream && update.streams.length === 1 && originalInput?.streams.length === 1) {
+          originalStream = {
+            ...update.streams[0],
+            vars: originalInput?.streams[0].vars,
+          };
+        }
+
         if (originalStream === undefined) {
           originalInput.streams.push(stream);
           continue;
@@ -1703,7 +1713,8 @@ export function updatePackageInputs(
         }
 
         if (stream.vars) {
-          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          const indexOfStream =
+            originalInput.streams.length === 1 ? 0 : originalInput.streams.indexOf(originalStream);
           originalInput.streams[indexOfStream] = deepMergeVars(
             originalStream,
             stream as InputsOverride,
@@ -1715,12 +1726,17 @@ export function updatePackageInputs(
     }
 
     // Filter all stream that have been removed from the input
-    originalInput.streams = originalInput.streams.filter((originalStream) => {
+    const filteredStreams = originalInput.streams.filter((originalStream) => {
       return (
         update.streams?.some((s) => s.data_stream.dataset === originalStream.data_stream.dataset) ??
         false
       );
     });
+
+    originalInput.streams =
+      filteredStreams.length === 0 && originalInput.streams.length === 1
+        ? originalInput.streams
+        : filteredStreams;
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {
