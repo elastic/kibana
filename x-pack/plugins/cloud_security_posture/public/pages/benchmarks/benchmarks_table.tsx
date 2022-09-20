@@ -11,8 +11,9 @@ import {
   type EuiBasicTableProps,
   type Pagination,
   type CriteriaWithPagination,
+  EuiLink,
 } from '@elastic/eui';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,18 +35,20 @@ interface BenchmarksTableProps
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
   const { http, application } = useKibana().services;
   const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
+
   return (
-    <a
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
       href={http.basePath.prepend([fleetBase, path].join(''))}
       title={name}
-      onClick={(e) => {
+      onClick={(e: MouseEvent<HTMLAnchorElement>) => {
         e.stopPropagation();
         e.preventDefault();
         application.navigateToApp('fleet', { path });
       }}
     >
       {name}
-    </a>
+    </EuiLink>
   );
 };
 
