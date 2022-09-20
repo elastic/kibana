@@ -14,7 +14,7 @@ import { TextBasedLanguageLayerPanelProps, LayerPanel } from './layerpanel';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
-const fieldsOne = [
+const fields = [
   {
     name: 'timestamp',
     id: 'timestamp',
@@ -52,7 +52,7 @@ const initialState: TextBasedLanguagesPrivateState = {
     { id: '2', title: 'my-fake-restricted-pattern' },
     { id: '3', title: 'my-compatible-pattern' },
   ],
-  fieldList: fieldsOne,
+  fieldList: fields,
 };
 describe('Layer Data Panel', () => {
   let defaultProps: TextBasedLanguageLayerPanelProps;
