@@ -55,6 +55,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { useLicense } from '../../../common/hooks/use_license';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -82,6 +83,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [detailName]
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
+
+  const isEnterprisePlus = useLicense().isEnterprise();
 
   const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -207,6 +210,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: isPlatinumOrTrialLicense,
                   hostName: detailName,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 
