@@ -43,8 +43,6 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
 export const LastTenTestRuns = () => {
-  const { euiTheme } = useEuiTheme();
-
   const { basePath } = useSyntheticsSettingsContext();
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
@@ -93,11 +91,7 @@ export const LastTenTestRuns = () => {
       name: '@timestamp',
       sortable: true,
       render: (timestamp: string, ping: Ping) => (
-        <EuiLink href={`${basePath}/app/uptime/journey/${ping?.monitor?.check_group ?? ''}/steps`}>
-          <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-            {formatTestRunAt(timestamp)}
-          </EuiText>
-        </EuiLink>
+        <TestDetailsLink isBrowserMonitor={isBrowserMonitor} timestamp={timestamp} ping={ping} />
       ),
     },
     {
@@ -199,6 +193,33 @@ const JourneyScreenshot = ({ ping }: { ping: Ping }) => {
       stepLabels={stepLabels}
       retryFetchOnRevisit={false}
     />
+  );
+};
+
+const TestDetailsLink = ({
+  isBrowserMonitor,
+  timestamp,
+  ping,
+}: {
+  isBrowserMonitor: boolean;
+  timestamp: string;
+  ping: Ping;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { basePath } = useSyntheticsSettingsContext();
+
+  const timestampText = (
+    <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
+      {formatTestRunAt(timestamp)}
+    </EuiText>
+  );
+
+  return isBrowserMonitor ? (
+    <EuiLink href={`${basePath}/app/uptime/journey/${ping?.monitor?.check_group ?? ''}/steps`}>
+      {timestampText}
+    </EuiLink>
+  ) : (
+    timestampText
   );
 };
 
