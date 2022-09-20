@@ -27,56 +27,6 @@ const baseConfig = {
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
-    describe('setupFullStory', () => {
-      beforeEach(() => {
-        jest.clearAllMocks();
-      });
-
-      const setupPlugin = async ({ config = {} }: { config?: Partial<CloudConfigType> }) => {
-        const initContext = coreMock.createPluginInitializerContext({
-          ...baseConfig,
-          id: 'cloudId',
-          ...config,
-        });
-
-        const plugin = new CloudPlugin(initContext);
-
-        const coreSetup = coreMock.createSetup();
-
-        const setup = plugin.setup(coreSetup, {});
-
-        // Wait for FullStory dynamic import to resolve
-        await new Promise((r) => setImmediate(r));
-
-        return { initContext, plugin, setup, coreSetup };
-      };
-
-      test('register the shipper FullStory with correct args when enabled and org_id are set', async () => {
-        const { coreSetup } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-        });
-
-        expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
-        expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
-          fullStoryOrgId: 'foo',
-          scriptUrl: '/internal/cloud/100/fullstory.js',
-          namespace: 'FSKibana',
-        });
-      });
-
-      it('does not call initializeFullStory when enabled=false', async () => {
-        const { coreSetup } = await setupPlugin({
-          config: { full_story: { enabled: false, org_id: 'foo' } },
-        });
-        expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
-      });
-
-      it('does not call initializeFullStory when org_id is undefined', async () => {
-        const { coreSetup } = await setupPlugin({ config: { full_story: { enabled: true } } });
-        expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
-      });
-    });
-
     describe('setupTelemetryContext', () => {
       const username = '1234';
       const expectedHashedPlainUsername = new Sha256().update(username, 'utf8').digest('hex');

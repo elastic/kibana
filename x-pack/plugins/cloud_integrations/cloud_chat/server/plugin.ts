@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -35,13 +35,9 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
         isDev: this.isDev,
       });
     }
-
-    return {};
   }
 
-  public start(core: CoreStart) {
-    return {};
-  }
+  public start() {}
 
   public stop() {}
 }

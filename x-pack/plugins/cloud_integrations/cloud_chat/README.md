@@ -1,9 +1,3 @@
-# cloudChat
+# Cloud Chat
 
-A Kibana plugin
-
----
-
-## Development
-
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
+Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.

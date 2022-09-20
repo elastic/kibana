@@ -317,6 +317,8 @@
       "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
       "@kbn/cloud-experiments-plugin": ["x-pack/plugins/cloud_integrations/cloud_experiments"],
       "@kbn/cloud-experiments-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_experiments/*"],
+      "@kbn/cloud-full-story-plugin": ["x-pack/plugins/cloud_integrations/cloud_full_story"],
+      "@kbn/cloud-full-story-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_full_story/*"],
       "@kbn/cloud-security-posture-plugin": ["x-pack/plugins/cloud_security_posture"],
       "@kbn/cloud-security-posture-plugin/*": ["x-pack/plugins/cloud_security_posture/*"],
       "@kbn/cloud-plugin": ["x-pack/plugins/cloud"],

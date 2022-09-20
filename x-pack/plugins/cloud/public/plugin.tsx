@@ -12,7 +12,6 @@ import type {
   Plugin,
   PluginInitializerContext,
   HttpStart,
-  IBasePath,
   AnalyticsServiceSetup,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -72,11 +71,6 @@ export interface CloudSetup {
   registerCloudService: (contextProvider: FC) => void;
 }
 
-interface SetupFullStoryDeps {
-  analytics: AnalyticsServiceSetup;
-  basePath: IBasePath;
-}
-
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
@@ -92,11 +86,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     { cloudExperiments, home, security }: CloudSetupDependencies
   ): CloudSetup {
     this.setupTelemetryContext(core.analytics, security, this.config.id);
-
-    this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
-      // eslint-disable-next-line no-console
-      console.debug(`Error setting up FullStory: ${e.toString()}`)
-    );
 
     const {
       id,
@@ -218,31 +207,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     // Cloud admin console will always perform the actual authorization checks.
     const user = await security.authc.getCurrentUser().catch(() => null);
     return user?.elastic_cloud_user ?? true;
-  }
-
-  /**
-   * If the right config is provided, register the FullStory shipper to the analytics client.
-   * @param analytics Core's Analytics service's setup contract.
-   * @param basePath Core's http.basePath helper.
-   * @private
-   */
-  private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
-    const { enabled, org_id: fullStoryOrgId, eventTypesAllowlist } = this.config.full_story;
-    if (!enabled || !fullStoryOrgId) {
-      return; // do not load any FullStory code in the browser if not enabled
-    }
-
-    // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
-    analytics.registerShipper(FullStoryShipper, {
-      eventTypesAllowlist,
-      fullStoryOrgId,
-      // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
-      scriptUrl: basePath.prepend(
-        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
-      ),
-      namespace: 'FSKibana',
-    });
   }
 
   /**

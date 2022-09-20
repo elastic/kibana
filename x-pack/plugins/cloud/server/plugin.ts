@@ -15,7 +15,6 @@ import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from './utils';
-import { registerFullstoryRoute } from './routes/fullstory';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
@@ -61,13 +60,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // We use the Cloud ID as the userId in the Cloud Experiments
       cloudExperiments?.identifyUser(createSHA256Hash(this.config.id), {
         kibanaVersion: this.context.env.packageInfo.version,
-      });
-    }
-
-    if (this.config.full_story.enabled) {
-      registerFullstoryRoute({
-        httpResources: core.http.resources,
-        packageInfo: this.context.env.packageInfo,
       });
     }
 
