@@ -13,25 +13,39 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTableSortingType,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
+
+import { MiniHistogram } from '../mini_histogram';
+
+import { SpikeAnalysisTable } from './spike_analysis_table';
+
+const NARROW_COLUMN_WIDTH = '120px';
+const EXPAND_COLUMN_WIDTH = '40px';
+const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
-const DEFAULT_SORT_FIELD = 'docCount';
-const DEFAULT_SORT_DIRECTION = 'desc';
+const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_DIRECTION = 'asc';
+
 interface GroupTableItem {
-  id: number;
+  id: string;
   docCount: number;
+  pValue: number | null;
   group: Record<string, any>;
   repeatedValues: Record<string, any>;
+  histogram: ChangePoint['histogram'];
 }
 
 interface SpikeAnalysisTableProps {
@@ -91,7 +105,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       }
 
       itemIdToExpandedRowMapValues[item.id] = (
-        <SpikeAnalysisTableExpandedRow
+        <SpikeAnalysisTable
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
           onPinnedChangePoint={onPinnedChangePoint}
@@ -107,7 +121,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   const columns: Array<EuiBasicTableColumn<GroupTableItem>> = [
     {
       align: RIGHT_ALIGNMENT,
-      width: '40px',
+      width: EXPAND_COLUMN_WIDTH,
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
@@ -118,7 +132,21 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiButtonIcon
           data-test-subj={'aiopsSpikeAnalysisGroupsTableRowExpansionButton'}
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          aria-label={
+            itemIdToExpandedRowMap[item.id]
+              ? i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.collapseAriaLabel',
+                  {
+                    defaultMessage: 'Collapse',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.expandAriaLabel',
+                  {
+                    defaultMessage: 'Expand',
+                  }
+                )
+          }
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
@@ -126,10 +154,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnGroup',
       field: 'group',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.groupLabel',
-        { defaultMessage: 'Group' }
-      ),
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel', {
+        defaultMessage: 'Group',
+      }),
       render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
         for (const fieldName in group) {
@@ -159,7 +186,11 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
                 color="hollow"
               >
-                +{Object.keys(repeatedValues).length} more
+                +{Object.keys(repeatedValues).length}{' '}
+                <FormattedMessage
+                  id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
+                  defaultMessage="more"
+                />
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
@@ -171,11 +202,74 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       textOnly: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnLogRate',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
+            {
+              defaultMessage:
+                'A visual representation of the impact of the field on the message rate difference',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateLabel"
+              defaultMessage="Log rate"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (_, { histogram, id }) => (
+        <MiniHistogram
+          chartData={histogram}
+          isLoading={loading && histogram === undefined}
+          label="Group x"
+        />
+      ),
+      sortable: false,
+    },
+    {
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnPValue',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip',
+            {
+              defaultMessage:
+                'The significance of changes in the frequency of values; lower values indicate greater change',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel"
+              defaultMessage="p-value"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
+      sortable: true,
+    },
+    {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
       field: 'docCount',
-      name: i18n.translate('xpack.aiops.correlations.correlationsTable.docCountLabel', {
-        defaultMessage: 'Doc count',
-      }),
+      name: i18n.translate(
+        'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.docCountLabel',
+        {
+          defaultMessage: 'Doc count',
+        }
+      ),
       sortable: true,
       width: '20%',
     },
@@ -228,6 +322,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       compressed
       columns={columns}
       items={pageOfItems}
+      itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
       pagination={pagination}
