@@ -9,9 +9,9 @@ import {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '@kbn/core/types/elasticsearch';
+import { isNil } from 'lodash';
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { isNil } from 'lodash';
 
 export const getOutcomeAggregation = () => {
   return {
