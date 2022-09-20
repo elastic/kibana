@@ -235,21 +235,6 @@
                 "id": "def-public.DashboardContainer.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "services",
-                "description": [],
-                "signature": [
-                  "DashboardContainerServices"
-                ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainer.Unnamed.$3",
-                "type": "Object",
-                "tags": [],
                 "label": "parent",
                 "description": [],
                 "signature": [
@@ -285,7 +270,7 @@
               },
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainer.Unnamed.$4",
+                "id": "def-public.DashboardContainer.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "controlGroup",
@@ -988,23 +973,6 @@
               {
                 "parentPluginId": "dashboard",
                 "id": "def-public.DashboardContainerFactoryDefinition.Unnamed.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "getStartServices",
-                "description": [],
-                "signature": [
-                  "() => Promise<",
-                  "DashboardContainerServices",
-                  ">"
-                ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainerFactoryDefinition.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "persistableStateService",
@@ -1323,21 +1291,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardContainerInput.dashboardCapabilities",
-            "type": "Object",
-            "tags": [],
-            "label": "dashboardCapabilities",
-            "description": [],
-            "signature": [
-              "DashboardAppCapabilities",
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.controlGroupInput",
@@ -1660,7 +1613,10 @@
             "docId": "kibSavedObjectsPluginApi",
             "section": "def-public.SavedObject",
             "text": "SavedObject"
-          }
+          },
+          "<",
+          "SavedObjectAttributes",
+          ">"
         ],
         "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
         "deprecated": false,

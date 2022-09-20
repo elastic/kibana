@@ -7,12 +7,12 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React, { VFC } from 'react';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { EuiFlexGroup } from '@elastic/eui';
 import { Indicator } from '../../../../../common/types/indicator';
 import { FilterIn } from '../../../query_bar/components/filter_in';
 import { FilterOut } from '../../../query_bar/components/filter_out';
 import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
-import { getIndicatorFieldAndValue } from '../../lib/field_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../lib/field_value';
 
 export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
 export const FILTER_IN_BUTTON_TEST_ID = 'FilterInButton';
@@ -44,8 +44,7 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   ...props
 }) => {
   const { key, value } = getIndicatorFieldAndValue(indicator, field);
-
-  if (!key || value === EMPTY_VALUE || !key) {
+  if (!fieldAndValueValid(key, value)) {
     return null;
   }
 
@@ -54,7 +53,7 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   const timelineTestId = `${props['data-test-subj']}${TIMELINE_BUTTON_TEST_ID}`;
 
   return (
-    <>
+    <EuiFlexGroup justifyContent="center" alignItems="center">
       <FilterIn as={Component} data={indicator} field={field} data-test-subj={filterInTestId} />
       <FilterOut as={Component} data={indicator} field={field} data-test-subj={filterOutTestId} />
       <AddToTimeline
@@ -63,6 +62,6 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
         field={field}
         data-test-subj={timelineTestId}
       />
-    </>
+    </EuiFlexGroup>
   );
 };

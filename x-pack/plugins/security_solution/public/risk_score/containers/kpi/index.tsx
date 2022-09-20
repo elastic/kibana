@@ -28,9 +28,9 @@ import {
 import { useKibana } from '../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { ESTermQuery } from '../../../../common/typed_json';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { SeverityCount } from '../../../common/components/severity/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 type GetHostRiskScoreProps = KpiRiskScoreRequestOptions & {
   data: DataPublicPluginStart;
@@ -93,14 +93,14 @@ export const useUserRiskScoreKpi = ({
 }: UseUserRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScoreKpi({
     filterQuery,
     skip,
     defaultIndex,
     entity: RiskScoreEntity.user,
-    featureEnabled: riskyUsersFeatureEnabled,
+    featureEnabled: isPlatinumOrTrialLicense,
   });
 };
 
@@ -110,14 +110,14 @@ export const useHostRiskScoreKpi = ({
 }: UseHostRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId) : undefined;
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScoreKpi({
     filterQuery,
     skip,
     defaultIndex,
     entity: RiskScoreEntity.host,
-    featureEnabled: riskyHostsFeatureEnabled,
+    featureEnabled: isPlatinumOrTrialLicense,
   });
 };
 

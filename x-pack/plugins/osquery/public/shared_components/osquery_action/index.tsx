@@ -8,6 +8,8 @@
 import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,
@@ -18,14 +20,14 @@ import {
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQuery } from '../../live_queries';
 import { OsqueryIcon } from '../../components/osquery_icon';
-import { useIsOsqueryAvailable } from './use_is_osquery_available';
+import { useIsOsqueryAvailable } from '../use_is_osquery_available';
 
 export interface OsqueryActionProps {
   agentId?: string;
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
@@ -66,8 +68,14 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
         titleSize="xs"
         body={
           <p>
-            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
-            privileges.
+            <FormattedMessage
+              id="xpack.osquery.action.missingPrivilleges"
+              defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{
+                osquery: <EuiCode>osquery</EuiCode>,
+              }}
+            />
           </p>
         }
       />
