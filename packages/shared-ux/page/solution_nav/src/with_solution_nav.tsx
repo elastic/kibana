@@ -53,7 +53,6 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      'kbnSolutionNav__sidebar',
       'kbnStickyMenu',
       {
         'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
