@@ -81,6 +81,10 @@ export const SELECT_TABLE = '[data-test-subj="table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
+export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
+
+export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
+
 export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
 
 export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=source\\.ip]';

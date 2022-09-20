@@ -13,7 +13,6 @@ import {
   validateEntities,
   validateTree,
 } from '../../../common/endpoint/schema/resolver';
-
 import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity/handler';
 import { handleEvents } from './resolver/events';
