@@ -13,7 +13,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Binary Executed from Shared Memory Directory",
-  "query": "process where event.type == \"start\" and \n    event.action == \"exec\" and user.name == \"root\" and \n    process.executable : (\n        \"/dev/shm/*\",\n        \"/run/shm/*\",\n        \"/var/run/*\",\n        \"/var/lock/*\"\n    ) and\n    not process.executable : ( \"/var/run/docker/*\")\n",
+  "query": "process where event.type == \"start\" and\n    event.action == \"exec\" and user.name == \"root\" and\n    process.executable : (\n        \"/dev/shm/*\",\n        \"/run/shm/*\",\n        \"/var/run/*\",\n        \"/var/lock/*\"\n    ) and\n    not process.executable : ( \"/var/run/docker/*\")\n",
   "references": [
     "https://linuxsecurity.com/features/fileless-malware-on-linux",
     "https://twitter.com/GossiTheDog/status/1522964028284411907"
@@ -70,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 100
 }

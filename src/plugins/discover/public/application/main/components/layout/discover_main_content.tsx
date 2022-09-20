@@ -180,6 +180,7 @@ export const DiscoverMainContent = ({
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               trackUiMetric={trackUiMetric}
               savedSearchRefetch$={savedSearchRefetch$}
+              savedSearchDataTotalHits$={savedSearchData$.totalHits$}
             />
           )}
         </EuiFlexGroup>

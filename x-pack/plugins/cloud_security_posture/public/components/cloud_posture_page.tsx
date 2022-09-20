@@ -65,7 +65,7 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
           href: cisIntegrationLink,
           isDisabled: !cisIntegrationLink,
           title: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-            defaultMessage: 'Add a CIS integration',
+            defaultMessage: 'Add a KSPM integration',
           }),
           description: (
             <FormattedMessage

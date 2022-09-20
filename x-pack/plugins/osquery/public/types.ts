@@ -18,15 +18,23 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
-import type { getLazyLiveQueryField, getLazyOsqueryAction } from './shared_components';
+import type {
+  getLazyOsqueryResults,
+  getLazyLiveQueryField,
+  getLazyOsqueryAction,
+  getLazyOsqueryResponseActionTypeForm,
+} from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
+  fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
+  OsqueryResponseActionTypeForm: ReturnType<typeof getLazyOsqueryResponseActionTypeForm>;
 }
 
 export interface AppPluginStartDependencies {

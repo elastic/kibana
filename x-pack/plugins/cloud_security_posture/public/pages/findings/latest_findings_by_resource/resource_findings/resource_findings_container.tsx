@@ -97,7 +97,6 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <PageTitleText
           title={
             <CloudPosturePageTitle
-              isBeta
               title={i18n.translate(
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
