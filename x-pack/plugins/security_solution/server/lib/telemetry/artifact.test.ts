@@ -9,7 +9,6 @@ import { createMockTelemetryReceiver } from './__mocks__';
 import { artifactService } from './artifact';
 
 describe('telemetry artifact test', () => {
-
   test('diagnostics telemetry task should query and enqueue events', async () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     await artifactService.start(mockTelemetryReceiver);
