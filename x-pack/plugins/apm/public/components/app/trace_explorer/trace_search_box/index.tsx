@@ -141,7 +141,7 @@ export function TraceSearchBox({
                         });
                       }}
                       appName={i18n.translate(
-                        'xpack.apm.feedbackMenu.appName',
+                        'xpack.apm.traceExplorer.appName',
                         {
                           defaultMessage: 'APM',
                         }
