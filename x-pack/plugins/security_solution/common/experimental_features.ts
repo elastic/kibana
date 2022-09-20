@@ -55,6 +55,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
+
+  /**
+   * Enables the detection response actions in rule + alerts
+   */
+  responseActionsEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
