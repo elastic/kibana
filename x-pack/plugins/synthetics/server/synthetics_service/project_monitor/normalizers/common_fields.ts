@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
   ConfigKey,
@@ -47,7 +48,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.APM_SERVICE_NAME]:
       monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
-    [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
+    [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
