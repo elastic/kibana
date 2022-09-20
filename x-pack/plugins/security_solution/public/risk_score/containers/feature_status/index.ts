@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
-import { RiskQueries } from '../../../../common/search_strategy';
-import { getRiskScoreIndexStatus, RiskEntity } from './api';
+import { RiskQueries, RiskScoreEntity } from '../../../../common/search_strategy';
+import { getRiskScoreIndexStatus } from './api';
 
 interface RiskScoresFeatureStatus {
   error: unknown;
@@ -29,7 +29,8 @@ export const useRiskScoreFeatureStatus = (
 ): RiskScoresFeatureStatus => {
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const entity = useMemo(
-    () => (factoryQueryType === RiskQueries.hostsRiskScore ? RiskEntity.host : RiskEntity.user),
+    () =>
+      factoryQueryType === RiskQueries.hostsRiskScore ? RiskScoreEntity.host : RiskScoreEntity.user,
     [factoryQueryType]
   );
 

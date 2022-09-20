@@ -338,6 +338,9 @@ export type {
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
   SavedObjectsPitParams,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObjectsServiceSetup,
