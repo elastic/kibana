@@ -18,6 +18,7 @@ import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
+import { renewIDs } from '../utils';
 import type {
   IndexPatternLayer,
   IndexPatternPersistedState,
@@ -622,3 +623,22 @@ export function getFiltersInLayer(
     },
   };
 }
+
+export const cloneLayer = (
+  layers: Record<string, IndexPatternLayer>,
+  layerId: string,
+  newLayerId: string,
+  getNewId: (id: string) => string
+) => {
+  if (layers[layerId]) {
+    return {
+      ...layers,
+      [newLayerId]: renewIDs(
+        layers[layerId],
+        Object.keys(layers[layerId]?.columns ?? {}),
+        getNewId
+      ),
+    };
+  }
+  return layers;
+};

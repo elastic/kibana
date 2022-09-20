@@ -24,6 +24,16 @@ import { createIndexPatternServiceMock } from '../../../mocks/data_views_service
 
 jest.mock('../../../id_generator');
 
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...original,
+    Storage: class Storage {
+      get = () => ({ skipDeleteModal: true });
+    },
+  };
+});
+
 let container: HTMLDivElement | undefined;
 
 beforeEach(() => {
@@ -90,6 +100,7 @@ describe('LayerPanel', () => {
       framePublicAPI: frame,
       isOnlyLayer: true,
       onRemoveLayer: jest.fn(),
+      onCloneLayer: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
@@ -138,7 +149,7 @@ describe('LayerPanel', () => {
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
         instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
-      ).toContain('Reset layer');
+      ).toContain('Clear layer');
     });
 
     it('should show the delete button when multiple layers', async () => {
@@ -168,9 +179,6 @@ describe('LayerPanel', () => {
         instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
       expect(cb).toHaveBeenCalled();
     });
   });

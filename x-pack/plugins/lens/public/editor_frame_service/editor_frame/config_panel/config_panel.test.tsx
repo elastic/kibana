@@ -29,6 +29,16 @@ import { createIndexPatternServiceMock } from '../../../mocks/data_views_service
 
 jest.mock('../../../id_generator');
 
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...original,
+    Storage: class Storage {
+      get = () => ({ skipDeleteModal: true });
+    },
+  };
+});
+
 const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
 
 let container: HTMLDivElement | undefined;
@@ -169,9 +179,7 @@ describe('ConfigPanel', () => {
         instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -196,9 +204,7 @@ describe('ConfigPanel', () => {
         instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -222,9 +228,7 @@ describe('ConfigPanel', () => {
         instance.find('[data-test-subj="lnsLayerRemove--1"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });

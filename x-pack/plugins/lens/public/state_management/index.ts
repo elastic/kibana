@@ -40,6 +40,7 @@ export const {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  cloneLayer,
   addLayer,
   setLayerDefaultDimension,
 } = lensActions;
