@@ -22,6 +22,11 @@ export class ApiService {
     this.onboardingGuideState$ = new BehaviorSubject<GuidedOnboardingState | undefined>(undefined);
   }
 
+  /**
+   * An Observable with the guided onboarding state.
+   * Initially the state is fetched from the backend.
+   * Subsequently, the observable is updated automatically, when the state changes.
+   */
   public fetchGuideState$(): Observable<GuidedOnboardingState> {
     // TODO add error handling if this.client has not been initialized or request fails
     return this.onboardingGuideState$.pipe(
@@ -35,6 +40,11 @@ export class ApiService {
     );
   }
 
+  /**
+   * Updates the state of the guided onboarding
+   * @param {GuidedOnboardingState} newState the new state of the guided onboarding
+   * @return {Promise} a promise with the updated state or undefined if the update fails
+   */
   public async updateGuideState(
     newState: GuidedOnboardingState
   ): Promise<{ state: GuidedOnboardingState } | undefined> {
@@ -58,6 +68,14 @@ export class ApiService {
     }
   }
 
+  /**
+   * An observable with the boolean value if the step is active.
+   * Returns true, if the passed params identify the guide step that is currently active.
+   * Returns false otherwise.
+   * @param {string} guideID the id of the guide (one of search, observability, security)
+   * @param {string} stepID the id of the step in the guide
+   * @return {Observable} an observable with the boolean value
+   */
   public isGuideStepActive$(guideID: string, stepID: string): Observable<boolean> {
     return this.fetchGuideState$().pipe(
       map((state) => {
@@ -66,6 +84,14 @@ export class ApiService {
     );
   }
 
+  /**
+   * Completes the guide step identified by the passed params.
+   * A noop if the passed step is not active.
+   * Completes the current guide, if the step is the last one in the guide.
+   * @param {string} guideID the id of the guide (one of search, observability, security)
+   * @param {string} stepID the id of the step in the guide
+   * @return {Promise} a promise with the updated state or undefined if the operation fails
+   */
   public async completeGuideStep(
     guideID: string,
     stepID: string
