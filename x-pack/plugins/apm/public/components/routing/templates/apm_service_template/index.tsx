@@ -281,7 +281,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           label="B"
           title="Beta"
           color="hollow"
-          tooltipContent="This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum."
+          tooltipContent={i18n.translate('xpack.apm.labs.reload', {
+            defaultMessage:
+              'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+          })}
         />
       ),
       label: i18n.translate('xpack.apm.home.infraTabLabel', {

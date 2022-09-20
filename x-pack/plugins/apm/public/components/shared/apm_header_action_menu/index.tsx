@@ -63,14 +63,6 @@ export function ApmHeaderActionMenu() {
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              size="m"
-              label="B"
-              title="Beta feature"
-              color="accent"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
               defaultMessage: 'Storage Explorer',
             })}
