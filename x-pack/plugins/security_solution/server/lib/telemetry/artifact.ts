@@ -14,7 +14,6 @@ export interface IArtifact {
 class Artifact implements IArtifact {
   private manifestUrl?: string;
   private readonly CDN_URL = 'https://artifacts.security.elastic.co';
-  //private readonly STAGING_CDN_URL = 'https://artifacts.security.elastic.co/downloads/endpoint/manifest/artifacts-8.4.0.zip';
   private readonly AXIOS_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
   private esClusterInfo?: ESClusterInfo;
