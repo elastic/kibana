@@ -51,7 +51,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
       {
-        defaultMessage: 'Discover, extract, index, and sync of all your website content',
+        defaultMessage: 'Discover, extract, index, and sync all of your website content',
       }
     ),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
