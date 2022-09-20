@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
-import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { guidesConfig } from '../constants';
@@ -40,7 +39,6 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 interface GuidePanelProps {
   api: ApiService;
   application: ApplicationStart;
-  http: HttpStart;
 }
 
 const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
@@ -126,7 +124,14 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
   if (!guideConfig) {
     return (
-      <EuiButton onClick={toggleGuide} color="success" fill isDisabled={true} size="s">
+      <EuiButton
+        onClick={toggleGuide}
+        color="success"
+        fill
+        isDisabled={true}
+        size="s"
+        data-test-subj="disabledGuideButton"
+      >
         {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
           defaultMessage: 'Setup guide',
         })}
@@ -138,7 +143,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
   return (
     <>
-      <EuiButton onClick={toggleGuide} color="success" fill size="s">
+      <EuiButton onClick={toggleGuide} color="success" fill size="s" data-test-subj="guideButton">
         {currentStep
           ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
               defaultMessage: 'Setup guide: Step {currentStep}',
@@ -158,6 +163,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           aria-labelledby="onboarding-guide"
           css={styles.flyoutOverrides.flyoutContainer}
           maskProps={{ headerZindexLocation: 'above' }}
+          data-test-subj="guidePanel"
         >
           <EuiFlyoutHeader>
             <EuiButtonEmpty
@@ -233,6 +239,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                     stepConfig={step}
                     stepNumber={index + 1}
                     navigateToStep={navigateToStep}
+                    key={accordionId}
                   />
                 );
               })}

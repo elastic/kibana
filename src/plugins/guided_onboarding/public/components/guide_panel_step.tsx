@@ -59,7 +59,7 @@ export const GuideStep = ({
   );
 
   return (
-    <div>
+    <div data-test-subj="guidePanelStep">
       <EuiAccordion
         id={accordionId}
         buttonContent={buttonContent}
