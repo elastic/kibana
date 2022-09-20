@@ -111,8 +111,8 @@ export const getColumnsFromVis = <T>(
   const columnsWithoutReferenced = getColumnsWithoutReferenced(columns);
 
   return {
-    metrics: getColumnIds(metrics.filter((columnId) => !isReferenced(columns, columnId))),
-    buckets: getColumnIds(columns.filter((c) => c.isBucketed)),
+    metrics: getColumnIds(columnsWithoutReferenced.filter((с) => !с.isBucketed)),
+    buckets: getColumnIds(columnsWithoutReferenced.filter((c) => c.isBucketed)),
     bucketCollapseFn: getBucketCollapseFn(visSchemas.metric),
     columnsWithoutReferenced,
     columns,
