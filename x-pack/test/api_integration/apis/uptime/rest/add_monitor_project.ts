@@ -189,10 +189,10 @@ export default function ({ getService }: FtrProviderContext) {
           })),
         };
 
-        await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(editedMonitors);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(editedMonitors)
+        );
 
         const updatedMonitorsResponse = await Promise.all(
           projectMonitors.monitors.map((monitor) => {
@@ -207,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         updatedMonitorsResponse.forEach((response) => {
           expect(response.body.monitors[0].attributes.revision).eql(2);
         });
+        expect(messages[0]).eql('1 monitor updated successfully. ');
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
