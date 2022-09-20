@@ -352,6 +352,18 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('ate');
     });
 
+    it('should select all text when ctrl or cmd + a is pressed', () => {
+      typeKeyboardKey('{ctrl>}a{/ctrl}');
+      let selection = window.getSelection();
+      expect(selection!.toString()).toEqual('isolate');
+
+      selection!.removeAllRanges();
+
+      typeKeyboardKey('{meta>}a{/meta}');
+      selection = window.getSelection();
+      expect(selection!.toString()).toEqual('isolate');
+    });
+
     // FIXME:PT uncomment once task OLM task #4384 is implemented
     it.skip('should return original cursor position if input history is closed with no selection', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history

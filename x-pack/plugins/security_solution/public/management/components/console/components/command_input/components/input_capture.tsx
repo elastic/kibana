@@ -100,7 +100,7 @@ export const InputCapture = memo<InputCaptureProps>(
     const getTestId = useTestIdGenerator(useDataTestSubj());
     // Reference to the `<div>` that take in focus (`tabIndex`)
     const focusEleRef = useRef<HTMLDivElement | null>(null);
-
+    const childrenEleRef = useRef<HTMLInputElement | null>(null);
     const hiddenInputEleRef = useRef<HTMLInputElement | null>(null);
 
     const getTextSelection = useCallback((): string => {
@@ -130,8 +130,22 @@ export const InputCapture = memo<InputCaptureProps>(
 
     const handleOnKeyDown = useCallback<KeyboardEventHandler>(
       (ev) => {
-        // allows for clipboard events to be captured via onPaste event handler
+        // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
+          if (ev.key === 'a') {
+            ev.preventDefault();
+            const selection = window.getSelection();
+            if (selection && childrenEleRef.current) {
+              const range = document.createRange();
+              range.selectNodeContents(childrenEleRef.current);
+              if (range.toString().length > 0) {
+                // clear any current selection
+                selection.removeAllRanges();
+                // add the input text selection
+                selection.addRange(range);
+              }
+            }
+          }
           return;
         }
 
@@ -260,7 +274,9 @@ export const InputCapture = memo<InputCaptureProps>(
             `Selection` object for 'focusNode` and `anchorNode` are within the input capture area.
           */}
           <div className="textSelectionBoundaryHelper"> </div>
-          {children}
+          <div ref={childrenEleRef} className="text-container">
+            {children}
+          </div>
           <div className="textSelectionBoundaryHelper"> </div>
           <input
             ref={hiddenInputEleRef}
