@@ -37,6 +37,7 @@ import { SearchPanel } from '../search_panel';
 
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
+import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './explain_log_rate_spikes_page.scss';
@@ -94,6 +95,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
 
   const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
   const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePoint | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<GroupTableItem | null>(null);
 
   // If a row is pinned, still overrule with a potentially hovered row.
   const currentSelectedChangePoint = useMemo(() => {
@@ -116,7 +118,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     { currentDataView: dataView, currentSavedSearch },
     aiopsListState,
     setGlobalState,
-    currentSelectedChangePoint
+    currentSelectedChangePoint,
+    undefined,
+    selectedGroup
   );
 
   const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
@@ -167,6 +171,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setWindowParameters(undefined);
     setPinnedChangePoint(null);
     setSelectedChangePoint(null);
+    setSelectedGroup(null);
   }
 
   return (
@@ -225,7 +230,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={
-                    currentSelectedChangePoint ? documentCountStatsCompare : undefined
+                    currentSelectedChangePoint || selectedGroup
+                      ? documentCountStatsCompare
+                      : undefined
                   }
                   totalCount={totalCount}
                   changePoint={currentSelectedChangePoint}
@@ -246,6 +253,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   onPinnedChangePoint={setPinnedChangePoint}
                   onSelectedChangePoint={setSelectedChangePoint}
                   selectedChangePoint={currentSelectedChangePoint}
+                  onSelectedGroup={setSelectedGroup}
                 />
               )}
               {windowParameters === undefined && (

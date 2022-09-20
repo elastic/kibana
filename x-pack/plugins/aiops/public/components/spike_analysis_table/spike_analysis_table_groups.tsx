@@ -50,7 +50,7 @@ const viewInDiscoverMessage = i18n.translate(
   }
 );
 
-interface GroupTableItem {
+export interface GroupTableItem {
   id: string;
   docCount: number;
   pValue: number | null;
@@ -67,6 +67,7 @@ interface SpikeAnalysisTableProps {
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
+  onSelectedGroup?: (group: GroupTableItem | null) => void;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -77,6 +78,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   onPinnedChangePoint,
   onSelectedChangePoint,
   selectedChangePoint,
+  onSelectedGroup,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -316,6 +318,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         />
       ),
       sortable: false,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
@@ -470,6 +473,16 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       rowProps={(group) => {
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
+          onMouseEnter: () => {
+            if (onSelectedGroup) {
+              onSelectedGroup(group);
+            }
+          },
+          onMouseLeave: () => {
+            if (onSelectedGroup) {
+              onSelectedGroup(null);
+            }
+          },
         };
       }}
     />
