@@ -18,6 +18,7 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
@@ -144,7 +145,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
       }),
       description: <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>,
     },
-  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
+  ].filter(truthy);
 
 export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const {
@@ -188,7 +189,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
           id: 'evidenceAccordion',
           listItems: getEvidenceList(data),
         },
-      ].filter(Boolean) as Accordion[],
+      ].filter(truthy),
     [data, discoverIndexLink]
   );
 
