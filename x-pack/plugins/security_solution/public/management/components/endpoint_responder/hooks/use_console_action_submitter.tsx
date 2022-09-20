@@ -10,6 +10,10 @@
 import React, { useEffect, useMemo } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ActionSuccess } from '../action_success';
+import { ActionError } from '../action_error';
+import { FormattedError } from '../../formatted_error';
 import { useGetActionDetails } from '../../../hooks/endpoint/use_get_action_details';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from '../constants';
 import { useIsMounted } from '../../../hooks/use_is_mounted';
@@ -140,6 +144,14 @@ export const useConsoleActionSubmitter = ({
     setStore,
   ]);
 
+  // If an error was returned while attempting to create the action request,
+  // then set command status to error
+  useEffect(() => {
+    if (currentActionState.request.error && isPending) {
+      setStatus('error');
+    }
+  }, [currentActionState.request.error, isPending, setStatus]);
+
   // If an error was return by the Action Details API, then store it and set the status to error
   useEffect(() => {
     if (apiActionDetailsError && isPending) {
@@ -173,8 +185,59 @@ export const useConsoleActionSubmitter = ({
     }
   }, [apiActionDetails, currentActionState, isPending, setStatus, setStore]);
 
+  const result = useMemo(() => {
+    if (isPending) {
+      return <ResultComponent showAs="pending" />;
+    }
+
+    const apiError = currentActionState.request.error || currentActionState.actionDetailsError;
+
+    if (apiError) {
+      return (
+        <ResultComponent showAs="failure" data-test-subj="responseActionFailure">
+          <FormattedMessage
+            id="xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessage"
+            defaultMessage="The following error was encountered:"
+          />
+          <FormattedError error={apiError} data-test-subj="responseActionApiErrorDetail" />
+        </ResultComponent>
+      );
+    }
+
+    const actionDetails = currentActionState.actionDetails;
+
+    if (actionDetails) {
+      // Response action failures
+      if (actionDetails.errors) {
+        return (
+          <ActionError
+            dataTestSubj={'responseActionExecError'}
+            action={actionDetails}
+            ResultComponent={ResultComponent}
+          />
+        );
+      }
+
+      return (
+        <ActionSuccess
+          action={actionDetails}
+          ResultComponent={ResultComponent}
+          data-test-subj="responseActionSuccess"
+        />
+      );
+    }
+
+    return <></>;
+  }, [
+    ResultComponent,
+    currentActionState.actionDetails,
+    currentActionState.actionDetailsError,
+    currentActionState.request.error,
+    isPending,
+  ]);
+
   return {
-    result: <>{'something here'}</>,
-    action: undefined,
+    result,
+    action: apiActionDetails?.data,
   };
 };
