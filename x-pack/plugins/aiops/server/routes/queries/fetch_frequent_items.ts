@@ -103,7 +103,7 @@ export async function fetchFrequentItems(
           frequent_items: {
             minimum_set_size: 2,
             size: 200,
-            minimum_support: 0.1,
+            minimum_support: 0.01,
             fields: aggFields,
           },
         },
