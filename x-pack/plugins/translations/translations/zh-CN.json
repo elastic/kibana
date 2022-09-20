@@ -27393,7 +27393,6 @@
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingRunningProcesses": "进程",
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingSuspendProcess": "挂起进程",
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate": "释放",
-    "xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration": "我们将使用建议的默认值保存您的集成。稍后，您可以通过在代理策略中编辑终端和云安全集成对其进行更改。",
     "xpack.securitySolution.endpoint.list.actionmenu": "打开",
     "xpack.securitySolution.endpoint.list.actions": "操作",
     "xpack.securitySolution.endpoint.list.backToPolicyButton": "返回到策略列表",

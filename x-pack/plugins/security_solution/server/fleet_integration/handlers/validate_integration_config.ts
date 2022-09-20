@@ -48,7 +48,7 @@ const validateEndpointIntegrationConfig = (
 const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger: Logger): void => {
   if (!config?.cloudConfig?.preventions) {
     logger.warn(
-      'missing cloudConfig preventions: {preventions : malware: true / false, behavior_protection: true / false}'
+      'missing cloudConfig preventions: {preventions : behavior_protection: true / false}'
     );
     throwError('invalid value for cloudConfig: missing preventions ');
   }
@@ -57,12 +57,6 @@ const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger:
       `invalid value for cloudConfig preventions behavior_protection: ${config.cloudConfig.preventions.behavior_protection}`
     );
     throwError('invalid value for cloudConfig preventions behavior_protection');
-  }
-  if (typeof config.cloudConfig.preventions.malware !== 'boolean') {
-    logger.warn(
-      `invalid value for cloudConfig preventions malware: ${config.cloudConfig.preventions.malware}`
-    );
-    throwError('invalid value for cloudConfig preventions malware');
   }
   if (!config?.eventFilters) {
     logger.warn(

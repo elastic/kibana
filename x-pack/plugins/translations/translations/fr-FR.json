@@ -27387,7 +27387,6 @@
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingRunningProcesses": "Processus",
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingSuspendProcess": "Suspendre le processus",
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate": "Libération",
-    "xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration": "Nous enregistrerons votre intégration avec nos valeurs par défaut recommandées. Vous pourrez les changer ultérieurement en modifiant l'intégration Endpoint and Cloud Security dans la politique de votre agent.",
     "xpack.securitySolution.endpoint.list.actionmenu": "Ouvrir",
     "xpack.securitySolution.endpoint.list.actions": "Actions",
     "xpack.securitySolution.endpoint.list.backToPolicyButton": "Retour à la liste des politiques",
