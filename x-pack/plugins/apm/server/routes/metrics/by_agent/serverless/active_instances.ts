@@ -13,7 +13,6 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import {
