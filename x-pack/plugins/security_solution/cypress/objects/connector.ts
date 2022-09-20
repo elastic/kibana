@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export interface EmailConnector {
+interface Connector {
+  type: string;
   name: string;
+}
+
+export interface EmailConnector extends Connector {
   from: string;
   host: string;
   port: string;
@@ -14,6 +18,13 @@ export interface EmailConnector {
   password: string;
   service: string;
 }
+
+export interface IndexConnector extends Connector {
+  index: string;
+  document: string;
+}
+
+export type Connectors = IndexConnector | EmailConnector;
 
 export const getEmailConnector = (): EmailConnector => ({
   name: 'Test connector',
@@ -23,4 +34,12 @@ export const getEmailConnector = (): EmailConnector => ({
   user: 'username',
   password: 'password',
   service: 'Other',
+  type: 'email',
+});
+
+export const getIndexConnector = (): IndexConnector => ({
+  name: 'Index test connector',
+  index: 'my-index-000001',
+  document: '{"test": "123"}',
+  type: 'index',
 });

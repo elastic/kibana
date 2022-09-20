@@ -10,6 +10,7 @@ import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_t
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
+import type { Connectors } from './connector';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -36,6 +37,11 @@ interface Interval {
   type: string;
 }
 
+export interface Actions {
+  interval: string;
+  connectors: Connectors[];
+}
+
 export type RuleDataSource =
   | { type: 'indexPatterns'; index: string[] }
   | { type: 'dataView'; dataView: string };
@@ -60,6 +66,7 @@ export interface CustomRule {
   maxSignals: number;
   buildingBlockType?: string;
   exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
+  actions?: Actions;
 }
 
 export interface ThresholdRule extends CustomRule {

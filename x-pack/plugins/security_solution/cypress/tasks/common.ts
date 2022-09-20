@@ -60,6 +60,7 @@ export const cleanKibana = () => {
   deleteAlertsAndRules();
   deleteCases();
   deleteTimelines();
+  deleteConnectors();
 };
 
 export const cleanPackages = () => {
@@ -179,6 +180,23 @@ export const deleteCases = () => {
   });
 };
 
+export const deleteConnectors = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'action',
+            },
+          },
+        ],
+      },
+    },
+  });
+};
+
 export const deleteSavedQueries = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
@@ -210,6 +228,15 @@ export const postDataView = (dataSource: string) => {
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
+export const deleteDataView = (dataSource: string) => {
+  cy.request({
+    method: 'DELETE',
+    url: `api/data_views/data_view/${dataSource}`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
   });
 };
 

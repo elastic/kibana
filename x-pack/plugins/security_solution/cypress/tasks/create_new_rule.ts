@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EmailConnector } from '../objects/connector';
-import { getEmailConnector } from '../objects/connector';
+import type { EmailConnector, IndexConnector } from '../objects/connector';
+import { getIndexConnector } from '../objects/connector';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -106,6 +106,13 @@ import {
   NEW_TERMS_HISTORY_SIZE,
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
+  ACTIONS_THROTTLE_INPUT,
+  INDEX_SELECTOR,
+  CREATE_CONNECTOR_BTN,
+  SAVE_ACTION_CONNECTOR_BTN,
+  JSON_EDITOR,
+  CREATE_ACTION_CONNECTOR_BTN,
+  EMAIL_ACTION_BTN,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -114,7 +121,6 @@ import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
-  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
@@ -274,9 +280,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
@@ -285,6 +289,27 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
   cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
   cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(rule.lookBack.interval);
   cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
+};
+
+export const fillRuleAction = (rule: CustomRule) => {
+  if (rule.actions) cy.get(ACTIONS_THROTTLE_INPUT).select(rule.actions.interval);
+  rule.actions?.connectors.forEach((connector) => {
+    switch (connector.type) {
+      case 'index':
+        const indexConnector = connector as IndexConnector;
+        cy.get(INDEX_SELECTOR).click();
+        cy.get(CREATE_CONNECTOR_BTN).click();
+        fillIndexConnectorForm(indexConnector);
+        break;
+      case 'email':
+        const emailConnector = connector as EmailConnector;
+        cy.get(EMAIL_ACTION_BTN).click();
+        cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+        fillEmailConnectorForm(emailConnector);
+        break;
+    }
+  });
 };
 
 export const fillDefineThresholdRule = (rule: ThresholdRule) => {
@@ -447,6 +472,18 @@ export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConne
   cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
   cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
   cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
+};
+
+export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
+  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
+  cy.get(COMBO_BOX_INPUT).type(connector.index.substring(0, 3));
+  cy.contains(connector.index).first().click();
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
+  cy.get(JSON_EDITOR).should('be.visible');
+  cy.get(JSON_EDITOR).type(connector.document, {
+    parseSpecialCharSequences: false,
+  });
 };
 
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
