@@ -28,13 +28,13 @@ const actions = [
   {
     key: 'edit',
     icon: 'pencil',
-    label: i18n.EXCEPTION_ITEM_EDIT_BUTTON(ExceptionListTypeEnum.DETECTION),
+    label: i18n.exceptionItemCardEditButton(ExceptionListTypeEnum.DETECTION),
     onClick: handleEdit,
   },
   {
     key: 'delete',
     icon: 'trash',
-    label: i18n.EXCEPTION_ITEM_DELETE_BUTTON(ExceptionListTypeEnum.DETECTION),
+    label: i18n.exceptionItemCardDeleteButton(ExceptionListTypeEnum.DETECTION),
     onClick: handleDelete,
   },
 ];

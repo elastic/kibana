@@ -68,14 +68,14 @@ const ExceptionItemCardComponent = ({
       {
         key: 'edit',
         icon: 'controlsHorizontal',
-        label: (editActionLabel || i18n.EXCEPTION_ITEM_EDIT_BUTTON(listType)) as string,
+        label: (editActionLabel || i18n.exceptionItemCardEditButton(listType)) as string,
         onClick: handleEdit,
       },
       {
         key: 'delete',
         icon: 'trash',
         label: (deleteActionLabel ||
-          listType === i18n.EXCEPTION_ITEM_DELETE_BUTTON(listType)) as string,
+          listType === i18n.exceptionItemCardDeleteButton(listType)) as string,
         onClick: handleDelete,
       },
     ],

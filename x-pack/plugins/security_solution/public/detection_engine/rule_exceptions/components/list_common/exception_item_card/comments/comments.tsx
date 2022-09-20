@@ -31,7 +31,7 @@ export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(({
         id="exceptionItemCardComments"
         buttonContent={
           <EuiText size="s" style={{ color: euiTheme.colors.primary }}>
-            {i18n.exceptionItemCommentsAccordion(comments.length)}
+            {i18n.exceptionItemCardCommentsAccordion(comments.length)}
           </EuiText>
         }
         arrowDisplay="none"

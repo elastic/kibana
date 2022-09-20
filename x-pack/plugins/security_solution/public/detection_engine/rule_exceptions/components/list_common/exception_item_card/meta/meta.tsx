@@ -79,7 +79,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         <StyledFlexItem grow={false}>
           <MetaInfoDetails
             fieldName="created_by"
-            label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
+            label={i18n.EXCEPTION_ITEM_CARD_CREATED_LABEL}
             value1={<FormattedDate fieldName="created_at" value={item.created_at} />}
             value2={item.created_by}
             dataTestSubj={`${dataTestSubj}-createdBy`}
@@ -88,7 +88,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         <StyledFlexItem grow={false}>
           <MetaInfoDetails
             fieldName="updated_by"
-            label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
+            label={i18n.EXCEPTION_ITEM_CARD_UPDATED_LABEL}
             value1={<FormattedDate fieldName="updated_at" value={item.updated_at} />}
             value2={item.updated_by}
             dataTestSubj={`${dataTestSubj}-updatedBy`}
@@ -142,7 +142,7 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
-          {i18n.EXCEPTION_ITEM_META_BY}
+          {i18n.EXCEPTION_ITEM_CARD_META_BY}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
