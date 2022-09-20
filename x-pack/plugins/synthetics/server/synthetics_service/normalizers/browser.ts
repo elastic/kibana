@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PrivateLocation } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { formatKibanaNamespace } from '../../../common/formatters';
 import {
@@ -51,7 +52,7 @@ export const normalizeProjectMonitor = ({
   namespace,
 }: {
   locations: Locations;
-  privateLocations: Locations;
+  privateLocations: PrivateLocation[];
   monitor: ProjectBrowserMonitor;
   projectId: string;
   namespace: string;
@@ -121,7 +122,7 @@ export const normalizeProjectMonitors = ({
   namespace,
 }: {
   locations: Locations;
-  privateLocations: Locations;
+  privateLocations: PrivateLocation[];
   monitors: ProjectBrowserMonitor[];
   projectId: string;
   namespace: string;
@@ -137,7 +138,7 @@ export const getMonitorLocations = ({
   monitor,
 }: {
   monitor: ProjectBrowserMonitor;
-  privateLocations: Locations;
+  privateLocations: PrivateLocation[];
   publicLocations: Locations;
 }) => {
   const publicLocs =

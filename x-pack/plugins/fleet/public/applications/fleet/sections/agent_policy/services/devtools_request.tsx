@@ -105,7 +105,7 @@ function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
   }
 
   return Object.entries(vars).reduce((acc, [varKey, varRecord]) => {
-    acc[varKey] = varRecord.value;
+    acc[varKey] = varRecord?.value;
 
     return acc;
   }, {} as SimplifiedVars);
