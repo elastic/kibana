@@ -7,6 +7,8 @@
 
 import { chunk } from 'lodash';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
@@ -19,6 +21,7 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
   addChangePointsAction,
+  addChangePointsGroupAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
@@ -30,8 +33,20 @@ import { API_ENDPOINT } from '../../common/api';
 
 import type { AiopsLicense } from '../types';
 
-import { fetchFieldCandidates } from './queries/fetch_field_candidates';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
+import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+import {
+  dropDuplicates,
+  fetchFrequentItems,
+  groupDuplicates,
+} from './queries/fetch_frequent_items';
+import type { ItemsetResult } from './queries/fetch_frequent_items';
+import {
+  getFieldValuePairCounts,
+  getSimpleHierarchicalTree,
+  getSimpleHierarchicalTreeLeaves,
+  markDuplicates,
+} from './queries/get_simple_hierarchical_tree';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
@@ -55,6 +70,8 @@ export const defineExplainLogRateSpikesRoute = (
         return response.forbidden();
       }
 
+      const groupingEnabled = !!request.body.grouping;
+
       const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const controller = new AbortController();
@@ -72,7 +89,8 @@ export const defineExplainLogRateSpikesRoute = (
 
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
         request.headers,
-        logger
+        logger,
+        true
       );
 
       function endWithUpdatedLoadingState() {
@@ -196,6 +214,150 @@ export const defineExplainLogRateSpikesRoute = (
         if (changePoints?.length === 0) {
           endWithUpdatedLoadingState();
           return;
+        }
+
+        if (groupingEnabled) {
+          // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
+          // Note this is a compromise and not 100% accurate because there could be change points that
+          // have the exact same counts but still don't co-occur.
+          const duplicateIdentifier: Array<keyof ChangePoint> = [
+            'doc_count',
+            'bg_count',
+            'total_doc_count',
+            'total_bg_count',
+          ];
+
+          // These are the deduplicated change points we pass to the `frequent_items` aggregation.
+          const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
+
+          // We use the grouped change points to later repopulate
+          // the `frequent_items` result with the missing duplicates.
+          const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
+            (g) => g.group.length > 1
+          );
+
+          const { fields, df } = await fetchFrequentItems(
+            client,
+            request.body.index,
+            JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
+            deduplicatedChangePoints,
+            request.body.timeFieldName,
+            request.body.deviationMin,
+            request.body.deviationMax
+          );
+
+          // The way the `frequent_items` aggregations works could return item sets that include
+          // field/value pairs that are not part of the original list of significant change points.
+          // This cleans up groups and removes those unrelated field/value pairs.
+          const filteredDf = df
+            .map((fi) => {
+              fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
+                (set, [field, value]) => {
+                  if (
+                    changePoints.some((cp) => cp.fieldName === field && cp.fieldValue === value)
+                  ) {
+                    set[field] = value;
+                  }
+                  return set;
+                },
+                {}
+              );
+              fi.size = Object.keys(fi.set).length;
+              return fi;
+            })
+            .filter((fi) => fi.size > 1);
+
+          // `frequent_items` returns lot of different small groups of field/value pairs that co-occur.
+          // The following steps analyse these small groups, identify overlap between these groups,
+          // and then summarize them in larger groups where possible.
+
+          // Get a tree structure based on `frequent_items`.
+          const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
+
+          // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
+          const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);
+
+          // To be able to display a more cleaned up results table in the UI, we identify field/value pairs
+          // that occur in multiple groups. This will allow us to highlight field/value pairs that are
+          // unique to a group in a better way. This step will also re-add duplicates we identified in the
+          // beginning and didn't pass on to the `frequent_items` agg.
+          const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
+          const changePointGroups = markDuplicates(treeLeaves, fieldValuePairCounts).map((g) => {
+            const group = [...g.group];
+
+            for (const groupItem of g.group) {
+              const { duplicate } = groupItem;
+              const duplicates = groupedChangePoints.find((d) =>
+                d.group.some(
+                  (dg) =>
+                    dg.fieldName === groupItem.fieldName && dg.fieldValue === groupItem.fieldValue
+                )
+              );
+
+              if (duplicates !== undefined) {
+                group.push(
+                  ...duplicates.group.map((d) => {
+                    return {
+                      fieldName: d.fieldName,
+                      fieldValue: d.fieldValue,
+                      duplicate,
+                    };
+                  })
+                );
+              }
+            }
+
+            return {
+              ...g,
+              group,
+            };
+          });
+
+          // Some field/value pairs might not be part of the `frequent_items` result set, for example
+          // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
+          // In this next part we identify those missing pairs and add them as individual groups.
+          const missingChangePoints = deduplicatedChangePoints.filter((cp) => {
+            return !changePointGroups.some((cpg) => {
+              return cpg.group.some(
+                (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
+              );
+            });
+          });
+
+          changePointGroups.push(
+            ...missingChangePoints.map((cp) => {
+              const duplicates = groupedChangePoints.find((d) =>
+                d.group.some(
+                  (dg) => dg.fieldName === cp.fieldName && dg.fieldValue === cp.fieldValue
+                )
+              );
+              if (duplicates !== undefined) {
+                return {
+                  group: duplicates.group.map((d) => ({
+                    fieldName: d.fieldName,
+                    fieldValue: d.fieldValue,
+                    duplicate: false,
+                  })),
+                  docCount: cp.doc_count,
+                  pValue: cp.pValue,
+                };
+              } else {
+                return {
+                  group: [{ fieldName: cp.fieldName, fieldValue: cp.fieldValue, duplicate: false }],
+                  docCount: cp.doc_count,
+                  pValue: cp.pValue,
+                };
+              }
+            })
+          );
+
+          // Finally, we'll find out if there's at least one group with at least two items,
+          // only then will we return the groups to the clients and make the grouping option available.
+          const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
+
+          if (maxItems > 1) {
+            push(addChangePointsGroupAction(changePointGroups));
+          }
         }
 
         const histogramFields: [NumericHistogramField] = [

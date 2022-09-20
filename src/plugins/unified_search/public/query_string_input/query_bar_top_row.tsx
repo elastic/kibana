@@ -26,12 +26,13 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
 } from '@elastic/eui';
-import { IDataPluginServices, TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUnifiedSearchPluginServices } from '../types';
 import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
@@ -80,6 +81,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showQueryInput?: boolean;
   showAddFilter?: boolean;
   showDatePicker?: boolean;
+  isDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
@@ -163,7 +165,7 @@ export const QueryBarTopRow = React.memo(
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
-    const kibana = useKibana<IDataPluginServices>();
+    const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings, storage, appName } = kibana.services;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
@@ -353,6 +355,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem className={wrapperClasses}>
           <SuperDatePicker
+            isDisabled={props.isDisabled}
             start={props.dateRangeFrom}
             end={props.dateRangeTo}
             isPaused={props.isRefreshPaused}
@@ -403,7 +406,7 @@ export const QueryBarTopRow = React.memo(
             iconType={props.isDirty ? iconDirty : 'refresh'}
             iconOnly={!isXXLarge}
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
-            isDisabled={isDateRangeInvalid}
+            isDisabled={isDateRangeInvalid || props.isDisabled}
             isLoading={props.isLoading}
             onClick={onClickSubmitButton}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
@@ -452,6 +455,7 @@ export const QueryBarTopRow = React.memo(
             onTextLangQuerySubmit={props.onTextLangQuerySubmit}
             textBasedLanguage={textBasedLanguage}
             onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
+            isDisabled={props.isDisabled}
           />
         </EuiFlexItem>
       );
@@ -467,6 +471,7 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              isDisabled={props.isDisabled}
             />
           </EuiFlexItem>
         )
@@ -511,6 +516,7 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                isDisabled={props.isDisabled}
               />
             </EuiFlexItem>
           )}
@@ -535,6 +541,7 @@ export const QueryBarTopRow = React.memo(
                 dateRange: dateRangeRef.current,
               })
             }
+            isDisabled={props.isDisabled}
           />
         )
       );

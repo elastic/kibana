@@ -2,13 +2,13 @@
 
 exports[`Intro component renders correctly 1`] = `
 <header
-  class="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+  class="euiPageHeader emotion-euiPageHeader"
 >
   <div
-    class="euiPageHeaderContent"
+    class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
     >
       <div
         class="euiFlexItem"
@@ -23,7 +23,7 @@ exports[`Intro component renders correctly 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
         >
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"

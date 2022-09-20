@@ -31,7 +31,7 @@ and Task Manager <<task-manager-diagnosing-root-cause,diagnostics endpoints>>.
 [float]
 [[alerting-managment-detail]]
 === Using rules and connectors list for the current state and finding issues
-*Rules and Connectors* in *Stack Management* lists the rules and connectors available in the space you’re currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active alerts. 
+*{rules-ui}* in *{stack-manage-app}* lists the rules and connectors available in the space you're currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active alerts. 
 The start date on this page indicates when a rule is triggered, and for what alerts. In addition, the duration of the condition indicates how long the instance is active.
 [role="screenshot"]
 image::images/rule-details-alerts-inactive.png[Alerting management details]
@@ -44,7 +44,9 @@ When creating or editing an index threshold rule, you see a graph of the data th
 [role="screenshot"]
 image::images/index-threshold-chart.png[Index Threshold chart]
 
-The end date is related to the rule interval (IIRC, 30 “intervals” worth of time). You can use this view to see if the rule is getting the data you expect, and visually compare to the threshold value (a horizontal line in the graph). If the graph does not contain any lines except for the threshold line, then the rule has an issue, for example, no data is available given the specified index and fields or there is a permission error.
+The end date is related to the check interval for the rule.
+//(IIRC, 30 “intervals” worth of time)
+You can use this view to see if the rule is getting the data you expect, and visually compare to the threshold value (a horizontal line in the graph). If the graph does not contain any lines except for the threshold line, then the rule has an issue, for example, no data is available given the specified index and fields or there is a permission error.
 Diagnosing these may be difficult - but there may be log messages for error conditions. 
 
 [float]
@@ -52,7 +54,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the http endpoints available for actions is the POST <<execute-connector-api,_execute API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
+One of the HTTP endpoints available for actions is the POST <<execute-connector-api,_execute API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
@@ -62,7 +64,7 @@ curl -X POST -k \
  -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
 --------------------------------------------------
 
-experimental[] In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
+experimental[] In addition, there is a command-line client that uses legacy {rules-ui} APIs, which can be easier to use, but must be updated for the new APIs.
 CLI tools to list, create, edit, and delete alerts (rules) and actions (connectors) are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
 [source, txt]
 --------------------------------------------------
@@ -75,7 +77,7 @@ The same REST POST _execute API command will be:
 kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
 --------------------------------------------------
 
-The result of this http request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action, along with error messages if errors were encountered.
+The result of this HTTP request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action, along with error messages if errors were encountered.
 
 [float]
 [[alerting-error-banners]]

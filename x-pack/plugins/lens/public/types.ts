@@ -6,7 +6,7 @@
  */
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
@@ -17,7 +17,8 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type { NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -28,6 +29,7 @@ import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/pu
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -46,7 +48,7 @@ import {
 import type { LensInspector } from './lens_inspector_service';
 import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
-import type { IndexPatternServiceAPI } from './indexpattern_service/service';
+import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
 
 export interface IndexPatternRef {
@@ -70,7 +72,8 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
-  spec?: DataViewSpec;
+  spec: DataViewSpec;
+  isPersisted: boolean;
 }
 
 export type IndexPatternField = FieldSpec & {
@@ -85,8 +88,6 @@ export type IndexPatternField = FieldSpec & {
   meta?: boolean;
   runtime?: boolean;
 };
-
-export type ErrorCallback = (e: { message: string }) => void;
 
 export interface PublicAPIProps<T> {
   state: T;
@@ -116,8 +117,8 @@ export interface EditorFrameSetup {
   registerDatasource: <T, P>(
     datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
   ) => void;
-  registerVisualization: <T>(
-    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  registerVisualization: <T, P>(
+    visualization: Visualization<T, P> | (() => Promise<Visualization<T, P>>)
   ) => void;
 }
 
@@ -216,35 +217,13 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
-interface AxisExtents {
-  mode: string;
-  lowerBound?: number;
-  upperBound?: number;
-}
-
-export interface VisualizeEditorContext {
-  layers: VisualizeEditorLayersContext[];
-  configuration: ChartSettings;
+export type VisualizeEditorContext = {
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-  type: string;
-}
-
-interface ChartSettings {
-  fill?: string;
-  legend?: Record<string, boolean | string>;
-  gridLinesVisibility?: Record<string, boolean>;
-  tickLabelsVisibility?: Record<string, boolean>;
-  axisTitlesVisibility?: Record<string, boolean>;
-  valueLabels?: boolean;
-  extents?: {
-    yLeftExtent: AxisExtents;
-    yRightExtent: AxisExtents;
-  };
-}
+} & NavigateToLensContext;
 
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
@@ -284,6 +263,12 @@ export interface Datasource<T = unknown, P = unknown> {
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
+  cloneLayer: (
+    state: T,
+    layerId: string,
+    newLayerId: string,
+    getNewId: (id: string) => string
+  ) => T;
   getLayers: (state: T) => string[];
   removeColumn: (props: {
     prevState: T;
@@ -329,7 +314,8 @@ export interface Datasource<T = unknown, P = unknown> {
   canCloseDimensionEditor?: (state: T) => boolean;
   getCustomWorkspaceRenderer?: (
     state: T,
-    dragging: DraggingIdentifier
+    dragging: DraggingIdentifier,
+    indexPatterns: Record<string, IndexPattern>
   ) => undefined | (() => JSX.Element);
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -371,7 +357,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeCharts: (
     state: T,
-    context: VisualizeEditorLayersContext[],
+    context: NavigateToLensContext['layers'],
     indexPatterns: IndexPatternMap
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -388,6 +374,15 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
+  /**
+   * Check the internal state integrity and returns a list of missing references
+   */
+  checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
+
   getErrorMessages: (
     state: T,
     indexPatterns: Record<string, IndexPattern>
@@ -398,22 +393,23 @@ export interface Datasource<T = unknown, P = unknown> {
         fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
-  /**
-   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
-   */
-  uniqueLabels: (state: T) => Record<string, string>;
-  /**
-   * Check the internal state integrity and returns a list of missing references
-   */
-  checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
+
   /**
    * The frame calls this function to display warnings about visualization
    */
   getWarningMessages?: (
     state: T,
     frame: FramePublicAPI,
+    adapters: Adapters,
     setState: StateSetter<T>
   ) => React.ReactNode[] | undefined;
+
+  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
+
+  /**
+   * The embeddable calls this function to display warnings about visualization on the dashboard
+   */
+  getSearchWarningMessages?: (state: P, warning: SearchResponseWarning) => string[] | undefined;
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
@@ -444,6 +440,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Get the used DataView value from state
    */
   getUsedDataView: (state: T, layerId: string) => string;
+  /**
+   * Get all the used DataViews from state
+   */
+  getUsedDataViews: (state: T) => string[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -495,7 +495,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
@@ -505,6 +505,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   uiActions: UiActionsStart;
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
+  usedIndexPatterns?: string[];
 }
 
 interface SharedDimensionProps {
@@ -548,7 +549,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
@@ -626,6 +627,7 @@ export interface Operation extends OperationMetadata {
 }
 
 export interface OperationMetadata {
+  interval?: string;
   // The output of this operation will have this data type
   dataType: DataType;
   // A bucketed operation is grouped by duplicate values, otherwise each row is
@@ -660,12 +662,10 @@ export interface VisualizationConfigProps<T = unknown> {
 
 export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
   setState: (newState: T) => void;
-  onChangeIndexPattern: (indexPatternId: string, layerId: string) => void;
+  onChangeIndexPattern: (indexPatternId: string) => void;
 };
 
-export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T> & {
-  defaultIndexPatternId: string;
-};
+export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T>;
 
 export interface VisualizationToolbarProps<T = unknown> {
   setState: (newState: T) => void;
@@ -696,6 +696,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupId: string;
   accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
+  dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
   requiredMinDimensionCount?: number;
@@ -744,17 +745,6 @@ export interface Suggestion {
   hide?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
-}
-
-interface VisualizationConfigurationFromContextChangeProps<T> {
-  layerId: string;
-  prevState: T;
-  context: VisualizeEditorLayersContext;
-}
-
-interface VisualizationStateFromContextChangeProps {
-  suggestions: Suggestion[];
-  context: VisualizeEditorContext;
 }
 
 /**
@@ -880,17 +870,27 @@ export interface VisualizationDisplayOptions {
   noPadding?: boolean;
 }
 
-export interface Visualization<T = unknown> {
+interface VisualizationStateFromContextChangeProps {
+  suggestions: Suggestion[];
+  context: VisualizeEditorContext;
+}
+
+export interface Visualization<T = unknown, P = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
   /**
    * Initialize is allowed to modify the state stored in memory. The initialize function
    * is called with a previous state in two cases:
-   * - Loadingn from a saved visualization
+   * - Loading from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
   initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
+
+  /**
+   * Retrieve the used DataViews in the visualization
+   */
+  getUsedDataViews?: (state?: T) => string[];
 
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 
@@ -914,15 +914,30 @@ export interface Visualization<T = unknown> {
   switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
   /** Description is displayed as the clickable text in the chart switcher */
   getDescription: (state: T) => { icon?: IconType; label: string };
-
+  /** Visualizations can have references as well */
+  getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  /** Hydrate from persistable state and references to final state */
+  fromPersistableState?: (
+    state: P,
+    references?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  ) => T;
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
-  clearLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string, indexPatternId: string) => T;
+  /** Reset button on each layer triggers this */
+  cloneLayer?: (
+    state: T,
+    layerId: string,
+    newLayerId: string,
+    /** @param contains map old -> new id **/
+    clonedIDsMap: Map<string, string>
+  ) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId?: string) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId: string) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
@@ -1001,19 +1016,7 @@ export interface Visualization<T = unknown> {
     dropType: DropType;
     group?: VisualizationDimensionGroupConfig;
   }) => T;
-  /**
-   * Update the configuration for the visualization. This is used to update the state
-   */
-  updateLayersConfigurationFromContext?: (
-    props: VisualizationConfigurationFromContextChangeProps<T>
-  ) => T;
 
-  /**
-   * Update the visualization state from the context.
-   */
-  getVisualizationSuggestionFromContext?: (
-    props: VisualizationStateFromContextChangeProps
-  ) => Suggestion;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options
@@ -1076,13 +1079,21 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: DatasourceLayers
+    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
   ) =>
     | Array<{
         shortMessage: string;
         longMessage: React.ReactNode;
       }>
     | undefined;
+
+  validateColumn?: (
+    state: T,
+    frame: Pick<FramePublicAPI, 'dataViews'>,
+    layerId: string,
+    columnId: string,
+    group?: VisualizationDimensionGroupConfig
+  ) => { invalid: boolean; invalidMessage?: string };
 
   /**
    * The frame calls this function to display warnings about visualization
@@ -1109,6 +1120,10 @@ export interface Visualization<T = unknown> {
    * Get RenderEventCounters events for telemetry
    */
   getRenderEventCounters?: (state: T) => string[];
+
+  getSuggestionFromConvertToLensContext?: (
+    props: VisualizationStateFromContextChangeProps
+  ) => Suggestion;
 }
 
 // Use same technique as TriggerContext

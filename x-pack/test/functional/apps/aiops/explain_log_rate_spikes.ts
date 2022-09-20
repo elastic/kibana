@@ -12,6 +12,7 @@ import type { TestData } from './types';
 import { farequoteDataViewTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const es = getService('es');
   const headerPage = getPageObject('header');
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
@@ -85,14 +86,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--e',
-        targetPx
+        targetPx + intervalPx
       );
 
       // Adjust the left brush handle
       await aiops.explainLogRateSpikes.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--w',
-        targetPx - intervalPx
+        targetPx
       );
 
       // Get the new brush selection width for later comparison.
@@ -114,20 +115,74 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
 
-      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExists();
+      // The group switch should be disabled by default
+      await aiops.explainLogRateSpikes.assertSpikeAnalysisGroupSwitchExists(false);
+
+      // Enabled grouping
+      await aiops.explainLogRateSpikes.clickSpikeAnalysisGroupSwitch(false);
+
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
+
+      const analysisGroupsTable =
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+
+      expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
+
+      await ml.testExecution.logTestStep('expand table row');
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
       const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-
       expect(analysisTable).to.be.eql(testData.expected.analysisTable);
     });
   }
 
+  // Failing: See https://github.com/elastic/kibana/issues/140848
   describe('explain log rate spikes', function () {
     this.tags(['aiops']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+
+      await es.updateByQuery({
+        index: 'ft_farequote',
+        body: {
+          script: {
+            // @ts-expect-error
+            inline: 'ctx._source.custom_field = "default"',
+            lang: 'painless',
+          },
+        },
+      });
+
+      for (const i of [...Array(100)]) {
+        await es.index({
+          index: 'ft_farequote',
+          body: {
+            '@timestamp': '2016-02-09T16:19:59.000Z',
+            '@version': i,
+            airline: 'UAL',
+            custom_field: 'deviation',
+            responsetime: 10,
+            type: 'farequote',
+          },
+        });
+      }
+
+      await es.index({
+        index: 'ft_farequote',
+        body: {
+          '@timestamp': '2016-02-09T16:19:59.000Z',
+          '@version': 101,
+          airline: 'UAL',
+          custom_field: 'deviation',
+          responsetime: 10,
+          type: 'farequote',
+        },
+        refresh: 'wait_for',
+      });
+
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();

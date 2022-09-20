@@ -12,7 +12,7 @@ import {
   EuiPage,
   EuiLink,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
