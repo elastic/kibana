@@ -80,9 +80,7 @@ export function buildBaseFilterCriteria(
   } else if (selectedGroup && !includeSelectedChangePoint) {
     filterCriteria.push({
       bool: {
-        must_not: [
-          ...groupFilter,
-        ],
+        must_not: [...groupFilter],
       },
     });
   }
