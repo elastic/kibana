@@ -26,7 +26,7 @@ import { i18nTexts } from './i18n_texts';
 export interface Props
   extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText' | 'disabled'> {
   onChange: (files: File[]) => void;
-  onUpload: () => void;
+  onUpload: (meta?: unknown) => void;
   onClear: () => void;
   onCancel: () => void;
   label?: string;
@@ -39,6 +39,7 @@ export interface Props
   retry?: boolean;
   allowClear?: boolean;
   initialFilePromptText?: string;
+  meta?: unknown;
 }
 
 const { euiFormMaxWidth, euiButtonHeight, euiButtonHeightSmall } = euiThemeVars;
@@ -46,6 +47,7 @@ const { euiFormMaxWidth, euiButtonHeight, euiButtonHeightSmall } = euiThemeVars;
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
     done,
+    meta,
     label,
     ready,
     retry,
@@ -94,7 +96,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
           size="s"
           data-test-subj="retryButton"
           disabled={done || uploading}
-          onClick={onUpload}
+          onClick={() => onUpload(meta)}
         >
           {i18nTexts.retry}
         </EuiButtonEmpty>

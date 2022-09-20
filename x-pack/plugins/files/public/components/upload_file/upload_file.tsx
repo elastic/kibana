@@ -6,9 +6,8 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import React, { type FunctionComponent, useState, useRef, useCallback } from 'react';
+import React, { type FunctionComponent, useState, useRef, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { finalize } from 'rxjs';
 import { FileKind } from '../../../common';
 import { FilesClient } from '../../types';
 
@@ -94,69 +93,57 @@ export const UploadFile: FunctionComponent<Props> = ({
   allowRepeatedUploads = false,
 }) => {
   const { registry } = useFilesContext();
-
   const ref = useRef<null | EuiFilePicker>(null);
-
   const [kind] = useState<FileKind>(() => registry.get(kindId));
-  const [uploadState] = useState(() =>
-    createUploadState({
-      client,
-      fileKind: kind,
-    })
+  const uploadState = useMemo(
+    () =>
+      createUploadState({
+        client,
+        fileKind: kind,
+        allowRepeatedUploads,
+      }),
+    [client, kind, allowRepeatedUploads]
   );
 
-  const uploading = useBehaviorSubject(uploadState.uploading$);
   const files = useObservable(uploadState.files$, []);
+  const uploading = useBehaviorSubject(uploadState.uploading$);
+  const error = useBehaviorSubject(uploadState.error$);
+  const done = useObservable(uploadState.done$);
 
-  const errors = files.filter((f) => Boolean(f.error));
-  const done = Boolean(files.length && files.every((f) => f.status === 'uploaded'));
   const retry = Boolean(files.some((f) => f.status === 'upload_failed'));
+  const hasErrors = Boolean(error);
 
-  const hasErrors = Boolean(errors.length);
-
-  const clearFiles = useCallback(() => {
-    ref.current?.removeFiles();
-    uploadState.setFiles([]);
-  }, [uploadState]);
-
-  const upload = useCallback(() => {
-    uploadState
-      .upload(meta)
-      .pipe(
-        finalize(() => {
-          if (allowRepeatedUploads) clearFiles();
-        })
-      )
-      .subscribe({
-        complete: () => {
-          onDone(files.map(({ id }) => ({ id: id!, kind: kindId })));
-        },
-        error: onError,
-      });
-  }, [onDone, onError, uploadState, files, kindId, meta, allowRepeatedUploads, clearFiles]);
+  useEffect(() => {
+    const subs = [
+      uploadState.clear$.subscribe(() => {
+        ref.current?.removeFiles();
+      }),
+      uploadState.done$.subscribe(onDone),
+      uploadState.error$.subscribe((e) => e && onError?.(e)),
+    ];
+    return () => subs.forEach((sub) => sub.unsubscribe());
+  }, [uploadState, onDone, onError]);
 
   return (
     <Component
       ref={ref}
+      meta={meta}
       ready={Boolean(files.length)}
       immediate={immediate}
-      onCancel={() => {
-        uploadState.abort();
-        if (immediate) clearFiles();
-      }}
+      onCancel={uploadState.abort}
       onChange={(fs) => {
         uploadState.setFiles(fs);
-        if (immediate) upload();
+        if (immediate) uploadState.upload(meta);
       }}
-      onUpload={upload}
-      onClear={clearFiles}
-      done={done}
+      onUpload={uploadState.upload}
+      onClear={uploadState.clear}
+      done={Boolean(done?.length)}
       uploading={!done && uploading}
       retry={!done && retry}
       accept={kind.allowedMimeTypes?.join(',')}
-      isInvalid={!uploading && hasErrors}
       allowClear={allowClear}
-      errorMessage={errors[0]?.error?.message}
+      isInvalid={!uploading && hasErrors}
+      errorMessage={error?.message}
     />
   );
 };

@@ -12,6 +12,7 @@ import {
   from,
   race,
   take,
+  filter,
   Subject,
   finalize,
   forkJoin,
@@ -21,14 +22,14 @@ import {
   ReplaySubject,
   BehaviorSubject,
   type Observable,
+  combineLatest,
+  distinctUntilChanged,
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
-
-const prop$ = <T = unknown>(initialValue: T) => new BehaviorSubject<T>(initialValue);
 
 interface FileState {
   file: File;
@@ -37,17 +38,62 @@ interface FileState {
   error?: Error;
 }
 
+type Upload = SimpleStateSubject<FileState>;
+
+interface DoneNotification {
+  id: string;
+  kind: string;
+}
+
+interface UploadOptions {
+  allowRepeatedUploads?: boolean;
+}
+
 export class UploadState {
   private readonly abort$ = new Subject<void>();
-  private readonly files$$ = prop$<Array<SimpleStateSubject<FileState>>>([]);
+  private readonly files$$ = new BehaviorSubject<Upload[]>([]);
 
   public readonly files$ = this.files$$.pipe(
     switchMap((files$) => (files$.length ? zip(...files$) : of([])))
   );
+  public readonly clear$ = new Subject<void>();
+  public readonly error$ = new BehaviorSubject<undefined | Error>(undefined);
+  public readonly uploading$ = new BehaviorSubject(false);
+  public readonly done$ = new Subject<DoneNotification[]>();
 
-  public readonly uploading$ = prop$(false);
+  constructor(
+    private readonly fileKind: FileKind,
+    private readonly client: FilesClient,
+    private readonly opts: UploadOptions = { allowRepeatedUploads: false }
+  ) {
+    const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
 
-  constructor(private readonly fileKind: FileKind, private readonly client: FilesClient) {}
+    latestFiles$
+      .pipe(
+        map((files) => files.some((file) => file.status === 'uploading')),
+        distinctUntilChanged()
+      )
+      .subscribe(this.uploading$);
+
+    latestFiles$
+      .pipe(
+        map((files) => {
+          const errorFile = files.find((file) => file.status === 'upload_failed');
+          return errorFile ? errorFile.error : undefined;
+        }),
+        filter(Boolean)
+      )
+      .subscribe(this.error$);
+
+    latestFiles$
+      .pipe(
+        filter(
+          (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
+        ),
+        map((files) => files.map((file) => ({ id: file.id!, kind: this.fileKind.id })))
+      )
+      .subscribe(this.done$);
+  }
 
   public isUploading(): boolean {
     return this.uploading$.getValue();
@@ -86,6 +132,11 @@ export class UploadState {
       throw new Error('No upload in progress');
     }
     this.abort$.next();
+  };
+
+  clear = (): void => {
+    this.setFiles([]);
+    this.clear$.next();
   };
 
   /**
@@ -152,38 +203,40 @@ export class UploadState {
     );
   };
 
-  public upload = (meta?: unknown): Observable<void> => {
+  public upload = (meta?: unknown): void => {
     if (this.isUploading()) {
       throw new Error('Upload already in progress');
     }
-    this.uploading$.next(true);
     const abort$ = new ReplaySubject<void>(1);
     const sub = this.abort$.subscribe(abort$);
-    return this.files$$.pipe(
+    const upload$ = this.files$$.pipe(
       take(1),
       switchMap((files$) => {
         return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)));
       }),
       map((results) => {
         const errors = results.filter(Boolean) as Error[];
-        if (errors.length) {
-          throw errors[0]; // Throw just the first error for now
-        }
+        if (errors.length) throw errors[0];
       }),
       finalize(() => {
-        this.uploading$.next(false);
+        if (this.opts.allowRepeatedUploads) this.clear();
         sub.unsubscribe();
       })
     );
+
+    upload$.subscribe({
+      error: (e) => this.error$.next(e),
+    });
   };
 }
 
 export const createUploadState = ({
   fileKind,
   client,
+  ...options
 }: {
   fileKind: FileKind;
   client: FilesClient;
-}) => {
-  return new UploadState(fileKind, client);
+} & UploadOptions) => {
+  return new UploadState(fileKind, client, options);
 };

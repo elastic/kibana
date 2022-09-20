@@ -6,7 +6,7 @@
  */
 
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { of, delay, merge, mergeMap, tap } from 'rxjs';
+import { of, delay, merge, tap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
@@ -42,9 +42,9 @@ describe('UploadState', () => {
       uploadState.setFiles([file1, file2]);
 
       // Simulate upload being triggered async
-      const upload$ = cold('--a|').pipe(mergeMap(uploadState.upload));
+      const upload$ = cold('--a|').pipe(tap(uploadState.upload));
 
-      expectObservable(upload$).toBe('--a|', { a: undefined });
+      expectObservable(upload$).toBe('--a|');
 
       expectObservable(uploadState.uploading$).toBe('a-(bc)', {
         a: false,
@@ -89,10 +89,12 @@ describe('UploadState', () => {
       uploadState.setFiles([file1, file2]);
 
       // Simulate upload being triggered async
-      const upload$ = cold('-0|').pipe(mergeMap(() => uploadState.upload({ myMeta: true })));
+      const upload$ = cold('-0|').pipe(tap(() => uploadState.upload({ myMeta: true })));
       const abort$ = cold(' --1|').pipe(tap(uploadState.abort));
 
-      expectObservable(merge(upload$, abort$)).toBe('--0#', ['1'], new Error('Abort!'));
+      expectObservable(merge(upload$, abort$)).toBe('-01|');
+
+      expectObservable(uploadState.error$).toBe('0--1', [undefined, new Error('Abort!')]);
 
       expectObservable(uploadState.uploading$).toBe('ab-c', {
         a: false,
@@ -147,7 +149,7 @@ describe('UploadState', () => {
           {
             file,
             status: 'idle',
-            error: new Error('File is too large. Maximum size is 1000 bytes.'),
+            error: new Error('File is too large. Maximum size is 1,000 bytes.'),
           },
         ],
       });
