@@ -25,6 +25,10 @@ import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
+jest.mock('../../../../integrations/hooks/use_confirm_open_unverified', () => ({
+  useConfirmOpenUnverified: () => <>confirmOpenUnverified</>,
+}));
+
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
