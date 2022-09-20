@@ -16,6 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { GroupTableItem } from '../../components/spike_analysis_table/spike_analysis_table_groups';
 
 /*
  * Contains utility functions for building and processing queries.
@@ -29,7 +30,8 @@ export function buildBaseFilterCriteria(
   latestMs?: number,
   query?: Query['query'],
   selectedChangePoint?: ChangePoint,
-  includeSelectedChangePoint = true
+  includeSelectedChangePoint = true,
+  selectedGroup?: GroupTableItem | null
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
@@ -48,10 +50,23 @@ export function buildBaseFilterCriteria(
     filterCriteria.push(query);
   }
 
-  if (selectedChangePoint && includeSelectedChangePoint) {
-    filterCriteria.push({
-      term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
-    });
+  const groupFilter = [];
+  if (selectedGroup) {
+    for (const fieldName in selectedGroup.group) {
+      if (selectedGroup.group.hasOwnProperty(fieldName)) {
+        groupFilter.push({ term: { [fieldName]: selectedGroup.group[fieldName] } });
+      }
+    }
+  }
+
+  if (includeSelectedChangePoint) {
+    if (selectedChangePoint) {
+      filterCriteria.push({
+        term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
+      });
+    } else if (selectedGroup) {
+      filterCriteria.push(...groupFilter);
+    }
   } else if (selectedChangePoint && !includeSelectedChangePoint) {
     filterCriteria.push({
       bool: {
@@ -59,6 +74,7 @@ export function buildBaseFilterCriteria(
           {
             term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
           },
+          ...groupFilter
         ],
       },
     });

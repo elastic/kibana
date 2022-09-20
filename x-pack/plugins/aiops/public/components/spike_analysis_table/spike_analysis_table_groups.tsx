@@ -27,7 +27,7 @@ import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_r
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'docCount';
 const DEFAULT_SORT_DIRECTION = 'desc';
-interface GroupTableItem {
+export interface GroupTableItem {
   id: number;
   docCount: number;
   group: Record<string, any>;
@@ -42,6 +42,7 @@ interface SpikeAnalysisTableProps {
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
+  onSelectedGroup?: (group: GroupTableItem | null) => void;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -52,6 +53,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   onPinnedChangePoint,
   onSelectedChangePoint,
   selectedChangePoint,
+  onSelectedGroup,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -233,9 +235,19 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       pagination={pagination}
       loading={false}
       sorting={sorting as EuiTableSortingType<GroupTableItem>}
-      rowProps={(group) => {
+        rowProps={(group) => {
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
+          onMouseEnter: () => {
+            if (onSelectedGroup) {
+              onSelectedGroup(group);
+            }
+          },
+          onMouseLeave: () => {
+            if (onSelectedGroup) {
+              onSelectedGroup(null);
+            }
+          },
         };
       }}
     />
