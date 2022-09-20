@@ -19,7 +19,7 @@ import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { getAggregatedMetrics } from '../../lib/helpers/get_aggregated_metrics';
+import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
@@ -133,7 +133,7 @@ const servicesRoute = createApmServerRoute({
 
     const { apmEventClient, config } = setup;
     const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
-      await getAggregatedMetrics({
+      await getServiceInventorySearchSource({
         config,
         apmEventClient,
         kuery,
@@ -221,7 +221,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
 
     const { apmEventClient, config } = setup;
     const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
-      await getAggregatedMetrics({
+      await getServiceInventorySearchSource({
         config,
         apmEventClient,
         kuery,

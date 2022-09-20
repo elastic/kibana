@@ -9,7 +9,7 @@ import { getSearchAggregatedTransactions } from './transactions';
 import { getSearchAggregatedServiceMetrics } from './service_metrics';
 import { APMConfig } from '../..';
 
-export async function getAggregatedMetrics({
+export async function getServiceInventorySearchSource({
   config,
   apmEventClient,
   start,
