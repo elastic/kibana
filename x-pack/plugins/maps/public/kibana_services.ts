@@ -66,6 +66,7 @@ export const getPresentationUtilContext = () => pluginsStart.presentationUtil.Co
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
+export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
