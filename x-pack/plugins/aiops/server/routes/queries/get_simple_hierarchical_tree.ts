@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { max } from 'd3-array';
 // import { omit, uniq } from 'lodash';
 
 import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
@@ -100,8 +99,8 @@ function dfDepthFirstSearch(
     return 0;
   }
 
-  const docCount = max(filteredItemSets.map((fis) => fis.doc_count)) ?? 0;
-  const totalDocCount = max(filteredItemSets.map((fis) => fis.total_doc_count)) ?? 0;
+  const docCount = Math.max(...filteredItemSets.map((fis) => fis.doc_count));
+  const totalDocCount = Math.max(...filteredItemSets.map((fis) => fis.total_doc_count));
 
   let label = `${parentLabel} ${value}`;
 
@@ -196,7 +195,7 @@ export function getSimpleHierarchicalTree(
 
   const field = fields[0];
 
-  const totalDocCount = max(df.map((d) => d.total_doc_count)) ?? 0;
+  const totalDocCount = Math.max(...df.map((d) => d.total_doc_count));
 
   const newRoot = NewNodeFactory('');
 
