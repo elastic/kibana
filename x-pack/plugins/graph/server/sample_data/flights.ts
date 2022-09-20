@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { APP_ICON, createWorkspacePath } from '../../common/constants';
+import { prepareWorkplaceState } from './utils';
 
 const datasetId = 'flights';
 
@@ -1604,7 +1606,10 @@ const wsState: any = {
   },
 };
 
-export function registerFlightsSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
+export function registerFlightsSampleData(
+  sampleDataRegistry: SampleDataRegistrySetup,
+  core: CoreSetup
+) {
   sampleDataRegistry.addSavedObjectsToSampleDataset(datasetId, [
     {
       type: 'graph-workspace',
@@ -1617,7 +1622,7 @@ export function registerFlightsSampleData(sampleDataRegistry: SampleDataRegistry
         numLinks: 142,
         numVertices: 91,
         version: 1,
-        wsState: JSON.stringify(JSON.stringify(wsState)),
+        wsState: prepareWorkplaceState(wsState, core),
         legacyIndexPatternRef: 'kibana_sample_data_flights',
       },
       references: [],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const urlTemplatePlaceholder = '{{gquery}}';
+import { urlTemplatePlaceholder } from '../../common/constants';
 export const urlTemplateRegex = /\{\{gquery\}\}/g;
 const defaultKibanaQuery = /,query:\(language:kuery,query:'.*?'\)/g;
 

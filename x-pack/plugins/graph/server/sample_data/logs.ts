@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { APP_ICON, createWorkspacePath } from '../../common/constants';
+import { prepareWorkplaceState } from './utils';
 
 const datasetId = 'logs';
 
@@ -421,7 +423,10 @@ const wsState: any = {
   },
 };
 
-export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
+export function registerLogsSampleData(
+  sampleDataRegistry: SampleDataRegistrySetup,
+  core: CoreSetup
+) {
   sampleDataRegistry.addSavedObjectsToSampleDataset(datasetId, [
     {
       type: 'graph-workspace',
@@ -434,7 +439,7 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
         numLinks: 61,
         numVertices: 27,
         version: 1,
-        wsState: JSON.stringify(JSON.stringify(wsState)),
+        wsState: prepareWorkplaceState(wsState, core),
         legacyIndexPatternRef: 'kibana_sample_data_logs',
       },
       references: [],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { registerLogsSampleData, registerLogsSampleDataLink } from './logs';
 import { registerEcommerceSampleData, registerEcommerceSampleDataLink } from './ecommerce';
@@ -13,12 +14,13 @@ import { LicenseState } from '../lib/license_state';
 
 export function registerSampleData(
   sampleDataRegistry: SampleDataRegistrySetup,
-  licenseState: LicenseState
+  licenseState: LicenseState,
+  core: CoreSetup
 ) {
   // always register the saved objects...
-  registerEcommerceSampleData(sampleDataRegistry);
-  registerFlightsSampleData(sampleDataRegistry);
-  registerLogsSampleData(sampleDataRegistry);
+  registerEcommerceSampleData(sampleDataRegistry, core);
+  registerFlightsSampleData(sampleDataRegistry, core);
+  registerLogsSampleData(sampleDataRegistry, core);
 
   // but wait for a license actually supporting Graph to add links to the sample data panels
   const licenseUpdates = licenseState.getLicenseInformation$();
