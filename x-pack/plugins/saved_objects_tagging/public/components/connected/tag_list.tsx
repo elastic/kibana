@@ -7,18 +7,18 @@
 
 import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedObject } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { Tag } from '../../../common/types';
+import { Tag, TagWithOptionalId } from '../../../common/types';
 import { getObjectTags } from '../../utils';
 import { TagList } from '../base';
 import { ITagsCache } from '../../services';
 import { byNameTagSorter } from '../../utils';
 
 interface SavedObjectTagListProps {
-  object: { references: SavedObject['references'] };
+  object: { references: SavedObjectReference[] };
   tags: Tag[];
-  onClick?: (name: string) => void;
+  onClick?: (tag: TagWithOptionalId) => void;
 }
 
 const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags, onClick }) => {

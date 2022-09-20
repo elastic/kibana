@@ -12,7 +12,7 @@ import { Tag, TagAttributes } from '../../../common/types';
 
 export interface TagBadgeProps {
   tag: Tag | TagAttributes;
-  onClick?: (name: string) => void;
+  onClick?: (tag: Tag | TagAttributes) => void;
 }
 
 /**
@@ -22,7 +22,7 @@ export const TagBadge: FC<TagBadgeProps> = ({ tag, onClick }) => {
   const onClickProps = onClick
     ? {
         onClick: () => {
-          onClick!(tag.name);
+          onClick!(tag);
         },
         onClickAriaLabel: i18n.translate('xpack.savedObjectsTagging.tagList.tagBadge.buttonLabel', {
           defaultMessage: '{tagName} tag button.',

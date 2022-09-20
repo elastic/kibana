@@ -12,7 +12,7 @@ import { TagBadge } from './tag_badge';
 
 export interface TagListProps {
   tags: Array<Tag | TagAttributes>;
-  onClick?: (name: string) => void;
+  onClick?: (tag: Tag | TagAttributes) => void;
 }
 
 /**

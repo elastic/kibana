@@ -44,7 +44,7 @@ export interface Services {
   };
   getSearchBarFilters?: () => SearchFilterConfig[];
   DateFormatterComp?: DateFormatter;
-  TagList: FC<{ references: SavedObjectsReference[]; onClick?: (name: string) => void }>;
+  TagList: FC<{ references: SavedObjectsReference[]; onClick?: (tag: { name: string }) => void }>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -104,7 +104,7 @@ export interface TableListViewKibanaDependencies {
           object: {
             references: SavedObjectsReference[];
           };
-          onClick?: (name: string) => void;
+          onClick?: (tag: { name: string }) => void;
         }>;
       };
       parseSearchQuery: (

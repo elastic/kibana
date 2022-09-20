@@ -38,7 +38,7 @@ export const TagList: Services['TagList'] = ({ onClick }) => {
           key={tag.name}
           onClick={() => {
             if (onClick) {
-              onClick(tag.name);
+              onClick(tag);
             }
           }}
           onClickAriaLabel=""
