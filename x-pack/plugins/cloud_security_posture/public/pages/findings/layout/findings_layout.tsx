@@ -89,7 +89,7 @@ const baseColumns = [
     name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
       defaultMessage: 'Result',
     }),
-    width: '110px',
+    width: '120px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
