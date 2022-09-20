@@ -8,6 +8,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
+import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -43,6 +46,7 @@ export const UserRiskScoreQueryTabBody = ({
     }),
     [activePage, limit]
   );
+  const { from, to } = useGlobalTime();
 
   const { toggleStatus } = useQueryToggle(UserRiskScoreQueryId.USERS_BY_RISK);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -50,17 +54,23 @@ export const UserRiskScoreQueryTabBody = ({
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
 
-  const [loading, { data, totalCount, inspect, isInspected, refetch }] = useUserRiskScore({
-    filterQuery,
-    skip: querySkip,
-    pagination,
-    sort,
-  });
+  const [loading, { data, totalCount, inspect, isInspected, isDeprecated, refetch }] =
+    useUserRiskScore({
+      filterQuery,
+      skip: querySkip,
+      pagination,
+      sort,
+      timerange: { to, from },
+    });
 
   const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
     filterQuery,
     skip: querySkip,
   });
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
+  }
 
   return (
     <UserRiskScoreTableManage

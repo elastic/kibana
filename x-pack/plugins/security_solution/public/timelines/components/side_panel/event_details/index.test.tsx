@@ -103,6 +103,13 @@ jest.mock('../../../../risk_score/containers', () => {
         isModuleEnabled: false,
       },
     ]),
+    useUserRiskScore: jest.fn().mockReturnValue([
+      true,
+      {
+        data: undefined,
+        isModuleEnabled: false,
+      },
+    ]),
   };
 });
 
@@ -138,6 +145,14 @@ describe('event details footer component', () => {
           ui: {
             getCasesContext: () => mockCasesContext,
           },
+        },
+        timelines: {
+          getHoverActions: jest.fn().mockReturnValue({
+            getAddToTimelineButton: jest.fn(),
+          }),
+        },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
         },
       },
     });
