@@ -42,25 +42,6 @@ describe('<BenchmarksTable />', () => {
     expect(screen.getByText(item.package_policy.name)).toBeInTheDocument();
   });
 
-  it('renders benchmark name', () => {
-    const item = createCspBenchmarkIntegrationFixture();
-    const benchmarks = [item];
-
-    render(
-      <TestProvider>
-        <BenchmarksTable
-          {...{
-            ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
-          }}
-        />
-      </TestProvider>
-    );
-
-    expect(screen.getByText(item.package_policy.package!.title)).toBeInTheDocument();
-  });
-
   it('renders agent policy name', () => {
     const agentPolicy = {
       id: chance.guid(),

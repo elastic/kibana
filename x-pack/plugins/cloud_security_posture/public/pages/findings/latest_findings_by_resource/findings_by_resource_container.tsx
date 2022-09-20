@@ -104,7 +104,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         loading={findingsGroupByResource.isFetching}
       />
       <EuiFlexGroup>
-        <EuiFlexItem grow={8}>
+        <EuiFlexItem>
           <PageTitle>
             <PageTitleText
               title={
@@ -118,7 +118,9 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             />
           </PageTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>{!error && <FindingsGroupBySelector type="resource" />}</EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
+          {!error && <FindingsGroupBySelector type="resource" />}
+        </EuiFlexItem>
       </EuiFlexGroup>
       {error && <ErrorCallout error={error} />}
       {!error && (
