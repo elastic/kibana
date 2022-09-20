@@ -27,7 +27,7 @@ const createConfig = (
   };
 };
 
-const kibanaVersion = '1.0.0'
+const kibanaVersion = '1.0.0';
 
 describe('parseClientOptions', () => {
   it('includes headers designing the HTTP request as originating from Kibana by default', () => {
@@ -101,7 +101,11 @@ describe('parseClientOptions', () => {
       });
 
       it('`keepAlive` is false', () => {
-        const options = parseClientOptions(createConfig({ keepAlive: false }), false, kibanaVersion);
+        const options = parseClientOptions(
+          createConfig({ keepAlive: false }),
+          false,
+          kibanaVersion
+        );
         expect(options.agent).toHaveProperty('keepAlive', false);
       });
 
@@ -113,7 +117,11 @@ describe('parseClientOptions', () => {
 
     describe('`maxSockets` option', () => {
       it('uses the specified config value', () => {
-        const options = parseClientOptions(createConfig({ maxSockets: 1024 }), false, kibanaVersion);
+        const options = parseClientOptions(
+          createConfig({ maxSockets: 1024 }),
+          false,
+          kibanaVersion
+        );
         expect(options.agent).toHaveProperty('maxSockets', 1024);
       });
 
@@ -125,12 +133,20 @@ describe('parseClientOptions', () => {
 
     describe('`compression` option', () => {
       it('`compression` is true', () => {
-        const options = parseClientOptions(createConfig({ compression: true }), false, kibanaVersion);
+        const options = parseClientOptions(
+          createConfig({ compression: true }),
+          false,
+          kibanaVersion
+        );
         expect(options.compression).toBe(true);
       });
 
       it('`compression` is false', () => {
-        const options = parseClientOptions(createConfig({ compression: false }), false, kibanaVersion);
+        const options = parseClientOptions(
+          createConfig({ compression: false }),
+          false,
+          kibanaVersion
+        );
         expect(options.compression).toBe(false);
       });
     });
@@ -224,7 +240,11 @@ describe('parseClientOptions', () => {
     });
 
     it('`caFingerprint` option', () => {
-      const options = parseClientOptions(createConfig({ caFingerprint: 'ab:cd:ef' }), false, kibanaVersion);
+      const options = parseClientOptions(
+        createConfig({ caFingerprint: 'ab:cd:ef' }),
+        false,
+        kibanaVersion
+      );
 
       expect(options.caFingerprint).toBe('ab:cd:ef');
     });
