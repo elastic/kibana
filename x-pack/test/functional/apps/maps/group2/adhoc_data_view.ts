@@ -11,13 +11,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['maps']);
-  
+
   describe('maps adhoc data view', () => {
     before(async () => {
-      await security.testUser.setRoles(
-        ['global_maps_all', 'test_logstash_reader'],
-        { skipBrowserRefresh: true }
-      );
+      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
+        skipBrowserRefresh: true,
+      });
       await PageObjects.maps.loadSavedMap('adhoc data view');
     });
 
