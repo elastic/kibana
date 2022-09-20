@@ -8,26 +8,6 @@
 import { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { replaceFirstAndLastDotSymbols } from '../actions_telemetry';
 
-export interface AvgActionRunDurationByConnectorTypeBucket {
-  key: string;
-  doc_count: number; // Not used for duration telemetry but can be helpful later.
-  duration: { average: { value: number } };
-}
-
-export function parseDurationsByConnectorTypesBucket(
-  connectorTypeBuckets: AggregationsBuckets<AvgActionRunDurationByConnectorTypeBucket> = []
-) {
-  const buckets = connectorTypeBuckets as AvgActionRunDurationByConnectorTypeBucket[];
-  return buckets.reduce((acc, connectorType) => {
-    return {
-      ...acc,
-      [replaceFirstAndLastDotSymbols(connectorType.key)]: Math.round(
-        connectorType.duration?.average?.value || 0
-      ),
-    };
-  }, {});
-}
-
 export interface AvgActionRunOutcomeByConnectorTypeBucket {
   key: string;
   doc_count: number; // Not used for duration telemetry but can be helpful later.

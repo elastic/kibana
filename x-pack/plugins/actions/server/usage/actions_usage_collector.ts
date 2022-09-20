@@ -54,7 +54,6 @@ export function createActionsUsageCollector(
           unknown: { type: 'long' },
         },
       },
-      avg_actions_run_duration_by_connector_type_per_day: { DYNAMIC_KEY: { type: 'long' } },
     },
     fetch: async () => {
       try {
@@ -86,7 +85,6 @@ export function createActionsUsageCollector(
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
           count_connector_types_by_action_run_outcome_per_day: {},
-          avg_actions_run_duration_by_connector_type_per_day: {},
         };
       }
     },

@@ -9,10 +9,8 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  AvgActionRunDurationByConnectorTypeBucket,
   AvgActionRunOutcomeByConnectorTypeBucket,
   parseActionRunOutcomeByConnectorTypesBucket,
-  parseDurationsByConnectorTypesBucket,
 } from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
@@ -422,7 +420,6 @@ export async function getExecutionsPerDayCount(
   countFailedByType: Record<string, number>;
   avgExecutionTime: number;
   avgExecutionTimeByType: Record<string, number>;
-  avgRunDurationByConnectorType: Record<string, number>;
   countRunOutcomeByConnectorType: Record<string, number>;
 }> {
   const scriptedMetric = {
@@ -545,46 +542,27 @@ export async function getExecutionsPerDayCount(
               },
             },
           },
-          avg_run_duration_by_connector_type: {
-            nested: {
-              path: 'kibana.saved_objects',
-            },
-            aggs: {
-              connector_types: {
-                terms: {
-                  field: 'kibana.saved_objects.type_id',
-                },
-                aggs: {
-                  duration: {
-                    reverse_nested: {},
-                    aggs: {
-                      average: {
-                        avg: {
-                          field: 'event.duration',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
           count_connector_types_by_action_run_outcome_per_day: {
             nested: {
               path: 'kibana.saved_objects',
             },
             aggs: {
-              connector_types: {
-                terms: {
-                  field: 'kibana.saved_objects.type_id',
-                },
+              actionSavedObjects: {
+                filter: { term: { 'kibana.saved_objects.type': 'action' } },
                 aggs: {
-                  outcome: {
-                    reverse_nested: {},
+                  connector_types: {
+                    terms: {
+                      field: 'kibana.saved_objects.type_id',
+                    },
                     aggs: {
-                      count: {
-                        terms: {
-                          field: 'event.outcome',
+                      outcome: {
+                        reverse_nested: {},
+                        aggs: {
+                          count: {
+                            terms: {
+                              field: 'event.outcome',
+                            },
+                          },
                         },
                       },
                     },
@@ -621,12 +599,11 @@ export async function getExecutionsPerDayCount(
       {}
     );
 
-    const aggregations = actionResults.aggregations as {
-      avg_run_duration_by_connector_type: {
-        connector_types: AggregationsTermsAggregateBase<AvgActionRunDurationByConnectorTypeBucket>;
-      };
+    const aggsCountConnectorTypeByActionRun = actionResults.aggregations as {
       count_connector_types_by_action_run_outcome_per_day: {
-        connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
+        actionSavedObjects: {
+          connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
+        };
       };
     };
 
@@ -652,11 +629,9 @@ export async function getExecutionsPerDayCount(
       ),
       avgExecutionTime: aggsAvgExecutionTime,
       avgExecutionTimeByType,
-      avgRunDurationByConnectorType: parseDurationsByConnectorTypesBucket(
-        aggregations.avg_run_duration_by_connector_type.connector_types.buckets
-      ),
       countRunOutcomeByConnectorType: parseActionRunOutcomeByConnectorTypesBucket(
-        aggregations.count_connector_types_by_action_run_outcome_per_day.connector_types.buckets
+        aggsCountConnectorTypeByActionRun.count_connector_types_by_action_run_outcome_per_day
+          .actionSavedObjects.connector_types.buckets
       ),
     };
   } catch (err) {
@@ -673,7 +648,6 @@ export async function getExecutionsPerDayCount(
       countFailedByType: {},
       avgExecutionTime: 0,
       avgExecutionTimeByType: {},
-      avgRunDurationByConnectorType: {},
       countRunOutcomeByConnectorType: {},
     };
   }

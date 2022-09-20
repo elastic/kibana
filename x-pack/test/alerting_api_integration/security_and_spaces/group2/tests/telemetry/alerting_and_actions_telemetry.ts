@@ -25,7 +25,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('telemetry', () => {
+  describe('telemetry xxx', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
 
     beforeEach(async () => {
@@ -246,6 +246,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_actions_executions_failed_by_type_per_day['test.throw'] > 0).to.be(
         true
       );
+
+      expect(
+        telemetry.count_connector_types_by_action_run_outcome_per_day['test.throw'].failure
+      ).to.greaterThan(0);
     }
 
     function verifyAlertingTelemetry(telemetry: any) {
@@ -528,24 +532,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         // eslint-disable-next-line @typescript-eslint/naming-convention
         alertsFixture: { test__noop: 9, test__throw: 9, __slack: 3 },
       });
-
-      expect(
-        telemetry.avg_actions_run_duration_by_connector_type_per_day['test__cumulative-firing']
-      ).to.be.greaterThan(0);
-      expect(
-        telemetry.avg_actions_run_duration_by_connector_type_per_day.test__throw
-      ).to.be.greaterThan(0);
-
-      expect(
-        telemetry.count_connector_types_by_action_run_outcome_per_day['test__cumulative-firing']
-          .failure
-      ).to.greaterThan(0);
-      expect(
-        telemetry.count_connector_types_by_action_run_outcome_per_day.test__throw.failure
-      ).to.greaterThan(0);
-
-      expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
-      expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
 
       expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
       expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
