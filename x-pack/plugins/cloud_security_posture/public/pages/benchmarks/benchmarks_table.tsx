@@ -182,7 +182,7 @@ export const BenchmarksTable = ({
   const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
     setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
-  console.log(benchmarks);
+
   return (
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
