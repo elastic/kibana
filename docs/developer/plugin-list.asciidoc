@@ -424,6 +424,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The cloud plugin adds Cloud-specific features to Kibana.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
 
