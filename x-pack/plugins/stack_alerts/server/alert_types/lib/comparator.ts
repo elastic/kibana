@@ -49,9 +49,9 @@ export const getComparatorScript = (
     case Comparator.GT_OR_EQ:
       return `${fieldName} >= ${threshold[0]}`;
     case Comparator.BETWEEN:
-      return `${fieldName} >= ${threshold[0]} && $${fieldName} <= ${threshold[1]}`;
+      return `${fieldName} >= ${threshold[0]} && ${fieldName} <= ${threshold[1]}`;
     case Comparator.NOT_BETWEEN:
-      return `${fieldName} < ${threshold[0]} || $${fieldName} > ${threshold[1]}`;
+      return `${fieldName} < ${threshold[0]} || ${fieldName} > ${threshold[1]}`;
   }
 };
 
