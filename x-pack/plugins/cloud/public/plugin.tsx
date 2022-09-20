@@ -20,7 +20,6 @@ import { catchError, from, map, of } from 'rxjs';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Sha256 } from '@kbn/crypto-browser';
-import type { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
@@ -45,7 +44,6 @@ export interface CloudConfigType {
 interface CloudSetupDependencies {
   home?: HomePublicPluginSetup;
   security?: Pick<SecurityPluginSetup, 'authc'>;
-  cloudExperiments?: CloudExperimentsPluginSetup;
 }
 
 interface CloudStartDependencies {
@@ -81,10 +79,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
   }
 
-  public setup(
-    core: CoreSetup,
-    { cloudExperiments, home, security }: CloudSetupDependencies
-  ): CloudSetup {
+  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies): CloudSetup {
     this.setupTelemetryContext(core.analytics, security, this.config.id);
 
     const {
@@ -95,13 +90,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deployment_url: deploymentUrl,
       base_url: baseUrl,
     } = this.config;
-
-    if (this.isCloudEnabled && id) {
-      // We use the Hashed Cloud Deployment ID as the userId in the Cloud Experiments
-      cloudExperiments?.identifyUser(sha256(id), {
-        kibanaVersion: this.initializerContext.env.packageInfo.version,
-      });
-    }
 
     if (home) {
       home.environment.update({ cloud: this.isCloudEnabled });
