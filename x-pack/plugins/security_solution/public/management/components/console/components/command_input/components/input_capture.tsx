@@ -134,19 +134,16 @@ export const InputCapture = memo<InputCaptureProps>(
         if (ev.metaKey || ev.ctrlKey) {
           if (ev.key === 'a') {
             ev.preventDefault();
-            // clear any current selection
             const selection = window.getSelection();
-            if (selection) {
-              selection.removeAllRanges();
-            }
-
-            // get the console input text selection;
-            const range = document.createRange();
-            if (focusEleRef.current) {
+            if (selection && focusEleRef.current) {
+              const range = document.createRange();
               range.selectNodeContents(focusEleRef.current);
-            }
-            if (selection) {
-              selection.addRange(range);
+              if (range.toString().length > 0) {
+                // clear any current selection
+                selection.removeAllRanges();
+                // add the input text selection
+                selection.addRange(range);
+              }
             }
           }
           return;
