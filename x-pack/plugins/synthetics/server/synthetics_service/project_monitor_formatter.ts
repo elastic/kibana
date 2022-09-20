@@ -13,6 +13,8 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import pMap from 'p-map';
+import { syncEditedMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import { syncNewMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { deleteMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
@@ -34,7 +36,6 @@ import {
 } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { normalizeProjectMonitor } from './normalizers/browser';
 import { formatSecrets, normalizeSecrets } from './utils/secrets';
-import { syncEditedMonitor } from '../routes/monitor_cruds/edit_monitor';
 import { validateProjectMonitor } from '../routes/monitor_cruds/monitor_validation';
 import type { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
@@ -117,11 +118,13 @@ export class ProjectMonitorFormatter {
 
   public configureAllProjectMonitors = async () => {
     const existingMonitors = await this.getProjectMonitorsForProject();
-
     this.staleMonitorsMap = await this.getStaleMonitorsMap(existingMonitors);
 
     const normalizedNewMonitors: BrowserFields[] = [];
-    const normalizedUpdateMonitors: BrowserFields[] = [];
+    const normalizedUpdateMonitors: Array<{
+      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
+      monitor: BrowserFields;
+    }> = [];
 
     for (const monitor of this.monitors) {
       const previousMonitor = existingMonitors.find(
@@ -138,7 +141,7 @@ export class ProjectMonitorFormatter {
           if (this.staleMonitorsMap[monitor.id]) {
             this.staleMonitorsMap[monitor.id].stale = false;
           }
-          normalizedUpdateMonitors.push(normM);
+          normalizedUpdateMonitors.push({ monitor: normM, previousMonitor });
         } else {
           normalizedNewMonitors.push(normM);
         }
@@ -147,7 +150,23 @@ export class ProjectMonitorFormatter {
 
     await this.createMonitorsBulk(normalizedNewMonitors);
 
-    await this.updateMonitorBulk(normalizedUpdateMonitors);
+    const { updatedCount } = await this.updateMonitors(normalizedUpdateMonitors);
+
+    if (normalizedUpdateMonitors.length > 0) {
+      let message = '';
+      if (updatedCount > 0) {
+        message = `${updatedCount} monitor${updatedCount > 1 ? 's' : ''} updated successfully. `;
+      }
+
+      const noChanges = normalizedUpdateMonitors.length - updatedCount;
+      if (noChanges > 0) {
+        message += `${noChanges} monitor${noChanges > 1 ? 's' : ''} found with no changes.`;
+      }
+
+      this.handleStreamingMessage({
+        message,
+      });
+    }
 
     await this.handleStaleMonitors();
   };
@@ -249,19 +268,6 @@ export class ProjectMonitorFormatter {
     return hits;
   };
 
-  private getExistingMonitor = async (
-    journeyId: string
-  ): Promise<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> => {
-    const filter = `${this.projectFilter} AND ${syntheticsMonitorType}.attributes.${ConfigKey.JOURNEY_ID}: "${journeyId}"`;
-    const { saved_objects: savedObjects } =
-      await this.savedObjectsClient.find<EncryptedSyntheticsMonitor>({
-        type: syntheticsMonitorType,
-        perPage: 1,
-        filter,
-      });
-    return savedObjects?.[0];
-  };
-
   private createMonitorsBulk = async (monitors: BrowserFields[]) => {
     try {
       if (monitors.length > 0) {
@@ -306,75 +312,78 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  private updateMonitorBulk = async (monitors: BrowserFields[]) => {
-    try {
-      for (const monitor of monitors) {
-        const previousMonitor = await this.getExistingMonitor(monitor[ConfigKey.JOURNEY_ID]!);
-        await this.updateMonitor(previousMonitor, monitor);
-      }
-
-      if (monitors.length > 0) {
-        this.handleStreamingMessage({
-          message: `${monitors.length} monitor${
-            monitors.length > 1 ? 's' : ''
-          } updated successfully.`,
-        });
-      }
-    } catch (e) {
-      this.server.logger.error(e);
-      this.failedMonitors.push({
-        reason: 'Failed to update monitors',
-        details: e.message,
-        payload: monitors,
-      });
-      this.handleStreamingMessage({
-        message: `Failed to update ${monitors.length} monitors`,
-      });
-    }
+  private getDecryptedMonitors = async (
+    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>
+  ) => {
+    return await pMap(
+      monitors,
+      async (monitor) =>
+        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+          syntheticsMonitor.name,
+          monitor.id,
+          {
+            namespace: monitor.namespaces?.[0],
+          }
+        ),
+      { concurrency: 500 }
+    );
   };
 
-  private updateMonitor = async (
-    previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
-    normalizedMonitor: BrowserFields
+  private updateMonitors = async (
+    monitors: Array<{
+      monitor: BrowserFields;
+      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
+    }>
   ): Promise<{
-    editedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
+    editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>>;
     errors: ServiceLocationErrors;
+    updatedCount: number;
   }> => {
-    const decryptedPreviousMonitor =
-      await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitor.name,
-        previousMonitor.id,
-        {
-          namespace: previousMonitor.namespaces?.[0],
-        }
-      );
-    const {
-      attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-    } = normalizeSecrets(decryptedPreviousMonitor);
-    const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
+    const decryptedPreviousMonitors = await this.getDecryptedMonitors(
+      monitors.map((m) => m.previousMonitor)
+    );
 
-    if (hasMonitorBeenEdited) {
-      const monitorWithRevision = formatSecrets({
-        ...normalizedPreviousMonitorAttributes,
-        ...normalizedMonitor,
-        revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-      });
+    const monitorsToUpdate = [];
 
-      const { editedMonitor } = await syncEditedMonitor({
-        normalizedMonitor,
-        monitorWithRevision,
-        previousMonitor,
-        decryptedPreviousMonitor,
-        server: this.server,
-        syntheticsMonitorClient: this.syntheticsMonitorClient,
-        savedObjectsClient: this.savedObjectsClient,
-        request: this.request,
-        spaceId: this.spaceId,
-      });
-      return { editedMonitor, errors: [] };
+    for (let i = 0; i < decryptedPreviousMonitors.length; i++) {
+      const decryptedPreviousMonitor = decryptedPreviousMonitors[i];
+      const previousMonitor = monitors[i].previousMonitor;
+      const normalizedMonitor = monitors[i].monitor;
+
+      const {
+        attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
+      } = normalizeSecrets(decryptedPreviousMonitor);
+      const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
+
+      if (hasMonitorBeenEdited) {
+        const monitorWithRevision = formatSecrets({
+          ...normalizedPreviousMonitorAttributes,
+          ...normalizedMonitor,
+          revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+        });
+        monitorsToUpdate.push({
+          normalizedMonitor,
+          previousMonitor,
+          monitorWithRevision,
+          decryptedPreviousMonitor,
+        });
+      }
     }
 
-    return { errors: [], editedMonitor: decryptedPreviousMonitor };
+    const { editedMonitors } = await syncEditedMonitorBulk({
+      monitorsToUpdate,
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+      request: this.request,
+      privateLocations: this.privateLocations,
+      spaceId: this.spaceId,
+    });
+    return {
+      editedMonitors: editedMonitors ?? [],
+      errors: [],
+      updatedCount: monitorsToUpdate.length,
+    };
   };
 
   private handleStaleMonitors = async () => {
