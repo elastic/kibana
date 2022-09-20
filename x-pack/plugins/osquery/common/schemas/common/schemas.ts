@@ -86,8 +86,8 @@ export const arrayQueries = t.array(
     id,
     query,
     ecs_mapping: ecsMapping,
-    version,
-    platform,
+    version: versionOrUndefined,
+    platform: platformOrUndefined,
   })
 );
 export type ArrayQueries = t.TypeOf<typeof arrayQueries>;
