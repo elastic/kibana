@@ -554,6 +554,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentActivityFlyout
             onAbortSuccess={fetchData}
             onClose={() => setAgentActivityFlyoutOpen(false)}
+            refreshAgentActivity={isLoading}
           />
         </EuiPortal>
       ) : null}

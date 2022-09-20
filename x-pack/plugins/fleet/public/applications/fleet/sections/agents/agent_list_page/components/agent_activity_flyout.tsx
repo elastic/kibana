@@ -32,6 +32,8 @@ import { useActionStatus } from '../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
+import { Loading } from '../../components';
+
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
@@ -47,12 +49,16 @@ const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
 export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
   onAbortSuccess: () => void;
-}> = ({ onClose, onAbortSuccess }) => {
+  refreshAgentActivity: boolean;
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity }) => {
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const { currentActions, abortUpgrade } = useActionStatus(onAbortSuccess);
+  const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
+    onAbortSuccess,
+    refreshAgentActivity
+  );
 
   const getAgentPolicyName = (policyId: string) => {
     const policy = agentPoliciesData?.items.find((item) => item.id === policyId);
@@ -102,7 +108,18 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         </EuiFlyoutHeader>
 
         <FullHeightFlyoutBody>
-          {currentActionsEnriched.length === 0 ? (
+          {isFirstLoading ? (
+            <EuiFlexGroup
+              direction="row"
+              justifyContent={'center'}
+              alignItems={'center'}
+              className="eui-fullHeight"
+            >
+              <EuiFlexItem>
+                <Loading />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : currentActionsEnriched.length === 0 ? (
             <EuiFlexGroup
               direction="column"
               justifyContent={'center'}
