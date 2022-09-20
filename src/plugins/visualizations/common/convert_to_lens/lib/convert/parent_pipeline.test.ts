@@ -15,7 +15,6 @@ import {
   ParentPipelineAggColumn,
   convertToCumulativeSumAggColumn,
 } from './parent_pipeline';
-import { MetricAggregationColumnWithoutSpecialParams } from './metric';
 
 const mockGetMetricFromParentPipelineAgg = jest.fn();
 const mockGetFormulaForPipelineAgg = jest.fn();
@@ -254,7 +253,7 @@ describe('convertToCumulativeSumAggColumn', () => {
       () => void,
       (
         | Partial<FormulaColumn>
-        | [Partial<ParentPipelineAggColumn>, Partial<MetricAggregationColumnWithoutSpecialParams>]
+        | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>]
         | null
       )
     ]
