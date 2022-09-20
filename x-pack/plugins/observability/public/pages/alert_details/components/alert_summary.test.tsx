@@ -64,8 +64,7 @@ describe('Alert summary', () => {
     const lastStatusUpdate = moment('2021-09-02T13:08:51.750Z').format(DEFAULT_DATE_FORMAT);
     expect(alertSummary.getByText(lastStatusUpdate, { exact: false })).toBeInTheDocument();
 
-    await waitFor(() =>
-      expect(alertSummary.queryByTestId('tagsOutPopover')).toBeInTheDocument());
+    await waitFor(() => expect(alertSummary.queryByTestId('tagsOutPopover')).toBeInTheDocument());
 
     expect(alertSummary.queryByText(tags[0])).toBeInTheDocument();
   });
