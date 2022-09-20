@@ -210,6 +210,9 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
 >;
 
 export enum RowRendererId {
+  /** event.kind: signal */
+  alert = 'alert',
+  /** endpoint alerts (created on the endpoint) */
   alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',

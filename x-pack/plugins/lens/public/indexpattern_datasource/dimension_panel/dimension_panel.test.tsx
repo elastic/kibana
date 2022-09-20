@@ -29,7 +29,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   HttpSetup,
-  CoreSetup,
+  CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { generateId } from '../../id_generator';
@@ -240,7 +240,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       } as unknown as DataPublicPluginStart,
-      core: {} as CoreSetup,
+      core: {} as CoreStart,
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
