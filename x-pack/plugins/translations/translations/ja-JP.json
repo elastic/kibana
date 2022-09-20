@@ -6711,7 +6711,6 @@
     "xpack.apm.api.fleet.fleetSecurityRequired": "FleetおよびSecurityプラグインが必要です",
     "xpack.apm.apmDescription": "アプリケーション内から自動的に詳細なパフォーマンスメトリックやエラーを集めます。",
     "xpack.apm.apmSchema.index": "APMサーバースキーマ - インデックス",
-    "xpack.apm.apmServiceGroups.index": "APMサービスグループ - インデックス",
     "xpack.apm.apmSettings.index": "APM 設定 - インデックス",
     "xpack.apm.betaBadgeDescription": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.betaBadgeLabel": "ベータ",
