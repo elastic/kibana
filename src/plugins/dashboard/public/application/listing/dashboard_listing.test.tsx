@@ -9,11 +9,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n-react';
+import {
+  TableListViewKibanaDependencies,
+  TableListViewKibanaProvider,
+} from '@kbn/content-management-table-list';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 function makeDefaultProps(): DashboardListingProps {
@@ -28,7 +32,28 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) 
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
-    return <I18nProvider>{children}</I18nProvider>;
+    const { application, notifications, savedObjectsTagging } = pluginServices.getServices();
+
+    return (
+      <I18nProvider>
+        <TableListViewKibanaProvider
+          core={{
+            application:
+              application as unknown as TableListViewKibanaDependencies['core']['application'],
+            notifications,
+          }}
+          savedObjectsTagging={
+            {
+              ui: { ...savedObjectsTagging },
+            } as unknown as TableListViewKibanaDependencies['savedObjectsTagging']
+          }
+          FormattedRelative={FormattedRelative}
+          toMountPoint={() => () => () => undefined}
+        >
+          {children}
+        </TableListViewKibanaProvider>
+      </I18nProvider>
+    );
   };
   const component = mount(<DashboardListing {...props} />, { wrappingComponent });
   return { component, props };

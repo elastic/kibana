@@ -454,15 +454,6 @@ export const dashboardListingTableStrings = {
       defaultMessage: 'dashboards',
     }),
   getTableListTitle: () => getDashboardPageTitle(),
-  getTableCaption: () => getDashboardPageTitle(),
-  getTitleColumnName: () =>
-    i18n.translate('dashboard.listing.table.titleColumnName', {
-      defaultMessage: 'Title',
-    }),
-  getDescriptionColumnName: () =>
-    i18n.translate('dashboard.listing.table.descriptionColumnName', {
-      defaultMessage: 'Description',
-    }),
 };
 
 export const dashboardUnsavedListingStrings = {

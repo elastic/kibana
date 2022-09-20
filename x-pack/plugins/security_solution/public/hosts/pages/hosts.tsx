@@ -55,10 +55,9 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
+import { useLicense } from '../../common/hooks/use_license';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -146,9 +145,9 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+
+  const isEnterprisePlus = useLicense().isEnterprise();
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -208,7 +207,8 @@ const HostsComponent = () => {
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 

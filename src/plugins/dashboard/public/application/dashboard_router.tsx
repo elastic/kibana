@@ -14,8 +14,13 @@ import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
-import { I18nProvider } from '@kbn/i18n-react';
+import {
+  TableListViewKibanaDependencies,
+  TableListViewKibanaProvider,
+} from '@kbn/content-management-table-list';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
@@ -27,6 +32,7 @@ import { pluginServices } from '../services/plugin_services';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
+import { DashboardApplicationService } from '../services/application/types';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
 import { DashboardEmbedSettings, RedirectToProps, DashboardMountContextProps } from '../types';
@@ -45,14 +51,23 @@ export interface DashboardMountProps {
   mountContext: DashboardMountContextProps;
 }
 
+// because the type of `application.capabilities.advancedSettings` is so generic, the provider
+// requiring the `save` key to be part of it is causing type issues - so, creating a custom type
+type TableListViewApplicationService = DashboardApplicationService & {
+  capabilities: { advancedSettings: { save: boolean } };
+};
+
 export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
   const { DashboardMountContext } = await import('./hooks/dashboard_mount_context');
 
   const {
+    application,
     chrome: { setBadge, docTitle },
     dashboardCapabilities: { showWriteControls },
     data: dataStart,
     embeddable,
+    notifications,
+    savedObjectsTagging,
     settings: { uiSettings },
   } = pluginServices.getServices();
 
@@ -151,26 +166,42 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       <Provider store={dashboardStateStore}>
         <DashboardMountContext.Provider value={mountContext}>
           <KibanaThemeProvider theme$={core.theme.theme$}>
-            <HashRouter>
-              <Switch>
-                <Route
-                  path={[
-                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                  ]}
-                  render={renderDashboard}
-                />
-                <Route
-                  exact
-                  path={DashboardConstants.LANDING_PAGE_PATH}
-                  render={renderListingPage}
-                />
-                <Route exact path="/">
-                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                </Route>
-                <Route render={renderNoMatch} />
-              </Switch>
-            </HashRouter>
+            <TableListViewKibanaProvider
+              {...{
+                core: {
+                  application: application as TableListViewApplicationService,
+                  notifications,
+                },
+                toMountPoint,
+                savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+                  ? ({
+                      ui: savedObjectsTagging,
+                    } as TableListViewKibanaDependencies['savedObjectsTagging'])
+                  : undefined,
+                FormattedRelative,
+              }}
+            >
+              <HashRouter>
+                <Switch>
+                  <Route
+                    path={[
+                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                    ]}
+                    render={renderDashboard}
+                  />
+                  <Route
+                    exact
+                    path={DashboardConstants.LANDING_PAGE_PATH}
+                    render={renderListingPage}
+                  />
+                  <Route exact path="/">
+                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                  </Route>
+                  <Route render={renderNoMatch} />
+                </Switch>
+              </HashRouter>
+            </TableListViewKibanaProvider>
           </KibanaThemeProvider>
         </DashboardMountContext.Provider>
       </Provider>

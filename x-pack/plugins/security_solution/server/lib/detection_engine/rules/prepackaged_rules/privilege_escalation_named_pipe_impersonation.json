@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Privilege Escalation via Named Pipe Impersonation",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.pe.original_file_name in (\"Cmd.Exe\", \"PowerShell.EXE\") and\n process.args : \"echo\" and process.args : \">\" and process.args : \"\\\\\\\\.\\\\pipe\\\\*\"\n",
+  "query": "process where event.type == \"start\" and\n process.pe.original_file_name in (\"Cmd.Exe\", \"PowerShell.EXE\") and\n process.args : \"echo\" and process.args : \">\" and process.args : \"\\\\\\\\.\\\\pipe\\\\*\"\n",
   "references": [
     "https://www.ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation"
   ],
@@ -64,5 +64,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 101
 }
