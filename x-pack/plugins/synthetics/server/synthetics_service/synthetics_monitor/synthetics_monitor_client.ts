@@ -100,14 +100,23 @@ export class SyntheticsMonitorClient {
     await this.syntheticsService.editConfig(editedConfig);
   }
 
-  async deleteMonitor(
-    monitor: SyntheticsMonitorWithId,
+  async deleteMonitors(
+    monitors: SyntheticsMonitorWithId[],
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
-    await this.privateLocationAPI.deleteMonitor(monitor, request, savedObjectsClient, spaceId);
-    return await this.syntheticsService.deleteConfigs([monitor]);
+    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
+      monitors,
+      request,
+      savedObjectsClient,
+      spaceId
+    );
+
+    const publicDeletePromise = this.syntheticsService.deleteConfigs(monitors);
+    const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
+
+    return pubicResponse;
   }
 
   parseLocations(config: HeartbeatConfig) {
