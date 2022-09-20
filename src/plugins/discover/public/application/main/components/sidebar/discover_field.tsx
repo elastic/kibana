@@ -266,7 +266,6 @@ export interface DiscoverFieldProps {
    * Optionally show or hide field stats in the popover
    */
   showFieldStats?: boolean;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 
   /**
    * Discover App State
@@ -293,7 +292,6 @@ function DiscoverFieldComponent({
   onEditField,
   onDeleteField,
   showFieldStats,
-  persistDataView,
   state,
   contextualFields,
 }: DiscoverFieldProps) {
@@ -520,7 +518,6 @@ function DiscoverFieldComponent({
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           contextualFields={contextualFields}
-          persistDataView={persistDataView}
         />
       </>
     );

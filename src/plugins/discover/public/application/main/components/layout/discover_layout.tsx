@@ -255,7 +255,6 @@ export function DiscoverLayout({
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
-              persistDataView={persistDataView}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
