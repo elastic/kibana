@@ -55,7 +55,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('find_cases', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/139626
+  describe.skip('find_cases', () => {
     describe('basic tests', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
