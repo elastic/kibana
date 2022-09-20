@@ -54,6 +54,7 @@ describe('services queries', () => {
       getServicesItems({
         setup,
         searchAggregatedTransactions: false,
+        searchAggregatedServiceMetrics: false,
         logger: {} as any,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',

@@ -46,12 +46,15 @@ export const PROCESSOR_EVENT = 'processor.event';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
+export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+export const TRANSACTION_FAILURE_COUNT = 'transaction.failure_count';
+export const TRANSACTION_SUCCESS_COUNT = 'transaction.success_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 

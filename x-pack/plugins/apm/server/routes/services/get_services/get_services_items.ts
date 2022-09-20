@@ -11,6 +11,7 @@ import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { getServiceAggregatedTransactionStats } from './get_service_aggregated_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
@@ -24,6 +25,7 @@ export async function getServicesItems({
   kuery,
   setup,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   logger,
   start,
   end,
@@ -34,6 +36,7 @@ export async function getServicesItems({
   kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics: boolean;
   logger: Logger;
   start: number;
   end: number;
@@ -46,6 +49,7 @@ export async function getServicesItems({
       kuery,
       setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
@@ -58,7 +62,9 @@ export async function getServicesItems({
       servicesFromErrorAndMetricDocuments,
       healthStatuses,
     ] = await Promise.all([
-      getServiceTransactionStats(params),
+      searchAggregatedServiceMetrics
+        ? getServiceAggregatedTransactionStats(params)
+        : getServiceTransactionStats(params),
       getServicesFromErrorAndMetricDocuments(params),
       getHealthStatuses(params).catch((err) => {
         logger.error(err);
