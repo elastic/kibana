@@ -11,6 +11,7 @@ import { getFieldValuePairCounts, markDuplicates } from './get_simple_hierarchic
 
 const changePointGroups: ChangePointGroup[] = [
   {
+    id: 'group-1',
     group: [
       {
         fieldName: 'custom_field.keyword',
@@ -25,6 +26,7 @@ const changePointGroups: ChangePointGroup[] = [
     pValue: 0.01,
   },
   {
+    id: 'group-2',
     group: [
       {
         fieldName: 'custom_field.keyword',
@@ -64,6 +66,7 @@ describe('get_simple_hierarchical_tree', () => {
 
       expect(markedDuplicates).toEqual([
         {
+          id: 'group-1',
           group: [
             {
               fieldName: 'custom_field.keyword',
@@ -80,6 +83,7 @@ describe('get_simple_hierarchical_tree', () => {
           pValue: 0.01,
         },
         {
+          id: 'group-2',
           group: [
             {
               fieldName: 'custom_field.keyword',

@@ -24,7 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+
 import { useEuiTheme } from '../../hooks/use_eui_theme';
+
+import { MiniHistogram } from '../mini_histogram';
+
 import { SpikeAnalysisTable } from './spike_analysis_table';
 
 const NARROW_COLUMN_WIDTH = '120px';
@@ -36,11 +40,12 @@ const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface GroupTableItem {
-  id: number;
+  id: string;
   docCount: number;
   pValue: number | null;
   group: Record<string, any>;
   repeatedValues: Record<string, any>;
+  histogram: ChangePoint['histogram'];
 }
 
 interface SpikeAnalysisTableProps {
@@ -197,6 +202,39 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       textOnly: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnLogRate',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
+            {
+              defaultMessage:
+                'A visual representation of the impact of the field on the message rate difference',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateLabel"
+              defaultMessage="Log rate"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (_, { histogram, id }) => (
+        <MiniHistogram
+          chartData={histogram}
+          isLoading={loading && histogram === undefined}
+          label="Group x"
+        />
+      ),
+      sortable: false,
+    },
+    {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -226,9 +264,12 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
       field: 'docCount',
-      name: i18n.translate('xpack.aiops.correlations.spikeAnalysisTableGroups.docCountLabel', {
-        defaultMessage: 'Doc count',
-      }),
+      name: i18n.translate(
+        'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.docCountLabel',
+        {
+          defaultMessage: 'Doc count',
+        }
+      ),
       sortable: true,
       width: '20%',
     },
@@ -281,6 +322,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       compressed
       columns={columns}
       items={pageOfItems}
+      itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
       pagination={pagination}
