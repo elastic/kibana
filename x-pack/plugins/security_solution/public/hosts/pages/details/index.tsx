@@ -18,8 +18,8 @@ import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { AlertsByStatus } from '@kbn/security-solution-plugin/public/overview/components/detection_response/alerts_by_status';
-import { useSignalIndex } from '@kbn/security-solution-plugin/public/detections/containers/detection_engine/alerts/use_signal_index';
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../common/store/inputs/constants';

@@ -15,7 +15,8 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { SecurityPageName } from '../../../../common/constants';
 import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useQueryToggle } from '../../containers/query_toggle';
-import { NavigateTo, GetAppUrl, useNavigation } from '../../lib/kibana';
+import type { NavigateTo, GetAppUrl } from '../../lib/kibana';
+import { useNavigation } from '../../lib/kibana';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
