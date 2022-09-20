@@ -265,7 +265,7 @@ export const uiSettings: Record<string, UiSettings> = {
       values: {
         feedbackLink:
           '<a href="https://ela.st/feedback-aws-lambda" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
+          i18n.translate('xpack.observability.awsLambdaDescription', {
             defaultMessage: 'Send feedback',
           }) +
           '</a>',
