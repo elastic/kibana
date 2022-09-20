@@ -6,10 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PhaseWithDownsample } from '../../../../common/types';
 
 export const isUsingCustomRolloverPath = '_meta.hot.customRollover.enabled';
 
 export const isUsingDefaultRolloverPath = '_meta.hot.isUsingDefaultRollover';
+
+export const isUsingDownsamplePath = (phase: PhaseWithDownsample) =>
+  `_meta.${phase}.downsample.enabled`;
 
 /**
  * These strings describe the path to their respective values in the serialized

@@ -8,23 +8,19 @@
 import { HttpSetup } from '@kbn/core/public';
 import {
   createDownsampleActions,
-  createForceMergeActions,
-  createMinAgeActions,
   createReadonlyActions,
   createRolloverActions,
   createSavePolicyAction,
-  createSearchableSnapshotActions,
-  createShrinkActions,
   createTogglePhaseAction,
 } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
 import { AppServicesContext } from '../../../../public/types';
 
-type SetupReturn = ReturnType<typeof setupSearchableSnapshotsTestBed>;
+type SetupReturn = ReturnType<typeof setupDownsampleTestBed>;
 
-export type SearchableSnapshotsTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
+export type DownsampleTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupSearchableSnapshotsTestBed = async (
+export const setupDownsampleTestBed = async (
   httpSetup: HttpSetup,
   args?: {
     appServicesContext?: Partial<AppServicesContext>;
@@ -39,27 +35,18 @@ export const setupSearchableSnapshotsTestBed = async (
       savePolicy: createSavePolicyAction(testBed),
       ...createRolloverActions(testBed),
       hot: {
-        ...createSearchableSnapshotActions(testBed, 'hot'),
-        ...createForceMergeActions(testBed, 'hot'),
-        ...createShrinkActions(testBed, 'hot'),
+        ...createReadonlyActions(testBed, 'hot'),
         ...createDownsampleActions(testBed, 'hot'),
       },
       warm: {
-        ...createForceMergeActions(testBed, 'warm'),
-        ...createShrinkActions(testBed, 'warm'),
         ...createReadonlyActions(testBed, 'warm'),
         ...createDownsampleActions(testBed, 'warm'),
       },
       cold: {
-        ...createMinAgeActions(testBed, 'cold'),
-        ...createSearchableSnapshotActions(testBed, 'cold'),
         ...createReadonlyActions(testBed, 'cold'),
         ...createDownsampleActions(testBed, 'cold'),
       },
-      frozen: {
-        ...createMinAgeActions(testBed, 'frozen'),
-        ...createSearchableSnapshotActions(testBed, 'frozen'),
-      },
+      frozen: {},
     },
   };
 };
