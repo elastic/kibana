@@ -95,7 +95,7 @@ export const arrayQueries = t.array(
   t.type({
     id,
     query,
-    ecsMapping,
+    ecs_mapping: ecsMapping,
     version,
     platform,
   })
@@ -105,7 +105,8 @@ export const objectQueries = t.record(
   t.string,
   t.type({
     query,
-    ecsMapping: ecsMappingOrUndefined,
+    id,
+    ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,
     saved_query_id: savedQueryIdOrUndefined,

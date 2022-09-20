@@ -22,7 +22,6 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiFormLabel,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -117,12 +116,12 @@ const DescriptionWrapper = styled(EuiFlexItem)`
 
 // align the icon to the inputs
 const StyledSemicolonWrapper = styled.div`
-  margin-top: 8px;
+  margin-top: 28px;
 `;
 
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
-  margin-top: 11px;
+  margin-top: 28px;
   width: 24px;
 `;
 
@@ -276,6 +275,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   return (
     <EuiFormRow
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel', {
+        defaultMessage: 'ECS field',
+      })}
       helpText={helpText}
       error={ECSFieldState.error?.message}
       isInvalid={!!ECSFieldState.error?.message?.length}
@@ -556,6 +558,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   return (
     <EuiFormRow
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel', {
+        defaultMessage: 'Value',
+      })}
       helpText={selectedOptions[0]?.value?.description}
       error={resultFieldState.error?.message}
       isInvalid={!!resultFieldState.error?.message?.length}
@@ -1048,25 +1053,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               defaultMessage="Use the fields below to map results from this query to ECS fields."
             />
           </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel"
-              defaultMessage="ECS field"
-            />
-          </EuiFormLabel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel"
-              defaultMessage="Value"
-            />
-          </EuiFormLabel>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
