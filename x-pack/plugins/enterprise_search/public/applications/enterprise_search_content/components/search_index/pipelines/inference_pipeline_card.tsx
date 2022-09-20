@@ -49,11 +49,6 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
     defaultMessage: 'Deployed',
   });
 
-  const notDeployedText = i18n.translate(
-    'xpack.enterpriseSearch.inferencePipelineCard.isNotDeployed',
-    { defaultMessage: 'Not deployed' }
-  );
-
   const actionButton = (
     <EuiButtonEmpty
       iconSide="right"
@@ -135,11 +130,11 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color={isDeployed ? 'success' : 'accent'}>
-                    {isDeployed ? deployedText : notDeployedText}
-                  </EuiHealth>
-                </EuiFlexItem>
+                {isDeployed && (
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth color="success">{deployedText}</EuiHealth>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
