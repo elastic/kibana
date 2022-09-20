@@ -72,9 +72,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
-      actions.setNameAndDescription(
-        isConnectorIndex(values.index) ? values.index.connector.configuration : {}
-      ),
+      actions.setNameAndDescription(isConnectorIndex(values.index) ? values.index.connector : {}),
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
