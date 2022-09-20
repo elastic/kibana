@@ -41,6 +41,7 @@ import {
   ActionVariable,
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
+import type { BulkEditError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -153,6 +154,12 @@ export interface ActionConnectorFieldsProps {
 export enum RuleFlyoutCloseReason {
   SAVED,
   CANCELED,
+}
+
+export interface BulkEditResponse {
+  rules: Rule[];
+  errors: BulkEditError[];
+  total: number;
 }
 
 export interface ActionParamsProps<TParams> {

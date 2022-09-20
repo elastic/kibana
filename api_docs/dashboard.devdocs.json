@@ -1613,7 +1613,10 @@
             "docId": "kibSavedObjectsPluginApi",
             "section": "def-public.SavedObject",
             "text": "SavedObject"
-          }
+          },
+          "<",
+          "SavedObjectAttributes",
+          ">"
         ],
         "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
         "deprecated": false,

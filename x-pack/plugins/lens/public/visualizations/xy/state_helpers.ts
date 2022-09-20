@@ -189,6 +189,14 @@ export function validateColumn(
 
   const invalidMessages: string[] = [];
 
+  if (annotation.timeField == null || annotation.timeField === '') {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldEmpty', {
+        defaultMessage: 'Time field is missing',
+      })
+    );
+  }
+
   if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
     invalidMessages.push(
       i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {

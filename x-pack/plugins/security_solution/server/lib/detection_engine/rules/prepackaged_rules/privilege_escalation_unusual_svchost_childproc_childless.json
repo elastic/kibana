@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Unusual Service Host Child Process - Childless Service",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n     process.parent.name : \"svchost.exe\" and\n\n     /* based on svchost service arguments -s svcname where the service is known to be childless */\n\n    process.parent.args : (\"WdiSystemHost\",\"LicenseManager\",\n      \"StorSvc\",\"CDPSvc\",\"cdbhsvc\",\"BthAvctpSvc\",\"SstpSvc\",\"WdiServiceHost\",\n      \"imgsvc\",\"TrkWks\",\"WpnService\",\"IKEEXT\",\"PolicyAgent\",\"CryptSvc\",\n      \"netprofm\",\"ProfSvc\",\"StateRepository\",\"camsvc\",\"LanmanWorkstation\",\n      \"NlaSvc\",\"EventLog\",\"hidserv\",\"DisplayEnhancementService\",\"ShellHWDetection\",\n      \"AppHostSvc\",\"fhsvc\",\"CscService\",\"PushToInstall\") and\n\n      /* unknown FPs can be added here */\n\n     not process.name : (\"WerFault.exe\",\"WerFaultSecure.exe\",\"wermgr.exe\") and\n     not (process.executable : \"?:\\\\Windows\\\\System32\\\\RelPost.exe\" and process.parent.args : \"WdiSystemHost\") and\n     not (process.name : \"rundll32.exe\" and\n          process.args : \"?:\\\\WINDOWS\\\\System32\\\\winethc.dll,ForceProxyDetectionOnNextRun\" and process.parent.args : \"WdiServiceHost\") and\n     not (process.executable : (\"?:\\\\Program Files\\\\*\", \"?:\\\\Program Files (x86)\\\\*\", \"?:\\\\Windows\\\\System32\\\\Kodak\\\\kds_i4x50\\\\lib\\\\lexexe.exe\") and\n          process.parent.args : \"imgsvc\")\n",
+  "query": "process where event.type == \"start\" and\n     process.parent.name : \"svchost.exe\" and\n\n     /* based on svchost service arguments -s svcname where the service is known to be childless */\n\n    process.parent.args : (\"WdiSystemHost\",\"LicenseManager\",\n      \"StorSvc\",\"CDPSvc\",\"cdbhsvc\",\"BthAvctpSvc\",\"SstpSvc\",\"WdiServiceHost\",\n      \"imgsvc\",\"TrkWks\",\"WpnService\",\"IKEEXT\",\"PolicyAgent\",\"CryptSvc\",\n      \"netprofm\",\"ProfSvc\",\"StateRepository\",\"camsvc\",\"LanmanWorkstation\",\n      \"NlaSvc\",\"EventLog\",\"hidserv\",\"DisplayEnhancementService\",\"ShellHWDetection\",\n      \"AppHostSvc\",\"fhsvc\",\"CscService\",\"PushToInstall\") and\n\n      /* unknown FPs can be added here */\n\n     not process.name : (\"WerFault.exe\",\"WerFaultSecure.exe\",\"wermgr.exe\") and\n     not (process.executable : \"?:\\\\Windows\\\\System32\\\\RelPost.exe\" and process.parent.args : \"WdiSystemHost\") and\n     not (process.name : \"rundll32.exe\" and\n          process.args : \"?:\\\\WINDOWS\\\\System32\\\\winethc.dll,ForceProxyDetectionOnNextRun\" and process.parent.args : \"WdiServiceHost\") and\n     not (process.executable : (\"?:\\\\Program Files\\\\*\", \"?:\\\\Program Files (x86)\\\\*\", \"?:\\\\Windows\\\\System32\\\\Kodak\\\\kds_i4x50\\\\lib\\\\lexexe.exe\") and\n          process.parent.args : \"imgsvc\")\n",
   "required_fields": [
     {
       "ecs": true,
@@ -102,5 +102,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 101
 }

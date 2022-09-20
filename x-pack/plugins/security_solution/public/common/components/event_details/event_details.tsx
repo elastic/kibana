@@ -27,6 +27,7 @@ import { ThreatSummaryView } from './cti_details/threat_summary_view';
 import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
+import type { Ecs } from '../../../../common/ecs';
 import type { BrowserFields } from '../../containers/source';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -38,11 +39,15 @@ import {
   timelineDataToEnrichment,
 } from './cti_details/helpers';
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
-import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { Insights } from './insights/insights';
 import { useRiskScoreData } from './use_risk_score_data';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+
+export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -79,6 +84,7 @@ export enum EventsViewType {
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
+  detailsEcsData: Ecs | null;
   id: string;
   indexName: string;
   isAlert: boolean;
@@ -121,9 +127,18 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
+const RendererContainer = styled.div`
+  overflow-x: auto;
+  padding-right: ${(props) => props.theme.eui.euiSizeXS};
+  & .${DETAILS_CLASS_NAME} .euiFlexGroup {
+    justify-content: flex-start;
+  }
+`;
+
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
+  detailsEcsData,
   id,
   indexName,
   isAlert,
@@ -169,6 +184,14 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
 
+  const renderer = useMemo(
+    () =>
+      detailsEcsData != null
+        ? getRowRenderer({ data: detailsEcsData, rowRenderers: defaultRowRenderers })
+        : null,
+    [detailsEcsData]
+  );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -190,7 +213,20 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-                <Reason eventId={id} data={data} />
+
+                {renderer != null && detailsEcsData != null && (
+                  <div>
+                    <RendererContainer data-test-subj="renderer">
+                      {renderer.renderRow({
+                        contextId: EVENT_DETAILS_CONTEXT_ID,
+                        data: detailsEcsData,
+                        isDraggable: isDraggable ?? false,
+                        timelineId,
+                      })}
+                    </RendererContainer>
+                  </div>
+                )}
+
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
@@ -214,19 +250,20 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {enrichmentCount > 0 && isLicenseValid && (
-                  <ThreatSummaryView
-                    isDraggable={isDraggable}
-                    hostRisk={hostRisk}
-                    userRisk={userRisk}
-                    browserFields={browserFields}
-                    data={data}
-                    eventId={id}
-                    timelineId={timelineId}
-                    enrichments={allEnrichments}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
+                {enrichmentCount > 0 ||
+                  (isLicenseValid && (hostRisk || userRisk) && (
+                    <ThreatSummaryView
+                      isDraggable={isDraggable}
+                      hostRisk={hostRisk}
+                      userRisk={userRisk}
+                      browserFields={browserFields}
+                      data={data}
+                      eventId={id}
+                      timelineId={timelineId}
+                      enrichments={allEnrichments}
+                      isReadOnly={isReadOnly}
+                    />
+                  ))}
 
                 {isEnrichmentsLoading && (
                   <>
@@ -240,22 +277,24 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
+      allEnrichments,
+      browserFields,
+      data,
+      detailsEcsData,
+      enrichmentCount,
+      goToTableTab,
+      handleOnEventClosed,
+      hostRisk,
       id,
       indexName,
       isAlert,
-      data,
-      browserFields,
       isDraggable,
-      timelineId,
-      enrichmentCount,
-      allEnrichments,
       isEnrichmentsLoading,
-      hostRisk,
-      goToTableTab,
-      handleOnEventClosed,
-      isReadOnly,
-      userRisk,
       isLicenseValid,
+      isReadOnly,
+      renderer,
+      timelineId,
+      userRisk,
     ]
   );
 

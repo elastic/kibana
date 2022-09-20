@@ -16,6 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
@@ -33,7 +34,6 @@ export const queryExecutor = async ({
   runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
   listClient,
   experimentalFeatures,
   ruleExecutionLogger,
@@ -45,6 +45,8 @@ export const queryExecutor = async ({
   wrapHits,
   primaryTimestamp,
   secondaryTimestamp,
+  unprocessedExceptions,
+  exceptionFilter,
   osqueryCreateAction,
   licensing,
 }: {
@@ -52,7 +54,6 @@ export const queryExecutor = async ({
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<UnifiedQueryRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   experimentalFeatures: ExperimentalFeatures;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -64,6 +65,8 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
   licensing: LicensingPluginSetup;
 }) => {
@@ -78,14 +81,14 @@ export const queryExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     const result = await searchAfterAndBulkCreate({
       tuple,
+      exceptionsList: unprocessedExceptions,
       services,
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
       eventsTelemetry,
       inputIndexPattern: inputIndex,

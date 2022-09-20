@@ -117,6 +117,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           alertId={alertId}
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={ecsData}
           event={expandedEvent}
           hostName={hostName}
           handleIsolationActionSuccess={handleIsolationActionSuccess}
@@ -160,6 +161,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <ExpandableEvent
             browserFields={browserFields}
             detailsData={detailsData}
+            detailsEcsData={ecsData}
             event={expandedEvent}
             isAlert={isAlert}
             isDraggable={isDraggable}
@@ -176,6 +178,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     alertId,
     browserFields,
     detailsData,
+    ecsData,
     expandedEvent,
     handleIsolationActionSuccess,
     handleOnEventClosed,

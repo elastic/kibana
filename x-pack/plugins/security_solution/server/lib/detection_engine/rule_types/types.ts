@@ -26,6 +26,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
+import type { Filter } from '@kbn/es-query';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
@@ -59,7 +60,6 @@ export interface RunOpts<TParams extends RuleParams> {
     from: Moment;
     maxSignals: number;
   };
-  exceptionItems: ExceptionListItemSchema[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   listClient: ListClient;
   searchAfterSize: number;
@@ -73,6 +73,8 @@ export interface RunOpts<TParams extends RuleParams> {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
 }
 
 export type SecurityAlertType<

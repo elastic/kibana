@@ -43,6 +43,7 @@ export interface SubChartProps {
   height: number;
   width?: number;
   category: string;
+  label: string;
   percentage: number;
   data: CountPerTime[];
   showAxes: boolean;
@@ -50,6 +51,7 @@ export interface SubChartProps {
   onShowMoreClick: (() => void) | null;
   style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
   showFrames: boolean;
+  padTitle: boolean;
 }
 
 const NUM_DISPLAYED_FRAMES = 5;
@@ -58,6 +60,7 @@ export const SubChart: React.FC<SubChartProps> = ({
   index,
   color,
   category,
+  label,
   percentage,
   height,
   data,
@@ -67,6 +70,7 @@ export const SubChart: React.FC<SubChartProps> = ({
   onShowMoreClick,
   style,
   showFrames,
+  padTitle,
 }) => {
   const theme = useEuiTheme();
 
@@ -90,7 +94,9 @@ export const SubChart: React.FC<SubChartProps> = ({
 
   const compact = !!onShowMoreClick;
 
-  const displayedFrames = compact ? metadata.slice(0, NUM_DISPLAYED_FRAMES) : metadata;
+  const displayedFrames = compact
+    ? metadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
+    : metadata.concat().reverse();
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -110,7 +116,7 @@ export const SubChart: React.FC<SubChartProps> = ({
               <>
                 <EuiFlexItem grow={false} key={frame.FrameID}>
                   <EuiFlexGroup direction="row" alignItems="center">
-                    <EuiFlexItem grow={false}>{frameIndex + 1}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{metadata.indexOf(frame) + 1}</EuiFlexItem>
                     <EuiFlexItem grow>
                       <StackFrameSummary frame={frame} />
                     </EuiFlexItem>
@@ -155,7 +161,11 @@ export const SubChart: React.FC<SubChartProps> = ({
     <EuiFlexGroup direction="column" gutterSize="s" style={{ ...style, height: '100%' }}>
       <EuiFlexItem
         grow={false}
-        style={{ padding: theme.euiTheme.size.l, paddingBottom: theme.euiTheme.size.s }}
+        style={{
+          ...(padTitle
+            ? { padding: theme.euiTheme.size.l, paddingBottom: theme.euiTheme.size.s }
+            : {}),
+        }}
       >
         <EuiFlexGroup
           direction="row"
@@ -173,11 +183,11 @@ export const SubChart: React.FC<SubChartProps> = ({
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
             {showFrames ? (
               <EuiLink onClick={() => onShowMoreClick?.()}>
-                <EuiText size="s">{category}</EuiText>
+                <EuiText size="s">{label}</EuiText>
               </EuiLink>
             ) : (
               <EuiLink href={href}>
-                <EuiText size="s">{category}</EuiText>
+                <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}
           </EuiFlexItem>
