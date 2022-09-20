@@ -25,7 +25,11 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import {
+  transformAlertToRuleAction,
+  transformAlertToRuleResponseAction,
+} from '../../../../../../common/detection_engine/transform_actions';
+
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -435,9 +439,17 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-        ...(ruleType === 'query' &&
-          ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
+        saved_id: undefined,
+        type: 'query' as Type,
+        // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
+        ...(['query', 'saved_query'].includes(ruleType) &&
+          ruleFields.queryBar?.saved_id &&
+          ruleFields.shouldLoadQueryDynamically && {
+            type: 'saved_query' as Type,
+            query: undefined,
+            filters: undefined,
+            saved_id: ruleFields.queryBar.saved_id,
+          }),
       };
   return {
     ...baseFields,
@@ -537,6 +549,7 @@ export const formatAboutStepData = (
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const {
     actions = [],
+    responseActions,
     enabled,
     kibanaSiemAppUrl,
     throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -544,6 +557,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
 
   return {
     actions: actions.map(transformAlertToRuleAction),
+    response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {

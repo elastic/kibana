@@ -7,16 +7,25 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
+import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
+import { PipelinesLogic } from './pipelines_logic';
 
 export const SearchIndexPipelines: React.FC = () => {
+  const { showAddMlInferencePipelineModal } = useValues(PipelinesLogic);
+  const { closeAddMlInferencePipelineModal, openAddMlInferencePipelineModal } =
+    useActions(PipelinesLogic);
+
   return (
     <>
       <EuiSpacer />
@@ -87,20 +96,16 @@ export const SearchIndexPipelines: React.FC = () => {
             )}
             iconType="compute"
             action={
-              <EuiButton color="success" size="s" iconType="plusInCircle">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.newButton',
-                  {
-                    defaultMessage: 'Add ML inference pipeline',
-                  }
-                )}
-              </EuiButton>
+              <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
             }
           >
             <MlInferencePipelineProcessorsCard />
           </DataPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {showAddMlInferencePipelineModal && (
+        <AddMLInferencePipelineModal onClose={closeAddMlInferencePipelineModal} />
+      )}
     </>
   );
 };

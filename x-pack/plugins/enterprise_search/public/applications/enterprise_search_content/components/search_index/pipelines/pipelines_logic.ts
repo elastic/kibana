@@ -46,6 +46,7 @@ import {
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
+import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
@@ -54,6 +55,7 @@ type PipelinesActions = Pick<
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeModal: () => void;
+  closeAddMlInferencePipelineModal: () => void;
   createCustomPipeline: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
@@ -80,22 +82,27 @@ type PipelinesActions = Pick<
   setPipelineState(pipeline: IngestPipelineParams): {
     pipeline: IngestPipelineParams;
   };
+  openAddMlInferencePipelineModal: () => void;
 };
 
 interface PipelinesValues {
   canSetPipeline: boolean;
+  canUseMlInferencePipeline: boolean;
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   index: FetchIndexApiResponse;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineState: IngestPipelineParams;
   showModal: boolean;
+  showAddMlInferencePipelineModal: boolean;
 }
 
 export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions>>({
   actions: {
     closeModal: true,
+    closeAddMlInferencePipelineModal: true,
     openModal: true,
+    openAddMlInferencePipelineModal: true,
     savePipeline: true,
     setPipelineState: (pipeline: IngestPipelineParams) => ({ pipeline }),
   },
@@ -120,6 +127,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         'makeRequest as fetchMlInferenceProcessors',
         'apiError as fetchMlInferenceProcessorsApiError',
       ],
+      CreateMlInferencePipelineApiLogic,
+      ['apiSuccess as createMlInferencePipelineSuccess'],
     ],
     values: [
       FetchDefaultPipelineApiLogic,
@@ -178,6 +187,9 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.savePipeline();
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
+    createMlInferencePipelineSuccess: () => {
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+    },
     fetchIndexApiSuccess: (index) => {
       if (!values.showModal) {
         // Don't do this when the modal is open to avoid overwriting the values while editing
@@ -223,11 +235,24 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         openModal: () => true,
       },
     ],
+    showAddMlInferencePipelineModal: [
+      false,
+      {
+        createMlInferencePipelineSuccess: () => false,
+        closeAddMlInferencePipelineModal: () => false,
+        openAddMlInferencePipelineModal: () => true,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     canSetPipeline: [
       () => [selectors.index],
       (index: ElasticsearchIndexWithIngestion) => !isApiIndex(index),
+    ],
+    canUseMlInferencePipeline: [
+      () => [selectors.canSetPipeline, selectors.pipelineState],
+      (canSetPipeline: boolean, pipelineState: IngestPipelineParams) =>
+        canSetPipeline && pipelineState.run_ml_inference,
     ],
     defaultPipelineValues: [
       () => [selectors.defaultPipelineValuesData],
