@@ -20,8 +20,8 @@ import { waitFor } from '@testing-library/react';
 jest.mock('../../../hooks/use_fetch_alert_detail');
 jest.mock('../../../hooks/use_breadcrumbs');
 jest.mock('react-router-dom', () => ({
-    ...jest.requireActual('react-router-dom'),
-    useParams: jest.fn(),
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
 }));
 
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
@@ -30,62 +30,53 @@ const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 const chance = new Chance();
 
 const params = {
-    alertId: chance.guid()
+  alertId: chance.guid(),
 };
 
 const config = {
-    unsafe: {
-        alertDetails: { enabled: true },
-    },
+  unsafe: {
+    alertDetails: { enabled: true },
+  },
 } as ConfigSchema;
 
 describe('Alert details', () => {
-    jest
-        .spyOn(useUiSettingHook, 'useUiSetting')
-        .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
+  jest
+    .spyOn(useUiSettingHook, 'useUiSetting')
+    .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        useParamsMock.mockReturnValue(params);
-        useBreadcrumbsMock.mockReturnValue([]);
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useParamsMock.mockReturnValue(params);
+    useBreadcrumbsMock.mockReturnValue([]);
+  });
 
-    it('should show alert summary', async () => {
-        useFetchAlertDetailMock.mockReturnValue([false, alert]);
+  it('should show alert summary', async () => {
+    useFetchAlertDetailMock.mockReturnValue([false, alert]);
 
-        const alertDetails = render(
-            <AlertDetails />,
-            config
-        );
+    const alertDetails = render(<AlertDetails />, config);
 
-        expect(alertDetails.queryByTestId("alertDetails")).toBeTruthy();
-        await waitFor(() => expect(alertDetails.queryByTestId("centerJustifiedSpinner")).toBeFalsy());
-        expect(alertDetails.queryByTestId("alertDetailsError")).toBeFalsy();
-    });
+    expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+    expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
+  });
 
-    it('should show error loading the alert details', async () => {
-        useFetchAlertDetailMock.mockReturnValue([false, alertWithNoData]);
+  it('should show error loading the alert details', async () => {
+    useFetchAlertDetailMock.mockReturnValue([false, alertWithNoData]);
 
-        const alertDetails = render(
-            <AlertDetails />,
-            config
-        );
+    const alertDetails = render(<AlertDetails />, config);
 
-        expect(alertDetails.queryByTestId("alertDetailsError")).toBeTruthy();
-        expect(alertDetails.queryByTestId("centerJustifiedSpinner")).toBeFalsy();
-        expect(alertDetails.queryByTestId("alertDetails")).toBeFalsy();
-    });
+    expect(alertDetails.queryByTestId('alertDetailsError')).toBeTruthy();
+    expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy();
+    expect(alertDetails.queryByTestId('alertDetails')).toBeFalsy();
+  });
 
-    it('should show loading spinner', async () => {
-        useFetchAlertDetailMock.mockReturnValue([true, alertWithNoData]);
+  it('should show loading spinner', async () => {
+    useFetchAlertDetailMock.mockReturnValue([true, alertWithNoData]);
 
-        const alertDetails = render(
-            <AlertDetails />,
-            config
-        );
+    const alertDetails = render(<AlertDetails />, config);
 
-        expect(alertDetails.queryByTestId("centerJustifiedSpinner")).toBeTruthy();
-        expect(alertDetails.queryByTestId("alertDetailsError")).toBeFalsy();
-        expect(alertDetails.queryByTestId("alertDetails")).toBeFalsy();
-    });
+    expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
+    expect(alertDetails.queryByTestId('alertDetails')).toBeFalsy();
+  });
 });
