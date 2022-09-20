@@ -28,7 +28,7 @@ export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<Cs
 const getIndexStats = async (
   esClient: ElasticsearchClient,
   index: string
-): Promise<IndexStats | null> => {
+): Promise<IndexStats | {}> => {
   const isIndexExists = await esClient.indices.exists({
     index,
   });
@@ -47,7 +47,7 @@ const getIndexStats = async (
     };
   }
 
-  return null;
+  return {};
 };
 
 const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>

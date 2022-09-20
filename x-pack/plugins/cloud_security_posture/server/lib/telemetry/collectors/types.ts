@@ -10,9 +10,9 @@ export interface CspmUsage {
 }
 
 export interface CspmIndicesStats {
-  findings: IndexStats | null;
-  latest_findings: IndexStats | null;
-  score: IndexStats | null;
+  findings: IndexStats | {};
+  latest_findings: IndexStats | {};
+  score: IndexStats | {};
 }
 
 export interface IndexStats {
