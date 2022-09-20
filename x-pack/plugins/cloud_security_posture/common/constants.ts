@@ -37,6 +37,7 @@ export const RULE_FAILED = `failed`;
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
+  showFindingFlyoutEvidence: false,
   showFindingsGroupBy: true,
 } as const;
 
