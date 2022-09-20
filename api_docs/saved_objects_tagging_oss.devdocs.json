@@ -470,7 +470,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ") => object is ",
+              "<",
+              "SavedObjectAttributes",
+              ">) => object is ",
               {
                 "pluginId": "savedObjectsTaggingOss",
                 "scope": "public",
@@ -497,7 +499,10 @@
                     "docId": "kibSavedObjectsPluginApi",
                     "section": "def-public.SavedObject",
                     "text": "SavedObject"
-                  }
+                  },
+                  "<",
+                  "SavedObjectAttributes",
+                  ">"
                 ],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
@@ -1175,7 +1180,9 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ") => object is ",
+          "<",
+          "SavedObjectAttributes",
+          ">) => object is ",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "public",
@@ -1203,7 +1210,10 @@
                 "docId": "kibSavedObjectsPluginApi",
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
-              }
+              },
+              "<",
+              "SavedObjectAttributes",
+              ">"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
@@ -1227,7 +1237,9 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          " & { getTags(): string[]; setTags(tags: string[]): void; }"
+          "<",
+          "SavedObjectAttributes",
+          "> & { getTags(): string[]; setTags(tags: string[]): void; }"
         ],
         "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
         "deprecated": false,
