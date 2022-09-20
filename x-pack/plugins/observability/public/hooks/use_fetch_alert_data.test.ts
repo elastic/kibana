@@ -11,7 +11,7 @@ import { useFetchAlertData } from './use_fetch_alert_data';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../utils/kibana_react', () => ({
+jest.mock('../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
