@@ -130,19 +130,17 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldName',
       field: 'fieldName',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
-        { defaultMessage: 'Field name' }
-      ),
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldNameLabel', {
+        defaultMessage: 'Field name',
+      }),
       sortable: true,
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldValue',
       field: 'fieldValue',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel',
-        { defaultMessage: 'Field value' }
-      ),
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldValueLabel', {
+        defaultMessage: 'Field value',
+      }),
       render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
       sortable: true,
     },
@@ -154,7 +152,7 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.logRateColumnTooltip',
             {
               defaultMessage:
                 'A visual representation of the impact of the field on the message rate difference',
@@ -163,7 +161,7 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.logRateLabel"
               defaultMessage="Log rate"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -190,7 +188,7 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueColumnTooltip',
             {
               defaultMessage:
                 'The significance of changes in the frequency of values; lower values indicate greater change',
@@ -199,14 +197,14 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel"
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueLabel"
               defaultMessage="p-value"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
-      render: (pValue: number) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
+      render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
     },
     {
@@ -217,7 +215,7 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
             {
               defaultMessage: 'The level of impact of the field on the message rate difference',
             }
@@ -225,7 +223,7 @@ export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProp
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel"
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabel"
               defaultMessage="Impact"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
