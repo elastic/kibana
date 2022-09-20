@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
 
 import type { SavedObject } from '@kbn/core/public';
 import { Direction } from '../../../../common/search_strategy';
@@ -76,7 +77,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
   );
 };
 
-const PlayButton = React.memo(PlayButtonComponent);
+const PlayButton = React.memo(PlayButtonComponent, deepEqual);
 
 interface EditButtonProps {
   disabled?: boolean;

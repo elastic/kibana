@@ -8,30 +8,26 @@ import React, { useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import deepEqual from 'fast-deep-equal';
-import { createFormIdFieldValidations } from '../packs/queries/validations';
 
-interface QueryIdFieldProps {
-  idSet?: Set<string>;
+interface DescriptionFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
+const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldProps }) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
   } = useController({
-    name: 'id',
+    name: 'description',
     defaultValue: '',
-    rules: idSet && createFormIdFieldValidations(idSet),
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
-        defaultMessage: 'ID',
+      label={i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
+        defaultMessage: 'Description (optional)',
       })}
       error={error?.message}
       isInvalid={hasError}
@@ -50,4 +46,4 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   );
 };
 
-export const QueryIdField = React.memo(QueryIdFieldComponent, deepEqual);
+export const DescriptionField = React.memo(DescriptionFieldComponent);

@@ -8,30 +8,37 @@ import React, { useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import deepEqual from 'fast-deep-equal';
-import { createFormIdFieldValidations } from '../packs/queries/validations';
 
-interface QueryIdFieldProps {
-  idSet?: Set<string>;
+interface NameFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
+const NameFieldComponent: React.FC<NameFieldProps> = ({ euiFieldProps }) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
   } = useController({
-    name: 'id',
+    name: 'name',
     defaultValue: '',
-    rules: idSet && createFormIdFieldValidations(idSet),
+    rules: {
+      pattern: {
+        value: /^[a-zA-Z0-9-_]+$/,
+        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.invalidIdError', {
+          defaultMessage: 'Characters must be alphanumeric, _, or -',
+        }),
+      },
+      required: i18n.translate('xpack.osquery.pack.form.nameFieldRequiredErrorMessage', {
+        defaultMessage: 'Name is a required field',
+      }),
+    },
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
-        defaultMessage: 'ID',
+      label={i18n.translate('xpack.osquery.pack.form.nameFieldLabel', {
+        defaultMessage: 'Name',
       })}
       error={error?.message}
       isInvalid={hasError}
@@ -50,4 +57,4 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   );
 };
 
-export const QueryIdField = React.memo(QueryIdFieldComponent, deepEqual);
+export const NameField = React.memo(NameFieldComponent);

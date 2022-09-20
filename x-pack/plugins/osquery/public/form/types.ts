@@ -8,13 +8,6 @@
 import type React from 'react';
 import type { ReactNode } from 'react';
 
-export interface FormField<T> {
-  name: string;
-  onChange: (data: T) => void;
-  value: T;
-  onBlur?: () => void;
-}
-
 export interface FormFieldProps<T> {
   name: string;
   label: string | Element;

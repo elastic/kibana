@@ -47,6 +47,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 schema.object({
                   query: schema.string(),
                   interval: schema.maybe(schema.number()),
+                  snapshot: schema.maybe(schema.boolean()),
+                  removed: schema.maybe(schema.boolean()),
                   platform: schema.maybe(schema.string()),
                   version: schema.maybe(schema.string()),
                   ecs_mapping: schema.maybe(

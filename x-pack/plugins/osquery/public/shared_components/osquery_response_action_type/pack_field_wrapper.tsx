@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash';
 import { useWatch } from 'react-hook-form';
-import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
+import type { ECSMapping } from '../../../common/schemas/common';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
@@ -20,7 +20,7 @@ interface PackFieldWrapperProps {
     queries?: Array<{
       id: string;
       query: string;
-      ecs_mapping?: EcsMappingFormField[];
+      ecs_mapping?: ECSMapping;
     }>;
     action_id?: string;
     agents?: string[];
@@ -39,7 +39,7 @@ export const PackFieldWrapper = ({
   showResultsHeader,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
-  const { packId } = useWatch() as unknown as { packId: string[] };
+  const { packId } = useWatch<{ packId: string[] }>();
 
   const selectedPackData = useMemo(
     () => (packId?.length ? find(packsData?.data, { id: packId[0] }) : null),
@@ -55,7 +55,7 @@ export const PackFieldWrapper = ({
         <PacksComboBoxField
           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
           fieldProps={{ packsData: packsData?.data }}
-          queryType={'pack'}
+          queryType="pack"
         />
       </EuiFlexItem>
       {submitButtonContent}
@@ -67,6 +67,7 @@ export const PackFieldWrapper = ({
             <PackQueriesStatusTable
               actionId={actionId}
               agentIds={agentIds}
+              // @ts-expect-error update types
               data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
               addToTimeline={addToTimeline}
               addToCase={addToCase}
