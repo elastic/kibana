@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -28,18 +29,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     before(async () => {
+      await kibanaServer.uiSettings.replace(
+        {
+          'banners:textContent': 'default space banner text',
+        },
+        { space: 'default' }
+      );
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
-      await PageObjects.spaceSelector.clickSpaceCard('default');
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
-
-      await PageObjects.settings.setAdvancedSettingsTextArea(
-        'banners:textContent',
-        'default space banner text'
-      );
     });
 
     it('displays the space-specific banner within the space', async () => {
@@ -53,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('home', { basePath: '/s/another-space' });
 
       expect(await PageObjects.banners.isTopBannerVisible()).to.eql(true);
-      expect(await PageObjects.banners.getTopBannerText()).to.eql('global banner text');
+      expect(await PageObjects.banners.getTopBannerText()).to.eql('global_banner_text');
     });
 
     it('displays the global banner on the login page', async () => {
@@ -61,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('login');
 
       expect(await PageObjects.banners.isTopBannerVisible()).to.eql(true);
-      expect(await PageObjects.banners.getTopBannerText()).to.eql('global banner text');
+      expect(await PageObjects.banners.getTopBannerText()).to.eql('global_banner_text');
     });
   });
 }

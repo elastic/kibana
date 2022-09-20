@@ -8,8 +8,9 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["licensing", "screenshotMode"],
-  "optionalPlugins": [],
+  "enabledOnAnonymousPages": true,
+  "requiredPlugins": ["licensing"],
+  "optionalPlugins": ["screenshotMode"],
   "requiredBundles": ["kibanaReact"],
   "configPath": ["xpack", "banners"]
 }
