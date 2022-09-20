@@ -13,8 +13,8 @@ import {
   type CriteriaWithPagination,
   EuiLink,
 } from '@elastic/eui';
-import React, { MouseEvent } from 'react';
-import { Link, useHistory, generatePath } from 'react-router-dom';
+import React from 'react';
+import { generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,21 +33,33 @@ interface BenchmarksTableProps
 }
 
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
-  const { http, application } = useKibana().services;
+  const { http } = useKibana().services;
   const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
 
+  return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
+};
+
+const IntegrationButtonLink = ({
+  packageName,
+  policyId,
+  packagePolicyId,
+}: {
+  packageName: string;
+  packagePolicyId: string;
+  policyId: string;
+}) => {
+  const { application } = useKibana().services;
+
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
-      href={http.basePath.prepend([fleetBase, path].join(''))}
-      title={name}
-      onClick={(e: MouseEvent<HTMLAnchorElement>) => {
-        e.stopPropagation();
-        e.preventDefault();
-        application.navigateToApp('fleet', { path });
-      }}
+      href={application.getUrlForApp('security', {
+        path: generatePath(cloudPosturePages.rules.path, {
+          packagePolicyId,
+          policyId,
+        }),
+      })}
     >
-      {name}
+      {packageName}
     </EuiLink>
   );
 };
@@ -59,18 +71,11 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
       defaultMessage: 'Integration',
     }),
     render: (packageName, benchmark) => (
-      <Link
-        to={generatePath(cloudPosturePages.rules.path, {
-          packagePolicyId: benchmark.package_policy.id,
-          policyId: benchmark.package_policy.policy_id,
-        })}
-        title={packageName}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {packageName}
-      </Link>
+      <IntegrationButtonLink
+        packageName={packageName}
+        packagePolicyId={benchmark.package_policy.id}
+        policyId={benchmark.package_policy.policy_id}
+      />
     ),
     truncateText: true,
     sortable: true,
@@ -157,18 +162,6 @@ export const BenchmarksTable = ({
   sorting,
   ...rest
 }: BenchmarksTableProps) => {
-  const history = useHistory();
-
-  const getRowProps: EuiBasicTableProps<Benchmark>['rowProps'] = (benchmark) => ({
-    onClick: () =>
-      history.push(
-        generatePath(cloudPosturePages.rules.path, {
-          packagePolicyId: benchmark.package_policy.id,
-          policyId: benchmark.package_policy.policy_id,
-        })
-      ),
-  });
-
   const pagination: Pagination = {
     pageIndex: Math.max(pageIndex - 1, 0),
     pageSize,
@@ -184,7 +177,6 @@ export const BenchmarksTable = ({
       data-test-subj={rest['data-test-subj']}
       items={benchmarks}
       columns={BENCHMARKS_TABLE_COLUMNS}
-      rowProps={getRowProps}
       itemId={(item) => [item.agent_policy.id, item.package_policy.id].join('/')}
       pagination={pagination}
       onChange={onChange}
