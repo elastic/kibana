@@ -42,7 +42,6 @@ describe('AlertsFlyout', () => {
     expect(flyout.getByText('Recovered')).toBeInTheDocument();
   });
 
-
   it('should NOT show the Alert details button as the feature flag is disabled', async () => {
     const flyout = render(
       <AlertsFlyout
@@ -51,7 +50,7 @@ describe('AlertsFlyout', () => {
         onClose={jest.fn()}
       />
     );
-    expect(flyout.queryByTestId("alertsFlyoutAlertDetailsButton")).not.toBeInTheDocument();
+    expect(flyout.queryByTestId('alertsFlyoutAlertDetailsButton')).not.toBeInTheDocument();
   });
 });
 
