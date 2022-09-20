@@ -50,8 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   type ServiceListItem = ValuesType<Awaited<ReturnType<typeof getSortedAndFilteredServices>>>;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/127939
-  registry.when.skip('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
+  registry.when('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
     before(async () => {
       const serviceA = apm
         .service({ name: SERVICE_NAME_PREFIX + 'a', environment: 'production', agentName: 'java' })
