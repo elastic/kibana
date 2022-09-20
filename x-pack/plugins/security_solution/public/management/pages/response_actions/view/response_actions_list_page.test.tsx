@@ -17,6 +17,7 @@ import { ResponseActionsListPage } from './response_actions_list_page';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
+import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -107,6 +108,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
+const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
+
 describe('Action history page', () => {
   const testPrefix = 'response-actions-list';
 
@@ -135,6 +139,18 @@ describe('Action history page', () => {
       ...baseMockedActionList,
       data: await getActionListMock({ actionCount: 43 }),
     };
+
+    mockUseGetEndpointsList.mockReturnValue({
+      data: Array.from({ length: 10 }).map((_, i) => {
+        return {
+          id: `agent-id-${i}`,
+          name: `Host-name-${i}`,
+        };
+      }),
+      page: 0,
+      pageSize: 50,
+      total: 10,
+    });
   });
 
   afterEach(() => {
@@ -180,6 +196,50 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?commands=release,processes');
     });
 
+    it('should read and set hosts filter values from URL params', () => {
+      mockUseGetEndpointsList.mockReturnValue({
+        data: Array.from({ length: 10 }).map((_, i) => {
+          return {
+            id: `agent-id-${i}`,
+            name: `Host-name-${i}`,
+            selected: [0, 1, 3, 5].includes(i) ? true : false,
+          };
+        }),
+        page: 0,
+        pageSize: 50,
+        total: 10,
+      });
+
+      const filterPrefix = 'hosts-filter';
+      reactTestingLibrary.act(() => {
+        history.push(
+          '/administration/action_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5'
+        );
+      });
+
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
+        if (option.getAttribute('aria-checked') === 'true') {
+          acc.push(option.textContent?.split(' - ')[0] as string);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions.length).toEqual(4);
+      expect(selectedFilterOptions).toEqual([
+        'Host-name-0',
+        'Host-name-1',
+        'Host-name-3',
+        'Host-name-5',
+      ]);
+      expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
+    });
+
     it('should read and set status filter values from URL params', () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
@@ -203,7 +263,7 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?statuses=pending,failed');
     });
 
-    // TODO: add tests for hosts and users when those filters are added
+    // TODO: add tests for users when that filter is added
 
     it('should read and set relative date ranges filter values from URL params', () => {
       reactTestingLibrary.act(() => {
@@ -279,6 +339,23 @@ describe('Action history page', () => {
       );
     });
 
+    it('should set selected hosts filter options to URL params ', () => {
+      const filterPrefix = 'hosts-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option, i) => {
+        if ([0, 1, 2].includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+
+      expect(history.location.search).toEqual('?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2');
+    });
+
     it('should set selected status filter options to URL params ', () => {
       const filterPrefix = 'statuses-filter';
       render();
@@ -294,7 +371,7 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
     });
 
-    // TODO: add tests for hosts and users when those filters are added
+    // TODO: add tests for users when that filter is added
 
     it('should set selected relative date range filter options to URL params ', async () => {
       const { getByTestId } = render();

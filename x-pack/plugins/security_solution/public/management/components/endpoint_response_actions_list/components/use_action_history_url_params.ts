@@ -84,7 +84,7 @@ export const actionsLogFiltersFromUrlParams = (
       }, [])
     : [];
 
-  const urlUsers = urlParams.hosts ? String(urlParams.users).split(',').sort() : [];
+  const urlUsers = urlParams.users ? String(urlParams.users).split(',').sort() : [];
 
   actionsLogFilters.commands = urlCommands.length ? urlCommands : undefined;
   actionsLogFilters.hosts = urlHosts.length ? urlHosts : undefined;
