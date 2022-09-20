@@ -13,7 +13,7 @@ const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations
 
 export const getEnabledCspIntegrationDetails = (packageInfo?: PackagePolicy) => {
   const enabledInput = packageInfo?.inputs.find((input) => input.enabled);
-  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return {};
+  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return null;
 
   const integration = cloudPostureIntegrations[enabledInput.policy_template];
   const enabledIntegrationOption = integration.options.find(

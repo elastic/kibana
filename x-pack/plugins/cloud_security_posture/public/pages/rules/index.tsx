@@ -55,32 +55,32 @@ const getRulesBreadcrumbs = (
 const getRulesSharedValues = (
   packageInfo?: PackagePolicy
 ): NonNullable<EuiDescriptionListProps['listItems']> => {
-  const { integration, enabledIntegrationOption } = getEnabledCspIntegrationDetails(packageInfo);
+  const enabledIntegration = getEnabledCspIntegrationDetails(packageInfo);
   const values = [];
 
-  if (integration?.shortName) {
+  if (enabledIntegration?.integration?.shortName) {
     values.push({
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
         defaultMessage: 'Integration',
       }),
-      description: integration.shortName,
+      description: enabledIntegration?.integration.shortName,
     });
   }
 
-  if (!enabledIntegrationOption) return values;
+  if (!enabledIntegration?.enabledIntegrationOption) return values;
 
   values.push(
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
         defaultMessage: 'Deployment Type',
       }),
-      description: enabledIntegrationOption.name,
+      description: enabledIntegration?.enabledIntegrationOption.name,
     },
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
         defaultMessage: 'Benchmark',
       }),
-      description: enabledIntegrationOption.benchmark,
+      description: enabledIntegration?.enabledIntegrationOption.benchmark,
     }
   );
 

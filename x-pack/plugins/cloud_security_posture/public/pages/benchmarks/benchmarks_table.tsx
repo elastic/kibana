@@ -100,7 +100,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
     render: (field) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
-      return enabledIntegration.integration?.shortName || ' ';
+      return enabledIntegration?.integration?.shortName || ' ';
     },
   },
   {
@@ -114,7 +114,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.DEPLOYMENT_TYPE,
     render: (field) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
-      return enabledIntegration.enabledIntegrationOption?.name || ' ';
+      return enabledIntegration?.enabledIntegrationOption?.name || ' ';
     },
   },
   {
