@@ -29,6 +29,8 @@ export default ({ getService }: FtrProviderContext): void => {
     const secOnlyInfo: User = getUserInfo(secOnlySpacesAll);
     let cookies: Cookie[];
     let suggestedSecUsers: UserProfile[];
+    let superUserHeaders: { Cookie: string };
+    let secOnlyHeaders: { Cookie: string };
 
     before(async () => {
       await createUsersAndRoles(
@@ -44,6 +46,14 @@ export default ({ getService }: FtrProviderContext): void => {
         users: [superUser, secOnlySpacesAll],
       });
 
+      superUserHeaders = {
+        Cookie: cookies[0].cookieString(),
+      };
+
+      secOnlyHeaders = {
+        Cookie: cookies[1].cookieString(),
+      };
+
       suggestedSecUsers = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
@@ -56,8 +66,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await es.security.disableUserProfile({ uid: suggestedSecUsers[0].uid, refresh: 'wait_for' });
-
       await deleteAllCaseItems(es);
     });
 
@@ -69,15 +77,40 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
+    it('filters by reporters using the profile uid and username', async () => {
+      // create a case with super user
+      const superUserCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+        200,
+        { user: superUser, space: null }
+      );
+
+      // create a case with a security user
+      const secOnlyCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+        200,
+        null,
+        secOnlyHeaders
+      );
+
+      // find cases for both users
+      const cases = await findCases({
+        supertest,
+        query: { reporters: [suggestedSecUsers[0].uid, superUser.username!] },
+      });
+
+      expect(cases).to.eql({
+        ...findCasesResp,
+        total: 2,
+        // should only find the case created by the security user
+        cases: [superUserCase, secOnlyCase],
+        count_open_cases: 2,
+      });
+    });
+
     it('filters by reporters using the profile uid', async () => {
-      const superUserHeaders = {
-        Cookie: cookies[0].cookieString(),
-      };
-
-      const secOnlyHeaders = {
-        Cookie: cookies[1].cookieString(),
-      };
-
       const [, secCase] = await Promise.all([
         // create a case with super user
         createCase(
