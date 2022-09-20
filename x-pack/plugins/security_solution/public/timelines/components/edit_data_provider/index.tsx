@@ -36,7 +36,7 @@ import {
 import * as i18n from './translations';
 
 const EDIT_DATA_PROVIDER_WIDTH = 400;
-const OPERATOR_COMBO_BOX_WIDTH = 160;
+const OPERATOR_COMBO_BOX_WIDTH = 152;
 const SAVE_CLASS_NAME = 'edit-data-provider-save';
 const VALUE_INPUT_CLASS_NAME = 'edit-data-provider-value';
 
@@ -188,7 +188,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
     return (
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={true}>
             <EuiFormRow label={i18n.FIELD}>
               <EuiComboBox
                 autoFocus
@@ -208,26 +208,26 @@ export const StatefulEditDataProvider = React.memo<Props>(
             <EuiSpacer size="m" />
           </EuiFlexItem>
 
-          {type !== DataProviderType.template &&
-          updatedOperator.length > 0 &&
-          updatedOperator[0].label !== i18n.EXISTS &&
-          updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
-            <EuiFlexItem grow={true}>
-              <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={i18n.OPERATOR}>
-                    <EuiComboBox
-                      data-test-subj="operator"
-                      isClearable={false}
-                      onChange={onOperatorSelected}
-                      options={operatorLabels}
-                      placeholder={i18n.SELECT_AN_OPERATOR}
-                      selectedOptions={updatedOperator}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
+              <EuiFlexItem grow={true}>
+                <EuiFormRow label={i18n.OPERATOR}>
+                  <EuiComboBox
+                    data-test-subj="operator"
+                    isClearable={false}
+                    onChange={onOperatorSelected}
+                    options={operatorLabels}
+                    placeholder={i18n.SELECT_AN_OPERATOR}
+                    selectedOptions={updatedOperator}
+                    singleSelection={{ asPlainText: true }}
+                    style={{ minWidth: OPERATOR_COMBO_BOX_WIDTH }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {type !== DataProviderType.template &&
+              updatedOperator.length > 0 &&
+              updatedOperator[0].label !== i18n.EXISTS &&
+              updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
                 <EuiFlexItem grow={false}>
                   <EuiFormRow label={i18n.VALUE_LABEL}>
                     <EuiFieldText
@@ -239,9 +239,9 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />
