@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ValuesType, UnionToIntersection } from 'utility-types';
+import type { ValuesType, UnionToIntersection } from 'utility-types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 interface AggregationsAggregationContainer extends Record<string, any> {

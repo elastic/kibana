@@ -853,6 +853,7 @@ packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
 packages/kbn-es-query @elastic/kibana-app-services
+packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
