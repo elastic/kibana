@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useFormattedDate } from './panels/use_formatted_date';
 import type { ResolverState } from '../types';
 
 export function useAutotuneTimerange() {
@@ -20,6 +21,8 @@ export function useAutotuneTimerange() {
       to: detectedBounds?.to ? detectedBounds.to : undefined,
     };
   });
+  const detectedFormattedFrom = useFormattedDate(detectedFrom);
+  const detectedFormattedTo = useFormattedDate(detectedTo);
 
   const successMessage = useMemo(() => {
     return i18n.translate('xpack.securitySolution.resolver.unboundedRequest.toast', {
@@ -27,11 +30,11 @@ export function useAutotuneTimerange() {
       found using a start date of {from} and an end date of {to}. Select a different time range in
        the date picker to use a different range.`,
       values: {
-        from: detectedFrom,
-        to: detectedTo,
+        from: detectedFormattedFrom,
+        to: detectedFormattedTo,
       },
     });
-  }, [detectedFrom, detectedTo]);
+  }, [detectedFormattedFrom, detectedFormattedTo]);
   useEffect(() => {
     if (detectedFrom || detectedTo) {
       addSuccess(successMessage);
