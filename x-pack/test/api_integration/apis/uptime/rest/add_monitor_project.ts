@@ -194,10 +194,10 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(tcpProjectMonitors)
         );
 
-        expect(messages).to.have.length(4);
-        expect(messages[3].updatedMonitors).eql([]);
-        expect(messages[3].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
-        expect(messages[3].failedMonitors).eql([
+        expect(messages).to.have.length(3);
+        expect(messages[2].updatedMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[2].failedMonitors).eql([
           {
             id: tcpProjectMonitors.monitors[2].id,
             details: `The following Heartbeat options are not supported for ${tcpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: ports|unsupportedKey.nestedUnsupportedKey`,
@@ -278,10 +278,10 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(icmpProjectMonitors)
         );
 
-        expect(messages).to.have.length(4);
-        expect(messages[3].updatedMonitors).eql([]);
-        expect(messages[3].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
-        expect(messages[3].failedMonitors).eql([
+        expect(messages).to.have.length(3);
+        expect(messages[2].updatedMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[2].failedMonitors).eql([
           {
             id: icmpProjectMonitors.monitors[2].id,
             details: `The following Heartbeat options are not supported for ${icmpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: unsupportedKey.nestedUnsupportedKey`,
