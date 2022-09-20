@@ -7,10 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import { SubscriptionNotAllowed } from './subscription_not_allowed';
+import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
@@ -20,6 +22,7 @@ export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
+export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
 interface CommonError {
   body: {
@@ -55,22 +58,30 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
       solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
         defaultMessage: 'Cloud Security Posture',
       })}
-      // TODO: Add real docs link once we have it
-      docsLink={'https://www.elastic.co/guide/index.html'}
+      docsLink={'https://ela.st/kspm'}
       logo={'logoSecurity'}
       actions={{
         elasticAgent: {
           href: cisIntegrationLink,
           isDisabled: !cisIntegrationLink,
           title: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-            defaultMessage: 'Add a CIS integration',
+            defaultMessage: 'Add a KSPM integration',
           }),
-          description: i18n.translate(
-            'xpack.csp.cloudPosturePage.packageNotInstalled.description',
-            {
-              defaultMessage:
-                'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
-            }
+          description: (
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.packageNotInstalled.description"
+              defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
+              values={{
+                integrationFullName: (
+                  <EuiLink href="https://ela.st/kspm">
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
+                      defaultMessage="Kubernetes Security Posture Management"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           ),
         },
       }}
@@ -120,28 +131,29 @@ const defaultErrorRenderer = (error: unknown) => (
   </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => {
-  return (
-    <FullSizeCenteredPage>
-      <NoDataPage
-        data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
-        pageTitle={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.pageTitle', {
-          defaultMessage: 'No data found',
-        })}
-        solution={i18n.translate(
-          'xpack.csp.cloudPosturePage.defaultNoDataConfig.solutionNameLabel',
-          {
-            defaultMessage: 'Cloud Security Posture',
-          }
-        )}
-        // TODO: Add real docs link once we have it
-        docsLink={'https://www.elastic.co/guide/index.html'}
-        logo={'logoSecurity'}
-        actions={{}}
-      />
-    </FullSizeCenteredPage>
-  );
-};
+const defaultNoDataRenderer = () => (
+  <FullSizeCenteredPage>
+    <NoDataPage
+      data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
+      pageTitle={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.pageTitle', {
+        defaultMessage: 'No data found',
+      })}
+      solution={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.solutionNameLabel', {
+        defaultMessage: 'Cloud Security Posture',
+      })}
+      // TODO: Add real docs link once we have it
+      docsLink={'https://www.elastic.co/guide/index.html'}
+      logo={'logoSecurity'}
+      actions={{}}
+    />
+  </FullSizeCenteredPage>
+);
+
+const subscriptionNotAllowedRenderer = () => (
+  <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
+    <SubscriptionNotAllowed />
+  </FullSizeCenteredPage>
+);
 
 interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
@@ -158,10 +170,23 @@ export const CloudPosturePage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
+  const subscriptionStatus = useSubscriptionStatus();
   const getSetupStatus = useCspSetupStatusApi();
   const cisIntegrationLink = useCISIntegrationLink();
 
   const render = () => {
+    if (subscriptionStatus.isError) {
+      return defaultErrorRenderer(subscriptionStatus.error);
+    }
+
+    if (subscriptionStatus.isLoading) {
+      return defaultLoadingRenderer();
+    }
+
+    if (!subscriptionStatus.data) {
+      return subscriptionNotAllowedRenderer();
+    }
+
     if (getSetupStatus.isError) {
       return defaultErrorRenderer(getSetupStatus.error);
     }

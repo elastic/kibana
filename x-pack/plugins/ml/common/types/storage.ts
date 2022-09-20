@@ -75,3 +75,16 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   : T extends typeof ML_NOTIFICATIONS_LAST_CHECKED_AT
   ? number | undefined
   : null;
+
+export const ML_STORAGE_KEYS = [
+  ML_ENTITY_FIELDS_CONFIG,
+  ML_APPLY_TIME_RANGE_CONFIG,
+  ML_GETTING_STARTED_CALLOUT_DISMISSED,
+  ML_FROZEN_TIER_PREFERENCE,
+  ML_ANOMALY_EXPLORER_PANELS,
+  ML_NOTIFICATIONS_LAST_CHECKED_AT,
+];
+
+export function isMlStorageKey(key: unknown): key is MlStorageKey {
+  return typeof key === 'string' && ML_STORAGE_KEYS.includes(key);
+}
