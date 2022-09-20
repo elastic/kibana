@@ -118,14 +118,20 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiButtonIcon
           data-test-subj={'aiopsSpikeAnalysisGroupsTableRowExpansionButton'}
           onClick={() => toggleDetails(item)}
-            aria-label={
+          aria-label={
             itemIdToExpandedRowMap[item.id]
-              ? i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.collapseAriaLabel', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.expandAriaLabel', {
-                  defaultMessage: 'Expand',
-                })
+              ? i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.collapseAriaLabel',
+                  {
+                    defaultMessage: 'Collapse',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.expandAriaLabel',
+                  {
+                    defaultMessage: 'Expand',
+                  }
+                )
           }
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
