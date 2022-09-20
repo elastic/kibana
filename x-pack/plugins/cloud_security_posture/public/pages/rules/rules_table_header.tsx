@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 interface RulesTableToolbarProps {
@@ -16,33 +15,19 @@ interface RulesTableToolbarProps {
   totalRulesCount: number;
   searchValue: string;
   isSearching: boolean;
-  lastModified: string | null;
 }
 
 interface CounterProps {
   count: number;
 }
 
-const LastModificationLabel = ({ lastModified }: { lastModified: string }) => (
-  <EuiText size="s">
-    <FormattedMessage
-      id="xpack.csp.rules.tableHeader.lastModificationLabel"
-      defaultMessage="Last modification to integration {timeAgo} "
-      values={{ timeAgo: moment(lastModified).fromNow() }}
-    />
-  </EuiText>
-);
-
 export const RulesTableHeader = ({
   search,
   totalRulesCount,
   searchValue,
   isSearching,
-  lastModified,
 }: RulesTableToolbarProps) => (
   <div>
-    {lastModified && <LastModificationLabel lastModified={lastModified} />}
-    <EuiSpacer />
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
       <Counters total={totalRulesCount} />
       <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />

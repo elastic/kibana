@@ -9540,7 +9540,6 @@
     "xpack.csp.rules.header.totalRulesCount": "Affichage des {rules}",
     "xpack.csp.rules.rulePageHeader.pageDescriptionTitle": "{integrationType}, {agentPolicyName}",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "Règles - {integrationName}",
-    "xpack.csp.rules.tableHeader.lastModificationLabel": "Dernière modification de l'intégration {timeAgo} ",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "Aucune intégration Benchmark trouvée",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle": "Nous n'avons trouvé aucune intégration Benchmark avec les filtres ci-dessus.",
     "xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder": "par exemple, le nom d'un benchmark",

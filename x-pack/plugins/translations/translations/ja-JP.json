@@ -9527,7 +9527,6 @@
     "xpack.csp.rules.header.totalRulesCount": "{rules}を表示しています",
     "xpack.csp.rules.rulePageHeader.pageDescriptionTitle": "{integrationType}, {agentPolicyName}",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "ルール - {integrationName}",
-    "xpack.csp.rules.tableHeader.lastModificationLabel": "統合{timeAgo}の前回変更日 ",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "ベンチマーク統合が見つかりません",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle": "上記のフィルターでベンチマーク統合が見つかりませんでした。",
     "xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder": "例：ベンチマーク名",

@@ -98,7 +98,6 @@ export const RulesContainer = () => {
           searchValue={rulesQuery.search}
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
-          lastModified={rulesPageData.lastModified}
         />
         <EuiSpacer />
         <RulesTable
