@@ -13,11 +13,11 @@ import styled from 'styled-components';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
-import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
+import type { EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -31,7 +31,6 @@ import {
   STATUS_OPEN,
 } from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { VIEW_ALERTS } from '../../../pages/translations';
 import { SEVERITY_COLOR } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -39,7 +38,8 @@ import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
-import { LinkButton } from '../../../../common/components/links';
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
+import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
 const donutHeight = 120;
 const StyledFlexItem = styled(EuiFlexItem)`
@@ -53,6 +53,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 
 interface AlertsByStatusProps {
   signalIndexName: string | null;
+  entityFilter?: EntityFilter;
 }
 
 const legendField = 'kibana.alert.severity';
@@ -64,28 +65,20 @@ const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
 ];
 const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
-export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
+export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
-  const { navigateTo } = useNavigation();
-  const goToAlerts = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateTo({
-        deepLinkId: SecurityPageName.alerts,
-        path: getDetectionEngineUrl(urlSearch),
-      });
-    },
-    [navigateTo, urlSearch]
-  );
+  const { openEntityInTimeline } = useNavigateToTimeline();
+  const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
+    deepLinkId: SecurityPageName.alerts,
+  });
 
   const detailsButtonOptions = useMemo(
     () => ({
       name: VIEW_ALERTS,
-      href: formatUrl(getDetectionEngineUrl()),
-      onClick: goToAlerts,
+      href: entityFilter ? undefined : href,
+      onClick: entityFilter ? () => openEntityInTimeline([entityFilter]) : goToAlerts,
     }),
-    [formatUrl, goToAlerts]
+    [goToAlerts, entityFilter]
   );
 
   const {
@@ -93,9 +86,10 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
     isLoading: loading,
     updatedAt,
   } = useAlertsByStatus({
+    entityFilter,
     signalIndexName,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     skip: !toggleStatus,
+    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
   const legendItems: LegendItem[] = useMemo(
     () =>

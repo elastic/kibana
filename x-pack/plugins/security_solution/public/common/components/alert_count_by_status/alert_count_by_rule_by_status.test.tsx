@@ -10,7 +10,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../mock';
-import { AlertCountByStatus } from './alert_count_by_rule_by_status';
+import { AlertCountByRuleByStatus } from './alert_count_by_rule_by_status';
 import { COLUMN_HEADER_COUNT, COLUMN_HEADER_RULE_NAME } from './translations';
 import type { UseAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
@@ -38,11 +38,15 @@ jest.mock('./use_alert_count_by_rule_by_status', () => ({
 const renderComponent = () =>
   render(
     <TestProviders>
-      <AlertCountByStatus field={'host.hostname'} value={'some_host_name'} />
+      <AlertCountByRuleByStatus
+        field={'host.hostname'}
+        value={'some_host_name'}
+        signalIndexName={''}
+      />
     </TestProviders>
   );
 
-describe('HostAlertsTable', () => {
+describe('AlertCountByRuleByStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -30,6 +30,7 @@ import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status
 interface AlertCountByStatusProps {
   field: string;
   value: string;
+  signalIndexName: string | null;
 }
 
 interface StatusSelection {
@@ -46,6 +47,7 @@ type GetTableColumns = ({
   openRuleInTimelineWithAdditionalFields: (ruleName: string) => void;
 }) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
 
+const KIBANA_RULE_ALERT_FIELD = 'kibana.alert.rule.name';
 const statuses = ['open', 'acknowledged', 'closed'];
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
 const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
@@ -55,90 +57,98 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  height: 272px;
+  height: 308px;
 `;
 
-export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStatusProps) => {
-  const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
-  const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
+export const AlertCountByRuleByStatus = React.memo(
+  ({ field, value, signalIndexName }: AlertCountByStatusProps) => {
+    const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
+    const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
-  const { getAppUrl, navigateTo } = useNavigation();
-  const { openRuleInTimeline } = useNavigateToTimeline();
-  const columns = useMemo(() => {
-    const openRuleInTimelineWithAdditionalFields = (ruleName: string) =>
-      openRuleInTimeline(ruleName, { field, value });
-    return getTableColumns({ getAppUrl, navigateTo, openRuleInTimelineWithAdditionalFields });
-  }, [field, value, openRuleInTimeline]);
+    const { getAppUrl, navigateTo } = useNavigation();
+    const { openEntityInTimeline } = useNavigateToTimeline();
+    const columns = useMemo(() => {
+      const openRuleInTimelineWithAdditionalFields = (ruleName: string) =>
+        openEntityInTimeline([
+          { field: KIBANA_RULE_ALERT_FIELD, value: ruleName },
+          { field, value },
+        ]);
+      return getTableColumns({ getAppUrl, navigateTo, openRuleInTimelineWithAdditionalFields });
+    }, [field, value, openEntityInTimeline]);
 
-  const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
-    defaultValue: {
-      [field]: ['open'],
-    },
-    key: LOCAL_STORAGE_KEY,
-    isInvalidDefault: (valueFromStorage) => {
-      return valueFromStorage && valueFromStorage[field] ? false : true;
-    },
-  });
+    const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
+      defaultValue: {
+        [field]: ['open'],
+      },
+      key: LOCAL_STORAGE_KEY,
+      isInvalidDefault: (valueFromStorage) => {
+        return valueFromStorage && valueFromStorage[field] ? false : true;
+      },
+    });
 
-  const updateSelection = useCallback(
-    (selection: Status[]) => {
-      setSelectedStatusesByField({
-        ...selectedStatusesByField,
-        [field]: selection,
-      });
-    },
-    [field, selectedStatusesByField, setSelectedStatusesByField]
-  );
+    const updateSelection = useCallback(
+      (selection: Status[]) => {
+        setSelectedStatusesByField({
+          ...selectedStatusesByField,
+          [field]: selection,
+        });
+      },
+      [field, selectedStatusesByField, setSelectedStatusesByField]
+    );
 
-  const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
-    field,
-    value,
-    queryId,
-    statuses: selectedStatusesByField[field] as Status[],
-    skip: !toggleStatus,
-  });
+    const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
+      field,
+      value,
+      queryId,
+      statuses: selectedStatusesByField[field] as Status[],
+      skip: !toggleStatus,
+      signalIndexName,
+    });
 
-  return (
-    <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
-      <StyledEuiPanel hasBorder data-test-subj="alertCountByRulePanel">
-        <>
-          <HeaderSection
-            id={queryId}
-            title={i18n.Alerts}
-            titleSize="s"
-            toggleStatus={toggleStatus}
-            toggleQuery={setToggleStatus}
-            subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-          >
-            <MultiSelectPopover
-              title={i18n.Status}
-              allItems={statuses}
-              selectedItems={selectedStatusesByField[field]}
-              onSelectedItemsChange={(selectedItems) => updateSelection(selectedItems as Status[])}
-            />
-          </HeaderSection>
-
-          {toggleStatus && (
-            <>
-              <EuiBasicTable
-                className="eui-yScroll"
-                data-test-subj="alertCountByRuleTable"
-                columns={columns}
-                items={items}
-                loading={isLoading}
-                noItemsMessage={
-                  <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+    return (
+      <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
+        <StyledEuiPanel hasBorder data-test-subj="alertCountByRulePanel">
+          <>
+            <HeaderSection
+              id={queryId}
+              title={i18n.Alerts}
+              titleSize="s"
+              toggleStatus={toggleStatus}
+              toggleQuery={setToggleStatus}
+              subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+            >
+              <MultiSelectPopover
+                title={i18n.Status}
+                allItems={statuses}
+                selectedItems={selectedStatusesByField[field]}
+                onSelectedItemsChange={(selectedItems) =>
+                  updateSelection(selectedItems as Status[])
                 }
               />
-            </>
-          )}
-        </>
-      </StyledEuiPanel>
-    </HoverVisibilityContainer>
-  );
-});
+            </HeaderSection>
 
-AlertCountByStatus.displayName = 'AlertCountByStatus';
+            {toggleStatus && (
+              <>
+                <EuiBasicTable
+                  className="eui-yScroll"
+                  data-test-subj="alertCountByRuleTable"
+                  columns={columns}
+                  items={items}
+                  loading={isLoading}
+                  noItemsMessage={
+                    <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+                  }
+                />
+              </>
+            )}
+          </>
+        </StyledEuiPanel>
+      </HoverVisibilityContainer>
+    );
+  }
+);
+
+AlertCountByRuleByStatus.displayName = 'AlertCountByStatus';
 
 export const getTableColumns: GetTableColumns = ({
   getAppUrl,

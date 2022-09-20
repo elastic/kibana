@@ -8,17 +8,16 @@
 import { useDispatch } from 'react-redux';
 
 import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import { sourcererActions } from '../../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import type { DataProvider } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 
-export interface AdditionalFilter {
+export interface Filter {
   field: string;
   value: string;
 }
+
 export const useNavigateToTimeline = () => {
   const dispatch = useDispatch();
 
@@ -39,14 +38,27 @@ export const useNavigateToTimeline = () => {
     );
     // Only show detection alerts
     // (This is required so the timeline event count matches the prevalence count)
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedDataViewId: 'security-solution-default',
-        selectedPatterns: ['.alerts-security.alerts-default'],
-      })
-    );
+    // dispatch(
+    //   sourcererActions.setSelectedDataView({
+    //     id: SourcererScopeName.timeline,
+    //     selectedDataViewId: 'security-solution-default',
+    //     selectedPatterns: ['.alerts-security.alerts-default'],
+    //   })
+    // );
   };
+
+  const openEntityInTimeline = (entityFilters: [Filter, ...Filter[]]) => {
+    const mainFilter = entityFilters.shift()!;
+    const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+
+    for (const filter of entityFilters) {
+      dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+    }
+
+    navigateToTimeline(dataProvider);
+  };
+
+  // TODO: Replace the usage of functions with openEntityInTimeline
 
   const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
     const dataProvider = getDataProvider('host.name', '', hostName);
@@ -67,17 +79,14 @@ export const useNavigateToTimeline = () => {
     navigateToTimeline(dataProvider);
   };
 
-  const openRuleInTimeline = (ruleName: string, additionalFilter?: AdditionalFilter) => {
+  const openRuleInTimeline = (ruleName: string) => {
     const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
-
-    if (additionalFilter) {
-      dataProvider.and.push(getDataProvider(additionalFilter.field, '', additionalFilter.value));
-    }
 
     navigateToTimeline(dataProvider);
   };
 
   return {
+    openEntityInTimeline,
     openHostInTimeline,
     openRuleInTimeline,
     openUserInTimeline,

@@ -60,6 +60,7 @@ const renderUseAlertCountByRuleByStatus = (
       value: 'test_value',
       statuses: ['open'],
       queryId: 'queryId',
+      signalIndexName: '',
       ...overrides,
     })
   );

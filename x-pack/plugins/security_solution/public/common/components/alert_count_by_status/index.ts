@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AlertCountByStatus } from './alert_count_by_rule_by_status';
+export { AlertCountByRuleByStatus } from './alert_count_by_rule_by_status';

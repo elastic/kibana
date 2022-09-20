@@ -10,7 +10,6 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
-import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useQueryInspector } from '../page/manage_query';
@@ -27,6 +26,7 @@ export interface UseAlertCountByRuleByStatusProps {
   queryId: string;
   statuses: Status[];
   skip?: boolean;
+  signalIndexName: string | null;
 }
 export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusProps) => {
   items: AlertCountByRuleByStatusItem[];
@@ -42,11 +42,11 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   queryId,
   statuses,
   skip = false,
+  signalIndexName,
 }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
 
-  const { signalIndexName } = useSignalIndex();
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
   const {

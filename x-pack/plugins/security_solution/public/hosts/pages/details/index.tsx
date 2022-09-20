@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { AlertsByStatus } from '@kbn/security-solution-plugin/public/overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '@kbn/security-solution-plugin/public/detections/containers/detection_engine/alerts/use_signal_index';
+
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -29,7 +35,6 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
-import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -58,17 +63,10 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { AlertCountByStatus } from '../../../common/components/alert_count_by_status';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 
 const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
-
-const StyledEuiFlexItem = euiStyled(EuiFlexItem)`
-  border: 1px solid ${euiThemeVars.euiColorLightShade};
-  border-radius: 5px;
-  padding: 12px;
-  width: 100%;
-`;
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
@@ -86,6 +84,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const { signalIndexName } = useSignalIndex();
 
   const capabilities = useMlCapabilities();
   const kibana = useKibana();
@@ -94,23 +93,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [detailName]
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
-
-  const updateDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        })
-      );
-    },
-    [dispatch]
-  );
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -151,6 +133,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_HOST_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
+
   return (
     <>
       {indicesExist ? (
@@ -166,6 +156,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           >
             <Display show={!globalFullScreen}>
               <HeaderPage
+                border
                 subtitle={
                   <LastEventTime
                     indexKey={LastEventIndexKey.hostDetails}
@@ -175,54 +166,54 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 }
                 title={detailName}
               />
-              <EuiFlexGroup>
-                <StyledEuiFlexItem grow={3}>
-                  <AnomalyTableProvider
-                    criteriaFields={hostToCriteria(hostOverview)}
+
+              <AnomalyTableProvider
+                criteriaFields={hostToCriteria(hostOverview)}
+                startDate={from}
+                endDate={to}
+                skip={isInitializing}
+              >
+                {({ isLoadingAnomaliesData, anomaliesData }) => (
+                  <HostOverviewManage
+                    id={id}
+                    isInDetailsSidePanel={false}
+                    data={hostOverview as HostItem}
+                    anomaliesData={anomaliesData}
+                    isLoadingAnomaliesData={isLoadingAnomaliesData}
+                    loading={loading}
                     startDate={from}
                     endDate={to}
-                    skip={isInitializing}
-                  >
-                    {({ isLoadingAnomaliesData, anomaliesData }) => (
-                      <HostOverviewManage
-                        id={id}
-                        isInDetailsSidePanel={false}
-                        data={hostOverview as HostItem}
-                        anomaliesData={anomaliesData}
-                        isLoadingAnomaliesData={isLoadingAnomaliesData}
-                        loading={loading}
-                        startDate={from}
-                        endDate={to}
-                        narrowDateRange={narrowDateRange}
-                        setQuery={setQuery}
-                        refetch={refetch}
-                        inspect={inspect}
-                        hostName={detailName}
-                        indexNames={selectedPatterns}
-                      />
-                    )}
-                  </AnomalyTableProvider>
-                </StyledEuiFlexItem>
-                <EuiFlexItem>
-                  {canReadAlerts && (
-                    <EuiFlexItem>
-                      <AlertCountByStatus field={ES_HOST_FIELD} value={detailName} />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <HostsDetailsKpiComponent
-                filterQuery={filterQuery}
-                from={from}
-                indexNames={selectedPatterns}
-                setQuery={setQuery}
-                to={to}
-                updateDateRange={updateDateRange}
-                skip={isInitializing}
-              />
-
+                    narrowDateRange={narrowDateRange}
+                    setQuery={setQuery}
+                    refetch={refetch}
+                    inspect={inspect}
+                    hostName={detailName}
+                    indexNames={selectedPatterns}
+                  />
+                )}
+              </AnomalyTableProvider>
+              <EuiHorizontalRule />
               <EuiSpacer />
+
+              {canReadAlerts && (
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <AlertsByStatus
+                        signalIndexName={signalIndexName}
+                        entityFilter={entityFilter}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <AlertCountByRuleByStatus
+                        {...entityFilter}
+                        signalIndexName={signalIndexName}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                </>
+              )}
 
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHostDetails({

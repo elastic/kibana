@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { AlertsByStatus } from '@kbn/security-solution-plugin/public/overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '@kbn/security-solution-plugin/public/detections/containers/detection_engine/alerts/use_signal_index';
 
-import { AlertCountByStatus } from '../../../common/components/alert_count_by_status';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -62,13 +68,6 @@ import { LandingPageComponent } from '../../../common/components/landing_page';
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
 
-const StyledEuiFlexItem = euiStyled(EuiFlexItem)`
-  border: 1px solid ${euiThemeVars.euiColorLightShade};
-  border-radius: 5px;
-  padding: 12px;
-  width: 100%;
-`;
-
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
   usersDetailsPagePath,
@@ -87,6 +86,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
+  const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
@@ -149,6 +149,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [dispatch]
   );
 
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_USER_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
+
   return (
     <>
       {indicesExist ? (
@@ -169,38 +177,46 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               }
               title={detailName}
             />
-            <EuiFlexGroup>
-              <StyledEuiFlexItem grow={3}>
-                <AnomalyTableProvider
-                  criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
+
+            <AnomalyTableProvider
+              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
+              startDate={from}
+              endDate={to}
+              skip={isInitializing}
+            >
+              {({ isLoadingAnomaliesData, anomaliesData }) => (
+                <UserOverview
+                  userName={detailName}
+                  id={QUERY_ID}
+                  isInDetailsSidePanel={false}
+                  data={userDetails}
+                  anomaliesData={anomaliesData}
+                  isLoadingAnomaliesData={isLoadingAnomaliesData}
+                  loading={loading}
                   startDate={from}
                   endDate={to}
-                  skip={isInitializing}
-                >
-                  {({ isLoadingAnomaliesData, anomaliesData }) => (
-                    <UserOverview
-                      userName={detailName}
-                      id={QUERY_ID}
-                      isInDetailsSidePanel={false}
-                      data={userDetails}
-                      anomaliesData={anomaliesData}
-                      isLoadingAnomaliesData={isLoadingAnomaliesData}
-                      loading={loading}
-                      startDate={from}
-                      endDate={to}
-                      narrowDateRange={narrowDateRange}
-                      indexPatterns={selectedPatterns}
-                    />
-                  )}
-                </AnomalyTableProvider>
-              </StyledEuiFlexItem>
-              {canReadAlerts && (
-                <EuiFlexItem>
-                  <AlertCountByStatus field={ES_USER_FIELD} value={detailName} />
-                </EuiFlexItem>
+                  narrowDateRange={narrowDateRange}
+                  indexPatterns={selectedPatterns}
+                />
               )}
-            </EuiFlexGroup>
+            </AnomalyTableProvider>
+            <EuiHorizontalRule />
             <EuiSpacer />
+
+            {canReadAlerts && (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={3}>
+                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <AlertCountByRuleByStatus {...entityFilter} signalIndexName={signalIndexName} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </>
+            )}
+
             <SecuritySolutionTabNavigation
               navTabs={navTabsUsersDetails(
                 detailName,
