@@ -6,14 +6,52 @@
  */
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import datemath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIconTip, EuiStat, EuiSpacer } from '@elastic/eui';
 import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
+
+const getParsedDate = (date: string) => {
+  if (date.includes('now')) {
+    return datemath.parse(date)?.format() || date;
+  }
+  return date;
+};
+
+const API_FAILED_MESSAGE = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.apiError',
+  {
+    defaultMessage: 'Failed to fetch event log KPI.',
+  }
+);
+
+const RESPONSE_TOOLTIP = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip',
+  {
+    defaultMessage: 'Response status of recent rule runs.',
+  }
+);
+
+const ALERTS_TOOLTIP = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.alertsTooltip',
+  {
+    defaultMessage: 'Alert status of recent rule runs.',
+  }
+);
+
+const ACTIONS_TOOLTIP = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.actionsTooltip',
+  {
+    defaultMessage: 'Action status of recent rule runs.',
+  }
+);
 
 const Stat = ({
   title,
@@ -60,6 +98,9 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
     loadExecutionKPIAggregations,
     loadGlobalExecutionKPIAggregations,
   } = props;
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const isInitialized = useRef(false);
 
@@ -78,14 +119,17 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
     try {
       const newKpi = await loadKPIFn({
         id: ruleId,
-        dateStart,
-        dateEnd,
+        dateStart: getParsedDate(dateStart),
+        dateEnd: getParsedDate(dateEnd),
         outcomeFilter,
         message,
       });
       setKpi(newKpi);
     } catch (e) {
-      // TODO Add toaster
+      toasts.addDanger({
+        title: API_FAILED_MESSAGE,
+        text: e.body?.message ?? e,
+      });
     }
     setIsLoading(false);
   };
@@ -119,10 +163,11 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={4}>
-        <Stat title="Response" tooltip="Response status of recent rule runs">
+        <Stat title="Response" tooltip={RESPONSE_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-successOutcome"
                 description={getStatDescription(<RuleEventLogListStatus status="success" />)}
                 titleSize="s"
                 title={kpi.success}
@@ -130,6 +175,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-unknownOutcome"
                 description={getStatDescription(<RuleEventLogListStatus status="unknown" />)}
                 titleSize="s"
                 title={kpi.unknown}
@@ -137,6 +183,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-failureOutcome"
                 description={getStatDescription(<RuleEventLogListStatus status="failure" />)}
                 titleSize="s"
                 title={kpi.failure}
@@ -146,10 +193,11 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         </Stat>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>
-        <Stat title="Alerts" tooltip="Alert status of recent rule runs">
+        <Stat title="Alerts" tooltip={ALERTS_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-activeAlerts"
                 description={getStatDescription('Active')}
                 titleSize="s"
                 title={kpi.activeAlerts}
@@ -157,6 +205,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-newAlerts"
                 description={getStatDescription('New')}
                 titleSize="s"
                 title={kpi.newAlerts}
@@ -164,6 +213,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-recoveredAlerts"
                 description={getStatDescription('Recovered')}
                 titleSize="s"
                 title={kpi.recoveredAlerts}
@@ -173,10 +223,11 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         </Stat>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <Stat title="Actions" tooltip="Action status of recent rule runs">
+        <Stat title="Actions" tooltip={ACTIONS_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-erroredActions"
                 description={getStatDescription('Errored')}
                 titleSize="s"
                 title={kpi.erroredActions}
@@ -184,6 +235,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
+                data-test-subj="ruleEventLogKpi-triggeredActions"
                 description={getStatDescription('Triggered')}
                 titleSize="s"
                 title={kpi.triggeredActions}

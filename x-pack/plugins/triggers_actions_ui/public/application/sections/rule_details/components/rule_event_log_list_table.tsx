@@ -114,6 +114,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   const [search, setSearch] = useState<string>('');
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
+  const [internalRefreshToken, setInternalRefreshToken] = useState<number | undefined>(
+    refreshToken
+  );
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
@@ -243,6 +246,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onRefresh = () => {
+    setInternalRefreshToken(Date.now());
     loadEventLogs();
   };
 
@@ -339,6 +343,10 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
   }, [localStorageKey, visibleColumns]);
 
+  useEffect(() => {
+    setInternalRefreshToken(refreshToken);
+  }, [refreshToken]);
+
   return (
     <>
       <EuiFlexGroup>
@@ -373,11 +381,11 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       <EuiSpacer />
       <RuleEventLogListKPI
         ruleId={ruleId}
-        dateStart={getParsedDate(dateStart)}
-        dateEnd={getParsedDate(dateEnd)}
+        dateStart={dateStart}
+        dateEnd={dateEnd}
         outcomeFilter={filter}
         message={searchText}
-        refreshToken={refreshToken}
+        refreshToken={internalRefreshToken}
       />
       <EuiSpacer />
       {renderList()}
