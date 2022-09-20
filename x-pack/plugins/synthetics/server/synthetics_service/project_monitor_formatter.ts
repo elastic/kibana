@@ -153,18 +153,21 @@ export class ProjectMonitorFormatter {
     const { updatedCount } = await this.updateMonitors(normalizedUpdateMonitors);
 
     if (normalizedUpdateMonitors.length > 0) {
-      let message = '';
+      let updateMessage = '';
       if (updatedCount > 0) {
-        message = `${updatedCount} monitor${updatedCount > 1 ? 's' : ''} updated successfully. `;
+        updateMessage = `${updatedCount} monitor${
+          updatedCount > 1 ? 's' : ''
+        } updated successfully.`;
       }
 
       const noChanges = normalizedUpdateMonitors.length - updatedCount;
+      let noChangeMessage = '';
       if (noChanges > 0) {
-        message += `${noChanges} monitor${noChanges > 1 ? 's' : ''} found with no changes.`;
+        noChangeMessage = `${noChanges} monitor${noChanges > 1 ? 's' : ''} found with no changes.`;
       }
 
       this.handleStreamingMessage({
-        message,
+        message: `${updateMessage} ${noChangeMessage}`,
       });
     }
 
