@@ -82,7 +82,7 @@ export const AlertCountByRuleByStatus = React.memo(
       },
       key: LOCAL_STORAGE_KEY,
       isInvalidDefault: (valueFromStorage) => {
-        return valueFromStorage && valueFromStorage[field] ? false : true;
+        return valueFromStorage && !valueFromStorage[field];
       },
     });
 

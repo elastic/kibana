@@ -6,4 +6,3 @@
  */
 
 export { MultiSelectPopover } from './multiselect_popover/multiselect_popover';
-export { LastUpdatedAt } from './last_updated_at/LastUpdatedAt';

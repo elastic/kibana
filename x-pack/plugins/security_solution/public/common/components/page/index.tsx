@@ -210,6 +210,8 @@ export const MoreRowItems = styled(EuiIcon)`
 MoreRowItems.displayName = 'MoreRowItems';
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
+  position: relative;
+
   .euiButtonIcon {
     position: absolute;
     right: ${(props) => props.theme.eui.euiSizeM};
