@@ -42,8 +42,8 @@ const mockGetPipeline2 = {
       },
       {
         inference: {
-          model_id: 'trained-model-id-1',
           inference_config: { regression: {} },
+          model_id: 'trained-model-id-1',
         },
       },
     ],
@@ -53,8 +53,8 @@ const mockGetPipeline2 = {
     processors: [
       {
         inference: {
-          model_id: 'trained-model-id-2',
           inference_config: { regression: {} },
+          model_id: 'trained-model-id-2',
         },
       },
     ],
@@ -92,10 +92,10 @@ const mockGetTrainedModelStats = {
       model_id: 'trained-model-id-1',
     },
     {
-      model_id: 'trained-model-id-2',
       deployment_stats: {
         state: 'started',
       },
+      model_id: 'trained-model-id-2',
     },
   ],
 };
