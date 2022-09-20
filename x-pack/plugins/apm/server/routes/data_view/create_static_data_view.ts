@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -18,6 +18,11 @@ import { getApmDataViewTitle } from './get_apm_data_view_title';
 import { Setup } from '../../lib/helpers/setup_request';
 import { APMConfig } from '../..';
 
+export type CreateDataViewResponse = Promise<
+  | { created: boolean; dataView: DataView }
+  | { created: boolean; reason?: string }
+>;
+
 export async function createStaticDataView({
   dataViewService,
   config,
@@ -26,18 +31,23 @@ export async function createStaticDataView({
   dataViewService: DataViewsService;
   config: APMConfig;
   setup: Setup;
-}): Promise<DataView | undefined> {
+}): CreateDataViewResponse {
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
     if (!config.autoCreateApmDataView) {
-      return;
+      return {
+        created: false,
+        reason:
+          'Auto-creation of data views has been disabled via "autoCreateApmDataView" config option',
+      };
     }
 
     // Discover and other apps will throw errors if an data view exists without having matching indices.
     // The following ensures the data view is only created if APM data is found
     const hasData = await hasHistoricalAgentData(setup);
+
     if (!hasData) {
-      return;
+      return { created: false, reason: 'No APM data' };
     }
 
     const apmDataViewTitle = getApmDataViewTitle(setup.indices);
@@ -47,11 +57,11 @@ export async function createStaticDataView({
     });
 
     if (!shouldCreateOrUpdate) {
-      return;
+      return { created: false, reason: 'Dataview exists in current space' };
     }
 
-    try {
-      return await withApmSpan('create_data_view', async () => {
+    return await withApmSpan('create_data_view', async () => {
+      try {
         const dataView = await dataViewService.createAndSave(
           {
             allowNoIndex: true,
@@ -81,16 +91,16 @@ export async function createStaticDataView({
           true
         );
 
-        return dataView;
-      });
-    } catch (e) {
-      // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
-      // that error should be silenced
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        return;
+        return { created: true, dataView };
+      } catch (e) {
+        // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
+        // that error should be silenced
+        if (SavedObjectsErrorHelpers.isConflictError(e)) {
+          return { created: false, reason: 'Dataview exists in another space' };
+        }
+        throw e;
       }
-      throw e;
-    }
+    });
   });
 }
 

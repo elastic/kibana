@@ -9,7 +9,7 @@ import { apm, ApmSynthtraceEsClient, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SupertestReturnType } from '../../common/apm_api_supertest';
+import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -19,8 +19,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
-  function createDataViewViaApmApi() {
+  function createDataViewWithWriteUser() {
     return apmApiClient.writeUser({ endpoint: 'POST /internal/apm/data_view/static' });
+  }
+
+  function createDataViewWithReadUser() {
+    return apmApiClient.readUser({ endpoint: 'POST /internal/apm/data_view/static' });
   }
 
   function deleteDataView() {
@@ -45,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
     describe('when no data is generated', () => {
       before(async () => {
-        response = await createDataViewViaApmApi();
+        response = await createDataViewWithWriteUser();
       });
 
       it('does not create data view', async () => {
@@ -60,17 +64,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('mappings exists', { config: 'basic', archives: [] }, () => {
+    after(async () => {
+      await synthtrace.clean();
+      try {
+        await deleteDataView();
+      } catch (e) {
+        // swallow error
+      }
+    });
+
     describe('when data is generated', () => {
       let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
 
       before(async () => {
         await generateApmData(synthtrace);
-        response = await createDataViewViaApmApi();
-      });
-
-      after(async () => {
-        await deleteDataView();
-        await synthtrace.clean();
+        response = await createDataViewWithWriteUser();
       });
 
       it('successfully creates the apm data view', async () => {
@@ -127,6 +135,39 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe.only('when creating data view via read user', () => {
+      before(async () => {
+        await generateApmData(synthtrace);
+      });
+
+      it('throws an error', async () => {
+        try {
+          await createDataViewWithReadUser();
+        } catch (e) {
+          const err = e as ApmApiError;
+          const responseBody = err.res.body;
+          expect(err.res.status).to.eql(403);
+          expect(responseBody.statusCode).to.eql(403);
+          expect(responseBody.error).to.eql('Forbidden');
+          expect(responseBody.message).to.eql('Unable to create index-pattern');
+        }
+      });
+    });
+
+    describe('when creating data view twice', () => {
+      before(async () => {
+        await generateApmData(synthtrace);
+      });
+
+      it('returns empty response if data view already exists', async () => {
+        await createDataViewWithWriteUser();
+        const res = await createDataViewWithWriteUser();
+
+        expect(res.status).to.be(200);
+        expect(res.body).to.eql({});
+      });
+    });
   });
 }
 
@@ -137,7 +178,7 @@ function generateApmData(synthtrace: ApmSynthtraceEsClient) {
   );
 
   const instance = apm
-    .service({ name: 'multiple-env-service', environment: 'production', agentName: 'go' })
+    .service({ name: 'my-service', environment: 'production', agentName: 'go' })
     .instance('my-instance');
 
   return synthtrace.index([
