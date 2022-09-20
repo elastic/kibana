@@ -14,7 +14,7 @@ export interface PackageInfo {
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
-  revision: 1022525;
+  revision: 1036745;
   isPreInstalled: boolean;
   location: 'custom' | 'common';
 }
@@ -49,7 +49,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac',
-      revision: 1022525,
+      revision: 1036745,
       isPreInstalled: false,
     },
     {
@@ -61,29 +61,29 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac_Arm',
-      revision: 1022525,
+      revision: 1036745,
       isPreInstalled: false,
     },
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-4440632-locales-linux_x64.zip',
-      archiveChecksum: 'b741d151459f572fb477fa0b9a18b289',
-      binaryChecksum: 'a3f478557e3d3f1ee781fff99cfb75e6',
+      archiveFilename: 'chromium-4fe4891-locales-linux_x64.zip',
+      archiveChecksum: '0cb9aab432143243ec9c68ac3fb42fd4',
+      binaryChecksum: 'aff8665cf50a550c770f38b264d4bcd0',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
-      revision: 1022525,
+      revision: 1036745,
       isPreInstalled: true,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-4440632-locales-linux_arm64.zip',
-      archiveChecksum: 'ded6e28e18a7cd390133a4675896580e',
-      binaryChecksum: '9d2ea394ddb46584d463a226e8e0bcd3',
+      archiveFilename: 'chromium-4fe4891-locales-linux_arm64.zip',
+      archiveChecksum: 'f1d817bf77f59e399c4907655bb27895',
+      binaryChecksum: '86d2d7e93f011e20cd115bf0780e790d',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
-      revision: 1022525,
+      revision: 1036745,
       isPreInstalled: true,
     },
     {
@@ -95,7 +95,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',
-      revision: 1022525,
+      revision: 1036745,
       isPreInstalled: true,
     },
   ];
