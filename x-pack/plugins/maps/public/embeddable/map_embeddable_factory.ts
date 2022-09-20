@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
@@ -55,8 +54,12 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const { MapEmbeddable } = await lazyLoadMapModules();
     const usageCollection = getUsageCollection();
     if (usageCollection) {
-      const appId = await lastValueFrom(getApplication().currentAppId$.pipe(first()));
-      usageCollection.reportUiCounter('map', 'loaded', `open_maps_vis_${appId}`);
+      // currentAppId$ is a BehaviorSubject exposed as an observable so subscription gets last value upon subscribe
+      getApplication()
+        .currentAppId$.pipe(first())
+        .subscribe((appId) => {
+          if (appId) usageCollection.reportUiCounter('map', 'loaded', `open_maps_vis_${appId}`);
+        });
     }
     return new MapEmbeddable(
       {
