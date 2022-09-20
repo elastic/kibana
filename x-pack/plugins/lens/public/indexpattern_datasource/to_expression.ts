@@ -57,41 +57,55 @@ function getExpressionForLayer(
   if (columnOrder.length === 0 || !indexPattern) {
     return null;
   }
-
   const columns = { ...layer.columns };
-  Object.keys(columns).forEach((columnId) => {
+  // make sure the columns are in topological order
+  const sortedColumns = sortedReferences(
+    columnOrder.map((colId) => [colId, columns[colId]] as const)
+  );
+
+  sortedColumns.forEach((columnId) => {
     const column = columns[columnId];
     const rootDef = operationDefinitionMap[column.operationType];
-    if (
-      'references' in column &&
-      rootDef.filterable &&
-      rootDef.input === 'fullReference' &&
-      column.filter
-    ) {
+    if ('references' in column && rootDef.filterable && column.filter) {
       // inherit filter to all referenced operations
-      column.references.forEach((referenceColumnId) => {
-        const referencedColumn = columns[referenceColumnId];
-        const referenceDef = operationDefinitionMap[column.operationType];
-        if (referenceDef.filterable) {
-          columns[referenceColumnId] = { ...referencedColumn, filter: column.filter };
-        }
-      });
+      function setFilterForAllReferences(currentColumn: GenericIndexPatternColumn) {
+        if (!('references' in currentColumn)) return;
+        currentColumn.references.forEach((referenceColumnId) => {
+          let referencedColumn = columns[referenceColumnId];
+          const hasFilter = referencedColumn.filter;
+          const referenceDef = operationDefinitionMap[column.operationType];
+          if (referenceDef.filterable && !hasFilter) {
+            referencedColumn = { ...referencedColumn, filter: column.filter };
+            columns[referenceColumnId] = referencedColumn;
+          }
+          if (!hasFilter) {
+            // only push through the current filter if the current level doesn't have its own
+            setFilterForAllReferences(referencedColumn);
+          }
+        });
+      }
+      setFilterForAllReferences(column);
     }
 
-    if (
-      'references' in column &&
-      rootDef.shiftable &&
-      rootDef.input === 'fullReference' &&
-      column.timeShift
-    ) {
+    if ('references' in column && rootDef.shiftable && column.timeShift) {
       // inherit time shift to all referenced operations
-      column.references.forEach((referenceColumnId) => {
-        const referencedColumn = columns[referenceColumnId];
-        const referenceDef = operationDefinitionMap[column.operationType];
-        if (referenceDef.shiftable) {
-          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
-        }
-      });
+      function setTimeShiftForAllReferences(currentColumn: GenericIndexPatternColumn) {
+        if (!('references' in currentColumn)) return;
+        currentColumn.references.forEach((referenceColumnId) => {
+          let referencedColumn = columns[referenceColumnId];
+          const hasShift = referencedColumn.timeShift;
+          const referenceDef = operationDefinitionMap[column.operationType];
+          if (referenceDef.shiftable && !hasShift) {
+            referencedColumn = { ...referencedColumn, timeShift: column.timeShift };
+            columns[referenceColumnId] = referencedColumn;
+          }
+          if (!hasShift) {
+            // only push through the current time shift if the current level doesn't have its own
+            setTimeShiftForAllReferences(referencedColumn);
+          }
+        });
+      }
+      setTimeShiftForAllReferences(column);
     }
   });
 
@@ -289,25 +303,25 @@ function getExpressionForLayer(
       ([, col]) => col.operationType === 'date_histogram'
     );
 
-    const columnsWithTimeScale = firstDateHistogramColumn
-      ? columnEntries.filter(
-          ([, col]) =>
-            col.timeScale &&
-            operationDefinitionMap[col.operationType].timeScalingMode &&
-            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
-        )
-      : [];
+    const columnsWithTimeScale = columnEntries.filter(
+      ([, col]) =>
+        col.timeScale &&
+        operationDefinitionMap[col.operationType].timeScalingMode &&
+        operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+    );
+
     const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {
         const scalingCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
-            dateColumnId: [firstDateHistogramColumn![0]],
+            dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
+            reducedTimeRange: col.reducedTimeRange ? [col.reducedTimeRange] : [],
           },
         };
 

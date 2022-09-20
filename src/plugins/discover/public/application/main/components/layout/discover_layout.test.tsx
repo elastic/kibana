@@ -16,8 +16,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
@@ -59,9 +58,7 @@ function mountComponent(
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const dataViewList = [dataView].map((ip) => {
-    return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<DataViewAttributes>>;
+  const dataViewList = [dataView];
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -163,6 +160,9 @@ function mountComponent(
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
+    persistDataView: jest.fn(),
+    updateAdHocDataViewId: jest.fn(),
+    adHocDataViewList: [],
   };
 
   return mountWithIntl(
@@ -175,24 +175,27 @@ function mountComponent(
 
 describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', () => {
-    const component = mountComponent(dataViewMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    const container = document.createElement('div');
+    mountComponent(dataViewMock, undefined, { attachTo: container });
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
   });
 
   test('selected data view with time field displays chart toggle', () => {
-    const component = mountComponent(dataViewWithTimefieldMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+    const container = document.createElement('div');
+    mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).not.toBeNull();
   });
 
   test('sql query displays no chart toggle', () => {
-    const component = mountComponent(
+    const container = document.createElement('div');
+    mountComponent(
       dataViewWithTimefieldMock,
       false,
-      {},
+      { attachTo: container },
       { sql: 'SELECT * FROM test' },
       true
     );
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
   });
 
   test('the saved search title h1 gains focus on navigate', () => {

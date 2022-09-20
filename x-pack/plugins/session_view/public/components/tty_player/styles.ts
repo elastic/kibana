@@ -11,20 +11,21 @@ import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 import { Teletype } from '../../../common/types/process_tree';
 
-export const useStyles = (tty?: Teletype) => {
-  const { euiTheme } = useEuiTheme();
+export const useStyles = (tty?: Teletype, show?: boolean) => {
+  const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
     const { size, font, colors, border } = euiTheme;
 
     const container: CSSObject = {
       position: 'absolute',
       top: 0,
+      opacity: show ? 1 : 0,
+      transition: 'opacity .3s',
+      pointerEvents: show ? 'auto' : 'none',
       width: '100%',
       height: '100%',
       overflow: 'hidden',
       zIndex: 10,
-      borderRadius: size.s,
-      backgroundColor: colors.ink,
       '.euiRangeLevel--warning': {
         backgroundColor: transparentize(colors.warning, 0.8),
       },
@@ -34,6 +35,11 @@ export const useStyles = (tty?: Teletype) => {
       '.euiRangeTick,.euiRangeLevel': {
         transition: 'left 500ms',
       },
+    };
+
+    const header: CSSObject = {
+      backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+      padding: `${size.m} ${size.base}`,
     };
 
     const windowBoundsColor = transparentize(colors.ghost, 0.6);
@@ -65,18 +71,22 @@ export const useStyles = (tty?: Teletype) => {
     }
 
     const scrollPane: CSSObject = {
+      position: 'relative',
+      transform: `translateY(${show ? 0 : '100%'})`,
+      transition: 'transform .2s',
       width: '100%',
-      height: 'calc(100% - 126px)',
-      border: border.thin,
+      height: 'calc(100% - 120px)',
       overflow: 'auto',
+      backgroundColor: colors.ink,
     };
 
     return {
       container,
+      header,
       terminal,
       scrollPane,
     };
-  }, [tty, euiTheme]);
+  }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 
   return cached;
 };

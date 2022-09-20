@@ -162,6 +162,12 @@ export const createStartServicesMock = (
     timelines: {
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
+      getHoverActions: jest.fn().mockReturnValue({
+        getAddToTimelineButton: jest.fn(),
+      }),
+    },
+    osquery: {
+      OsqueryResults: jest.fn().mockReturnValue(null),
     },
     triggersActionsUi,
   } as unknown as StartServices;

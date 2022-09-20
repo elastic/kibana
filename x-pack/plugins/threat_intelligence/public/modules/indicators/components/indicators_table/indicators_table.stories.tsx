@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { mockTriggersActionsUiService } from '../../../../common/mocks/mock_kibana_triggers_actions_ui_service';
-import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
-import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
+import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
 import { IndicatorsFiltersContext } from '../../context';
+import { DEFAULT_COLUMNS } from './hooks/use_column_settings';
 
 export default {
   component: IndicatorsTable,
@@ -26,17 +23,24 @@ const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
+const columnSettings = {
+  columnVisibility: {
+    visibleColumns: DEFAULT_COLUMNS.map(({ id }) => id),
+    setVisibleColumns: stub,
+  },
+  columns: DEFAULT_COLUMNS,
+  handleResetColumns: stub,
+  handleToggleColumn: stub,
+  sorting: {
+    columns: [],
+    onSort: stub,
+  },
+};
 export function WithIndicators() {
   const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
 
-  const KibanaReactContext = createKibanaReactContext({
-    uiSettings: mockUiSettingsService(),
-    timelines: mockKibanaTimelinesService,
-    triggersActionsUi: mockTriggersActionsUiService,
-  } as unknown as CoreStart);
-
   return (
-    <KibanaReactContext.Provider>
+    <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsTable
           browserFields={{}}
@@ -51,27 +55,31 @@ export function WithIndicators() {
           onChangeItemsPerPage={stub}
           indicatorCount={indicatorsFixture.length * 2}
           indexPattern={mockIndexPattern}
+          columnSettings={columnSettings}
         />
       </IndicatorsFiltersContext.Provider>
-    </KibanaReactContext.Provider>
+    </StoryProvidersComponent>
   );
 }
 
 export function WithNoIndicators() {
   return (
-    <IndicatorsTable
-      browserFields={{}}
-      pagination={{
-        pageSize: 10,
-        pageIndex: 0,
-        pageSizeOptions: [10, 25, 50],
-      }}
-      indicators={[]}
-      onChangePage={stub}
-      onChangeItemsPerPage={stub}
-      indicatorCount={0}
-      loading={false}
-      indexPattern={mockIndexPattern}
-    />
+    <StoryProvidersComponent>
+      <IndicatorsTable
+        browserFields={{}}
+        pagination={{
+          pageSize: 10,
+          pageIndex: 0,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        indicators={[]}
+        onChangePage={stub}
+        onChangeItemsPerPage={stub}
+        indicatorCount={0}
+        loading={false}
+        indexPattern={mockIndexPattern}
+        columnSettings={columnSettings}
+      />
+    </StoryProvidersComponent>
   );
 }

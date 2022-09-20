@@ -19,7 +19,11 @@ describe('DSL invocations', () => {
     new Date('2021-01-01T00:00:00.000Z'),
     new Date('2021-01-01T00:15:00.000Z')
   );
-  const javaService = apm.service('opbeans-java', 'production', 'java');
+  const javaService = apm.service({
+    name: 'opbeans-java',
+    environment: 'production',
+    agentName: 'java',
+  });
   const javaInstance = javaService.instance('instance-1');
   let globalSeq = 0;
 
@@ -28,13 +32,13 @@ describe('DSL invocations', () => {
     .rate(1)
     .generator((timestamp, index) =>
       javaInstance
-        .transaction(`GET /api/product/${index}/${globalSeq++}`)
+        .transaction({ transactionName: `GET /api/product/${index}/${globalSeq++}` })
         .duration(1000)
         .success()
         .timestamp(timestamp)
         .children(
           javaInstance
-            .span('GET apm-*/_search', 'db', 'elasticsearch')
+            .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
             .success()
             .duration(900)
             .timestamp(timestamp + 50)
