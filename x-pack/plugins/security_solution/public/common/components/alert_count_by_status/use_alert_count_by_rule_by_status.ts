@@ -18,6 +18,7 @@ import { useQueryInspector } from '../page/manage_query';
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;
   count: number;
+  uuid: string;
 }
 
 export interface UseAlertCountByRuleByStatusProps {
@@ -154,13 +155,35 @@ export const buildRuleAlertsByEntityQuery = ({
         field: 'kibana.alert.rule.name',
         size: 100,
       },
+      aggs: {
+        ruleUuid: {
+          top_hits: {
+            _source: ['kibana.alert.rule.uuid'],
+            size: 1,
+          },
+        },
+      },
     },
   },
 });
 
+interface RuleUuidData extends GenericBuckets {
+  ruleUuid: {
+    hits: {
+      hits: [
+        {
+          _source: {
+            'kibana.alert.rule.uuid': string;
+          };
+        }
+      ];
+    };
+  };
+}
+
 interface AlertCountByRuleByFieldAggregation {
   [ALERTS_BY_RULE_AGG]: {
-    buckets: GenericBuckets[];
+    buckets: RuleUuidData[];
   };
 }
 
@@ -169,9 +192,11 @@ const parseAlertCountByRuleItems = (
 ): AlertCountByRuleByStatusItem[] => {
   const buckets = aggregations?.[ALERTS_BY_RULE_AGG].buckets ?? [];
   return buckets.map<AlertCountByRuleByStatusItem>((bucket) => {
+    const uuid = bucket.ruleUuid.hits?.hits[0]?._source['kibana.alert.rule.uuid'] || '';
     return {
       ruleName: bucket.key,
       count: bucket.doc_count,
+      uuid,
     };
   });
 };

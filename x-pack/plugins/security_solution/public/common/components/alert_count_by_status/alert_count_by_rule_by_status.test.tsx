@@ -81,7 +81,8 @@ describe('HostAlertsTable', () => {
 
 const mockItem = [
   {
-    ruleName: 'Test Name',
     count: 100,
+    ruleName: 'Test Name',
+    uuid: 'uuid',
   },
 ];

@@ -8,20 +8,14 @@
 import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { Status } from '../../../../common/detection_engine/schemas/common';
-import type { AdditionalFilter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+import { SecurityPageName } from '../../../../common/constants';
 import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { NavigateTo, GetAppUrl, useNavigation } from '../../lib/kibana';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
@@ -41,10 +35,15 @@ interface StatusSelection {
   [fieldName: string]: Status[];
 }
 
-type GetTableColumns = (
-  openRuleInTimeline: (ruleName: string, additionalFilter: AdditionalFilter) => void,
-  additionalFilter: AdditionalFilter
-) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
+type GetTableColumns = ({
+  getAppUrl,
+  navigateTo,
+  openRuleInTimelineWithAdditionalFields,
+}: {
+  getAppUrl: GetAppUrl;
+  navigateTo: NavigateTo;
+  openRuleInTimelineWithAdditionalFields: (ruleName: string) => void;
+}) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
 
 const statuses = ['open', 'acknowledged', 'closed'];
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
@@ -62,11 +61,13 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
   const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
   const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
+  const { getAppUrl, navigateTo } = useNavigation();
   const { openRuleInTimeline } = useNavigateToTimeline();
-  const columns = useMemo(
-    () => getTableColumns(openRuleInTimeline, { field, value }),
-    [field, value, openRuleInTimeline]
-  );
+  const columns = useMemo(() => {
+    const openRuleInTimelineWithAdditionalFields = (ruleName: string) =>
+      openRuleInTimeline(ruleName, { field, value });
+    return getTableColumns({ getAppUrl, navigateTo, openRuleInTimelineWithAdditionalFields });
+  }, [field, value, openRuleInTimeline]);
 
   const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
     defaultValue: {
@@ -138,7 +139,11 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
 
 AlertCountByStatus.displayName = 'AlertCountByStatus';
 
-export const getTableColumns: GetTableColumns = (openRuleInTimeline, additionalFilter) => [
+export const getTableColumns: GetTableColumns = ({
+  getAppUrl,
+  navigateTo,
+  openRuleInTimelineWithAdditionalFields,
+}) => [
   {
     field: 'ruleName',
     name: i18n.COLUMN_HEADER_RULE_NAME,
@@ -146,16 +151,31 @@ export const getTableColumns: GetTableColumns = (openRuleInTimeline, additionalF
     align: 'left',
     width: '67%',
     sortable: false,
-    render: (ruleName: string) => (
-      <EuiToolTip
-        data-test-subj={`${ruleName}-tooltip`}
-        title={i18n.TOOLTIP_TITLE}
-        content={ruleName}
-        anchorClassName="eui-textTruncate"
-      >
-        <EuiText>{ruleName}</EuiText>
-      </EuiToolTip>
-    ),
+    render: (ruleName: string, { uuid }) => {
+      const url = getAppUrl({ deepLinkId: SecurityPageName.rules, path: `id/${uuid}` });
+      return (
+        <EuiToolTip
+          data-test-subj={`${ruleName}-tooltip`}
+          title={i18n.TOOLTIP_TITLE}
+          content={ruleName}
+          anchorClassName="eui-textTruncate"
+        >
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiLink
+            data-test-subj="severityRuleAlertsTable-name"
+            href={url}
+            onClick={(ev?: React.MouseEvent) => {
+              if (ev) {
+                ev.preventDefault();
+              }
+              navigateTo({ url });
+            }}
+          >
+            {ruleName}
+          </EuiLink>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'count',
@@ -167,7 +187,7 @@ export const getTableColumns: GetTableColumns = (openRuleInTimeline, additionalF
     render: (count: number, { ruleName }) => (
       <EuiLink
         disabled={count === 0}
-        onClick={() => openRuleInTimeline(ruleName, additionalFilter)}
+        onClick={() => openRuleInTimelineWithAdditionalFields(ruleName)}
       >
         <FormattedCount count={count} />
       </EuiLink>
