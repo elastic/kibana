@@ -84,32 +84,33 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     // only during 1st component render (thus why the eslint disabled rule below).
     // Default values for config are endpoint + NGAV
     useEffect(() => {
-      onChange({
-        isValid: false,
-        updatedPolicy: {
-          ...newPolicy,
-          name: '',
-          inputs: [
-            {
-              enabled: true,
-              streams: [],
-              type: ENDPOINT_INTEGRATION_CONFIG_KEY,
-              config: {
-                _config: {
-                  value: {
-                    type: 'endpoint',
-                    endpointConfig: {
-                      preset: 'NGAV',
+      if (initialRender.current) {
+        onChange({
+          isValid: false,
+          updatedPolicy: {
+            ...newPolicy,
+            name: '',
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+                config: {
+                  _config: {
+                    value: {
+                      type: 'endpoint',
+                      endpointConfig: {
+                        preset: 'NGAV',
+                      },
                     },
                   },
                 },
               },
-            },
-          ],
-        },
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+            ],
+          },
+        });
+      }
+    }, [onChange, newPolicy]);
 
     useEffect(() => {
       // Skip trigerring this onChange on the initial render
