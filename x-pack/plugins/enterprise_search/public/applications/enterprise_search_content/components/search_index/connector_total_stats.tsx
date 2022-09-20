@@ -23,6 +23,7 @@ import { isConnectorIndex } from '../../utils/indices';
 
 import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { NATIVE_CONNECTORS } from './connector/constants';
+import { NameAndDescriptionStats } from './name_and_description_stats';
 import { OverviewLogic } from './overview.logic';
 
 export const ConnectorTotalStats: React.FC = () => {
@@ -43,9 +44,9 @@ export const ConnectorTotalStats: React.FC = () => {
       ),
       isLoading: hideStats,
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.totalStats.crawlerIngestionMethodLabel',
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
         {
-          defaultMessage: 'Crawler',
+          defaultMessage: 'Connector',
         }
       ),
     },
@@ -80,6 +81,8 @@ export const ConnectorTotalStats: React.FC = () => {
 
   return (
     <>
+      <NameAndDescriptionStats />
+      <EuiSpacer />
       <EuiFlexGroup direction="row">
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
