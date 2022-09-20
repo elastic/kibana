@@ -375,7 +375,8 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         ruleId={ruleId}
         dateStart={getParsedDate(dateStart)}
         dateEnd={getParsedDate(dateEnd)}
-        filter={}
+        outcomeFilter={filter}
+        message={searchText}
         refreshToken={refreshToken}
       />
       <EuiSpacer />

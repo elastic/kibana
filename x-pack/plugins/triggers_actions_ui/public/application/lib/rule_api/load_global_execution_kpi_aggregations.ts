@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export interface LoadExecutionKPIAggregationsProps {
+export interface LoadGlobalExecutionKPIAggregationsProps {
   id: string;
   outcomeFilter?: string[];
   message?: string;
@@ -31,17 +31,17 @@ const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; messa
   return filter;
 };
 
-export const loadExecutionKPIAggregations = ({
+export const loadGlobalExecutionKPIAggregations = ({
   id,
   http,
   outcomeFilter,
   message,
   dateStart,
   dateEnd,
-}: LoadExecutionKPIAggregationsProps & { http: HttpSetup }) => {
+}: LoadGlobalExecutionKPIAggregationsProps & { http: HttpSetup }) => {
   const filter = getFilter({ outcomeFilter, message });
 
-  return http.get<any>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_kpi`, {
+  return http.get<any>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_global_execution_kpi`, {
     query: {
       filter: filter.length ? filter.join(' and ') : undefined,
       date_start: dateStart,

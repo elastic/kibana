@@ -48,6 +48,8 @@ import {
   unsnoozeRule,
   loadExecutionKPIAggregations,
   LoadExecutionKPIAggregationsProps,
+  loadGlobalExecutionKPIAggregations,
+  LoadGlobalExecutionKPIAggregationsProps,
   bulkUnsnoozeRules,
   BulkUnsnoozeRulesProps,
 } from '../../../lib/rule_api';
@@ -83,6 +85,9 @@ export interface ComponentOpts {
   loadGlobalExecutionLogAggregations: (
     props: LoadGlobalExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
+  loadGlobalExecutionKPIAggregations: (
+    props: LoadGlobalExecutionKPIAggregationsProps
+  ) => Promise<any>;
   loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
@@ -185,6 +190,14 @@ export function withBulkRuleOperations<T>(
         ) =>
           loadExecutionKPIAggregations({
             ...loadExecutionKPIAggregationProps,
+            http,
+          })
+        }
+        loadGlobalExecutionKPIAggregations={async (
+          loadGlobalExecutionKPIAggregationsProps: LoadGlobalExecutionKPIAggregationsProps
+        ) =>
+          loadGlobalExecutionKPIAggregations({
+            ...loadGlobalExecutionKPIAggregationsProps,
             http,
           })
         }

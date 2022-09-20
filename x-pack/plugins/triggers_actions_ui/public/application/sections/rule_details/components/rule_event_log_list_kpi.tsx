@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIconTip, EuiStat, EuiSpacer } from '@elastic/eui';
 import {
   ComponentOpts as RuleApis,
@@ -43,26 +43,44 @@ export type RuleEventLogListKPIProps = {
   ruleId: string;
   dateStart: string;
   dateEnd: string;
-  filter: string;
+  outcomeFilter?: string[];
+  message?: string;
   refreshToken?: number;
-} & Pick<RuleApis, 'loadExecutionKPIAggregations'>;
+} & Pick<RuleApis, 'loadExecutionKPIAggregations' | 'loadGlobalExecutionKPIAggregations'>;
 
 export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
-  const { ruleId, dateStart, dateEnd, filter, refreshToken, loadExecutionKPIAggregations } = props;
+  const {
+    ruleId,
+    dateStart,
+    dateEnd,
+    outcomeFilter,
+    message,
+    refreshToken,
+    loadExecutionKPIAggregations,
+    loadGlobalExecutionKPIAggregations,
+  } = props;
 
   const isInitialized = useRef(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [kpi, setKpi] = useState<any>(null);
 
+  const loadKPIFn = useMemo(() => {
+    if (ruleId === '*') {
+      return loadGlobalExecutionKPIAggregations;
+    }
+    return loadExecutionKPIAggregations;
+  }, [ruleId, loadExecutionKPIAggregations, loadGlobalExecutionKPIAggregations]);
+
   const loadKPIs = async () => {
     setIsLoading(true);
     try {
-      const newKpi = await loadExecutionKPIAggregations({
+      const newKpi = await loadKPIFn({
         id: ruleId,
         dateStart,
         dateEnd,
-        filter,
+        outcomeFilter,
+        message,
       });
       setKpi(newKpi);
     } catch (e) {
@@ -74,7 +92,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   useEffect(() => {
     loadKPIs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleId, dateStart, dateEnd, filter]);
+  }, [ruleId, dateStart, dateEnd, outcomeFilter, message]);
 
   useEffect(() => {
     if (isInitialized.current) {
