@@ -27,7 +27,7 @@ import { SpikeAnalysisTable } from './spike_analysis_table';
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'docCount';
 const DEFAULT_SORT_DIRECTION = 'desc';
-interface GroupTableItem {
+export interface GroupTableItem {
   id: number;
   docCount: number;
   group: Record<string, any>;
@@ -42,6 +42,7 @@ interface SpikeAnalysisTableProps {
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
+  onSelectedGroup?: (group: GroupTableItem | null) => void;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -52,6 +53,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   onPinnedChangePoint,
   onSelectedChangePoint,
   selectedChangePoint,
+  onSelectedGroup,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -118,7 +120,15 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiButtonIcon
           data-test-subj={'aiopsSpikeAnalysisGroupsTableRowExpansionButton'}
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          aria-label={
+            itemIdToExpandedRowMap[item.id]
+              ? i18n.translate('xpack.aiops.correlations.correlationsTable.collapseAriaLabel', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.aiops.correlations.correlationsTable.expandAriaLabel', {
+                  defaultMessage: 'Expand',
+                })
+          }
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
@@ -236,8 +246,46 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       rowProps={(group) => {
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
+          onMouseEnter: () => {
+            if (onSelectedGroup) {
+              onSelectedGroup(group);
+            }
+          },
+          onMouseLeave: () => {
+            if (onSelectedGroup) {
+              onSelectedGroup(null);
+            }
+          },
         };
       }}
+      // rowProps={(changePoint) => {
+      //   return {
+      //     'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
+      //     onClick: () => {
+      //       if (onPinnedChangePoint) {
+      //         onPinnedChangePoint(changePoint);
+      //       }
+      //     },
+      //     onMouseEnter: () => {
+      //       if (onSelectedChangePoint) {
+      //         onSelectedChangePoint(changePoint);
+      //       }
+      //     },
+      //     onMouseLeave: () => {
+      //       if (onSelectedChangePoint) {
+      //         onSelectedChangePoint(null);
+      //       }
+      //     },
+      //     style:
+      //       selectedChangePoint &&
+      //       selectedChangePoint.fieldValue === changePoint.fieldValue &&
+      //       selectedChangePoint.fieldName === changePoint.fieldName
+      //         ? {
+      //             backgroundColor: euiTheme.euiColorLightestShade,
+      //           }
+      //         : null,
+      //   };
+      // }}
     />
   );
 };

@@ -28,6 +28,7 @@ import {
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
 import type { Dictionary } from './use_url_state';
+import type { GroupTableItem } from '../components/spike_analysis_table/spike_analysis_table_groups';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -39,7 +40,8 @@ export const useData = (
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint,
-  barTarget: number = DEFAULT_BAR_TARGET
+  barTarget: number = DEFAULT_BAR_TARGET,
+  selectedGroup?: GroupTableItem | null
 ) => {
   const {
     uiSettings,
@@ -114,10 +116,15 @@ export const useData = (
   }, [fieldStatsRequest, selectedChangePoint]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest && selectedChangePoint
-      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+    return fieldStatsRequest && (selectedChangePoint || selectedGroup)
+      ? {
+          ...fieldStatsRequest,
+          selectedChangePoint,
+          selectedGroup,
+          includeSelectedChangePoint: true,
+        }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint]);
+  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
 
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
