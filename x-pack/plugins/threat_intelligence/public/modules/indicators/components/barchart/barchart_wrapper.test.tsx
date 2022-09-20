@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
+import { IndicatorBarChartWrapper } from '.';
 import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
 import { useFilters } from '../../../query_bar/hooks/use_filters';
 
@@ -33,7 +33,7 @@ const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
 
 const stub = () => {};
 
-describe('<IndicatorsBarChartWrapper />', () => {
+describe('<IndicatorBarChartWrapper />', () => {
   beforeEach(() => {
     (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
       filters: [],
@@ -47,7 +47,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
   it('should render barchart and field selector dropdown', () => {
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsBarChartWrapper indexPattern={mockIndexPattern} timeRange={mockTimeRange} />
+        <IndicatorBarChartWrapper indexPattern={mockIndexPattern} timeRange={mockTimeRange} />
       </TestProvidersComponent>
     );
 

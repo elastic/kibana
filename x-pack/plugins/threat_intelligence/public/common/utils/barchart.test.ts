@@ -6,7 +6,7 @@
  */
 
 import { convertAggregationToChartSeries } from './barchart';
-import { Aggregation } from '../../modules/indicators/hooks/use_aggregated_indicators';
+import { Aggregation } from '../../modules/indicators/components/barchart_wrapper/hooks/use_aggregated_indicators';
 
 const aggregation1: Aggregation = {
   events: {

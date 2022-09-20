@@ -15,15 +15,18 @@ import {
   isErrorResponse,
   TimeRangeBounds,
 } from '@kbn/data-plugin/common';
-import { useFilters } from '../../query_bar/hooks/use_filters';
-import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
-import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { THREAT_QUERY_BASE } from '../../../../common/constants';
-import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
-import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
-import { useSourcererDataView } from './use_sourcerer_data_view';
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
+import { useFilters } from '../../../../query_bar/hooks/use_filters';
+import { convertAggregationToChartSeries } from '../../../../../common/utils/barchart';
+import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
+import { THREAT_QUERY_BASE } from '../../../../../../common/constants';
+import { calculateBarchartColumnTimeInterval } from '../../../../../common/utils/dates';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { DEFAULT_TIME_RANGE } from '../../../../query_bar/hooks/use_filters/utils';
+import { useSourcererDataView } from '../../../hooks/use_sourcerer_data_view';
+import {
+  threatIndicatorNamesOriginScript,
+  threatIndicatorNamesScript,
+} from '../../../lib/display_name';
 
 export interface UseAggregatedIndicatorsParam {
   /**
@@ -39,7 +42,7 @@ export interface UseAggregatedIndicatorsValue {
    */
   indicators: ChartSeries[];
   /**
-   * Callback used by the IndicatorsFieldSelector component to query a new set of
+   * Callback used by the IndicatorFieldSelector component to query a new set of
    * aggregated indicators.
    * @param field the selected Indicator field
    */

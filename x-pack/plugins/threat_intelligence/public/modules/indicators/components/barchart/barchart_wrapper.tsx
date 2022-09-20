@@ -11,13 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { useAggregatedIndicators } from '../../hooks/use_aggregated_indicators';
-import { IndicatorsFieldSelector } from '../indicators_field_selector/indicators_field_selector';
-import { IndicatorsBarChart } from '../indicators_barchart/indicators_barchart';
+import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
+import { IndicatorFieldSelector } from './components/field_selector';
+import { IndicatorBarChart } from './components/barchart';
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
-export interface IndicatorsBarChartWrapperProps {
+export interface IndicatorBarChartWrapperProps {
   /**
    * From and to values received from the KQL bar and passed down to the hook to query data.
    */
@@ -29,10 +29,10 @@ export interface IndicatorsBarChartWrapperProps {
 }
 
 /**
- * Displays the {@link IndicatorsBarChart} and {@link IndicatorsFieldSelector} components,
+ * Displays the {@link IndicatorBarChart} and {@link IndicatorFieldSelector} components,
  * and handles retrieving aggregated indicator data.
  */
-export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
+export const IndicatorBarChartWrapper = memo<IndicatorBarChartWrapperProps>(
   ({ timeRange, indexPattern }) => {
     const { dateRange, indicators, selectedField, onFieldChange } = useAggregatedIndicators({
       timeRange,
@@ -52,7 +52,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <IndicatorsFieldSelector
+            <IndicatorFieldSelector
               indexPattern={indexPattern}
               defaultStackByValue={DEFAULT_FIELD}
               valueChange={onFieldChange}
@@ -60,7 +60,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
           </EuiFlexItem>
         </EuiFlexGroup>
         {timeRange ? (
-          <IndicatorsBarChart indicators={indicators} dateRange={dateRange} field={selectedField} />
+          <IndicatorBarChart indicators={indicators} dateRange={dateRange} field={selectedField} />
         ) : (
           <></>
         )}

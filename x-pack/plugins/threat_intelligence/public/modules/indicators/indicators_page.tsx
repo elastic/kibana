@@ -7,7 +7,7 @@
 
 import React, { VFC } from 'react';
 import { FiltersContextProvider } from './containers';
-import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
+import { IndicatorBarChartWrapper } from './components/barchart';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
 import { DefaultPageLayout } from '../../components/layout';
@@ -62,7 +62,7 @@ export const IndicatorsPage: VFC = () => {
           />
         </FiltersGlobal>
         <FiltersContextProvider filterManager={filterManager}>
-          <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
+          <IndicatorBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
           <IndicatorsTable
             browserFields={browserFields}
             indexPattern={indexPattern}

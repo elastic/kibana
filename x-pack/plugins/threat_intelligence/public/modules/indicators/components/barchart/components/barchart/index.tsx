@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicators_barchart';
+export * from './barchart';

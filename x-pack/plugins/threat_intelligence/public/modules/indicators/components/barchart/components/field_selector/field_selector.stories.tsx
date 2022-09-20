@@ -8,8 +8,8 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFieldSelector } from './indicators_field_selector';
+import { RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
+import { IndicatorFieldSelector } from '.';
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -25,13 +25,13 @@ const mockIndexPattern: DataView = {
 } as DataView;
 
 export default {
-  component: IndicatorsFieldSelector,
-  title: 'IndicatorsFieldSelector',
+  component: IndicatorFieldSelector,
+  title: 'IndicatorFieldSelector',
 };
 
 export const Default: Story<void> = () => {
   return (
-    <IndicatorsFieldSelector
+    <IndicatorFieldSelector
       indexPattern={mockIndexPattern}
       valueChange={(value: string) => window.alert(`${value} selected`)}
     />
@@ -40,7 +40,7 @@ export const Default: Story<void> = () => {
 
 export const WithDefaultValue: Story<void> = () => {
   return (
-    <IndicatorsFieldSelector
+    <IndicatorFieldSelector
       indexPattern={mockIndexPattern}
       valueChange={(value: string) => window.alert(`${value} selected`)}
       defaultStackByValue={RawIndicatorFieldId.LastSeen}
@@ -49,5 +49,5 @@ export const WithDefaultValue: Story<void> = () => {
 };
 
 export const NoData: Story<void> = () => {
-  return <IndicatorsFieldSelector indexPattern={{ fields: [] } as any} valueChange={() => {}} />;
+  return <IndicatorFieldSelector indexPattern={{ fields: [] } as any} valueChange={() => {}} />;
 };

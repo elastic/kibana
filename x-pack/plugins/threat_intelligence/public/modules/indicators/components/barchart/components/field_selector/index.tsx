@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicators_barchart_wrapper';
+export * from './field_selector';

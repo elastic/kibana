@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<IndicatorsBarChartWrapper /> should render barchart and field selector dropdown 1`] = `
+exports[`<IndicatorBarChartWrapper /> should render barchart and field selector dropdown 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>

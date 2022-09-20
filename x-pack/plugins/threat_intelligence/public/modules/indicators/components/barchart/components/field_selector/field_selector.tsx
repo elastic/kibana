@@ -9,12 +9,12 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { SecuritySolutionDataViewBase } from '../../../../types';
-import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { SecuritySolutionDataViewBase } from '../../../../../../types';
+import { RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
 
 export const DROPDOWN_TEST_ID = 'tiIndicatorFieldSelectorDropdown';
 
-export interface IndicatorsFieldSelectorProps {
+export interface IndicatorFieldSelectorProps {
   indexPattern: SecuritySolutionDataViewBase;
   valueChange: (value: string) => void;
   defaultStackByValue?: RawIndicatorFieldId;
@@ -22,7 +22,7 @@ export interface IndicatorsFieldSelectorProps {
 
 const DEFAULT_STACK_BY_VALUE = RawIndicatorFieldId.Feed;
 
-export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
+export const IndicatorFieldSelector = memo<IndicatorFieldSelectorProps>(
   ({ indexPattern, valueChange, defaultStackByValue = DEFAULT_STACK_BY_VALUE }) => {
     const [selectedField, setSelectedField] = useState<string>(defaultStackByValue);
 

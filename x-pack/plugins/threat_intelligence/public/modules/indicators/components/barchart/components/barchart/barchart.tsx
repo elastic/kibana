@@ -9,15 +9,15 @@ import React, { VFC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { IndicatorBarchartLegendAction } from '../indicator_barchart_legend_action/indicator_barchart_legend_action';
-import { barChartTimeAxisLabelFormatter } from '../../../../common/utils/dates';
+import { IndicatorBarchartLegendAction } from '../legend_action';
+import { barChartTimeAxisLabelFormatter } from '../../../../../../common/utils/dates';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
 const DEFAULT_CHART_WIDTH = '100%';
 
-export interface IndicatorsBarChartProps {
+export interface IndicatorBarChartProps {
   /**
    * Array of indicators already processed to be consumed by the BarSeries component from the @elastic/charts library.
    */
@@ -39,7 +39,7 @@ export interface IndicatorsBarChartProps {
 /**
  * Displays a barchart of aggregated indicators using the @elastic/charts library.
  */
-export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
+export const IndicatorBarChart: VFC<IndicatorBarChartProps> = ({
   indicators,
   dateRange,
   field,

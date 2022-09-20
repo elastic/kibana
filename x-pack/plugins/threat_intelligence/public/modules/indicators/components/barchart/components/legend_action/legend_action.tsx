@@ -8,10 +8,10 @@
 import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ComponentType } from '../../../../../common/types/component_type';
-import { FilterIn } from '../../../query_bar/components/filter_in';
-import { FilterOut } from '../../../query_bar/components/filter_out';
-import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
+import { ComponentType } from '../../../../../../../common/types/component_type';
+import { FilterIn } from '../../../../../query_bar/components/filter_in';
+import { FilterOut } from '../../../../../query_bar/components/filter_out';
+import { AddToTimeline } from '../../../../../timeline/components/add_to_timeline';
 
 export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
 export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';

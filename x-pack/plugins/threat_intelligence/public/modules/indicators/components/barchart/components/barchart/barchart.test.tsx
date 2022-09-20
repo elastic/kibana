@@ -9,14 +9,14 @@ import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
-import { IndicatorsBarChart } from './indicators_barchart';
+import { IndicatorBarChart } from '.';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
-describe('<IndicatorsBarChart />', () => {
+describe('<IndicatorBarChart />', () => {
   it('should render barchart', () => {
     const mockIndicators: ChartSeries[] = [
       {
@@ -49,7 +49,7 @@ describe('<IndicatorsBarChart />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsBarChart
+        <IndicatorBarChart
           indicators={mockIndicators}
           dateRange={mockDateRange}
           field={mockField}

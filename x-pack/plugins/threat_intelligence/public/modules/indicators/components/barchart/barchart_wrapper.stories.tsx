@@ -16,13 +16,13 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { Aggregation, AGGREGATION_NAME } from '../../hooks/use_aggregated_indicators';
+import { Aggregation, AGGREGATION_NAME } from './hooks/use_aggregated_indicators';
 import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
-import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
+import { IndicatorBarChartWrapper } from '.';
 
 export default {
-  component: IndicatorsBarChartWrapper,
-  title: 'IndicatorsBarChartWrapper',
+  component: IndicatorBarChartWrapper,
+  title: 'IndicatorBarChartWrapper',
 };
 
 export const Default: Story<void> = () => {
@@ -120,7 +120,7 @@ export const Default: Story<void> = () => {
     <StoryProvidersComponent
       kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
     >
-      <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
+      <IndicatorBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
     </StoryProvidersComponent>
   );
 };

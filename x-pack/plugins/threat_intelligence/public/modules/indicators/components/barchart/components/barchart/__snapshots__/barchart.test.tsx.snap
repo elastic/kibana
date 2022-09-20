@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<IndicatorsBarChart /> should render barchart 1`] = `
+exports[`<IndicatorBarChart /> should render barchart 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>

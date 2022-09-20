@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { DROPDOWN_TEST_ID, IndicatorsFieldSelector } from './indicators_field_selector';
+import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
+import { DROPDOWN_TEST_ID, IndicatorFieldSelector } from '.';
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -24,11 +24,11 @@ const mockIndexPattern: DataView = {
   ],
 } as DataView;
 
-describe('<IndicatorsFieldSelector />', () => {
+describe('<IndicatorFieldSelector />', () => {
   it('should handle empty array of indexPatterns', () => {
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsFieldSelector
+        <IndicatorFieldSelector
           indexPattern={{ fields: [] } as any}
           // eslint-disable-next-line no-console
           valueChange={(value: string) => console.log(value)}
@@ -42,7 +42,7 @@ describe('<IndicatorsFieldSelector />', () => {
   it('should display all unique fields from a DataView[]', () => {
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsFieldSelector
+        <IndicatorFieldSelector
           indexPattern={mockIndexPattern}
           // eslint-disable-next-line no-console
           valueChange={(value: string) => console.log(value)}
