@@ -36,7 +36,6 @@ import {
 import * as i18n from './translations';
 
 const EDIT_DATA_PROVIDER_WIDTH = 400;
-const FIELD_COMBO_BOX_WIDTH = 195;
 const OPERATOR_COMBO_BOX_WIDTH = 160;
 const SAVE_CLASS_NAME = 'edit-data-provider-save';
 const VALUE_INPUT_CLASS_NAME = 'edit-data-provider-value';
