@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBottomBar, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
@@ -80,6 +81,19 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     [findingsGroupByNone.data?.total, urlQuery.pageIndex, urlQuery.pageSize]
   );
 
+  const handleDistributionClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: getFilters({
+        filters: urlQuery.filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
+
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -97,6 +111,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
             <FindingsDistributionBar
               {...{
+                distributionOnClick: handleDistributionClick,
                 type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
                   defaultMessage: 'Findings',
                 }),

@@ -52,6 +52,7 @@ export interface FindingsByResourcePage {
   cluster_id: string;
   'resource.name': string;
   'resource.sub_type': string;
+  'rule.benchmark.name': string;
   'rule.section': string[];
 }
 
@@ -66,6 +67,7 @@ interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKey
   name: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   subtype: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   cluster_id: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+  benchmarkName: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
   cis_sections: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
@@ -90,6 +92,9 @@ export const getFindingsByResourceAggQuery = ({
           },
           subtype: {
             terms: { field: 'resource.sub_type', size: 1 },
+          },
+          benchmarkName: {
+            terms: { field: 'rule.benchmark.name' },
           },
           cis_sections: {
             terms: { field: 'rule.section' },
@@ -172,10 +177,12 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
 
 const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResourcePage => {
   if (
+    !Array.isArray(resource.benchmarkName.buckets) ||
     !Array.isArray(resource.cis_sections.buckets) ||
     !Array.isArray(resource.name.buckets) ||
     !Array.isArray(resource.subtype.buckets) ||
     !Array.isArray(resource.cluster_id.buckets) ||
+    !resource.benchmarkName.buckets.length ||
     !resource.cis_sections.buckets.length ||
     !resource.name.buckets.length ||
     !resource.subtype.buckets.length ||
@@ -189,6 +196,7 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
     ['resource.sub_type']: resource.subtype.buckets[0]?.key,
     cluster_id: resource.cluster_id.buckets[0]?.key,
     ['rule.section']: resource.cis_sections.buckets.map((v) => v.key),
+    ['rule.benchmark.name']: resource.benchmarkName.buckets[0]?.key,
     failed_findings: {
       count: resource.failed_findings.doc_count,
       normalized:
