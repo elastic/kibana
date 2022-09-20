@@ -40,8 +40,8 @@ There are three ways to run the tests depending on your goals:
 +
 ["source","shell"]
 ----------
-export TEST_KIBANA_URL=https://elastic:password@my-kbn-cluster.elastic-cloud.com:9243
-export TEST_ES_URL=https://elastic:password@my-es-cluster.elastic-cloud.com:9243
+export TEST_KIBANA_URL=https://elastic:password@my-kbn-cluster.elastic-cloud.com:443
+export TEST_ES_URL=https://elastic:password@my-es-cluster.elastic-cloud.com:443
 
 export TEST_CLOUD=1
 export ES_SECURITY_ENABLED=1
