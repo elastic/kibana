@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-const regexForCISSemanticVersioning = /CIS (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;
+const regexForCISSemanticVersioning = /CIS ([0-9])(?:\.[0-9]\.?)?(?:[0-9])?/;
 
-export const getPrimaryRuleTags = (tags: string[]): { benchmark: string; version: string } =>
-  tags.reduce(
-    (acc, tag) => {
-      if (tag === 'Kubernetes' || tag === 'EKS') acc.benchmark = tag;
-      if (regexForCISSemanticVersioning.test(tag)) acc.version = tag;
+const isBenchmarkVersion = (tag: string) => regexForCISSemanticVersioning.test(tag);
+const isBenchmarkType = (tag: string) => tag === 'Kubernetes' || tag === 'EKS';
 
-      return acc;
-    },
-    { benchmark: '', version: '' }
-  );
+export const getPrimaryRuleTags = (tags: string[]) =>
+  tags.reduce<string[]>((acc, tag) => {
+    if (isBenchmarkType(tag) || isBenchmarkVersion(tag)) acc.push(tag);
+
+    return acc;
+  }, []);
