@@ -9,7 +9,6 @@ import {
   CreateDataViewResponse,
   createStaticDataView,
 } from './create_static_data_view';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -18,10 +17,9 @@ const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
   handler: async (resources): CreateDataViewResponse => {
-    const setup = await setupRequest(resources);
-    const { context, plugins, request, config } = resources;
-
+    const { context, plugins, request } = resources;
     const coreContext = await context.core;
+
     const dataViewStart = await plugins.dataViews.start();
     const dataViewService = await dataViewStart.dataViewsServiceFactory(
       coreContext.savedObjects.client,
@@ -32,8 +30,7 @@ const staticDataViewRoute = createApmServerRoute({
 
     const res = await createStaticDataView({
       dataViewService,
-      config,
-      setup,
+      resources,
     });
 
     return res;

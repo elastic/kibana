@@ -15,8 +15,8 @@ import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
-import { Setup } from '../../lib/helpers/setup_request';
-import { APMConfig } from '../..';
+import { setupRequest } from '../../lib/helpers/setup_request';
+import { APMRouteHandlerResources } from '../typings';
 
 export type CreateDataViewResponse = Promise<
   | { created: boolean; dataView: DataView }
@@ -25,13 +25,14 @@ export type CreateDataViewResponse = Promise<
 
 export async function createStaticDataView({
   dataViewService,
-  config,
-  setup,
+  resources,
 }: {
   dataViewService: DataViewsService;
-  config: APMConfig;
-  setup: Setup;
+  resources: APMRouteHandlerResources;
 }): CreateDataViewResponse {
+  const setup = await setupRequest(resources);
+  const { request, config, core } = resources;
+
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
     if (!config.autoCreateApmDataView) {
@@ -57,7 +58,10 @@ export async function createStaticDataView({
     });
 
     if (!shouldCreateOrUpdate) {
-      return { created: false, reason: 'Dataview exists in current space' };
+      return {
+        created: false,
+        reason: 'Dataview already exists in current space',
+      };
     }
 
     return await withApmSpan('create_data_view', async () => {
@@ -91,12 +95,27 @@ export async function createStaticDataView({
           true
         );
 
+        const startServices = await core.start();
+        const scopedClient =
+          startServices.savedObjects.getScopedClient(request);
+
+        // make data view available across all spaces
+        await scopedClient.updateObjectsSpaces(
+          [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
+          ['*'],
+          []
+        );
+
         return { created: true, dataView };
       } catch (e) {
         // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
         // that error should be silenced
         if (SavedObjectsErrorHelpers.isConflictError(e)) {
-          return { created: false, reason: 'Dataview exists in another space' };
+          return {
+            created: false,
+            reason:
+              'Dataview already exists in another space but is not made available in this space',
+          };
         }
         throw e;
       }
