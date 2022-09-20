@@ -8,9 +8,10 @@
 
 import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../embeddable';
+import type { DashboardContainer } from '../embeddable';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 

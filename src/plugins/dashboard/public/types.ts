@@ -21,7 +21,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
 
-import type { DashboardContainer } from '.';
+import type { DashboardContainer } from './application';
 import type { DashboardAppLocatorParams } from './locator';
 import type { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../common';
 

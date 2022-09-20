@@ -16,7 +16,7 @@ import {
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
+import { DashboardContainer } from '../embeddable';
 import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
 import {
   enableDashboardSearchSessions,
@@ -24,6 +24,7 @@ import {
   stateToDashboardContainerInput,
 } from '.';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
   initialDashboardState: DashboardState;

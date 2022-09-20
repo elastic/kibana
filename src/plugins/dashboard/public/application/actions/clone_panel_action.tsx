@@ -27,9 +27,10 @@ import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
-import { dashboardClonePanelAction } from '../../dashboard_strings';
-import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
 import { pluginServices } from '../../services/plugin_services';
+import { dashboardClonePanelAction } from '../../dashboard_strings';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
+import { type DashboardPanelState, type DashboardContainer } from '..';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 

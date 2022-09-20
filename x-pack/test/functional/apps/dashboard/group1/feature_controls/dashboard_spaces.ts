@@ -116,7 +116,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows 404`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({});
+        await PageObjects.dashboard.gotoDashboardURL({
+          args: {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await PageObjects.error.expectNotFound();
       });
 

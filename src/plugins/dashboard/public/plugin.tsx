@@ -50,16 +50,15 @@ import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import {
-  DASHBOARD_CONTAINER_TYPE,
   type DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   createDashboardContainerByValueRenderer,
 } from './application/embeddable';
 import type { DashboardMountContextProps } from './types';
-import { DashboardConstants } from './dashboard_constants';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { type DashboardAppLocator, DashboardAppLocatorDefinition } from './locator';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
+import { DashboardConstants, DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;

@@ -22,7 +22,7 @@ import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container'
 import { GridData } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 

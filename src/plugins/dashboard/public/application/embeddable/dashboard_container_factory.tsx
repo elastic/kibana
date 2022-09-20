@@ -29,7 +29,7 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 import { DashboardContainerInput } from '../..';
 import { createExtract, createInject } from '../../../common';
 import type { DashboardContainer } from './dashboard_container';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,

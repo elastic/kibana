@@ -440,12 +440,11 @@ export class DashboardPageObject extends FtrService {
     editMode?: boolean;
     args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
   } = {}) {
-    let dashboardLocation = '';
-    if (!id) {
-      dashboardLocation = `/create`;
+    let dashboardLocation = `/create`;
+    if (id) {
+      const edit = editMode ? `?_a=(viewMode:edit)` : '';
+      dashboardLocation = `/view/${id}${edit}`;
     }
-    const edit = editMode ? `?_a=(viewMode:edit)` : '';
-    dashboardLocation = `/view/${id}${edit}`;
     this.common.navigateToActualUrl('dashboard', dashboardLocation, args);
   }
 

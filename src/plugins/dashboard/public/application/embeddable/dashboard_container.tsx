@@ -32,7 +32,7 @@ import type { Query } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
