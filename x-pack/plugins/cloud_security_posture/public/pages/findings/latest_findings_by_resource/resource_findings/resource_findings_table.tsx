@@ -82,7 +82,6 @@ const ResourceFindingsTableComponent = ({
         onChange={setTableOptions}
         pagination={pagination}
         sorting={sorting}
-        tableLayout="auto"
       />
       {selectedFinding && (
         <FindingsRuleFlyout

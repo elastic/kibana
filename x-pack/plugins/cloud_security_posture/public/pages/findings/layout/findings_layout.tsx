@@ -162,7 +162,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
       { defaultMessage: 'Rule Tags' }
     ),
-    width: '13%',
+    width: '15%',
     sortable: false,
     truncateText: true,
     render: (tags: string[]) => {
