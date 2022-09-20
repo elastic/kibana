@@ -46,12 +46,12 @@ import {
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
+import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,
   DeleteMlInferencePipelineApiLogicArgs,
   DeleteMlInferencePipelineResponse,
 } from '../../../api/ml_models/delete_ml_inference_pipeline';
-import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
