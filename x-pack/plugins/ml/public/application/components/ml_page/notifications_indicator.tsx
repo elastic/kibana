@@ -11,13 +11,12 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiNotificationBadge,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { timer, combineLatest, of } from 'rxjs';
-import { switchMap, filter, catchError } from 'rxjs/operators';
-import { css } from '@emotion/react';
+import { combineLatest, of, timer } from 'rxjs';
+import { catchError, filter, switchMap } from 'rxjs/operators';
 import { useAsObservable } from '../../hooks';
 import { NotificationsCountResponse } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
@@ -32,7 +31,6 @@ export const NotificationsIndicator: FC = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
-  const { euiTheme } = useEuiTheme();
   const [lastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
 
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
@@ -102,20 +100,13 @@ export const NotificationsIndicator: FC = () => {
               />
             }
           >
-            <svg
-              css={css`
-                display: block;
-              `}
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
+            <EuiHealth
+              css={{ display: 'block' }}
+              color="primary"
               aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadIcon', {
                 defaultMessage: 'Unread notifications indicator.',
               })}
-              fill={euiTheme.colors.primary}
-            >
-              <circle cx="8" cy="8" r="4" />
-            </svg>
+            />
           </EuiToolTip>
         </EuiFlexItem>
       ) : null}
