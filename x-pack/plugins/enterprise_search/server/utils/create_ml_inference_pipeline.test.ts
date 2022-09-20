@@ -79,9 +79,11 @@ describe('createMlInferencePipeline util function', () => {
       mockClient as unknown as ElasticsearchClient
     );
 
-    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(expect.objectContaining({
-      id: `ml-inference-my_pipeline_with_spaces`
-    }));
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'ml-inference-my_pipeline_with_spaces',
+      })
+    );
   });
 
   it('should throw an error without creating the pipeline if it already exists', () => {
