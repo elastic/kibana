@@ -8,11 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Column, ColumnWithMeta, SchemaConfig } from '@kbn/visualizations-plugin/common';
-import {
-  getColumnsFromVis,
-  getVisSchemas,
-  getPercentageColumnFormulaColumn,
-} from '@kbn/visualizations-plugin/public';
+import { convertToLensModule, getVisSchemas } from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
@@ -39,14 +35,19 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   }
 
   const dataViews = getDataViewsStart();
-  const dataView = vis.data.indexPattern?.id
-    ? await dataViews.get(vis.data.indexPattern.id)
-    : await dataViews.getDefault();
-
+  let dataView;
+  try {
+    dataView = vis.data.indexPattern?.id
+      ? await dataViews.get(vis.data.indexPattern.id)
+      : await dataViews.getDefault();
+  } catch (err) {
+    return null;
+  }
   if (!dataView) {
     return null;
   }
 
+  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
   const result = getColumnsFromVis(
     vis,
     timefilter,
