@@ -50,7 +50,7 @@ describe('Pagination', () => {
     fireEvent.click(wrapper.getByTestId('pagination-button-next'));
 
     expect(mockOnPaginationChange).toHaveBeenCalledWith({
-      pagination: { pageIndex: 1, pageSize: 5, totalItemCount: 32 },
+      pagination: { pageIndex: 1, pageSize: 5, totalItemCount: 160 },
     });
   });
 
@@ -71,7 +71,7 @@ describe('Pagination', () => {
     fireEvent.click(wrapper.getByTestId('pagination-button-2'));
 
     expect(mockOnPaginationChange).toHaveBeenCalledWith({
-      pagination: { pageIndex: 2, pageSize: 50, totalItemCount: 4 },
+      pagination: { pageIndex: 2, pageSize: 50, totalItemCount: 160 },
     });
   });
 });

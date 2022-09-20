@@ -448,7 +448,7 @@ Object {
                 >
                   <div
                     class="euiFlexItem"
-                    data-test-subj="exceptionItemsViewerItem-header"
+                    data-test-subj="exceptionItemCard-header"
                   >
                     <div
                       class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -494,7 +494,7 @@ Object {
                   </div>
                   <div
                     class="euiFlexItem"
-                    data-test-subj="exceptionItemsViewerItem-meta"
+                    data-test-subj="exceptionItemCard-meta"
                   >
                     <div
                       class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -697,6 +697,7 @@ Object {
                   </div>
                   <div
                     class="euiFlexItem"
+                    data-test-subj="exceptionItemCard-condition"
                   >
                     <div
                       class="euiPanel euiPanel--subdued euiPanel--paddingMedium c11 emotion-euiPanel-grow-m-m-subdued"
@@ -989,7 +990,7 @@ Object {
           data-test-subj="exceptionsContainer"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero sc-pIIdL ecQiqd"
+            class="euiFlexItem euiFlexItem--flexGrowZero sc-qWeMO hQaFyk"
             data-test-subj="exceptionItemContainer"
           >
             <div
@@ -1001,7 +1002,7 @@ Object {
               >
                 <div
                   class="euiFlexItem"
-                  data-test-subj="exceptionItemsViewerItem-header"
+                  data-test-subj="exceptionItemCard-header"
                 >
                   <div
                     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1047,14 +1048,14 @@ Object {
                 </div>
                 <div
                   class="euiFlexItem"
-                  data-test-subj="exceptionItemsViewerItem-meta"
+                  data-test-subj="exceptionItemCard-meta"
                 >
                   <div
                     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                     data-test-subj="exceptionItemCardMetaInfo"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero sc-qWRQj ftJhyq"
+                      class="euiFlexItem euiFlexItem--flexGrowZero sc-ptTkw hXGmCZ"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -1134,7 +1135,7 @@ Object {
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero sc-qWRQj ftJhyq"
+                      class="euiFlexItem euiFlexItem--flexGrowZero sc-ptTkw hXGmCZ"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -1250,6 +1251,7 @@ Object {
                 </div>
                 <div
                   class="euiFlexItem"
+                  data-test-subj="exceptionItemCard-condition"
                 >
                   <div
                     class="euiPanel euiPanel--subdued euiPanel--paddingMedium sc-fzqNJr jfJSfU emotion-euiPanel-grow-m-m-subdued"
