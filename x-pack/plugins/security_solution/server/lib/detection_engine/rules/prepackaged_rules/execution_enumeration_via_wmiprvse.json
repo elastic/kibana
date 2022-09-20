@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Enumeration Command Spawned via WMIPrvSE",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name:\n  (\n    \"arp.exe\",\n    \"dsquery.exe\",\n    \"dsget.exe\",\n    \"gpresult.exe\",\n    \"hostname.exe\",\n    \"ipconfig.exe\",\n    \"nbtstat.exe\",\n    \"net.exe\",\n    \"net1.exe\",\n    \"netsh.exe\",\n    \"netstat.exe\",\n    \"nltest.exe\",\n    \"ping.exe\",\n    \"qprocess.exe\",\n    \"quser.exe\",\n    \"qwinsta.exe\",\n    \"reg.exe\",\n    \"sc.exe\",\n    \"systeminfo.exe\",\n    \"tasklist.exe\",\n    \"tracert.exe\",\n    \"whoami.exe\"\n  ) and\n  process.parent.name:\"wmiprvse.exe\"\n",
+  "query": "process where event.type == \"start\" and\n  process.name:\n  (\n    \"arp.exe\",\n    \"dsquery.exe\",\n    \"dsget.exe\",\n    \"gpresult.exe\",\n    \"hostname.exe\",\n    \"ipconfig.exe\",\n    \"nbtstat.exe\",\n    \"net.exe\",\n    \"net1.exe\",\n    \"netsh.exe\",\n    \"netstat.exe\",\n    \"nltest.exe\",\n    \"ping.exe\",\n    \"qprocess.exe\",\n    \"quser.exe\",\n    \"qwinsta.exe\",\n    \"reg.exe\",\n    \"sc.exe\",\n    \"systeminfo.exe\",\n    \"tasklist.exe\",\n    \"tracert.exe\",\n    \"whoami.exe\"\n  ) and\n  process.parent.name:\"wmiprvse.exe\"\n",
   "required_fields": [
     {
       "ecs": true,
@@ -86,5 +86,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 101
 }

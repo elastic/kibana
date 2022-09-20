@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -58,22 +58,30 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
       solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
         defaultMessage: 'Cloud Security Posture',
       })}
-      // TODO: Add real docs link once we have it
-      docsLink={'https://www.elastic.co/guide/index.html'}
+      docsLink={'https://ela.st/kspm'}
       logo={'logoSecurity'}
       actions={{
         elasticAgent: {
           href: cisIntegrationLink,
           isDisabled: !cisIntegrationLink,
           title: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-            defaultMessage: 'Add a CIS integration',
+            defaultMessage: 'Add a KSPM integration',
           }),
-          description: i18n.translate(
-            'xpack.csp.cloudPosturePage.packageNotInstalled.description',
-            {
-              defaultMessage:
-                'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
-            }
+          description: (
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.packageNotInstalled.description"
+              defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
+              values={{
+                integrationFullName: (
+                  <EuiLink href="https://ela.st/kspm">
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
+                      defaultMessage="Kubernetes Security Posture Management"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           ),
         },
       }}
