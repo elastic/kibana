@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-
 export const ConfirmOpenUnverifiedModal: React.FC<{
   onCancel: () => void;
   onConfirm: () => void;
@@ -50,7 +49,7 @@ export const ConfirmOpenUnverifiedModal: React.FC<{
         title={i18n.translate('xpack.fleet.ConfirmOpenUnverifiedModal.calloutTitleWithPkg', {
           defaultMessage: 'Integration {pkgName} has failed verification',
           values: {
-            pkgName: pkgName,
+            pkgName,
           },
         })}
         color="warning"
