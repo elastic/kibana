@@ -23,6 +23,13 @@ export interface IndicatorsFieldSelectorProps {
 }
 
 const DEFAULT_STACK_BY_VALUE = RawIndicatorFieldId.Feed;
+const COMBOBOX_PREPEND_LABEL = i18n.translate(
+  'xpack.threatIntelligence.indicator.fieldSelector.label',
+  {
+    defaultMessage: 'Stack by',
+  }
+);
+const COMBOBOX_SINGLE_SELECTION = { asPlainText: true };
 
 export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
   ({ indexPattern, valueChange, defaultStackByValue = DEFAULT_STACK_BY_VALUE }) => {
@@ -60,11 +67,9 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
       <EuiComboBox
         css={styles.comboBox}
         data-test-subj={DROPDOWN_TEST_ID}
-        prepend={i18n.translate('xpack.threatIntelligence.indicator.fieldSelector.label', {
-          defaultMessage: 'Stack by',
-        })}
-        singleSelection={{ asPlainText: true }}
-        onChange={(event) => selectedFieldChange(event)}
+        prepend={COMBOBOX_PREPEND_LABEL}
+        singleSelection={COMBOBOX_SINGLE_SELECTION}
+        onChange={selectedFieldChange}
         options={fields}
         selectedOptions={selectedField}
         isClearable={false}
