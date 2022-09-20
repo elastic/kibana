@@ -6,40 +6,14 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
-export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta: boolean }) => (
+export const CloudPosturePageTitle = ({ title }: { title: string }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiTitle>
         <h1>{title}</h1>
       </EuiTitle>
     </EuiFlexItem>
-    {isBeta && (
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          // tooltipContent wraps EuiBetaBadge with a span element which breaks alignment
-          .euiToolTipAnchor {
-            display: flex;
-          }
-        `}
-      >
-        <EuiBetaBadge
-          label={i18n.translate('xpack.csp.common.cloudPosturePageTitle.BetaBadgeLabel', {
-            defaultMessage: 'Beta',
-          })}
-          tooltipContent={i18n.translate(
-            'xpack.csp.common.cloudPosturePageTitle.BetaBadgeTooltip',
-            {
-              defaultMessage:
-                'This functionality is in beta and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in beta are not subject to the support SLA of official GA features.',
-            }
-          )}
-        />
-      </EuiFlexItem>
-    )}
   </EuiFlexGroup>
 );

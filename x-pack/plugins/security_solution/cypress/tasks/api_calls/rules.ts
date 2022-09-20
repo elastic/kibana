@@ -11,6 +11,7 @@ import type {
   MachineLearningRule,
   ThresholdRule,
   NewTermsRule,
+  SavedQueryRule,
 } from '../../objects/rule';
 
 export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'ml_rule_testing') =>
@@ -148,6 +149,39 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
     });
   }
 };
+
+export const createSavedQueryRule = (
+  rule: SavedQueryRule,
+  ruleId = 'saved_query_rule_testing'
+): Cypress.Chainable<Cypress.Response<unknown>> =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: ruleId,
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval: rule.interval,
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'saved_query',
+      from: 'now-50000h',
+      index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : '',
+      saved_id: rule.savedId,
+      language: 'kuery',
+      enabled: false,
+      exceptions_list: rule.exceptionLists ?? [],
+      tags: rule.tags,
+      ...(rule.timeline.id ?? rule.timeline.templateTimelineId
+        ? {
+            timeline_id: rule.timeline.id ?? rule.timeline.templateTimelineId,
+            timeline_title: rule.timeline.title,
+          }
+        : {}),
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
 
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') => {
   if (rule.dataSource.type === 'indexPatterns') {

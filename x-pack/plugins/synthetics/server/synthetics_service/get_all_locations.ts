@@ -18,7 +18,7 @@ export async function getAllLocations(
   try {
     const [privateLocations, { locations: publicLocations, throttling }] = await Promise.all([
       getPrivateLocations(syntheticsMonitorClient, savedObjectsClient),
-      getServiceLocations(server),
+      getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
     return { publicLocations, privateLocations, throttling };
   } catch (e) {
@@ -26,3 +26,17 @@ export async function getAllLocations(
     return { publicLocations: [], privateLocations: [] };
   }
 }
+
+const getServicePublicLocations = async (
+  server: UptimeServerSetup,
+  syntheticsMonitorClient: SyntheticsMonitorClient
+) => {
+  if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {
+    return await getServiceLocations(server);
+  }
+
+  return {
+    locations: syntheticsMonitorClient.syntheticsService.locations,
+    throttling: syntheticsMonitorClient.syntheticsService.throttling,
+  };
+};
