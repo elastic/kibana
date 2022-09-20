@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
@@ -53,10 +55,8 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const { MapEmbeddable } = await lazyLoadMapModules();
     const usageCollection = getUsageCollection();
     if (usageCollection) {
-      const subscription = getApplication().currentAppId$.subscribe((appId) => {
-        usageCollection.reportUiCounter('map', 'loaded', `open_maps_vis_${appId}`);
-      });
-      subscription.unsubscribe();
+      const appId = await lastValueFrom(getApplication().currentAppId$.pipe(first()));
+      usageCollection.reportUiCounter('map', 'loaded', `open_maps_vis_${appId}`);
     }
     return new MapEmbeddable(
       {
