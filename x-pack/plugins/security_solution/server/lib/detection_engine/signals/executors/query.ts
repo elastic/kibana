@@ -14,15 +14,12 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { Filter } from '@kbn/es-query';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type {
-  CompleteRule,
-  SavedQueryRuleParams,
-  QueryRuleParams,
-} from '../../schemas/rule_schemas';
+import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -33,7 +30,6 @@ export const queryExecutor = async ({
   runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
   listClient,
   experimentalFeatures,
   ruleExecutionLogger,
@@ -45,12 +41,13 @@ export const queryExecutor = async ({
   wrapHits,
   primaryTimestamp,
   secondaryTimestamp,
+  unprocessedExceptions,
+  exceptionFilter,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
+  completeRule: CompleteRule<UnifiedQueryRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   experimentalFeatures: ExperimentalFeatures;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -62,6 +59,8 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -74,15 +73,14 @@ export const queryExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     return searchAfterAndBulkCreate({
       tuple,
-      completeRule,
+      exceptionsList: unprocessedExceptions,
       services,
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
       eventsTelemetry,
       inputIndexPattern: inputIndex,

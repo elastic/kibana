@@ -12,7 +12,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./unenroll'));
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./upgrade'));
-    loadTestFile(require.resolve('./current_upgrades'));
+    loadTestFile(require.resolve('./action_status'));
     loadTestFile(require.resolve('./reassign'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./update'));

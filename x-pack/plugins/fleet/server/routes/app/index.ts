@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
-import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
+import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetAuthzRouter } from '../security';
 import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
@@ -77,11 +77,11 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
       });
     } else {
       const error = new GenerateServiceTokenError('Unable to generate service token');
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } catch (e) {
     const error = new GenerateServiceTokenError(e);
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 

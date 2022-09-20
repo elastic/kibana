@@ -65,6 +65,10 @@
     "SetupModule",
     "CheckExistingModuleJobs",
 
+    "Notifications",
+    "GetNotifications",
+    "GetNotificationCounts",
+
     "Annotations",
     "GetAnnotations",
     "IndexAnnotations",
