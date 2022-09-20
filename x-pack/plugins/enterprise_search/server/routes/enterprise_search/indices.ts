@@ -460,7 +460,7 @@ export function registerIndexRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/_simulate',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate',
       validate: {
         body: schema.object({
           pipeline: schema.object({
@@ -513,7 +513,7 @@ export function registerIndexRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
       validate: {
         body: schema.object({
           description: schema.maybe(schema.string()),
@@ -571,7 +571,7 @@ export function registerIndexRoutes({
 
   router.delete(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
       validate: {
         params: schema.object({
           indexName: schema.string(),
