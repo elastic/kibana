@@ -6724,7 +6724,6 @@
     "xpack.apm.api.fleet.fleetSecurityRequired": "需要 Fleet 和 Security 插件",
     "xpack.apm.apmDescription": "自动从您的应用程序内收集深层的性能指标和错误。",
     "xpack.apm.apmSchema.index": "APM Server 架构 - 索引",
-    "xpack.apm.apmServiceGroups.index": "APM 服务组 - 索引",
     "xpack.apm.apmSettings.index": "APM 设置 - 索引",
     "xpack.apm.betaBadgeDescription": "此功能当前为公测版。如果遇到任何错误或有任何反馈，请报告问题或访问我们的论坛。",
     "xpack.apm.betaBadgeLabel": "公测版",

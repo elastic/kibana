@@ -6,17 +6,11 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SERVICE_NAME } from '../elasticsearch_fieldnames';
-import { ServiceGroup } from '../service_groups';
+import { kqlQuery } from '@kbn/observability-plugin/server';
+import { ServiceGroup } from '../../common/service_groups';
 
 export function serviceGroupQuery(
   serviceGroup?: ServiceGroup | null
 ): QueryDslQueryContainer[] {
-  if (!serviceGroup) {
-    return [];
-  }
-
-  return serviceGroup?.serviceNames
-    ? [{ terms: { [SERVICE_NAME]: serviceGroup.serviceNames } }]
-    : [];
+  return serviceGroup ? kqlQuery(serviceGroup?.kuery) : [];
 }

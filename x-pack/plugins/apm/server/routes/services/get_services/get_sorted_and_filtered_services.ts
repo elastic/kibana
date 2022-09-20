@@ -14,6 +14,7 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
+import { lookupServices } from '../../service_groups/lookup_services';
 
 export async function getSortedAndFilteredServices({
   setup,
@@ -70,7 +71,13 @@ export async function getSortedAndFilteredServices({
       return [];
     }),
     serviceGroup
-      ? getServiceNamesFromServiceGroup(serviceGroup)
+      ? getServiceNamesFromServiceGroup({
+          setup,
+          start,
+          end,
+          maxNumberOfServices,
+          serviceGroup,
+        })
       : getServiceNamesFromTermsEnum(),
   ]);
 
@@ -85,6 +92,25 @@ export async function getSortedAndFilteredServices({
   return services;
 }
 
-async function getServiceNamesFromServiceGroup(serviceGroup: ServiceGroup) {
-  return serviceGroup.serviceNames;
+async function getServiceNamesFromServiceGroup({
+  setup,
+  start,
+  end,
+  maxNumberOfServices,
+  serviceGroup: { kuery },
+}: {
+  setup: Setup;
+  start: number;
+  end: number;
+  maxNumberOfServices: number;
+  serviceGroup: ServiceGroup;
+}) {
+  const services = await lookupServices({
+    setup,
+    kuery,
+    start,
+    end,
+    maxNumberOfServices,
+  });
+  return services.map(({ serviceName }) => serviceName);
 }
