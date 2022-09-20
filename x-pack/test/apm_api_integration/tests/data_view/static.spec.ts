@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -84,11 +85,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('successfully creates the apm data view', async () => {
         expect(response.status).to.be(200);
 
-        expect(response.body.dataView!.id).to.be('apm_static_index_pattern_id');
-        expect(response.body.dataView!.name).to.be('APM');
-        expect(response.body.dataView!.title).to.be(
-          'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
-        );
+        // @ts-expect-error
+        const dataView = response.body.dataView as DataView;
+
+        expect(dataView.id).to.be('apm_static_index_pattern_id');
+        expect(dataView.name).to.be('APM');
+        expect(dataView.title).to.be('traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*');
       });
 
       describe('when fetching the data view', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   TRACE_ID,
   TRANSACTION_ID,
