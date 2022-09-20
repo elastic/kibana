@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { AlertRawEventData } from '../../../../common/components/event_details/event_details';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -127,7 +128,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           loading={loading}
-          rawEventData={rawEventData}
+          rawEventData={rawEventData as AlertRawEventData}
           showAlertDetails={showAlertDetails}
           timelineId={timelineId}
           isReadOnly={isReadOnly}
@@ -165,7 +166,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             isAlert={isAlert}
             isDraggable={isDraggable}
             loading={loading}
-            rawEventData={rawEventData}
+            rawEventData={rawEventData as AlertRawEventData}
             timelineId={timelineId}
             timelineTabType={tabType}
             handleOnEventClosed={handleOnEventClosed}

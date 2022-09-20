@@ -50,6 +50,8 @@ import {
 import { StatusBadge } from './components/status_badge';
 import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
+import { ManagementPageLoader } from '../management_page_loader';
+import { ActionsLogEmptyState } from './components/actions_log_empty_state';
 
 const emptyValue = getEmptyValue();
 
@@ -111,8 +113,12 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsLog = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds'> & { showHostNames?: boolean; isFlyout?: boolean }
->(({ agentIds, showHostNames = false, isFlyout = true }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds'> & {
+    showHostNames?: boolean;
+    isFlyout?: boolean;
+    setIsDataInResponse?: (isData: boolean) => void;
+  }
+>(({ agentIds, showHostNames = false, isFlyout = true, setIsDataInResponse }) => {
   const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
     useUrlPagination();
   const {
@@ -127,6 +133,9 @@ export const ResponseActionsLog = memo<
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
+
+  // Used to decide if display global loader or not (only the fist time tha page loads)
+  const [isFirstAttempt, setIsFirstAttempt] = useState(true);
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
     page: isFlyout ? 1 : paginationFromUrlParams.page,
@@ -163,11 +172,34 @@ export const ResponseActionsLog = memo<
     isFetching,
     isFetched,
     refetch: reFetchEndpointActionList,
-  } = useGetEndpointActionList({
-    ...queryParams,
-    startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-    endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
-  });
+  } = useGetEndpointActionList(
+    {
+      ...queryParams,
+      startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
+      endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+    },
+    { retry: false }
+  );
+
+  // Hide page header when there is no actions index calling the setIsDataInResponse with false value.
+  // Otherwise, it shows the page header calling the setIsDataInResponse with true value and it also keeps track
+  // if the API request was done for the first time.
+  useEffect(() => {
+    if (
+      !isFetching &&
+      error?.body?.statusCode === 404 &&
+      error?.body?.message === 'index_not_found_exception'
+    ) {
+      if (setIsDataInResponse) {
+        setIsDataInResponse(false);
+      }
+    } else if (!isFetching && actionList) {
+      setIsFirstAttempt(false);
+      if (setIsDataInResponse) {
+        setIsDataInResponse(true);
+      }
+    }
+  }, [actionList, error, isFetching, setIsDataInResponse]);
 
   // handle auto refresh data
   const onRefresh = useCallback(() => {
@@ -575,6 +607,11 @@ export const ResponseActionsLog = memo<
     [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
   );
 
+  if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
+    return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
+  } else if (isFetching && isFirstAttempt) {
+    return <ManagementPageLoader data-test-subj={getTestId('global-loader')} />;
+  }
   return (
     <>
       <ActionsLogFilters
