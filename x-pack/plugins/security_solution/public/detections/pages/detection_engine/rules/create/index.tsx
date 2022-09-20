@@ -544,6 +544,7 @@ const CreateRulePageComponent: React.FC = () => {
                   // We need a key to make this component remount when edit/view mode is toggled
                   // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
                   key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
+                  ruleType={ruleType}
                 />
               </EuiAccordion>
             </MyEuiPanel>

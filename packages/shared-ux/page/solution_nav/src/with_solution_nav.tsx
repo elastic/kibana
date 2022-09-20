@@ -9,8 +9,13 @@
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
 import { SerializedStyles } from '@emotion/serialize';
-import { useIsWithinBreakpoints, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
+import {
+  useIsWithinBreakpoints,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
+  EuiPageSidebarProps,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
@@ -33,7 +38,7 @@ const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
   const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-    const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+    const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );

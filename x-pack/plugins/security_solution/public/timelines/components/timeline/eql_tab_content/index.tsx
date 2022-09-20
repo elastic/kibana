@@ -58,6 +58,7 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import type { Sort } from '../body/sort';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -182,7 +183,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const ACTION_BUTTON_COUNT = 6;
+
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -252,7 +255,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (

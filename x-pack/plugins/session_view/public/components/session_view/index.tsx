@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiBetaBadge,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -273,15 +274,27 @@ export const SessionView = ({
 
           {hasTTYOutput && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                isSelected={showTTY}
-                display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
-                onClick={onToggleTTY}
-                size="m"
-                aria-label={TOGGLE_TTY_PLAYER}
-                data-test-subj="sessionView:TTYPlayerToggle"
-              />
+              <EuiToolTip
+                title={
+                  <FormattedMessage
+                    id="xpack.sessionView.ttyToggle"
+                    defaultMessage="{kb}Kb of tty output"
+                    values={{
+                      kb: Math.round(totalTTYOutputBytes.total / 1024),
+                    }}
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  isSelected={showTTY}
+                  display={showTTY ? 'fill' : 'empty'}
+                  iconType="apmTrace"
+                  onClick={onToggleTTY}
+                  size="m"
+                  aria-label={TOGGLE_TTY_PLAYER}
+                  data-test-subj="sessionView:TTYPlayerToggle"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
 
