@@ -7,10 +7,18 @@
 
 import React, { useContext, useMemo } from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  type EuiDescriptionListProps,
+  EuiFlexGroup,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
@@ -20,6 +28,8 @@ import { useCspIntegrationInfo } from './use_csp_integration';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
+import { CloudPostureIntegrations, cloudPostureIntegrations } from '../../common/constants';
+import * as TEST_SUBJECTS from './test_subjects';
 
 const getRulesBreadcrumbs = (
   name?: string,
@@ -41,12 +51,55 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
+const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
+  typeof name === 'string' && name in cloudPostureIntegrations;
+
+const getRulesSharedValues = (
+  packageInfo?: PackagePolicy
+): NonNullable<EuiDescriptionListProps['listItems']> => {
+  const enabledInput = packageInfo?.inputs.find((input) => input.enabled);
+  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return [];
+
+  const integration = cloudPostureIntegrations[enabledInput.policy_template];
+  const enabledIntegrationOption = integration.options.find(
+    (option) => option.type === enabledInput.type
+  );
+
+  const values = [
+    {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
+        defaultMessage: 'Integration',
+      }),
+      description: integration.shortName,
+    },
+  ];
+
+  if (!enabledIntegrationOption) return values;
+
+  values.push(
+    {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
+        defaultMessage: 'Deployment Type',
+      }),
+      description: enabledIntegrationOption.name,
+    },
+    {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
+        defaultMessage: 'Benchmark',
+      }),
+      description: enabledIntegrationOption.benchmark,
+    }
+  );
+
+  return values;
+};
+
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
-  const [packageInfo, agentInfo] = integrationInfo.data || [];
+  const [packageInfo] = integrationInfo.data || [];
 
   const breadcrumbs = useMemo(
     () =>
@@ -55,6 +108,8 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   );
 
   useCspBreadcrumbs(breadcrumbs);
+
+  const sharedValues = getRulesSharedValues(packageInfo);
 
   return (
     <CloudPosturePage query={integrationInfo}>
@@ -93,18 +148,10 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
           </EuiFlexGroup>
         }
         description={
-          packageInfo?.package &&
-          agentInfo?.name && (
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
-                defaultMessage="{integrationType}, {agentPolicyName}"
-                values={{
-                  integrationType: packageInfo.package.title,
-                  agentPolicyName: agentInfo.name,
-                }}
-              />
-            </EuiTextColor>
+          sharedValues.length && (
+            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
+              <CspInlineDescriptionList listItems={sharedValues} />
+            </div>
           )
         }
         bottomBorder
