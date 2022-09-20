@@ -9,8 +9,8 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 
-import { TestProviders } from '../../../../mock/test_providers';
-import { LastUpdatedAt } from './LastUpdatedAt';
+import { TestProviders } from '../../mock/test_providers';
+import { LastUpdatedAt } from './last_updated_at';
 
 describe('LastUpdatedAt Component', () => {
   it('Should show "updating" text while loading', () => {

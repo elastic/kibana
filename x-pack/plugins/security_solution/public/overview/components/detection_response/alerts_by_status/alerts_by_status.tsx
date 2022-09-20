@@ -33,11 +33,12 @@ import {
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { VIEW_ALERTS } from '../../../pages/translations';
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { SEVERITY_COLOR } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton } from '../../../../common/components/links';
 
 const donutHeight = 120;

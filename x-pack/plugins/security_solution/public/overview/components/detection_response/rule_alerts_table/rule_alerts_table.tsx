@@ -22,7 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import type { RuleAlertsItem } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
@@ -32,6 +32,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
