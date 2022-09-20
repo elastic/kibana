@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { DROPDOWN_TEST_ID, IndicatorsFieldSelector } from './indicators_field_selector';
+import { IndicatorsFieldSelector } from './indicators_field_selector';
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -51,11 +51,5 @@ describe('<IndicatorsFieldSelector />', () => {
     );
 
     expect(component).toMatchSnapshot();
-
-    const dropdownOptions: string = component.getByTestId(DROPDOWN_TEST_ID).innerHTML;
-    const optionsCount: number = (dropdownOptions.match(/<option/g) || []).length;
-    const mockFieldsCount: number = mockIndexPattern.fields.length;
-
-    expect(optionsCount).toBe(mockFieldsCount);
   });
 });

@@ -21,43 +21,67 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--group"
+            class="euiComboBox euiComboBox--prepended css-18y0wn9"
+            data-test-subj="tiIndicatorFieldSelectorDropdown"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              Stack by
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout euiFormControlLayout--group"
             >
-              <select
-                class="euiSelect euiFormControlLayout--1icons euiSelect--inGroup"
-                data-test-subj="tiIndicatorFieldSelectorDropdown"
+              <label
+                class="euiFormLabel euiFormControlLayout__prepend"
+                for="generated-id__eui-combobox-id"
               >
-                <option
-                  value="@timestamp"
-                >
-                  @timestamp
-                </option>
-                <option
-                  value="threat.feed.name"
-                >
-                  threat.feed.name
-                </option>
-              </select>
+                Stack by
+              </label>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <span
-                  class="euiFormControlLayoutCustomIcon"
+                <div
+                  class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
                 >
                   <span
-                    aria-hidden="true"
-                    class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
-                  />
-                </span>
+                    class="euiComboBoxPill euiComboBoxPill--plainText"
+                  >
+                    threat.feed.name
+                  </span>
+                  <div
+                    class="euiComboBox__input"
+                    style="font-size: 14px; display: inline-block;"
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      aria-controls=""
+                      aria-expanded="false"
+                      data-test-subj="comboBoxSearchInput"
+                      id="generated-id__eui-combobox-id"
+                      role="combobox"
+                      style="box-sizing: content-box; width: 2px;"
+                      value=""
+                    />
+                    <div
+                      style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <button
+                    aria-label="Open list of options"
+                    class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                    data-test-subj="comboBoxToggleListButton"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -102,43 +126,67 @@ Object {
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--group"
+          class="euiComboBox euiComboBox--prepended css-18y0wn9"
+          data-test-subj="tiIndicatorFieldSelectorDropdown"
         >
-          <label
-            class="euiFormLabel euiFormControlLayout__prepend"
-          >
-            Stack by
-          </label>
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout euiFormControlLayout--group"
           >
-            <select
-              class="euiSelect euiFormControlLayout--1icons euiSelect--inGroup"
-              data-test-subj="tiIndicatorFieldSelectorDropdown"
+            <label
+              class="euiFormLabel euiFormControlLayout__prepend"
+              for="generated-id__eui-combobox-id"
             >
-              <option
-                value="@timestamp"
-              >
-                @timestamp
-              </option>
-              <option
-                value="threat.feed.name"
-              >
-                threat.feed.name
-              </option>
-            </select>
+              Stack by
+            </label>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <span
-                class="euiFormControlLayoutCustomIcon"
+              <div
+                class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
               >
                 <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </span>
+                  class="euiComboBoxPill euiComboBoxPill--plainText"
+                >
+                  threat.feed.name
+                </span>
+                <div
+                  class="euiComboBox__input"
+                  style="font-size: 14px; display: inline-block;"
+                >
+                  <input
+                    aria-autocomplete="list"
+                    aria-controls=""
+                    aria-expanded="false"
+                    data-test-subj="comboBoxSearchInput"
+                    id="generated-id__eui-combobox-id"
+                    role="combobox"
+                    style="box-sizing: content-box; width: 2px;"
+                    value=""
+                  />
+                  <div
+                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                  />
+                </div>
+              </div>
+              <div
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </div>
