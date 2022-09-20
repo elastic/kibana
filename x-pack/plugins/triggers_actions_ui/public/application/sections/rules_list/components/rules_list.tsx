@@ -22,7 +22,6 @@ import {
   EuiLink,
   EuiEmptyPrompt,
   EuiHealth,
-  EuiText,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
@@ -65,7 +64,7 @@ import {
   snoozeRule,
   unsnoozeRule,
   deleteRules,
-  updateAPIKey,
+  bulkUpdateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -88,6 +87,10 @@ import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
+import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
+import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
+import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
+import { runRule } from '../../../lib/run_rule';
 
 const ENTER_KEY = 13;
 
@@ -154,7 +157,6 @@ export const RulesList = ({
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
@@ -203,6 +205,19 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+
+  const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
+  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<string>('');
+
+  const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
+  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<string>('');
+
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
+  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<string>('');
+
+  const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
+  const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
+  const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
@@ -255,10 +270,13 @@ export const RulesList = ({
     onError,
   });
 
-  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
+  };
+
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
@@ -364,6 +382,19 @@ export const RulesList = ({
       onLastResponseFilterChange(ruleExecutionStatusesFilter);
     }
   }, [ruleExecutionStatusesFilter]);
+
+  // Clear bulk selection anytime the filters change
+  useEffect(() => {
+    onClearSelection();
+  }, [
+    searchText,
+    rulesTypesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
+    hasDefaultRuleTypesFiltersOn,
+  ]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -488,6 +519,11 @@ export const RulesList = ({
     return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
+  const onSearchPopulate = (value: string) => {
+    setInputText(value);
+    setSearchText(value);
+  };
+
   const filterOptions = sortBy(Object.entries(groupRuleTypesByProducer())).map(
     ([groupName, ruleTypesOptions]) => ({
       groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
@@ -516,11 +552,78 @@ export const RulesList = ({
     ...getRuleTagFilter(),
   ];
 
-  const authorizedToModifySelectedRules = selectedIds.length
-    ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
-        hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
-      )
-    : false;
+  const tableItems = useMemo(() => {
+    if (ruleTypesState.isInitialized === false) {
+      return [];
+    }
+    return convertRulesToTableItems({
+      rules: rulesState.data,
+      ruleTypeIndex: ruleTypesState.data,
+      canExecuteActions,
+      config,
+    });
+  }, [ruleTypesState, rulesState, canExecuteActions, config]);
+
+  const {
+    isAllSelected,
+    selectedIds,
+    isPageSelected,
+    numberOfSelectedItems,
+    isRowSelected,
+    getFilter,
+    onSelectRow,
+    onSelectAll,
+    onSelectPage,
+    onClearSelection,
+  } = useBulkEditSelect({
+    totalItemCount: rulesState.totalItemCount,
+    items: tableItems,
+  });
+
+  const authorizedToModifySelectedRules = useMemo(() => {
+    if (isAllSelected) {
+      return true;
+    }
+    const selectedIdsArray = [...selectedIds];
+    return selectedIdsArray.length
+      ? filterRulesById(rulesState.data, selectedIdsArray).every((selectedRule) =>
+          hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
+        )
+      : false;
+  }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
+
+  const clearRulesToSnooze = () => {
+    setRulesToSnooze([]);
+    setRulesToSnoozeFilter('');
+  };
+
+  const clearRulesToSchedule = () => {
+    setRulesToSchedule([]);
+    setRulesToScheduleFilter('');
+  };
+
+  const clearRulesToUpdateAPIKey = () => {
+    setRulesToUpdateAPIKey([]);
+    setRulesToUpdateAPIKeyFilter('');
+  };
+
+  const isRulesTableLoading = useMemo(() => {
+    return (
+      rulesState.isLoading ||
+      ruleTypesState.isLoading ||
+      isPerformingAction ||
+      isSnoozingRules ||
+      isSchedulingRules ||
+      isUpdatingRuleAPIKeys
+    );
+  }, [
+    rulesState,
+    ruleTypesState,
+    isPerformingAction,
+    isSnoozingRules,
+    isSchedulingRules,
+    isUpdatingRuleAPIKeys,
+  ]);
 
   const table = (
     <>
@@ -553,27 +656,6 @@ export const RulesList = ({
         </>
       ) : null}
       <EuiFlexGroup gutterSize="s">
-        {selectedIds.length > 0 && authorizedToModifySelectedRules && (
-          <EuiFlexItem grow={false}>
-            <BulkOperationPopover>
-              <RuleQuickEditButtons
-                selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, selectedIds),
-                  ruleTypeIndex: ruleTypesState.data,
-                  canExecuteActions,
-                  config,
-                })}
-                onPerformingAction={() => setIsPerformingAction(true)}
-                onActionPerformed={() => {
-                  loadData();
-                  setIsPerformingAction(false);
-                }}
-                setRulesToDelete={setRulesToDelete}
-                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-              />
-            </BulkOperationPopover>
-          </EuiFlexItem>
-        )}
         {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -594,6 +676,7 @@ export const RulesList = ({
             fullWidth
             isClearable
             data-test-subj="ruleSearchField"
+            value={inputText}
             onChange={(e) => {
               setInputText(e.target.value);
               if (e.target.value === '') {
@@ -623,7 +706,10 @@ export const RulesList = ({
           <EuiButton
             data-test-subj="refreshRulesButton"
             iconType="refresh"
-            onClick={loadData}
+            onClick={() => {
+              onClearSelection();
+              loadData();
+            }}
             name="refresh"
             color="primary"
           >
@@ -638,18 +724,6 @@ export const RulesList = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalItemsCountDescription"
-                  defaultMessage="Showing: {pageSize} of {totalItemCount} rules."
-                  values={{
-                    totalItemCount: rulesState.totalItemCount,
-                    pageSize: rulesState.data.length,
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
                 <FormattedMessage
@@ -742,11 +816,14 @@ export const RulesList = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <RulesListTable
-        canExecuteActions={canExecuteActions}
-        isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
+        items={tableItems}
+        isLoading={isRulesTableLoading}
         rulesState={rulesState}
         ruleTypesState={ruleTypesState}
         ruleTypeRegistry={ruleTypeRegistry}
+        isPageSelected={isPageSelected}
+        isAllSelected={isAllSelected}
+        numberOfSelectedRules={numberOfSelectedItems}
         sort={sort}
         page={page}
         percentileOptions={percentileOptions}
@@ -770,14 +847,15 @@ export const RulesList = ({
             ruleTypeId: rule.ruleTypeId,
           })
         }
-        onSelectionChange={(updatedSelectedItemsList) =>
-          setSelectedIds(updatedSelectedItemsList.map((item) => item.id))
-        }
         onPercentileOptionsChange={setPercentileOptions}
         onDisableRule={onDisableRule}
         onEnableRule={onEnableRule}
         onSnoozeRule={onSnoozeRule}
         onUnsnoozeRule={onUnsnoozeRule}
+        onSelectAll={onSelectAll}
+        onSelectPage={onSelectPage}
+        onSelectRow={onSelectRow}
+        isRowSelected={isRowSelected}
         renderCollapsedItemActions={(rule, onLoading) => (
           <CollapsedItemActions
             key={rule.id}
@@ -787,6 +865,7 @@ export const RulesList = ({
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
+            onRunRule={() => onRunRule(rule.id)}
           />
         )}
         renderRuleError={(rule) => {
@@ -802,6 +881,40 @@ export const RulesList = ({
               iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
             />
           ) : null;
+        }}
+        renderSelectAllDropdown={() => {
+          return (
+            <BulkOperationPopover
+              numberOfSelectedRules={numberOfSelectedItems}
+              canModifySelectedRules={authorizedToModifySelectedRules}
+            >
+              <RuleQuickEditButtons
+                selectedItems={convertRulesToTableItems({
+                  rules: filterRulesById(rulesState.data, [...selectedIds]),
+                  ruleTypeIndex: ruleTypesState.data,
+                  canExecuteActions,
+                  config,
+                })}
+                isAllSelected={isAllSelected}
+                getFilter={getFilter}
+                onPerformingAction={() => setIsPerformingAction(true)}
+                onActionPerformed={() => {
+                  loadData();
+                  setIsPerformingAction(false);
+                }}
+                isSnoozingRules={isSnoozingRules}
+                isSchedulingRules={isSchedulingRules}
+                isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
+                setRulesToDelete={setRulesToDelete}
+                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
+                setRulesToSnooze={setRulesToSnooze}
+                setRulesToSchedule={setRulesToSchedule}
+                setRulesToSnoozeFilter={setRulesToSnoozeFilter}
+                setRulesToScheduleFilter={setRulesToScheduleFilter}
+                setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+              />
+            </BulkOperationPopover>
+          );
         }}
         rulesListKey={rulesListKey}
         config={config}
@@ -845,7 +958,7 @@ export const RulesList = ({
       <DeleteModalConfirmation
         onDeleted={async () => {
           setRulesToDelete([]);
-          setSelectedIds([]);
+          onClearSelection();
           await loadData();
         }}
         onErrors={async () => {
@@ -868,19 +981,53 @@ export const RulesList = ({
           setRulesState({ ...rulesState, isLoading });
         }}
       />
+      <BulkSnoozeModal
+        rulesToSnooze={rulesToSnooze}
+        rulesToSnoozeFilter={rulesToSnoozeFilter}
+        setIsLoading={setIsSnoozingRules}
+        onClose={() => {
+          clearRulesToSnooze();
+        }}
+        onSave={async () => {
+          clearRulesToSnooze();
+          onClearSelection();
+          await loadData();
+        }}
+        onSearchPopulate={onSearchPopulate}
+      />
+      <BulkSnoozeScheduleModal
+        rulesToSchedule={rulesToSchedule}
+        rulesToScheduleFilter={rulesToScheduleFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
+        setIsLoading={setIsSchedulingRules}
+        onClose={() => {
+          clearRulesToSchedule();
+        }}
+        onSave={async () => {
+          clearRulesToSchedule();
+          onClearSelection();
+          await loadData();
+        }}
+        onSearchPopulate={onSearchPopulate}
+      />
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
-          setRulesToUpdateAPIKey([]);
+          clearRulesToUpdateAPIKey();
         }}
         idsToUpdate={rulesToUpdateAPIKey}
-        apiUpdateApiKeyCall={updateAPIKey}
+        idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={(isLoading: boolean) => {
+          setIsUpdatingRuleAPIKeys(isLoading);
           setRulesState({ ...rulesState, isLoading });
         }}
         onUpdated={async () => {
-          setRulesToUpdateAPIKey([]);
+          clearRulesToUpdateAPIKey();
+          onClearSelection();
           await loadData();
         }}
+        onSearchPopulate={onSearchPopulate}
       />
       <EuiSpacer size="xs" />
       {getRulesList()}

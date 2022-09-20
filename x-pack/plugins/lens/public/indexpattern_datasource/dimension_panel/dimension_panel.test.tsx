@@ -29,7 +29,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   HttpSetup,
-  CoreSetup,
+  CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { generateId } from '../../id_generator';
@@ -55,8 +55,8 @@ jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
 jest.mock('../loader');
-jest.mock('../query_input', () => ({
-  QueryInput: () => null,
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  QueryStringInput: () => null,
 }));
 
 jest.mock('../operations');
@@ -123,6 +123,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   },
 };
 
@@ -238,7 +240,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       } as unknown as DataPublicPluginStart,
-      core: {} as CoreSetup,
+      core: {} as CoreStart,
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
@@ -2242,6 +2244,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 searchable: true,
               },
             ]),
+            isPersisted: true,
+            spec: {},
           },
         }}
       />

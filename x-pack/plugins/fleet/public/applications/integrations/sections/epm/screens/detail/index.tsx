@@ -41,11 +41,9 @@ import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../..
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading } from '../../../../components';
+import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
-
-import { HeaderReleaseBadge } from '../../components/release_badge';
 
 import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -61,6 +59,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
+import { DocumentationPage } from './documentation';
 
 import './index.scss';
 
@@ -491,6 +490,22 @@ export function Detail() {
       });
     }
 
+    tabs.push({
+      id: 'api-reference',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
+          defaultMessage="API reference"
+        />
+      ),
+      isSelected: panel === 'api-reference',
+      'data-test-subj': `tab-api-reference`,
+      href: getHref('integration_details_api_reference', {
+        pkgkey: packageInfoKey,
+        ...(integration ? { integration } : {}),
+      }),
+    });
+
     return tabs;
   }, [
     packageInfo,
@@ -576,6 +591,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
+            <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Switch>

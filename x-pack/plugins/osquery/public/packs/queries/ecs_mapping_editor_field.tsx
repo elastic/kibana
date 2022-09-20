@@ -18,10 +18,9 @@ import {
   trim,
   get,
 } from 'lodash';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiFormLabel,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -127,12 +126,12 @@ const DescriptionWrapper = styled(EuiFlexItem)`
 
 // align the icon to the inputs
 const StyledSemicolonWrapper = styled.div`
-  margin-top: 8px;
+  margin-top: 28px;
 `;
 
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
-  margin-top: 11px;
+  margin-top: 28px;
   width: 24px;
 `;
 
@@ -263,6 +262,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   return (
     <EuiFormRow
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel', {
+        defaultMessage: 'ECS field',
+      })}
       helpText={helpText}
       error={error}
       isInvalid={!!error}
@@ -534,6 +536,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   return (
     <EuiFormRow
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel', {
+        defaultMessage: 'Value',
+      })}
       helpText={selectedOptions[0]?.value?.description}
       error={resultFieldState.error?.message}
       isInvalid={!!resultFieldState.error?.message?.length}
@@ -625,25 +630,6 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
     defaultValue: '',
   });
 
-  const MultiFields = useMemo(
-    () => (
-      <div>
-        <OsqueryColumnField
-          item={item}
-          index={index}
-          isLastItem={isLastItem}
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          euiFieldProps={{
-            // @ts-expect-error update types
-            options: osquerySchemaOptions,
-            isDisabled,
-          }}
-        />
-      </div>
-    ),
-    [item, index, isLastItem, osquerySchemaOptions, isDisabled]
-  );
-
   const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
 
   const handleDeleteClick = useCallback(() => {
@@ -676,7 +662,19 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <ECSFieldWrapper>{MultiFields}</ECSFieldWrapper>
+            <ECSFieldWrapper>
+              <OsqueryColumnField
+                item={item}
+                index={index}
+                isLastItem={isLastItem}
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                euiFieldProps={{
+                  // @ts-expect-error update types
+                  options: osquerySchemaOptions,
+                  isDisabled,
+                }}
+              />
+            </ECSFieldWrapper>
             {!isDisabled && (
               <EuiFlexItem grow={false}>
                 <StyledButtonWrapper>
@@ -742,7 +740,7 @@ export const ECSMappingEditorField = React.memo(
       const fieldsToValidate = prepareEcsFieldsToValidate(fields);
       // it is always at least 2 - empty fields
       if (fieldsToValidate.length > 2) {
-        setTimeout(async () => await trigger('ecs_mapping'), 0);
+        setTimeout(() => trigger('ecs_mapping'), 0);
       }
     }, [fields, query, trigger]);
 
@@ -977,7 +975,7 @@ export const ECSMappingEditorField = React.memo(
       );
     }, [query]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
       const ecsList = formData?.ecs_mapping;
       const lastEcs = formData?.ecs_mapping?.[itemsList?.current.length - 1];
 
@@ -986,15 +984,16 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
-      // // list contains ecs already, and the last item has values provided
+      // list contains ecs already, and the last item has values provided
       if (
-        ecsList?.length === itemsList.current.length &&
-        lastEcs?.key?.length &&
-        lastEcs?.result?.value?.length
+        (ecsList?.length === itemsList.current.length &&
+          lastEcs?.key?.length &&
+          lastEcs?.result?.value?.length) ||
+        !fields?.length
       ) {
         return append(defaultEcsFormData);
       }
-    }, [append, euiFieldProps?.isDisabled, formData]);
+    }, [append, fields, formData]);
 
     return (
       <>
@@ -1014,25 +1013,6 @@ export const ECSMappingEditorField = React.memo(
                 defaultMessage="Use the fields below to map results from this query to ECS fields."
               />
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel"
-                defaultMessage="ECS field"
-              />
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel"
-                defaultMessage="Value"
-              />
-            </EuiFormLabel>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

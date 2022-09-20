@@ -21,6 +21,7 @@ const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 const useIndicatorsParams: UseIndicatorsParams = {
   filters: [],
   filterQuery: { query: '', language: 'kuery' },
+  sorting: [],
 };
 
 describe('useIndicators()', () => {

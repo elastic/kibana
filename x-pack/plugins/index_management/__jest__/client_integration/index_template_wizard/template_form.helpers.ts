@@ -137,6 +137,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     order,
     priority,
     version,
+    dataStream,
   }: Partial<TemplateDeserialized> = {}) => {
     const { component, form, find } = testBed;
 
@@ -160,6 +161,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     await act(async () => {
       if (order) {
         form.setInputValue('orderField.input', JSON.stringify(order));
+      }
+
+      if (dataStream) {
+        form.toggleEuiSwitch('dataStreamField.input');
       }
 
       if (priority) {
@@ -255,6 +260,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     component.update();
   };
 
+  const previewTemplate = async () => {
+    testBed.find('previewIndexTemplate').simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -272,6 +281,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       componentTemplates,
       mappings,
       review,
+      previewTemplate,
     },
   };
 };
@@ -317,6 +327,7 @@ export type TestSubjects =
   | 'orderField'
   | 'orderField.input'
   | 'priorityField.input'
+  | 'dataStreamField.input'
   | 'pageTitle'
   | 'previewTab'
   | 'removeFieldButton'
@@ -341,4 +352,5 @@ export type TestSubjects =
   | 'settingsEditor'
   | 'versionField.input'
   | 'mappingsEditor.formTab'
-  | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle';
+  | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
+  | 'previewIndexTemplate';
