@@ -70,6 +70,8 @@ Try the runtime field examples on your own using the <<gs-get-data-into-kibana,*
 [[simple-hello-world-example]]
 ==== Return a keyword value
 
+(image:management/images/runtime_field.png[Runtime field with keyword type])
+
 Return `Hello World!`:
 
 [source,text]
@@ -79,7 +81,7 @@ emit("Hello World!");
 
 [float]
 [[perform-a-calculation-on-a-single-field]]
-===== Perform a calculation on a single field
+==== Perform a calculation on a single field
 
 Calculate kilobytes from bytes:
 
@@ -90,7 +92,7 @@ emit(doc['bytes'].value / 1024)
 
 [float]
 [[return-substring]]
-===== Return a substring
+==== Return a substring
 
 Return the string that appears after the last slash in the URL:
 
@@ -109,9 +111,11 @@ emit("");
 
 [float]
 [[return-multiple-fields]]
-===== Return multiple fields
+==== Return multiple fields with a composite runtime field
 
 A single runtime field can also produce multiple subfields when the type `Composite` is selected. The script editor provides default types that can be customized for each subfields.
+
+(image:management/images/runtime_field_composite.png[Runtime field with composite type])
 
 Return keyworld and double type subfields. Note that the first argument for `emit` is the name of the subfield.
 
