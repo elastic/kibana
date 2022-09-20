@@ -15,11 +15,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
   const retry = getService('retry');
-  const comboBox = getService('comboBox');
   const supertest = getService('supertest');
 
   // FLAKY: https://github.com/elastic/kibana/issues/88796
-  describe.skip('Connectors', function () {
+  describe('Connectors', function () {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -107,7 +106,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should test a connector and display a successful result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      await createIndexConnector(connectorName, indexName);
+      const createdAction = await createIndexConnector(connectorName, indexName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -135,7 +135,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should test a connector and display a failure result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      await createIndexConnector(connectorName, indexName);
+      const createdAction = await createIndexConnector(connectorName, indexName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -281,27 +282,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function createIndexConnector(connectorName: string, indexName: string) {
-    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-    await testSubjects.click('.index-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-
-    await retry.try(async () => {
-      // At times we find the driver controlling the ComboBox in tests
-      // can select the wrong item, this ensures we always select the correct index
-      await comboBox.set('connectorIndexesComboBox', indexName);
-      expect(
-        await comboBox.isOptionSelected(
-          await testSubjects.find('connectorIndexesComboBox'),
-          indexName
-        )
-      ).to.be(true);
-    });
-
-    await find.clickByCssSelector(
-      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-    );
-    await pageObjects.common.closeToast();
+    const { body: createdAction } = await supertest
+      .post(`/api/actions/connector`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        config: {
+          index: indexName,
+          refresh: false,
+        },
+        connector_type_id: '.index',
+        name: connectorName,
+        secrets: {},
+      })
+      .expect(200);
+    await testSubjects.click('connectorsTab');
+    return createdAction;
   }
 };
