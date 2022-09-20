@@ -239,7 +239,7 @@ describe('enable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], true);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
   test('enables a rule that does not have an apiKey', async () => {
@@ -295,7 +295,7 @@ describe('enable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], true);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
   test(`doesn't update already enabled alerts but ensures task is enabled`, async () => {
@@ -311,7 +311,7 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], true);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
   test('sets API key when createAPIKey returns one', async () => {
@@ -361,7 +361,7 @@ describe('enable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], true);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
   test('throws an error if API key creation throws', async () => {
@@ -373,7 +373,7 @@ describe('enable()', () => {
     await expect(
       async () => await rulesClient.enable({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule: no"`);
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
   test('falls back when failing to getDecryptedAsInternalUser', async () => {
@@ -384,7 +384,7 @@ describe('enable()', () => {
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'enable(): Failed to load API key of alert 1: Fail'
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], true);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
   test('throws error when failing to load the saved object using SOC', async () => {
@@ -397,7 +397,7 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
   test('throws when unsecuredSavedObjectsClient update fails', async () => {
@@ -413,7 +413,7 @@ describe('enable()', () => {
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
   test('enables task when scheduledTaskId is defined and task exists', async () => {
@@ -423,11 +423,11 @@ describe('enable()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], true);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
   test('throws error when enabling task fails', async () => {
-    taskManager.bulkEnableDisable.mockRejectedValueOnce(new Error('Failed to enable task'));
+    taskManager.bulkEnable.mockRejectedValueOnce(new Error('Failed to enable task'));
     await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to enable task"`
     );
@@ -459,7 +459,7 @@ describe('enable()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(taskManager.schedule).toHaveBeenCalledWith({
       id: '1',
       taskType: `alerting:myType`,
@@ -508,7 +508,7 @@ describe('enable()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(taskManager.schedule).toHaveBeenCalledWith({
       id: '1',
       taskType: `alerting:myType`,
@@ -543,7 +543,7 @@ describe('enable()', () => {
       `"Fail to schedule"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(taskManager.schedule).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
   });
@@ -562,7 +562,7 @@ describe('enable()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(taskManager.schedule).toHaveBeenCalled();
   });
 
@@ -601,7 +601,7 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
     expect(taskManager.schedule).toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenNthCalledWith(2, 'alert', '1', {
       scheduledTaskId: '1',
     });
