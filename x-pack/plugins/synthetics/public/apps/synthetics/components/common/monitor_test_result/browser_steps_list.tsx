@@ -79,7 +79,7 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
     },
     {
       field: 'synthetics.step.status',
-      name: STATUS_LABEL,
+      name: RESULT_LABEL,
       render: (pingStatus: string) => <StatusBadge status={parseBadgeStatus(pingStatus)} />,
     },
     {
@@ -158,8 +158,8 @@ const StepNumber = ({
   );
 };
 
-const STATUS_LABEL = i18n.translate('xpack.synthetics.monitor.status.label', {
-  defaultMessage: 'Status',
+const RESULT_LABEL = i18n.translate('xpack.synthetics.monitor.result.label', {
+  defaultMessage: 'Result',
 });
 
 const STEP_LABEL = i18n.translate('xpack.synthetics.monitor.step.label', {
