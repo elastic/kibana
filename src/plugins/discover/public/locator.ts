@@ -11,6 +11,7 @@ import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { VIEW_MODE } from './components/view_mode_toggle';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
@@ -30,6 +31,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * @deprecated
    */
   indexPatternId?: string;
+  dataViewSpec?: DataViewSpec;
 
   /**
    * Optionally set the time range in the time picker.
@@ -97,6 +99,10 @@ export interface DiscoverAppLocatorDependencies {
   useHash: boolean;
 }
 
+export interface HistoryLocationState {
+  dataViewSpec?: DataViewSpec;
+}
+
 export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverAppLocatorParams> {
   public readonly id = DISCOVER_APP_LOCATOR;
 
@@ -108,6 +114,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       filters,
       dataViewId,
       indexPatternId,
+      dataViewSpec,
       query,
       refreshInterval,
       savedSearchId,
@@ -150,6 +157,11 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
+    const state: HistoryLocationState = {};
+    if (dataViewSpec) {
+      state.dataViewSpec = dataViewSpec;
+    }
+
     let path = `#/${savedSearchPath}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
@@ -161,7 +173,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     return {
       app: 'discover',
       path,
-      state: {},
+      state,
     };
   };
 }

@@ -512,14 +512,6 @@ export function getFiltersInLayer(
   indexPattern: IndexPattern,
   timeRange: TimeRange | undefined
 ) {
-  if (!indexPattern.isPersisted) {
-    return {
-      error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
-        defaultMessage:
-          'You have unsaved data views. To explore the data in Discover, save the data views.',
-      }),
-    };
-  }
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
   const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
     ['enabled', 'disabled'] as const

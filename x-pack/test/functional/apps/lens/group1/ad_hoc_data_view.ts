@@ -17,10 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedSearch',
     'dashboard',
     'timeToVisualize',
+    'common',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -144,6 +147,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const metricData = await PageObjects.lens.getMetricVisualizationData();
       expect(metricData[0].value).to.eql('5.73K');
       expect(metricData[0].title).to.eql('Average of bytes');
+    });
+
+    it('should navigate to discover correctly', async () => {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
+
+      const [, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.common.sleep(15000);
+
+      const actualIndexPattern = await (
+        await testSubjects.find('discover-dataView-switch-link')
+      ).getVisibleText();
+      expect(actualIndexPattern).to.be('*stash*');
+
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      expect(actualDiscoverQueryHits).to.be('14,005');
     });
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -30,6 +30,7 @@ export interface IndexPatternServiceProps {
   data: DataPublicPluginStart;
   dataViews: DataViewsContract;
   uiActions: UiActionsStart;
+  contextDataViewSpec?: DataViewSpec;
   updateIndexPatterns: (
     newState: Partial<DataViewsState>,
     options?: { applyImmediately: boolean }
@@ -105,6 +106,7 @@ export function createIndexPatternService({
   updateIndexPatterns,
   replaceIndexPattern,
   uiActions,
+  contextDataViewSpec,
 }: IndexPatternServiceProps): IndexPatternServiceAPI {
   const onChangeError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -122,7 +124,12 @@ export function createIndexPatternService({
     },
     replaceDataViewId: async (dataView: DataView) => {
       const newDataView = await dataViews.create({ ...dataView.toSpec(), id: generateId() });
-      dataViews.clearInstanceCache(dataView.id);
+
+      // Do not clear initial data view instance from cache
+      // if adhoc data view id has been provided by the context.
+      if (contextDataViewSpec && contextDataViewSpec.id !== dataView.id) {
+        dataViews.clearInstanceCache(dataView.id);
+      }
       const loadedPatterns = await loadIndexPatterns({
         dataViews,
         patterns: [newDataView.id!],
