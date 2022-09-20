@@ -11,6 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { ErrorCode } from '../../common/types/error_codes';
 
 import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
+
 import {
   getInferencePipelineNameFromIndexName,
   getPrefixedInferencePipelineProcessorName,

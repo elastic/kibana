@@ -7,6 +7,7 @@
 
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 /**

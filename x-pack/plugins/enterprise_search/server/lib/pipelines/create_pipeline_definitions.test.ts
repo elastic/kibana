@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
