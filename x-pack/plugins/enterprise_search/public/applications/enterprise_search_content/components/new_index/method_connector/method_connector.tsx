@@ -60,12 +60,21 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
           docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
           disabled={isGated}
           error={errorToText(error)}
-          title={i18n.translate(
-            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
-            {
-              defaultMessage: 'Build a connector',
-            }
-          )}
+          title={
+            isNative
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.title',
+                  {
+                    defaultMessage: 'Index using a connector',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
+                  {
+                    defaultMessage: 'Build a connector',
+                  }
+                )
+          }
           type="connector"
           onNameChange={() => {
             apiReset();
