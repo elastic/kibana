@@ -92,6 +92,11 @@ describe('AlertsTable', () => {
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
     updatedAt: Date.now(),
+    onToggleColumn: () => {},
+    onResetColumns: () => {},
+    onColumnsChange: () => {},
+    onChangeVisibleColumns: () => {},
+    browserFields: {},
   };
 
   const AlertsTableWithLocale: React.FunctionComponent<AlertsTableProps> = (props) => (
