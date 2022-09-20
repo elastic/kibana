@@ -7,12 +7,12 @@
 
 import React, { FC } from 'react';
 import { EuiBadgeGroup } from '@elastic/eui';
-import { Tag, TagAttributes } from '../../../common/types';
+import { TagWithOptionalId } from '../../../common/types';
 import { TagBadge } from './tag_badge';
 
 export interface TagListProps {
-  tags: Array<Tag | TagAttributes>;
-  onClick?: (tag: Tag | TagAttributes) => void;
+  tags: TagWithOptionalId[];
+  onClick?: (tag: TagWithOptionalId) => void;
 }
 
 /**

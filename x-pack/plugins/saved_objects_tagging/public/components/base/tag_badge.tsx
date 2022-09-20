@@ -8,11 +8,11 @@
 import React, { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Tag, TagAttributes } from '../../../common/types';
+import { TagWithOptionalId } from '../../../common/types';
 
 export interface TagBadgeProps {
-  tag: Tag | TagAttributes;
-  onClick?: (tag: Tag | TagAttributes) => void;
+  tag: TagWithOptionalId;
+  onClick?: (tag: TagWithOptionalId) => void;
 }
 
 /**

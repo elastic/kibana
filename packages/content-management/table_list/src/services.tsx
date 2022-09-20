@@ -104,7 +104,7 @@ export interface TableListViewKibanaDependencies {
           object: {
             references: SavedObjectsReference[];
           };
-          onClick?: (tag: { name: string }) => void;
+          onClick?: (tag: { name: string; description: string; color: string }) => void;
         }>;
       };
       parseSearchQuery: (
