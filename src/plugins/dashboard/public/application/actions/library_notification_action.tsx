@@ -17,10 +17,10 @@ import {
 import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { UnlinkFromLibraryAction } from '.';
-import { LibraryNotificationPopover } from './library_notification_popover';
-import { dashboardLibraryNotification } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { LibraryNotificationPopover } from './library_notification_popover';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
