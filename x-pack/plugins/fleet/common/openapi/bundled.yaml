@@ -350,6 +350,14 @@ paths:
                           - install_failed
                           - not_installed
                       savedObject:
+                        type: object
+                      latestVersion:
+                        type: string
+                      keepPoliciesUpToDate:
+                        type: boolean
+                      notice:
+                        type: string
+                      licensePath:
                         type: string
                     required:
                       - status
@@ -2623,6 +2631,20 @@ components:
           type: string
         version:
           type: string
+        release:
+          type: string
+          enum:
+            - experimental
+            - beta
+            - ga
+        source:
+          type: object
+          properties:
+            license:
+              type: string
+              enum:
+                - Apache-2.0
+                - Elastic-2.0
         readme:
           type: string
         description:
@@ -2633,21 +2655,24 @@ components:
           type: array
           items:
             type: string
-        requirement:
-          oneOf:
-            - properties:
-                kibana:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
-            - properties:
-                elasticsearch:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
+        conditions:
           type: object
+          properties:
+            kibana:
+              type: object
+              properties:
+                versions:
+                  type: string
+            elasticsearch:
+              type: object
+              properties:
+                subscription:
+                  type: string
+                  enum:
+                    - basic
+                    - gold
+                    - platinum
+                    - enterprise
         screenshots:
           type: array
           items:
@@ -2718,6 +2743,16 @@ components:
           type: string
         path:
           type: string
+        elasticsearch:
+          type: object
+          properties:
+            privileges:
+              type: object
+              properties:
+                cluster:
+                  type: array
+                  items:
+                    type: string
       required:
         - name
         - title
@@ -2725,7 +2760,7 @@ components:
         - description
         - type
         - categories
-        - requirement
+        - conditions
         - assets
         - format_version
         - download

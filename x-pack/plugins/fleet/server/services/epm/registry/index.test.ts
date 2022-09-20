@@ -9,7 +9,12 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PackageNotFoundError } from '../../../errors';
 
-import { splitPkgKey, fetchFindLatestPackageOrUndefined, fetchFindLatestPackageOrThrow } from '.';
+import {
+  splitPkgKey,
+  fetchFindLatestPackageOrUndefined,
+  fetchFindLatestPackageOrThrow,
+  getLicensePath,
+} from '.';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -141,5 +146,28 @@ describe('fetch package', () => {
         PackageNotFoundError
       );
     });
+  });
+});
+
+describe('getLicensePath', () => {
+  it('returns first license path if found', () => {
+    const path = getLicensePath([
+      '/package/good-1.0.0/NOTICE.txt',
+      '/package/good-1.0.0/changelog.yml',
+      '/package/good-1.0.0/manifest.yml',
+      '/package/good-1.0.0/LICENSE.txt',
+      '/package/good-1.0.0/docs/README.md',
+    ]);
+    expect(path).toEqual('/package/good/1.0.0/LICENSE.txt');
+  });
+
+  it('returns undefined if no license', () => {
+    const path = getLicensePath([
+      '/package/good-1.0.0/NOTICE.txt',
+      '/package/good-1.0.0/changelog.yml',
+      '/package/good-1.0.0/manifest.yml',
+      '/package/good-1.0.0/docs/README.md',
+    ]);
+    expect(path).toEqual(undefined);
   });
 });
