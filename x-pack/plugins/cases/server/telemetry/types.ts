@@ -7,6 +7,7 @@
 
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { OWNERS } from './constants';
 
 export interface Buckets {
   buckets: Array<{
@@ -47,6 +48,36 @@ export interface Count {
   daily: number;
 }
 
+export type CaseAggregationResult = Record<
+  typeof OWNERS[number],
+  {
+    counts: Buckets;
+    totalUniqueAssignees: Cardinality;
+    assigneeFilters: {
+      buckets: {
+        zero: { doc_count: number };
+        atLeastOne: { doc_count: number };
+      };
+    };
+  }
+> & {
+  counts: Buckets;
+  syncAlerts: Buckets;
+  status: Buckets;
+  users: Cardinality;
+  tags: Cardinality;
+  totalUniqueAssignees: Cardinality;
+  totalsByOwner: Buckets;
+};
+
+export interface SolutionTelemetry extends Count {
+  assignees: {
+    totalUnique: number;
+    totalWithZero: number;
+    totalWithAtLeastOne: number;
+  };
+}
+
 export interface Status {
   open: number;
   inProgress: number;
@@ -70,11 +101,12 @@ export interface CasesTelemetry {
       totalTags: number;
       totalWithAlerts: number;
       totalWithConnectors: number;
+      totalUniqueAssignees: number;
       latestDates: LatestDates;
     };
-    sec: Count;
-    obs: Count;
-    main: Count;
+    sec: SolutionTelemetry;
+    obs: SolutionTelemetry;
+    main: SolutionTelemetry;
   };
   userActions: { all: Count & { maxOnACase: number } };
   comments: { all: Count & { maxOnACase: number } };

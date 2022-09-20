@@ -7,6 +7,7 @@
 
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { CaseAggregationResult } from '../types';
 import { getCasesTelemetryData } from './cases';
 
 describe('getCasesTelemetryData', () => {
@@ -50,13 +51,31 @@ describe('getCasesTelemetryData', () => {
         ],
       };
 
-      mockFind({
+      const solutionValues = {
+        counts,
+        assigneeFilters: {
+          buckets: {
+            atLeastOne: {
+              doc_count: 0,
+            },
+            zero: {
+              doc_count: 100,
+            },
+          },
+        },
+        totalUniqueAssignees: { value: 5 },
+      };
+
+      const caseAggsResult: CaseAggregationResult = {
         users: { value: 1 },
         tags: { value: 2 },
+        totalUniqueAssignees: {
+          value: 5,
+        },
         counts,
-        securitySolution: { counts },
-        observability: { counts },
-        cases: { counts },
+        securitySolution: { ...solutionValues },
+        observability: { ...solutionValues },
+        cases: { ...solutionValues },
         syncAlerts: {
           buckets: [
             {
@@ -93,7 +112,9 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
-      });
+      };
+
+      mockFind(caseAggsResult);
       mockFind({ participants: { value: 2 } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 3 } } } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } });
@@ -139,20 +160,36 @@ describe('getCasesTelemetryData', () => {
           totalUsers: 1,
           totalWithAlerts: 3,
           totalWithConnectors: 4,
+          totalUniqueAssignees: 5,
         },
         main: {
+          assignees: {
+            totalUnique: 5,
+            totalWithZero: 100,
+            totalWithAtLeastOne: 0,
+          },
           total: 1,
           daily: 3,
           weekly: 2,
           monthly: 1,
         },
         obs: {
+          assignees: {
+            totalUnique: 5,
+            totalWithZero: 100,
+            totalWithAtLeastOne: 0,
+          },
           total: 1,
           daily: 3,
           weekly: 2,
           monthly: 1,
         },
         sec: {
+          assignees: {
+            totalUnique: 5,
+            totalWithZero: 100,
+            totalWithAtLeastOne: 0,
+          },
           total: 1,
           daily: 3,
           weekly: 2,
@@ -166,145 +203,239 @@ describe('getCasesTelemetryData', () => {
 
       await getCasesTelemetryData({ savedObjectsClient, logger });
 
-      expect(savedObjectsClient.find.mock.calls[0][0]).toEqual({
-        aggs: {
-          cases: {
-            aggs: {
-              counts: {
-                date_range: {
-                  field: 'cases.attributes.created_at',
-                  format: 'dd/MM/YYYY',
-                  ranges: [
-                    {
-                      from: 'now-1d',
-                      to: 'now',
+      expect(savedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "cases": Object {
+              "aggs": Object {
+                "assigneeFilters": Object {
+                  "filters": Object {
+                    "filters": Object {
+                      "atLeastOne": Object {
+                        "bool": Object {
+                          "filter": Object {
+                            "exists": Object {
+                              "field": "cases.attributes.assignees.uid",
+                            },
+                          },
+                        },
+                      },
+                      "zero": Object {
+                        "bool": Object {
+                          "must_not": Object {
+                            "exists": Object {
+                              "field": "cases.attributes.assignees.uid",
+                            },
+                          },
+                        },
+                      },
                     },
-                    {
-                      from: 'now-1w',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1M',
-                      to: 'now',
-                    },
-                  ],
+                  },
+                },
+                "counts": Object {
+                  "date_range": Object {
+                    "field": "cases.attributes.created_at",
+                    "format": "dd/MM/YYYY",
+                    "ranges": Array [
+                      Object {
+                        "from": "now-1d",
+                        "to": "now",
+                      },
+                      Object {
+                        "from": "now-1w",
+                        "to": "now",
+                      },
+                      Object {
+                        "from": "now-1M",
+                        "to": "now",
+                      },
+                    ],
+                  },
+                },
+                "totalUniqueAssignees": Object {
+                  "cardinality": Object {
+                    "field": "cases.attributes.assignees.uid",
+                  },
+                },
+              },
+              "filter": Object {
+                "term": Object {
+                  "cases.attributes.owner": "cases",
                 },
               },
             },
-            filter: {
-              term: {
-                'cases.attributes.owner': 'cases',
+            "counts": Object {
+              "date_range": Object {
+                "field": "cases.attributes.created_at",
+                "format": "dd/MM/YYYY",
+                "ranges": Array [
+                  Object {
+                    "from": "now-1d",
+                    "to": "now",
+                  },
+                  Object {
+                    "from": "now-1w",
+                    "to": "now",
+                  },
+                  Object {
+                    "from": "now-1M",
+                    "to": "now",
+                  },
+                ],
+              },
+            },
+            "observability": Object {
+              "aggs": Object {
+                "assigneeFilters": Object {
+                  "filters": Object {
+                    "filters": Object {
+                      "atLeastOne": Object {
+                        "bool": Object {
+                          "filter": Object {
+                            "exists": Object {
+                              "field": "cases.attributes.assignees.uid",
+                            },
+                          },
+                        },
+                      },
+                      "zero": Object {
+                        "bool": Object {
+                          "must_not": Object {
+                            "exists": Object {
+                              "field": "cases.attributes.assignees.uid",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                "counts": Object {
+                  "date_range": Object {
+                    "field": "cases.attributes.created_at",
+                    "format": "dd/MM/YYYY",
+                    "ranges": Array [
+                      Object {
+                        "from": "now-1d",
+                        "to": "now",
+                      },
+                      Object {
+                        "from": "now-1w",
+                        "to": "now",
+                      },
+                      Object {
+                        "from": "now-1M",
+                        "to": "now",
+                      },
+                    ],
+                  },
+                },
+                "totalUniqueAssignees": Object {
+                  "cardinality": Object {
+                    "field": "cases.attributes.assignees.uid",
+                  },
+                },
+              },
+              "filter": Object {
+                "term": Object {
+                  "cases.attributes.owner": "observability",
+                },
+              },
+            },
+            "securitySolution": Object {
+              "aggs": Object {
+                "assigneeFilters": Object {
+                  "filters": Object {
+                    "filters": Object {
+                      "atLeastOne": Object {
+                        "bool": Object {
+                          "filter": Object {
+                            "exists": Object {
+                              "field": "cases.attributes.assignees.uid",
+                            },
+                          },
+                        },
+                      },
+                      "zero": Object {
+                        "bool": Object {
+                          "must_not": Object {
+                            "exists": Object {
+                              "field": "cases.attributes.assignees.uid",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                "counts": Object {
+                  "date_range": Object {
+                    "field": "cases.attributes.created_at",
+                    "format": "dd/MM/YYYY",
+                    "ranges": Array [
+                      Object {
+                        "from": "now-1d",
+                        "to": "now",
+                      },
+                      Object {
+                        "from": "now-1w",
+                        "to": "now",
+                      },
+                      Object {
+                        "from": "now-1M",
+                        "to": "now",
+                      },
+                    ],
+                  },
+                },
+                "totalUniqueAssignees": Object {
+                  "cardinality": Object {
+                    "field": "cases.attributes.assignees.uid",
+                  },
+                },
+              },
+              "filter": Object {
+                "term": Object {
+                  "cases.attributes.owner": "securitySolution",
+                },
+              },
+            },
+            "status": Object {
+              "terms": Object {
+                "field": "cases.attributes.status",
+              },
+            },
+            "syncAlerts": Object {
+              "terms": Object {
+                "field": "cases.attributes.settings.syncAlerts",
+              },
+            },
+            "tags": Object {
+              "cardinality": Object {
+                "field": "cases.attributes.tags",
+              },
+            },
+            "totalUniqueAssignees": Object {
+              "cardinality": Object {
+                "field": "cases.attributes.assignees.uid",
+              },
+            },
+            "totalsByOwner": Object {
+              "terms": Object {
+                "field": "cases.attributes.owner",
+              },
+            },
+            "users": Object {
+              "cardinality": Object {
+                "field": "cases.attributes.created_by.username",
               },
             },
           },
-          counts: {
-            date_range: {
-              field: 'cases.attributes.created_at',
-              format: 'dd/MM/YYYY',
-              ranges: [
-                {
-                  from: 'now-1d',
-                  to: 'now',
-                },
-                {
-                  from: 'now-1w',
-                  to: 'now',
-                },
-                {
-                  from: 'now-1M',
-                  to: 'now',
-                },
-              ],
-            },
-          },
-          observability: {
-            aggs: {
-              counts: {
-                date_range: {
-                  field: 'cases.attributes.created_at',
-                  format: 'dd/MM/YYYY',
-                  ranges: [
-                    {
-                      from: 'now-1d',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1w',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1M',
-                      to: 'now',
-                    },
-                  ],
-                },
-              },
-            },
-            filter: {
-              term: {
-                'cases.attributes.owner': 'observability',
-              },
-            },
-          },
-          securitySolution: {
-            aggs: {
-              counts: {
-                date_range: {
-                  field: 'cases.attributes.created_at',
-                  format: 'dd/MM/YYYY',
-                  ranges: [
-                    {
-                      from: 'now-1d',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1w',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1M',
-                      to: 'now',
-                    },
-                  ],
-                },
-              },
-            },
-            filter: {
-              term: {
-                'cases.attributes.owner': 'securitySolution',
-              },
-            },
-          },
-          status: {
-            terms: {
-              field: 'cases.attributes.status',
-            },
-          },
-          syncAlerts: {
-            terms: {
-              field: 'cases.attributes.settings.syncAlerts',
-            },
-          },
-          tags: {
-            cardinality: {
-              field: 'cases.attributes.tags',
-            },
-          },
-          totalsByOwner: {
-            terms: {
-              field: 'cases.attributes.owner',
-            },
-          },
-          users: {
-            cardinality: {
-              field: 'cases.attributes.created_by.username',
-            },
-          },
-        },
-        page: 0,
-        perPage: 0,
-        type: 'cases',
-      });
+          "page": 0,
+          "perPage": 0,
+          "type": "cases",
+        }
+      `);
 
       expect(savedObjectsClient.find.mock.calls[1][0]).toEqual({
         aggs: {
