@@ -30,25 +30,29 @@ import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Enrichment', () => {
+describe('Enrichment', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risky_hosts');
     esArchiverLoad('risky_users');
     login();
   });
 
   after(() => {
-    esArchiverUnload('risky_hosts');
     esArchiverUnload('risky_users');
-    esArchiverUnload('risky_hosts_updated');
   });
+
   describe('Custom query rule', () => {
     beforeEach(() => {
+      esArchiverLoad('risky_hosts');
       deleteAlertsAndRules();
       createCustomRuleEnabled(getNewRule(), 'rule1');
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+    });
+
+    afterEach(() => {
+      esArchiverUnload('risky_hosts');
+      esArchiverUnload('risky_hosts_updated');
     });
 
     it('Should has enrichment fields', function () {
