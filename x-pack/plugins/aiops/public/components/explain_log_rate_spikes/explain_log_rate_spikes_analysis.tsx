@@ -124,7 +124,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(({ group, docCount }, index) => {
+    const tableItems = data.changePointsGroups.map(({ group, docCount, histogram }, index) => {
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
@@ -145,6 +145,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         docCount,
         group: dedupedGroup,
         repeatedValues,
+        histogram,
       };
     });
 

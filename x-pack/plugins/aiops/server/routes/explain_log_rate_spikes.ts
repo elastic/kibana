@@ -22,6 +22,7 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import {
   addChangePointsAction,
   addChangePointsGroupAction,
+  addChangePointsGroupHistogramAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
@@ -210,6 +211,21 @@ export const defineExplainLogRateSpikesRoute = (
           return;
         }
 
+        const histogramFields: [NumericHistogramField] = [
+          { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
+        ];
+
+        const [overallTimeSeries] = (await fetchHistogramsForFields(
+          client,
+          request.body.index,
+          { match_all: {} },
+          // fields
+          histogramFields,
+          // samplerShardSize
+          -1,
+          undefined
+        )) as [NumericChartData];
+
         if (groupingEnabled) {
           const { fields, df } = await fetchFrequentItems(
             client,
@@ -236,22 +252,62 @@ export const defineExplainLogRateSpikesRoute = (
           const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
 
           push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));
+
+          if (changePointsGroups) {
+            await asyncForEach(changePointsGroups, async (cpg, index) => {
+              const histogramQuery = {
+                bool: {
+                  filter: cpg.group.map((d) => ({
+                    term: { [d.fieldName]: d.fieldValue },
+                  })),
+                },
+              };
+
+              const [cpgTimeSeries] = (await fetchHistogramsForFields(
+                client,
+                request.body.index,
+                histogramQuery,
+                // fields
+                [
+                  {
+                    fieldName: request.body.timeFieldName,
+                    type: KBN_FIELD_TYPES.DATE,
+                    interval: overallTimeSeries.interval,
+                    min: overallTimeSeries.stats[0],
+                    max: overallTimeSeries.stats[1],
+                  },
+                ],
+                // samplerShardSize
+                -1,
+                undefined
+              )) as [NumericChartData];
+
+              const histogram =
+                overallTimeSeries.data.map((o, i) => {
+                  const current = cpgTimeSeries.data.find(
+                    (d1) => d1.key_as_string === o.key_as_string
+                  ) ?? {
+                    doc_count: 0,
+                  };
+                  return {
+                    key: o.key,
+                    key_as_string: o.key_as_string ?? '',
+                    doc_count_change_point: current.doc_count,
+                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                  };
+                }) ?? [];
+
+              push(
+                addChangePointsGroupHistogramAction([
+                  {
+                    id: cpg.id,
+                    histogram,
+                  },
+                ])
+              );
+            });
+          }
         }
-
-        const histogramFields: [NumericHistogramField] = [
-          { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
-        ];
-
-        const [overallTimeSeries] = (await fetchHistogramsForFields(
-          client,
-          request.body.index,
-          { match_all: {} },
-          // fields
-          histogramFields,
-          // samplerShardSize
-          -1,
-          undefined
-        )) as [NumericChartData];
 
         // time series filtered by fields
         if (changePoints) {

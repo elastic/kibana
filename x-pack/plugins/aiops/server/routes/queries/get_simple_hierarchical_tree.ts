@@ -8,6 +8,7 @@
 // import { omit, uniq } from 'lodash';
 
 import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import type { ItemsetResult } from './fetch_frequent_items';
 
@@ -224,9 +225,12 @@ export function getSimpleHierarchicalTreeLeaves(
   leaves: ChangePointGroup[],
   level = 1
 ) {
-  // console.log(`${'-'.repeat(level)} ${tree.name} ${tree.children.length}`);
   if (tree.children.length === 0) {
-    leaves.push({ group: tree.set, docCount: tree.docCount });
+    leaves.push({
+      id: `${stringHash(JSON.stringify(tree.set))}`,
+      group: tree.set,
+      docCount: tree.docCount,
+    });
   } else {
     for (const child of tree.children) {
       const newLeaves = getSimpleHierarchicalTreeLeaves(child, [], level + 1);

@@ -13,16 +13,25 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTableSortingType,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+
 import { useEuiTheme } from '../../hooks/use_eui_theme';
+
+import { MiniHistogram } from '../mini_histogram';
+
 import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
+
+const NARROW_COLUMN_WIDTH = '120px';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'docCount';
@@ -32,6 +41,7 @@ interface GroupTableItem {
   docCount: number;
   group: Record<string, any>;
   repeatedValues: Record<string, any>;
+  histogram: ChangePoint['histogram'];
 }
 
 interface SpikeAnalysisTableProps {
@@ -169,6 +179,39 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       },
       sortable: false,
       textOnly: true,
+    },
+    {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnLogRate',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
+            {
+              defaultMessage:
+                'A visual representation of the impact of the field on the message rate difference',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+              defaultMessage="Log rate"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (_, { histogram, id }) => (
+        <MiniHistogram
+          chartData={histogram}
+          isLoading={loading && histogram === undefined}
+          label="Group x"
+        />
+      ),
+      sortable: false,
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
