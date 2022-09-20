@@ -23,6 +23,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiLoadingContent,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { FullTimeRangeSelector } from '../full_time_range_selector';
@@ -209,6 +210,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
+    setCategories(null);
     setSelectedField(value && value.length ? value[0].label : undefined);
   };
 
@@ -312,8 +314,32 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           <EuiSpacer />
         </>
       ) : null}
+
+      {categories === null && loading === false && (
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.aiops.logCategorization.emptyPromptTitle"
+                defaultMessage="Select a text field and click Run categorization to start analysis"
+              />
+            </h2>
+          }
+          titleSize="xs"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.aiops.logCategorization.emptyPromptBody"
+                defaultMessage="The Log Pattern Analysis feature groups messages into common categories."
+              />
+            </p>
+          }
+          data-test-subj="aiopsNoWindowParametersEmptyPrompt"
+        />
+      )}
+
       {loading === true ? <EuiLoadingContent lines={10} /> : null}
-      {categories !== null ? (
+      {selectedField !== undefined && categories !== null ? (
         <CategoryTable
           categories={categories}
           aiopsListState={aiopsListState}
