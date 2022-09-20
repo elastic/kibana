@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiBetaBadge,
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
@@ -40,7 +39,7 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
-import { BETA, REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
+import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.
@@ -259,9 +258,6 @@ export const SessionView = ({
     <div css={styles.sessionViewerComponent}>
       <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:sessionViewProcessEventsSearch">
             <SessionViewSearchBar
               searchQuery={searchQuery}
