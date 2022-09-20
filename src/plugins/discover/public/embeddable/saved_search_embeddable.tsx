@@ -153,7 +153,7 @@ export class SavedSearchEmbeddable
         this.searchProps &&
         (titleChanged ||
           this.isFetchRequired(this.searchProps) ||
-          this.rerenderRequired(this.searchProps))
+          this.isRerenderRequired(this.searchProps))
       ) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
@@ -420,7 +420,7 @@ export class SavedSearchEmbeddable
     );
   }
 
-  private rerenderRequired(searchProps?: SearchProps) {
+  private isRerenderRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
     }
