@@ -7,15 +7,14 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useState, useRef, useEffect, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { FileKind } from '../../../common';
 import { FilesClient } from '../../types';
 
 import { useFilesContext } from '../context';
-import { useBehaviorSubject } from '../use_behavior_subject';
 
 import { UploadFile as Component } from './upload_file.component';
 import { createUploadState } from './upload_state';
+import { context } from './context';
 
 /**
  * An object representing an uploadded file
@@ -105,46 +104,33 @@ export const UploadFile: FunctionComponent<Props> = ({
     [client, kind, allowRepeatedUploads]
   );
 
-  const files = useObservable(uploadState.files$, []);
-  const uploading = useBehaviorSubject(uploadState.uploading$);
-  const error = useBehaviorSubject(uploadState.error$);
-  const done = useObservable(uploadState.done$);
-
-  const retry = Boolean(files.some((f) => f.status === 'upload_failed'));
-  const hasErrors = Boolean(error);
-
   useEffect(() => {
     const subs = [
       uploadState.clear$.subscribe(() => {
         ref.current?.removeFiles();
       }),
-      uploadState.done$.subscribe(onDone),
+      uploadState.done$.subscribe((n) => n && onDone(n)),
       uploadState.error$.subscribe((e) => e && onError?.(e)),
     ];
     return () => subs.forEach((sub) => sub.unsubscribe());
   }, [uploadState, onDone, onError]);
 
   return (
-    <Component
-      ref={ref}
-      meta={meta}
-      ready={Boolean(files.length)}
-      immediate={immediate}
-      onCancel={uploadState.abort}
-      onChange={(fs) => {
-        uploadState.setFiles(fs);
-        if (immediate) uploadState.upload(meta);
-      }}
-      onUpload={uploadState.upload}
-      onClear={uploadState.clear}
-      done={Boolean(done?.length)}
-      uploading={!done && uploading}
-      retry={!done && retry}
-      accept={kind.allowedMimeTypes?.join(',')}
-      allowClear={allowClear}
-      isInvalid={!uploading && hasErrors}
-      errorMessage={error?.message}
-    />
+    <context.Provider value={uploadState}>
+      <Component
+        ref={ref}
+        meta={meta}
+        onCancel={uploadState.abort}
+        onChange={(fs) => {
+          uploadState.setFiles(fs);
+          if (immediate) uploadState.upload(meta);
+        }}
+        onUpload={uploadState.upload}
+        onClear={uploadState.clear}
+        immediate={immediate}
+        allowClear={allowClear}
+      />
+    </context.Provider>
   );
 };
 

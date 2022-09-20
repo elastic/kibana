@@ -7,50 +7,41 @@
 
 import React from 'react';
 import {
-  EuiIcon,
   EuiText,
-  EuiButton,
   EuiSpacer,
-  useEuiTheme,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFilePicker,
-  EuiButtonEmpty,
-  type EuiFilePickerProps,
   useGeneratedHtmlId,
+  type EuiFilePickerProps,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+import { useBehaviorSubject } from '../use_behavior_subject';
 import { i18nTexts } from './i18n_texts';
+import { ControlButton, ClearButton } from './components';
+import { useUploadState } from './context';
 
 export interface Props
   extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText' | 'disabled'> {
-  onChange: (files: File[]) => void;
-  onUpload: (meta?: unknown) => void;
-  onClear: () => void;
-  onCancel: () => void;
-  label?: string;
-  errorMessage?: string;
+  meta?: unknown;
   accept?: string;
-  done?: boolean;
-  ready?: boolean;
-  uploading?: boolean;
   immediate?: boolean;
-  retry?: boolean;
   allowClear?: boolean;
   initialFilePromptText?: string;
-  meta?: unknown;
+
+  onClear: () => void;
+  onCancel: () => void;
+  onChange: (files: File[]) => void;
+  onUpload: (meta?: unknown) => void;
 }
 
-const { euiFormMaxWidth, euiButtonHeight, euiButtonHeightSmall } = euiThemeVars;
+const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
-    done,
     meta,
-    label,
-    ready,
-    retry,
     style,
     accept,
     onClear,
@@ -59,82 +50,21 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
     onUpload,
     className,
     immediate,
-    uploading,
-    isInvalid,
     compressed,
-    errorMessage,
     allowClear = false,
     initialFilePromptText,
     ...rest
   } = props;
 
-  const { euiTheme } = useEuiTheme();
-  const { size } = euiTheme;
+  const uploadState = useUploadState();
+  const uploading = useBehaviorSubject(uploadState.uploading$);
+  const error = useBehaviorSubject(uploadState.error$);
+  const done = useObservable(uploadState.done$);
+  const isInvalid = Boolean(error);
+  const errorMessage = error?.message;
+
   const id = useGeneratedHtmlId({ prefix: 'filesUploadFile' });
   const errorId = `${id}_error`;
-
-  const controllButton = (): JSX.Element | null => {
-    if (uploading) {
-      return (
-        <EuiButtonEmpty
-          key="cancelButton"
-          size="s"
-          data-test-subj="cancelButton"
-          disabled={!uploading}
-          onClick={onCancel}
-          color="danger"
-        >
-          {i18nTexts.cancel}
-        </EuiButtonEmpty>
-      );
-    }
-
-    if (retry) {
-      return (
-        <EuiButtonEmpty
-          key="retryButton"
-          size="s"
-          data-test-subj="retryButton"
-          disabled={done || uploading}
-          onClick={() => onUpload(meta)}
-        >
-          {i18nTexts.retry}
-        </EuiButtonEmpty>
-      );
-    }
-
-    if (!done && !immediate) {
-      return (
-        <EuiButton
-          key="uploadButton"
-          color={done ? 'success' : 'primary'}
-          disabled={done || uploading || !ready || isInvalid}
-          onClick={onUpload}
-          size="s"
-          data-test-subj="uploadButton"
-        >
-          {uploading ? i18nTexts.uploading : i18nTexts.upload}
-        </EuiButton>
-      );
-    }
-    if (done) {
-      return (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiIcon
-            css={css`
-              margin-inline: ${size.m};
-              height: ${euiButtonHeight};
-            `}
-            data-test-subj="uploadSuccessIcon"
-            type="checkInCircleFilled"
-            color="success"
-            aria-label={i18nTexts.uploadDone}
-          />
-        </EuiFlexGroup>
-      );
-    }
-    return null;
-  };
 
   return (
     <div
@@ -150,15 +80,15 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
         {...rest}
         id={id}
         ref={ref}
-        onChange={(files) => {
-          onChange(Array.from(files ?? []));
+        onChange={(fs) => {
+          onChange(Array.from(fs ?? []));
         }}
         multiple={false}
         initialPromptText={initialFilePromptText}
         isLoading={uploading}
         isInvalid={isInvalid}
         accept={accept}
-        disabled={done || uploading}
+        disabled={Boolean(done?.length || uploading)}
         aria-describedby={errorMessage ? errorId : undefined}
       />
 
@@ -170,8 +100,14 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
         direction="rowReverse"
         gutterSize="m"
       >
-        <EuiFlexItem grow={false}>{controllButton()}</EuiFlexItem>
-        {!done && !uploading && Boolean(errorMessage) && (
+        <EuiFlexItem grow={false}>
+          <ControlButton
+            immediate={immediate}
+            onCancel={onCancel}
+            onUpload={() => onUpload(meta)}
+          />
+        </EuiFlexItem>
+        {Boolean(!done && !uploading && errorMessage) && (
           <EuiFlexItem>
             <EuiText
               data-test-subj="error"
@@ -187,18 +123,11 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
             </EuiText>
           </EuiFlexItem>
         )}
-        {done && allowClear && (
+        {done?.length && allowClear && (
           <>
-            <EuiFlexItem />
+            <EuiFlexItem /> {/* Occupy middle space */}
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                data-test-subj="clearButton"
-                onClick={onClear}
-                color="primary"
-              >
-                {i18nTexts.clear}
-              </EuiButtonEmpty>
+              <ClearButton onClick={onClear} />
             </EuiFlexItem>
           </>
         )}

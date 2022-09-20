@@ -19,6 +19,7 @@ import {
   mergeMap,
   switchMap,
   catchError,
+  shareReplay,
   ReplaySubject,
   BehaviorSubject,
   type Observable,
@@ -59,7 +60,7 @@ export class UploadState {
   public readonly clear$ = new Subject<void>();
   public readonly error$ = new BehaviorSubject<undefined | Error>(undefined);
   public readonly uploading$ = new BehaviorSubject(false);
-  public readonly done$ = new Subject<DoneNotification[]>();
+  public readonly done$ = new Subject<undefined | DoneNotification[]>();
 
   constructor(
     private readonly fileKind: FileKind,
@@ -78,7 +79,7 @@ export class UploadState {
     latestFiles$
       .pipe(
         map((files) => {
-          const errorFile = files.find((file) => file.status === 'upload_failed');
+          const errorFile = files.find((file) => Boolean(file.error));
           return errorFile ? errorFile.error : undefined;
         }),
         filter(Boolean)
@@ -112,6 +113,11 @@ export class UploadState {
   public setFiles = (files: File[]): void => {
     if (this.isUploading()) {
       throw new Error('Cannot update files while uploading');
+    }
+
+    if (!files.length) {
+      this.done$.next(undefined);
+      this.error$.next(undefined);
     }
 
     const validationError = this.validateFiles(files);
@@ -192,8 +198,9 @@ export class UploadState {
       }),
       catchError((e) => {
         erroredOrAborted = true;
-        file$.setState({ status: 'upload_failed', error: e.message === 'Abort!' ? undefined : e });
-        return of(e);
+        const isAbortError = e.message === 'Abort!';
+        file$.setState({ status: 'upload_failed', error: isAbortError ? undefined : e });
+        return of(isAbortError ? undefined : e);
       }),
       finalize(() => {
         if (erroredOrAborted && uploadTarget) {
@@ -203,7 +210,7 @@ export class UploadState {
     );
   };
 
-  public upload = (meta?: unknown): void => {
+  public upload = (meta?: unknown): Observable<void> => {
     if (this.isUploading()) {
       throw new Error('Upload already in progress');
     }
@@ -214,19 +221,17 @@ export class UploadState {
       switchMap((files$) => {
         return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)));
       }),
-      map((results) => {
-        const errors = results.filter(Boolean) as Error[];
-        if (errors.length) throw errors[0];
-      }),
+      map(() => undefined),
       finalize(() => {
         if (this.opts.allowRepeatedUploads) this.clear();
         sub.unsubscribe();
-      })
+      }),
+      shareReplay()
     );
 
-    upload$.subscribe({
-      error: (e) => this.error$.next(e),
-    });
+    upload$.subscribe();
+
+    return upload$;
   };
 }
 
