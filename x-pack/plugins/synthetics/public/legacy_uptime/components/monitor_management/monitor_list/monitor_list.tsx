@@ -12,6 +12,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +31,6 @@ import {
   BrowserFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
@@ -70,7 +70,7 @@ export const MonitorManagementList = ({
   errorSummaries,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
-  const isXl = useBreakpoints().up('xl');
+  const isXl = useIsWithinMinBreakpoint('xxl');
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: EncryptedSyntheticsMonitorWithId[] = useMemo(

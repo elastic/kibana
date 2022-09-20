@@ -206,6 +206,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button emotion-euiAccordion__button"
+              disabled={false}
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -941,6 +942,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button emotion-euiAccordion__button"
+              disabled={false}
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -1676,6 +1678,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button emotion-euiAccordion__button"
+              disabled={false}
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -1834,6 +1837,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button emotion-euiAccordion__button"
+              disabled={false}
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -2194,6 +2198,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               aria-controls="canvas-filter-group-1"
               aria-expanded={true}
               className="euiAccordion__button emotion-euiAccordion__button"
+              disabled={false}
               id="generated-id"
               onClick={[Function]}
               type="button"

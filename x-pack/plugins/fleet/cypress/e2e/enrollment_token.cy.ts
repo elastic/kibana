@@ -24,7 +24,9 @@ describe('Enrollment token page', () => {
       },
       headers: { 'kbn-xsrf': 'cypress' },
     });
-    cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
+    cy.getBySel(ENROLLMENT_TOKENS_TAB, {
+      timeout: 15000,
+    }).click();
   });
 
   after(() => {

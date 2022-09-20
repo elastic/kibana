@@ -8,7 +8,12 @@
 
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, useEuiTheme, EuiPageSidebarProps } from '@elastic/eui';
+import {
+  useIsWithinBreakpoints,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
+  EuiPageSidebarProps,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 import './with_solution_nav.scss';
@@ -35,7 +40,7 @@ const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
   const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-    const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+    const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );

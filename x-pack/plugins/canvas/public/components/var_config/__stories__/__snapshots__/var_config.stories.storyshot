@@ -36,6 +36,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           aria-controls="accordion-variables"
           aria-expanded={false}
           className="euiAccordion__button emotion-euiAccordion__button"
+          disabled={false}
           id="generated-id"
           onClick={[Function]}
           type="button"
