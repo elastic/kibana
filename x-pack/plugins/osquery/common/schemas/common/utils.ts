@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, reduce } from 'lodash';
+import { isEmpty, map, reduce } from 'lodash';
 import type { ECSMapping } from './schemas';
 
 export const convertECSMappingToObject = (
@@ -30,3 +30,21 @@ export const convertECSMappingToObject = (
     },
     {} as Record<string, { field?: string; value?: string }>
   );
+
+export type EcsMappingFormValueArray = Array<{
+  key: string;
+  result: {
+    type: string;
+    value: string;
+  };
+}>;
+export const convertECSMappingToFormValue = (
+  mapping?: Record<string, Record<'field', string>>
+): EcsMappingFormValueArray =>
+  map(mapping, (value, key) => ({
+    key,
+    result: {
+      type: Object.keys(value)[0],
+      value: Object.values(value)[0],
+    },
+  }));

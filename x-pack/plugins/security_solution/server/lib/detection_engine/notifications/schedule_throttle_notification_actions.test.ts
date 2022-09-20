@@ -42,6 +42,7 @@ describe('schedule_throttle_notification_actions', () => {
       filters: [],
       index: ['index-123'],
       maxSignals: 100,
+      responseActions: [],
       riskScore: 80,
       riskScoreMapping: [],
       ruleNameOverride: undefined,

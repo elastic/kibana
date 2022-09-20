@@ -496,6 +496,7 @@ export const sampleSignalHit = (): SignalHit => ({
       exceptions_list: getListArrayMock(),
       related_integrations: [],
       required_fields: [],
+      response_actions: undefined,
       setup: '',
       throttle: 'no_actions',
       actions: [],

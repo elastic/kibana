@@ -14,6 +14,8 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { firstValueFrom } from 'rxjs';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
@@ -24,6 +26,8 @@ import type { ExperimentalFeatures } from '../../../../../common/experimental_fe
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { SetupPlugins } from '../../../../plugin_contract';
 
 export const queryExecutor = async ({
   inputIndex,
@@ -43,6 +47,8 @@ export const queryExecutor = async ({
   secondaryTimestamp,
   unprocessedExceptions,
   exceptionFilter,
+  osqueryCreateAction,
+  licensing,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -61,6 +67,8 @@ export const queryExecutor = async ({
   secondaryTimestamp?: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -76,7 +84,7 @@ export const queryExecutor = async ({
       exceptionFilter,
     });
 
-    return searchAfterAndBulkCreate({
+    const result = await searchAfterAndBulkCreate({
       tuple,
       exceptionsList: unprocessedExceptions,
       services,
@@ -93,5 +101,22 @@ export const queryExecutor = async ({
       primaryTimestamp,
       secondaryTimestamp,
     });
+
+    const license = await firstValueFrom(licensing.license$);
+    const hasGoldLicense = license.hasAtLeast('gold');
+
+    if (hasGoldLicense) {
+      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+        scheduleNotificationResponseActions(
+          {
+            signals: result.createdSignals,
+            responseActions: completeRule.ruleParams.responseActions,
+          },
+          osqueryCreateAction
+        );
+      }
+    }
+
+    return result;
   });
 };

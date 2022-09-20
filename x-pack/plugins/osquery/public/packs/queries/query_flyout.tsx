@@ -22,9 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
-import { isEmpty, map } from 'lodash';
+import { isEmpty } from 'lodash';
 import { QueryIdField, IntervalField } from '../../form';
 import { defaultEcsFormData } from './ecs_mapping_editor_field';
+import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
@@ -84,13 +85,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         setValue(
           'ecs_mapping',
           !isEmpty(savedQuery.ecs_mapping)
-            ? map(savedQuery.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0] as string,
-                },
-              }))
+            ? convertECSMappingToFormValue(savedQuery.ecs_mapping)
             : [defaultEcsFormData]
         );
       }

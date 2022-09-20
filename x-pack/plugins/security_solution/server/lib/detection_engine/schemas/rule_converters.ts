@@ -72,7 +72,11 @@ import {
   DEFAULT_MAX_SIGNALS,
   SERVER_APP_ID,
 } from '../../../../common/constants';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import {
+  transformAlertToRuleResponseAction,
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../common/detection_engine/transform_actions';
 import {
   transformFromAlertThrottle,
   transformToAlertThrottle,
@@ -134,6 +138,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     case 'saved_query': {
@@ -145,6 +150,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     case 'threshold': {
@@ -236,6 +242,9 @@ const patchQueryParams = (
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
     savedId: params.saved_id ?? existingRule.savedId,
+    responseActions:
+      params.response_actions?.map(transformRuleToAlertResponseAction) ??
+      existingRule.responseActions,
   };
 };
 
@@ -251,6 +260,9 @@ const patchSavedQueryParams = (
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
     savedId: params.saved_id ?? existingRule.savedId,
+    responseActions:
+      params.response_actions?.map(transformRuleToAlertResponseAction) ??
+      existingRule.responseActions,
   };
 };
 
@@ -561,6 +573,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'saved_query': {
@@ -572,6 +585,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         filters: params.filters,
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'threshold': {

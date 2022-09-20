@@ -89,6 +89,7 @@ export const getOutputRuleAlertForRest = (): FullResponseSchema => ({
   execution_summary: undefined,
   related_integrations: [],
   required_fields: [],
+  response_actions: undefined,
   setup: '',
   outcome: undefined,
   alias_target_id: undefined,

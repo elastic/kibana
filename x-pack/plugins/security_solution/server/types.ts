@@ -18,6 +18,7 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
+import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
 import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
@@ -43,6 +44,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;
+  getQueryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

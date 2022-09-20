@@ -46,7 +46,7 @@ import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const DataContext = createContext<ResultEdges>([]);
 
-interface ResultsTableComponentProps {
+export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];

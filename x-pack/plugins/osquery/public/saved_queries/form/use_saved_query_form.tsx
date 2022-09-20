@@ -14,6 +14,7 @@ import type { ECSMapping } from '../../../common/schemas/common';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
+
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
@@ -96,7 +97,14 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
     serializer: savedQueryDataSerializer,
     idSet,
     ...useHookForm<SavedQueryFormData>({
-      defaultValues: defaultValue ? deserializer(defaultValue) : {},
+      defaultValues: defaultValue
+        ? deserializer(defaultValue)
+        : {
+            id: '',
+            query: '',
+            interval: 3600,
+            ecs_mapping: [defaultEcsFormData],
+          },
     }),
   };
 };

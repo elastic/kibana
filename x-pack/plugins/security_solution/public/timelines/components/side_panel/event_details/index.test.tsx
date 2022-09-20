@@ -146,6 +146,14 @@ describe('event details footer component', () => {
             getCasesContext: () => mockCasesContext,
           },
         },
+        timelines: {
+          getHoverActions: jest.fn().mockReturnValue({
+            getAddToTimelineButton: jest.fn(),
+          }),
+        },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
+        },
       },
     });
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());

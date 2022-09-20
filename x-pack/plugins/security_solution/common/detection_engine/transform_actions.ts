@@ -6,6 +6,7 @@
  */
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
@@ -31,3 +32,23 @@ export const transformAlertToRuleAction = ({
   params,
   action_type_id: actionTypeId,
 });
+
+export const transformRuleToAlertResponseAction = ({
+  action_type_id: actionTypeId,
+  params,
+}: ResponseAction): RuleResponseAction => {
+  return {
+    params,
+    actionTypeId,
+  };
+};
+
+export const transformAlertToRuleResponseAction = ({
+  actionTypeId,
+  params,
+}: RuleResponseAction): ResponseAction => {
+  return {
+    params,
+    action_type_id: actionTypeId,
+  };
+};

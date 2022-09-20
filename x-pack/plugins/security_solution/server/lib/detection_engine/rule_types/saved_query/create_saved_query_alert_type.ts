@@ -12,12 +12,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
+
 export const createSavedQueryAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateQueryRuleOptions
 ): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version } = createOptions;
+  const { experimentalFeatures, version, osqueryCreateAction, licensing } = createOptions;
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
@@ -98,6 +99,8 @@ export const createSavedQueryAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
+        osqueryCreateAction,
+        licensing,
       });
       return { ...result, state };
     },

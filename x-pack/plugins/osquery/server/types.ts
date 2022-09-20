@@ -20,9 +20,12 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OsqueryPluginSetup {}
+export interface OsqueryPluginSetup {
+  osqueryCreateAction: (payload: CreateLiveQueryRequestBodySchema) => void;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginStart {}
 

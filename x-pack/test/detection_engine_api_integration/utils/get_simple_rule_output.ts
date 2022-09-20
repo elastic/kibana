@@ -70,6 +70,7 @@ const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSch
   data_view_id: undefined,
   filters: undefined,
   saved_id: undefined,
+  response_actions: undefined,
 });
 
 /**

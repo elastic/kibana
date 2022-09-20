@@ -16,6 +16,7 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 jest.mock('../../signals/utils', () => ({
   ...jest.requireActual('../../signals/utils'),
@@ -31,6 +32,8 @@ jest.mock('../utils/get_list_client', () => ({
 
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
+  const licensing = licensingMock.createSetup();
+
   const { dependencies, executor, services } = mocks;
   const { alerting, lists, logger, ruleDataClient } = dependencies;
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
@@ -51,6 +54,8 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
+        licensing,
+        osqueryCreateAction: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
@@ -95,6 +100,8 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
+        licensing,
+        osqueryCreateAction: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
