@@ -132,7 +132,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should test a connector and display a failure result', async () => {
       const connectorName = generateUniqueKey();
-      await createConnector(connectorName);
+      const indexName = generateUniqueKey();
+      await createIndexConnector(connectorName, indexName);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -143,15 +144,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-      await find.setValue('[data-test-subj="messageTextArea"]', 'test');
+      await find.setValueByClass('kibanaCodeEditor', '"test"');
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
       await retry.try(async () => {
-        const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
-        expect(await executionFailureResultCallout.getVisibleText()).to.match(
-          /Test failed to run*/
-        );
+        await testSubjects.find('executionFailureResult');
       });
 
       await find.clickByCssSelector('[data-test-subj="edit-connector-flyout-cancel-btn"]');
