@@ -6,8 +6,8 @@
  */
 
 import type { FC } from 'react';
+import styled from 'styled-components';
 import React, { memo, useCallback, useEffect } from 'react';
-
 import type { RuleStepProps, ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -17,6 +17,9 @@ import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { schema } from './schema';
 
+const StyledForm = styled(Form)`
+  max-width: 235px !important;
+`;
 interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues: ScheduleStepRule;
   onRuleDataChange?: (data: ScheduleStepRule) => void;
@@ -84,7 +87,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="stepScheduleRule">
+        <StyledForm form={form} data-test-subj="stepScheduleRule">
           <UseField
             path="interval"
             component={ScheduleItem}
@@ -104,7 +107,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               minimumValue: 1,
             }}
           />
-        </Form>
+        </StyledForm>
       </StepContentWrapper>
 
       {!isUpdateView && (

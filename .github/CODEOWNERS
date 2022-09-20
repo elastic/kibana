@@ -158,6 +158,9 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
+# Profiling
+/x-pack/plugins/profiling @elastic/profiling-ui
+
 # Observability onboarding tour
 /x-pack/plugins/observability/public/components/shared/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
@@ -323,6 +326,9 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/actions/ @elastic/response-ops
 /x-pack/plugins/event_log/ @elastic/response-ops
 /x-pack/plugins/task_manager/ @elastic/response-ops
+/x-pack/plugins/stack_connectors/ @elastic/response-ops
+/x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops-cases
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
@@ -361,6 +367,10 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/watcher/  @elastic/platform-deployment-management
 /x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
+
+# Management Experience - Platform Onboarding
+/src/plugins/guided_onboarding/ @elastic/platform-onboarding
+/examples/guided_onboarding_example/ @elastic/platform-onboarding
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -498,6 +508,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-solution-platform
 
+/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
@@ -570,6 +581,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
+/x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
+/x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-asset-management
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-asset-management
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
@@ -655,6 +669,7 @@ packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
+packages/content-management/table_list @elastic/shared-ux
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
@@ -838,6 +853,7 @@ packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
 packages/kbn-es-query @elastic/kibana-app-services
+packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations

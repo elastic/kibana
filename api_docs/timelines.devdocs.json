@@ -822,7 +822,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -856,7 +856,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -2559,7 +2559,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+              ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
               "TGridCellAction",
               "[] | undefined; category?: string | undefined; columnHeaderType: ",
               {
@@ -3145,7 +3145,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -3173,7 +3173,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -4347,7 +4347,7 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
                       "TGridCellAction",
                       "[] | undefined; category?: string | undefined; columnHeaderType: ",
                       {
@@ -5566,7 +5566,7 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ data, isDraggable, timelineId, }: { data: ",
+              "({ contextId, data, isDraggable, timelineId, }: { contextId?: string | undefined; data: ",
               "Ecs",
               "; isDraggable: boolean; timelineId: string; }) => React.ReactNode"
             ],
@@ -5579,12 +5579,26 @@
                 "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    data,\n    isDraggable,\n    timelineId,\n  }",
+                "label": "{\n    contextId,\n    data,\n    isDraggable,\n    timelineId,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "timelines",
+                    "id": "def-common.RowRenderer.renderRow.$1.contextId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "contextId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
                   {
                     "parentPluginId": "timelines",
                     "id": "def-common.RowRenderer.renderRow.$1.data",
@@ -7075,7 +7089,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -7151,7 +7165,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ name: string; type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -7159,7 +7173,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",

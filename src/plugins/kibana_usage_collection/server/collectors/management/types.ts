@@ -42,6 +42,7 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
+  'observability:enableInfrastructureHostsView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -139,6 +140,7 @@ export interface UsageStats {
   'lens:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:apmOperationsTab': boolean;
+  'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
@@ -147,4 +149,5 @@ export interface UsageStats {
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
   'enterpriseSearch:enableIndexTransformsTab': boolean;
+  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }
