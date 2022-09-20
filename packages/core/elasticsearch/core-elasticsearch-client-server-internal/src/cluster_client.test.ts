@@ -91,12 +91,14 @@ describe('ClusterClient', () => {
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       agentManager,
+      kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       agentManager,
+      kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
@@ -280,6 +282,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             authorization: 'auth',
             other: 'yep',
             'x-opaque-id': expect.any(String),
@@ -318,6 +321,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             authorization: 'auth',
             other: 'yep',
             'x-opaque-id': expect.any(String),
@@ -353,6 +357,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             foo: 'bar',
             hello: 'dolly',
             'x-opaque-id': expect.any(String),
@@ -384,6 +389,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             'x-opaque-id': 'my-fake-id',
           },
         })
@@ -419,6 +425,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             foo: 'auth',
             hello: 'dolly',
             'x-opaque-id': expect.any(String),
@@ -456,6 +463,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             foo: 'request',
             hello: 'dolly',
             'x-opaque-id': expect.any(String),
@@ -490,6 +498,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             [headerKey]: 'foo',
+            'user-agent': 'Kibana/1.0.0',
             'x-opaque-id': expect.any(String),
           },
         })
@@ -522,6 +531,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             [headerKey]: 'foo',
+            'user-agent': 'Kibana/1.0.0',
             'x-opaque-id': expect.any(String),
           },
         })
@@ -556,6 +566,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...DEFAULT_HEADERS,
+            'user-agent': 'Kibana/1.0.0',
             'x-opaque-id': 'from request',
           },
         })
@@ -588,7 +599,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, authorization: 'auth' },
+          headers: { ...DEFAULT_HEADERS, 'user-agent': 'Kibana/1.0.0', authorization: 'auth' },
         })
       );
     });
@@ -621,7 +632,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, foo: 'bar' },
+          headers: { ...DEFAULT_HEADERS, 'user-agent': 'Kibana/1.0.0', foo: 'bar' },
         })
       );
     });
