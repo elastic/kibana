@@ -203,7 +203,7 @@ const NetworkDetailsComponent: React.FC = () => {
             {canReadAlerts && (
               <>
                 <EuiFlexGroup>
-                  <EuiFlexItem grow={3}>
+                  <EuiFlexItem>
                     <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
                   </EuiFlexItem>
                   <EuiFlexItem>

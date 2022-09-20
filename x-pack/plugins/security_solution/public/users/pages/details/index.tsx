@@ -206,7 +206,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             {canReadAlerts && (
               <>
                 <EuiFlexGroup>
-                  <EuiFlexItem grow={3}>
+                  <EuiFlexItem>
                     <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
                   </EuiFlexItem>
                   <EuiFlexItem>
