@@ -161,6 +161,9 @@ export class ListingTableService extends FtrService {
    * Clicks item on Landing page by link name if it is present
    */
   public async clickItemLink(appName: AppName, name: string) {
+    // Give some time for the link to be scrolled into view
+    await this.common.sleep(500);
+
     await this.testSubjects.click(
       `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`
     );
