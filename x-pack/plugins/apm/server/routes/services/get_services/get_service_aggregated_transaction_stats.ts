@@ -25,7 +25,7 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDocumentTypeFilterForServiceMetrics } from '../../../lib/helpers/service_metrics';
