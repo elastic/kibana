@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getToolbarVisibility } from './toolbar_visibility';
-export { AlertsCount } from './components/alerts_count/alerts_count';
+export * from './toolbar_visibility';

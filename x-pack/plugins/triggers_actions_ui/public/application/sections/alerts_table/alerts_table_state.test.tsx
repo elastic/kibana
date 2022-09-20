@@ -21,10 +21,12 @@ import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
+import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
 import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('./hooks/use_fetch_alerts');
+jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('@kbn/kibana-utils-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -53,6 +55,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
             delete: true,
             push: true,
           }),
+        },
+      },
+      notifications: {
+        toasts: {
+          addDanger: () => {},
         },
       },
     },
@@ -136,6 +143,9 @@ hookUseFetchAlerts.mockImplementation(() => [
     totalAlerts: alerts.length,
   },
 ]);
+
+const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
+hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
 
 const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
   <IntlProvider locale="en">

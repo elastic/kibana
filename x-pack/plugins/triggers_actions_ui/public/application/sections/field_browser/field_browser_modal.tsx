@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import type { FieldBrowserProps, BrowserFields } from './types';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { FieldBrowserProps } from './types';
 import { Search } from './components/search';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';

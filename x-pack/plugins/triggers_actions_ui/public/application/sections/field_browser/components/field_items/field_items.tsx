@@ -11,20 +11,15 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiScreenReaderOnly,
   EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 
-import { getEmptyValue, getExampleText, getIconFromType } from '../../helpers';
-import type {
-  BrowserFields,
-  BrowserFieldItem,
-  FieldTableColumns,
-  GetFieldTableColumns,
-} from '../../types';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { getIconFromType } from '../../helpers';
+import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
 import { FieldName } from '../field_name';
 import * as i18n from '../../translations';
 import { styles } from './field_items.style';
@@ -92,26 +87,6 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
     },
     sortable: true,
     width: '225px',
-  },
-  {
-    field: 'description',
-    name: i18n.DESCRIPTION,
-    render: (description: string, { name, example }) => (
-      <EuiToolTip content={description}>
-        <>
-          <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
-            <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
-          </EuiScreenReaderOnly>
-          <span css={styles.truncatable}>
-            <span css={styles.description} data-test-subj={`field-${name}-description`}>
-              {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
-            </span>
-          </span>
-        </>
-      </EuiToolTip>
-    ),
-    sortable: true,
-    width: '400px',
   },
   {
     field: 'category',

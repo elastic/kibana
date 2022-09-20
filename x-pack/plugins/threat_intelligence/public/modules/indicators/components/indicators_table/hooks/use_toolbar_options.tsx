@@ -8,7 +8,7 @@
 import React from 'react';
 import { useMemo } from 'react';
 import { EuiDataGridColumn, EuiText } from '@elastic/eui';
-import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { IndicatorsFieldBrowser } from '../../indicators_field_browser';
 
 export const useToolbarOptions = ({

@@ -142,7 +142,12 @@ export class TriggersActionsUiExamplePlugin
       useInternalFlyout,
       getRenderCellValue: () => (props: any) => {
         const value = props.data.find((d: any) => d.field === props.columnId)?.value ?? [];
-        return <>{value.length ? value.join() : '--'}</>;
+
+        if (Array.isArray(value)) {
+          return <>{value.length ? value.join() : '--'}</>;
+        }
+
+        return <>{value}</>;
       },
       sort,
     };
