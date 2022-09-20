@@ -84,8 +84,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
-  const ACTION_BUTTON_COUNT = 5;
   const license = useLicense();
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -189,7 +190,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     );
   }, [dispatch, filterManager, tGridEnabled, timelineId, license]);
 
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const leadingControlColumns = useMemo(
+    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
+    [ACTION_BUTTON_COUNT]
+  );
 
   if (loading || isEmpty(selectedPatterns)) {
     return null;
