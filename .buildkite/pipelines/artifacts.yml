@@ -75,7 +75,7 @@ steps:
     label: 'Cloud Deployment'
     soft_fail:
       - exit_status: 255
-      - exit_status: '-1'
+      - exit_status: -1
     agents:
       queue: n2-2
     timeout_in_minutes: 30
