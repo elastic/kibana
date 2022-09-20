@@ -9,11 +9,10 @@
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
 import { SerializedStyles } from '@emotion/serialize';
-import { css } from '@emotion/react';
 import { useIsWithinBreakpoints, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
-import './with_solution_nav.scss';
+import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
@@ -52,7 +51,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const { canBeCollapsed = true } = solutionNav;
     const isSidebarShrunk =
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
-    //  const withSolutionNavStyles = WithSolutionNavStyles();
+    const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
       'kbnSolutionNav__sidebar',
       'kbnStickyMenu',
@@ -74,11 +73,8 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
-      className: '',
-      css: css`
-        background-color: red;
-        min-width: ${euiTheme.size.xxl};
-      `,
+      className: sideBarClasses,
+      css: withSolutionNavStyles,
     };
 
     return (
