@@ -13,6 +13,7 @@ import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
@@ -37,6 +38,7 @@ import {
   GETTING_STARTED_ROUTE,
   MONITOR_ROUTE,
 } from '../../../common/constants';
+import { PLUGIN } from '../../../common/constants/plugin';
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
@@ -64,7 +66,8 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
-  history: ReturnType<typeof useHistory>
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string
 ): RouteProps[] => {
   return [
     {
@@ -103,7 +106,7 @@ const getRoutes = (
             ),
             color: 'primary',
             'aria-current': false,
-            href: '#', // FIXME
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
           },
         ],
         rightSideItems: [
@@ -277,10 +280,15 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
+  const { services } = useKibana();
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const routes = getRoutes(euiTheme, history);
+  const routes = getRoutes(
+    euiTheme,
+    history,
+    services.application!.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+  );
 
   apiService.addInspectorRequest = addInspectorRequest;
 
