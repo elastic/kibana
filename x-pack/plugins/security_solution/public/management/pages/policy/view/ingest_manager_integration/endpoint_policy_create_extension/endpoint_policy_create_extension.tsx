@@ -198,7 +198,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           <p>
             <FormattedMessage
               id="xpack.securitySolution.createPackagePolicy.stepConfigure.quickSettingsTranslation"
-              defaultMessage="Use quick settings to configure the integration to {environments}. You can make changes to the configurations after you add it."
+              defaultMessage="Use quick settings to configure the integration to {environments}. You can make configuration changes after you create the integration."
               values={{
                 environments: (
                   <strong>
@@ -218,7 +218,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           label={
             <FormattedMessage
               id="xpack.securitySolution.createPackagePolicy.stepConfigure.selectEnvironmentTextTranslation"
-              defaultMessage="Select for what environment you would like to add the integration:"
+              defaultMessage="Select the type of environment you want to protect:"
             />
           }
         >
@@ -282,7 +282,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.createPackagePolicy.stepConfigure.interactiveSessionSuggestionTranslation"
-                  defaultMessage="To save on data ingestion volume select interactive session only "
+                  defaultMessage="To reduce data ingestion volume, select Interactive only"
                 />
               </p>
             </EuiText>
@@ -331,7 +331,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                     <FormattedMessage
                       id="xpack.securitySolution.createPackagePolicy.stepConfigure.protectionModeDetailsTranslation"
                       defaultMessage="In addition to detections, Elastic security can prevent threats before they happen.
-              You can disable detections anytime in the agent policy configurations settings."
+                      You can disable protections anytime in the agent policy configurations settings."
                     />
                   </p>
                 </EuiText>
