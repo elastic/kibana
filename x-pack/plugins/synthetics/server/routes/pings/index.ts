@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export enum SYNTHETICS_API_URLS {
-  SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
-  PINGS = '/internal/synthetics/pings',
-}
+export { syntheticsGetPingsRoute } from './get_pings';

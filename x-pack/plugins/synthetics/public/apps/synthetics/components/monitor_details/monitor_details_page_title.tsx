@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSelectedLocation } from './hooks/use_selected_location';
@@ -37,7 +37,7 @@ export const MonitorDetailsPageTitle = () => {
       <EuiFlexItem>{monitor?.name}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         {pingsLoading || (latestPing && latestPing.monitor.id !== monitorId) ? (
-          <EuiLoadingSpinner />
+          <EuiLoadingContent data-test-subj="monitorDetailsPageTitleLoading" lines={1} />
         ) : latestPing ? (
           <MonitorSummaryLastRunInfo ping={latestPing} />
         ) : (

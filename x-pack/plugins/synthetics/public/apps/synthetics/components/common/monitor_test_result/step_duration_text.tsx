@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { CSSProperties, useMemo } from 'react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
+import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
+
 export const StepDurationText = ({ step }: { step: JourneyStep }) => {
-  const stepDurationText = useMemo(() => {
-    if (step.synthetics.step?.status === 'skipped') {
-      return '-';
+  const { euiTheme } = useEuiTheme();
+
+  const stepDuration = useMemo(() => {
+    const status = parseBadgeStatus(step.synthetics.step?.status ?? '');
+    const color = euiTheme.colors[getTextColorForMonitorStatus(status)] as CSSProperties['color'];
+    if (status === 'skipped') {
+      return { text: '-', color };
     }
 
-    return formatTestDuration(step.synthetics.step?.duration?.us);
-  }, [step.synthetics.step?.duration.us, step.synthetics.step?.status]);
+    return {
+      text: formatTestDuration(step.synthetics.step?.duration?.us),
+      color,
+    };
+  }, [euiTheme.colors, step.synthetics.step?.duration?.us, step.synthetics.step?.status]);
 
-  return <EuiText size="s">{stepDurationText}</EuiText>;
+  return (
+    <EuiText size="s" color={stepDuration.color}>
+      {stepDuration.text}
+    </EuiText>
+  );
 };

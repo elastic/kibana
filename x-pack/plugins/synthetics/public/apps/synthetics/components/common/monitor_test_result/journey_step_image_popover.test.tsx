@@ -8,10 +8,10 @@
 import { screen } from '@elastic/eui/lib/test/rtl';
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { StepImagePopover, StepImagePopoverProps } from './step_image_popover';
+import { JourneyStepImagePopover, StepImagePopoverProps } from './journey_step_image_popover';
 import { render } from '../../../utils/testing';
 
-describe('StepImagePopover', () => {
+describe('JourneyStepImagePopover', () => {
   let defaultProps: StepImagePopoverProps;
 
   beforeEach(() => {
@@ -20,11 +20,13 @@ describe('StepImagePopover', () => {
       imageCaption: <div>test caption element</div>,
       imgSrc: 'http://sample.com/sampleImageSrc.png',
       isImagePopoverOpen: false,
+      isStepFailed: false,
+      isLoading: false,
     };
   });
 
   it('opens displays full-size image on click, hides after close is clicked', async () => {
-    const { getByAltText } = render(<StepImagePopover {...defaultProps} />);
+    const { getByAltText } = render(<JourneyStepImagePopover {...defaultProps} />);
 
     expect(screen.queryByTestSubject('deactivateFullScreenButton')).toBeNull();
 
@@ -43,13 +45,13 @@ describe('StepImagePopover', () => {
   it('shows the popover when `isOpen` is true', () => {
     defaultProps.isImagePopoverOpen = true;
 
-    const { getByAltText } = render(<StepImagePopover {...defaultProps} />);
+    const { getByAltText } = render(<JourneyStepImagePopover {...defaultProps} />);
 
     expect(getByAltText(`A larger version of the screenshot for this journey step's thumbnail.`));
   });
 
   it('renders caption content', () => {
-    const { getByRole } = render(<StepImagePopover {...defaultProps} />);
+    const { getByRole } = render(<JourneyStepImagePopover {...defaultProps} />);
     const image = getByRole('img');
     expect(image).toHaveAttribute('alt', 'test caption');
     expect(image).toHaveAttribute('src', 'http://sample.com/sampleImageSrc.png');

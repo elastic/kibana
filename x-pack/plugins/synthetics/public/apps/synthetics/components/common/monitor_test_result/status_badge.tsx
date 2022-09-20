@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, IconColor } from '@elastic/eui';
+import { EuiBadge, IconColor, EuiThemeComputed } from '@elastic/eui';
 
 type MonitorStatus = 'succeeded' | 'failed' | 'skipped';
 export const StatusBadge = ({ status }: { status: MonitorStatus }) => {
   return (
-    <EuiBadge color={getEuiColorForMonitorStatus(status)}>
+    <EuiBadge color={getBadgeColorForMonitorStatus(status)}>
       {status === 'succeeded' ? COMPLETE_LABEL : status === 'failed' ? FAILED_LABEL : SKIPPED_LABEL}
     </EuiBadge>
   );
@@ -36,8 +36,14 @@ export const parseBadgeStatus = (status: string) => {
   }
 };
 
-export const getEuiColorForMonitorStatus = (status: MonitorStatus): IconColor => {
+export const getBadgeColorForMonitorStatus = (status: MonitorStatus): IconColor => {
   return status === 'succeeded' ? 'success' : status === 'failed' ? 'danger' : 'default';
+};
+
+export const getTextColorForMonitorStatus = (
+  status: MonitorStatus
+): keyof EuiThemeComputed['colors'] => {
+  return status === 'skipped' ? 'disabledText' : 'text';
 };
 
 export const COMPLETE_LABEL = i18n.translate('xpack.synthetics.monitorStatus.complete', {

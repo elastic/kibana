@@ -8,16 +8,17 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import moment from 'moment';
-import { PingTimestamp } from './ping_timestamp';
+import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
 import { render } from '../../../utils/testing';
 import * as observabilityPublic from '@kbn/observability-plugin/public';
 import { getShortTimeStamp } from '../../../utils/monitor_test_result/timestamp';
 import '../../../utils/testing/__mocks__/use_composite_image.mock';
 import { mockRef } from '../../../utils/testing/__mocks__/screenshot_ref.mock';
+import * as retrieveHooks from './use_retrieve_step_image';
 
 jest.mock('@kbn/observability-plugin/public');
 
-describe('Ping Timestamp component', () => {
+describe('JourneyStepScreenshotContainer', () => {
   let checkGroup: string;
   let timestamp: string;
   const { FETCH_STATUS } = observabilityPublic;
@@ -34,9 +35,12 @@ describe('Ping Timestamp component', () => {
         .spyOn(observabilityPublic, 'useFetcher')
         .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
       const { getByTestId } = render(
-        <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
+        <JourneyStepScreenshotContainer
+          checkGroup={checkGroup}
+          stepLabels={[getShortTimeStamp(moment(timestamp))]}
+        />
       );
-      expect(getByTestId('pingTimestampSpinner')).toBeInTheDocument();
+      expect(getByTestId('stepScreenshotPlaceholderLoading')).toBeInTheDocument();
     }
   );
 
@@ -45,37 +49,44 @@ describe('Ping Timestamp component', () => {
       .spyOn(observabilityPublic, 'useFetcher')
       .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
     const { getByTestId } = render(
-      <PingTimestamp
+      <JourneyStepScreenshotContainer
         checkGroup={checkGroup}
-        label={getShortTimeStamp(moment(timestamp))}
+        stepLabels={[getShortTimeStamp(moment(timestamp))]}
         allStepsLoaded={true}
       />
     );
-    expect(getByTestId('pingTimestampNoImageAvailable')).toBeInTheDocument();
+    expect(getByTestId('stepScreenshotNotAvailable')).toBeInTheDocument();
   });
 
   it('displays image when img src is available from useFetcher', () => {
     const src = 'http://sample.com/sampleImageSrc.png';
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: FETCH_STATUS.SUCCESS,
+    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue({
+      loading: false,
       data: { maxSteps: 2, stepName: 'test', src },
-      refetch: () => null,
+      attempts: 1,
     });
+
     const { container } = render(
-      <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
+      <JourneyStepScreenshotContainer
+        checkGroup={checkGroup}
+        stepLabels={[getShortTimeStamp(moment(timestamp))]}
+      />
     );
     expect(container.querySelector('img')?.src).toBe(src);
   });
 
   it('displays popover image when mouse enters img caption, and hides onLeave', async () => {
     const src = 'http://sample.com/sampleImageSrc.png';
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: FETCH_STATUS.SUCCESS,
+    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue({
+      loading: false,
       data: { maxSteps: 1, stepName: null, src },
-      refetch: () => null,
+      attempts: 1,
     });
     const { getByAltText, getAllByText, queryByAltText } = render(
-      <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
+      <JourneyStepScreenshotContainer
+        checkGroup={checkGroup}
+        stepLabels={[getShortTimeStamp(moment(timestamp))]}
+      />
     );
 
     const caption = getAllByText('Nov 26, 2020 10:28:56 AM');
@@ -91,14 +102,17 @@ describe('Ping Timestamp component', () => {
   });
 
   it('handles screenshot ref data', async () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: FETCH_STATUS.SUCCESS,
+    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue({
+      loading: false,
       data: mockRef,
-      refetch: () => null,
+      attempts: 1,
     });
 
     const { getByAltText, getByText, getByRole, getAllByText, queryByAltText } = render(
-      <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
+      <JourneyStepScreenshotContainer
+        checkGroup={checkGroup}
+        stepLabels={[getShortTimeStamp(moment(timestamp))]}
+      />
     );
 
     await waitFor(() => getByRole('img'));

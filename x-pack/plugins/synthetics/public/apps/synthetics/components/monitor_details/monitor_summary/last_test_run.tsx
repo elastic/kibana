@@ -12,7 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiLoadingContent,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -23,10 +23,12 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 
 import {
+  ConfigKey,
   DataStream,
   EncryptedSyntheticsSavedMonitor,
   Ping,
 } from '../../../../../../common/runtime_types';
+import { checkIsStalePing } from '../../../utils/monitor_test_result/check_pings';
 import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -48,16 +50,15 @@ export const LastTestRun = () => {
     latestPing?.monitor?.check_group
   );
 
-  const loading =
-    (monitor?.id && latestPing?.monitor?.id && monitor.id !== latestPing.monitor.id) ||
-    stepsLoading ||
-    pingsLoading;
+  const hasStalePings = checkIsStalePing(monitor, latestPing);
+  const loading = hasStalePings || stepsLoading || pingsLoading;
 
   return (
     <EuiPanel css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!loading && latestPing?.error ? (
         <EuiCallOut
+          data-test-subj="monitorTestRunErrorCallout"
           style={{
             marginTop: euiTheme.base,
             borderRadius: euiTheme.border.radius.medium,
@@ -68,7 +69,7 @@ export const LastTestRun = () => {
           color="danger"
           iconType="alert"
         >
-          <EuiButton color="danger">
+          <EuiButton data-test-subj="monitorTestRunViewErrorDetails" color="danger">
             {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
               defaultMessage: 'View error details',
             })}
@@ -109,6 +110,8 @@ const PanelHeader = ({
     [latestPing?.timestamp]
   );
 
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+
   const TitleNode = (
     <EuiTitle size="xs">
       <h3>{LAST_TEST_RUN_LABEL}</h3>
@@ -121,8 +124,12 @@ const PanelHeader = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
           <EuiFlexItem>
-            <EuiLoadingSpinner />
+            <EuiLoadingContent css={{ width: 52 }} lines={1} />
           </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiLoadingContent lines={1} />
+          </EuiFlexItem>
+          <EuiFlexItem>{isBrowserMonitor ? <EuiLoadingContent lines={1} /> : null}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
@@ -146,19 +153,24 @@ const PanelHeader = ({
             {lastRunTimestamp}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="inspect"
-            iconSide="left"
-            href={`${basePath}/app/uptime/journey/${monitor?.id ?? ''}/steps`}
-            data-test-subj="monitorSummaryViewLastTestRun"
-          >
-            {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
-              defaultMessage: 'View test run',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+
+        {isBrowserMonitor ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="monitorSummaryViewLastTestRun"
+              size="xs"
+              iconType="inspect"
+              iconSide="left"
+              href={`${basePath}/app/uptime/journey/${
+                latestPing?.monitor?.check_group ?? ''
+              }/steps`}
+            >
+              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
+                defaultMessage: 'View test run',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </>
   );

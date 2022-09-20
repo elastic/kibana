@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -19,8 +19,8 @@ import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 
-import { StatusBadge, parseBadgeStatus } from './status_badge';
-import { StepImage } from './step_image';
+import { StatusBadge, parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
+import { JourneyStepScreenshotWithLabel } from './journey_step_screenshot_with_label';
 import { StepDurationText } from './step_duration_text';
 
 interface Props {
@@ -37,6 +37,7 @@ export function isStepEnd(step: JourneyStep) {
 export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
+  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
 
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -46,8 +47,8 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
           {
             field: 'synthetics.step.index',
             name: '#',
-            render: (stepIndex: number) => (
-              <StepNumber stepIndex={stepIndex} steps={stepEnds} euiTheme={euiTheme} />
+            render: (stepIndex: number, item: JourneyStep) => (
+              <StepNumber stepIndex={stepIndex} step={item} euiTheme={euiTheme} />
             ),
           },
         ]
@@ -57,7 +58,12 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
       field: 'timestamp',
       name: STEP_LABEL,
       render: (_timestamp: string, item) => (
-        <StepImage step={item} compactView={true} allStepsLoaded={true} />
+        <JourneyStepScreenshotWithLabel
+          step={item}
+          stepLabels={stepLabels}
+          compactView={true}
+          allStepsLoaded={true}
+        />
       ),
       mobileOptions: {
         render: (item: JourneyStep) => (
@@ -77,7 +83,7 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
       render: (pingStatus: string) => <StatusBadge status={parseBadgeStatus(pingStatus)} />,
     },
     {
-      align: 'right',
+      align: 'left',
       name: STEP_DURATION,
       render: (item: JourneyStep) => {
         return <StepDurationText step={item} />;
@@ -130,23 +136,22 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
 
 const StepNumber = ({
   stepIndex,
-  steps,
+  step,
   euiTheme,
 }: {
   stepIndex: number;
-  steps: JourneyStep[];
+  step: JourneyStep;
   euiTheme: EuiThemeComputed;
 }) => {
-  const foundIndex = (steps ?? []).findIndex((step) => step?.synthetics?.step?.index === stepIndex);
-  const status =
-    foundIndex > -1
-      ? parseBadgeStatus(steps[foundIndex].synthetics?.step?.status ?? '')
-      : parseBadgeStatus('');
+  const status = parseBadgeStatus(step.synthetics?.step?.status ?? '');
+
   return (
     <EuiText
-      css={{ fontWeight: euiTheme.font.weight.bold }}
+      css={{
+        fontWeight: euiTheme.font.weight.bold,
+      }}
       size="s"
-      color={status === 'failed' ? euiTheme.colors.danger : euiTheme.colors.text}
+      color={euiTheme.colors[getTextColorForMonitorStatus(status)] as CSSProperties['color']}
     >
       {stepIndex}
     </EuiText>

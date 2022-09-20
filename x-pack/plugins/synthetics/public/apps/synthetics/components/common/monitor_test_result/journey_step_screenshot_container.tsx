@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useContext, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import useIntersection from 'react-use/lib/useIntersection';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useStepImage } from './use_step_image';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
@@ -20,33 +18,28 @@ import {
 
 import { SyntheticsSettingsContext } from '../../../contexts';
 
-import { NoImageDisplay } from './no_image_display';
-import { StepImageCaption } from './step_image_caption';
-import { StepImagePopover } from './step_image_popover';
-
-const StepDiv = euiStyled.div`
-  figcaption {
-    display: none;
-  }
-`;
+import { useRetrieveStepImage } from './use_retrieve_step_image';
+import { ScreenshotOverlayFooter } from './screenshot_overlay_footer';
+import { JourneyStepImagePopover } from './journey_step_image_popover';
+import { EmptyThumbnail } from './empty_thumbnail';
 
 interface Props {
   checkGroup?: string;
-  label?: string;
+  stepLabels?: string[];
   stepStatus?: string;
   initialStepNo?: number;
   allStepsLoaded?: boolean;
+  retryFetchOnRevisit?: boolean; // Set to `true` fro "Run Once" / "Test Now" modes
 }
 
-export const PingTimestamp = ({
-  label,
+export const JourneyStepScreenshotContainer = ({
+  stepLabels = [],
   checkGroup,
   stepStatus,
   allStepsLoaded,
   initialStepNo = 1,
+  retryFetchOnRevisit = false,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -57,6 +50,7 @@ export const PingTimestamp = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
+  const stepLabel = stepLabels[stepNumber - 1] ?? '';
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -66,11 +60,15 @@ export const PingTimestamp = ({
 
   const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
 
-  const { data, loading } = useStepImage({
-    hasImage: Boolean(stepImages[stepNumber - 1]) || Boolean(screenshotRef),
+  const isScreenshotRefValid = Boolean(
+    screenshotRef && screenshotRef?.ref?.screenshotRef?.synthetics?.step?.index === stepNumber
+  );
+  const { data, loading } = useRetrieveStepImage({
+    hasImage: Boolean(stepImages[stepNumber - 1]) || isScreenshotRefValid,
     hasIntersected: Boolean(intersection && intersection.intersectionRatio === 1),
     stepStatus,
     imgPath,
+    retryFetchOnRevisit,
   });
 
   useEffect(() => {
@@ -90,8 +88,9 @@ export const PingTimestamp = ({
 
   const [numberOfCaptions, setNumberOfCaptions] = useState(0);
 
-  const ImageCaption = (
-    <StepImageCaption
+  // Overlay Footer has next and previous buttons to traverse journey's steps
+  const overlayFooter = (
+    <ScreenshotOverlayFooter
       captionContent={captionContent}
       imgSrc={imgSrc}
       imgRef={screenshotRef}
@@ -99,7 +98,7 @@ export const PingTimestamp = ({
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
       isLoading={Boolean(loading)}
-      label={label}
+      label={stepLabel}
       onVisible={(val) => setNumberOfCaptions((prevVal) => (val ? prevVal + 1 : prevVal - 1))}
     />
   );
@@ -117,38 +116,30 @@ export const PingTimestamp = ({
   }, [numberOfCaptions, initialStepNo, stepNumber]);
 
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
-        <StepDiv
-          css={{
-            border:
-              stepStatus === 'failed'
-                ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.danger}`
-                : undefined,
-          }}
-          onMouseEnter={() => setIsImagePopoverOpen(true)}
-          onMouseLeave={() => setIsImagePopoverOpen(false)}
-          ref={intersectionRef}
-        >
-          {(imgSrc || screenshotRef) && (
-            <StepImagePopover
-              captionContent={captionContent}
-              imageCaption={ImageCaption}
-              imgSrc={imgSrc}
-              imgRef={screenshotRef}
-              isImagePopoverOpen={isImagePopoverOpen}
-            />
-          )}
-          {!imgSrc && !screenshotRef && <NoImageDisplay isLoading={loading || !allStepsLoaded} />}
-        </StepDiv>
-      </EuiFlexItem>
-
-      {label && (
-        <EuiFlexItem grow={false}>
-          <EuiText className="eui-textNoWrap">{label}</EuiText>
-        </EuiFlexItem>
+    <div
+      css={css`
+        figcaption {
+          display: none; // Do not show the OverlayFooter under thumbnails
+        }
+      `}
+      onMouseEnter={() => setIsImagePopoverOpen(true)}
+      onMouseLeave={() => setIsImagePopoverOpen(false)}
+      ref={intersectionRef}
+    >
+      {imgSrc || screenshotRef ? (
+        <JourneyStepImagePopover
+          captionContent={captionContent}
+          imageCaption={overlayFooter}
+          imgSrc={imgSrc}
+          imgRef={screenshotRef}
+          isImagePopoverOpen={isImagePopoverOpen}
+          isStepFailed={stepStatus === 'failed'}
+          isLoading={Boolean(loading)}
+        />
+      ) : (
+        <EmptyThumbnail isLoading={loading || !allStepsLoaded} />
       )}
-    </EuiFlexGroup>
+    </div>
   );
 };
 

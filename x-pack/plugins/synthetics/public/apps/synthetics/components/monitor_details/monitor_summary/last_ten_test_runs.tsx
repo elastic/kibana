@@ -23,18 +23,22 @@ import {
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
+import { ConfigKey, DataStream, JourneyStep, Ping } from '../../../../../../common/runtime_types';
 import {
   formatTestDuration,
   formatTestRunAt,
 } from '../../../utils/monitor_test_result/test_time_formats';
-import { Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
+import { checkIsStalePing } from '../../../utils/monitor_test_result/check_pings';
 import { selectPingsLoading, selectMonitorRecentPings, selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
+import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
+import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useJourneySteps } from '../hooks/use_journey_steps';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -53,8 +57,9 @@ export const LastTenTestRuns = () => {
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
 
-  const stalePings = monitor?.id && pings?.[0]?.monitor?.id && monitor.id !== pings[0].monitor.id;
-  const loading = stalePings || pingsLoading;
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+  const hasStalePings = checkIsStalePing(monitor, pings?.[0]);
+  const loading = hasStalePings || pingsLoading;
 
   const sorting: EuiTableSortingType<Ping> = {
     sort: {
@@ -71,14 +76,24 @@ export const LastTenTestRuns = () => {
   };
 
   const columns: Array<EuiBasicTableColumn<Ping>> = [
+    ...((isBrowserMonitor
+      ? [
+          {
+            align: 'left',
+            field: 'timestamp',
+            name: SCREENSHOT_LABEL,
+            render: (_timestamp: string, item) => <JourneyScreenshot ping={item} />,
+          },
+        ]
+      : []) as Array<EuiBasicTableColumn<Ping>>),
     {
       align: 'left',
       valign: 'middle',
       field: 'timestamp',
       name: '@timestamp',
       sortable: true,
-      render: (timestamp: string) => (
-        <EuiLink href={`${basePath}/app/uptime/journey/${monitor?.id ?? ''}/steps`}>
+      render: (timestamp: string, ping: Ping) => (
+        <EuiLink href={`${basePath}/app/uptime/journey/${ping?.monitor?.check_group ?? ''}/steps`}>
           <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
             {formatTestRunAt(timestamp)}
           </EuiText>
@@ -140,7 +155,7 @@ export const LastTenTestRuns = () => {
         loading={loading}
         columns={columns}
         error={pingsError?.body?.message}
-        items={stalePings ? [] : sortedPings}
+        items={hasStalePings ? [] : sortedPings}
         noItemsMessage={
           loading
             ? i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
@@ -158,6 +173,35 @@ export const LastTenTestRuns = () => {
   );
 };
 
+const JourneyScreenshot = ({ ping }: { ping: Ping }) => {
+  const { data: stepsData, loading: stepsLoading } = useJourneySteps(ping?.monitor?.check_group);
+  const stepEnds: JourneyStep[] = (stepsData?.steps ?? []).filter(isStepEnd);
+  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
+
+  const lastSignificantStep = useMemo(() => {
+    const copy = [...stepEnds];
+    // Sort desc by timestamp
+    copy.sort(
+      (stepA, stepB) =>
+        Number(new Date(stepB['@timestamp'])) - Number(new Date(stepA['@timestamp']))
+    );
+    return copy.find(
+      (stepEnd) => parseBadgeStatus(stepEnd?.synthetics?.step?.status ?? 'skipped') !== 'skipped'
+    );
+  }, [stepEnds]);
+
+  return (
+    <JourneyStepScreenshotContainer
+      checkGroup={lastSignificantStep?.monitor.check_group}
+      initialStepNo={lastSignificantStep?.synthetics?.step?.index}
+      stepStatus={lastSignificantStep?.synthetics.payload?.status}
+      allStepsLoaded={!stepsLoading}
+      stepLabels={stepLabels}
+      retryFetchOnRevisit={false}
+    />
+  );
+};
+
 const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRuns', {
   defaultMessage: 'Test Runs',
 });
@@ -168,6 +212,10 @@ const LAST_10_TEST_RUNS = i18n.translate(
     defaultMessage: 'Last 10 Test Runs',
   }
 );
+
+const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.screenshot', {
+  defaultMessage: 'Screenshot',
+});
 
 const RESULT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.result', {
   defaultMessage: 'Result',

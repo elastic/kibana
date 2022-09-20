@@ -6,14 +6,14 @@
  */
 
 import React, { MouseEvent, useEffect } from 'react';
+import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 
-export interface StepImageCaptionProps {
+export interface ScreenshotOverlayFooterProps {
   captionContent: string;
   imgSrc?: string;
   imgRef?: ScreenshotRefImageData;
@@ -25,7 +25,7 @@ export interface StepImageCaptionProps {
   isLoading: boolean;
 }
 
-export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
+export const ScreenshotOverlayFooter: React.FC<ScreenshotOverlayFooterProps> = ({
   captionContent,
   imgRef,
   imgSrc,
@@ -51,10 +51,19 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   const isSmall = breakpoints.down('m');
 
   return (
-    <CaptionWrapper
+    <div
+      css={css`
+        background-color: ${euiTheme.colors.lightShade};
+        display: inline-block;
+        width: 100%;
+        text-decoration: none;
+      `}
       onClick={(evt) => {
         // we don't want this to be captured by row click which leads to step list page
         evt.stopPropagation();
+      }}
+      onKeyDown={(evt) => {
+        // Just to satisfy ESLint
       }}
     >
       <div className="stepArrowsFullScreen">
@@ -76,7 +85,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SecondaryText>{captionContent}</SecondaryText>
+              <EuiText color={euiTheme.colors.text}>{captionContent}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
@@ -96,24 +105,18 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        <SecondaryText css={{ padding: euiTheme.size.xs }} className="eui-textNoWrap" size="s">
+        <EuiText
+          color={euiTheme.colors.text}
+          css={{ padding: euiTheme.size.xs }}
+          className="eui-textNoWrap"
+          size="s"
+        >
           {label}
-        </SecondaryText>
+        </EuiText>
       </div>
-    </CaptionWrapper>
+    </div>
   );
 };
-
-const CaptionWrapper = euiStyled.div`
-  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
-  display: inline-block;
-  width: 100%;
-  text-decoration: none;
-`;
-
-const SecondaryText = euiStyled(EuiText)((props) => ({
-  color: props.theme.eui.euiTextColor,
-}));
 
 export const prevAriaLabel = i18n.translate('xpack.synthetics.monitor.step.previousStep', {
   defaultMessage: 'Previous step',

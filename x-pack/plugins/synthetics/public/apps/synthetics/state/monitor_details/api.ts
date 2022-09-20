@@ -13,7 +13,7 @@ import {
   PingsResponseType,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface QueryParams {
   monitorId: string;
@@ -35,7 +35,7 @@ export const fetchMonitorRecentPings = async ({
   const size = 10;
 
   return await apiService.get(
-    API_URLS.PINGS,
+    SYNTHETICS_API_URLS.PINGS,
     { monitorId, from, to, locations, sort, size },
     PingsResponseType
   );

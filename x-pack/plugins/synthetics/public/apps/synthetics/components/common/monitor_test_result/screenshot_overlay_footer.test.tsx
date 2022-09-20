@@ -8,13 +8,13 @@
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../../utils/testing';
-import { StepImageCaption, StepImageCaptionProps } from './step_image_caption';
+import { ScreenshotOverlayFooter, ScreenshotOverlayFooterProps } from './screenshot_overlay_footer';
 import { getShortTimeStamp } from '../../../utils/monitor_test_result/timestamp';
 import moment from 'moment';
 import { mockRef } from '../../../utils/testing/__mocks__/screenshot_ref.mock';
 
-describe('StepImageCaption', () => {
-  let defaultProps: StepImageCaptionProps;
+describe('ScreenshotOverlayFooter', () => {
+  let defaultProps: ScreenshotOverlayFooterProps;
 
   beforeEach(() => {
     defaultProps = {
@@ -30,14 +30,14 @@ describe('StepImageCaption', () => {
   });
 
   it('labels prev and next buttons', () => {
-    const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByLabelText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     expect(getByLabelText('Previous step'));
     expect(getByLabelText('Next step'));
   });
 
   it('increments step number on next click', async () => {
-    const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByLabelText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     const nextButton = getByLabelText('Next step');
 
@@ -50,7 +50,7 @@ describe('StepImageCaption', () => {
   });
 
   it('decrements step number on prev click', async () => {
-    const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByLabelText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     const nextButton = getByLabelText('Previous step');
 
@@ -65,7 +65,7 @@ describe('StepImageCaption', () => {
   it('disables `next` button on final step', () => {
     defaultProps.stepNumber = 3;
 
-    const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByLabelText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     // getByLabelText('Next step');
     expect(getByLabelText('Next step')).toHaveAttribute('disabled');
@@ -75,27 +75,27 @@ describe('StepImageCaption', () => {
   it('disables `prev` button on final step', () => {
     defaultProps.stepNumber = 1;
 
-    const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByLabelText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     expect(getByLabelText('Next step')).not.toHaveAttribute('disabled');
     expect(getByLabelText('Previous step')).toHaveAttribute('disabled');
   });
 
   it('renders a timestamp', () => {
-    const { getByText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     getByText('Nov 26, 2020 10:28:56 AM');
   });
 
   it('renders caption content', () => {
-    const { getByText } = render(<StepImageCaption {...defaultProps} />);
+    const { getByText } = render(<ScreenshotOverlayFooter {...defaultProps} />);
 
     getByText('test caption content');
   });
 
   it('renders caption content for screenshot ref data', async () => {
     const { getByText } = render(
-      <StepImageCaption {...{ ...defaultProps, imgRef: mockRef, imgSrc: undefined }} />
+      <ScreenshotOverlayFooter {...{ ...defaultProps, imgRef: mockRef, imgSrc: undefined }} />
     );
 
     getByText('test caption content');

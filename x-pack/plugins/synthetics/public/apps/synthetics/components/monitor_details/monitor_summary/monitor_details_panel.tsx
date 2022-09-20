@@ -13,7 +13,7 @@ import {
   EuiBadge,
   EuiSpacer,
   EuiLink,
-  EuiLoadingSpinner,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +40,7 @@ export const MonitorDetailsPanel = () => {
     (latestPing && latestPing.monitor?.id !== monitorId) ||
     (monitor && monitor.id !== monitorId)
   ) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingContent lines={6} />;
   }
 
   return (
