@@ -10,12 +10,7 @@ import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
 import { SerializedStyles } from '@emotion/serialize';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
-import {
-  useIsWithinBreakpoints,
-  useEuiTheme,
-  useIsWithinMinBreakpoint,
-  EuiPageSidebarProps,
-} from '@elastic/eui';
+import { useIsWithinBreakpoints, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
