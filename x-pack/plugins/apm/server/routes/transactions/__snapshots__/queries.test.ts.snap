@@ -284,6 +284,11 @@ Object {
 
 exports[`transaction queries fetches transaction trace samples 1`] = `
 Object {
+  "_source": Array [
+    "transaction.id",
+    "trace.id",
+    "@timestamp",
+  ],
   "apm": Object {
     "events": Array [
       "transaction",
