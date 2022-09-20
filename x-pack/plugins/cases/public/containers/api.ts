@@ -7,6 +7,7 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import { isEmpty } from 'lodash';
 import {
   Cases,
   FetchCasesProps,
@@ -182,7 +183,7 @@ export const getCases = async ({
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
     assignees: filterOptions.assignees,
-    reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
+    reporters: constructReportersFilter(filterOptions.reporters),
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
@@ -197,6 +198,18 @@ export const getCases = async ({
   });
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
+};
+
+export const constructReportersFilter = (reporters: User[]) => {
+  return reporters
+    .map((reporter) => {
+      if (reporter.profile_uid != null) {
+        return reporter.profile_uid;
+      }
+
+      return reporter.username ?? '';
+    })
+    .filter((reporterID) => !isEmpty(reporterID));
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {
