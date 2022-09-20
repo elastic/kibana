@@ -21,7 +21,6 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
@@ -136,7 +135,7 @@ export async function getComputeUsage({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,
               }),
-              color: getVizColorForIndex(1, theme),
+              color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage = calculateComputeUsageGBSeconds({
                   faasBilledDuration: bucket.avgFaasBilledDuration.value,

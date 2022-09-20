@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
@@ -24,6 +25,7 @@ const chartBase: ChartBase = {
         'xpack.apm.agentMetrics.serverless.coldStartDuration',
         { defaultMessage: 'Cold start duration' }
       ),
+      color: theme.euiColorVis5,
     },
   },
   description: i18n.translate(

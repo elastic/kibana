@@ -36,7 +36,7 @@ const chartBase: ChartBase = {
     'xpack.apm.agentMetrics.serverless.avgDuration.description',
     {
       defaultMessage:
-        "The Transaction Duration shows your serverless function’s latency to process the request and respond back to the client. The serverless runtime might be busy with additional tasks (e.g. flushing APM data) after your function's response to the client. This does not affect the Transaction Duration but contributes to the overall Billed Duration for your serverless function.",
+        'Transaction duration is the time spent processing and responding to a request. If the request is queued it will not be contribute to the transaction duration but will contribute the overall billed duration',
     }
   ),
 };
