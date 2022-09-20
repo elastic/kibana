@@ -93,28 +93,4 @@ export const timeUnits = [
       defaultMessage: 'minutes',
     }),
   },
-  {
-    value: 's',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.secondsLabel', {
-      defaultMessage: 'seconds',
-    }),
-  },
-  {
-    value: 'ms',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.millisecondsLabel', {
-      defaultMessage: 'milliseconds',
-    }),
-  },
-  {
-    value: 'micros',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.microsecondsLabel', {
-      defaultMessage: 'microseconds',
-    }),
-  },
-  {
-    value: 'nanos',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.nanosecondsLabel', {
-      defaultMessage: 'nanoseconds',
-    }),
-  },
 ];

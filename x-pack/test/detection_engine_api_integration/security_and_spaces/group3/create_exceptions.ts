@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import {
+import type {
   CreateRulesSchema,
   EqlCreateSchema,
   QueryCreateSchema,
@@ -18,7 +18,6 @@ import {
   ThresholdCreateSchema,
 } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -106,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const rule = await createRule(supertest, log, ruleWithException);
-          const expected: Partial<RulesSchema> = {
+          const expected = {
             ...getSimpleRuleOutput(),
             exceptions_list: [
               {
@@ -147,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, log, rule.id);
           const bodyToCompare = removeServerGeneratedProperties(rule);
 
-          const expected: Partial<RulesSchema> = {
+          const expected = {
             ...getSimpleRuleOutput(),
             enabled: true,
             exceptions_list: [
@@ -831,6 +830,68 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               threat_filters: [],
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
+
+          it('generates no signals when a value list exception is added for a threshold rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: ThresholdCreateSchema = {
+              description: 'Detecting root and admin users',
+              name: 'Query with a rule id',
+              severity: 'high',
+              index: ['auditbeat-*'],
+              type: 'threshold',
+              risk_score: 55,
+              language: 'kuery',
+              rule_id: 'rule-1',
+              from: '1900-01-01T00:00:00.000Z',
+              query: 'host.name: "zeek-sensor-amsterdam"',
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
+
+          it('generates no signals when a value list exception is added for an EQL rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: EqlCreateSchema = {
+              ...getEqlRuleForSignalTesting(['auditbeat-*']),
+              query: 'configuration where host.name=="zeek-sensor-amsterdam"',
             };
 
             const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [

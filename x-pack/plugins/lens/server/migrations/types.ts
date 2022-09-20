@@ -294,6 +294,7 @@ export interface XYVisState850 {
         layerId: string;
         layerType: Extract<LayerType, 'annotations'>;
         annotations: Array<{ id: string; type: 'manual' | 'query' }>;
+        ignoreGlobalFilters: boolean;
       }
   >;
 }
