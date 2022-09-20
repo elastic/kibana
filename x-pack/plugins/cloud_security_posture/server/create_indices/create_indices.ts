@@ -12,7 +12,7 @@ import {
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSP_INGEST_TIMESTAMP_PIPELINE,
-  CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+  CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE,
   FINDINGS_INDEX_NAME,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
@@ -25,7 +25,7 @@ import { benchmarkScoreMapping } from './benchmark_score_mapping';
 
 export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
   await createPipelineIfNotExists(esClient, CSP_INGEST_TIMESTAMP_PIPELINE, logger);
-  await createPipelineIfNotExists(esClient, CSP_LATEST_INGEST_TIMESTAMP_PIPELINE, logger);
+  await createPipelineIfNotExists(esClient, CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE, logger);
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
@@ -95,7 +95,7 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
         mappings: template?.mappings,
         settings: {
           ...template?.settings,
-          default_pipeline: CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+          default_pipeline: CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE,
           lifecycle: {
             ...template?.settings?.lifecycle,
             name: '',
