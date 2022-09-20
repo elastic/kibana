@@ -6,7 +6,6 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
@@ -17,7 +16,6 @@ import { getStore } from '../common/store';
 import { useKibana } from '../common/lib/kibana';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
@@ -29,11 +27,6 @@ const ThreatIntelligence = memo(() => {
   const ThreatIntelligencePlugin = threatIntelligence.getComponent();
 
   const sourcererDataView = useSourcererDataView();
-
-  const enabled = useIsExperimentalFeatureEnabled('threatIntelligenceEnabled');
-  if (!enabled) {
-    return <Redirect to="/" />;
-  }
 
   const securitySolutionStore = getStore() as Store;
 
