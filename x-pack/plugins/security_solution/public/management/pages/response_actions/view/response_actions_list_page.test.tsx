@@ -155,7 +155,7 @@ describe('Action history page', () => {
       expect(getByTestId('responseActionsPage-header')).toBeTruthy();
     });
 
-    it('should not show header when there is no data', () => {
+    it('should not show header when there is no actions index', () => {
       reactTestingLibrary.act(() => {
         history.push('/administration/action_history?page=3&pageSize=20');
       });

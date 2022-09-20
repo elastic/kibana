@@ -181,9 +181,9 @@ export const ResponseActionsLog = memo<
     { retry: false }
   );
 
-  // Will call setIsDataInResponse with `true` if exists and there is no error on fetching data.
-  // It also will call setIsFirstAttempt with false in same situation as the first attemp has been done.
-  // It will call it with `false` if there is an error with specific code fetching data.
+  // Hide page header when there is no actions index calling the setIsDataInResponse with false value.
+  // Otherwise, it shows the page header calling the setIsDataInResponse with true value and it also keeps track
+  // if the API request was done for the first time.
   useEffect(() => {
     if (
       !isFetching &&

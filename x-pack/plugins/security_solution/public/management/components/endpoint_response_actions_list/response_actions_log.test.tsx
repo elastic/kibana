@@ -148,7 +148,7 @@ describe('Response Actions Log', () => {
     jest.clearAllMocks();
   });
 
-  describe('When index does not exists yet', () => {
+  describe('When index does not exist yet', () => {
     it('should show global loader when waiting for response', () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
