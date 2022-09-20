@@ -12,12 +12,13 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 export const getTestSyntheticsPolicy = (
   name: string,
   id: string,
-  locationName?: string
+  locationName?: string,
+  namespace?: string
 ): PackagePolicy => ({
   id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
   version: 'WzE2MjYsMV0=',
   name: 'test-monitor-name-Test private location 0-default',
-  namespace: 'default',
+  namespace: namespace || 'testnamespace',
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.2' },
   enabled: true,
   policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',

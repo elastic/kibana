@@ -40,7 +40,13 @@ export function FieldManagerComponent(props: {
   store?: GraphStore; // only for testing purpose
 }) {
   return (
-    <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
+    <EuiFlexGroup
+      className="gphFieldManager"
+      gutterSize="s"
+      alignItems="center"
+      wrap={true}
+      responsive={false}
+    >
       {props.selectedFields.map((field) => (
         <EuiFlexItem key={field.name} grow={false}>
           <FieldEditor {...props} field={field} />
