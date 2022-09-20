@@ -259,14 +259,10 @@ export function getTextBasedLanguagesDatasource({
       domElement: Element,
       props: DatasourceDimensionTriggerProps<TextBasedLanguagesPrivateState>
     ) => {
-      const layer = props.state.layers[props.layerId];
-      const selectedField = layer?.allColumns?.find(
-        (column) => column.columnId === props.columnId
-      )!;
+      const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(props.state);
+
       render(
-        <EuiButtonEmpty onClick={() => {}}>
-          {selectedField?.customLabel ?? selectedField?.fieldName}
-        </EuiButtonEmpty>,
+        <EuiButtonEmpty onClick={() => {}}>{columnLabelMap[props.columnId]}</EuiButtonEmpty>,
         domElement
       );
     },
@@ -324,12 +320,12 @@ export function getTextBasedLanguagesDatasource({
                           columns: props.state.layers[props.layerId].columns.map((col) =>
                             col.columnId !== props.columnId
                               ? col
-                              : { ...col, fieldName: choice.field, customLabel: undefined }
+                              : { ...col, fieldName: choice.field }
                           ),
                           allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
                             col.columnId !== props.columnId
                               ? col
-                              : { ...col, fieldName: choice.field, customLabel: undefined }
+                              : { ...col, fieldName: choice.field }
                           ),
                         },
                       },
@@ -355,15 +351,30 @@ export function getTextBasedLanguagesDatasource({
     },
 
     uniqueLabels(state: TextBasedLanguagesPrivateState) {
-      const layers = state?.layers;
+      const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
+      const counts = {} as Record<string, number>;
 
+      const makeUnique = (label: string) => {
+        let uniqueLabel = label;
+
+        while (counts[uniqueLabel] >= 0) {
+          const num = ++counts[uniqueLabel];
+          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
+            defaultMessage: '{label} [{num}]',
+            values: { label, num },
+          });
+        }
+
+        counts[uniqueLabel] = 0;
+        return uniqueLabel;
+      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
-        Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = columnId;
+        Object.values(layer.columns).forEach((column) => {
+          columnLabelMap[column.columnId] = makeUnique(column.fieldName);
         });
       });
 
@@ -387,13 +398,8 @@ export function getTextBasedLanguagesDatasource({
         Object.keys(layers).forEach((layerId) => {
           const currentLayer = layers[layerId];
           const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
-          const columnExists = currentLayer.allColumns.some((c) => c.columnId === source.columnId);
-          const numCols = currentLayer.allColumns.filter((c) => c.fieldName === field?.fieldName);
           const newColumn = {
             columnId: target.columnId,
-            customLabel: columnExists
-              ? `${field?.fieldName}[${numCols.length - 1}]`
-              : field?.fieldName ?? '',
             fieldName: field?.fieldName ?? '',
             meta: field?.meta,
           };
@@ -435,12 +441,13 @@ export function getTextBasedLanguagesDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.allColumns?.find((c) => c.columnId === columnId);
+          const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(state);
 
           if (column) {
             return {
               dataType: column?.meta?.type as DataType,
-              label: column?.fieldName,
-              isBucketed: false,
+              label: columnLabelMap[columnId] ?? column?.fieldName,
+              isBucketed: Boolean(column?.meta?.type !== 'number'),
               hasTimeShift: false,
             };
           }

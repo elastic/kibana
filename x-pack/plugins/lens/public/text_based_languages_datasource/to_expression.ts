@@ -25,7 +25,7 @@ function getExpressionForLayer(
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push({
         id: col.columnId,
-        label: col.customLabel ?? col.fieldName,
+        label: col.fieldName,
       } as OriginalColumn);
     } else {
       idMapper = {
