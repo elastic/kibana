@@ -25,7 +25,7 @@ export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<Cs
   };
 };
 
-export const getIndexStats = async (
+const getIndexStats = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<IndexStats | null> => {
@@ -50,7 +50,7 @@ export const getIndexStats = async (
   return null;
 };
 
-export const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
+const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
   esClient.indices.stats({ index });
 
 const getLatestDocTimestamp = async (
