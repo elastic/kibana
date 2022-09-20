@@ -13,6 +13,7 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { isAnnotationsLayer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   Datasource,
   DatasourceLayers,
@@ -40,7 +41,6 @@ import {
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
-import { isAnnotationsLayer } from '../../visualizations/xy/visualization_helpers';
 
 function getIndexPatterns(
   references?: SavedObjectReference[],
