@@ -26,7 +26,7 @@ import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
 
-import { useConfirmOpenUnverified } from '../../applications/integrations/hooks';
+import { useConfirmOpenUnverified } from '../../applications/integrations/hooks/use_confirm_open_unverified';
 
 import { useRequest, sendRequest } from './use_request';
 
