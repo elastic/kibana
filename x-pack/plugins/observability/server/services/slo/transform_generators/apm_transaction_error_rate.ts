@@ -107,14 +107,10 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
   }
 
   private buildDestination(slo: APMTransactionErrorRateSLO, spaceId: string) {
-    if (slo.settings.destination_index === undefined) {
-      return {
-        pipeline: SLO_INGEST_PIPELINE_NAME,
-        index: getSLODestinationIndexName(spaceId),
-      };
-    }
-
-    return { index: slo.settings.destination_index };
+    return {
+      pipeline: SLO_INGEST_PIPELINE_NAME,
+      index: getSLODestinationIndexName(spaceId),
+    };
   }
 
   private buildGroupBy() {

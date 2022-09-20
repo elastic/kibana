@@ -30,9 +30,6 @@ export const createSLOParams = (indicator: SLI): CreateSLOParams => ({
 export const createSLO = (indicator: SLI): SLO => ({
   ...commonSLO,
   id: uuid.v1(),
-  settings: {
-    destination_index: 'some-index',
-  },
   indicator,
 });
 

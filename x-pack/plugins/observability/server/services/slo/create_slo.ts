@@ -52,9 +52,6 @@ export class CreateSLO {
     return {
       ...sloParams,
       id: uuid.v1(),
-      settings: {
-        destination_index: sloParams.settings?.destination_index,
-      },
     };
   }
 
