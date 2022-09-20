@@ -43,11 +43,12 @@ export type RuleEventLogListKPIProps = {
   ruleId: string;
   dateStart: string;
   dateEnd: string;
+  filter: string;
   refreshToken?: number;
 } & Pick<RuleApis, 'loadExecutionKPIAggregations'>;
 
 export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
-  const { ruleId, dateStart, dateEnd, refreshToken, loadExecutionKPIAggregations } = props;
+  const { ruleId, dateStart, dateEnd, filter, refreshToken, loadExecutionKPIAggregations } = props;
 
   const isInitialized = useRef(false);
 
@@ -57,19 +58,23 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   const loadKPIs = async () => {
     setIsLoading(true);
     try {
-      const kpi = await loadExecutionKPIAggregations({
+      const newKpi = await loadExecutionKPIAggregations({
         id: ruleId,
         dateStart,
         dateEnd,
+        filter,
       });
-      setKpi(kpi);
-    } catch (e) {}
+      setKpi(newKpi);
+    } catch (e) {
+      // TODO Add toaster
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
     loadKPIs();
-  }, [ruleId, dateStart, dateEnd]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleId, dateStart, dateEnd, filter]);
 
   useEffect(() => {
     if (isInitialized.current) {
