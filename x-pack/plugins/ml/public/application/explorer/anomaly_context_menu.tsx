@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { isDefined } from '../../../common/types/guards';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForFieldValuePair } from '../util/string_utils';

@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DashboardSavedObject } from '@kbn/dashboard-plugin/public';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { getDefaultSwimlanePanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { SWIMLANE_TYPE, SwimlaneType } from '../explorer_constants';

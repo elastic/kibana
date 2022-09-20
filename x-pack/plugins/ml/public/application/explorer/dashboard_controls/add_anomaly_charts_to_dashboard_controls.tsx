@@ -7,7 +7,7 @@
 import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { isDefined } from '../../../../common/types/guards';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
