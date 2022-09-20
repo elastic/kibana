@@ -115,6 +115,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
 
+      // The group switch should be disabled by default
+      await aiops.explainLogRateSpikes.assertSpikeAnalysisGroupSwitchExists(false);
+
+      // Enabled grouping
+      await aiops.explainLogRateSpikes.clickSpikeAnalysisGroupSwitch(false);
+
       await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
 
       const analysisGroupsTable =
