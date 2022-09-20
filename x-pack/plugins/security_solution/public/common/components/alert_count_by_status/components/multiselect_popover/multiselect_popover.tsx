@@ -7,20 +7,13 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
+import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 export interface MultiSelectPopoverProps {
   title: string;
   allItems: readonly string[];
   selectedItems: string[];
   onSelectedItemsChange: (newItems: string[]) => void;
 }
-
-const StyledFilterButton = euiStyled(EuiFilterButton)`
-  border-radius: 5px;
-  border: 1px solid rgba(17,43,134,0.1); 
-`;
 
 export const MultiSelectPopover = React.memo(
   ({ allItems, selectedItems, title, onSelectedItemsChange }: MultiSelectPopoverProps) => {
@@ -55,18 +48,20 @@ export const MultiSelectPopover = React.memo(
       <EuiPopover
         ownFocus
         button={
-          <StyledFilterButton
-            grow={false}
-            data-test-subj={'multiselect-popover-button'}
-            iconType="arrowDown"
-            onClick={() => togglePopover()}
-            numFilters={allItems.length}
-            isSelected={isItemPopoverOpen}
-            hasActiveFilters={selectedItems.length > 0}
-            numActiveFilters={selectedItems.length}
-          >
-            {title}
-          </StyledFilterButton>
+          <EuiFilterGroup>
+            <EuiFilterButton
+              grow={false}
+              data-test-subj={'multiselect-popover-button'}
+              iconType="arrowDown"
+              onClick={() => togglePopover()}
+              numFilters={allItems.length}
+              isSelected={isItemPopoverOpen}
+              hasActiveFilters={selectedItems.length > 0}
+              numActiveFilters={selectedItems.length}
+            >
+              {title}
+            </EuiFilterButton>
+          </EuiFilterGroup>
         }
         isOpen={isItemPopoverOpen}
         closePopover={() => togglePopover(false)}
