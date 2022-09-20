@@ -5,11 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiPageHeader,
+  type EuiDescriptionListProps,
+} from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
@@ -53,6 +59,32 @@ const BackToResourcesButton = () => (
     </EuiButtonEmpty>
   </Link>
 );
+
+const getResourceFindingSharedValues = (sharedValues: {
+  resourceId: string;
+  resourceSubType: string;
+  resourceName: string;
+  clusterId: string;
+}): EuiDescriptionListProps['listItems'] => [
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
+      defaultMessage: 'Resource Type',
+    }),
+    description: sharedValues.resourceSubType,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceIdTitle', {
+      defaultMessage: 'Resource ID',
+    }),
+    description: sharedValues.resourceId,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.clusterIdTitle', {
+      defaultMessage: 'Cluster ID',
+    }),
+    description: sharedValues.clusterId,
+  },
+];
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
@@ -114,14 +146,28 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
               title={i18n.translate(
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
-                  defaultMessage: '{resourceId} - Findings',
-                  values: { resourceId: params.resourceId },
+                  defaultMessage: '{resourceName} - Findings',
+                  values: { resourceName: resourceFindings.data?.resourceName },
                 }
               )}
             />
           }
         />
       </PageTitle>
+      <EuiPageHeader
+        description={
+          resourceFindings.data && (
+            <CspInlineDescriptionList
+              listItems={getResourceFindingSharedValues({
+                resourceId: params.resourceId,
+                resourceName: resourceFindings.data.resourceName,
+                resourceSubType: resourceFindings.data.resourceSubType,
+                clusterId: resourceFindings.data.clusterId,
+              })}
+            />
+          )
+        }
+      />
       <EuiSpacer />
       {error && <ErrorCallout error={error} />}
       {!error && (
