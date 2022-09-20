@@ -5,42 +5,23 @@
  * 2.0.
  */
 
-import { useState } from 'react';
-import useWindowSize from 'react-use/lib/useWindowSize';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
-  getBreakpoint,
-  isWithinMaxBreakpoint,
-  isWithinMinBreakpoint,
+  useIsWithinMaxBreakpoint,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 
-export type Breakpoints = ReturnType<typeof getScreenSizes>;
-
-export function getScreenSizes(windowWidth: number) {
-  return {
-    isXSmall: isWithinMaxBreakpoint(windowWidth, 'xs'),
-    isSmall: isWithinMaxBreakpoint(windowWidth, 's'),
-    isMedium: isWithinMaxBreakpoint(windowWidth, 'm'),
-    isLarge: isWithinMaxBreakpoint(windowWidth, 'l'),
-    isXl: isWithinMaxBreakpoint(windowWidth, 1599),
-    isXXL: isWithinMaxBreakpoint(windowWidth, 1999),
-    isXXXL: isWithinMinBreakpoint(windowWidth, 2000),
-  };
-}
+export type Breakpoints = Record<string, boolean>;
 
 export function useBreakpoints() {
-  const { width } = useWindowSize();
-  const [breakpoint, setBreakpoint] = useState(getBreakpoint(width));
-  const [screenSizes, setScreenSizes] = useState(getScreenSizes(width));
+  const screenSizes = {
+    isXSmall: useIsWithinMaxBreakpoint('xs'),
+    isSmall: useIsWithinMaxBreakpoint('s'),
+    isMedium: useIsWithinMaxBreakpoint('m'),
+    isLarge: useIsWithinMaxBreakpoint('l'),
+    isXl: useIsWithinMaxBreakpoint('xl'),
+    isXXL: useIsWithinMaxBreakpoint('xxl'),
+    isXXXL: useIsWithinMinBreakpoint('xxxl'),
+  };
 
-  useDebounce(
-    () => {
-      setBreakpoint(getBreakpoint(width));
-      setScreenSizes(getScreenSizes(width));
-    },
-    50,
-    [width]
-  );
-
-  return { ...screenSizes, breakpoint, width };
+  return screenSizes;
 }

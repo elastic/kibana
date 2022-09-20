@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
-import { configure } from '@testing-library/react';
+import { configure, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
 jest.mock('../../common/navigation/hooks');
@@ -27,6 +30,7 @@ const mockData = {
   ...useGetCasesMockState,
 };
 
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
@@ -34,12 +38,17 @@ describe('RecentCases', () => {
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetCurrentUserProfileMock.mockReturnValue({
+      data: userProfiles[0],
+      isLoading: false,
+    });
     useGetCasesMock.mockImplementation(() => mockData);
-    useCurrentUserMock.mockResolvedValue({
+    useCurrentUserMock.mockReturnValue({
       email: 'elastic@elastic.co',
       fullName: 'Elastic',
       username: 'elastic',
     });
+
     appMockRender = createAppMockRenderer();
   });
 
@@ -78,7 +87,7 @@ describe('RecentCases', () => {
     });
   });
 
-  it('sets the reporter filters correctly', () => {
+  it('sets the reporter filters correctly', async () => {
     const { getByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
@@ -91,12 +100,21 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    const myRecentCasesElement = getByTestId('myRecentlyReported');
-    userEvent.click(myRecentCasesElement);
+    await waitFor(() => {
+      const myRecentCasesElement = getByTestId('myRecentlyReported');
+      userEvent.click(myRecentCasesElement);
+    });
 
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
-        reporters: [{ email: undefined, full_name: undefined, username: undefined }],
+        reporters: [
+          {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
+        ],
       },
       queryParams: { perPage: 10 },
     });
@@ -108,6 +126,40 @@ describe('RecentCases', () => {
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
         reporters: [],
+      },
+      queryParams: { perPage: 10 },
+    });
+  });
+
+  it('sets the reporter filters to the user info without the profile uid when it cannot find the current user profile', async () => {
+    useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
+
+    const { getByTestId } = appMockRender.render(
+      <TestProviders>
+        <RecentCases {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [] },
+      queryParams: { perPage: 10 },
+    });
+
+    // apply the filter
+    await waitFor(() => {
+      const myRecentCasesElement = getByTestId('myRecentlyReported');
+      userEvent.click(myRecentCasesElement);
+    });
+
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [
+          {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic',
+            username: 'elastic',
+          },
+        ],
       },
       queryParams: { perPage: 10 },
     });

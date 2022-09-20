@@ -41,6 +41,7 @@ export interface IngestPipelineParams {
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  error: string | null;
   id: string;
   index_name: string;
   is_native: boolean;
