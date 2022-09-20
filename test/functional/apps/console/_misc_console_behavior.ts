@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.collapseHelp();
+      await PageObjects.console.setFontSizeSetting(16);
     });
 
     beforeEach(async () => {
