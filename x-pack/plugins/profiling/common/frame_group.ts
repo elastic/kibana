@@ -44,7 +44,7 @@ export type FrameGroup = EmptyFrameGroup | ElfFrameGroup | FullFrameGroup;
 // createFrameGroup is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
 //
-// For ELF-symbolized frames, group by FunctionName and FileID.
+// For ELF-symbolized frames, group by FunctionName, ExeFileName and FileID.
 // For non-symbolized frames, group by FileID and AddressOrLine.
 // otherwise group by ExeFileName, SourceFilename and FunctionName.
 export function createFrameGroup(frame: StackFrameMetadata): FrameGroup {
