@@ -40,6 +40,7 @@ import {
   fetchFrequentItems,
   groupDuplicates,
 } from './queries/fetch_frequent_items';
+import type { ItemsetResult } from './queries/fetch_frequent_items';
 import {
   getFieldValuePairCounts,
   getSimpleHierarchicalTree,
@@ -250,19 +251,18 @@ export const defineExplainLogRateSpikesRoute = (
           // This cleans up groups and removes those unrelated field/value pairs.
           const filteredDf = df
             .map((fi) => {
-              const { set: currentItems } = fi;
-
-              for (const [field, value] of Object.entries(currentItems)) {
-                const stIndex = changePoints.findIndex(
-                  (cp) => cp.fieldName === field && cp.fieldValue === value
-                );
-                if (stIndex === -1) {
-                  delete currentItems[field];
-                }
-              }
-
-              fi.set = currentItems;
-              fi.size = Object.keys(currentItems).length;
+              fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
+                (set, [field, value]) => {
+                  if (
+                    changePoints.some((cp) => cp.fieldName === field && cp.fieldValue === value)
+                  ) {
+                    set[field] = value;
+                  }
+                  return set;
+                },
+                {}
+              );
+              fi.size = Object.keys(fi.set).length;
               return fi;
             })
             .filter((fi) => fi.size > 1);
