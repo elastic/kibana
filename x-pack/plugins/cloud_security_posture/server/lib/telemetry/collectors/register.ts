@@ -15,7 +15,7 @@ export function registerCspmUsageCollector(
   logger: Logger,
   usageCollection?: UsageCollectionSetup
 ): void {
-  // usageCollection is an optional dependency, so make sure to return if it is not registered.
+  // usageCollection is an optional dependency, so make sure to return if it is not registered
   if (!usageCollection) {
     return;
   }
