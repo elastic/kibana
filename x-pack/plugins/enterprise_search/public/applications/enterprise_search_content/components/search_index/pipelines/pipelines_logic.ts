@@ -47,6 +47,11 @@ import {
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
+import {
+  DeleteMlInferencePipelineApiLogic,
+  DeleteMlInferencePipelineApiLogicArgs,
+  DeleteMlInferencePipelineResponse,
+} from '../../../api/ml_models/delete_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
@@ -67,6 +72,18 @@ type PipelinesActions = Pick<
   createCustomPipelineSuccess: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
+  >['apiSuccess'];
+  deleteMlPipeline: Actions<
+    DeleteMlInferencePipelineApiLogicArgs,
+    DeleteMlInferencePipelineResponse
+  >['makeRequest'];
+  deleteMlPipelineError: Actions<
+    DeleteMlInferencePipelineApiLogicArgs,
+    DeleteMlInferencePipelineResponse
+  >['apiError'];
+  deleteMlPipelineSuccess: Actions<
+    DeleteMlInferencePipelineApiLogicArgs,
+    DeleteMlInferencePipelineResponse
   >['apiSuccess'];
   fetchCustomPipeline: Actions<
     FetchCustomPipelineApiLogicArgs,
@@ -129,6 +146,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
       CreateMlInferencePipelineApiLogic,
       ['apiSuccess as createMlInferencePipelineSuccess'],
+      DeleteMlInferencePipelineApiLogic,
+      [
+        'apiError as deleteMlPipelineError',
+        'apiSuccess as deleteMlPipelineSuccess',
+        'makeRequest as deleteMlPipeline',
+      ],
     ],
     values: [
       FetchDefaultPipelineApiLogic,
@@ -188,6 +211,23 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     createMlInferencePipelineSuccess: () => {
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+    },
+    deleteMlPipelineError: (error) => flashAPIErrors(error),
+    deleteMlPipelineSuccess: (value) => {
+      if (value.deleted) {
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.successToastDeleteMlPipeline.title',
+            {
+              defaultMessage: 'Deleted machine learning inference pipeline "{pipelineName}"',
+              values: {
+                pipelineName: value.deleted,
+              },
+            }
+          )
+        );
+      }
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
     },
     fetchIndexApiSuccess: (index) => {
