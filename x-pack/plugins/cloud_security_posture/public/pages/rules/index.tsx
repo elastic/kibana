@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiPageHeader,
   EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -115,6 +116,38 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
     <CloudPosturePage query={integrationInfo}>
       <EuiPageHeader
         alignItems={'bottom'}
+        bottomBorder
+        pageTitle={
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem style={{ width: 'fit-content' }}>
+              <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
+                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                  <FormattedMessage
+                    id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
+                    defaultMessage="Benchmark Integrations"
+                  />
+                </EuiButtonEmpty>
+              </Link>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CloudPosturePageTitle
+                title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+                  defaultMessage: 'Rules - {integrationName}',
+                  values: {
+                    integrationName: packageInfo?.name,
+                  },
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        description={
+          sharedValues.length && (
+            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
+              <CspInlineDescriptionList listItems={sharedValues} />
+            </div>
+          )
+        }
         rightSideItems={[
           <EuiButtonEmpty
             iconType="gear"
@@ -127,34 +160,6 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             />
           </EuiButtonEmpty>,
         ]}
-        pageTitle={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-              <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
-                <FormattedMessage
-                  id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
-                  defaultMessage="Benchmark Integrations"
-                />
-              </EuiButtonEmpty>
-            </Link>
-            <CloudPosturePageTitle
-              title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                defaultMessage: 'Rules - {integrationName}',
-                values: {
-                  integrationName: packageInfo?.name,
-                },
-              })}
-            />
-          </EuiFlexGroup>
-        }
-        description={
-          sharedValues.length && (
-            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
-              <CspInlineDescriptionList listItems={sharedValues} />
-            </div>
-          )
-        }
-        bottomBorder
       />
       <EuiSpacer />
       <RulesContainer />
