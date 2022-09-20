@@ -6,7 +6,7 @@
  */
 
 import type { EmailConnector, IndexConnector } from '../objects/connector';
-import { getIndexConnector } from '../objects/connector';
+import { getIndexConnector, getEmailConnector } from '../objects/connector';
 import type {
   CustomRule,
   MachineLearningRule,
