@@ -6,7 +6,7 @@
  */
 
 import fnv from 'fnv-plus';
-import { CallerCalleeNode, sortCallerCalleeNodes } from './callercallee';
+import { CallerCalleeGraph, sortCallerCalleeNodes } from './callercallee';
 import { getCalleeLabel } from './profiling';
 
 interface ColumnarCallerCallee {
@@ -94,19 +94,11 @@ function normalize(n: number, lower: number, upper: number): number {
   return (n - lower) / (upper - lower);
 }
 
-function countCallees(root: CallerCalleeNode): number {
-  let numCallees = 1;
-  for (const [_, callee] of root.Callees) {
-    numCallees += countCallees(callee);
-  }
-  return numCallees;
-}
-
 // createColumnarCallerCallee flattens the intermediate representation of the diagram
 // into a columnar format that is more compact than JSON. This representation will later
 // need to be normalized into the response ultimately consumed by the flamegraph.
-export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCallerCallee {
-  const numCallees = countCallees(root);
+export function createColumnarCallerCallee(graph: CallerCalleeGraph): ColumnarCallerCallee {
+  const numCallees = graph.size;
   const columnar: ColumnarCallerCallee = {
     Label: new Array<string>(numCallees),
     Value: new Array<number>(numCallees),
@@ -120,7 +112,7 @@ export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCall
     ExecutableID: new Array<string>(numCallees),
   };
 
-  const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
+  const queue = [{ x: 0, depth: 1, node: graph.root, parentID: 'root' }];
 
   let idx = 0;
   while (queue.length > 0) {

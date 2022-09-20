@@ -107,6 +107,11 @@ export function createCallerCalleeNode(
   };
 }
 
+export interface CallerCalleeGraph {
+  root: CallerCalleeNode;
+  size: number;
+}
+
 // createCallerCalleeGraph creates a graph in the internal representation
 // from a StackFrameMetadata that identifies the "centered" function and
 // the trace results that provide traces and the number of times that the
@@ -121,7 +126,7 @@ export function createCallerCalleeGraph(
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>,
   lazyFrameMap: Map<StackTraceID, LazyStackFrameMetadata[]>
-): CallerCalleeNode {
+): CallerCalleeGraph {
   // Create a node for the centered frame
   const rootFrameGroup = createFrameGroup(
     rootFrame.FileID,
@@ -132,6 +137,7 @@ export function createCallerCalleeGraph(
   );
   const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
   const root = createCallerCalleeNode(rootFrame, rootFrameGroup, rootFrameGroupID, 0);
+  const graph: CallerCalleeGraph = { root, size: 1 };
 
   // Obtain only the relevant frames (e.g. frames that contain the root frame
   // somewhere). If the root frame is "empty" (e.g. fileID is zero and line
@@ -193,6 +199,7 @@ export function createCallerCalleeGraph(
           samples
         );
         currentNode.Callees.set(lazyFrame.FrameGroupID, node);
+        graph.size++;
       } else {
         node.Samples += samples;
       }
@@ -210,7 +217,7 @@ export function createCallerCalleeGraph(
   root.CountExclusive = 0;
   root.CountInclusive = root.Samples;
 
-  return root;
+  return graph;
 }
 
 export function sortCallerCalleeNodes(

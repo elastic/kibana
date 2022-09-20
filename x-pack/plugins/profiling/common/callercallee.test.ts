@@ -17,7 +17,7 @@ describe('Caller-callee operations', () => {
 
     const rootFrame = createStackFrameMetadata();
     const lazyStackTraceMap = createLazyStackTraceMap(stackTraces, stackFrames, executables);
-    const root = createCallerCalleeGraph(
+    const graph = createCallerCalleeGraph(
       rootFrame,
       events,
       stackTraces,
@@ -26,8 +26,8 @@ describe('Caller-callee operations', () => {
       lazyStackTraceMap
     );
 
-    expect(root.Samples).toEqual(totalSamples);
-    expect(root.CountInclusive).toEqual(totalSamples);
-    expect(root.CountExclusive).toEqual(0);
+    expect(graph.root.Samples).toEqual(totalSamples);
+    expect(graph.root.CountInclusive).toEqual(totalSamples);
+    expect(graph.root.CountExclusive).toEqual(0);
   });
 });

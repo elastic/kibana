@@ -64,7 +64,7 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
 
           const t1 = new Date().getTime();
           const rootFrame = createStackFrameMetadata();
-          const root = createCallerCalleeGraph(
+          const graph = createCallerCalleeGraph(
             rootFrame,
             stackTraceEvents,
             stackTraces,
@@ -75,7 +75,7 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           logger.info(`creating caller-callee graph took ${new Date().getTime() - t1} ms`);
 
           const t2 = new Date().getTime();
-          const columnar = createColumnarCallerCallee(root);
+          const columnar = createColumnarCallerCallee(graph);
           logger.info(`creating columnar caller-callee graph took ${new Date().getTime() - t2} ms`);
 
           const t3 = new Date().getTime();
