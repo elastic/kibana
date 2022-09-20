@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButton,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { throttle } from 'lodash';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
@@ -18,7 +25,7 @@ import {
 } from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   show: boolean;
@@ -115,6 +122,9 @@ export const TTYPlayer = ({
     <div css={styles.container}>
       <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
           </EuiFlexItem>

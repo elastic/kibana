@@ -80,11 +80,16 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       backgroundColor: colors.ink,
     };
 
+    const betaBadge: CSSObject = {
+      backgroundColor: `${colors.emptyShade}`,
+    };
+
     return {
       container,
       header,
       terminal,
       scrollPane,
+      betaBadge,
     };
   }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 
