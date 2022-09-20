@@ -70,14 +70,14 @@ Try the runtime field examples on your own using the <<gs-get-data-into-kibana,*
 [[simple-hello-world-example]]
 ==== Return a keyword value
 
-(image:management/images/runtime_field.png[Runtime field with keyword type])
-
 Return `Hello World!`:
 
 [source,text]
 ----
 emit("Hello World!");
 ----
+
+image:management/images/runtime_field.png[Runtime field with keyword type]
 
 [float]
 [[perform-a-calculation-on-a-single-field]]
@@ -110,12 +110,10 @@ emit("");
 ----
 
 [float]
-[[return-multiple-fields]]
+[[composite-runtime-field]]
 ==== Return multiple fields with a composite runtime field
 
 A single runtime field can also produce multiple subfields when the type `Composite` is selected. The script editor provides default types that can be customized for each subfields.
-
-(image:management/images/runtime_field_composite.png[Runtime field with composite type])
 
 Return keyworld and double type subfields. Note that the first argument for `emit` is the name of the subfield.
 
@@ -125,9 +123,11 @@ emit('subfield_a', 'Hello');
 emit('sufield_b', 42);
 ----
 
+image:management/images/runtime_field_composite.png[Runtime field with composite type]
+
 [float]
 [[replace-nulls-with-blanks]]
-===== Replace nulls with blanks
+==== Replace nulls with blanks
 Replace `null` values with `None`:
 
 [source,text]
