@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
@@ -44,7 +46,9 @@ import { LandingPageComponent } from '../../../common/components/landing_page';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -66,6 +70,10 @@ const NetworkDetailsComponent: React.FC = () => {
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
+
+  const { signalIndexName } = useSignalIndex();
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
@@ -137,6 +145,14 @@ const NetworkDetailsComponent: React.FC = () => {
     [isInitializing, filterQuery]
   );
 
+  const entityFilter = useMemo(
+    () => ({
+      field: `${flowTarget}.ip`,
+      value: detailName,
+    }),
+    [detailName, flowTarget]
+  );
+
   return (
     <div data-test-subj="network-details-page">
       {indicesExist ? (
@@ -161,6 +177,7 @@ const NetworkDetailsComponent: React.FC = () => {
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
             </HeaderPage>
+
             <NetworkDetailsManage
               id={id}
               inspect={inspect}
@@ -179,8 +196,27 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
             />
+
             <EuiHorizontalRule />
             <EuiSpacer />
+
+            {canReadAlerts && (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <AlertCountByRuleByStatus
+                      entityFilter={entityFilter}
+                      signalIndexName={signalIndexName}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </>
+            )}
+
             <SecuritySolutionTabNavigation
               navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
             />

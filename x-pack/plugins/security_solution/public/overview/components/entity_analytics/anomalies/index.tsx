@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel } from '@elastic/
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { LastUpdatedAt } from '../../detection_response/utils';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import * as i18n from './translations';
 import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useAnomaliesColumns } from './columns';

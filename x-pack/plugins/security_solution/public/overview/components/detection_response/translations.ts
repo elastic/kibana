@@ -60,6 +60,13 @@ export const ALERTS = (totalAlerts: number) =>
 export const ALERTS_TEXT = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
   defaultMessage: 'Alerts',
 });
+export const ALERTS_BY_STATUS_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus',
+  {
+    defaultMessage: 'Alerts by Status',
+  }
+);
+
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
