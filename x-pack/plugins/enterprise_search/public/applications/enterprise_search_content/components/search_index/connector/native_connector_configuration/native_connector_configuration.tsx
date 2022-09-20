@@ -13,9 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -126,7 +128,79 @@ export const NativeConnectorConfiguration: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiFlexGroup direction="column" />
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder hasShadow={false}>
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="clock" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xxs">
+                      <h4>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.schedulingReminder.title',
+                          {
+                            defaultMessage: 'Configurable sync schedule',
+                          }
+                        )}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.schedulingReminder.description',
+                    {
+                      defaultMessage:
+                        'Remember to set a sync schedule in the Scheduling tab to continually refresh your searchable data.',
+                    }
+                  )}
+                </EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder hasShadow={false}>
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="globe" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xxs">
+                      <h4>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.title',
+                          {
+                            defaultMessage: 'Document level security',
+                          }
+                        )}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.description',
+                    {
+                      defaultMessage:
+                        'Restrict and personalize the read access users have to the index documents at query time.',
+                    }
+                  )}
+                  <EuiSpacer size="s" />
+                  <EuiLink href={'' /* TODO docsLink url */} target="_blank">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.securityLinkLabel',
+                      {
+                        defaultMessage: 'Document level security',
+                      }
+                    )}
+                  </EuiLink>
+                </EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

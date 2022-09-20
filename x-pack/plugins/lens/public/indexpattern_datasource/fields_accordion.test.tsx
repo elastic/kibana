@@ -19,7 +19,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 describe('Fields Accordion', () => {
   let defaultProps: FieldsAccordionProps;
   let indexPattern: IndexPattern;
-  let core: ReturnType<typeof coreMock['createSetup']>;
+  let core: ReturnType<typeof coreMock['createStart']>;
   let fieldProps: FieldItemSharedProps;
 
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('Fields Accordion', () => {
         },
       ],
     } as IndexPattern;
-    core = coreMock.createSetup();
+    core = coreMock.createStart();
     core.http.post.mockClear();
 
     fieldProps = {
