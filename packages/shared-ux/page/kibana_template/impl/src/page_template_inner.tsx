@@ -38,11 +38,12 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   const [offset, setOffset] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    const kibanaChrome = document
-      .querySelectorAll('[data-test-subj="kibanaChrome"]')
-      ?.item(0) as HTMLElement;
+    const kibanaChrome = document.querySelector('[data-test-subj="kibanaChrome"]') as HTMLElement;
     if (kibanaChrome) {
-      setOffset(kibanaChrome.offsetHeight);
+      const kibanaChromeHeader = kibanaChrome.querySelector(
+        '[data-test-subj="headerGlobalNav"]'
+      ) as HTMLElement;
+      setOffset(kibanaChromeHeader?.offsetHeight);
     }
   }, []);
 
