@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { TopAlert } from '../alerts/containers/alerts_page/types';
 
 export interface PageHeaderProps {
-  alert: EcsFieldsResponse;
+  alert: TopAlert | null;
 }
 
 export interface AlertDetailsPathParams {
   alertId: string;
-  ruleId: string;
 }
 
 export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';

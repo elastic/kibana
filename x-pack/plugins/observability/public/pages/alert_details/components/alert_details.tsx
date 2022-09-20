@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
-import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -20,33 +17,13 @@ import { paths } from '../../../config/paths';
 import { AlertDetailsPathParams } from '../types';
 import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
 import { AlertSummary } from '.';
-import { useFetchAlert, FetchAlertArgs } from './hooks/use_fetch_alert';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import PageNotFound from '../../404';
+import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 
 export function AlertDetails() {
   const { http } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
-  const { alertId, ruleId } = useParams<AlertDetailsPathParams>();
-  const [features, setFeatures] = useState<string>('');
-
-  const filteredRuleTypes = useMemo(
-    () => observabilityRuleTypeRegistry.list(),
-    [observabilityRuleTypeRegistry]
-  );
-
-  const { rule } = useFetchRule({ ruleId, http });
-  const { ruleTypes } = useLoadRuleTypes({ filteredRuleTypes });
-
-  useEffect(() => {
-    if (ruleTypes.length && rule) {
-      const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
-
-      if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-        setFeatures(matchedRuleType.producer);
-      } else setFeatures(rule.consumer);
-    }
-  }, [rule, ruleTypes]);
+  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { alertId } = useParams<AlertDetailsPathParams>();
 
   useBreadcrumbs([
     {
@@ -57,25 +34,12 @@ export function AlertDetails() {
     },
   ]);
 
-  const query = {
-    size: 1,
-    bool: {
-      filter: [
-        {
-          term: {
-            'kibana.alert.uuid': alertId,
-          },
-        },
-      ],
-    },
-  };
+  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  if (!config.unsafe.alertDetails.enabled) {
+    return <PageNotFound />;
+  }
 
-  const fetchAlertArgs: FetchAlertArgs = {
-    featureIds: [features] as AlertConsumers[],
-    query,
-  };
-
-  const [isLoading, { alert }] = useFetchAlert(fetchAlertArgs);
+  const [isLoading, alert] = useFetchAlertDetail(alertId);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -83,7 +47,7 @@ export function AlertDetails() {
 
   if (!isLoading && !alert)
     return (
-      <EuiPanel>
+      <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
           iconType="alert"
           color="danger"
@@ -104,11 +68,6 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
-
-  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (!config.unsafe.alertDetails.enabled) {
-    return <PageNotFound />;
-  }
 
   return (
     <ObservabilityPageTemplate data-test-subj="alertDetails">

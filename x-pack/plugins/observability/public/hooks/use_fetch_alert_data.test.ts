@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { kibanaStartMock } from '../utils/kibana_react.mock';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();

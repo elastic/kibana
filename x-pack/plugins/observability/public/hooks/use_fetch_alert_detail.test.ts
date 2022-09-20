@@ -6,11 +6,11 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { TopAlert } from '../alerts';
-import * as pluginContext from '../../hooks/use_plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../..';
-import { PluginContextValue } from '../../context/plugin_context';
+import { kibanaStartMock } from '../utils/kibana_react.mock';
+import { TopAlert } from '../pages/alerts';
+import * as pluginContext from './use_plugin_context';
+import { createObservabilityRuleTypeRegistryMock } from '../';
+import { PluginContextValue } from '../context/plugin_context';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
