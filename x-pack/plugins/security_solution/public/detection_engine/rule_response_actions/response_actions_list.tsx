@@ -24,7 +24,6 @@ interface IResponseActionsListProps {
 
 const GhostFormField = () => <></>;
 
-// eslint-disable-next-line react/display-name
 export const ResponseActionsList = React.memo(
   ({
     items,
@@ -78,3 +77,5 @@ export const ResponseActionsList = React.memo(
     );
   }
 );
+
+ResponseActionsList.displayName = 'ResponseActionsList';
