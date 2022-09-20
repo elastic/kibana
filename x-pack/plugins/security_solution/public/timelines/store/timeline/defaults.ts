@@ -117,4 +117,5 @@ export const tableDefaults: TGridModel = {
   documentType: '',
   savedObjectId: null,
   id: '',
+  selectAll: false,
 };

@@ -211,7 +211,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 };
 
 const makeMapStateToProps = () => {
-  const getDataTable = dataTableSelectors.getTGridByIdSelector();
+  const getDataTable = dataTableSelectors.getTableByIdSelector();
   const getGlobalInputs = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
     const { tableId } = ownProps;

@@ -26,12 +26,17 @@ import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { tableDefaults, timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
-import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
+import {
+  EVENT_FIELDS_TABLE_CLASS_NAME,
+  isTimelineScope,
+  onEventDetailsTabKeyPressed,
+  search,
+  isInTableScope,
+} from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
-import { TableId, TimelineId } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
@@ -161,11 +166,6 @@ const useFieldBrowserPagination = () => {
   };
 };
 
-const isTimelineScope = (scopeId: string) =>
-  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
-const isInTableScope = (scopeId: string) =>
-  Object.values(TableId).includes(scopeId as unknown as TableId);
-
 /**
  * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
  * attributes to every `<tr>`.
@@ -183,8 +183,9 @@ export const EventFieldsBrowser = React.memo<Props>(
         return dataTableSelectors.getTableByIdSelector();
       }
     }, [scopeId]);
+    const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
     const columnHeaders = useDeepEqualSelector((state) => {
-      const { columns } = (getScope && getScope(state, scopeId)) ?? timelineDefaults;
+      const { columns } = (getScope && getScope(state, scopeId)) ?? defaults;
       return getColumnHeaders(columns, browserFields);
     });
 

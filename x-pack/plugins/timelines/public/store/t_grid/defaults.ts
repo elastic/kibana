@@ -92,6 +92,9 @@ export const tGridDefaults: SubsetTGridModel = {
   savedObjectId: null,
   version: null,
   graphEventId: '',
+  dataProviders: [],
+  kqlMode: 'filter',
+  sessionViewConfig: null,
 };
 
 export const getTGridManageDefaults = (id: string) => ({

@@ -95,7 +95,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
-  const getTable = useMemo(() => dataTableSelectors.getTGridByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.detectionsPage) ?? tableDefaults).graphEventId
   );

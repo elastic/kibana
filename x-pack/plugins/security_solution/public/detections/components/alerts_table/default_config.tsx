@@ -12,7 +12,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import type { TGridModel } from '@kbn/timelines-plugin/public';
+import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
 import { RowRendererId } from '../../../../common/types/timeline';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { tableDefaults } from '../../../timelines/store/timeline/defaults';
@@ -152,14 +152,12 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const alertsDefaultModel: TGridModel = {
+export const alertsDefaultModel: SubsetTGridModel = {
   ...tableDefaults,
   columns,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
-  id: '',
   savedObjectId: null,
-  documentType: '',
 };
 
 export const alertsPreviewDefaultModel = {

@@ -61,9 +61,9 @@ const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
-  const getDataTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getDataTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

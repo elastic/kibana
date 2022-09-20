@@ -11,5 +11,5 @@ import type { TGridModel } from '../../store/data_table/model';
 export interface DataTablesStorage {
   getAllDataTables: () => Record<TableIdLiteral, TGridModel>;
   getDataTablesById: (id: TableIdLiteral) => TGridModel | null;
-  addDataTable: (id: TableIdLiteral, timeline: TGridModel) => void;
+  addDataTable: (id: TableIdLiteral, table: TGridModel) => void;
 }

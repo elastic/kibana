@@ -40,10 +40,6 @@ const tableActionTypes = [
   setExcludedRowRendererIds.type,
 ];
 
-export const isPageTimeline = (tableId: string | undefined): boolean =>
-  // Is not a flyout table
-  !(tableId && tableId.toLowerCase().startsWith('timeline'));
-
 export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
   (action$, state$, { tableByIdSelector, storage }) => {
@@ -51,7 +47,6 @@ export const createDataTableLocalStorageEpic =
     return action$.pipe(
       delay(500),
       withLatestFrom(table$),
-      filter(([action]) => isPageTimeline(get('payload.id', action))),
       tap(([action, tableById]) => {
         if (tableActionTypes.includes(action.type)) {
           if (storage) {

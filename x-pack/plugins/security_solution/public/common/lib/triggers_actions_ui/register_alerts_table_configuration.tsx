@@ -25,8 +25,8 @@ const registerAlertsTableConfiguration = (
   if (registry.has(APP_ID)) {
     return;
   }
-  const timelineStorage = getDataTablesInStorageByIds(storage, [TableId.detectionsPage]);
-  const columnsFormStorage = timelineStorage?.[TableId.detectionsPage]?.columns ?? [];
+  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.detectionsPage]);
+  const columnsFormStorage = dataTableStorage?.[TableId.detectionsPage]?.columns ?? [];
   const alertColumns = columnsFormStorage.length ? columnsFormStorage : columns;
 
   registry.register({

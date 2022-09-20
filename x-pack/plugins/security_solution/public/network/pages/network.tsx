@@ -68,7 +68,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const getTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
+    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
       (state) => (getTable(state, TableId.networkPageEvents) ?? tableDefaults).graphEventId
     );

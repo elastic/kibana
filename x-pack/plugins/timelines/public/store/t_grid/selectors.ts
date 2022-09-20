@@ -35,6 +35,7 @@ export const getManageDataTableById = () =>
       queryFields,
       title,
       selectAll,
+      graphEventId,
     }) => ({
       dataViewId,
       documentType,
@@ -46,5 +47,6 @@ export const getManageDataTableById = () =>
       queryFields,
       title,
       selectAll,
+      graphEventId,
     })
   );
