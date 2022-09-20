@@ -225,7 +225,11 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       </EuiPortal>
       <EuiPortal>
         {isLicenseModalOpen && packageInfo.licensePath && (
-          <LicenseModal licensePath={packageInfo.licensePath} onClose={toggleLicenseModal} />
+          <LicenseModal
+            licenseName={packageInfo.source?.license}
+            licensePath={packageInfo.licensePath}
+            onClose={toggleLicenseModal}
+          />
         )}
       </EuiPortal>
       <EuiFlexGroup direction="column" gutterSize="m">

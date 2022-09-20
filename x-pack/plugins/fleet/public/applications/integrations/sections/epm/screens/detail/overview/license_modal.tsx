@@ -22,11 +22,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { sendGetFileByPath, useStartServices } from '../../../../../hooks';
 
 interface Props {
+  licenseName?: string;
   licensePath: string;
   onClose: () => void;
 }
 
-export const LicenseModal: React.FunctionComponent<Props> = ({ licensePath, onClose }) => {
+export const LicenseModal: React.FunctionComponent<Props> = ({
+  licenseName = 'LICENSE.txt',
+  licensePath,
+  onClose,
+}) => {
   const { notifications } = useStartServices();
   const [licenseText, setLicenseText] = useState<string | undefined>(undefined);
 
@@ -38,7 +43,7 @@ export const LicenseModal: React.FunctionComponent<Props> = ({ licensePath, onCl
       } catch (err) {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.fleet.epm.errorLoadingLicense', {
-            defaultMessage: 'Error loading LICENSE.txt',
+            defaultMessage: 'Error loading license information',
           }),
         });
       }
@@ -49,7 +54,7 @@ export const LicenseModal: React.FunctionComponent<Props> = ({ licensePath, onCl
     <EuiModal maxWidth={true} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>LICENSE.txt</h1>
+          <h1>{licenseName}</h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
