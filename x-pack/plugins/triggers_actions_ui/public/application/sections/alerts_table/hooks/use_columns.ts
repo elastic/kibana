@@ -195,10 +195,17 @@ export const useColumns = ({
         return euiColumnFactory(column ? column : { id: _columnId }, browserFields);
       });
 
-      onChangeVisibleColumns(newColumnIds);
-      onColumnsChange(newColumns, newColumnIds);
+      setVisibleColumns(newColumnIds);
+      setColumns(newColumns);
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
+        columns: newColumns,
+        visibleColumns: newColumnIds,
+      });
     },
-    [browserFields, defaultColumns, onChangeVisibleColumns, onColumnsChange, visibleColumns]
+    [browserFields, defaultColumns, id, storage, storageAlertsTable, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
