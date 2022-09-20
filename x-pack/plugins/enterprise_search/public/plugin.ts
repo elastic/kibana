@@ -15,6 +15,7 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -125,6 +126,9 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: ANALYTICS_PLUGIN.NAME,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       searchable: bahavioralAnalyticsEnabled,
+      navLinkStatus: bahavioralAnalyticsEnabled
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
       appRoute: ANALYTICS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
