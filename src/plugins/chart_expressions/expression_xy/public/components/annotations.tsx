@@ -10,10 +10,10 @@ import './annotations.scss';
 import './reference_lines/reference_lines.scss';
 
 import React, { Fragment } from 'react';
-import { groupBy, snakeCase } from 'lodash';
+import { snakeCase } from 'lodash';
 import {
   AnnotationDomainType,
-  AnnotationTooltipFormatter,
+  CustomAnnotationTooltip,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -26,6 +26,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
@@ -56,27 +57,9 @@ export interface AnnotationsProps {
   outsideDimension: number;
 }
 
-const TooltipAnnotationHeader = ({
-  row: { label, color, icon },
-}: {
-  row: PointEventAnnotationRow;
-}) => (
-  <div className="echTooltip__item--container" key={snakeCase(label)}>
-    <EuiFlexGroup className="echTooltip__label" gutterSize="xs">
-      {hasIcon(icon) && (
-        <EuiFlexItem grow={false}>
-          <AnnotationIcon type={icon} color={color} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem> {label}</EuiFlexItem>
-    </EuiFlexGroup>
-  </div>
-);
-
 const TooltipAnnotationDetails = ({
   row,
   extraFields,
-  timeFormat,
 }: {
   row: PointEventAnnotationRow;
   extraFields: Array<{
@@ -84,23 +67,19 @@ const TooltipAnnotationDetails = ({
     name: string;
     formatter: FieldFormat | undefined;
   }>;
-  timeFormat: string;
 }) => {
-  return (
-    <div className="echTooltip__item--container">
-      <span className="echTooltip__value">
-        <div>{moment(row.time).format(timeFormat)}</div>
-        <div className="xyAnnotationTooltip__extraFields">
-          {extraFields.map((field) => (
-            <div>
-              {field.name}:{' '}
-              {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
-            </div>
-          ))}
-        </div>
-      </span>
+  return extraFields.length > 0 ? (
+    <div className="xyAnnotationTooltip__extraFields">
+      {extraFields.map((field) => (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">{field.name}:</EuiFlexItem>
+          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
+            {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
     </div>
-  );
+  ) : null;
 };
 
 const getExtraFields = (
@@ -120,63 +99,84 @@ const getExtraFields = (
     });
 };
 
-const createCustomTooltipDetails =
+const DISPLAYED_COUNT_OF_ROWS = 5;
+
+const createCustomTooltip =
   (
     rows: PointEventAnnotationRow[],
     formatFactory: FormatFactory,
     columns: DatatableColumn[] | undefined,
     timeFormat: string
-  ): AnnotationTooltipFormatter =>
+  ): CustomAnnotationTooltip =>
   () => {
-    const groupedConfigs = groupBy(rows, 'id');
     const lastElement = rows[rows.length - 1];
-    return (
-      <div key={rows[0].time} className="xyAnnotationTooltip">
-        {Object.values(groupedConfigs).map((group) => {
-          const firstElement = group[0];
-          const extraFields = getExtraFields(firstElement, formatFactory, columns);
+    const skippedCountFromRequest = lastElement.skippedCount || 0;
+    const displayedSkippedCount =
+      rows.length > DISPLAYED_COUNT_OF_ROWS ? rows.length - DISPLAYED_COUNT_OF_ROWS : 0;
+    const skippedCount = skippedCountFromRequest + displayedSkippedCount;
 
-          return (
-            <div className="xyAnnotationTooltip__group" key={firstElement.time}>
-              <TooltipAnnotationHeader row={firstElement} />
-              <EuiPanel
-                color="subdued"
-                hasShadow={false}
-                paddingSize="xs"
-                borderRadius="none"
-                hasBorder={true}
-              >
-                {group.map((row, index) => (
-                  <Fragment key={`${row.id}-${row.time}`}>
-                    {index > 0 && (
-                      <>
-                        <EuiSpacer size="xs" />
-                        <EuiHorizontalRule margin="none" />
-                        <EuiSpacer size="xs" />
-                      </>
-                    )}
-                    <TooltipAnnotationDetails
-                      key={snakeCase(row.time)}
-                      row={row}
-                      extraFields={extraFields}
-                      timeFormat={timeFormat}
-                    />
-                  </Fragment>
-                ))}
-              </EuiPanel>
+    return (
+      <EuiPanel
+        color="plain"
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="none"
+        borderRadius="none"
+        className="xyAnnotationTooltip"
+      >
+        <div className="xyAnnotationTooltip__rows">
+          {rows.slice(0, DISPLAYED_COUNT_OF_ROWS).map((row, index) => {
+            const extraFields = getExtraFields(row, formatFactory, columns);
+
+            return (
+              <Fragment key={row.time}>
+                {index > 0 && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiHorizontalRule margin="none" />
+                    <EuiSpacer size="xs" />
+                  </>
+                )}
+                <div className="xyAnnotationTooltip__row">
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <AnnotationIcon
+                        type={hasIcon(row.icon) ? row.icon : 'empty'}
+                        color={row.color}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xxxs">
+                        <h6>{row.label}</h6>
+                      </EuiTitle>
+                      <EuiFlexItem>{moment(row.time).format(timeFormat)}</EuiFlexItem>
+                      <TooltipAnnotationDetails
+                        key={snakeCase(row.time)}
+                        row={row}
+                        extraFields={extraFields}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              </Fragment>
+            );
+          })}
+        </div>
+        {skippedCount ? (
+          <div className="xyAnnotationTooltip__skippedCount">
+            <EuiSpacer size="xs" />
+            <EuiHorizontalRule margin="none" />
+            <EuiSpacer size="xs" />
+            <div className="xyAnnotationTooltip__row ">
+              <FormattedMessage
+                id="expressionXY.annotations.skippedCount"
+                defaultMessage="+{value} more…"
+                values={{ value: skippedCount }}
+              />
             </div>
-          );
-        })}
-        {lastElement.skippedCount && (
-          <div className="echTooltip__value">
-            <FormattedMessage
-              id="expressionXY.annotations.skippedCount"
-              defaultMessage="... +{value} more"
-              values={{ value: lastElement.skippedCount }}
-            />
           </div>
-        )}
-      </div>
+        ) : null}
+      </EuiPanel>
     );
   };
 
@@ -250,12 +250,7 @@ export const getAnnotationsGroupedByInterval = (
       icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
-      customTooltipDetails: createCustomTooltipDetails(
-        rowsPerBucket,
-        formatFactory,
-        columns,
-        timeFormat
-      ),
+      customTooltip: createCustomTooltip(rowsPerBucket, formatFactory, columns, timeFormat),
       isGrouped: false,
     };
     if (rowsPerBucket.length > 1) {
@@ -263,6 +258,7 @@ export const getAnnotationsGroupedByInterval = (
       return {
         ...mergedAnnotation,
         ...commonStyles,
+        label: '',
         isGrouped: true,
         icon: String(rowsPerBucket.length),
       };
@@ -335,14 +331,11 @@ export const Annotations = ({
                       isBarChart && minInterval ? timebucket + minInterval / 2 : timebucket
                     ).valueOf()
                   : moment(time).valueOf(),
-                header:
-                  formatter?.convert(isGrouped ? timebucket : time) ||
-                  moment(isGrouped ? timebucket : time).toISOString(),
                 details: annotation.label,
               },
             ]}
-            customTooltipDetails={annotation.customTooltipDetails}
-            placement={'bottom'}
+            customTooltip={annotation.customTooltip}
+            placement="bottom"
             style={{
               line: {
                 strokeWidth,
@@ -365,14 +358,16 @@ export const Annotations = ({
             id={id}
             key={id}
             customTooltip={() => (
-              <div className="echTooltip">
-                <EuiText size="xs" className="echTooltip__header">
-                  <h4>
-                    {formatter
-                      ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
-                      : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
-                  </h4>
-                </EuiText>
+              <div className="echTooltip xyAnnotationTooltip">
+                <div className="echTooltip__header">
+                  <EuiText size="xs">
+                    <h4>
+                      {formatter
+                        ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
+                        : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
+                    </h4>
+                  </EuiText>
+                </div>
                 <div className="xyAnnotationTooltipDetail">{label}</div>
               </div>
             )}
