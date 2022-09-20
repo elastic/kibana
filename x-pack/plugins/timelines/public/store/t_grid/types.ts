@@ -12,21 +12,9 @@ import type { TGridModel, TGridModelSettings } from './model';
 
 export type { TGridModel };
 
-export interface AutoSavedWarningMsg {
-  timelineId: string | null;
-  newTimelineModel: TGridModel | null;
-}
-
-/** A map of id to timeline  */
+/** A map of id to data table  */
 export interface TableById {
   [id: string]: TGridModel;
-}
-
-export interface InsertTimeline {
-  graphEventId?: string;
-  timelineId: string;
-  timelineSavedObjectId: string | null;
-  timelineTitle: string;
 }
 
 export const EMPTY_TABLE_BY_ID: TableById = {}; // stable reference
@@ -50,7 +38,7 @@ export enum TableIds {
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   casePage = 'timeline-case',
-  test = 'test', // Reserved for testing purposes
+  test = 'test-table', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }

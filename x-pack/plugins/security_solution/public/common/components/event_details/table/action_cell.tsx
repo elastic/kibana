@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState, useContext } from 'react';
-import { TimelineContext } from '@kbn/timelines-plugin/public';
+import { TimelineContext } from '../../../../timelines/components/timeline';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import type { EnrichedFieldInfo } from '../types';

@@ -312,7 +312,7 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
 export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
-  test = 'test', // Reserved for testing purposes
+  test = 'timeline-test', // Reserved for testing purposes
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([

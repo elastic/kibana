@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { DataProvider, TimelineId } from '../../../../common/types';
+import { DataProvider } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { tGridSelectors } from '../../../types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
@@ -72,7 +72,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     const getTGrid = tGridSelectors.getTGridByIdSelector();
 
     const { timelineType } = useDeepEqualSelector((state) => {
-      return getTGrid(state, TimelineId.active);
+      return getTGrid(state, 'active');
     });
 
     const handleStartDragToTimeline = useCallback(() => {
@@ -84,7 +84,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
           if (provider) {
             dispatch(
               addProviderToTimeline({
-                id: TimelineId.active,
+                id: 'active',
                 dataProvider: provider,
               })
             );
