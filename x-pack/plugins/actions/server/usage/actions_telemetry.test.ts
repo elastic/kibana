@@ -812,7 +812,6 @@ Object {
 Object {
   "avgExecutionTime": 0,
   "avgExecutionTimeByType": Object {},
-  "avgRunDurationByConnectorType": Object {},
   "countByType": Object {},
   "countFailed": 0,
   "countFailedByType": Object {},

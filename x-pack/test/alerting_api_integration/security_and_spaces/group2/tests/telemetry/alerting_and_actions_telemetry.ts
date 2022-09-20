@@ -25,7 +25,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('telemetry xxx', () => {
+  describe('telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
 
     beforeEach(async () => {
