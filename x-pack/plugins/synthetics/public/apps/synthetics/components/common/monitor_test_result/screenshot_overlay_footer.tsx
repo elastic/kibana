@@ -7,11 +7,17 @@
 
 import React, { MouseEvent, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
-import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 
 export interface ScreenshotOverlayFooterProps {
   captionContent: string;
@@ -37,7 +43,6 @@ export const ScreenshotOverlayFooter: React.FC<ScreenshotOverlayFooterProps> = (
   onVisible,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const breakpoints = useBreakpoints();
 
   useEffect(() => {
     onVisible(true);
@@ -48,7 +53,7 @@ export const ScreenshotOverlayFooter: React.FC<ScreenshotOverlayFooterProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isSmall = breakpoints.down('m');
+  const isSmall = useIsWithinMaxBreakpoint('m');
 
   return (
     <div
