@@ -190,38 +190,19 @@ export const StatefulEditDataProvider = React.memo<Props>(
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label={i18n.FIELD}>
-                  <EuiComboBox
-                    autoFocus
-                    data-test-subj="field"
-                    isClearable={false}
-                    onChange={onFieldSelected}
-                    options={getCategorizedFieldNames(browserFields)}
-                    placeholder={i18n.FIELD_PLACEHOLDER}
-                    selectedOptions={updatedField}
-                    singleSelection={{ asPlainText: true }}
-                    style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label={i18n.OPERATOR}>
-                  <EuiComboBox
-                    data-test-subj="operator"
-                    isClearable={false}
-                    onChange={onOperatorSelected}
-                    options={operatorLabels}
-                    placeholder={i18n.SELECT_AN_OPERATOR}
-                    selectedOptions={updatedOperator}
-                    singleSelection={{ asPlainText: true }}
-                    style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFormRow label={i18n.FIELD}>
+              <EuiComboBox
+                autoFocus
+                data-test-subj="field"
+                isClearable={false}
+                onChange={onFieldSelected}
+                options={getCategorizedFieldNames(browserFields)}
+                placeholder={i18n.FIELD_PLACEHOLDER}
+                selectedOptions={updatedField}
+                singleSelection={{ asPlainText: true }}
+                fullWidth={true}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -232,16 +213,34 @@ export const StatefulEditDataProvider = React.memo<Props>(
           updatedOperator.length > 0 &&
           updatedOperator[0].label !== i18n.EXISTS &&
           updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
-            <EuiFlexItem grow={false}>
-              <EuiFormRow label={i18n.VALUE_LABEL}>
-                <EuiFieldText
-                  className={VALUE_INPUT_CLASS_NAME}
-                  onChange={onValueChange}
-                  placeholder={i18n.VALUE}
-                  value={sanatizeValue(updatedValue)}
-                  isInvalid={isValueFieldInvalid}
-                />
-              </EuiFormRow>
+            <EuiFlexItem grow={true}>
+              <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label={i18n.OPERATOR}>
+                    <EuiComboBox
+                      data-test-subj="operator"
+                      isClearable={false}
+                      onChange={onOperatorSelected}
+                      options={operatorLabels}
+                      placeholder={i18n.SELECT_AN_OPERATOR}
+                      selectedOptions={updatedOperator}
+                      singleSelection={{ asPlainText: true }}
+                      style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label={i18n.VALUE_LABEL}>
+                    <EuiFieldText
+                      className={VALUE_INPUT_CLASS_NAME}
+                      onChange={onValueChange}
+                      placeholder={i18n.VALUE}
+                      value={sanatizeValue(updatedValue)}
+                      isInvalid={isValueFieldInvalid}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
 
