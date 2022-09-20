@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { amountAndUnitToObject } from '../amount_and_unit';
 import { getRangeTypeMessage } from './get_range_type_message';
+import { isFiniteNumber } from '../../utils/is_finite_number';
 
 const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
 
@@ -21,21 +22,26 @@ function toBytes(amount: number, unit: string, decimalUnitBase?: boolean) {
   return amount * base ** unitExponent;
 }
 
-function amountAndUnitToBytes(
-  value?: string,
-  decimalUnitBase?: boolean
-): number | undefined {
+function amountAndUnitToBytes({
+  value,
+  decimalUnitBase,
+}: {
+  value?: string;
+  decimalUnitBase?: boolean;
+}): number | undefined {
   if (value) {
     const { amount, unit } = amountAndUnitToObject(value);
-    if (isFinite(amount) && unit) {
+    if (isFiniteNumber(amount) && unit) {
       return toBytes(amount, unit, decimalUnitBase);
     }
   }
 }
 
 export function getStorageSizeRt({ min, max }: { min?: string; max?: string }) {
-  const minAsBytes = amountAndUnitToBytes(min, true) ?? -Infinity;
-  const maxAsBytes = amountAndUnitToBytes(max, true) ?? Infinity;
+  const minAsBytes =
+    amountAndUnitToBytes({ value: min, decimalUnitBase: true }) ?? -Infinity;
+  const maxAsBytes =
+    amountAndUnitToBytes({ value: max, decimalUnitBase: true }) ?? Infinity;
   const message = getRangeTypeMessage(min, max);
 
   return new t.Type<string, string, unknown>(
@@ -45,7 +51,10 @@ export function getStorageSizeRt({ min, max }: { min?: string; max?: string }) {
       return either.chain(
         t.string.validate(input, context),
         (inputAsString) => {
-          const inputAsBytes = amountAndUnitToBytes(inputAsString, true);
+          const inputAsBytes = amountAndUnitToBytes({
+            value: inputAsString,
+            decimalUnitBase: true,
+          });
 
           const isValidAmount =
             inputAsBytes !== undefined &&
