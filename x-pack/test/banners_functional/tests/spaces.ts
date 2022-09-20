@@ -9,8 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const spacesService = getService('spaces');
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -52,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('home', { basePath: '/s/another-space' });
 
       expect(await PageObjects.banners.isTopBannerVisible()).to.eql(true);
-      expect(await PageObjects.banners.getTopBannerText()).to.eql('global banner text');
+      expect(await PageObjects.banners.getTopBannerText()).to.eql('global_banner_text');
     });
 
     // Reference: https://github.com/elastic/kibana/pull/135783#issuecomment-1178178075
@@ -65,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('login');
 
       expect(await PageObjects.banners.isTopBannerVisible()).to.eql(true);
-      expect(await PageObjects.banners.getTopBannerText()).to.eql('global banner text');
+      expect(await PageObjects.banners.getTopBannerText()).to.eql('global_banner_text');
     });
   });
 }

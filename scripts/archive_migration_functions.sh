@@ -9,6 +9,29 @@ new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multi_space"
 
 test_config="x-pack/test/banners_functional/config.ts"
 
+list_stragglers() {
+
+  echo "### OSS"
+  while read -r x; do
+    local a=$(grep -l '"index": ".kibana' "$x")
+    if [ -n "$a" ]; then
+      echo "${a%/mappings.json}"
+    fi
+  done <<<"$(find test/functional/fixtures/es_archiver -name mappings.json)"
+
+  echo
+  echo
+
+  echo "### X-PACK"
+  while read -r y; do
+    local b=$(grep -l '"index": ".kibana' "$y")
+    if [ -n "$b" ]; then
+      echo "${b%/mappings.json}"
+    fi
+  done <<<"$(find x-pack/test/functional/es_archives -name mappings.json)"
+
+}
+
 curl_so_count() {
   local so=${1:-search-session}
   local count

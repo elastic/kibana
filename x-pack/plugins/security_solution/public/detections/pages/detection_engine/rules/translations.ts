@@ -187,6 +187,13 @@ export const BULK_ACTION_ADD_RULE_ACTIONS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_SET_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setScheduleTitle',
+  {
+    defaultMessage: 'Update rule schedules',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
