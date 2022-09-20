@@ -16,7 +16,6 @@ function createStartMock(): jest.Mocked<CloudExperimentsPluginStart> {
 
 function createSetupMock(): jest.Mocked<CloudExperimentsPluginSetup> {
   return {
-    ...createStartMock(),
     identifyUser: jest.fn(),
   };
 }
