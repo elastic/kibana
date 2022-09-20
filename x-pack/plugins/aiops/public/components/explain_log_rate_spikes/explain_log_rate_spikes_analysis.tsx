@@ -106,6 +106,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
   function startHandler() {
+    // Reset grouping to false when restarting the analysis.
+    setGroupResults(false);
+
     if (onPinnedChangePoint) {
       onPinnedChangePoint(null);
     }
