@@ -100,12 +100,6 @@ describe('createColumn', () => {
       },
     ],
   ])('should create column by agg %s', (_, input, expected) => {
-    if (expected === null) {
-      expect(createColumn(...input)).toBeNull();
-    } else if (Array.isArray(expected)) {
-      expect(createColumn(...input)).toEqual(expected.map(expect.objectContaining));
-    } else {
-      expect(createColumn(...input)).toEqual(expect.objectContaining(expected));
-    }
+    expect(createColumn(...input)).toEqual(expect.objectContaining(expected));
   });
 });
