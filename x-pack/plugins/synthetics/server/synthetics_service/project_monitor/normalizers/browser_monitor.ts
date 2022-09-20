@@ -14,9 +14,8 @@ import {
   PrivateLocation,
   ProjectMonitor,
 } from '../../../../common/runtime_types';
-import { getNormalizeCommonFields } from './common_fields';
+import { getNormalizeCommonFields, getValueInSeconds } from './common_fields';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { getMonitorTimeout } from './common_fields';
 
 export interface NormalizedProjectProps {
   locations: Locations;
@@ -73,7 +72,7 @@ export const getNormalizeBrowserFields = ({
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
     [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getMonitorTimeout(monitor.timeout)
+      ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
   };
   return {

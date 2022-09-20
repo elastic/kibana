@@ -24,6 +24,7 @@ import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 
 const testMonitors = [
   {
+    type: 'browser',
     throttling: { download: 5, upload: 3, latency: 20 },
     schedule: 3,
     locations: [],
@@ -46,6 +47,7 @@ const testMonitors = [
     filter: { match: 'check if title is present 10 0' },
   },
   {
+    type: 'browser',
     throttling: { download: 5, upload: 3, latency: 20 },
     schedule: 3,
     locations: [],
