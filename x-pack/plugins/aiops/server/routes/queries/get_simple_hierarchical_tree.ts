@@ -35,6 +35,7 @@ interface NewNode {
   name: string;
   set: FieldValuePair[];
   docCount: number;
+  pValue: number | null;
   children: NewNode[];
   icon: string;
   iconStyle: string;
@@ -52,6 +53,7 @@ function NewNodeFactory(name: string): NewNode {
     name,
     set: [],
     docCount: 0,
+    pValue: 0,
     children,
     icon: 'default',
     iconStyle: 'default',
@@ -101,6 +103,7 @@ function dfDepthFirstSearch(
   }
 
   const docCount = max(filteredItemSets.map((fis) => fis.doc_count)) ?? 0;
+  const pValue = max(filteredItemSets.map((fis) => fis.maxPValue)) ?? 0;
   const totalDocCount = max(filteredItemSets.map((fis) => fis.total_doc_count)) ?? 0;
 
   let label = `${parentLabel} ${value}`;
@@ -111,6 +114,7 @@ function dfDepthFirstSearch(
     displayParent.name += ` ${value}`;
     displayParent.set.push({ fieldName: field, fieldValue: value });
     displayParent.docCount = docCount;
+    displayParent.pValue = pValue;
     displayNode = displayParent;
   } else {
     displayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
@@ -118,6 +122,7 @@ function dfDepthFirstSearch(
     displayNode.set = [...displayParent.set];
     displayNode.set.push({ fieldName: field, fieldValue: value });
     displayNode.docCount = docCount;
+    displayNode.pValue = pValue;
     displayParent.addNode(displayNode);
   }
 
@@ -145,6 +150,7 @@ function dfDepthFirstSearch(
         nextDisplayNode.iconStyle = 'warning';
         nextDisplayNode.set = displayNode.set;
         nextDisplayNode.docCount = docCount;
+        nextDisplayNode.pValue = pValue;
         displayNode.addNode(nextDisplayNode);
         displayNode = nextDisplayNode;
       }
@@ -227,7 +233,7 @@ export function getSimpleHierarchicalTreeLeaves(
 ) {
   // console.log(`${'-'.repeat(level)} ${tree.name} ${tree.children.length}`);
   if (tree.children.length === 0) {
-    leaves.push({ group: tree.set, docCount: tree.docCount });
+    leaves.push({ group: tree.set, docCount: tree.docCount, pValue: tree.pValue });
   } else {
     for (const child of tree.children) {
       const newLeaves = getSimpleHierarchicalTreeLeaves(child, [], level + 1);

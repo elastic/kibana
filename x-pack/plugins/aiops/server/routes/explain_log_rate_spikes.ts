@@ -339,11 +339,13 @@ export const defineExplainLogRateSpikesRoute = (
                     duplicate: false,
                   })),
                   docCount: cp.doc_count,
+                  pValue: cp.pValue,
                 };
               } else {
                 return {
                   group: [{ fieldName: cp.fieldName, fieldValue: cp.fieldValue, duplicate: false }],
                   docCount: cp.doc_count,
+                  pValue: cp.pValue,
                 };
               }
             })

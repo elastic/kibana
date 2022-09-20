@@ -22,6 +22,7 @@ const changePointGroups: ChangePointGroup[] = [
       },
     ],
     docCount: 101,
+    pValue: 0.01,
   },
   {
     group: [
@@ -35,6 +36,7 @@ const changePointGroups: ChangePointGroup[] = [
       },
     ],
     docCount: 49,
+    pValue: 0.001,
   },
 ];
 
