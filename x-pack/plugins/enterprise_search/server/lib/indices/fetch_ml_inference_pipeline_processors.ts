@@ -8,13 +8,14 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { InferencePipeline } from '../../../common/types/pipelines';
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 export const fetchMlInferencePipelineProcessorNames = async (
   client: ElasticsearchClient,
   indexName: string
 ): Promise<string[]> => {
   try {
-    const mlInferencePipelineName = `${indexName}@ml-inference`;
+    const mlInferencePipelineName = getInferencePipelineNameFromIndexName(indexName);
     const {
       [mlInferencePipelineName]: { processors: mlInferencePipelineProcessors = [] },
     } = await client.ingest.getPipeline({

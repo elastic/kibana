@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
@@ -20,7 +22,7 @@ describe('createIndexPipelineDefinitions util function', () => {
   };
 
   const expectedResult = {
-    created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`],
+    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
   };
 
   beforeEach(() => {
