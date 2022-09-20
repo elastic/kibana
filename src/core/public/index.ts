@@ -220,6 +220,8 @@ export type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-browser';
 
+export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+
 export type { CoreSystem } from './core_system';
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';
