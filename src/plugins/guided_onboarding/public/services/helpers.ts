@@ -15,7 +15,7 @@ const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   }
 };
 
-const getActiveStepIndex = (guideID: string, stepID: string): number => {
+const getStepIndex = (guideID: string, stepID: string): number => {
   const guide = getGuideConfig(guideID);
   if (guide) {
     return guide.steps.findIndex((step: StepConfig) => step.id === stepID);
@@ -23,9 +23,9 @@ const getActiveStepIndex = (guideID: string, stepID: string): number => {
   return -1;
 };
 
-export const isLastStepActive = (guideID: string, stepID: string): boolean => {
+export const isLastStep = (guideID: string, stepID: string): boolean => {
   const guide = getGuideConfig(guideID);
-  const activeStepIndex = getActiveStepIndex(guideID, stepID);
+  const activeStepIndex = getStepIndex(guideID, stepID);
   const stepsNumber = guide?.steps.length || 0;
   if (stepsNumber > 0) {
     return activeStepIndex === stepsNumber - 1;
@@ -35,7 +35,7 @@ export const isLastStepActive = (guideID: string, stepID: string): boolean => {
 
 export const getNextStep = (guideID: string, stepID: string): string | undefined => {
   const guide = getGuideConfig(guideID);
-  const activeStepIndex = getActiveStepIndex(guideID, stepID);
+  const activeStepIndex = getStepIndex(guideID, stepID);
   if (activeStepIndex > -1 && guide?.steps[activeStepIndex + 1]) {
     return guide?.steps[activeStepIndex + 1].id;
   }

@@ -11,7 +11,7 @@ import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom }
 
 import { API_BASE_PATH } from '../../common';
 import { GuidedOnboardingState, UseCase } from '../types';
-import { getNextStep, isLastStepActive } from './helpers';
+import { getNextStep, isLastStep } from './helpers';
 
 export class ApiService {
   private client: HttpSetup | undefined;
@@ -72,7 +72,7 @@ export class ApiService {
   ): Promise<{ state: GuidedOnboardingState } | undefined> {
     const isStepActive = await firstValueFrom(this.isGuideStepActive$(guideID, stepID));
     if (isStepActive) {
-      if (isLastStepActive(guideID, stepID)) {
+      if (isLastStep(guideID, stepID)) {
         await this.updateGuideState({ activeGuide: guideID as UseCase, activeStep: 'completed' });
       } else {
         const nextStepID = getNextStep(guideID, stepID);
