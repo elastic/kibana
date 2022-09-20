@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import {
+import type { LicenseType } from '@kbn/licensing-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { PersistableStateDefinition, UiComponent } from '@kbn/kibana-utils-plugin/common';
+import type {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
+  SerializedAction,
   SerializedEvent,
 } from '../dynamic_actions';
 
@@ -109,9 +110,18 @@ export interface DrilldownDefinition<
 
   /**
    * Should return an internationalized name of the drilldown, which will be
-   * displayed to the user.
+   * displayed to the user as the name of drilldown factory when configuring a drilldown.
    */
   getDisplayName: () => string;
+
+  /**
+   * Name of the drilldown instance displayed to the user at the moment of
+   * drilldown execution. Should be internationalized.
+   */
+  readonly actionMenuItem?: UiComponent<{
+    config: Omit<SerializedAction<Config>, 'factoryId'>;
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>;
+  }>;
 
   /**
    * isCompatible during execution

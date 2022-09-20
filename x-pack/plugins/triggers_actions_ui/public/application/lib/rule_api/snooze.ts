@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { SnoozeSchedule } from '../../../types';
+import { SnoozeSchedule, BulkEditResponse } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 function rewriteSnoozeSchedule({ id, duration, rRule }: SnoozeSchedule) {
@@ -33,4 +33,35 @@ export async function snoozeRule({
       snooze_schedule: rewriteSnoozeSchedule(snoozeSchedule),
     }),
   });
+}
+
+export interface BulkSnoozeRulesProps {
+  ids?: string[];
+  filter?: string;
+  snoozeSchedule: SnoozeSchedule;
+}
+
+export function bulkSnoozeRules({
+  ids,
+  filter,
+  snoozeSchedule,
+  http,
+}: BulkSnoozeRulesProps & { http: HttpSetup }): Promise<BulkEditResponse> {
+  let body: string;
+  try {
+    body = JSON.stringify({
+      ids: ids?.length ? ids : undefined,
+      filter,
+      operations: [
+        {
+          operation: 'set',
+          field: 'snoozeSchedule',
+          value: rewriteSnoozeSchedule(snoozeSchedule),
+        },
+      ],
+    });
+  } catch (e) {
+    throw new Error(`Unable to parse bulk snooze params: ${e}`);
+  }
+  return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, { body });
 }
