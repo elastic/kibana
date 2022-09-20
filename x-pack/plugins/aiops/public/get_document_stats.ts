@@ -61,7 +61,7 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     searchQuery,
     selectedChangePoint,
     includeSelectedChangePoint,
-    selectedGroup,
+    selectedGroup
   );
 
   // Don't use the sampler aggregation as this can lead to some potentially
