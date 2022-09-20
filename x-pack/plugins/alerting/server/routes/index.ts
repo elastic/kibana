@@ -22,6 +22,7 @@ import { findRulesRoute, findInternalRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { getActionErrorLogRoute } from './get_action_error_log';
 import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
@@ -65,6 +66,7 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionLogRoute(router, licenseState);
   getActionErrorLogRoute(router, licenseState);
   getRuleExecutionKPIRoute(router, licenseState);
+  getGlobalExecutionKPIRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);
