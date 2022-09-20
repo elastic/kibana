@@ -209,6 +209,39 @@ export interface LazyStackFrameMetadata {
   StackTraceIndex: number;
 }
 
+export function groupStackFrameMetadataByStackTrace(
+  stackTraces: Map<StackTraceID, StackTrace>,
+  stackFrames: Map<StackFrameID, StackFrame>,
+  executables: Map<FileID, Executable>
+): Record<string, StackFrameMetadata[]> {
+  const stackTraceMap: Record<string, StackFrameMetadata[]> = {};
+  for (const [stackTraceID, trace] of stackTraces) {
+    const numFramesPerTrace = trace.FrameIDs.length;
+    const frameMetadata = new Array<StackFrameMetadata>(numFramesPerTrace);
+    for (let i = 0; i < numFramesPerTrace; i++) {
+      const frameID = trace.FrameIDs[i];
+      const fileID = trace.FileIDs[i];
+      const addressOrLine = trace.AddressOrLines[i];
+      const frame = stackFrames.get(frameID)!;
+      const executable = executables.get(fileID)!;
+
+      frameMetadata[i] = createStackFrameMetadata({
+        FrameID: frameID,
+        FileID: fileID,
+        AddressOrLine: addressOrLine,
+        FrameType: trace.Types[i],
+        FunctionName: frame.FunctionName,
+        FunctionOffset: frame.FunctionOffset,
+        SourceLine: frame.LineNumber,
+        SourceFilename: frame.FileName,
+        ExeFileName: executable.FileName,
+      });
+    }
+    stackTraceMap[stackTraceID] = frameMetadata;
+  }
+  return stackTraceMap;
+}
+
 // createLazyStackTraceMap collects all of the per-stack-frame metadata for a
 // given set of trace IDs and their respective stack frames.
 export function createLazyStackTraceMap(
