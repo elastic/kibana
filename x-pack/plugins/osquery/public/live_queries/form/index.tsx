@@ -82,7 +82,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     clearErrors,
     getFieldState,
     register,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = hooksForm;
 
   const canRunSingleQuery = useMemo(
@@ -135,7 +135,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const onSubmit = useCallback(
-    async (values: LiveQueryFormFields) => {
+    (values: LiveQueryFormFields) => {
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
@@ -145,16 +145,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
-      );
-      if (isEmpty(errors)) {
-        try {
-          // @ts-expect-error update types
-          await mutateAsync(serializedData);
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
+      ) as unknown as LiveQueryFormFields;
+
+      mutateAsync(serializedData);
     },
-    [errors, mutateAsync]
+    [mutateAsync]
   );
 
   const serializedData: SavedQuerySOFormData = useMemo(

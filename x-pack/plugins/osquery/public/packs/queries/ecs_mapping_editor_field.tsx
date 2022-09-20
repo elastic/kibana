@@ -18,6 +18,7 @@ import {
   reduce,
   trim,
   get,
+  reject,
 } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -39,7 +40,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
+import type { InternalFieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
 import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
 import {
@@ -730,11 +731,14 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     watch: watchRoot,
     register: registerRoot,
     setValue: setValueRoot,
+    formState: { errors: errorsRoot },
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
+
+  useEffect(() => {
+    registerRoot('ecs_mapping');
+  }, [registerRoot]);
+
   const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping'], { ecs_mapping: {} });
-
-  registerRoot('ecs_mapping');
-
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
     ecsMappingArray: ECSMappingArray;
   }>({
@@ -1029,11 +1033,24 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
   useEffect(() => {
     if (!formState.isValid) {
-      setError('ecs_mapping', {});
+      const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
+      if (nonEmptyErrors.length) {
+        setError('ecs_mapping', {
+          type: nonEmptyErrors[0].key?.type ?? 'custom',
+          message: nonEmptyErrors[0].key?.message ?? '',
+        });
+      }
     } else {
       clearErrors('ecs_mapping');
     }
-  }, [clearErrors, formState.isValid, setError]);
+  }, [
+    errorsRoot,
+    clearErrors,
+    formState.isValid,
+    formState.errors,
+    setError,
+    ecsMappingArrayState.error,
+  ]);
 
   return (
     <>

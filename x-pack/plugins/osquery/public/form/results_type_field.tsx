@@ -6,11 +6,18 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-
-import { EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
+import { i18n } from '@kbn/i18n';
 
 const SNAPSHOT_OPTION = {
   value: 'snapshot',
@@ -105,11 +112,19 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
   return (
     <EuiFormRow
       label={
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <FormattedMessage
               id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
               defaultMessage="Result type"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate('xpack.osquery.betaBadgeLabel', {
+                defaultMessage: 'Beta',
+              })}
+              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
