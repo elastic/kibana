@@ -84,7 +84,7 @@ export const fetchAndAddTrainedModelData = async (
 
       pipelineProcessorData[trainedModelName].types = [
         trainedModelData.model_type,
-        ...Object.keys(trainedModelData.inference_config),
+        ...Object.keys(trainedModelData.inference_config || {}),
         ...(isBuiltIn ? [BUILT_IN_MODEL_TAG] : []),
       ].filter((type): type is string => type !== undefined);
     }
