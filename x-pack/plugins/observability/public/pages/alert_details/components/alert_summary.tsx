@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
@@ -20,153 +20,139 @@ export function AlertSummary({ alert }: PageHeaderProps) {
 
   return (
     <>
-      <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
-        <EuiTitle size="xs">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.actualValue"
+                defaultMessage="Actual value"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {alert?.fields['kibana.alert.evaluation.value'] ?? '-'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.expectedValue"
+                defaultMessage="Expected value"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {alert?.fields['kibana.alert.evaluation.threshold'] ?? '-'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.duration"
+                defaultMessage="Duration"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {asDuration(Number(alert?.fields['kibana.alert.duration.us']))}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
+                defaultMessage="Status"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {
+            alert?.fields['kibana.alert.status'] ?
+              <AlertStatusIndicator
+                alertStatus={
+                  alert?.fields['kibana.alert.status'] === ALERT_STATUS_ACTIVE
+                    ? ALERT_STATUS_ACTIVE
+                    : ALERT_STATUS_RECOVERED
+                }
+              /> : <div data-test-subj='noAlertStatus'>-</div>
+          }
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.source"
+                defaultMessage="Source"
+              />
+            </h5>
+          </EuiTitle>
           <div>
-            <FormattedMessage
-              id="xpack.observability.pages.alertDetails.alertSummary"
-              defaultMessage="Alert Summary"
-            />
+            <EuiSpacer size="s" />-
           </div>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder={true} hasShadow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.alertName"
-                    defaultMessage="Alert"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued" data-test-subj="alertId">
-                {alert?.fields['kibana.alert.uuid'] ?? '-'}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-                    defaultMessage="Actual Value"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                {alert?.fields['kibana.alert.evaluation.value'] ?? '-'}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.duration"
-                    defaultMessage="Duration"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                {asDuration(Number(alert?.fields['kibana.alert.duration.us']))}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
-                    defaultMessage="Status"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              {
-                <AlertStatusIndicator
-                  alertStatus={
-                    alert?.fields['kibana.alert.status']?.toString() === ALERT_STATUS_ACTIVE
-                      ? ALERT_STATUS_ACTIVE
-                      : ALERT_STATUS_RECOVERED
-                  }
-                />
-              }
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Source"
-                  />
-                </h5>
-              </EuiTitle>
-              <div>
-                <EuiSpacer size="s" />-
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.started"
-                    defaultMessage="Started"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                {moment(alert?.fields['kibana.alert.start']?.toString()).format(
-                  DEFAULT_DATE_FORMAT
-                )}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-                    defaultMessage="Last status update"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                {moment(alert?.fields['@timestamp']?.toString()).fromNow()},&nbsp;
-                {moment(alert?.fields['@timestamp']?.toString()).format(DEFAULT_DATE_FORMAT)}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {alert?.fields['kibana.alert.rule.tags'] &&
-                alert?.fields['kibana.alert.rule.tags'].length > 0 && (
-                  <>
-                    <EuiTitle size="xxs">
-                      <h5>
-                        <FormattedMessage
-                          id="xpack.observability.pages.alertDetails.alertSummary.tags"
-                          defaultMessage="Tags"
-                        />
-                      </h5>
-                    </EuiTitle>
-                    <EuiSpacer size="s" />
-                    <div>
-                      <EuiSpacer size="s" />
-                      {triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-                        tagsOutPopover: true,
-                        tags: alert?.fields['kibana.alert.rule.tags'],
-                      })}
-                    </div>
-                  </>
-                )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
-      <EuiSpacer size="xs" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.started"
+                defaultMessage="Started"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {moment(alert?.fields['kibana.alert.start']?.toString()).format(
+              DEFAULT_DATE_FORMAT
+            )}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
+                defaultMessage="Last status update"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {moment(alert?.fields['@timestamp']?.toString()).fromNow()},&nbsp;
+            {moment(alert?.fields['@timestamp']?.toString()).format(DEFAULT_DATE_FORMAT)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.alertSummary.ruleTags"
+                defaultMessage="Rule Tags"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <div>
+            <EuiSpacer size="s" />
+            {
+              alert?.fields['kibana.alert.rule.tags'] &&
+              alert?.fields['kibana.alert.rule.tags'].length > 0 &&
+              triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+                tagsOutPopover: true,
+                tags: alert?.fields['kibana.alert.rule.tags'],
+              })
+            }
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

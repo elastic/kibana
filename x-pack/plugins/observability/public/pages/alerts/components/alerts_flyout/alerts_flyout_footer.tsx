@@ -26,8 +26,7 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
             prepend &&
             prepend(
               paths.observability.alertDetails(
-                alert.fields['kibana.alert.uuid'],
-                alert.fields['kibana.alert.rule.uuid']
+                alert.fields['kibana.alert.uuid']
               )
             )
           }

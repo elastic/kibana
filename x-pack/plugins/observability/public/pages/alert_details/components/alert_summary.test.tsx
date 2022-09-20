@@ -49,10 +49,6 @@ describe('Alert summary', () => {
   it('should show alert data', async () => {
     const alertSummary = render(<AlertSummary alert={alertWithTags} />);
 
-    expect(alertSummary.queryByTestId('alertId')).toHaveTextContent(
-      '756240e5-92fb-452f-b08e-cd3e0dc51738'
-    );
-
     expect(alertSummary.queryByText('1957')).toBeInTheDocument();
     expect(alertSummary.queryByText(asDuration(882076000))).toBeInTheDocument();
     expect(alertSummary.queryByText('Active')).toBeInTheDocument();
@@ -73,7 +69,8 @@ describe('Alert summary', () => {
   it('should show empty "-" for fields when no data available', async () => {
     const alertSummary = render(<AlertSummary alert={alertWithNoData} />);
 
-    expect(alertSummary.queryByTestId('alertId')).toHaveTextContent('-');
+    expect(alertSummary.queryByTestId('noAlertStatus')).toBeInTheDocument();
+    expect(alertSummary.queryByTestId('noAlertStatus')).toHaveTextContent('-');
 
     await waitFor(() =>
       expect(alertSummary.queryByTestId('tagsOutPopover')).not.toBeInTheDocument()
