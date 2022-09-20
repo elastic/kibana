@@ -24,6 +24,7 @@ import type {
 import type { ExperimentalDataStreamFeature } from '../../common/types';
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
+
 import type { NewPackagePolicyWithId } from './package_policy';
 
 export interface PackagePolicyService {
@@ -59,6 +60,14 @@ export interface PackagePolicyClient {
       force?: true;
     }
   ): Promise<PackagePolicy[]>;
+
+  bulkUpdate(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
+    options?: { user?: AuthenticatedUser; force?: boolean },
+    currentVersion?: string
+  ): Promise<PackagePolicy[] | null>;
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
