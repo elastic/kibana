@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import {
@@ -268,31 +269,30 @@ export const SessionView = ({
             />
           </EuiFlexItem>
 
-          {hasTTYOutput && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                title={
-                  <FormattedMessage
-                    id="xpack.sessionView.ttyToggle"
-                    defaultMessage="{kb}Kb of tty output"
-                    values={{
-                      kb: Math.round(totalTTYOutputBytes.total / 1024),
-                    }}
-                  />
-                }
-              >
-                <EuiButtonIcon
-                  isSelected={showTTY}
-                  display={showTTY ? 'fill' : 'empty'}
-                  iconType="apmTrace"
-                  onClick={onToggleTTY}
-                  size="m"
-                  aria-label={TOGGLE_TTY_PLAYER}
-                  data-test-subj="sessionView:TTYPlayerToggle"
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              title={
+                <FormattedMessage
+                  id="xpack.sessionView.ttyToggle"
+                  defaultMessage="{value} {unit} of TTY output"
+                  values={{
+                    ...byteSize(totalTTYOutputBytes?.total),
+                  }}
                 />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
+              }
+            >
+              <EuiButtonIcon
+                disabled={!hasTTYOutput}
+                isSelected={showTTY}
+                display={showTTY ? 'fill' : 'empty'}
+                iconType="apmTrace"
+                onClick={onToggleTTY}
+                size="m"
+                aria-label={TOGGLE_TTY_PLAYER}
+                data-test-subj="sessionView:TTYPlayerToggle"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
