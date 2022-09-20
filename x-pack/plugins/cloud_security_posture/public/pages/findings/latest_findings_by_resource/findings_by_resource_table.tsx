@@ -62,7 +62,7 @@ const FindingsByResourceTableComponent = ({
 
   const columns = useMemo(
     () => [
-      findingsByResourceColumns['resource_id'],
+      findingsByResourceColumns.resource_id,
       createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
@@ -137,7 +137,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       );
     },
   },
-  baseFindingsColumns['cluster_id'],
+  baseFindingsColumns.cluster_id,
   {
     field: 'failed_findings',
     width: '150px',
