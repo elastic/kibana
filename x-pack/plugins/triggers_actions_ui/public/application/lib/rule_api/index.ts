@@ -28,14 +28,8 @@ export {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
 } from './load_execution_log_aggregations';
-export {
-  loadExecutionKPIAggregations,
-  LoadExecutionKPIAggregationsProps,
-} from './load_execution_kpi_aggregations';
-export {
-  loadGlobalExecutionKPIAggregations,
-  LoadGlobalExecutionKPIAggregationsProps,
-} from './load_global_execution_kpi_aggregations';
+export type { LoadExecutionKPIAggregationsProps } from './load_execution_kpi_aggregations';
+export { loadExecutionKPIAggregations } from './load_execution_kpi_aggregations';
 export type { LoadActionErrorLogProps } from './load_action_error_log';
 export { loadActionErrorLog } from './load_action_error_log';
 export { unmuteAlertInstance } from './unmute_alert';
