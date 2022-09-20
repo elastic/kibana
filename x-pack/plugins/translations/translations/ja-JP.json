@@ -27362,7 +27362,6 @@
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingRunningProcesses": "プロセス",
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingSuspendProcess": "プロセスを一時停止",
     "xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate": "リリース",
-    "xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration": "推奨のデフォルト値で統合が保存されます。後からこれを変更するには、エージェントポリシー内でエンドポイントおよびクラウドセキュリティ統合を編集します。",
     "xpack.securitySolution.endpoint.list.actionmenu": "開く",
     "xpack.securitySolution.endpoint.list.actions": "アクション",
     "xpack.securitySolution.endpoint.list.backToPolicyButton": "ポリシーリストに戻る",
