@@ -15,13 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { OverviewLogic } from './overview.logic';
 
-interface TotalStatsProps {
-  additionalItems?: EuiStatProps[];
-  ingestionType: string;
-  lastUpdated?: string;
-}
-
-export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
+export const ApiTotalStats: React.FC = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const documentCount = indexData?.count ?? 0;
   const hideStats = isLoading || isError;
@@ -35,7 +29,12 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
         }
       ),
       isLoading: hideStats,
-      title: ingestionType,
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
+        {
+          defaultMessage: 'API',
+        }
+      ),
     },
     {
       description: i18n.translate(
@@ -47,7 +46,6 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
       isLoading: hideStats,
       title: documentCount,
     },
-    ...additionalItems,
   ];
 
   return (
