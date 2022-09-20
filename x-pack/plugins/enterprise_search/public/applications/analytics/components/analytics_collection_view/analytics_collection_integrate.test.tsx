@@ -9,9 +9,9 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiDescriptionListDescription } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
@@ -29,7 +29,18 @@ describe('AnalyticsCollectionIntegrate', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<AnalyticsCollectionIntegrate collection={analyticsCollections} />);
+    const wrapper = mount(<AnalyticsCollectionIntegrate collection={analyticsCollections} />);
     expect(wrapper.find(EuiCodeBlock)).toHaveLength(2);
+    expect(wrapper.find(EuiDescriptionListDescription).get(0)).toMatchInlineSnapshot(`
+      <EuiDescriptionListDescription>
+        example
+      </EuiDescriptionListDescription>
+    `);
+
+    expect(wrapper.find(EuiDescriptionListDescription).get(1)).toMatchInlineSnapshot(`
+          <EuiDescriptionListDescription>
+            /analytics/api/collections/example
+          </EuiDescriptionListDescription>
+      `);
   });
 });
