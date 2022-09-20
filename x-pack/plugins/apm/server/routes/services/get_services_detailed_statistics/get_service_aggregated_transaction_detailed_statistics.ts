@@ -6,10 +6,14 @@
  */
 
 import { keyBy } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_DURATION_SUMMARY,
+  TRANSACTION_FAILURE_COUNT,
+  TRANSACTION_SUCCESS_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
@@ -18,26 +22,19 @@ import {
 } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-} from '../../../lib/helpers/transaction_error_rate';
+import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDocumentTypeFilterForServiceMetrics } from '../../../lib/helpers/service_metrics';
 
-export async function getServiceTransactionDetailedStats({
+export async function getServiceAggregatedTransactionDetailedStats({
   serviceNames,
   environment,
   kuery,
   setup,
-  searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   offset,
   start,
   end,
@@ -47,7 +44,7 @@ export async function getServiceTransactionDetailedStats({
   environment: string;
   kuery: string;
   setup: Setup;
-  searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics: boolean;
   offset?: string;
   start: number;
   end: number;
@@ -60,24 +57,34 @@ export async function getServiceTransactionDetailedStats({
     offset,
   });
 
-  const outcomes = getOutcomeAggregation();
-
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions),
+        field: TRANSACTION_DURATION_SUMMARY,
       },
     },
-    outcomes,
+    total_doc: {
+      value_count: {
+        field: TRANSACTION_DURATION_SUMMARY,
+      },
+    },
+    failure_count: {
+      sum: {
+        field: TRANSACTION_FAILURE_COUNT,
+      },
+    },
+    success_count: {
+      sum: {
+        field: TRANSACTION_SUCCESS_COUNT,
+      },
+    },
   };
 
   const response = await apmEventClient.search(
-    'get_service_transaction_detail_stats',
+    'get_service_aggregated_transaction_detail_stats',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
-        ],
+        events: [ProcessorEvent.metric],
       },
       body: {
         size: 0,
@@ -85,9 +92,7 @@ export async function getServiceTransactionDetailedStats({
           bool: {
             filter: [
               { terms: { [SERVICE_NAME]: serviceNames } },
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
+              ...getDocumentTypeFilterForServiceMetrics(),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -118,7 +123,7 @@ export async function getServiceTransactionDetailedStats({
                               start: startWithOffset,
                               end: endWithOffset,
                               numBuckets: 20,
-                              searchAggregatedTransactions,
+                              searchAggregatedServiceMetrics,
                             }).intervalString,
                           min_doc_count: 0,
                           extended_bounds: {
@@ -127,6 +132,17 @@ export async function getServiceTransactionDetailedStats({
                           },
                         },
                         aggs: metrics,
+                      },
+                      bucket_sort: {
+                        bucket_sort: {
+                          sort: [
+                            {
+                              total_doc: {
+                                order: 'desc',
+                              },
+                            },
+                          ],
+                        },
                       },
                     },
                   },
@@ -158,7 +174,10 @@ export async function getServiceTransactionDetailedStats({
         transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateFailedTransactionRate(dateBucket.outcomes),
+            y: calculateFailedTransactionRateFromServiceMetrics({
+              failedTransactions: dateBucket.failure_count.value,
+              successfulTransactions: dateBucket.success_count.value,
+            }),
           })
         ),
         throughput: topTransactionTypeBucket.timeseries.buckets.map(
@@ -167,7 +186,7 @@ export async function getServiceTransactionDetailedStats({
             y: calculateThroughputWithRange({
               start,
               end,
-              value: dateBucket.doc_count,
+              value: dateBucket.total_doc.value,
             }),
           })
         ),
@@ -177,12 +196,12 @@ export async function getServiceTransactionDetailedStats({
   );
 }
 
-export async function getServiceDetailedStatsPeriods({
+export async function getServiceAggregatedDetailedStatsPeriods({
   serviceNames,
   environment,
   kuery,
   setup,
-  searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   offset,
   start,
   end,
@@ -192,28 +211,28 @@ export async function getServiceDetailedStatsPeriods({
   environment: string;
   kuery: string;
   setup: Setup;
-  searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics: boolean;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
 }) {
-  return withApmSpan('get_service_detailed_statistics', async () => {
+  return withApmSpan('get_service_aggregated_detailed_stats', async () => {
     const commonProps = {
       serviceNames,
       environment,
       kuery,
       setup,
-      searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       start,
       end,
       randomSampler,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceTransactionDetailedStats(commonProps),
+      getServiceAggregatedTransactionDetailedStats(commonProps),
       offset
-        ? getServiceTransactionDetailedStats({
+        ? getServiceAggregatedTransactionDetailedStats({
             ...commonProps,
             offset,
           })
