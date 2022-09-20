@@ -36,6 +36,7 @@ export interface BasicSettingRow {
     | 'boolean'
     | 'integer'
     | 'bytes'
+    | 'storageSize'
     | 'duration'
     | 'yaml';
   key: string;

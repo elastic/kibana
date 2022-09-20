@@ -66,6 +66,7 @@ import {
   getTSDBRollupWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
+  cloneLayer,
 } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
@@ -186,6 +187,13 @@ export function getIndexPatternDatasource({
           ...state.layers,
           [newLayerId]: blankLayer(state.currentIndexPatternId),
         },
+      };
+    },
+
+    cloneLayer(state, layerId, newLayerId, getNewId) {
+      return {
+        ...state,
+        layers: cloneLayer(state.layers, layerId, newLayerId, getNewId),
       };
     },
 
@@ -426,11 +434,16 @@ export function getIndexPatternDatasource({
     getDropProps,
     onDrop,
 
-    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+    getCustomWorkspaceRenderer: (
+      state: IndexPatternPrivateState,
+      dragging: DraggingIdentifier,
+      indexPatterns: Record<string, IndexPattern>
+    ) => {
       if (dragging.field === undefined || dragging.indexPatternId === undefined) {
         return undefined;
       }
 
+      const indexPattern = indexPatterns[dragging.indexPatternId as string];
       const draggedField = dragging as DraggingIdentifier & {
         field: IndexPatternField;
         indexPatternId: string;
@@ -446,7 +459,7 @@ export function getIndexPatternDatasource({
               <GeoFieldWorkspacePanel
                 uiActions={uiActions}
                 fieldType={geoFieldType}
-                indexPatternId={draggedField.indexPatternId}
+                indexPattern={indexPattern}
                 fieldName={draggedField.field.name}
               />
             );

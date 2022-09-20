@@ -31,6 +31,9 @@ const configSchema = schema.object({
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
     maxTraceItems: schema.number({ defaultValue: 1000 }),
   }),
+  searchAggregatedServiceMetrics: schema.boolean({
+    defaultValue: false,
+  }),
   searchAggregatedTransactions: schema.oneOf(
     [
       schema.literal(SearchAggregatedTransactionSetting.auto),
@@ -41,7 +44,6 @@ const configSchema = schema.object({
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
-  profilingEnabled: schema.boolean({ defaultValue: false }),
   agent: schema.object({
     migrations: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
@@ -107,7 +109,6 @@ export const config: PluginConfigDescriptor<APMConfig> = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
-    profilingEnabled: true,
   },
   schema: configSchema,
 };

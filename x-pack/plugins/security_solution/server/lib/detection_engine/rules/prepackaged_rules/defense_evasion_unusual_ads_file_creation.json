@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Unusual File Creation - Alternate Data Stream",
   "note": "",
-  "query": "file where event.type == \"creation\" and\n  file.path : \"C:\\\\*:*\" and\n  not file.path : \"C:\\\\*:zone.identifier*\" and\n  file.extension :\n    (\n      \"pdf\",\n      \"dll\",\n      \"png\",\n      \"exe\",\n      \"dat\",\n      \"com\",\n      \"bat\",\n      \"cmd\",\n      \"sys\",\n      \"vbs\",\n      \"ps1\",\n      \"hta\",\n      \"txt\",\n      \"vbe\",\n      \"js\",\n      \"wsh\",\n      \"docx\",\n      \"doc\",\n      \"xlsx\",\n      \"xls\",\n      \"pptx\",\n      \"ppt\",\n      \"rtf\",\n      \"gif\",\n      \"jpg\",\n      \"png\",\n      \"bmp\",\n      \"img\",\n      \"iso\"\n    )\n",
+  "query": "file where event.type == \"creation\" and\n\n  file.path : \"C:\\\\*:*\" and\n  not file.path : \"C:\\\\*:zone.identifier*\" and\n\n  not process.executable :\n          (\"?:\\\\windows\\\\System32\\\\svchost.exe\",\n           \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\w3wp.exe\",\n           \"?:\\\\Windows\\\\explorer.exe\",\n           \"?:\\\\Windows\\\\System32\\\\sihost.exe\",\n           \"?:\\\\Windows\\\\System32\\\\PickerHost.exe\",\n           \"?:\\\\Windows\\\\System32\\\\SearchProtocolHost.exe\",\n           \"?:\\\\Program Files (x86)\\\\Dropbox\\\\Client\\\\Dropbox.exe\",\n           \"?:\\\\Program Files\\\\Rivet Networks\\\\SmartByte\\\\SmartByteNetworkService.exe\",\n           \"?:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\",\n           \"?:\\\\Program Files\\\\ExpressConnect\\\\ExpressConnectNetworkService.exe\",\n           \"?:\\\\Program Files (x86)\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n           \"?:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n           \"?:\\\\Program Files\\\\Mozilla Firefox\\\\firefox.exe\") and\n\n  file.extension :\n    (\n      \"pdf\",\n      \"dll\",\n      \"png\",\n      \"exe\",\n      \"dat\",\n      \"com\",\n      \"bat\",\n      \"cmd\",\n      \"sys\",\n      \"vbs\",\n      \"ps1\",\n      \"hta\",\n      \"txt\",\n      \"vbe\",\n      \"js\",\n      \"wsh\",\n      \"docx\",\n      \"doc\",\n      \"xlsx\",\n      \"xls\",\n      \"pptx\",\n      \"ppt\",\n      \"rtf\",\n      \"gif\",\n      \"jpg\",\n      \"png\",\n      \"bmp\",\n      \"img\",\n      \"iso\"\n    )\n",
   "required_fields": [
     {
       "ecs": true,
@@ -28,6 +28,11 @@
     {
       "ecs": true,
       "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
       "type": "keyword"
     }
   ],
@@ -68,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 100
 }

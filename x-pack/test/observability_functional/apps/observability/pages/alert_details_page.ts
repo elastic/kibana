@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should show 404 page when the feature flag is disabled', async () => {
-      await observability.alerts.common.navigateToAlertDetails(uuid.v4());
+      await observability.alerts.common.navigateToAlertDetails(uuid.v4(), uuid.v4());
       await retry.waitFor(
         'Alerts page to be visible',
         async () => await testSubjects.exists('pageNotFound')

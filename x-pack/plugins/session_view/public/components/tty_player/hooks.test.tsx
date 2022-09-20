@@ -8,9 +8,13 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import { ProcessEventsPage } from '../../../common/types/process_tree';
-import { DEFAULT_TTY_FONT_SIZE, DEFAULT_TTY_PLAYSPEED_MS } from '../../../common/constants';
+import {
+  DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_PLAYSPEED_MS,
+  TTY_LINES_PER_FRAME,
+} from '../../../common/constants';
 
-const VIM_LINE_START = 19;
+const VIM_LINE_START = 22;
 
 describe('TTYPlayer/hooks', () => {
   beforeAll(() => {
@@ -72,6 +76,7 @@ describe('TTYPlayer/hooks', () => {
         lines,
         hasNextPage: false,
         fetchNextPage: () => null,
+        isFetching: false,
         fontSize: DEFAULT_TTY_FONT_SIZE,
       };
     });
@@ -127,7 +132,9 @@ describe('TTYPlayer/hooks', () => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
 
-      expect(result.current.currentLine).toBe(10);
+      const expectedLineNumber = Math.min(initialProps.lines.length - 1, TTY_LINES_PER_FRAME * 10);
+
+      expect(result.current.currentLine).toBe(expectedLineNumber);
     });
 
     it('allows the user to stop', async () => {
@@ -143,7 +150,9 @@ describe('TTYPlayer/hooks', () => {
       act(() => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
-      expect(result.current.currentLine).toBe(10); // should still be ten.
+      const expectedLineNumber = Math.min(initialProps.lines.length - 1, TTY_LINES_PER_FRAME * 10);
+
+      expect(result.current.currentLine).toBe(expectedLineNumber); // should not have advanced
     });
 
     it('should stop when it reaches the end of the array of lines', async () => {

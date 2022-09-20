@@ -18,7 +18,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { PackagePolicyServiceInterface } from '../services/package_policy';
+import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
@@ -86,6 +86,10 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
     },
+    packagePolicyService: {
+      asCurrentUser: createPackagePolicyServiceMock(),
+      asInternalUser: createPackagePolicyServiceMock(),
+    },
     epm: {
       internalSoClient: savedObjectsClientMock.create(),
     },
@@ -105,7 +109,7 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
+export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClient> => {
   return {
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
@@ -116,6 +120,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
+    bulkUpdate: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),

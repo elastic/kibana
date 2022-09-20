@@ -13,8 +13,8 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiBetaBadge,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -39,7 +39,7 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
-import { BETA, REFRESH_SESSION, OPEN_TTY_PLAYER } from './translations';
+import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.
@@ -75,6 +75,7 @@ export const SessionView = ({
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
+  const [currentJumpToOutputEntityId, setCurrentJumpToOutputEntityId] = useState('');
 
   const styles = useStyles({ height, isFullScreen });
 
@@ -112,6 +113,11 @@ export const SessionView = ({
     [sessionEntityId]
   );
 
+  const onJumpToOutput = useCallback((entityId: string) => {
+    setCurrentJumpToOutputEntityId(entityId);
+    setShowTTY(true);
+  }, []);
+
   const {
     data,
     error,
@@ -132,10 +138,15 @@ export const SessionView = ({
     refetch: refetchAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
 
+  const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } =
+    useFetchGetTotalIOBytes(sessionEntityId);
+  const hasTTYOutput = !!totalTTYOutputBytes?.total;
+
   const handleRefresh = useCallback(() => {
     refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
     refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
-  }, [refetch, refetchAlerts]);
+    refetchTotalTTYOutput();
+  }, [refetch, refetchAlerts, refetchTotalTTYOutput]);
 
   const alerts = useMemo(() => {
     let events: ProcessEvent[] = [];
@@ -161,9 +172,6 @@ export const SessionView = ({
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
   );
-
-  const { data: totalTTYOutputBytes } = useFetchGetTotalIOBytes(sessionEntityId);
-  const hasTTYOutput = !!totalTTYOutputBytes?.total;
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {
@@ -250,9 +258,6 @@ export const SessionView = ({
     <div css={styles.sessionViewerComponent}>
       <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:sessionViewProcessEventsSearch">
             <SessionViewSearchBar
               searchQuery={searchQuery}
@@ -262,6 +267,32 @@ export const SessionView = ({
               onNext={onSearchIndexChange}
             />
           </EuiFlexItem>
+
+          {hasTTYOutput && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                title={
+                  <FormattedMessage
+                    id="xpack.sessionView.ttyToggle"
+                    defaultMessage="{kb}Kb of tty output"
+                    values={{
+                      kb: Math.round(totalTTYOutputBytes.total / 1024),
+                    }}
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  isSelected={showTTY}
+                  display={showTTY ? 'fill' : 'empty'}
+                  iconType="apmTrace"
+                  onClick={onToggleTTY}
+                  size="m"
+                  aria-label={TOGGLE_TTY_PLAYER}
+                  data-test-subj="sessionView:TTYPlayerToggle"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -274,20 +305,6 @@ export const SessionView = ({
               isLoading={isFetching}
             />
           </EuiFlexItem>
-
-          {hasTTYOutput && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                isSelected={showTTY}
-                display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
-                onClick={onToggleTTY}
-                size="m"
-                aria-label={OPEN_TTY_PLAYER}
-                data-test-subj="sessionView:TTYPlayerToggle"
-              />
-            </EuiFlexItem>
-          )}
 
           <EuiFlexItem grow={false}>
             <SessionViewDisplayOptions
@@ -302,12 +319,9 @@ export const SessionView = ({
               onClick={toggleDetailPanel}
               iconType="list"
               data-test-subj="sessionView:sessionViewDetailPanelToggle"
-              fill={isDetailOpen}
+              fill={!isDetailOpen}
             >
-              <FormattedMessage
-                id="xpack.sessionView.buttonOpenDetailPanel"
-                defaultMessage="Detail panel"
-              />
+              {DETAIL_PANEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -354,6 +368,7 @@ export const SessionView = ({
                       searchQuery={searchQuery}
                       selectedProcess={selectedProcess}
                       onProcessSelected={onProcessSelected}
+                      onJumpToOutput={onJumpToOutput}
                       jumpToEntityId={currentJumpToEntityId}
                       investigatedAlertId={investigatedAlertId}
                       isFetching={isFetching}
@@ -395,14 +410,14 @@ export const SessionView = ({
           );
         }}
       </EuiResizableContainer>
-      {showTTY && (
-        <TTYPlayer
-          sessionEntityId={sessionEntityId}
-          onClose={onToggleTTY}
-          isFullscreen={isFullScreen}
-          onJumpToEvent={onJumpToEvent}
-        />
-      )}
+      <TTYPlayer
+        show={showTTY}
+        sessionEntityId={sessionEntityId}
+        onClose={onToggleTTY}
+        isFullscreen={isFullScreen}
+        onJumpToEvent={onJumpToEvent}
+        autoSeekToEntityId={currentJumpToOutputEntityId}
+      />
     </div>
   );
 };
