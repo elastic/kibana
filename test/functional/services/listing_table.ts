@@ -128,7 +128,12 @@ export class ListingTableService extends FtrService {
    * Searches for item on Landing page and retruns items count that match `ListingTitleLink-${name}` pattern
    */
   public async searchAndExpectItemsCount(appName: AppName, name: string, count: number) {
-    await this.searchForItemWithName(name);
+    // There is an issue with Selenium and the EuiHighlight, when the text is completely highlighted
+    // it is invisible to Selenium which then throws an error. We'll leave 1 char **not** highlighted
+    // to avoid this issue.
+    const nameShortened = name.substring(0, name.length - 2);
+
+    await this.searchForItemWithName(nameShortened);
     await this.retry.try(async () => {
       const links = await this.testSubjects.findAll(
         `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
@@ -161,9 +166,6 @@ export class ListingTableService extends FtrService {
    * Clicks item on Landing page by link name if it is present
    */
   public async clickItemLink(appName: AppName, name: string) {
-    // Give some time for the link to be scrolled into view
-    await this.common.sleep(500);
-
     await this.testSubjects.click(
       `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`
     );
