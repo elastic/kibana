@@ -990,7 +990,7 @@ Object {
           data-test-subj="exceptionsContainer"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero sc-qWeMO hQaFyk"
+            class="euiFlexItem euiFlexItem--flexGrowZero sc-pdOLj bmEoYE"
             data-test-subj="exceptionItemContainer"
           >
             <div
@@ -1055,7 +1055,7 @@ Object {
                     data-test-subj="exceptionItemCardMetaInfo"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero sc-ptTkw hXGmCZ"
+                      class="euiFlexItem euiFlexItem--flexGrowZero sc-qcpsZ jyXFme"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -1135,7 +1135,7 @@ Object {
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero sc-ptTkw hXGmCZ"
+                      class="euiFlexItem euiFlexItem--flexGrowZero sc-qcpsZ jyXFme"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

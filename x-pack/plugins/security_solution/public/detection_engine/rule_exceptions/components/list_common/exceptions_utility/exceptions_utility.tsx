@@ -70,7 +70,7 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
               </UtilityBarText>
               {exceptionsTitle && (
                 <UtilityBarText dataTestSubj={exceptionsTitleDataTestSubj}>
-                  <FormattedMessage id={exceptionsTitle} />
+                  {exceptionsTitle}
                 </UtilityBarText>
               )}
             </UtilityBarGroup>
