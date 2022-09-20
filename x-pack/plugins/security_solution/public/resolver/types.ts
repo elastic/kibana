@@ -307,6 +307,8 @@ export interface DataState {
     data: SafeResolverEvent | null;
   };
 
+  readonly detectedBounds?: TimeFilters;
+
   readonly tree?: {
     /**
      * The parameters passed from the resolver properties
