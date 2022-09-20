@@ -34,6 +34,7 @@ describe('duplicateRule', () => {
       outputIndex: '.siem-signals-default',
       meta: undefined,
       maxSignals: 100,
+      responseActions: [],
       relatedIntegrations: [],
       requiredFields: [],
       riskScore: 42,
