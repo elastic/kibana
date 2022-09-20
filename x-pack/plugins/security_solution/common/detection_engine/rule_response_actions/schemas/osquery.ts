@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { arrayQueries, ecsMapping } from '@kbn/osquery-plugin/common/schemas/common';
 
 export const OsqueryParams = t.intersection([
   t.type({
@@ -13,29 +14,8 @@ export const OsqueryParams = t.intersection([
   }),
   t.partial({
     query: t.union([t.string, t.undefined]),
-    ecs_mapping: t.record(
-      t.string,
-      t.partial({
-        field: t.string,
-        value: t.union([t.string, t.array(t.string)]),
-      })
-    ),
-    queries: t.array(
-      t.type({
-        id: t.string,
-        query: t.string,
-        version: t.union([t.string, t.undefined]),
-        platform: t.union([t.string, t.undefined]),
-        interval: t.union([t.number, t.undefined]),
-        ecs_mapping: t.record(
-          t.string,
-          t.partial({
-            field: t.string,
-            value: t.union([t.string, t.array(t.string)]),
-          })
-        ),
-      })
-    ),
+    ecs_mapping: ecsMapping,
+    queries: arrayQueries,
     packId: t.union([t.string, t.undefined]),
     savedQueryId: t.union([t.string, t.undefined]),
   }),
