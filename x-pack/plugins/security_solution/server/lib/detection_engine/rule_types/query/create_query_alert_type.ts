@@ -12,12 +12,14 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
+
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateQueryRuleOptions
 ): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction, licensing } =
+    createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -66,7 +68,6 @@ export const createQueryAlertType = (
           runtimeMappings,
           completeRule,
           tuple,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           searchAfterSize,
@@ -74,15 +75,15 @@ export const createQueryAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          unprocessedExceptions,
+          exceptionFilter,
         },
         services,
         state,
       } = execOptions;
-
       const result = await queryExecutor({
         completeRule,
         tuple,
-        exceptionItems,
         listClient,
         experimentalFeatures,
         ruleExecutionLogger,
@@ -96,6 +97,10 @@ export const createQueryAlertType = (
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        unprocessedExceptions,
+        exceptionFilter,
+        osqueryCreateAction,
+        licensing,
       });
       return { ...result, state };
     },

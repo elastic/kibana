@@ -11,6 +11,7 @@ import {
   Locations,
   LocationStatus,
   ProjectBrowserMonitor,
+  PrivateLocation,
 } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from './browser';
@@ -42,11 +43,12 @@ describe('browser normalizers', () => {
         status: LocationStatus.GA,
       },
     ];
-    const privateLocations: Locations = [
+    const privateLocations: PrivateLocation[] = [
       {
         id: 'germany',
         label: 'Germany',
-        isServiceManaged: false,
+        concurrentMonitors: 1,
+        agentPolicyId: 'germany',
       },
     ];
     const monitors: ProjectBrowserMonitor[] = [
@@ -234,11 +236,7 @@ describe('browser normalizers', () => {
               url: 'test-url',
               status: 'ga',
             },
-            {
-              id: 'germany',
-              isServiceManaged: false,
-              label: 'Germany',
-            },
+            privateLocations[0],
           ],
           name: 'test-name-3',
           params: JSON.stringify(params),
