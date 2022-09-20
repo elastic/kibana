@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -54,12 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await PageObjects.banners.getTopBannerText()).to.eql('global_banner_text');
     });
 
-    // Reference: https://github.com/elastic/kibana/pull/135783#issuecomment-1178178075
-    // TLDR: No banner on login page.
-    // Bugs Filed:
-    // https://github.com/elastic/kibana/issues/140307
-    // https://github.com/elastic/kibana/issues/140309
-    it.skip('displays the global banner on the login page', async () => {
+    it('displays the global banner on the login page', async () => {
       await PageObjects.security.forceLogout();
       await PageObjects.common.navigateToApp('login');
 
