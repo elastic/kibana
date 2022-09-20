@@ -8,6 +8,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -80,6 +81,19 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
 
   const error = findingsGroupByResource.error || baseEsQuery.error;
 
+  const handleDistributionClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: getFilters({
+        filters: urlQuery.filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
+
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -108,6 +122,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
             <FindingsDistributionBar
               {...{
+                distributionOnClick: handleDistributionClick,
                 type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
                   defaultMessage: 'Resources',
                 }),
