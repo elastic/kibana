@@ -31,9 +31,12 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
         const hits: FindDashboardSavedObjectsResponse['hits'] = [];
         for (let i = 0; i < sizeToUse; i++) {
           hits.push({
+            type: 'dashboard',
             id: `dashboard${i}`,
-            title: `dashboard${i} - ${search} - title`,
-            description: `dashboard${i} desc`,
+            attributes: {
+              description: `dashboard${i} desc`,
+              title: `dashboard${i} - ${search} - title`,
+            },
           } as FindDashboardSavedObjectsResponse['hits'][0]);
         }
         return Promise.resolve({

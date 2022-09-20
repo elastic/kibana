@@ -98,7 +98,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -110,14 +115,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('emptyDashboardWidget', {
           timeout: config.get('timeouts.waitFor'),
         });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -287,7 +302,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -295,17 +315,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -390,7 +425,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
@@ -400,7 +440,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
@@ -483,7 +528,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          },
+        });
         await PageObjects.error.expectForbidden();
       });
 

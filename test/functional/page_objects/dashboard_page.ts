@@ -453,7 +453,7 @@ export class DashboardPageObject extends FtrService {
     args,
   }: {
     args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
-  }) {
+  } = {}) {
     await this.common.navigateToActualUrl('dashboard', '/list', args);
   }
 
