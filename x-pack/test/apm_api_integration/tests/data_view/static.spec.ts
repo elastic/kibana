@@ -9,9 +9,9 @@ import { apm, ApmSynthtraceEsClient, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { DataView } from '@kbn/data-views-plugin/common';
+import request from 'superagent';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
-import request from 'superagent';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -37,7 +37,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   function getDataView({ space }: { space: string }) {
     const spacePrefix = space !== 'default' ? `/s/${space}` : '';
-    console.log({ spacePrefix });
     return supertest.get(
       `${spacePrefix}/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`
     );
