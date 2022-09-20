@@ -15,7 +15,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import _, { cloneDeep, each, reject } from 'lodash';
+import { cloneDeep, each, reject } from 'lodash';
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
