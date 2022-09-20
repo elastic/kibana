@@ -769,9 +769,15 @@ class AgentPolicyService {
         .map((fleetServerPolicy) =>
           // There are some potential performance concerns around using `agentPolicyService.update` in this context.
           // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-          agentPolicyService.update(soClient, esClient, fleetServerPolicy.policy_id, {
-            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-          })
+          agentPolicyService.update(
+            soClient,
+            esClient,
+            fleetServerPolicy.policy_id,
+            {
+              schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+            },
+            { force: true }
+          )
         )
     );
   }
