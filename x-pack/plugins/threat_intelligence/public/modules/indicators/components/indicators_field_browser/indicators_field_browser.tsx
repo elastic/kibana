@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { VFC } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 

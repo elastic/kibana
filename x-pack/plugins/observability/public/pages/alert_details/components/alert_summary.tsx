@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPanel,
-  EuiTitle
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
@@ -113,8 +106,7 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 </h5>
               </EuiTitle>
               <div>
-                <EuiSpacer size="s" />
-                -
+                <EuiSpacer size="s" />-
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -128,7 +120,9 @@ export function AlertSummary({ alert }: PageHeaderProps) {
               </EuiTitle>
               <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
-                {moment(alert?.fields['kibana.alert.start']?.toString()).format(DEFAULT_DATE_FORMAT)}
+                {moment(alert?.fields['kibana.alert.start']?.toString()).format(
+                  DEFAULT_DATE_FORMAT
+                )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

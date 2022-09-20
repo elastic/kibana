@@ -46,7 +46,8 @@ const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
-describe('AllCases', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/139677
+describe.skip('AllCases', () => {
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
@@ -229,6 +230,13 @@ describe('AllCases', () => {
       expect(
         wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
       ).toBeFalsy();
+    });
+  });
+
+  it('should render the case callouts', async () => {
+    const result = appMockRender.render(<AllCases />);
+    await waitFor(() => {
+      expect(result.getByTestId('case-callouts')).toBeInTheDocument();
     });
   });
 });

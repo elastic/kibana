@@ -11,7 +11,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { usePluginContext } from './use_plugin_context';
 import { TopAlert, parseAlert } from '../pages/alerts';
-import { ObservabilityRuleTypeRegistry } from '../';
+import { ObservabilityRuleTypeRegistry } from '..';
 import { useDataFetcher } from './use_data_fetcher';
 
 interface AlertDetailParams {

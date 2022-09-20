@@ -22,35 +22,58 @@ export const ActionsLogFilters = memo(
   ({
     dateRangePickerState,
     isDataLoading,
+    isFlyout,
     onClick,
+    onChangeHostsFilter,
     onChangeCommandsFilter,
     onChangeStatusesFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
+    showHostsFilter,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
+    isFlyout: boolean;
+    onChangeHostsFilter: (selectedCommands: string[]) => void;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
+    showHostsFilter: boolean;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
     const filters = useMemo(() => {
-      // TODO: add more filter names here (users, hosts, statuses)
       return (
         <>
-          <ActionsLogFilter filterName={'actions'} onChangeFilterOptions={onChangeCommandsFilter} />
+          {showHostsFilter && (
+            <ActionsLogFilter
+              filterName={'hosts'}
+              isFlyout={isFlyout}
+              onChangeFilterOptions={onChangeHostsFilter}
+            />
+          )}
+          <ActionsLogFilter
+            filterName={'actions'}
+            isFlyout={isFlyout}
+            onChangeFilterOptions={onChangeCommandsFilter}
+          />
           <ActionsLogFilter
             filterName={'statuses'}
+            isFlyout={isFlyout}
             onChangeFilterOptions={onChangeStatusesFilter}
           />
         </>
       );
-    }, [onChangeCommandsFilter, onChangeStatusesFilter]);
+    }, [
+      isFlyout,
+      onChangeCommandsFilter,
+      onChangeHostsFilter,
+      onChangeStatusesFilter,
+      showHostsFilter,
+    ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
@@ -63,6 +86,7 @@ export const ActionsLogFilters = memo(
           <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
+            isFlyout={isFlyout}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
