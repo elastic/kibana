@@ -18,6 +18,7 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 import type { ChangePoint, NumericChartData, NumericHistogramField } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import {
   addChangePointsAction,
@@ -341,27 +342,40 @@ export const defineExplainLogRateSpikesRoute = (
           });
 
           changePointGroups.push(
-            ...missingChangePoints.map((cp) => {
+            ...missingChangePoints.map(({ fieldName, fieldValue, doc_count: docCount, pValue }) => {
               const duplicates = groupedChangePoints.find((d) =>
-                d.group.some(
-                  (dg) => dg.fieldName === cp.fieldName && dg.fieldValue === cp.fieldValue
-                )
+                d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
               );
               if (duplicates !== undefined) {
                 return {
+                  id: `${stringHash(
+                    JSON.stringify(
+                      duplicates.group.map((d) => ({
+                        fieldName: d.fieldName,
+                        fieldValue: d.fieldValue,
+                      }))
+                    )
+                  )}`,
                   group: duplicates.group.map((d) => ({
                     fieldName: d.fieldName,
                     fieldValue: d.fieldValue,
                     duplicate: false,
                   })),
-                  docCount: cp.doc_count,
-                  pValue: cp.pValue,
+                  docCount,
+                  pValue,
                 };
               } else {
                 return {
-                  group: [{ fieldName: cp.fieldName, fieldValue: cp.fieldValue, duplicate: false }],
-                  docCount: cp.doc_count,
-                  pValue: cp.pValue,
+                  id: `${stringHash(JSON.stringify({ fieldName, fieldValue }))}`,
+                  group: [
+                    {
+                      fieldName,
+                      fieldValue,
+                      duplicate: false,
+                    },
+                  ],
+                  docCount,
+                  pValue,
                 };
               }
             })
