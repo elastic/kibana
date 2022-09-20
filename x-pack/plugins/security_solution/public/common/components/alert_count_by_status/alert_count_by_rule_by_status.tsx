@@ -15,21 +15,24 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { SecurityPageName } from '../../../../common/constants';
 import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useQueryToggle } from '../../containers/query_toggle';
-import { NavigateTo, GetAppUrl, useNavigation } from '../../lib/kibana';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../inspect';
 import { LastUpdatedAt } from '../last_updated_at';
+import { SecuritySolutionLinkAnchor } from '../links';
 import { useLocalStorage } from '../local_storage';
 import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
-interface AlertCountByStatusProps {
+interface EntityFilter {
   field: string;
   value: string;
+}
+interface AlertCountByStatusProps {
+  entityFilter: EntityFilter;
   signalIndexName: string | null;
 }
 
@@ -37,18 +40,12 @@ interface StatusSelection {
   [fieldName: string]: Status[];
 }
 
-type GetTableColumns = ({
-  getAppUrl,
-  navigateTo,
-  openRuleInTimelineWithAdditionalFields,
-}: {
-  getAppUrl: GetAppUrl;
-  navigateTo: NavigateTo;
-  openRuleInTimelineWithAdditionalFields: (ruleName: string) => void;
-}) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
+type GetTableColumns = (
+  openRuleInTimelineWithAdditionalFields: (ruleName: string) => void
+) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
 
 const KIBANA_RULE_ALERT_FIELD = 'kibana.alert.rule.name';
-const statuses = ['open', 'acknowledged', 'closed'];
+const STATUSES = ['open', 'acknowledged', 'closed'] as const;
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
 const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
 
@@ -61,20 +58,18 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
-  ({ field, value, signalIndexName }: AlertCountByStatusProps) => {
+  ({ entityFilter, signalIndexName }: AlertCountByStatusProps) => {
+    const { field, value } = entityFilter;
+
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
-    const { getAppUrl, navigateTo } = useNavigation();
     const { openEntityInTimeline } = useNavigateToTimeline();
     const columns = useMemo(() => {
       const openRuleInTimelineWithAdditionalFields = (ruleName: string) =>
-        openEntityInTimeline([
-          { field: KIBANA_RULE_ALERT_FIELD, value: ruleName },
-          { field, value },
-        ]);
-      return getTableColumns({ getAppUrl, navigateTo, openRuleInTimelineWithAdditionalFields });
-    }, [field, value, openEntityInTimeline]);
+        openEntityInTimeline([{ field: KIBANA_RULE_ALERT_FIELD, value: ruleName }, entityFilter]);
+      return getTableColumns(openRuleInTimelineWithAdditionalFields);
+    }, [entityFilter, openEntityInTimeline]);
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
@@ -119,7 +114,7 @@ export const AlertCountByRuleByStatus = React.memo(
             >
               <MultiSelectPopover
                 title={i18n.Status}
-                allItems={statuses}
+                allItems={STATUSES}
                 selectedItems={selectedStatusesByField[field] || ['open']}
                 onSelectedItemsChange={(selectedItems) =>
                   updateSelection(selectedItems as Status[])
@@ -150,11 +145,7 @@ export const AlertCountByRuleByStatus = React.memo(
 
 AlertCountByRuleByStatus.displayName = 'AlertCountByStatus';
 
-export const getTableColumns: GetTableColumns = ({
-  getAppUrl,
-  navigateTo,
-  openRuleInTimelineWithAdditionalFields,
-}) => [
+export const getTableColumns: GetTableColumns = (openRuleInTimelineWithAdditionalFields) => [
   {
     field: 'ruleName',
     name: i18n.COLUMN_HEADER_RULE_NAME,
@@ -162,31 +153,22 @@ export const getTableColumns: GetTableColumns = ({
     align: 'left',
     width: '67%',
     sortable: false,
-    render: (ruleName: string, { uuid }) => {
-      const url = getAppUrl({ deepLinkId: SecurityPageName.rules, path: `id/${uuid}` });
-      return (
-        <EuiToolTip
-          data-test-subj={`${ruleName}-tooltip`}
-          title={i18n.TOOLTIP_TITLE}
-          content={ruleName}
-          anchorClassName="eui-textTruncate"
+    render: (ruleName: string, { uuid }) => (
+      <EuiToolTip
+        data-test-subj={`${ruleName}-tooltip`}
+        title={i18n.TOOLTIP_TITLE}
+        content={ruleName}
+        anchorClassName="eui-textTruncate"
+      >
+        <SecuritySolutionLinkAnchor
+          data-test-subj="severityRuleAlertsTable-name"
+          deepLinkId={SecurityPageName.rules}
+          path={`id/${uuid}`}
         >
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiLink
-            data-test-subj="severityRuleAlertsTable-name"
-            href={url}
-            onClick={(ev?: React.MouseEvent) => {
-              if (ev) {
-                ev.preventDefault();
-              }
-              navigateTo({ url });
-            }}
-          >
-            {ruleName}
-          </EuiLink>
-        </EuiToolTip>
-      );
-    },
+          {ruleName}
+        </SecuritySolutionLinkAnchor>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'count',

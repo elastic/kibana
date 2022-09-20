@@ -31,11 +31,7 @@ export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, update
     ) : (
       <EuiFlexItem grow={false}>
         <>{UPDATED} </>
-        <FormattedRelative
-          data-test-subj="last-updated-at-date"
-          key={`formattedRelative-${Date.now()}`}
-          value={new Date(updatedAt)}
-        />
+        <FormattedRelative data-test-subj="last-updated-at-date" value={new Date(updatedAt)} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

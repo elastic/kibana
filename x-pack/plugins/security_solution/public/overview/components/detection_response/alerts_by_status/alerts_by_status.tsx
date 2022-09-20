@@ -78,7 +78,7 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
       href: entityFilter ? undefined : href,
       onClick: entityFilter ? () => openEntityInTimeline([entityFilter]) : goToAlerts,
     }),
-    [goToAlerts, entityFilter]
+    [entityFilter, href, goToAlerts, openEntityInTimeline]
   );
 
   const {

@@ -11,9 +11,9 @@ import { useParams } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
@@ -207,7 +207,10 @@ const NetworkDetailsComponent: React.FC = () => {
                     <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <AlertCountByRuleByStatus {...entityFilter} signalIndexName={signalIndexName} />
+                    <AlertCountByRuleByStatus
+                      entityFilter={entityFilter}
+                      signalIndexName={signalIndexName}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer />

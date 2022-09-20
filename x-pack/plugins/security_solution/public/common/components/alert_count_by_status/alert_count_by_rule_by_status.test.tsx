@@ -39,8 +39,10 @@ const renderComponent = () =>
   render(
     <TestProviders>
       <AlertCountByRuleByStatus
-        field={'host.hostname'}
-        value={'some_host_name'}
+        entityFilter={{
+          field: 'host.hostname',
+          value: 'some_host_name',
+        }}
         signalIndexName={''}
       />
     </TestProviders>

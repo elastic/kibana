@@ -48,14 +48,17 @@ export const useNavigateToTimeline = () => {
   };
 
   const openEntityInTimeline = (entityFilters: [Filter, ...Filter[]]) => {
-    const mainFilter = entityFilters.shift()!;
-    const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+    const mainFilter = entityFilters.shift();
 
-    for (const filter of entityFilters) {
-      dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+    if (mainFilter) {
+      const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+
+      for (const filter of entityFilters) {
+        dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+      }
+
+      navigateToTimeline(dataProvider);
     }
-
-    navigateToTimeline(dataProvider);
   };
 
   // TODO: Replace the usage of functions with openEntityInTimeline

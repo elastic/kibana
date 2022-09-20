@@ -12,7 +12,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export interface MultiSelectPopoverProps {
   title: string;
-  allItems: string[];
+  allItems: readonly string[];
   selectedItems: string[];
   onSelectedItemsChange: (newItems: string[]) => void;
 }
