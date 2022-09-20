@@ -26,19 +26,19 @@
 
 import './index.scss';
 
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type {
+export type { DocLinksStart } from '@kbn/core-doc-links-browser';
+export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+export type { I18nStart } from '@kbn/core-i18n-browser';
+export type {
   FatalErrorsSetup,
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
-import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import type {
+export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type { Capabilities } from '@kbn/core-capabilities-common';
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
@@ -59,19 +59,17 @@ import type {
   ChromeUserBanner,
   ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
-import type {
-  Plugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginOpaqueId,
-} from './plugins';
+export type { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
-export type { CoreSystem } from './core_system';
-export type { AppCategory } from '../types';
+export {
+  DEFAULT_APP_CATEGORIES,
+  APP_WRAPPER_CLASS,
+  type AppCategory,
+} from '@kbn/core-application-common';
 export type {
   UiSettingsParams,
   PublicUiSettingsParams,
@@ -222,43 +220,6 @@ export type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-browser';
 
-export type {
-  Capabilities,
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeHelpExtension,
-  ChromeHelpMenuActions,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
-  ChromeNavLink,
-  ChromeNavLinks,
-  ChromeDocTitle,
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-  ChromeUserBanner,
-  ChromeStart,
-  DocLinksStart,
-  FatalErrorInfo,
-  FatalErrorsSetup,
-  FatalErrorsStart,
-  HttpSetup,
-  HttpStart,
-  I18nStart,
-  NotificationsSetup,
-  NotificationsStart,
-  Plugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  SavedObjectsStart,
-  PluginOpaqueId,
-  IUiSettingsClient,
-  UiSettingsState,
-};
+export type { CoreSystem } from './core_system';
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';
