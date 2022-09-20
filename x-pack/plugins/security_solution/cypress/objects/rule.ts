@@ -52,18 +52,18 @@ export interface CustomRule {
   description: string;
   dataSource: RuleDataSource;
   interval?: string;
-  severity: string;
-  riskScore: string;
-  tags: string[];
+  severity?: string;
+  riskScore?: string;
+  tags?: string[];
   timelineTemplate?: string;
-  referenceUrls: string[];
-  falsePositivesExamples: string[];
-  mitre: Mitre[];
-  note: string;
-  runsEvery: Interval;
-  lookBack: Interval;
-  timeline: CompleteTimeline;
-  maxSignals: number;
+  referenceUrls?: string[];
+  falsePositivesExamples?: string[];
+  mitre?: Mitre[];
+  note?: string;
+  runsEvery?: Interval;
+  lookBack?: Interval;
+  timeline?: CompleteTimeline;
+  maxSignals?: number;
   buildingBlockType?: string;
   exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
   actions?: Actions;
@@ -236,6 +236,15 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+});
+
+export const getSimpleRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
 });
 
 export const getBuildingBlockRule = (): CustomRule => ({
@@ -496,7 +505,7 @@ export const getEditedRule = (): CustomRule => ({
   ...getExistingRule(),
   severity: 'Medium',
   description: 'Edited Rule description',
-  tags: [...getExistingRule().tags, 'edited'],
+  tags: [...(getExistingRule().tags || []), 'edited'],
 });
 
 export const expectedExportedRule = (

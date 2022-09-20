@@ -6,11 +6,10 @@
  */
 
 import { getIndexConnector } from '../../objects/connector';
-import { getNewRule } from '../../objects/rule';
+import { getSimpleRule } from '../../objects/rule';
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createEmptyDocument, createIndex, deleteIndex } from '../../tasks/api_calls';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import {
   cleanKibana,
   deleteAlertsAndRules,
@@ -21,7 +20,7 @@ import {
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillDefineCustomRuleAndContinue,
   fillRuleAction,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
@@ -48,39 +47,30 @@ describe('Rule actions', () => {
   });
 
   const rule = {
-    ...getNewRule(),
+    ...getSimpleRule(),
     actions: { interval: 'rule', connectors: [INDEX_CONNECTOR] },
   };
 
   beforeEach(() => {
     deleteAlertsAndRules();
     deleteConnectors();
-    createTimeline(rule.timeline).then((response) => {
-      cy.wrap({
-        ...rule,
-        timeline: {
-          ...rule.timeline,
-          id: response.body.data.persistTimeline.timeline.savedObjectId,
-        },
-      }).as('rule');
-    });
   });
 
   it('Creates a custom query rule with an index action ', function () {
     visit(RULE_CREATION);
-    fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
-    fillAboutRuleAndContinue(this.rule);
-    fillScheduleRuleAndContinue(this.rule);
-    fillRuleAction(this.rule);
+    fillDefineCustomRuleAndContinue(rule);
+    fillAboutRuleAndContinue(rule);
+    fillScheduleRuleAndContinue(rule);
+    fillRuleAction(rule);
     createAndEnableRule();
     goToRuleDetails();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    const expectedJson = JSON.parse(this.rule.actions.connectors[0].document);
+    const expectedJson = JSON.parse(rule.actions.connectors[0].document);
     cy.request({
       method: 'GET',
-      url: `${Cypress.env('ELASTICSEARCH_URL')}/${this.rule.actions.connectors[0].index}/_search`,
+      url: `${Cypress.env('ELASTICSEARCH_URL')}/${rule.actions.connectors[0].index}/_search`,
       headers: { 'kbn-xsrf': 'cypress-creds' },
     }).then((response) => {
       expect(response.body.hits.hits[1]._source).to.have.property(
