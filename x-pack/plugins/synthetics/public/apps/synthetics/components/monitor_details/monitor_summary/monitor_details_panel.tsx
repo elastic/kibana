@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -14,12 +15,12 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingContent,
+  useEuiTheme,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { MonitorTags } from './monitor_tags';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
@@ -28,6 +29,7 @@ import { getMonitorAction, selectLatestPing } from '../../../state';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const MonitorDetailsPanel = () => {
+  const { euiTheme } = useEuiTheme();
   const latestPing = useSelector(selectLatestPing);
 
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -43,8 +45,15 @@ export const MonitorDetailsPanel = () => {
     return <EuiLoadingContent lines={6} />;
   }
 
+  const wrapperStyle = css`
+    .euiDescriptionList.euiDescriptionList--column > *,
+    .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
+      margin-top: ${euiTheme.size.s};
+    }
+  `;
+
   return (
-    <Wrapper>
+    <div css={wrapperStyle}>
       <EuiSpacer size="s" />
       <EuiDescriptionList type="responsiveColumn" compressed={true}>
         <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
@@ -81,16 +90,9 @@ export const MonitorDetailsPanel = () => {
           {monitor && <MonitorTags tags={monitor[ConfigKey.TAGS]} />}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
-    </Wrapper>
+    </div>
   );
 };
-
-const Wrapper = euiStyled.div`
-  .euiDescriptionList.euiDescriptionList--column > *,
-  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
-    margin-top: ${(props) => props.theme.eui.euiSizeS};
-  }
-`;
 
 const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.management.monitorList.frequency', {
   defaultMessage: 'Frequency',

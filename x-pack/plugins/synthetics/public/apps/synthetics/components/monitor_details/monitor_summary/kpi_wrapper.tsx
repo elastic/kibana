@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
-export const KpiWrapper = euiStyled.div`
-  & .euiLoadingSpinner {
-    margin: ${({ theme }) => theme.eui.euiSizeS};
-  }
+export const KpiWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
 
-  & .legacyMtrVis__container > div {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`;
+  const wrapperStyle = css`
+    border: none;
+    & > span.euiLoadingSpinner {
+      margin: ${euiTheme.size.s};
+    }
+
+    .legacyMtrVis__container > div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  `;
+
+  return <div css={wrapperStyle}>{children}</div>;
+};
