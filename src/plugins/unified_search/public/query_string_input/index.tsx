@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
 

@@ -10,22 +10,22 @@ import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataView } from '@kbn/data-plugin/common';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { STACK_ALERTS_FEATURE_ID } from '../../../../common/constants';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
-import { GeoContainmentAlertParams } from '../types';
+import type { GeoContainmentAlertParams } from '../types';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
