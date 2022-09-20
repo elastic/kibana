@@ -51,7 +51,7 @@ const viewInDiscoverMessage = i18n.translate(
 );
 
 export interface GroupTableItem {
-  id: number;
+  id: string;
   docCount: number;
   pValue: number | null;
   group: Record<string, string | number>;
