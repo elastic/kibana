@@ -142,6 +142,11 @@ export const SessionView = ({
   const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } =
     useFetchGetTotalIOBytes(sessionEntityId);
   const hasTTYOutput = !!totalTTYOutputBytes?.total;
+  const bytesOfOutput = useMemo(() => {
+    const { unit, value } = byteSize(totalTTYOutputBytes?.total || 0);
+
+    return { unit, value };
+  }, [totalTTYOutputBytes?.total]);
 
   const handleRefresh = useCallback(() => {
     refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
@@ -275,9 +280,7 @@ export const SessionView = ({
                 <FormattedMessage
                   id="xpack.sessionView.ttyToggle"
                   defaultMessage="{value} {unit} of TTY output"
-                  values={{
-                    ...byteSize(totalTTYOutputBytes?.total),
-                  }}
+                  values={bytesOfOutput}
                 />
               }
             >
