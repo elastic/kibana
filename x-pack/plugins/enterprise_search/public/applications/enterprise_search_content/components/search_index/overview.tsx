@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -30,6 +30,24 @@ export const SearchIndexOverview: React.FC = () => {
   return (
     <>
       <EuiSpacer />
+      {isConnectorIndex(indexData) && indexData.connector.error && (
+        <>
+          <EuiCallOut
+            iconType="alert"
+            color="danger"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndex.connectorErrorCallOut.title',
+              {
+                defaultMessage: 'Your connector has reported an error',
+              }
+            )}
+          >
+            <EuiSpacer size="s" />
+            <EuiText size="s">{indexData.connector.error}</EuiText>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       {isCrawlerIndex(indexData) ? (
         <CrawlerTotalStats />
       ) : (
