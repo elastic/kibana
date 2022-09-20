@@ -12,7 +12,16 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution/public/common',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/security_solution/public/common/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/security_solution/public/common/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/plugins/security_solution/public/common/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/plugins/security_solution/public/common/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
+    '!<rootDir>/x-pack/plugins/security_solution/public/common/*mock*.{ts,tsx}',
+    '!<rootDir>/x-pack/plugins/security_solution/public/common/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/plugins/security_solution/public/common/*.d.ts',
+    '!<rootDir>/x-pack/plugins/security_solution/public/common/index.{js,ts,tsx}',
+  ],
+
   // See: https://github.com/elastic/kibana/issues/117255, the moduleNameMapper creates mocks to avoid memory leaks from kibana core.
   moduleNameMapper: {
     'core/server$': '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/core.mock.ts',
