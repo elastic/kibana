@@ -74,7 +74,7 @@ export const createMlInferencePipeline = async (
   destinationField: string,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
-  const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
+  const inferencePipelineGeneratedName = `ml-inference-${formatPipelineName(pipelineName)}`;
 
   // Check that a pipeline with the same name doesn't already exist
   let pipelineByName: IngestGetPipelineResponse | undefined;
@@ -170,3 +170,9 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
     addedToParentPipeline: true,
   });
 };
+
+const formatPipelineName = (rawName: string) =>
+  rawName
+    .trim()
+    .replace(/ /g, '_') // Convert spaces to underscores
+    .toLowerCase();
