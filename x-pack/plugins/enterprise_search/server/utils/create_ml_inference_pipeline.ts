@@ -175,9 +175,3 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
     addedToParentPipeline: true,
   });
 };
-
-const formatPipelineName = (rawName: string) =>
-  rawName
-    .trim()
-    .replace(/ /g, '_') // Convert spaces to underscores
-    .toLowerCase();
