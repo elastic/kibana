@@ -30,8 +30,9 @@ import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
+import { MiniHistogram } from '../mini_histogram';
 
+import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { SpikeAnalysisTable } from './spike_analysis_table';
 
 const NARROW_COLUMN_WIDTH = '120px';
@@ -50,11 +51,12 @@ const viewInDiscoverMessage = i18n.translate(
 );
 
 interface GroupTableItem {
-  id: number;
+  id: string;
   docCount: number;
   pValue: number | null;
   group: Record<string, string | number>;
   repeatedValues: Record<string, string | number>;
+  histogram: ChangePoint['histogram'];
 }
 
 interface SpikeAnalysisTableProps {
@@ -278,6 +280,44 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       valign: 'top',
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnLogRate',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
+            {
+              defaultMessage:
+                'A visual representation of the impact of the field on the message rate difference',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateLabel"
+              defaultMessage="Log rate"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (_, { histogram, id }) => (
+        <MiniHistogram
+          chartData={histogram}
+          isLoading={loading && histogram === undefined}
+          label={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel',
+            {
+              defaultMessage: 'Group',
+            }
+          )}
+        />
+      ),
+      sortable: false,
+    },
+    {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
       width: NARROW_COLUMN_WIDTH,
       field: 'docCount',
@@ -421,6 +461,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       compressed
       columns={columns}
       items={pageOfItems}
+      itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
       pagination={pagination}
