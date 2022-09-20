@@ -7,10 +7,10 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import type { DiscoveredPlugin, PluginOpaqueId } from '../../server';
+import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
 import { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
-import { CoreStart, CoreSetup } from '..';
 
 /**
  * The interface that should be returned by a `PluginInitializer`.

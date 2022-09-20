@@ -8,7 +8,7 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
-import { DiscoveredPlugin, PluginType } from '../../server';
+import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
 

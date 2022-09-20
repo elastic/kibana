@@ -7,12 +7,12 @@
  */
 
 import { omit } from 'lodash';
+import type { PackageInfo, EnvironmentMode } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-import type { DiscoveredPlugin } from '../../server';
-import type { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
+import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '..';
 
 /**
  * The available core services passed to a `PluginInitializer`
