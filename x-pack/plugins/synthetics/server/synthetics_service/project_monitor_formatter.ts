@@ -13,8 +13,8 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { deleteMonitor } from '../routes/monitor_cruds/delete_monitor';
 import { syncNewMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
+import { deleteMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
@@ -24,6 +24,8 @@ import {
   ServiceLocationErrors,
   ProjectBrowserMonitor,
   Locations,
+  SyntheticsMonitor,
+  MonitorFields,
   PrivateLocation,
 } from '../../common/runtime_types';
 import {
@@ -377,19 +379,93 @@ export class ProjectMonitorFormatter {
 
   private handleStaleMonitors = async () => {
     try {
-      const staleMonitorsData = Object.values(this.staleMonitorsMap).filter(
+      const staleMonitorsList = Object.values(this.staleMonitorsMap).filter(
         (monitor) => monitor.stale === true
       );
 
-      for (const staleMonitor of staleMonitorsData) {
-        if (!this.keepStale) {
-          await this.deleteStaleMonitor({
-            monitorId: staleMonitor.savedObjectId,
-            journeyId: staleMonitor.journeyId,
+      const encryptedMonitors = await this.savedObjectsClient.bulkGet<SyntheticsMonitor>(
+        staleMonitorsList.map((staleMonitor) => ({
+          id: staleMonitor.savedObjectId,
+          type: syntheticsMonitorType,
+        }))
+      );
+
+      let monitors = encryptedMonitors.saved_objects;
+
+      const hasPrivateMonitor = monitors.some((monitor) =>
+        monitor.attributes.locations.some((location) => !location.isServiceManaged)
+      );
+
+      if (hasPrivateMonitor) {
+        const {
+          integrations: { writeIntegrationPolicies },
+        } = await this.server.fleet.authz.fromRequest(this.request);
+        if (!writeIntegrationPolicies) {
+          monitors = monitors.filter((monitor) => {
+            const hasPrivateLocation = monitor.attributes.locations.some(
+              (location) => !location.isServiceManaged
+            );
+            if (hasPrivateLocation) {
+              const journeyId = (monitor.attributes as MonitorFields)[ConfigKey.JOURNEY_ID]!;
+              const monitorName = (monitor.attributes as MonitorFields)[ConfigKey.NAME]!;
+              this.handleStreamingMessage({
+                message: `Monitor ${journeyId} could not be deleted`,
+              });
+              this.failedStaleMonitors.push({
+                id: journeyId,
+                reason: 'Failed to delete stale monitor',
+                details: `Unable to delete Synthetics package policy for monitor ${monitorName}. Fleet write permissions are needed to use Synthetics private locations.`,
+              });
+            }
+            return !hasPrivateLocation;
           });
-        } else {
-          this.staleMonitors.push(staleMonitor.journeyId);
-          return null;
+        }
+      }
+
+      const chunkSize = 100;
+      for (let i = 0; i < monitors.length; i += chunkSize) {
+        const chunkMonitors = monitors.slice(i, i + chunkSize);
+        try {
+          if (!this.keepStale) {
+            await deleteMonitorBulk({
+              monitors: chunkMonitors,
+              savedObjectsClient: this.savedObjectsClient,
+              server: this.server,
+              syntheticsMonitorClient: this.syntheticsMonitorClient,
+              request: this.request,
+            });
+
+            for (const sm of chunkMonitors) {
+              const journeyId = (sm.attributes as MonitorFields)[ConfigKey.JOURNEY_ID]!;
+
+              this.deletedMonitors.push(journeyId);
+              this.handleStreamingMessage({
+                message: `Monitor ${journeyId} deleted successfully`,
+              });
+            }
+          } else {
+            chunkMonitors.forEach((sm) => {
+              const journeyId = (sm.attributes as MonitorFields)[ConfigKey.JOURNEY_ID]!;
+              this.staleMonitors.push(journeyId);
+            });
+          }
+        } catch (e) {
+          chunkMonitors.forEach((sm) => {
+            const journeyId = (sm.attributes as MonitorFields)[ConfigKey.JOURNEY_ID]!;
+
+            this.handleStreamingMessage({
+              message: `Monitor ${journeyId} could not be deleted`,
+            });
+            this.failedStaleMonitors.push({
+              id: journeyId,
+              reason: 'Failed to delete stale monitor',
+              details: e.message,
+              payload: staleMonitorsList.find(
+                (staleMonitor) => staleMonitor.savedObjectId === sm.id
+              ),
+            });
+          });
+          this.server.logger.error(e);
         }
       }
     } catch (e) {
@@ -397,34 +473,7 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  private deleteStaleMonitor = async ({
-    monitorId,
-    journeyId,
-  }: {
-    monitorId: string;
-    journeyId: string;
-  }) => {
-    try {
-      await deleteMonitor({
-        savedObjectsClient: this.savedObjectsClient,
-        server: this.server,
-        monitorId,
-        syntheticsMonitorClient: this.syntheticsMonitorClient,
-        request: this.request,
-      });
-      this.deletedMonitors.push(journeyId);
-      this.handleStreamingMessage({ message: `Monitor ${journeyId} deleted successfully` });
-    } catch (e) {
-      this.handleStreamingMessage({ message: `Monitor ${journeyId} could not be deleted` });
-      this.failedStaleMonitors.push({
-        id: journeyId,
-        reason: 'Failed to delete stale monitor',
-        details: e.message,
-      });
-    }
-  };
-
-  private handleStreamingMessage = async ({ message }: { message: string }) => {
+  private handleStreamingMessage = ({ message }: { message: string }) => {
     if (this.subject) {
       this.subject?.next(message);
     }
