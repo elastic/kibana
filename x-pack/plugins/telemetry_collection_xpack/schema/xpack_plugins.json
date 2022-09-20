@@ -4888,6 +4888,35 @@
         }
       }
     },
+    "cloudExperiments": {
+      "properties": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Flags received by the client"
+              }
+            }
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
