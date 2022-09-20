@@ -133,6 +133,17 @@ export async function getServiceAggregatedTransactionDetailedStats({
                         },
                         aggs: metrics,
                       },
+                      bucket_sort: {
+                        bucket_sort: {
+                          sort: [
+                            {
+                              total_doc: {
+                                order: 'desc',
+                              },
+                            },
+                          ],
+                        },
+                      },
                     },
                   },
                 },

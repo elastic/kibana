@@ -119,6 +119,17 @@ export async function getServiceAggregatedTransactionStats({
                           },
                         },
                       },
+                      bucket_sort: {
+                        bucket_sort: {
+                          sort: [
+                            {
+                              total_doc: {
+                                order: 'desc',
+                              },
+                            },
+                          ],
+                        },
+                      },
                     },
                   },
                 },
