@@ -10,7 +10,11 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
+import {
+  getSLODestinationIndexName,
+  getSLOTransformId,
+  SLO_INGEST_PIPELINE_NAME,
+} from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import {
   SLO,
@@ -38,7 +42,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
   }
 
   private buildTransformId(slo: APMTransactionDurationSLO): string {
-    return `slo-${slo.id}`;
+    return getSLOTransformId(slo.id);
   }
 
   private buildSource(slo: APMTransactionDurationSLO) {

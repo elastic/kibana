@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export * from './resource_installer';
-export * from './slo_repository';
-export * from './transform_manager';
-export * from './create_slo';
-export * from './delete_slo';
+/* eslint-disable max-classes-per-file */
+
+export class ObservabilityError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+
+export class SLONotFound extends ObservabilityError {}

@@ -22,7 +22,11 @@ describe('resourceInstaller', () => {
     it('installs the common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
-      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(
+        mockClusterClient,
+        loggerMock.create(),
+        'space-id'
+      );
 
       await installer.ensureCommonResourcesInstalled();
 
@@ -51,7 +55,11 @@ describe('resourceInstaller', () => {
       mockClusterClient.ingest.getPipeline.mockResponseOnce({
         [SLO_INGEST_PIPELINE_NAME]: { _meta: { version: SLO_RESOURCES_VERSION } },
       } as IngestGetPipelineResponse);
-      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(
+        mockClusterClient,
+        loggerMock.create(),
+        'space-id'
+      );
 
       await installer.ensureCommonResourcesInstalled();
 

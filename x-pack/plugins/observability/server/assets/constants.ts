@@ -13,3 +13,5 @@ export const SLO_RESOURCES_VERSION = 1;
 
 export const getSLODestinationIndexName = (spaceId: string) =>
   `${SLO_INDEX_TEMPLATE_NAME}-v${SLO_RESOURCES_VERSION}-${spaceId}`;
+
+export const getSLOTransformId = (sloId: string) => `slo-${sloId}`;

@@ -12,7 +12,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
-import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
+import {
+  getSLODestinationIndexName,
+  getSLOTransformId,
+  SLO_INGEST_PIPELINE_NAME,
+} from '../../../assets/constants';
 import {
   apmTransactionErrorRateSLOSchema,
   APMTransactionErrorRateSLO,
@@ -40,7 +44,7 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
   }
 
   private buildTransformId(slo: APMTransactionErrorRateSLO): string {
-    return `slo-${slo.id}`;
+    return getSLOTransformId(slo.id);
   }
 
   private buildSource(slo: APMTransactionErrorRateSLO) {

@@ -7,7 +7,7 @@
 
 import { ResourceInstaller } from '../resource_installer';
 import { SLORepository } from '../slo_repository';
-import { TransformInstaller } from '../transform_installer';
+import { TransformManager } from '../transform_manager';
 
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
   return {
@@ -15,9 +15,12 @@ const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
   };
 };
 
-const createTransformInstallerMock = (): jest.Mocked<TransformInstaller> => {
+const createTransformManagerMock = (): jest.Mocked<TransformManager> => {
   return {
-    installAndStartTransform: jest.fn(),
+    install: jest.fn(),
+    uninstall: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
   };
 };
 
@@ -29,4 +32,4 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
   };
 };
 
-export { createResourceInstallerMock, createTransformInstallerMock, createSLORepositoryMock };
+export { createResourceInstallerMock, createTransformManagerMock, createSLORepositoryMock };
