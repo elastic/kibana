@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type { InternalCoreSetup } from './internal_core_setup';
+export type { InternalCoreStart } from './internal_core_start';

@@ -1,5 +1,5 @@
 # @kbn/core-lifecycle-browser
 
-This package contains the public type for core's lifecycle contracts:
+This package contains the public types for core's lifecycle contracts:
 - `CoreSetup`
 - `CoreStart`
