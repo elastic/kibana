@@ -82,7 +82,7 @@ export const AlertCountByRuleByStatus = React.memo(
       },
       key: LOCAL_STORAGE_KEY,
       isInvalidDefault: (valueFromStorage) => {
-        return valueFromStorage && !valueFromStorage[field];
+        return !valueFromStorage;
       },
     });
 
@@ -120,7 +120,7 @@ export const AlertCountByRuleByStatus = React.memo(
               <MultiSelectPopover
                 title={i18n.Status}
                 allItems={statuses}
-                selectedItems={selectedStatusesByField[field]}
+                selectedItems={selectedStatusesByField[field] || ['open']}
                 onSelectedItemsChange={(selectedItems) =>
                   updateSelection(selectedItems as Status[])
                 }
