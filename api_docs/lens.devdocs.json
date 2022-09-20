@@ -6506,6 +6506,17 @@
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYAnnotationLayerConfig.ignoreGlobalFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7762,14 +7773,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.LineStyle",
-                "text": "LineStyle"
-              },
-              " | undefined"
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -9658,7 +9662,7 @@
             "label": "layers",
             "description": [],
             "signature": [
-              "({ layerId: string; layerType: \"data\" | \"referenceLine\"; } | { layerId: string; layerType: \"annotations\"; annotations: { id: string; type: \"query\" | \"manual\"; }[]; })[]"
+              "({ layerId: string; layerType: \"data\" | \"referenceLine\"; } | { layerId: string; layerType: \"annotations\"; annotations: { id: string; type: \"query\" | \"manual\"; }[]; ignoreGlobalFilters: boolean; })[]"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false,
