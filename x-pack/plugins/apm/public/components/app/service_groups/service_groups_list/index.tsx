@@ -150,8 +150,8 @@ export function ServiceGroupsList() {
                   <EuiText style={{ fontWeight: 'bold' }} size="s">
                     {i18n.translate('xpack.apm.serviceGroups.groupsCount', {
                       defaultMessage:
-                        '{serviceGroupsCount} {serviceGroupsCount, plural, =0 {group} one {group} other {groups}}',
-                      values: { serviceGroupsCount: filteredItems.length + 1 },
+                        '{servicesCount} {servicesCount, plural, =0 {group} one {group} other {groups}}',
+                      values: { servicesCount: filteredItems.length + 1 },
                     })}
                   </EuiText>
                 </EuiFlexItem>
