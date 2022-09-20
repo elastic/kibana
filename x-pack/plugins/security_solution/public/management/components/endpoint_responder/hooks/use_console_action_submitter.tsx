@@ -140,6 +140,39 @@ export const useConsoleActionSubmitter = ({
     setStore,
   ]);
 
+  // If an error was return by the Action Details API, then store it and set the status to error
+  useEffect(() => {
+    if (apiActionDetailsError && isPending) {
+      setStatus('error');
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          actionApiState: {
+            ...(prevState.actionApiState ?? currentActionState),
+            actionDetails: undefined,
+            actionDetailsError: apiActionDetailsError,
+          },
+        };
+      });
+    }
+  }, [apiActionDetailsError, currentActionState, isPending, setStatus, setStore]);
+
+  // If the action details indicates complete, then update the action's console state and set the status to success
+  useEffect(() => {
+    if (apiActionDetails?.data.isCompleted && isPending) {
+      setStatus('success');
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          actionApiState: {
+            ...(prevState.actionApiState ?? currentActionState),
+            actionDetails: apiActionDetails.data,
+          },
+        };
+      });
+    }
+  }, [apiActionDetails, currentActionState, isPending, setStatus, setStore]);
+
   return {
     result: <>{'something here'}</>,
     action: undefined,
