@@ -11,6 +11,10 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { ErrorCode } from '../../common/types/error_codes';
 
 import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
+import {
+  getInferencePipelineNameFromIndexName,
+  getPrefixedInferencePipelineProcessorName,
+} from './ml_inference_pipeline_utils';
 
 /**
  * Details of a created pipeline.
@@ -74,7 +78,7 @@ export const createMlInferencePipeline = async (
   destinationField: string,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
-  const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
+  const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
 
   // Check that a pipeline with the same name doesn't already exist
   let pipelineByName: IngestGetPipelineResponse | undefined;
@@ -120,7 +124,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   pipelineName: string,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
-  const parentPipelineId = `${indexName}@ml-inference`;
+  const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   // Fetch the parent pipeline
   let parentPipeline: IngestPipeline | undefined;

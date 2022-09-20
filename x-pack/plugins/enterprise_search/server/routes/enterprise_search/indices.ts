@@ -39,6 +39,7 @@ import {
   isIndexNotFoundException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
+import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
 
 export function registerIndexRoutes({
   router,
@@ -530,7 +531,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const pipelineName = decodeURIComponent(request.params.pipelineName);
       const { client } = (await context.core).elasticsearch;
-      const pipelineId = `ml-inference-${pipelineName}`;
+      const pipelineId = getPrefixedInferencePipelineProcessorName(pipelineName);
       const defaultDescription = `ML inference pipeline for index ${indexName}`;
 
       if (!(await indexOrAliasExists(client, indexName))) {

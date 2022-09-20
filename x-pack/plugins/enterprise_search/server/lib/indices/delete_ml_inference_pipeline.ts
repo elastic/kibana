@@ -7,6 +7,7 @@
 
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 /**
  * Response for deleting sub-pipeline from @ml-inference pipeline.
@@ -24,7 +25,7 @@ export const deleteMlInferencePipeline = async (
   client: ElasticsearchClient
 ) => {
   const response: DeleteMlInferencePipelineResponse = {};
-  const parentPipelineId = `${indexName}@ml-inference`;
+  const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   // find parent pipeline
   try {
