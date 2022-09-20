@@ -91,7 +91,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: <ConnectorNameAndDescription />,
-                  status: hasConfigured || hasDescription ? 'complete' : 'incomplete',
+                  status: hasDescription ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.nameAndDescriptionTitle',
                     {
