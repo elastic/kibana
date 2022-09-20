@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import {
   isJavaAgentName,
   isJRubyAgent,
@@ -139,10 +140,15 @@ function TemplateWithContext({
 export function isMetricsTabHidden({
   agentName,
   runtimeName,
+  isAwsLambdaEnabled,
 }: {
   agentName?: string;
   runtimeName?: string;
+  isAwsLambdaEnabled?: boolean;
 }) {
+  if (isServerlessAgent(runtimeName)) {
+    return !isAwsLambdaEnabled;
+  }
   return (
     !agentName ||
     isRumAgentName(agentName) ||
@@ -190,6 +196,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   );
 
   const router = useApmRouter();
+
+  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(
+    enableAwsLambdaMetrics,
+    true
+  );
 
   const {
     path: { serviceName },
@@ -259,7 +270,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: isServerlessAgent(runtimeName) ? (
         <TechnicalPreviewBadge icon="beaker" />
       ) : undefined,
-      hidden: isMetricsTabHidden({ agentName, runtimeName }),
+      hidden: isMetricsTabHidden({
+        agentName,
+        runtimeName,
+        isAwsLambdaEnabled,
+      }),
     },
     {
       key: 'nodes',
