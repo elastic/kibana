@@ -7,7 +7,7 @@
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getSearchAggregatedTransactions } from './transactions';
 import { getSearchAggregatedServiceMetrics } from './service_metrics';
-import { APMConfig } from '../../';
+import { APMConfig } from '../..';
 
 export async function getAggregatedMetrics({
   config,
