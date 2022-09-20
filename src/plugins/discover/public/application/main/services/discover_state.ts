@@ -40,7 +40,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/data-plugin/common';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { FetchStatus } from '../../types';
-import { updateSavedSearch } from '../utils/persist_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -256,6 +255,7 @@ function getSavedSearchContainer({
     savedSearch$.next(newSavedSearch);
     return newSavedSearch;
   };
+
   return {
     savedSearch$,
     set,
@@ -297,19 +297,14 @@ export function getDiscoverStateContainer({
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
 
   let initialAppState = handleSourceColumnState(
-    {
-      ...defaultAppState,
-      ...appStateFromUrl,
-    },
+    savedSearch.id
+      ? { ...defaultAppState }
+      : {
+          ...defaultAppState,
+          ...appStateFromUrl,
+        },
     services.uiSettings
   );
-  updateSavedSearch({
-    savedSearch,
-    dataView: savedSearch.searchSource.getField('index')!,
-    state: initialAppState,
-    services,
-  });
-
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState = {};
   const appStateContainer = createStateContainer<AppState>(initialAppState);

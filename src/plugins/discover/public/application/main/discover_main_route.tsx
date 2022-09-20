@@ -93,7 +93,6 @@ export function DiscoverMainRoute(props: Props) {
           setShowNoDataPage(true);
           return;
         }
-
         const { appStateContainer } = getDiscoverStateContainer({
           history,
           savedSearch: nextSavedSearch,
