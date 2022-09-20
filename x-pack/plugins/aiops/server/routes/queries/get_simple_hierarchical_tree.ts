@@ -254,14 +254,12 @@ type FieldValuePairCounts = Record<string, Record<string, number>>;
  * Get a nested record of field/value pairs with counts
  */
 export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePairCounts {
-  return cpgs.reduce<FieldValuePairCounts>((p, cpg) => {
-    cpg.group.forEach((g) => {
-      if (p[g.fieldName] === undefined) {
-        p[g.fieldName] = {};
+  return cpgs.reduce<FieldValuePairCounts>((p, { group }) => {
+    group.forEach(({ fieldName, fieldValue }) => {
+      if (p[fieldName] === undefined) {
+        p[fieldName] = {};
       }
-      p[g.fieldName][g.fieldValue] = p[g.fieldName][g.fieldValue]
-        ? p[g.fieldName][g.fieldValue] + 1
-        : 1;
+      p[fieldName][fieldValue] = p[fieldName][fieldValue] ? p[fieldName][fieldValue] + 1 : 1;
     });
     return p;
   }, {});
