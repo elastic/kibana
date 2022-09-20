@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import uuid from 'uuid';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
@@ -16,7 +16,7 @@ import { appContextService } from '../app_context';
 import { ActionRunner } from './action_runner';
 
 import { errorsToResults, bulkUpdateAgents } from './crud';
-import { createAgentAction } from './actions';
+import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -62,7 +62,7 @@ export async function reassignBatch(
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
       errors[agent.id] = new AgentReassignmentError(
-        `${agent.id} is already assigned to ${options.newAgentPolicyId}`
+        `Agent ${agent.id} is already assigned to agent policy ${options.newAgentPolicyId}`
       );
     } else if (isHostedAgent(hostedPolicies, agent)) {
       errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
@@ -95,14 +95,39 @@ export async function reassignBatch(
     }))
   );
 
+  const actionId = options.actionId ?? uuid();
+  const errorCount = Object.keys(errors).length;
+  const total = options.total ?? agentsToUpdate.length + errorCount;
+
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
-    id: options.actionId,
+    id: actionId,
     agents: agentsToUpdate.map((agent) => agent.id),
     created_at: now,
     type: 'POLICY_REASSIGN',
-    total: options.total,
+    total,
+    data: {
+      policy_id: options.newAgentPolicyId,
+    },
   });
+
+  if (errorCount > 0) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping ${errorCount} agents, as failed validation (already assigned or assigned to hosted policy)`
+      );
+
+    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
+    await bulkCreateAgentActionResults(
+      esClient,
+      Object.keys(errors).map((agentId) => ({
+        agentId,
+        actionId,
+        error: errors[agentId].message,
+      }))
+    );
+  }
 
   return result;
 }
