@@ -8,6 +8,8 @@
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+
 export interface CreatedPipelines {
   created: string[];
 }
@@ -35,7 +37,7 @@ export const createIndexPipelineDefinitions = (
   // TODO: add back descriptions (see: https://github.com/elastic/elasticsearch-specification/issues/1827)
   esClient.ingest.putPipeline({
     description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
-    id: `${indexName}@ml-inference`,
+    id: getInferencePipelineNameFromIndexName(indexName),
     processors: [],
     version: 1,
   });
@@ -97,7 +99,7 @@ export const createIndexPipelineDefinitions = (
       {
         pipeline: {
           if: 'ctx?._run_ml_inference == true',
-          name: `${indexName}@ml-inference`,
+          name: getInferencePipelineNameFromIndexName(indexName),
           on_failure: [
             {
               append: {
@@ -228,7 +230,9 @@ export const createIndexPipelineDefinitions = (
     ],
     version: 1,
   });
-  return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
+  return {
+    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
+  };
 };
 
 /**
