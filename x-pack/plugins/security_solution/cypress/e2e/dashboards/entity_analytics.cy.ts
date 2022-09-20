@@ -49,60 +49,45 @@ describe('Entity Analytics Dashboard', () => {
     });
   });
 
-  describe('Host Risk Score enabled but still no data', () => {
+  describe('Risk Score enabled but still no data', () => {
     before(() => {
       esArchiverLoad('risk_hosts_no_data');
+      esArchiverLoad('risk_users_no_data');
+
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
       esArchiverUnload('risk_hosts_no_data');
-    });
-
-    it('shows no data detected propmpt', () => {
-      cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-    });
-  });
-
-  describe('User Risk Score enabled but still no data', () => {
-    before(() => {
-      esArchiverLoad('risk_users_no_data');
-      visit(ENTITY_ANALYTICS_URL);
-    });
-
-    after(() => {
       esArchiverUnload('risk_users_no_data');
     });
 
-    it('shows no data detected propmpt', () => {
+    it('shows no data detected propmpt for host risk score module', () => {
+      cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+    });
+
+    it('shows no data detected propmpt for user risk score module', () => {
       cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
     });
   });
 
-  describe('With hosts Legacy data', () => {
+  describe('With Legacy data', () => {
     before(() => {
       esArchiverLoad('risk_hosts_legacy_data');
+      esArchiverLoad('risk_users_legacy_data');
+
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
       esArchiverUnload('risk_hosts_legacy_data');
+      esArchiverUnload('risk_users_legacy_data');
     });
 
     it('shows upgrade host risk button', () => {
       cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.visible');
     });
-  });
 
-  describe('With users Legacy data', () => {
-    before(() => {
-      esArchiverLoad('risk_users_legacy_data');
-      visit(ENTITY_ANALYTICS_URL);
-    });
-
-    after(() => {
-      esArchiverUnload('risk_users_legacy_data');
-    });
     it('shows upgrade user risk button', () => {
       cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
     });
