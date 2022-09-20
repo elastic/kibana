@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiPanel, EuiLink } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { RiskScore } from '../../severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { UserRisk } from '../../../../risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
-import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
+import { RiskScoreDocLink } from '../../risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreHeaderTitle } from '../../risk_score/risk_score_onboarding/risk_score_header_title';
 
 const UserRiskSummaryComponent: React.FC<{
   userRisk: UserRisk;
@@ -25,19 +27,29 @@ const UserRiskSummaryComponent: React.FC<{
     <>
       <EuiPanel hasBorder paddingSize="s" grow={false}>
         <ThreatSummaryPanelHeader
-          title={i18n.USER_RISK_DATA_TITLE}
+          title={
+            <RiskScoreHeaderTitle
+              title={i18n.USER_RISK_DATA_TITLE}
+              riskScoreEntity={RiskScoreEntity.user}
+              showTooltip={false}
+            />
+          }
           toolTipContent={
             <FormattedMessage
               id="xpack.securitySolution.alertDetails.overview.userDataTooltipContent"
               defaultMessage="Risk classification is displayed only when available for a user. Ensure {userRiskScoreDocumentationLink} is enabled within your environment."
               values={{
                 userRiskScoreDocumentationLink: (
-                  <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertDetails.overview.userRiskScoreLink"
-                      defaultMessage="User Risk Score"
-                    />
-                  </EuiLink>
+                  <RiskScoreDocLink
+                    external={false}
+                    riskScoreEntity={RiskScoreEntity.user}
+                    title={
+                      <FormattedMessage
+                        id="xpack.securitySolution.alertDetails.overview.userRiskScoreLink"
+                        defaultMessage="User Risk Score"
+                      />
+                    }
+                  />
                 ),
               }}
             />

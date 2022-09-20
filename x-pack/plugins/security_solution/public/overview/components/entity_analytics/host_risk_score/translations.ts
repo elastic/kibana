@@ -36,13 +36,6 @@ export const HOST_NAME = i18n.translate(
   }
 );
 
-export const HOST_RISK_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.title',
-  {
-    defaultMessage: 'Host Risk Scores',
-  }
-);
-
 export const TOTAL_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.totalLabel',
   {
@@ -57,32 +50,16 @@ export const VIEW_ALL = i18n.translate(
   }
 );
 
-export const ENABLE_HOST_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableHostRiskScore',
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.learnMore',
   {
-    defaultMessage: 'Enable Host Risk Score',
+    defaultMessage: 'Learn more',
   }
 );
 
-export const ENABLE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableHostRiskScoreDescription',
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableViaDevToolsButtonTitle',
   {
-    defaultMessage:
-      'Once you have enabled this feature you can get quick access to the host risk scores in this section.',
-  }
-);
-
-export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableRiskScorePopoverTitle',
-  {
-    defaultMessage: 'Alerts need to be available before enabling module',
-  }
-);
-
-export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostsTableTooltip',
-  {
-    defaultMessage:
-      'The host risk table is not affected by the time range. This table shows the latest recorded risk score for each host.',
+    defaultMessage: 'Enable via Dev Tools',
   }
 );

@@ -36,13 +36,6 @@ export const USER_NAME = i18n.translate(
   }
 );
 
-export const USER_RISK_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.title',
-  {
-    defaultMessage: 'User Risk Scores',
-  }
-);
-
 export const TOTAL_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.usersRiskDashboard.totalLabel',
   {
@@ -57,25 +50,16 @@ export const VIEW_ALL = i18n.translate(
   }
 );
 
-export const ENABLE_USER_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableUserRiskScore',
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.learnMore',
   {
-    defaultMessage: 'Enable User Risk Score',
+    defaultMessage: 'Learn more',
   }
 );
 
-export const ENABLE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableUserRiskScoreDescription',
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableViaDevToolsButtonTitle',
   {
-    defaultMessage:
-      'Once you have enabled this feature you can get quick access to the user risk scores in this section.',
-  }
-);
-
-export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.usersTableTooltip',
-  {
-    defaultMessage:
-      'The user risk table is not affected by the time range. This table shows the latest recorded risk score for each user.',
+    defaultMessage: 'Enable via Dev Tools',
   }
 );

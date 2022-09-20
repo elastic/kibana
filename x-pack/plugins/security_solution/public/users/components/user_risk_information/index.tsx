@@ -20,7 +20,6 @@ import {
   EuiButton,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -28,8 +27,8 @@ import React from 'react';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
-import { RiskSeverity } from '../../../../common/search_strategy';
-import { RISKY_USERS_DOC_LINK } from '../constants';
+import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -108,12 +107,16 @@ const UserRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
           defaultMessage="You can learn more about user risk {UserRiskScoreDocumentationLink}"
           values={{
             UserRiskScoreDocumentationLink: (
-              <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.users.userRiskInformation.link"
-                  defaultMessage="here"
-                />
-              </EuiLink>
+              <RiskScoreDocLink
+                external={false}
+                riskScoreEntity={RiskScoreEntity.user}
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.users.userRiskInformation.link"
+                    defaultMessage="here"
+                  />
+                }
+              />
             ),
           }}
         />
