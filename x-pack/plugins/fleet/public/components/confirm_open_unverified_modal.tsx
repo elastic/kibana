@@ -12,26 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import type { PackageInfo } from '../../common';
 
 export const ConfirmOpenUnverifiedModal: React.FC<{
   onCancel: () => void;
   onConfirm: () => void;
-  pkg?: Pick<PackageInfo, 'name' | 'version'>;
+  pkgName: string;
   docLinks: DocLinksStart;
-}> = ({ onCancel, onConfirm, pkg, docLinks }) => {
-  const title =
-    pkg && pkg.name && pkg.version
-      ? i18n.translate('xpack.fleet.ConfirmOpenUnverifiedModal.calloutTitleWithPkg', {
-          defaultMessage: 'Integration {pkgName}-{pkgVersion} has failed verification',
-          values: {
-            pkgName: pkg.name,
-            pkgVersion: pkg.version,
-          },
-        })
-      : i18n.translate('xpack.fleet.ConfirmOpenUnverifiedModal.calloutTitleNoPkg', {
-          defaultMessage: 'The integration has failed verification',
-        });
+}> = ({ onCancel, onConfirm, pkgName, docLinks }) => {
   return (
     <EuiConfirmModal
       title={
@@ -60,7 +47,12 @@ export const ConfirmOpenUnverifiedModal: React.FC<{
       data-test-subj="ConfirmOpenUnverifiedModal"
     >
       <EuiCallOut
-        title={title}
+        title={i18n.translate('xpack.fleet.ConfirmOpenUnverifiedModal.calloutTitleWithPkg', {
+          defaultMessage: 'Integration {pkgName} has failed verification',
+          values: {
+            pkgName: pkgName,
+          },
+        })}
         color="warning"
         iconType="alert"
         children={

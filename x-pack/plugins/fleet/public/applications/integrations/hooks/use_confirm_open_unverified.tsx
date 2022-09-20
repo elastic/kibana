@@ -14,11 +14,11 @@ import { useStartServices } from '../../fleet/hooks';
 import { ConfirmOpenUnverifiedModal } from '../components';
 
 const confirmOpenUnverified = ({
-  pkg,
+  pkgName,
   overlays,
   docLinks,
 }: {
-  pkg: { name: string; version: string };
+  pkgName: string;
   overlays: OverlayStart;
   docLinks: DocLinksStart;
 }): Promise<boolean> =>
@@ -26,7 +26,7 @@ const confirmOpenUnverified = ({
     const session = overlays.openModal(
       toMountPoint(
         <ConfirmOpenUnverifiedModal
-          pkg={pkg}
+          pkgName={pkgName}
           onConfirm={() => {
             session.close();
             resolve(true);
@@ -45,7 +45,7 @@ export const useConfirmOpenUnverified = () => {
   const { overlays, docLinks } = useStartServices();
 
   return useCallback(
-    (pkg: { name: string; version: string }) => confirmOpenUnverified({ pkg, overlays, docLinks }),
+    (pkgName: string) => confirmOpenUnverified({ pkgName, overlays, docLinks }),
     [docLinks, overlays]
   );
 };

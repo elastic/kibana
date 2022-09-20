@@ -86,7 +86,7 @@ export const useGetPackageInfoByKey = (
 
   useEffect(() => {
     const confirm = async () => {
-      const forceInstall = await confirmOpenUnverified({ name: pkgName, version: 'latest' }); // TODO: change
+      const forceInstall = await confirmOpenUnverified(pkgName);
 
       if (forceInstall) {
         setIgnoreUnverifiedQueryParam(true);
