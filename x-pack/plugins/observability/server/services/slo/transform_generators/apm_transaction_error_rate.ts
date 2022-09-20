@@ -14,8 +14,8 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { TransformGenerator } from '.';
 import {
   getSLODestinationIndexName,
+  getSLOIngestPipelineName,
   getSLOTransformId,
-  SLO_INGEST_PIPELINE_NAME,
 } from '../../../assets/constants';
 import {
   apmTransactionErrorRateSLOSchema,
@@ -108,7 +108,7 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
 
   private buildDestination(slo: APMTransactionErrorRateSLO, spaceId: string) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOIngestPipelineName(spaceId),
       index: getSLODestinationIndexName(spaceId),
     };
   }
