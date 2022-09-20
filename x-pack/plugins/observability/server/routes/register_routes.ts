@@ -70,6 +70,10 @@ export function registerRoutes({
             spacesService,
           })) as any;
 
+          if (data === undefined) {
+            return response.noContent();
+          }
+
           return response.ok({ body: data });
         } catch (error) {
           if (error instanceof ObservabilityError) {
