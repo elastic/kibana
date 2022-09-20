@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { useKibanaSpace } from './hooks/use_kibana_space';
+import { useKibanaSpace } from './hooks';
 import { getServiceLocations } from '../../state';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';

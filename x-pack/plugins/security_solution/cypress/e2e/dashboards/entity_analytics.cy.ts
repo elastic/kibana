@@ -83,7 +83,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('renders donut chart', () => {
-      cy.get(USERS_DONUT_CHART).should('include.text', '6Total');
+      cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
     });
 
     it('renders table', () => {
@@ -94,8 +94,8 @@ describe('Entity Analytics Dashboard', () => {
     it('filters by risk classification', () => {
       openRiskTableFilterAndSelectTheLowOption();
 
-      cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
-      cy.get(USERS_TABLE_ROWS).should('have.length', 1);
+      cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
+      cy.get(USERS_TABLE_ROWS).should('have.length', 2);
     });
   });
 
