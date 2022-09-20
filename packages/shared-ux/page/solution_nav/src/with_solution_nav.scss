@@ -1,0 +1,7 @@
+.kbnSolutionNav__sidebar {
+  overflow: hidden;
+
+  @include euiCanAnimate {
+    transition: min-width $euiAnimSpeedFast $euiAnimSlightResistance;
+  }
+}

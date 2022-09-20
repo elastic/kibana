@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeAnimationSpeeds } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const WithSolutionNavStyles = () => {
-  return {
-    overflow: 'hidden',
-    transition: `min-width ${EuiThemeAnimationSpeeds[1]} ${EuiThemeAnimationSpeeds[2]}`,
-  };
+  return css`
+    background: red;
+  `;
 };

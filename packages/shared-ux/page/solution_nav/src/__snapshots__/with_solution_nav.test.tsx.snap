@@ -2,6 +2,20 @@
 
 exports[`WithSolutionNav renders wrapped component 1`] = `
 <TestComponent
+  css={
+    Object {
+      "map": undefined,
+      "name": "1go9zi6",
+      "next": undefined,
+      "styles": "
+    overflow: hidden;
+    @media screen and (prefers-reduced-motion: no-preference) {
+      transition: min-width fast normal;
+    }
+  ",
+      "toString": [Function],
+    }
+  }
   pageSideBar={
     <SolutionNav
       icon="logoKibana"
@@ -52,7 +66,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnSolutionNav__sidebar kbnStickyMenu",
+      "className": "kbnStickyMenu",
       "minWidth": undefined,
       "paddingSize": "none",
     }
@@ -62,6 +76,20 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
 
 exports[`WithSolutionNav with children 1`] = `
 <TestComponent
+  css={
+    Object {
+      "map": undefined,
+      "name": "1go9zi6",
+      "next": undefined,
+      "styles": "
+    overflow: hidden;
+    @media screen and (prefers-reduced-motion: no-preference) {
+      transition: min-width fast normal;
+    }
+  ",
+      "toString": [Function],
+    }
+  }
   pageSideBar={
     <SolutionNav
       icon="logoKibana"
@@ -112,7 +140,7 @@ exports[`WithSolutionNav with children 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnSolutionNav__sidebar kbnStickyMenu",
+      "className": "kbnStickyMenu",
       "minWidth": undefined,
       "paddingSize": "none",
     }

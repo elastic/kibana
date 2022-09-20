@@ -43,7 +43,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       const kibanaChromeHeader = kibanaChrome.querySelector(
         '[data-test-subj="headerGlobalNav"]'
       ) as HTMLElement;
-      setOffset(kibanaChromeHeader?.offsetHeight);
+      setOffset(kibanaChromeHeader?.offsetTop + kibanaChromeHeader?.offsetHeight);
     }
   }, []);
 
