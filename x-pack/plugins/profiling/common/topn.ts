@@ -6,7 +6,7 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { InferSearchResponseOf } from '@kbn/core/types/elasticsearch';
+import { InferSearchResponseOf } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { ProfilingESField } from './elasticsearch';

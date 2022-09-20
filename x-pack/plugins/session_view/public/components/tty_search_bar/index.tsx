@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { useMemo, useState, useCallback } from 'react';
+import stripAnsi from 'strip-ansi';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { IOLine } from '../../../common/types/process_tree';
-import { TTY_STRIP_CONTROL_CODES_REGEX } from '../../../common/constants';
 
 interface SearchResult {
   line: IOLine;
@@ -52,9 +52,8 @@ export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarD
           // check for cursor movement at the start of the line
           const cursorMovement = current.value.match(/^\x1b\[\d+;(\d+)(H|d)/);
           const regex = new RegExp(searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'ig');
-          const lineMatches = current.value
-            .replace(TTY_STRIP_CONTROL_CODES_REGEX, '')
-            .replace(/^\r?\n/, '')
+          const lineMatches = stripAnsi(current.value)
+            .replace(/^\r|\r?\n/, '')
             .matchAll(regex);
 
           if (lineMatches) {
