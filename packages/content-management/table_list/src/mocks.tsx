@@ -41,7 +41,7 @@ export const TagList: Services['TagList'] = ({ onClick }) => {
               onClick(tag);
             }
           }}
-          onClickAriaLabel=""
+          onClickAriaLabel="tag button"
           iconOnClick={() => undefined}
           iconOnClickAriaLabel=""
           color={tag.color}
