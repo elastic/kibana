@@ -22,6 +22,7 @@ import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
+import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -66,7 +67,7 @@ const IntegrationButtonLink = ({
 const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'package_policy.name',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationNameColumnTitle', {
       defaultMessage: 'Integration Name',
     }),
     render: (packageName, benchmark) => (
@@ -78,25 +79,43 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     ),
     truncateText: true,
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_NAME,
   },
   {
     field: 'rules.enabled',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.rulesColumnTitle', {
       defaultMessage: 'Rules',
     }),
     truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.RULES,
   },
   {
-    field: 'package_policy.package.title',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationTypeColumnTitle', {
-      defaultMessage: 'Integration Type',
+    field: 'package_policy',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
+      defaultMessage: 'Integration',
     }),
     dataType: 'string',
     truncateText: true,
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_TYPE,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
+    render: (field) => {
+      const enabledIntegration = getEnabledCspIntegrationDetails(field);
+      return enabledIntegration.integration?.shortName || ' ';
+    },
+  },
+  {
+    field: 'package_policy',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.deploymentTypeColumnTitle', {
+      defaultMessage: 'Deployment Type',
+    }),
+    dataType: 'string',
+    truncateText: true,
+    sortable: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.DEPLOYMENT_TYPE,
+    render: (field) => {
+      const enabledIntegration = getEnabledCspIntegrationDetails(field);
+      return enabledIntegration.enabledIntegrationOption?.name || ' ';
+    },
   },
   {
     field: 'agent_policy.name',
