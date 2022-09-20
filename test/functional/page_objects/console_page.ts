@@ -15,6 +15,7 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly common = this.ctx.getPageObject('common');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -310,15 +311,24 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getCurrentLineNumber() {
-    const editor = await this.getEditor();
-    const activeLine = await editor.findByClassName('ace_active-line');
+    const editor = await this.getRequestEditor();
+    let line = await editor.findByCssSelector('.ace_active-line');
+
+    await this.retry.try(async () => {
+      const firstInnerHtml = await line.getAttribute('innerHTML');
+      this.common.sleep(500);
+      line = await editor.findByCssSelector('.ace_active-line');
+      const secondInnerHtml = await line.getAttribute('innerHTML');
+      return firstInnerHtml === secondInnerHtml;
+    });
+
     // style attribute looks like this: "top: 0px; height: 18.5px;" height is the line height
-    const styleAttribute = await activeLine.getAttribute('style');
-    const lineHeight = parseInt(styleAttribute.split('height: ')[1].split('px')[0], 10);
-    const top = parseInt(styleAttribute.split('top: ')[1].split('px')[0], 10);
+    const styleAttribute = await line.getAttribute('style');
+    const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
+    const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
     // calculate the line number by dividing the top position by the line height
     // and adding 1 because line numbers start at 1
-    return Math.floor(top / lineHeight) + 1;
+    return Math.ceil(top / height) + 1;
   }
 
   public async pressCtrlEnter() {
