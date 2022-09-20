@@ -433,6 +433,29 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-hooks",
+        "id": "def-common.useFindListsBySize",
+        "type": "Function",
+        "tags": [],
+        "label": "useFindListsBySize",
+        "description": [],
+        "signature": [
+          "() => ",
+          "Task",
+          "<[args: ",
+          "OptionalSignalArgs",
+          "<",
+          "FindListsParams",
+          ">], { largeLists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; smallLists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-hooks/src/use_find_lists_by_size/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-hooks",
         "id": "def-common.useImportList",
         "type": "Function",
         "tags": [],
@@ -852,6 +875,74 @@
                 "description": [],
                 "signature": [
                   "ApiCallFindListsItemsMemoProps"
+                ],
+                "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-hooks",
+            "id": "def-common.ExceptionsApi.getExceptionFilterFromIds",
+            "type": "Function",
+            "tags": [],
+            "label": "getExceptionFilterFromIds",
+            "description": [],
+            "signature": [
+              "(arg: ",
+              "ApiCallGetExceptionFilterFromIdsMemoProps",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-list-hooks",
+                "id": "def-common.ExceptionsApi.getExceptionFilterFromIds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  "ApiCallGetExceptionFilterFromIdsMemoProps"
+                ],
+                "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-hooks",
+            "id": "def-common.ExceptionsApi.getExceptionFilterFromExceptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getExceptionFilterFromExceptions",
+            "description": [],
+            "signature": [
+              "(arg: ",
+              "ApiCallGetExceptionFilterFromExceptionsMemoProps",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-list-hooks",
+                "id": "def-common.ExceptionsApi.getExceptionFilterFromExceptions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  "ApiCallGetExceptionFilterFromExceptionsMemoProps"
                 ],
                 "path": "packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
                 "deprecated": false,

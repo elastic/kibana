@@ -289,6 +289,20 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "customIntegrations",
+          "id": "def-public.CustomIntegrationsStart.languageClientsUiComponents",
+          "type": "Object",
+          "tags": [],
+          "label": "languageClientsUiComponents",
+          "description": [],
+          "signature": [
+            "Map<string, React.FC<{}>>"
+          ],
+          "path": "src/plugins/custom_integrations/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
