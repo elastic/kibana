@@ -237,6 +237,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
+        if (!pValue) return NOT_AVAILABLE;
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
