@@ -15,7 +15,7 @@ import {
 } from '@kbn/maps-plugin/common/descriptor_types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
 import { SEVERITY_COLOR_RAMP } from '../../common';

@@ -7,7 +7,7 @@
 
 // Service for obtaining data for the ML Results dashboards.
 import { useMemo } from 'react';
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 

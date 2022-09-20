@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { APMConfig } from '..';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 

@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { getAgentStatus } from '../../../common/services/agent_status';

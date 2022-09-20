@@ -14,10 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';

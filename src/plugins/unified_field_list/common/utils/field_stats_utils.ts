@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { FieldStatsResponse } from '../types';
 import { getFieldExampleBuckets, canProvideExamplesForField } from './field_examples_calculator';
 

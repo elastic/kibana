@@ -7,7 +7,7 @@
 
 import { defineGetCspStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import {
   AgentClient,
   AgentPolicyServiceInterface,

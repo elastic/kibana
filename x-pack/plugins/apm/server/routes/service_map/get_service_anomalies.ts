@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';

@@ -11,7 +11,7 @@ import type {
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { SignalSource } from '../types';
 import type {
   buildThresholdMultiBucketAggregation,

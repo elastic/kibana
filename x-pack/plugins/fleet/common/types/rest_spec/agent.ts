@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
 import type { Agent, AgentAction, ActionStatus, CurrentUpgrade, NewAgentAction } from '../models';
 
