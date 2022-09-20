@@ -52,18 +52,34 @@ describe('navTabsHostDetails', () => {
     expect(tabs).toHaveProperty(HostsTableType.risk);
   });
 
-  test('it should display Beta badge for sessions tab', () => {
+  test('it should display sessions tab when users are on Enterprise and above license', () => {
     const tabs = navTabsHostDetails({
       hasMlUserPermissions: false,
       isRiskyHostsEnabled: true,
       hostName: mockHostName,
+      isEnterprise: true,
     });
 
     const sessionsTab = Object.values<TabNavigationItemProps>(tabs).find(
       (item) => item.id === HostsTableType.sessions
     );
 
-    expect(sessionsTab?.isBeta).toEqual(true);
+    expect(sessionsTab).toBeTruthy();
+  });
+
+  test('it should not display sessions tab when users are not on Enterprise and above license', () => {
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: false,
+      isRiskyHostsEnabled: true,
+      hostName: mockHostName,
+      isEnterprise: false,
+    });
+
+    const sessionsTab = Object.values<TabNavigationItemProps>(tabs).find(
+      (item) => item.id === HostsTableType.sessions
+    );
+
+    expect(sessionsTab).not.toBeTruthy();
   });
 
   test('it should display Beta badge for risk tab', () => {
