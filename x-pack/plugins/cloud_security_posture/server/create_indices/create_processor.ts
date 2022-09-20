@@ -6,9 +6,10 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   CSP_INGEST_TIMESTAMP_PIPELINE,
-  CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+  CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE,
 } from '../../common/constants';
 
 /**
@@ -47,27 +48,20 @@ export const createPipelineIfNotExists = async (
   return false;
 };
 
-export const getPipelineById = (id: string): PipelineIngest => {
+export const getPipelineById = (id: string): IngestPutPipelineRequest => {
   switch (id) {
     case CSP_INGEST_TIMESTAMP_PIPELINE: {
-      return findingsPipeline;
+      return scorePipelineIngest;
     }
-    case CSP_LATEST_INGEST_TIMESTAMP_PIPELINE: {
-      return latestFindingsPipeline;
+    case CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE: {
+      return latestFindingsPipelineIngest;
     }
     default:
       throw new Error('No ingest pipeline was found for this Id');
   }
 };
 
-export interface PipelineIngest {
-  id: string;
-  description: string;
-  on_failure: Array<{ set: { field: string; value: string } }>;
-  processors: Array<{ set: { field: string; value: string } }>;
-}
-
-const findingsPipeline = {
+const scorePipelineIngest = {
   id: CSP_INGEST_TIMESTAMP_PIPELINE,
   description: 'Pipeline for adding event timestamp',
   processors: [
@@ -88,8 +82,8 @@ const findingsPipeline = {
   ],
 };
 
-const latestFindingsPipeline = {
-  id: CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+const latestFindingsPipelineIngest = {
+  id: CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE,
   description: 'Pipeline for cloudbeat latest findings index',
   processors: [
     {
