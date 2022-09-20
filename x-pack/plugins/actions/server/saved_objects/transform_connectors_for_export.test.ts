@@ -6,36 +6,26 @@
  */
 
 import { transformConnectorsForExport } from './transform_connectors_for_export';
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../actions_config.mock';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ActionExecutor, TaskRunnerFactory } from '../lib';
-import { registerBuiltInActionTypes } from '../builtin_action_types';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
 
 describe('transform connector for export', () => {
-  const inMemoryMetrics = inMemoryMetricsMock.create();
-  const actionTypeRegistryParams: ActionTypeRegistryOpts = {
-    licensing: licensingMock.createSetup(),
-    taskManager: taskManagerMock.createSetup(),
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
-      inMemoryMetrics
-    ),
-    actionsConfigUtils: actionsConfigMock.create(),
-    licenseState: licenseStateMock.create(),
-    preconfiguredActions: [],
+  const connectorType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+    validate: {
+      secrets: {
+        schema: {
+          validate: (value: unknown) => value as ActionTypeSecrets,
+        },
+      },
+    },
   };
-  const actionTypeRegistry: ActionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-
-  registerBuiltInActionTypes({
-    logger: loggingSystemMock.create().get(),
-    actionTypeRegistry,
-    actionsConfigUtils: actionsConfigMock.create(),
-  });
+  const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> =
+    actionTypeRegistryMock.create();
 
   const connectorsWithNoSecrets = [
     {
@@ -239,6 +229,7 @@ describe('transform connector for export', () => {
   ];
 
   it('should not change connectors without secrets', () => {
+    actionTypeRegistry.get.mockReturnValue(connectorType);
     expect(transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)).toEqual(
       connectorsWithNoSecrets.map((connector) => ({
         ...connector,
@@ -251,6 +242,18 @@ describe('transform connector for export', () => {
   });
 
   it('should remove secrets for connectors with secrets', () => {
+    actionTypeRegistry.get.mockReturnValue({
+      ...connectorType,
+      validate: {
+        secrets: {
+          schema: {
+            validate: (value: unknown) => {
+              throw new Error('i need secrets!');
+            },
+          },
+        },
+      },
+    });
     expect(transformConnectorsForExport(connectorsWithSecrets, actionTypeRegistry)).toEqual(
       connectorsWithSecrets.map((connector) => ({
         ...connector,

@@ -76,5 +76,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./epoch_millis'));
     loadTestFile(require.resolve('./show_underlying_data'));
     loadTestFile(require.resolve('./show_underlying_data_dashboard'));
+    loadTestFile(require.resolve('./tsdb'));
   });
 };

@@ -3532,16 +3532,16 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8612,7 +8612,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
+          "{ schema?: string | undefined; type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8622,7 +8622,7 @@
           },
           "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -11519,7 +11519,15 @@
           "references": [
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
+              "path": "src/plugins/dashboard/public/services/data/types.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
             },
             {
               "plugin": "stackAlerts",
@@ -15421,7 +15429,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ get: { <TDocument = unknown>(this: That, params: ",
+                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
                   " | ",
                   "GetRequest",
@@ -15539,7 +15547,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",

@@ -29,10 +29,14 @@ import {
   ExportExceptionListProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
+  GetExceptionFilterFromExceptionListIdsProps,
+  GetExceptionFilterFromExceptionsProps,
+  ExceptionFilterResponse,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   ENDPOINT_LIST_URL,
+  EXCEPTION_FILTER,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -545,5 +549,61 @@ export const exportExceptionList = async ({
   http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
     method: 'POST',
     query: { id, list_id: listId, namespace_type: namespaceType },
+    signal,
+  });
+
+/**
+ * Create a Filter query from an exception list id
+ *
+ * @param exceptionListId The id of the exception list from which create a Filter query
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getExceptionFilterFromExceptionListIds = async ({
+  alias,
+  chunkSize,
+  exceptionListIds,
+  excludeExceptions,
+  http,
+  signal,
+}: GetExceptionFilterFromExceptionListIdsProps): Promise<ExceptionFilterResponse> =>
+  http.fetch(EXCEPTION_FILTER, {
+    method: 'POST',
+    body: JSON.stringify({
+      exception_list_ids: exceptionListIds,
+      type: 'exception_list_ids',
+      alias,
+      exclude_exceptions: excludeExceptions,
+      chunk_size: chunkSize,
+    }),
+    signal,
+  });
+
+/**
+ * Create a Filter query from a list of exceptions
+ *
+ * @param exceptions Exception items to be made into a `Filter` query
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getExceptionFilterFromExceptions = async ({
+  exceptions,
+  alias,
+  excludeExceptions,
+  http,
+  chunkSize,
+  signal,
+}: GetExceptionFilterFromExceptionsProps): Promise<ExceptionFilterResponse> =>
+  http.fetch(EXCEPTION_FILTER, {
+    method: 'POST',
+    body: JSON.stringify({
+      exceptions,
+      type: 'exception_items',
+      alias,
+      exclude_exceptions: excludeExceptions,
+      chunk_size: chunkSize,
+    }),
     signal,
   });

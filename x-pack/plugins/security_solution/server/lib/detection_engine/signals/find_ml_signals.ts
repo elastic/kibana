@@ -6,10 +6,9 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import type { AnomalyResults } from '../../machine_learning';
 import { getAnomalies } from '../../machine_learning';
 
@@ -21,7 +20,7 @@ export const findMlSignals = async ({
   anomalyThreshold,
   from,
   to,
-  exceptionItems,
+  exceptionFilter,
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
@@ -30,7 +29,7 @@ export const findMlSignals = async ({
   anomalyThreshold: number;
   from: string;
   to: string;
-  exceptionItems: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
 }): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
@@ -38,7 +37,7 @@ export const findMlSignals = async ({
     threshold: anomalyThreshold,
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
-    exceptionItems,
+    exceptionFilter,
   };
   return getAnomalies(params, mlAnomalySearch);
 };
