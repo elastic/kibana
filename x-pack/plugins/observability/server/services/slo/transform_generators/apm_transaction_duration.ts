@@ -12,8 +12,8 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLODestinationIndexName,
+  getSLOIngestPipelineName,
   getSLOTransformId,
-  SLO_INGEST_PIPELINE_NAME,
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import {
@@ -106,7 +106,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
 
   private buildDestination(slo: APMTransactionDurationSLO, spaceId: string) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOIngestPipelineName(spaceId),
       index: getSLODestinationIndexName(spaceId),
     };
   }
