@@ -35,6 +35,8 @@ const createConfig = (
   };
 };
 
+const kibanaVersion = '1.0.0';
+
 const createClient = () =>
   ({ close: jest.fn(), child: jest.fn() } as unknown as jest.Mocked<Client>);
 
@@ -82,6 +84,7 @@ describe('ClusterClient', () => {
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       agentManager,
+      kibanaVersion,
     });
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
@@ -108,6 +111,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
 
       expect(clusterClient.asInternalUser).toBe(internalClient);
@@ -122,6 +126,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -148,6 +153,7 @@ describe('ClusterClient', () => {
         getExecutionContext,
         getUnauthorizedErrorHandler,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -171,6 +177,7 @@ describe('ClusterClient', () => {
         getExecutionContext,
         getUnauthorizedErrorHandler,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -203,6 +210,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -227,6 +235,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -260,6 +269,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -293,6 +303,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -331,6 +342,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -359,6 +371,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
         kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
@@ -395,6 +408,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -429,6 +443,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -464,6 +479,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -493,6 +509,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { [headerKey]: 'foo' },
@@ -525,6 +542,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -556,6 +574,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = {
         headers: {
@@ -588,6 +607,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
       const request = {
         headers: {
@@ -615,6 +635,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
 
       await clusterClient.close();
@@ -632,6 +653,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
 
       let internalClientClosed = false;
@@ -676,6 +698,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
 
       internalClient.close.mockRejectedValue(new Error('error closing client'));
@@ -692,6 +715,7 @@ describe('ClusterClient', () => {
         type: 'custom-type',
         authHeaders,
         agentManager,
+        kibanaVersion,
       });
 
       await clusterClient.close();
