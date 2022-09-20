@@ -97,7 +97,6 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
           ...template?.settings,
           default_pipeline: CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE,
           lifecycle: {
-            ...template?.settings?.lifecycle,
             name: '',
           },
         },
