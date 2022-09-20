@@ -135,11 +135,11 @@ export class AuthenticationService {
         });
       }
 
-      const authenticationResult = await this.authenticator.authenticate(request);
+      const [authenticationResult, sessionValue] = await this.authenticator.authenticate(request);
 
       if (authenticationResult.succeeded()) {
         return t.authenticated({
-          state: authenticationResult.user,
+          state: { ...authenticationResult.user, profile_uid: sessionValue?.userProfileId },
           requestHeaders: authenticationResult.authHeaders,
           responseHeaders: authenticationResult.authResponseHeaders,
         });

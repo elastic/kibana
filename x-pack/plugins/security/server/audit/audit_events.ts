@@ -98,6 +98,7 @@ export interface UserLoginParams {
   authenticationProvider?: string;
   authenticationType?: string;
   sessionId?: string;
+  userProfileId?: string;
 }
 
 export function userLoginEvent({
@@ -105,6 +106,7 @@ export function userLoginEvent({
   authenticationProvider,
   authenticationType,
   sessionId,
+  userProfileId,
 }: UserLoginParams): AuditEvent {
   return {
     message: authenticationResult.user
@@ -116,6 +118,7 @@ export function userLoginEvent({
       outcome: authenticationResult.user ? 'success' : 'failure',
     },
     user: authenticationResult.user && {
+      id: userProfileId,
       name: authenticationResult.user.username,
       roles: authenticationResult.user.roles as string[],
     },
@@ -137,9 +140,14 @@ export function userLoginEvent({
 export interface UserLogoutParams {
   username?: string;
   provider: AuthenticationProvider;
+  userProfileId?: string;
 }
 
-export function userLogoutEvent({ username, provider }: UserLogoutParams): AuditEvent {
+export function userLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
   return {
     message: `User [${username}] is logging out using ${provider.type} provider [name=${provider.name}]`,
     event: {
@@ -147,11 +155,13 @@ export function userLogoutEvent({ username, provider }: UserLogoutParams): Audit
       category: ['authentication'],
       outcome: 'unknown',
     },
-    user: username
-      ? {
-          name: username,
-        }
-      : undefined,
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
     kibana: {
       authentication_provider: provider.name,
       authentication_type: provider.type,

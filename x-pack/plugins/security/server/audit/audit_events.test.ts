@@ -240,6 +240,7 @@ describe('#userLoginEvent', () => {
         authenticationProvider: 'basic1',
         authenticationType: 'basic',
         sessionId: '123',
+        userProfileId: 'uid',
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -261,6 +262,7 @@ describe('#userLoginEvent', () => {
         },
         "message": "User [user] has logged in using basic provider [name=basic1]",
         "user": Object {
+          "id": "uid",
           "name": "user",
           "roles": Array [
             "user-role",
@@ -311,6 +313,7 @@ describe('#userLogoutEvent', () => {
       userLogoutEvent({
         username: 'elastic',
         provider: { name: 'basic1', type: 'basic' },
+        userProfileId: 'uid',
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -327,6 +330,7 @@ describe('#userLogoutEvent', () => {
         },
         "message": "User [elastic] is logging out using basic provider [name=basic1]",
         "user": Object {
+          "id": "uid",
           "name": "elastic",
         },
       }

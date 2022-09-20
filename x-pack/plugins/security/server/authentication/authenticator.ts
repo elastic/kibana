@@ -351,7 +351,9 @@ export class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: KibanaRequest) {
+  async authenticate(
+    request: KibanaRequest
+  ): Promise<[AuthenticationResult, Readonly<SessionValue> | null]> {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
@@ -364,19 +366,22 @@ export class Authenticator {
           providerNameSuggestedByHint ?? 'n/a'
         }).`
       );
-      return AuthenticationResult.redirectTo(
-        `${
-          this.options.basePath.serverBasePath
-        }/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-          `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
-        )}${
-          providerNameSuggestedByHint
-            ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                providerNameSuggestedByHint
-              )}`
-            : ''
-        }`
-      );
+      return [
+        AuthenticationResult.redirectTo(
+          `${
+            this.options.basePath.serverBasePath
+          }/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+            `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
+          )}${
+            providerNameSuggestedByHint
+              ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                  providerNameSuggestedByHint
+                )}`
+              : ''
+          }`
+        ),
+        existingSessionValue,
+      ];
     }
 
     const suggestedProviderName =
@@ -399,14 +404,16 @@ export class Authenticator {
           authenticationResult,
           existingSessionValue,
         });
-
-        return canRedirectRequest(request)
-          ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
-          : authenticationResult;
+        return [
+          canRedirectRequest(request)
+            ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
+            : authenticationResult,
+          sessionUpdateResult ? sessionUpdateResult.value : null,
+        ];
       }
     }
 
-    return AuthenticationResult.notHandled();
+    return [AuthenticationResult.notHandled(), existingSessionValue];
   }
 
   /**
@@ -631,6 +638,7 @@ export class Authenticator {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLoginEvent({
+          userProfileId: existingSessionValue?.userProfileId,
           sessionId: existingSessionValue?.sid,
           authenticationResult,
           authenticationProvider: provider.name,
@@ -737,7 +745,7 @@ export class Authenticator {
       }
     }
 
-    let newSessionValue;
+    let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
@@ -756,6 +764,7 @@ export class Authenticator {
         const auditLogger = this.options.audit.asScoped(request);
         auditLogger.log(
           userLoginEvent({
+            userProfileId, // We must explicitly specify the `userProfileId` here since we just created the session and it can't be inferred from the request context.
             sessionId: newSessionValue?.sid, // We must explicitly specify the `sessionId` here since we just created the session and it can't be inferred from the request context.
             authenticationResult,
             authenticationProvider: provider.name,
@@ -796,12 +805,7 @@ export class Authenticator {
   }: InvalidateSessionValueParams) {
     if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
-      auditLogger.log(
-        userLogoutEvent({
-          username: sessionValue.username,
-          provider: sessionValue.provider,
-        })
-      );
+      auditLogger.log(userLogoutEvent(sessionValue));
     }
 
     await this.session.invalidate(request, { match: 'current' });
