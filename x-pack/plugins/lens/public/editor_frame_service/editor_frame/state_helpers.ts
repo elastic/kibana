@@ -13,6 +13,7 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { isAnnotationsLayer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   Datasource,
   DatasourceLayers,
@@ -52,6 +53,9 @@ function getIndexPatterns(
     if ('isVisualizeAction' in initialContext) {
       for (const { indexPatternId } of initialContext.layers) {
         indexPatternIds.push(indexPatternId);
+      }
+      for (const l of initialContext.configuration.layers) {
+        if (isAnnotationsLayer(l)) indexPatternIds.push(l.indexPatternId);
       }
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
@@ -209,6 +213,7 @@ export async function initializeSources(
       visualizationMap,
       visualizationState,
       references,
+      initialContext,
     }),
   };
 }
@@ -217,16 +222,19 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
+  initialContext,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) {
   if (visualizationState?.activeId) {
     return (
       visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
         visualizationState.state,
-        references
+        references,
+        initialContext
       ) ?? visualizationState.state
     );
   }

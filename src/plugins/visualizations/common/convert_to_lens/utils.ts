@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './constants';
-export * from './utils';
+import { XYAnnotationsLayerConfig, XYLayerConfig } from './types';
+
+export const isAnnotationsLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYAnnotationsLayerConfig => layer.layerType === 'annotations';
