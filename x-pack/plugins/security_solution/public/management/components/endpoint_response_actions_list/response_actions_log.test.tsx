@@ -9,6 +9,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
@@ -21,7 +22,7 @@ import { getActionListMock } from './mocks';
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;
-  error?: null;
+  error?: Partial<IHttpFetchError> | null;
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
@@ -145,6 +146,28 @@ describe('Response Actions Log', () => {
       ...baseMockedActionList,
     };
     jest.clearAllMocks();
+  });
+
+  describe('When index does not exists yet', () => {
+    it('should show global loader when waiting for response', () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        isFetched: false,
+        isFetching: true,
+      };
+      render();
+      expect(renderResult.getByTestId(`${testPrefix}-global-loader`)).toBeTruthy();
+    });
+    it('should show empty page when there is no index', () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        error: {
+          body: { statusCode: 404, message: 'index_not_found_exception' },
+        },
+      };
+      render();
+      expect(renderResult.getByTestId(`${testPrefix}-empty-state`)).toBeTruthy();
+    });
   });
 
   describe('Without data', () => {

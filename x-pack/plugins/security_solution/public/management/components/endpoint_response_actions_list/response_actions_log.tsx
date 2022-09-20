@@ -116,9 +116,9 @@ export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
     showHostNames?: boolean;
     isFlyout?: boolean;
-    setIsDataCallback?: (isData: boolean) => void;
+    setIsDataInResponse?: (isData: boolean) => void;
   }
->(({ agentIds, showHostNames = false, isFlyout = true, setIsDataCallback }) => {
+>(({ agentIds, showHostNames = false, isFlyout = true, setIsDataInResponse }) => {
   const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
     useUrlPagination();
   const {
@@ -134,6 +134,7 @@ export const ResponseActionsLog = memo<
     [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
 
+  // Used to decide if display global loader or not (only the fist time tha page loads)
   const [isFirstAttempt, setIsFirstAttempt] = useState(true);
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
@@ -179,6 +180,26 @@ export const ResponseActionsLog = memo<
     },
     { retry: false }
   );
+
+  // Will call setIsDataInResponse with `true` if exists and there is no error on fetching data.
+  // It also will call setIsFirstAttempt with false in same situation as the first attemp has been done.
+  // It will call it with `false` if there is an error with specific code fetching data.
+  useEffect(() => {
+    if (
+      !isFetching &&
+      error?.body?.statusCode === 404 &&
+      error?.body?.message === 'index_not_found_exception'
+    ) {
+      if (setIsDataInResponse) {
+        setIsDataInResponse(false);
+      }
+    } else if (!isFetching && actionList) {
+      setIsFirstAttempt(false);
+      if (setIsDataInResponse) {
+        setIsDataInResponse(true);
+      }
+    }
+  }, [actionList, error, isFetching, setIsDataInResponse]);
 
   // handle auto refresh data
   const onRefresh = useCallback(() => {
@@ -586,27 +607,10 @@ export const ResponseActionsLog = memo<
     [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
   );
 
-  useEffect(() => {
-    if (
-      !isFetching &&
-      error?.body?.statusCode === 404 &&
-      error?.body?.message === 'index_not_found_exception'
-    ) {
-      if (setIsDataCallback) {
-        setIsDataCallback(false);
-      }
-    } else if (!isFetching && actionList) {
-      setIsFirstAttempt(false);
-      if (setIsDataCallback) {
-        setIsDataCallback(true);
-      }
-    }
-  }, [actionList, error, isFetching, setIsDataCallback]);
-
   if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
-    return <ActionsLogEmptyState />;
+    return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
   } else if (isFetching && isFirstAttempt) {
-    return <ManagementPageLoader />;
+    return <ManagementPageLoader data-test-subj={getTestId('global-loader')} />;
   }
   return (
     <>
