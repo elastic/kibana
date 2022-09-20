@@ -35,7 +35,10 @@ export function useHistoryBlock(isEdited: boolean) {
 
         if (confirmRes) {
           unblock();
-          application.navigateToUrl(state.pathname + state.search, { state: state.state });
+
+          application.navigateToUrl(state.pathname + state.hash + state.search, {
+            state: state.state,
+          });
         }
       }
       confirmAsync();
