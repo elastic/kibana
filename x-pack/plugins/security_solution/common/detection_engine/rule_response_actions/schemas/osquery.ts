@@ -6,7 +6,24 @@
  */
 
 import * as t from 'io-ts';
-import { arrayQueries, ecsMapping } from '@kbn/osquery-plugin/common/schemas/common';
+
+const ecsMapping = t.record(
+  t.string,
+  t.partial({
+    field: t.string,
+    value: t.union([t.string, t.array(t.string)]),
+  })
+);
+
+export const arrayQueries = t.array(
+  t.type({
+    id: t.string,
+    query: t.string,
+    ecs_mapping: ecsMapping,
+    version: t.union([t.string, t.undefined]),
+    platform: t.union([t.string, t.undefined]),
+  })
+);
 
 export const OsqueryParams = t.intersection([
   t.type({
