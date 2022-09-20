@@ -638,6 +638,22 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDurationC",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeDurationC",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
         "id": "def-common.UUIDC",
         "type": "Type",
         "tags": [],
@@ -1022,6 +1038,24 @@
           "<number, string, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDuration",
+        "type": "Object",
+        "tags": [],
+        "label": "TimeDuration",
+        "description": [
+          "\nTypes the TimeDuration as:\n  - A string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time\n  - in the format {safe_integer}{timeUnit}, e.g. \"30s\", \"1m\", \"2h\""
+        ],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
