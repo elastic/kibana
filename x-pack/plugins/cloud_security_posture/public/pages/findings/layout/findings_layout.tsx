@@ -139,8 +139,8 @@ const baseColumns = [
     sortable: false,
     truncateText: true,
     render: (tags: string[]) => {
-      const { benchmark, version } = getPrimaryRuleTags(tags);
-      return [benchmark, version].map((tag) => <EuiBadge>{tag}</EuiBadge>);
+      const primaryTags = getPrimaryRuleTags(tags);
+      return primaryTags.map((tag) => <EuiBadge key={tag}>{tag}</EuiBadge>);
     },
   },
   {
