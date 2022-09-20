@@ -115,7 +115,11 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       />
     ),
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
-      <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
+      <Link
+        to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
+        className="eui-textTruncate"
+        title={resourceId}
+      >
         {resourceId}
       </Link>
     ),
@@ -139,6 +143,11 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
         defaultMessage="Resource Name"
       />
     ),
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.benchmark.name',
@@ -159,7 +168,14 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
         defaultMessage="CIS Sections"
       />
     ),
-    render: (sections: string[]) => sections.join(', '),
+    render: (sections: string[]) => {
+      const items = sections.join(', ');
+      return (
+        <EuiToolTip content={items} anchorClassName="eui-textTruncate">
+          <>{items}</>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'cluster_id',

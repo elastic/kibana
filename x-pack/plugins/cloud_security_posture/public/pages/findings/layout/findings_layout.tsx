@@ -112,6 +112,11 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.name',
@@ -119,6 +124,11 @@ const baseColumns = [
       defaultMessage: 'Rule',
     }),
     sortable: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.benchmark.name',
@@ -135,8 +145,14 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
+    width: '10%',
     sortable: true,
     truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.tags',
