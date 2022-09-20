@@ -962,9 +962,14 @@ describe('last_value', () => {
         // group 7
         'aggFilteredMetric id="12" enabled=true schema="metric" \n  customBucket={aggFilter id="12-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggTopMetrics id="12-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
         'aggFilteredMetric id="13" enabled=true schema="metric" \n  customBucket={aggFilter id="13-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggTopMetrics id="13-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 8
+        // group 8 - uses "aggTopHit"
         'aggFilteredMetric id="14" enabled=true schema="metric" \n  customBucket={aggFilter id="14-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopHit id="14-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp" aggregate="concat"}',
         'aggFilteredMetric id="15" enabled=true schema="metric" \n  customBucket={aggFilter id="15-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopHit id="15-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp" aggregate="concat"}',
+        // group 9 - unrelated aggs (should remain untouched)
+        'aggCardinality id="16" enabled=true schema="metric" field="bytes" emptyAsNull=false',
+        'aggCardinality id="17" enabled=true schema="metric" field="bytes" emptyAsNull=false',
+        'aggFilteredMetric id="18" enabled=true schema="metric" \n  customBucket={aggFilter id="18-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="18-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
+        'aggFilteredMetric id="19" enabled=true schema="metric" \n  customBucket={aggFilter id="19-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="19-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
       ].map((expression) => buildExpression(parseExpression(expression)));
 
       const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
@@ -975,7 +980,7 @@ describe('last_value', () => {
         aggsToIdsMap
       );
 
-      expect(newAggs.length).toBe(8);
+      expect(newAggs.length).toBe(12);
 
       expect(newIdMap).toMatchInlineSnapshot(`
         Object {
@@ -1009,6 +1014,16 @@ describe('last_value', () => {
             },
             Object {
               "id": "original-15",
+            },
+          ],
+          "col-16-16": Array [
+            Object {
+              "id": "original-16",
+            },
+          ],
+          "col-17-17": Array [
+            Object {
+              "id": "original-17",
             },
           ],
           "col-2-2": Array [

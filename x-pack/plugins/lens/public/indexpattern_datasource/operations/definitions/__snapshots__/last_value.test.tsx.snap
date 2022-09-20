@@ -750,5 +750,57 @@ Array [
     ],
     "type": "expression",
   },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "emptyAsNull": Array [
+            false,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "16",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggCardinality",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "emptyAsNull": Array [
+            false,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "17",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggCardinality",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
 ]
 `;
