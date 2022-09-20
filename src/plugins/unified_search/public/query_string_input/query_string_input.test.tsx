@@ -20,12 +20,9 @@ import { render } from '@testing-library/react';
 
 import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { QueryLanguageSwitcher } from './language_switcher';
 import QueryStringInput from './query_string_input';
@@ -66,14 +63,6 @@ const createMockStorage = () => ({
 });
 
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
-  const services = {
-    ...startMock,
-    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-    data: dataPluginMock.createStartContract(),
-    appName: testProps.appName || 'test',
-    storage: storage || createMockStorage(),
-  };
-
   const defaultOptions = {
     screenTitle: 'Another Screen',
     intl: null as any,
@@ -83,16 +72,15 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
       appName: testProps.appName || 'test',
       storage: storage || createMockStorage(),
       usageCollection: { reportUiCounter: () => {} },
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: httpServiceMock.createSetupContract(),
+      uiSettings: startMock.uiSettings,
+      http: startMock.http,
+      docLinks: startMock.docLinks,
     },
   };
 
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <QueryStringInput {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
+      <QueryStringInput {...defaultOptions} {...testProps} />
     </I18nProvider>
   );
 }

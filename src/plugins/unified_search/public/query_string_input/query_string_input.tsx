@@ -734,6 +734,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         nonKqlMode={this.props.nonKqlMode}
+        deps={{
+          docLinks: this.props.deps.docLinks,
+        }}
       />
     );
 
