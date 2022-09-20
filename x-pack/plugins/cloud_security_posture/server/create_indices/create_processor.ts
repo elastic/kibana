@@ -6,10 +6,15 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  CSP_INGEST_TIMESTAMP_PIPELINE,
+  CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+} from '../../common/constants';
 
 /**
  * @param pipelineId - the pipeline id to create. If a pipeline with the same pipelineId already exists, nothing is created or updated.
- *
+ * @param logger - logger
+ * @param esClient - the elasticsearch client
  * @return true if the pipeline exits or created, false otherwise.
  */
 export const createPipelineIfNotExists = async (
@@ -25,26 +30,8 @@ export const createPipelineIfNotExists = async (
     const exitError = transformError(exitErr);
     if (exitError.statusCode === 404) {
       try {
-        await esClient.ingest.putPipeline({
-          id: pipelineId,
-          description: 'Pipeline for adding event timestamp',
-          processors: [
-            {
-              set: {
-                field: '@timestamp',
-                value: '{{_ingest.timestamp}}',
-              },
-            },
-          ],
-          on_failure: [
-            {
-              set: {
-                field: 'error.message',
-                value: '{{ _ingest.on_failure_message }}',
-              },
-            },
-          ],
-        });
+        const ingest = getPipelineById(pipelineId);
+        await esClient.ingest.putPipeline(ingest);
         logger.trace(`pipeline: ${pipelineId} was created`);
         return true;
       } catch (existError) {
@@ -58,4 +45,66 @@ export const createPipelineIfNotExists = async (
     }
   }
   return false;
+};
+
+export const getPipelineById = (id: string): PipelineIngest => {
+  switch (id) {
+    case CSP_INGEST_TIMESTAMP_PIPELINE: {
+      return findingsPipeline;
+    }
+    case CSP_LATEST_INGEST_TIMESTAMP_PIPELINE: {
+      return latestFindingsPipeline;
+    }
+    default:
+      throw new Error('No ingest pipeline was found for this Id');
+  }
+};
+
+export interface PipelineIngest {
+  id: string;
+  description: string;
+  on_failure: Array<{ set: { field: string; value: string } }>;
+  processors: Array<{ set: { field: string; value: string } }>;
+}
+
+const findingsPipeline = {
+  id: CSP_INGEST_TIMESTAMP_PIPELINE,
+  description: 'Pipeline for adding event timestamp',
+  processors: [
+    {
+      set: {
+        field: '@timestamp',
+        value: '{{_ingest.timestamp}}',
+      },
+    },
+  ],
+  on_failure: [
+    {
+      set: {
+        field: 'error.message',
+        value: '{{ _ingest.on_failure_message }}',
+      },
+    },
+  ],
+};
+
+const latestFindingsPipeline = {
+  id: CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+  description: 'Pipeline for cloudbeat latest findings index',
+  processors: [
+    {
+      set: {
+        field: 'event.ingested',
+        value: '{{_ingest.timestamp}}',
+      },
+    },
+  ],
+  on_failure: [
+    {
+      set: {
+        field: 'error.message',
+        value: '{{ _ingest.on_failure_message }}',
+      },
+    },
+  ],
 };

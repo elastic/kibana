@@ -12,6 +12,7 @@ import {
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSP_INGEST_TIMESTAMP_PIPELINE,
+  CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
   FINDINGS_INDEX_NAME,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
@@ -24,6 +25,7 @@ import { benchmarkScoreMapping } from './benchmark_score_mapping';
 
 export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
   await createPipelineIfNotExists(esClient, CSP_INGEST_TIMESTAMP_PIPELINE, logger);
+  await createPipelineIfNotExists(esClient, CSP_LATEST_INGEST_TIMESTAMP_PIPELINE, logger);
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
@@ -84,20 +86,25 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
     const { template, composed_of, _meta } =
       findingsIndexTemplateResponse.index_templates[0].index_template;
 
-    if (template?.settings) {
-      template.settings.lifecycle = {
-        name: '',
-      };
-    }
-
     // We always want to keep the index template updated
     await esClient.indices.putIndexTemplate({
       name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
       index_patterns: LATEST_FINDINGS_INDEX_PATTERN,
       priority: 500,
+      template: {
+        mappings: template?.mappings,
+        settings: {
+          ...template?.settings,
+          default_pipeline: CSP_LATEST_INGEST_TIMESTAMP_PIPELINE,
+          lifecycle: {
+            ...template?.settings?.lifecycle,
+            name: '',
+          },
+        },
+        aliases: template?.aliases,
+      },
       _meta,
       composed_of,
-      template,
     });
 
     await createIndexSafe(esClient, logger, LATEST_FINDINGS_INDEX_DEFAULT_NS);
