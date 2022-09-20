@@ -6,14 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
-import { getApplication, getUsageCollection } from '../kibana_services';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -52,10 +50,6 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
     const { MapEmbeddable } = await lazyLoadMapModules();
-
-    getApplication().currentAppId$.pipe(first()).subscribe((appId: string) => {
-      console.log(appId);
-    });
     return new MapEmbeddable(
       {
         editable: await this.isEditable(),
