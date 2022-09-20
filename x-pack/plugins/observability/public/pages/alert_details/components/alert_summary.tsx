@@ -73,16 +73,17 @@ export function AlertSummary({ alert }: PageHeaderProps) {
             </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {
-            alert?.fields['kibana.alert.status'] ?
-              <AlertStatusIndicator
-                alertStatus={
-                  alert?.fields['kibana.alert.status'] === ALERT_STATUS_ACTIVE
-                    ? ALERT_STATUS_ACTIVE
-                    : ALERT_STATUS_RECOVERED
-                }
-              /> : <div data-test-subj='noAlertStatus'>-</div>
-          }
+          {alert?.fields['kibana.alert.status'] ? (
+            <AlertStatusIndicator
+              alertStatus={
+                alert?.fields['kibana.alert.status'] === ALERT_STATUS_ACTIVE
+                  ? ALERT_STATUS_ACTIVE
+                  : ALERT_STATUS_RECOVERED
+              }
+            />
+          ) : (
+            <div data-test-subj="noAlertStatus">-</div>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
@@ -110,9 +111,7 @@ export function AlertSummary({ alert }: PageHeaderProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {moment(alert?.fields['kibana.alert.start']?.toString()).format(
-              DEFAULT_DATE_FORMAT
-            )}
+            {moment(alert?.fields['kibana.alert.start']?.toString()).format(DEFAULT_DATE_FORMAT)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -142,14 +141,12 @@ export function AlertSummary({ alert }: PageHeaderProps) {
           <EuiSpacer size="s" />
           <div>
             <EuiSpacer size="s" />
-            {
-              alert?.fields['kibana.alert.rule.tags'] &&
+            {alert?.fields['kibana.alert.rule.tags'] &&
               alert?.fields['kibana.alert.rule.tags'].length > 0 &&
               triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
                 tagsOutPopover: true,
                 tags: alert?.fields['kibana.alert.rule.tags'],
-              })
-            }
+              })}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
