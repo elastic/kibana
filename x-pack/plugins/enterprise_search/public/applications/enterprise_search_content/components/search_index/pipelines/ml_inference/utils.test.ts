@@ -86,6 +86,9 @@ describe('ml inference utils', () => {
       expect(isValidPipelineName('a_pipeline_name123')).toEqual(true);
       expect(isValidPipelineName('a-pipeline-name-123')).toEqual(true);
     });
+    it('does not allow spaces', () => {
+      expect(isValidPipelineName('a pipeline name')).toEqual(false);
+    });
     it('does not allow special characters', () => {
       expect(isValidPipelineName('a_pipeline_name_1$')).toEqual(false);
       expect(isValidPipelineName('a_pipeline_name_1%')).toEqual(false);

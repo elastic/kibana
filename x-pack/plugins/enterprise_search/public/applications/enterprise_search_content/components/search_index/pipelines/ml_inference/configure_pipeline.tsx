@@ -27,7 +27,7 @@ import { MLInferenceLogic } from './ml_inference_logic';
 
 export const ConfigurePipeline: React.FC = () => {
   const {
-    addInferencePipelineModal: { configuration },
+    addInferencePipelineModal: { configuration, indexName },
     formErrors,
     supportedMLModels,
     sourceFields,
@@ -78,7 +78,10 @@ export const ConfigurePipeline: React.FC = () => {
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
               {
                 defaultMessage:
-                  'Pipeline names can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference-".',
+                  'Pipeline names can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference@{indexName}-".',
+                values: {
+                  indexName,
+                },
               }
             )
           }

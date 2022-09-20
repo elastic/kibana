@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -17,10 +19,12 @@ import { IngestPipelinesCard } from './ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
+import { PipelinesLogic } from './pipelines_logic';
 
 export const SearchIndexPipelines: React.FC = () => {
-  const [addInferencePipelineOpen, setShowAddInferencePipeline] = React.useState<boolean>(false);
-  const closeAddInferencePipelineModal = () => setShowAddInferencePipeline(false);
+  const { showAddMlInferencePipelineModal } = useValues(PipelinesLogic);
+  const { closeAddMlInferencePipelineModal, openAddMlInferencePipelineModal } =
+    useActions(PipelinesLogic);
 
   return (
     <>
@@ -92,15 +96,15 @@ export const SearchIndexPipelines: React.FC = () => {
             )}
             iconType="compute"
             action={
-              <AddMLInferencePipelineButton onClick={() => setShowAddInferencePipeline(true)} />
+              <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
             }
           >
             <MlInferencePipelineProcessorsCard />
           </DataPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {addInferencePipelineOpen && (
-        <AddMLInferencePipelineModal onClose={closeAddInferencePipelineModal} />
+      {showAddMlInferencePipelineModal && (
+        <AddMLInferencePipelineModal onClose={closeAddMlInferencePipelineModal} />
       )}
     </>
   );

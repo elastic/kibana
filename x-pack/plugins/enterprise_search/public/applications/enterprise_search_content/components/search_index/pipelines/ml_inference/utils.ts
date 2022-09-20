@@ -35,7 +35,7 @@ export const sortSourceFields = (a: string, b: string): number => {
   return a.localeCompare(b);
 };
 
-const VALID_PIPELINE_NAME_REGEX = /^[\w\s\-]+$/;
+const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 export const isValidPipelineName = (input: string): boolean => {
   return input.length > 0 && VALID_PIPELINE_NAME_REGEX.test(input);
 };
