@@ -308,6 +308,45 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#bulk_delete', () => {
+    const bulkDeleteDoc = {
+      id: 'AVwSwFxtcMV38qjDZoQg',
+      type: 'config',
+    };
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({
+        statuses: [{ id: bulkDeleteDoc.id, type: bulkDeleteDoc.type, success: true }],
+      });
+    });
+
+    test('deletes with an array of id, type and success status for deleted docs', async () => {
+      const response = savedObjectsClient.bulkDelete([bulkDeleteDoc]);
+      await expect(response).resolves.toHaveProperty('statuses');
+
+      const result = await response;
+      expect(result.statuses).toHaveLength(1);
+      expect(result.statuses[0]).toHaveProperty('success');
+    });
+
+    test('makes HTTP call', async () => {
+      await savedObjectsClient.bulkDelete([bulkDeleteDoc]);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_delete",
+            Object {
+              "body": "[{\\"type\\":\\"config\\",\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\"}]",
+              "method": "POST",
+              "query": Object {
+                "force": false,
+              },
+            },
+          ],
+        ]
+      `);
+    });
+  });
+
   describe('#update', () => {
     const attributes = { foo: 'Foo', bar: 'Bar' };
     const options = { version: '1' };

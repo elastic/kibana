@@ -5,84 +5,81 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import negate from 'lodash/negate';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { translateFieldLabel } from '../../indicator_field_label';
 
-const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
-  {
-    id: RawIndicatorFieldId.TimeStamp,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.timestampColumnTitle', {
-      defaultMessage: '@timestamp',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.Name,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
-      defaultMessage: 'Indicator',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.Type,
-    displayAsText: i18n.translate(
-      'xpack.threatIntelligence.indicator.table.indicatorTypeColumTitle',
-      {
-        defaultMessage: 'Indicator type',
-      }
-    ),
-  },
-  {
-    id: RawIndicatorFieldId.Feed,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.FeedColumTitle', {
-      defaultMessage: 'Feed',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.FirstSeen,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.firstSeenColumTitle', {
-      defaultMessage: 'First seen',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.LastSeen,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.lastSeenColumTitle', {
-      defaultMessage: 'Last seen',
-    }),
-  },
-];
+export const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
+  RawIndicatorFieldId.TimeStamp,
+  RawIndicatorFieldId.Name,
+  RawIndicatorFieldId.Type,
+  RawIndicatorFieldId.Feed,
+  RawIndicatorFieldId.FirstSeen,
+  RawIndicatorFieldId.LastSeen,
+].map((field) => ({
+  id: field,
+  displayAsText: translateFieldLabel(field),
+}));
 
 const DEFAULT_VISIBLE_COLUMNS = DEFAULT_COLUMNS.map((column) => column.id);
 
 const INDICATORS_TABLE_STORAGE = 'indicatorsTable' as const;
 
-export const useColumnSettings = () => {
+type CachedColumnsPreferences = Partial<{
+  visibleColumns: string[];
+  columns: EuiDataGridColumn[];
+  sortingState: EuiDataGridSorting['columns'];
+}>;
+
+export interface ColumnSettingsValue {
+  columns: EuiDataGridColumn[];
+  columnVisibility: {
+    visibleColumns: string[];
+    setVisibleColumns: (columns: string[]) => void;
+  };
+  sorting: EuiDataGridSorting;
+  handleToggleColumn: (columnId: string) => void;
+  handleResetColumns: () => void;
+}
+
+export const useColumnSettings = (): ColumnSettingsValue => {
   const {
     services: { storage },
   } = useKibana();
+
+  const [sortingState, setSortingState] = useState<EuiDataGridSorting['columns']>([]);
+  const sorting: EuiDataGridSorting = useMemo(
+    () => ({ columns: sortingState, onSort: setSortingState }),
+    [sortingState]
+  );
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
   const [visibleColumns, setVisibleColumns] = useState<Array<EuiDataGridColumn['id']>>([]);
 
   /** Deserialize preferences on mount */
   useEffect(() => {
-    const cachedPreferences = storage.get(INDICATORS_TABLE_STORAGE) || {
+    const {
+      visibleColumns: cachedVisibleColumns = [],
+      columns: cachedColumns = [],
+      sortingState: cachedSortingState = [],
+    }: CachedColumnsPreferences = storage.get(INDICATORS_TABLE_STORAGE) || {
       visibleColumns: DEFAULT_VISIBLE_COLUMNS,
       columns: DEFAULT_COLUMNS,
+      sortingState: [],
     };
-
-    const { visibleColumns: cachedVisibleColumns, columns: cachedColumns } = cachedPreferences;
 
     setVisibleColumns(cachedVisibleColumns);
     setColumns(cachedColumns);
+    setSortingState(cachedSortingState);
   }, [storage]);
 
   /** Ensure preferences are serialized into plugin storage on change */
   useEffect(() => {
-    storage.set(INDICATORS_TABLE_STORAGE, { visibleColumns, columns });
-  }, [columns, storage, visibleColumns]);
+    storage.set(INDICATORS_TABLE_STORAGE, { visibleColumns, columns, sortingState });
+  }, [columns, sortingState, storage, visibleColumns]);
 
   /** Toggle column and adjust its visibility */
   const handleToggleColumn = useCallback((columnId: string) => {
@@ -131,5 +128,6 @@ export const useColumnSettings = () => {
     handleToggleColumn,
     columns,
     columnVisibility,
+    sorting,
   };
 };

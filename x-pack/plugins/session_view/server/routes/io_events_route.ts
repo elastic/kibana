@@ -8,7 +8,9 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ProcessEvent } from '../../common/types/process_tree';
+import { parse } from '@kbn/datemath';
+import { Aggregate } from '../../common/types/aggregate';
+import { EventAction, EventKind, ProcessEvent } from '../../common/types/process_tree';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -16,7 +18,9 @@ import {
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TTY_CHAR_DEVICE_MAJOR_PROPERTY,
   TTY_CHAR_DEVICE_MINOR_PROPERTY,
-  HOST_BOOT_ID_PROPERTY,
+  HOST_ID_PROPERTY,
+  PROCESS_ENTITY_ID_PROPERTY,
+  PROCESS_EVENTS_PER_PAGE,
 } from '../../common/constants';
 
 /**
@@ -52,15 +56,21 @@ export const getTTYQueryPredicates = async (
 
   if (lastEventHits.length > 0) {
     const lastEvent: ProcessEvent = lastEventHits[0]._source as ProcessEvent;
-    const range = [lastEvent?.process?.entry_leader?.start, lastEvent[TIMESTAMP]];
+    const sessionEnded = lastEvent.event?.action === EventAction.end && lastEvent['@timestamp'];
+    const lastEventTime = lastEvent['@timestamp'];
+    const rangeEnd =
+      sessionEnded && lastEventTime
+        ? parse(lastEventTime)?.add(30, 'second').toISOString()
+        : new Date().toISOString();
+    const range = [lastEvent?.process?.entry_leader?.start, rangeEnd];
     const tty = lastEvent?.process?.entry_leader?.tty;
-    const bootId = lastEvent?.host?.boot?.id;
+    const hostId = lastEvent?.host?.id;
 
-    if (tty?.char_device?.major !== undefined && tty?.char_device?.minor !== undefined && bootId) {
+    if (tty?.char_device?.major !== undefined && tty?.char_device?.minor !== undefined && hostId) {
       return {
         ttyMajor: tty.char_device.major,
         ttyMinor: tty.char_device.minor,
-        bootId,
+        hostId,
         range,
       };
     }
@@ -77,13 +87,13 @@ export const registerIOEventsRoute = (router: IRouter) => {
         query: schema.object({
           sessionEntityId: schema.string(),
           cursor: schema.maybe(schema.string()),
+          pageSize: schema.maybe(schema.number()),
         }),
       },
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { cursor } = request.query;
-      const { sessionEntityId } = request.query;
+      const { sessionEntityId, cursor, pageSize = IO_EVENTS_PER_PAGE } = request.query;
 
       try {
         const ttyPredicates = await getTTYQueryPredicates(client, sessionEntityId);
@@ -100,20 +110,20 @@ export const registerIOEventsRoute = (router: IRouter) => {
                 must: [
                   { term: { [TTY_CHAR_DEVICE_MAJOR_PROPERTY]: ttyPredicates.ttyMajor } },
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
-                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
+                  { term: { [HOST_ID_PROPERTY]: ttyPredicates.hostId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
                   {
                     range: {
                       [TIMESTAMP]: {
-                        gte: ttyPredicates.range[0],
-                        lte: ttyPredicates.range[1],
+                        gte: ttyPredicates.range[0]?.toString(),
+                        lte: ttyPredicates.range[1]?.toString(),
                       },
                     },
                   },
                 ],
               },
             },
-            size: IO_EVENTS_PER_PAGE,
+            size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
             sort: [{ [TIMESTAMP]: 'asc' }],
             search_after: cursor ? [cursor] : undefined,
           },
@@ -134,4 +144,68 @@ export const registerIOEventsRoute = (router: IRouter) => {
       }
     }
   );
+};
+
+export const searchProcessWithIOEvents = async (
+  client: ElasticsearchClient,
+  sessionEntityId: string,
+  range?: string[]
+) => {
+  const rangeFilter = range
+    ? [
+        {
+          range: {
+            '@timestamp': {
+              gte: range[0],
+              lte: range[1],
+            },
+          },
+        },
+      ]
+    : [];
+
+  const search = await client.search({
+    index: [PROCESS_EVENTS_INDEX],
+    body: {
+      query: {
+        bool: {
+          must: [
+            { term: { [EVENT_ACTION]: 'text_output' } },
+            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+            ...rangeFilter,
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        custom_agg: {
+          terms: {
+            field: PROCESS_ENTITY_ID_PROPERTY,
+          },
+          aggs: {
+            bucket_sort: {
+              bucket_sort: {
+                size: PROCESS_EVENTS_PER_PAGE,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const agg: any = search.aggregations?.custom_agg;
+  const buckets: Aggregate[] = agg?.buckets || [];
+
+  return buckets.map((bucket) => ({
+    _source: {
+      event: {
+        kind: EventKind.event,
+        action: EventAction.text_output,
+      },
+      process: {
+        entity_id: bucket.key,
+      },
+    },
+  }));
 };
