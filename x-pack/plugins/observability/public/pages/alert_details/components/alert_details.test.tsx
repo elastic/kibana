@@ -27,6 +27,7 @@ jest.mock('react-router-dom', () => ({
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
+
 const chance = new Chance();
 
 const params = {
