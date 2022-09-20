@@ -41,6 +41,19 @@ describe('AlertsFlyout', () => {
 
     expect(flyout.getByText('Recovered')).toBeInTheDocument();
   });
+
+
+  it('should NOT show the Alert details button as the feature flag is disabled', async () => {
+    const flyout = render(
+      <AlertsFlyout
+        alert={recoveredAlert}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
+        onClose={jest.fn()}
+      />
+    );
+    console.log(flyout.debug())
+    expect(flyout.queryByTestId("alertsFlyoutAlertDetailsButton")).not.toBeInTheDocument();
+  });
 });
 
 const activeAlert: TopAlert = {
