@@ -23,6 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
@@ -31,11 +32,14 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
 
+const NARROW_COLUMN_WIDTH = '120px';
+const EXPAND_COLUMN_WIDTH = '40px';
 const ACTIONS_COLUMN_WIDTH = '60px';
+const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
-const DEFAULT_SORT_FIELD = 'docCount';
-const DEFAULT_SORT_DIRECTION = 'desc';
+const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_DIRECTION = 'asc';
 const viewInDiscoverMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.viewInDiscover',
   {
@@ -46,6 +50,7 @@ const viewInDiscoverMessage = i18n.translate(
 interface GroupTableItem {
   id: number;
   docCount: number;
+  pValue: number | null;
   group: Record<string, string | number>;
   repeatedValues: Record<string, string | number>;
 }
@@ -188,7 +193,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   const columns: Array<EuiBasicTableColumn<GroupTableItem>> = [
     {
       align: RIGHT_ALIGNMENT,
-      width: '40px',
+      width: EXPAND_COLUMN_WIDTH,
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
@@ -207,10 +212,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnGroup',
       field: 'group',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.groupLabel',
-        { defaultMessage: 'Group' }
-      ),
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel', {
+        defaultMessage: 'Group',
+      }),
       render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
         for (const fieldName in group) {
@@ -240,7 +244,11 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
                 color="hollow"
               >
-                +{Object.keys(repeatedValues).length} more
+                +{Object.keys(repeatedValues).length}{' '}
+                <FormattedMessage
+                  id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
+                  defaultMessage="more"
+                />
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
@@ -252,9 +260,36 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       textOnly: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnPValue',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'pValue',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip',
+            {
+              defaultMessage:
+                'The significance of changes in the frequency of values; lower values indicate greater change',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel"
+              defaultMessage="p-value"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
+      sortable: true,
+    },
+    {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
       field: 'docCount',
-      name: i18n.translate('xpack.aiops.correlations.correlationsTable.docCountLabel', {
+      name: i18n.translate('xpack.aiops.correlations.spikeAnalysisTableGroups.docCountLabel', {
         defaultMessage: 'Doc count',
       }),
       sortable: true,
