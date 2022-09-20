@@ -18,6 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { validateSetting } from '../../../../../../../common/agent_configuration/setting_definitions';
 import {
@@ -25,7 +26,6 @@ import {
   amountAndUnitToObject,
 } from '../../../../../../../common/agent_configuration/amount_and_unit';
 import { SelectWithPlaceholder } from '../../../../../shared/select_with_placeholder';
-import { EuiMarkdownFormat } from '@elastic/eui';
 
 function FormRow({
   setting,
