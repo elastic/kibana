@@ -51,7 +51,6 @@ describe('AlertsFlyout', () => {
         onClose={jest.fn()}
       />
     );
-    console.log(flyout.debug())
     expect(flyout.queryByTestId("alertsFlyoutAlertDetailsButton")).not.toBeInTheDocument();
   });
 });
