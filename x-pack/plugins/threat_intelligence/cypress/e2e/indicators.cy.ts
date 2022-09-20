@@ -25,6 +25,9 @@ import {
   ENDING_BREADCRUMB,
   FIELD_BROWSER,
   FIELD_BROWSER_MODAL,
+  FIELD_SELECTOR_TOGGLE_BUTTON,
+  FIELD_SELECTOR_INPUT,
+  FIELD_SELECTOR_LIST,
 } from '../screens/indicators';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -143,16 +146,13 @@ describe('Indicators', () => {
 
     it('should have the default selected field, then update when user selects', () => {
       const threatFeedName = 'threat.feed.name';
-      cy.get(`${FIELD_SELECTOR}`).should('have.value', threatFeedName);
+      cy.get(`${FIELD_SELECTOR_INPUT}`).eq(0).should('have.text', threatFeedName);
 
       const threatIndicatorIp: string = 'threat.indicator.ip';
 
-      cy.get(`${FIELD_SELECTOR}`)
-        .should('exist')
-        .select(threatIndicatorIp)
-        .should('have.value', threatIndicatorIp);
+      cy.get(`${FIELD_SELECTOR_TOGGLE_BUTTON}`).should('exist').click();
 
-      cy.get(`${FIELD_SELECTOR}`).should('have.value', threatIndicatorIp);
+      cy.get(`${FIELD_SELECTOR_LIST}`).should('exist').contains(threatIndicatorIp);
     });
   });
 
