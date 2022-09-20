@@ -68,6 +68,7 @@ const ResourceFindingsTableComponent = ({
     ],
     [onAddFilter]
   );
+
   if (!loading && !items.length)
     return (
       <EuiEmptyPrompt

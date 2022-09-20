@@ -7,7 +7,14 @@
 
 import React, { useContext, useMemo } from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -60,36 +67,29 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
     <CloudPosturePage query={integrationInfo}>
       <EuiPageHeader
         alignItems={'bottom'}
-        rightSideItems={[
-          <EuiButtonEmpty
-            iconType="gear"
-            size="xs"
-            href={http.basePath.prepend(pagePathGetters.edit_integration(params).join(''))}
-          >
-            <FormattedMessage
-              id="xpack.csp.rules.manageIntegrationButtonLabel"
-              defaultMessage="Manage Integration"
-            />
-          </EuiButtonEmpty>,
-        ]}
+        bottomBorder
         pageTitle={
           <EuiFlexGroup direction="column" gutterSize="none">
-            <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-              <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
-                <FormattedMessage
-                  id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
-                  defaultMessage="Benchmark Integrations"
-                />
-              </EuiButtonEmpty>
-            </Link>
-            <CloudPosturePageTitle
-              title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                defaultMessage: 'Rules - {integrationName}',
-                values: {
-                  integrationName: packageInfo?.name,
-                },
-              })}
-            />
+            <EuiFlexItem style={{ width: 'fit-content' }}>
+              <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
+                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                  <FormattedMessage
+                    id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
+                    defaultMessage="Benchmark Integrations"
+                  />
+                </EuiButtonEmpty>
+              </Link>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CloudPosturePageTitle
+                title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+                  defaultMessage: 'Rules - {integrationName}',
+                  values: {
+                    integrationName: packageInfo?.name,
+                  },
+                })}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         description={
@@ -107,7 +107,18 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             </EuiTextColor>
           )
         }
-        bottomBorder
+        rightSideItems={[
+          <EuiButtonEmpty
+            iconType="gear"
+            size="xs"
+            href={http.basePath.prepend(pagePathGetters.edit_integration(params).join(''))}
+          >
+            <FormattedMessage
+              id="xpack.csp.rules.manageIntegrationButtonLabel"
+              defaultMessage="Manage Integration"
+            />
+          </EuiButtonEmpty>,
+        ]}
       />
       <EuiSpacer />
       <RulesContainer />
