@@ -133,16 +133,16 @@ describe('SyntheticsMonitorClient', () => {
     locations[1].isServiceManaged = false;
 
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.deleteMonitor = jest.fn();
+    client.privateLocationAPI.deleteMonitors = jest.fn();
 
-    await client.deleteMonitor(
-      monitor as unknown as SyntheticsMonitorWithId,
+    await client.deleteMonitors(
+      [monitor as unknown as SyntheticsMonitorWithId],
       mockRequest,
       savedObjectsClientMock,
       'test-space'
     );
 
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.deleteMonitor).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledTimes(1);
   });
 });

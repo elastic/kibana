@@ -168,8 +168,8 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitor(
-        testConfig,
+      await syntheticsPrivateLocation.deleteMonitors(
+        [testConfig],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
         'test-space'
