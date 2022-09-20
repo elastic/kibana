@@ -63,7 +63,7 @@ export const ActionsLogUsersFilter = memo(
     return (
       <EuiFormControlLayout clear={{ onClick: onClear }} fullWidth>
         <EuiFieldSearch
-          data-test-subj={getTestId('users-filter-input')}
+          data-test-subj={getTestId('users-filter-search')}
           isClearable
           fullWidth
           placeholder={FILTER_NAMES.users}
