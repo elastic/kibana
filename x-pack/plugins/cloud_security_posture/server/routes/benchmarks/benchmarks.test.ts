@@ -22,27 +22,7 @@ import {
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { createCspRequestHandlerContextMock } from '../../mocks';
-
-function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
-  return {
-    id: 'some-uuid1',
-    namespace: 'default',
-    monitoring_enabled: [],
-    name: 'Test Policy',
-    description: '',
-    is_default: false,
-    is_preconfigured: false,
-    status: 'active',
-    is_managed: false,
-    revision: 1,
-    updated_at: '',
-    updated_by: 'elastic',
-    package_policies: [],
-    ...props,
-  };
-}
 
 describe('benchmarks API', () => {
   beforeEach(() => {
