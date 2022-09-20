@@ -97,4 +97,5 @@ interface ChangePointGroupItem extends FieldValuePair {
 export interface ChangePointGroup {
   group: ChangePointGroupItem[];
   docCount: number;
+  pValue: number | null;
 }
