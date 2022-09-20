@@ -47,14 +47,14 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should limit multiple agent IDs in an array to 50', () => {
+    it('should not limit multiple agent IDs', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          agentIds: Array(51)
+          agentIds: Array(255)
             .fill(1)
             .map(() => uuid.v4()),
         });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should work with all required query params', () => {
