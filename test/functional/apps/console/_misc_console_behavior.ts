@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
+      await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.collapseHelp();
     });
