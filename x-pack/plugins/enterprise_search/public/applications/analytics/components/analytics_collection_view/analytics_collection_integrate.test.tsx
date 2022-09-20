@@ -9,11 +9,9 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import {
-  EuiCodeBlock,
-  EuiDescriptionListDescription
-} from '@elastic/eui';
 import { mount } from 'enzyme';
+
+import { EuiCodeBlock, EuiDescriptionListDescription } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
