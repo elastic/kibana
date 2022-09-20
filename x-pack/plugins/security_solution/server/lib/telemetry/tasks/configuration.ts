@@ -42,6 +42,7 @@ export function createTelemetryConfigurationTaskConfig() {
         return 0;
       } catch (err) {
         tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
+        return 0;
       }
     },
   };
