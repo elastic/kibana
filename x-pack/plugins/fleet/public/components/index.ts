@@ -26,5 +26,4 @@ export * from './agent_enrollment_flyout';
 export * from './platform_selector';
 export { ConfirmForceInstallModal } from './confirm_force_install_modal';
 export { DevtoolsRequestFlyoutButton } from './devtools_request_flyout';
-export { ConfirmOpenUnverifiedModal } from './confirm_open_unverified_modal';
 export { HeaderReleaseBadge, InlineReleaseBadge } from './release_badge';

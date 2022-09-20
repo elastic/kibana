@@ -11,7 +11,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback } from 'react';
 
 import { useStartServices } from '../../fleet/hooks';
-import { ConfirmOpenUnverifiedModal } from '../components';
+import { ConfirmOpenUnverifiedModal } from '../components/confirm_open_unverified_modal';
 
 const confirmOpenUnverified = ({
   pkgName,
