@@ -119,8 +119,8 @@ export const PreviewHistogram = ({
       excludedRowRendererIds,
     } = alertsPreviewDefaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, TableId.rulePreview));
-console.log('dddd')
-console.log(columns)
+  console.log('dddd');
+  console.log(columns);
   const {
     browserFields,
     indexPattern: selectedIndexPattern,
