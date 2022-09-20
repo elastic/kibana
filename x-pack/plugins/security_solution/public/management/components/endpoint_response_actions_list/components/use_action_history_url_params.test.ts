@@ -106,4 +106,19 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       users: undefined,
     });
   });
+
+  it('should use set given hosts values to URL params', () => {
+    expect(
+      actionsLogFiltersFromUrlParams({
+        hosts: 'agent-id-1,agent-id-2',
+      })
+    ).toEqual({
+      commands: undefined,
+      endDate: undefined,
+      hosts: ['agent-id-1', 'agent-id-2'],
+      startDate: undefined,
+      statuses: undefined,
+      users: undefined,
+    });
+  });
 });
