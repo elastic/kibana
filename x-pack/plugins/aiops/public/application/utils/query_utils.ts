@@ -52,9 +52,10 @@ export function buildBaseFilterCriteria(
 
   const groupFilter = [];
   if (selectedGroup) {
-    for (const fieldName in selectedGroup.group) {
-      if (selectedGroup.group.hasOwnProperty(fieldName)) {
-        groupFilter.push({ term: { [fieldName]: selectedGroup.group[fieldName] } });
+    const allItems = { ...selectedGroup.group, ...selectedGroup.repeatedValues };
+    for (const fieldName in allItems) {
+      if (allItems.hasOwnProperty(fieldName)) {
+        groupFilter.push({ term: { [fieldName]: allItems[fieldName] } });
       }
     }
   }
@@ -80,7 +81,13 @@ export function buildBaseFilterCriteria(
   } else if (selectedGroup && !includeSelectedChangePoint) {
     filterCriteria.push({
       bool: {
-        must_not: [...groupFilter],
+        must_not: [
+          {
+            bool: {
+              filter: [...groupFilter],
+            },
+          },
+        ],
       },
     });
   }
