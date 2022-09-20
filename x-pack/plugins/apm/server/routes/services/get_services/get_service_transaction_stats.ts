@@ -38,7 +38,6 @@ interface AggregationParams {
   kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
-  searchAggregatedServiceMetrics: boolean;
   maxNumServices: number;
   start: number;
   end: number;
@@ -51,7 +50,6 @@ export async function getServiceTransactionStats({
   kuery,
   setup,
   searchAggregatedTransactions,
-  searchAggregatedServiceMetrics,
   maxNumServices,
   start,
   end,
