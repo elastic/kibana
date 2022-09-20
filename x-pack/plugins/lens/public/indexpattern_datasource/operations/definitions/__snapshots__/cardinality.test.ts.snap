@@ -1,0 +1,563 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`unique values function optimizeEsAggs consolidates duplicate aggs 2`] = `
+Array [
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "emptyAsNull": Array [
+            false,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "0",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggCardinality",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "chain": Array [
+                          Object {
+                            "arguments": Object {
+                              "q": Array [
+                                "geo.dest: \\"GA\\" ",
+                              ],
+                            },
+                            "function": "kql",
+                            "type": "function",
+                          },
+                        ],
+                        "type": "expression",
+                      },
+                    ],
+                    "id": Array [
+                      "2-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "function": "aggFilter",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "2-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "function": "aggCardinality",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "2",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggFilteredMetric",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "chain": Array [
+                          Object {
+                            "arguments": Object {
+                              "q": Array [
+                                "geo.dest: \\"AL\\" ",
+                              ],
+                            },
+                            "function": "kql",
+                            "type": "function",
+                          },
+                        ],
+                        "type": "expression",
+                      },
+                    ],
+                    "id": Array [
+                      "4-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "function": "aggFilter",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "4-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "function": "aggCardinality",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "4",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggFilteredMetric",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "chain": Array [
+                          Object {
+                            "arguments": Object {
+                              "q": Array [
+                                "\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+                              ],
+                            },
+                            "function": "lucene",
+                            "type": "function",
+                          },
+                        ],
+                        "type": "expression",
+                      },
+                    ],
+                    "id": Array [
+                      "6-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "function": "aggFilter",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "6-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "function": "aggCardinality",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "6",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggFilteredMetric",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "chain": Array [
+                          Object {
+                            "arguments": Object {
+                              "q": Array [
+                                "geo.dest: \\"AL\\" ",
+                              ],
+                            },
+                            "function": "kql",
+                            "type": "function",
+                          },
+                        ],
+                        "type": "expression",
+                      },
+                    ],
+                    "id": Array [
+                      "8-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                    "timeWindow": Array [
+                      "1m",
+                    ],
+                  },
+                  "function": "aggFilter",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "8-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "function": "aggCardinality",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "8",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggFilteredMetric",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "chain": Array [
+                          Object {
+                            "arguments": Object {
+                              "q": Array [
+                                "bytes: *",
+                              ],
+                            },
+                            "function": "kql",
+                            "type": "function",
+                          },
+                        ],
+                        "type": "expression",
+                      },
+                    ],
+                    "id": Array [
+                      "10-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "function": "aggFilter",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "10-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                    "size": Array [
+                      1,
+                    ],
+                    "sortField": Array [
+                      "timestamp",
+                    ],
+                    "sortOrder": Array [
+                      "desc",
+                    ],
+                  },
+                  "function": "aggTopMetrics",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "10",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggFilteredMetric",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+  Object {
+    "chain": Array [
+      Object {
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "chain": Array [
+                          Object {
+                            "arguments": Object {
+                              "q": Array [
+                                "bytes: *",
+                              ],
+                            },
+                            "function": "kql",
+                            "type": "function",
+                          },
+                        ],
+                        "type": "expression",
+                      },
+                    ],
+                    "id": Array [
+                      "11-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "function": "aggFilter",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "11-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                    "size": Array [
+                      1,
+                    ],
+                    "sortField": Array [
+                      "timestamp",
+                    ],
+                    "sortOrder": Array [
+                      "desc",
+                    ],
+                  },
+                  "function": "aggTopMetrics",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "11",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "function": "aggFilteredMetric",
+        "type": "function",
+      },
+    ],
+    "type": "expression",
+  },
+]
+`;

@@ -9,8 +9,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import {
+  AggFunctionsMapping,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
+} from '@kbn/data-plugin/public';
+import {
+  AnyExpressionFunctionDefinition,
+  buildExpressionFunction,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunctionBuilder,
+} from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
@@ -26,6 +35,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { groupByKey } from '../group_by_key';
 
 const supportedTypes = new Set([
   'string',
@@ -185,6 +195,87 @@ export const cardinalityOperation: OperationDefinition<
       timeShift: column.filter ? undefined : column.timeShift,
       emptyAsNull: column.params?.emptyAsNull,
     }).toAst();
+  },
+  optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+    let aggs = [..._aggs];
+    const esAggsIdMap = { ..._esAggsIdMap };
+
+    const aggKey = 'aggCardinality';
+
+    const aggsByArgs = groupByKey<ExpressionAstExpressionBuilder>(aggs, (expressionBuilder) => {
+      const {
+        functions: [fnBuilder],
+      } = expressionBuilder;
+
+      let groupKey;
+
+      if (fnBuilder.name === aggKey) {
+        groupKey = `${fnBuilder.getArgument('field')?.[0]}-${
+          fnBuilder.getArgument('timeShift')?.[0]
+        }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`;
+      }
+
+      if (fnBuilder.name === 'aggFilteredMetric') {
+        const metricFnBuilder = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
+          | ExpressionAstFunctionBuilder<AnyExpressionFunctionDefinition>
+          | undefined;
+
+        if (metricFnBuilder?.name === aggKey) {
+          const aggFilterFnBuilder = (
+            fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
+          ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
+
+          groupKey = `filtered-${aggFilterFnBuilder.getArgument('timeWindow')}-${
+            metricFnBuilder.getArgument('field')?.[0]
+          }-${fnBuilder.getArgument('timeShift')?.[0]}`;
+
+          const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
+            | ExpressionAstExpressionBuilder
+            | undefined;
+
+          if (filterExpression) {
+            const filterFnBuilder = filterExpression.functions[0] as
+              | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
+              | undefined;
+
+            groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
+          }
+        }
+      }
+
+      return groupKey;
+    });
+
+    // collapse them into a single expression builder
+    Object.values(aggsByArgs).forEach((expressionBuilders) => {
+      if (expressionBuilders.length <= 1) {
+        // don't need to optimize if there aren't more than one
+        return;
+      }
+
+      const [firstExpressionBuilder, ...restExpressionBuilders] = expressionBuilders;
+
+      // throw away all but the first expression builder
+      aggs = aggs.filter((aggBuilder) => !restExpressionBuilders.includes(aggBuilder));
+
+      const firstEsAggsId = aggExpressionToEsAggsIdMap.get(firstExpressionBuilder);
+      if (firstEsAggsId === undefined) {
+        throw new Error('Could not find current column ID for expression builder');
+      }
+
+      restExpressionBuilders.forEach((expressionBuilder) => {
+        const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
+        if (currentEsAggsId === undefined) {
+          throw new Error('Could not find current column ID for expression builder');
+        }
+
+        esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
+
+        delete esAggsIdMap[currentEsAggsId];
+      });
+    });
+
+    return { aggs, esAggsIdMap };
   },
   onFieldChange: (oldColumn, field) => {
     return {
