@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
 import { DEFAULT_PLATFORM } from '../../../common/constants';
-import { QueryIdField, IntervalField } from '../../form';
+import { QueryIdField, IntervalField, VersionField, ResultsTypeField } from '../../form';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
@@ -36,8 +36,6 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
-import { VersionField } from '../../form';
-import { LoggingField } from '../../form/logging_field';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -147,7 +145,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                 }}
               />
               <EuiSpacer />
-              <LoggingField />
+              <ResultsTypeField />
             </EuiFlexItem>
             <EuiFlexItem>
               <PlatformCheckBoxGroupField />

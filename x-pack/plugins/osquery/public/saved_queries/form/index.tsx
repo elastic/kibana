@@ -17,13 +17,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IntervalField, QueryIdField, QueryDescriptionField, VersionField } from '../../form';
+import {
+  IntervalField,
+  QueryIdField,
+  QueryDescriptionField,
+  VersionField,
+  ResultsTypeField,
+} from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
 import { CodeEditorField } from './code_editor_field';
-import { LoggingField } from '../../form/logging_field';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
@@ -127,7 +132,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
           <EuiSpacer size="m" />
           <VersionField euiFieldProps={versionEuiFieldProps} />
           <EuiSpacer size="m" />
-          <LoggingField euiFieldProps={euiFieldProps} />
+          <ResultsTypeField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
           <PlatformCheckBoxGroupField euiFieldProps={euiFieldProps} />

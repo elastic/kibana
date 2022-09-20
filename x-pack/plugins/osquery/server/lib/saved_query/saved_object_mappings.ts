@@ -33,6 +33,7 @@ export const usageMetricType: SavedObjectsType = {
 };
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     description: {
       type: 'text',
@@ -63,14 +64,6 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     interval: {
       type: 'keyword',
-    },
-    snapshot: {
-      type: 'keyword',
-      index: false,
-    },
-    removed: {
-      type: 'keyword',
-      index: false,
     },
     ecs_mapping: {
       type: 'object',
@@ -134,6 +127,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -143,14 +137,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         interval: {
           type: 'text',
-        },
-        snapshot: {
-          type: 'keyword',
-          index: false,
-        },
-        removed: {
-          type: 'keyword',
-          index: false,
         },
         platform: {
           type: 'keyword',
@@ -210,6 +196,7 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -219,14 +206,6 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         interval: {
           type: 'text',
-        },
-        snapshot: {
-          type: 'keyword',
-          index: false,
-        },
-        removed: {
-          type: 'keyword',
-          index: false,
         },
         platform: {
           type: 'keyword',

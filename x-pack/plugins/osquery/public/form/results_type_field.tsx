@@ -12,42 +12,44 @@ import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 
-const LOGGING_FIELD_OPTIONS = [
-  {
-    value: 'snapshot',
-    inputDisplay: (
-      <FormattedMessage
-        id="xpack.osquery.pack.queryFlyoutForm.loggingField.snapshotValueLabel"
-        defaultMessage="Snapshot"
-      />
-    ),
-  },
-  {
-    value: 'differential',
-    inputDisplay: (
-      <FormattedMessage
-        id="xpack.osquery.pack.queryFlyoutForm.loggingField.differentialValueLabel"
-        defaultMessage="Diffential"
-      />
-    ),
-  },
-  {
-    value: 'removed',
-    inputDisplay: (
-      <FormattedMessage
-        id="xpack.osquery.pack.queryFlyoutForm.loggingField.differentialIgnoreRemovalsValueLabel"
-        defaultMessage="Differential (Ignore removals)"
-      />
-    ),
-  },
-];
+const SNAPSHOT_OPTION = {
+  value: 'snapshot',
+  inputDisplay: (
+    <FormattedMessage
+      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.snapshotValueLabel"
+      defaultMessage="Snapshot"
+    />
+  ),
+};
 
-interface LoggingFieldProps {
+const DIFFERENTIAL_OPTION = {
+  value: 'differential',
+  inputDisplay: (
+    <FormattedMessage
+      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialValueLabel"
+      defaultMessage="Diffential"
+    />
+  ),
+};
+
+const DIFFERENTIAL_ADDED_ONLY_OPTION = {
+  value: 'added_only',
+  inputDisplay: (
+    <FormattedMessage
+      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyValueLabel"
+      defaultMessage="Differential (Ignore removals)"
+    />
+  ),
+};
+
+const FIELD_OPTIONS = [SNAPSHOT_OPTION, DIFFERENTIAL_OPTION, DIFFERENTIAL_ADDED_ONLY_OPTION];
+
+interface ResultsTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const LoggingFieldComponent: React.FC<LoggingFieldProps> = ({ euiFieldProps = {} }) => {
-  const [selectedOption, setSelectedOption] = useState(LOGGING_FIELD_OPTIONS[0].value);
+const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldProps = {} }) => {
+  const [selectedOption, setSelectedOption] = useState(SNAPSHOT_OPTION.value);
   const {
     field: { onChange: onSnapshotChange, value: snapshotValue },
   } = useController({
@@ -64,17 +66,17 @@ const LoggingFieldComponent: React.FC<LoggingFieldProps> = ({ euiFieldProps = {}
 
   const handleChange = useCallback(
     (newValue) => {
-      if (newValue === LOGGING_FIELD_OPTIONS[0].value) {
+      if (newValue === SNAPSHOT_OPTION.value) {
         onSnapshotChange(true);
         onRemovedChange(false);
       }
 
-      if (newValue === LOGGING_FIELD_OPTIONS[1].value) {
+      if (newValue === DIFFERENTIAL_OPTION.value) {
         onSnapshotChange(false);
         onRemovedChange(true);
       }
 
-      if (newValue === LOGGING_FIELD_OPTIONS[2].value) {
+      if (newValue === DIFFERENTIAL_ADDED_ONLY_OPTION.value) {
         onSnapshotChange(false);
         onRemovedChange(false);
       }
@@ -85,18 +87,18 @@ const LoggingFieldComponent: React.FC<LoggingFieldProps> = ({ euiFieldProps = {}
   useEffect(() => {
     setSelectedOption(() => {
       if (snapshotValue) {
-        return LOGGING_FIELD_OPTIONS[0].value;
+        return SNAPSHOT_OPTION.value;
       }
 
       if (!snapshotValue && removedValue) {
-        return LOGGING_FIELD_OPTIONS[1].value;
+        return DIFFERENTIAL_OPTION.value;
       }
 
       if (!snapshotValue && !removedValue) {
-        return LOGGING_FIELD_OPTIONS[2].value;
+        return DIFFERENTIAL_ADDED_ONLY_OPTION.value;
       }
 
-      return LOGGING_FIELD_OPTIONS[0].value;
+      return SNAPSHOT_OPTION.value;
     });
   }, [removedValue, snapshotValue]);
 
@@ -106,8 +108,8 @@ const LoggingFieldComponent: React.FC<LoggingFieldProps> = ({ euiFieldProps = {}
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.osquery.pack.queryFlyoutForm.loggingFieldLabel"
-              defaultMessage="Logging"
+              id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
+              defaultMessage="Result type"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -125,13 +127,14 @@ const LoggingFieldComponent: React.FC<LoggingFieldProps> = ({ euiFieldProps = {}
       fullWidth
     >
       <EuiSuperSelect
-        options={LOGGING_FIELD_OPTIONS}
+        options={FIELD_OPTIONS}
         fullWidth
         valueOfSelected={selectedOption}
         onChange={handleChange}
+        {...euiFieldProps}
       />
     </EuiFormRow>
   );
 };
 
-export const LoggingField = React.memo(LoggingFieldComponent, deepEqual);
+export const ResultsTypeField = React.memo(ResultsTypeFieldComponent, deepEqual);
