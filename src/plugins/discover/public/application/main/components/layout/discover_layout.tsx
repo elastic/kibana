@@ -180,7 +180,7 @@ export function DiscoverLayout({
   );
 
   const onFieldEdited = useCallback(() => {
-    stateContainer.actions.fetch();
+    stateContainer.actions.fetch(true);
   }, [stateContainer]);
 
   const onDisableFilters = useCallback(() => {
