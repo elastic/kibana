@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useRef } from 'react';
+import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiForm,
   EuiCheckbox,
@@ -151,37 +151,49 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           },
         });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedEnvironment, behaviorProtectionChecked, selectedCloudEvent, endpointPreset]);
+    }, [
+      selectedEnvironment,
+      behaviorProtectionChecked,
+      selectedCloudEvent,
+      endpointPreset,
+      onChange,
+      newPolicy,
+    ]);
 
-    const onChangeEnvironment = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onChangeEnvironment = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedEnvironment(e?.target?.value as Environment);
-    };
-    const onChangeCloudEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
+    }, []);
+    const onChangeCloudEvent = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setSelectedCloudEvent(e.target.value as CloudEvent);
-    };
-    const onChangeEndpointPreset = (e: React.ChangeEvent<HTMLInputElement>) => {
+    }, []);
+    const onChangeEndpointPreset = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setEndpointPreset(e.target.value as EndpointPreset);
-    };
-    const onChangeMaliciousBehavior = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setBehaviorProtectionChecked(!behaviorProtectionChecked);
-    };
+    }, []);
+    const onChangeMaliciousBehavior = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      setBehaviorProtectionChecked((checked) => !checked);
+    }, []);
 
-    const getEndpointPresetsProps = (preset: EndpointPreset) => ({
-      id: `${PREFIX}_endpoint_preset_${preset}`,
-      label: endpointPresetsMapping[preset],
-      value: preset,
-      checked: endpointPreset === preset,
-      onChange: onChangeEndpointPreset,
-    });
+    const getEndpointPresetsProps = useCallback(
+      (preset: EndpointPreset) => ({
+        id: `${PREFIX}_endpoint_preset_${preset}`,
+        label: endpointPresetsMapping[preset],
+        value: preset,
+        checked: endpointPreset === preset,
+        onChange: onChangeEndpointPreset,
+      }),
+      [endpointPreset, onChangeEndpointPreset]
+    );
 
-    const getCloudEventsProps = (cloudEvent: CloudEvent) => ({
-      id: `${PREFIX}_cloud_event_${cloudEvent}`,
-      label: cloudEventMapping[cloudEvent],
-      value: cloudEvent,
-      checked: selectedCloudEvent === cloudEvent,
-      onChange: onChangeCloudEvent,
-    });
+    const getCloudEventsProps = useCallback(
+      (cloudEvent: CloudEvent) => ({
+        id: `${PREFIX}_cloud_event_${cloudEvent}`,
+        label: cloudEventMapping[cloudEvent],
+        value: cloudEvent,
+        checked: selectedCloudEvent === cloudEvent,
+        onChange: onChangeCloudEvent,
+      }),
+      [selectedCloudEvent, onChangeCloudEvent]
+    );
 
     return (
       <EuiForm component="form">
@@ -349,6 +361,9 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         <EuiSpacer size="xl" />
       </EuiForm>
     );
+  },
+  (prevProps, nextProps) => {
+    return prevProps.newPolicy.name === nextProps.newPolicy.name;
   }
 );
 EndpointPolicyCreateExtension.displayName = 'EndpointPolicyCreateExtension';
