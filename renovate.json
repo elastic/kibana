@@ -218,8 +218,8 @@
       "prCreation": "immediate"
     },
     {
-      "groupName": "byte-size",
-      "matchPackageNames": ["byte-size"],
+      "groupName": "TTY Output",
+      "matchPackageNames": ["xterm", "byte-size"],
       "reviewers": ["awp:viz"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
