@@ -67,49 +67,52 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
     rawEventData.fields
   ) as ExpandedEventFieldsObject;
 
-  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
   const parameters = expandedEventFieldsObject.kibana?.alert?.rule?.parameters;
-  const agentIds = expandedEventFieldsObject.agent?.id;
   const responseActions = parameters?.[0].response_actions;
 
   const osqueryActionsLength = responseActions?.filter(
     (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
   )?.length;
 
+  if (!osqueryActionsLength) {
+    return;
+  }
+  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
+  const agentIds = expandedEventFieldsObject.agent?.id;
+
   const alertId = rawEventData._id;
-  return osqueryActionsLength
-    ? {
-        id: EventsViewType.osqueryView,
-        'data-test-subj': 'osqueryViewTab',
-        name: (
-          <EuiFlexGroup
-            direction="row"
-            alignItems={'center'}
-            justifyContent={'spaceAround'}
-            gutterSize="xs"
-          >
-            <EuiFlexItem>
-              <span>{i18n.OSQUERY_VIEW}</span>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-                {osqueryActionsLength}
-              </EuiNotificationBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        content: (
-          <>
-            <TabContentWrapper data-test-subj="osqueryViewWrapper">
-              <OsqueryResults
-                agentIds={agentIds}
-                ruleName={ruleName}
-                alertId={alertId}
-                addToTimeline={handleAddToTimeline}
-              />
-            </TabContentWrapper>
-          </>
-        ),
-      }
-    : undefined;
+
+  return {
+    id: EventsViewType.osqueryView,
+    'data-test-subj': 'osqueryViewTab',
+    name: (
+      <EuiFlexGroup
+        direction="row"
+        alignItems={'center'}
+        justifyContent={'spaceAround'}
+        gutterSize="xs"
+      >
+        <EuiFlexItem>
+          <span>{i18n.OSQUERY_VIEW}</span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+            {osqueryActionsLength}
+          </EuiNotificationBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    content: (
+      <>
+        <TabContentWrapper data-test-subj="osqueryViewWrapper">
+          <OsqueryResults
+            agentIds={agentIds}
+            ruleName={ruleName}
+            alertId={alertId}
+            addToTimeline={handleAddToTimeline}
+          />
+        </TabContentWrapper>
+      </>
+    ),
+  };
 };
