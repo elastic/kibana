@@ -508,6 +508,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-solution-platform
 
+/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
@@ -580,6 +581,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
+/x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
+/x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-asset-management
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-asset-management
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
@@ -849,6 +853,7 @@ packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
 packages/kbn-es-query @elastic/kibana-app-services
+packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
