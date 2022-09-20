@@ -8,10 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
-import type { AlertRawEventData } from './event_details';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 import { useHandleAddToTimeline } from './add_to_timeline_button';
@@ -20,14 +20,38 @@ const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
 `;
+type RuleParameters = Array<{
+  response_actions: Array<{
+    action_type_id: string;
+    params: Record<string, unknown>;
+  }>;
+}>;
+export interface AlertRawEventData {
+  _id: string;
+  fields: {
+    ['agent.id']?: string[];
+    ['kibana.alert.rule.parameters']: RuleParameters;
+    ['kibana.alert.rule.name']: string[];
+  };
 
-export const useOsqueryTab = ({
-  rawEventData,
-  id,
-}: {
-  rawEventData?: AlertRawEventData;
-  id: string;
-}) => {
+  [key: string]: unknown;
+}
+
+interface ExpandedEventFieldsObject {
+  agent: {
+    id: string[];
+  };
+  kibana: {
+    alert: {
+      rule: {
+        parameters: RuleParameters;
+        name: string[];
+      };
+    };
+  };
+}
+
+export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventData }) => {
   const {
     services: { osquery },
   } = useKibana();
@@ -38,15 +62,21 @@ export const useOsqueryTab = ({
   }
 
   const { OsqueryResults } = osquery;
-  const parameters = rawEventData.fields['kibana.alert.rule.parameters'];
+  const expandedEventFieldsObject = expandDottedObject(rawEventData.fields);
+  const {
+    kibana: {
+      alert: {
+        rule: { name: ruleName, parameters },
+      },
+    },
+    agent: { id: agentIds },
+  } = expandedEventFieldsObject as ExpandedEventFieldsObject;
+
   const responseActions = parameters?.[0].response_actions;
 
   const osqueryActionsLength = responseActions?.filter(
     (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
   )?.length;
-
-  const agentIds = rawEventData.fields['agent.id'];
-  const ruleName = rawEventData.fields['kibana.alert.rule.name'];
 
   const alertId = rawEventData._id;
   return osqueryActionsLength
