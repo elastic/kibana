@@ -23,6 +23,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_comments'));
       loadTestFile(require.resolve('./_variables'));
       loadTestFile(require.resolve('./_xjson'));
+      loadTestFile(require.resolve('./_misc_console_behavior'));
     }
   });
 }

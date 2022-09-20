@@ -249,4 +249,110 @@ export class ConsolePageObject extends FtrService {
       }
     });
   }
+
+  public async collapseJsonBlock(blockNumber: number) {
+    const blocks = await this.find.allByCssSelector('.ace_fold-widget');
+
+    if (blocks.length < blockNumber) {
+      throw new Error(`No block with index: ${blockNumber}`);
+    }
+
+    await blocks[blockNumber].click();
+    await this.retry.waitFor('json block to be collapsed', async () => {
+      return blocks[blockNumber].getAttribute('class').then((classes) => {
+        return classes.includes('ace_closed');
+      });
+    });
+  }
+
+  public async expandJsonBlock(blockNumber: number) {
+    const blocks = await this.find.allByCssSelector('.ace_fold-widget');
+
+    if (blocks.length < blockNumber) {
+      throw new Error(`No block with index: ${blockNumber}`);
+    }
+
+    await blocks[blockNumber].click();
+    await this.retry.waitFor('json block to be expanded', async () => {
+      return blocks[blockNumber].getAttribute('class').then((classes) => {
+        return classes.includes('ace_open');
+      });
+    });
+  }
+
+  public async isJsonBlockExpanded(blockNumber: number) {
+    const blocks = await this.find.allByCssSelector('.ace_fold-widget');
+
+    if (blocks.length < blockNumber) {
+      throw new Error(`No block with index: ${blockNumber}`);
+    }
+
+    const classes = await blocks[blockNumber].getAttribute('class');
+    return classes.includes('ace_open');
+  }
+
+  public async selectCurrentRequest() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.clickMouseButton();
+  }
+
+  public async getRequestAtLine(lineNumber: number) {
+    const editor = await this.getEditor();
+    const lines = await editor.findAllByClassName('ace_line_group');
+    if (lines.length < lineNumber) {
+      throw new Error(`No line with index: ${lineNumber}`);
+    }
+
+    const line = lines[lineNumber];
+    const text = await line.getVisibleText();
+
+    return text.trim();
+  }
+
+  public async getCurrentLineNumber() {
+    const editor = await this.getEditor();
+    const activeLine = await editor.findByClassName('ace_active-line');
+    // style attribute looks like this: "top: 0px; height: 18.5px;" height is the line height
+    const styleAttribute = await activeLine.getAttribute('style');
+    const lineHeight = parseInt(styleAttribute.split('height: ')[1].split('px')[0], 10);
+    const top = parseInt(styleAttribute.split('top: ')[1].split('px')[0], 10);
+    // calculate the line number by dividing the top position by the line height
+    return Math.ceil(top / lineHeight);
+  }
+
+  public async pressCtrlEnter() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.ENTER,
+    ]);
+  }
+
+  public async pressCtrlI() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'i']);
+  }
+
+  public async pressCtrlUp() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], Key.UP]);
+  }
+
+  public async pressCtrlDown() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.DOWN,
+    ]);
+  }
+
+  public async pressCtrlL() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'l']);
+  }
+
+  public async pressCtrlSlash() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
+  }
 }
