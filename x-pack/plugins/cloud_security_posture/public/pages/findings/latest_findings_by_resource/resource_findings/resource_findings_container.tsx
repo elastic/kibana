@@ -10,6 +10,7 @@ import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
@@ -83,6 +84,19 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
 
   const error = resourceFindings.error || baseEsQuery.error;
 
+  const handleDistributionClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: getFilters({
+        filters: urlQuery.filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
+
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -115,6 +129,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
             <FindingsDistributionBar
               {...{
+                distributionOnClick: handleDistributionClick,
                 type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
                   defaultMessage: 'Findings',
                 }),
