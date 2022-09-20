@@ -180,7 +180,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
 
-  console.log(columnsHeader);
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>

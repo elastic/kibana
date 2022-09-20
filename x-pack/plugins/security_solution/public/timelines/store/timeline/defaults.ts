@@ -10,7 +10,7 @@ import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/t
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
-import type { TGridModel } from '../data_table/model';
+import type { SubsetTGridModel } from '../data_table/model';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
@@ -78,8 +78,7 @@ export const timelineDefaults: SubsetTimelineModel &
   isSelectAllChecked: false,
 };
 
-export const tableDefaults: TGridModel = {
-  columns: defaultHeaders,
+export const tableDefaults: SubsetTGridModel = {
   defaultColumns: defaultHeaders,
   dataProviders: [],
   dataViewId: null,
@@ -97,8 +96,6 @@ export const tableDefaults: TGridModel = {
     filterQuery: null,
   },
   loadingEventIds: [],
-  queryFields: [],
-  timelineType: TimelineType.default,
   selectedEventIds: {},
   showCheckboxes: false,
   sort: [
@@ -110,12 +107,9 @@ export const tableDefaults: TGridModel = {
     },
   ],
   version: null,
-  title: '',
   graphEventId: '',
   kqlMode: 'filter',
   sessionViewConfig: null,
-  documentType: '',
   savedObjectId: null,
-  id: '',
-  selectAll: false,
+  columns: defaultHeaders,
 };

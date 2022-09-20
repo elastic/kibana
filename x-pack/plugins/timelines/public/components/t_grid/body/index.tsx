@@ -48,7 +48,6 @@ import {
   RowRenderer,
   AlertStatus,
   SortColumnTable,
-  TimelineId,
   SetEventsLoading,
   SetEventsDeleted,
 } from '../../../../common/types/timeline';
@@ -124,11 +123,6 @@ interface OwnProps {
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
-
-export const hasAdditionalActions = (id: TimelineId): boolean =>
-  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
-    id
-  );
 
 const ES_LIMIT_COUNT = 9999;
 
@@ -938,8 +932,7 @@ const makeMapStateToProps = () => {
       sort,
       isLoading,
     } = dataTable;
-    console.log('test');
-    console.log(columns);
+
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       excludedRowRendererIds,

@@ -15,7 +15,10 @@ const selectTableById = (state: State): TableById => state.dataTable.tableById;
 
 export const tableByIdSelector = createSelector(selectTableById, (tableById) => tableById);
 
-export const selectTable = (state: State, tableId: string): TGridModel =>
-  state.dataTable.tableById[tableId] ?? tableDefaults;
+export const selectTable = (state: State, tableId: string): TGridModel => {
+  const v = state.dataTable.tableById[tableId];
+  console.log(v)
+  return v ?? tableDefaults;
+}
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);
