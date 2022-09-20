@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERT_NAME = i18n.translate('xpack.securitySolution.eventRenderers.alertName', {
+  defaultMessage: 'Alert',
+});
+
 export const ALERTS_NAME = i18n.translate('xpack.securitySolution.eventRenderers.alertsName', {
   defaultMessage: 'Alerts',
 });
