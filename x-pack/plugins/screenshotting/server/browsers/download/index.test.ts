@@ -92,10 +92,7 @@ describe('ensureDownloaded', () => {
         ])
       );
       expect(readdirSync(path.resolve(`${paths.archivesPath}/arm64`))).toEqual(
-        expect.arrayContaining([
-          'chrome-mac.zip',
-          'chromium-9e5fa0b-locales-linux_arm64.zip',
-        ])
+        expect.arrayContaining(['chrome-mac.zip', 'chromium-9e5fa0b-locales-linux_arm64.zip'])
       );
     });
 
