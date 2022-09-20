@@ -54,7 +54,7 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  height: 308px;
+  max-height: 308px;
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
@@ -65,11 +65,14 @@ export const AlertCountByRuleByStatus = React.memo(
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
     const { openEntityInTimeline } = useNavigateToTimeline();
-    const columns = useMemo(() => {
-      const openRuleInTimelineWithAdditionalFields = (ruleName: string) =>
-        openEntityInTimeline([{ field: KIBANA_RULE_ALERT_FIELD, value: ruleName }, entityFilter]);
-      return getTableColumns(openRuleInTimelineWithAdditionalFields);
-    }, [entityFilter, openEntityInTimeline]);
+
+    const columns = useMemo(
+      () =>
+        getTableColumns((ruleName: string) =>
+          openEntityInTimeline([{ field: KIBANA_RULE_ALERT_FIELD, value: ruleName }, entityFilter])
+        ),
+      [entityFilter, openEntityInTimeline]
+    );
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
@@ -106,7 +109,7 @@ export const AlertCountByRuleByStatus = React.memo(
           <>
             <HeaderSection
               id={queryId}
-              title={i18n.Alerts}
+              title={i18n.ALERTS_BY_RULE}
               titleSize="s"
               toggleStatus={toggleStatus}
               toggleQuery={setToggleStatus}

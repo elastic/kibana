@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  useIsWithinMaxBreakpoint,
+  useIsWithinMinBreakpoint,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -22,6 +31,7 @@ import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
   ALERTS_TEXT,
+  ALERTS_BY_STATUS_TEXT,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -41,7 +51,6 @@ import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
-const donutHeight = 120;
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
 `;
@@ -65,6 +74,11 @@ const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
 ];
 const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
+const eventKindSignalFilter: EntityFilter = {
+  field: 'event.kind',
+  value: 'signal',
+};
+
 export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openEntityInTimeline } = useNavigateToTimeline();
@@ -72,11 +86,17 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
     deepLinkId: SecurityPageName.alerts,
   });
 
+  const isLargerBreakpoint = useIsWithinMinBreakpoint('xl');
+  const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
+  const donutHeight = isSmallBreakpoint || isLargerBreakpoint ? 120 : 90;
+
   const detailsButtonOptions = useMemo(
     () => ({
       name: VIEW_ALERTS,
       href: entityFilter ? undefined : href,
-      onClick: entityFilter ? () => openEntityInTimeline([entityFilter]) : goToAlerts,
+      onClick: entityFilter
+        ? () => openEntityInTimeline([entityFilter, eventKindSignalFilter])
+        : goToAlerts,
     }),
     [entityFilter, href, goToAlerts, openEntityInTimeline]
   );
@@ -126,7 +146,7 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={ALERTS_TEXT}
+            title={entityFilter ? ALERTS_BY_STATUS_TEXT : ALERTS_TEXT}
             titleSize="s"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple

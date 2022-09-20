@@ -11,9 +11,12 @@ export const Status = i18n.translate('xpack.securitySolution.alertCountByRuleByS
   defaultMessage: 'Status',
 });
 
-export const Alerts = i18n.translate('xpack.securitySolution.alertCountByRuleByStatus.alerts', {
-  defaultMessage: 'Alerts',
-});
+export const ALERTS_BY_RULE = i18n.translate(
+  'xpack.securitySolution.alertCountByRuleByStatus.alertsByRule',
+  {
+    defaultMessage: 'Alerts by Rule',
+  }
+);
 export const COLUMN_HEADER_RULE_NAME = i18n.translate(
   'xpack.securitySolution.alertCountByRuleByStatus.ruleName',
   {
