@@ -230,7 +230,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={
-                    currentSelectedChangePoint || selectedGroup ? documentCountStatsCompare : undefined
+                    currentSelectedChangePoint || selectedGroup
+                      ? documentCountStatsCompare
+                      : undefined
                   }
                   totalCount={totalCount}
                   changePoint={currentSelectedChangePoint}

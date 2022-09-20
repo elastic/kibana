@@ -235,7 +235,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       pagination={pagination}
       loading={false}
       sorting={sorting as EuiTableSortingType<GroupTableItem>}
-        rowProps={(group) => {
+      rowProps={(group) => {
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
           onMouseEnter: () => {

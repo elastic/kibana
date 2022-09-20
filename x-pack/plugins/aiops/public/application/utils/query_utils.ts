@@ -74,7 +74,7 @@ export function buildBaseFilterCriteria(
           {
             term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
           },
-          ...groupFilter
+          ...groupFilter,
         ],
       },
     });
