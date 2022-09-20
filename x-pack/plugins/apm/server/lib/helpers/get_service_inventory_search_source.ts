@@ -18,8 +18,8 @@ export async function getServiceInventorySearchSource({
 }: {
   config: APMConfig;
   apmEventClient: APMEventClient;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
   kuery: string;
 }): Promise<{
   searchAggregatedTransactions: boolean;

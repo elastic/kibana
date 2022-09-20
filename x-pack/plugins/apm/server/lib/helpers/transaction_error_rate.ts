@@ -11,6 +11,7 @@ import {
 } from '@kbn/core/types/elasticsearch';
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
+import { isNil } from 'lodash';
 
 export const getOutcomeAggregation = () => {
   return {
@@ -57,9 +58,15 @@ export function calculateFailedTransactionRateFromServiceMetrics({
   failedTransactions: number | null;
   successfulTransactions: number | null;
 }) {
-  failedTransactions = failedTransactions ?? 0;
-  successfulTransactions = successfulTransactions ?? 0;
+  if (failedTransactions === 0) {
+    return 0;
+  }
 
+  if (isNil(failedTransactions)) {
+    return null;
+  }
+
+  successfulTransactions = successfulTransactions ?? 0;
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
 
