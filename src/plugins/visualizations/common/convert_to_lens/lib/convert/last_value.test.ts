@@ -22,11 +22,8 @@ jest.mock('../utils', () => ({
 }));
 
 describe('convertToLastValueColumn', () => {
-  const aggId = `some-id`;
   const dataView = stubLogstashDataView;
   const sortField = dataView.fields[0];
-  const timeShift = '1h';
-  const filters = [{ input: { language: 'lucene', query: 'some other query' }, label: 'split' }];
 
   const topHitAggParams: AggParamsTopHit = {
     sortOrder: {
