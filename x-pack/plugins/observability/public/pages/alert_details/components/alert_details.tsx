@@ -24,6 +24,7 @@ export function AlertDetails() {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const [isLoading, alert] = useFetchAlertDetail(alertId);
 
   useBreadcrumbs([
     {
@@ -38,8 +39,6 @@ export function AlertDetails() {
   if (!config.unsafe.alertDetails.enabled) {
     return <PageNotFound />;
   }
-
-  const [isLoading, alert] = useFetchAlertDetail(alertId);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
