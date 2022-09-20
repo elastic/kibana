@@ -21,7 +21,7 @@ Object {
   },
   "dest": Object {
     "index": "slo-observability.sli-v1-my-namespace",
-    "pipeline": "observability-slo-monthly-index",
+    "pipeline": "slo-observability.sli.monthly-my-namespace",
   },
   "frequency": "1m",
   "pivot": Object {
