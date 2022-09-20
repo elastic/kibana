@@ -6,14 +6,18 @@
  */
 
 import uuid from 'uuid';
+import sinon from 'sinon';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { getRuleType, ActionGroupId } from './rule_type';
 import { ActionContext } from './action_context';
 import { Params } from './rule_type_params';
+import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
+
+let fakeTimer: sinon.SinonFakeTimers;
 
 describe('ruleType', () => {
   const logger = loggingSystemMock.create().get();
@@ -24,9 +28,15 @@ describe('ruleType', () => {
 
   const ruleType = getRuleType(logger, Promise.resolve(data));
 
+  beforeAll(() => {
+    fakeTimer = sinon.useFakeTimers();
+  });
+
   afterEach(() => {
     data.timeSeriesQuery.mockReset();
   });
+
+  afterAll(() => fakeTimer.restore());
 
   it('rule type creation structure is the expected value', async () => {
     expect(ruleType.id).toBe('.index-threshold');
@@ -341,5 +351,91 @@ describe('ruleType', () => {
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
+  });
+
+  it('should correctly pass comparator script to timeSeriesQuery', async () => {
+    data.timeSeriesQuery.mockImplementation((...args) => {
+      return {
+        results: [
+          {
+            group: 'all documents',
+            metrics: [['2021-07-14T14:49:30.978Z', 0]],
+          },
+        ],
+      };
+    });
+    const params: Params = {
+      index: 'index-name',
+      timeField: 'time-field',
+      aggType: 'foo',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: Comparator.LT,
+      threshold: [1],
+    };
+
+    await ruleType.executor({
+      alertId: uuid.v4(),
+      executionId: uuid.v4(),
+      startedAt: new Date(),
+      previousStartedAt: new Date(),
+      services: alertServices as unknown as RuleExecutorServices<
+        {},
+        ActionContext,
+        typeof ActionGroupId
+      >,
+      params,
+      state: {
+        latestTimestamp: undefined,
+      },
+      spaceId: uuid.v4(),
+      name: uuid.v4(),
+      tags: [],
+      createdBy: null,
+      updatedBy: null,
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
+      },
+    });
+
+    expect(data.timeSeriesQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          aggField: undefined,
+          aggType: 'foo',
+          dateEnd: '1970-01-01T00:00:00.000Z',
+          dateStart: '1970-01-01T00:00:00.000Z',
+          groupBy: 'all',
+          index: 'index-name',
+          interval: undefined,
+          termField: undefined,
+          termSize: undefined,
+          timeField: 'time-field',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+        },
+        selector: {
+          conditionScript: `${TIME_SERIES_BUCKET_SELECTOR_FIELD} < 1`,
+          termLimit: 1000,
+        },
+      })
+    );
   });
 });

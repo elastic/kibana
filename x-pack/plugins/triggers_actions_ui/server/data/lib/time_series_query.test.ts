@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// test error conditions of calling timeSeriesQuery - postive results tested in FT
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
@@ -57,7 +54,7 @@ describe('timeSeriesQuery', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid date format for dateStart: \\"x\\""`);
   });
 
-  it('should create correct query when aggType=count and termField is undefined (count over all)', async () => {
+  it('should create correct query when aggType=count and termField is undefined (count over all) and selector params are undefined', async () => {
     await timeSeriesQuery(params);
     expect(esClient.search).toHaveBeenCalledWith(
       {
@@ -103,88 +100,59 @@ describe('timeSeriesQuery', () => {
     );
   });
 
-  it('should create correct query when aggType=count and termField is specified (count over top N termField)', async () => {
-    // {
-    //   "took": 1,
-    //   "timed_out": false,
-    //   "_shards": {
-    //     "total": 1,
-    //     "successful": 1,
-    //     "skipped": 0,
-    //     "failed": 0
-    //   },
-    //   "hits": {
-    //     "total": {
-    //       "value": 223,
-    //       "relation": "eq"
-    //     },
-    //     "max_score": null,
-    //     "hits": []
-    //   },
-    //   "aggregations": {
-    //     "groupAgg": {
-    //       "doc_count_error_upper_bound": 0,
-    //       "sum_other_doc_count": 0,
-    //       "buckets": [
-    //         {
-    //           "key": "starting",
-    //           "doc_count": 19,
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 19
-    //               }
-    //             ]
-    //           }
-    //         },
-    //         {
-    //           "key": "execute",
-    //           "doc_count": 12,
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 12
-    //               }
-    //             ]
-    //           }
-    //         },
-    //         {
-    //           "key": "execute-start",
-    //           "doc_count": 12,
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 12
-    //               }
-    //             ]
-    //           }
-    //         }
-    //       ]
-    //     },
-    //     "groupAggCount": {
-    //       "count": 3,
-    //       "min": 12,
-    //       "max": 19,
-    //       "avg": 14.333333333333334,
-    //       "sum": 43
-    //     }
-    //   }
-    // }
+  it('should create correct query when aggType=count and termField is undefined (count over all) and selector params are defined', async () => {
+    await timeSeriesQuery({
+      ...params,
+      selector: {
+        termLimit: 1000,
+        conditionScript: `params.compareValue > 1`,
+      },
+    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        allow_no_indices: true,
+        body: {
+          aggs: {
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            },
+          },
+          size: 0,
+        },
+        ignore_unavailable: true,
+        index: 'index-name',
+      },
+      { ignore: [404], meta: true }
+    );
+  });
+
+  it('should create correct query when aggType=count and termField is specified (count over top N termField) and selector params are undefined', async () => {
     await timeSeriesQuery({
       ...params,
       query: {
@@ -204,12 +172,77 @@ describe('timeSeriesQuery', () => {
                 size: 10,
               },
               aggs: {
+                dateAgg: {
+                  date_range: {
+                    field: 'time-field',
+                    format: 'strict_date_time',
+                    ranges: [
+                      {
+                        from: '2021-04-22T15:14:31.000Z',
+                        to: '2021-04-22T15:19:31.000Z',
+                      },
+                      {
+                        from: '2021-04-22T15:15:31.000Z',
+                        to: '2021-04-22T15:20:31.000Z',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            },
+          },
+          size: 0,
+        },
+        ignore_unavailable: true,
+        index: 'index-name',
+      },
+      { ignore: [404], meta: true }
+    );
+  });
+
+  it('should create correct query when aggType=count and termField is specified (count over top N termField) and selector params are defined', async () => {
+    await timeSeriesQuery({
+      ...params,
+      query: {
+        ...params.query,
+        termField: 'the-term',
+        termSize: 10,
+      },
+      selector: {
+        termLimit: 1000,
+        conditionScript: `params.compareValue > 1`,
+      },
+    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        allow_no_indices: true,
+        body: {
+          aggs: {
+            groupAgg: {
+              terms: {
+                field: 'the-term',
+                size: 10,
+              },
+              aggs: {
                 conditionSelector: {
                   bucket_selector: {
                     buckets_path: {
-                      docCount: '_count',
+                      compareValue: '_count',
                     },
-                    script: `params.docCount > 20`,
+                    script: `params.compareValue > 1`,
                   },
                 },
                 dateAgg: {
@@ -258,7 +291,7 @@ describe('timeSeriesQuery', () => {
     );
   });
 
-  it('should create correct query when aggType!=count and termField is undefined (aggregate metric over all)', async () => {
+  it('should create correct query when aggType!=count and termField is undefined (aggregate metric over all) and selector params are undefined', async () => {
     await timeSeriesQuery({
       ...params,
       query: {
@@ -323,128 +356,76 @@ describe('timeSeriesQuery', () => {
     );
   });
 
-  it('should create correct query when aggType!=count and termField is specified (aggregate metric over top N termField)', async () => {
-    // {
-    //   "took": 3,
-    //   "timed_out": false,
-    //   "_shards": {
-    //     "total": 1,
-    //     "successful": 1,
-    //     "skipped": 0,
-    //     "failed": 0
-    //   },
-    //   "hits": {
-    //     "total": {
-    //       "value": 223,
-    //       "relation": "eq"
-    //     },
-    //     "max_score": null,
-    //     "hits": []
-    //   },
-    //   "aggregations": {
-    //     "groupAgg": {
-    //       "doc_count_error_upper_bound": 0,
-    //       "sum_other_doc_count": 0,
-    //       "buckets": [
-    //         {
-    //           "key": "recovered-instance",
-    //           "doc_count": 60,
-    //           "sortValueAgg": {
-    //             "value": 11007250000
-    //           },
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 60,
-    //                 "metricAgg": {
-    //                   "value": 11007250000
-    //                 }
-    //               }
-    //             ]
-    //           }
-    //         },
-    //         {
-    //           "key": "execute",
-    //           "doc_count": 12,
-    //           "sortValueAgg": {
-    //             "value": 155166666.66666666
-    //           },
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 12,
-    //                 "metricAgg": {
-    //                   "value": 155166666.66666666
-    //                 }
-    //               }
-    //             ]
-    //           }
-    //         },
-    //         {
-    //           "key": "active-instance",
-    //           "doc_count": 60,
-    //           "sortValueAgg": {
-    //             "value": 0
-    //           },
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 60,
-    //                 "metricAgg": {
-    //                   "value": 0
-    //                 }
-    //               }
-    //             ]
-    //           }
-    //         },
-    //         {
-    //           "key": "new-instance",
-    //           "doc_count": 60,
-    //           "sortValueAgg": {
-    //             "value": 0
-    //           },
-    //           "dateAgg": {
-    //             "buckets": [
-    //               {
-    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
-    //                 "from": 1663546471000,
-    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
-    //                 "to": 1663629571000,
-    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
-    //                 "doc_count": 60,
-    //                 "metricAgg": {
-    //                   "value": 0
-    //                 }
-    //               }
-    //             ]
-    //           }
-    //         }
-    //       ]
-    //     },
-    //     "groupAggCount": {
-    //       "count": 4,
-    //       "min": 12,
-    //       "max": 60,
-    //       "avg": 48,
-    //       "sum": 192
-    //     }
-    //   }
-    // }
+  it('should create correct query when aggType!=count and termField is undefined (aggregate metric over all) and selector params are defined', async () => {
+    await timeSeriesQuery({
+      ...params,
+      query: {
+        ...params.query,
+        aggType: 'avg',
+        aggField: 'avg-field',
+      },
+      selector: {
+        termLimit: 1000,
+        conditionScript: `params.compareValue > 1`,
+      },
+    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        allow_no_indices: true,
+        body: {
+          aggs: {
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+              aggs: {
+                metricAgg: {
+                  avg: {
+                    field: 'avg-field',
+                  },
+                },
+              },
+            },
+            sortValueAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            },
+          },
+          size: 0,
+        },
+        ignore_unavailable: true,
+        index: 'index-name',
+      },
+      { ignore: [404], meta: true }
+    );
+  });
+
+  it('should create correct query when aggType!=count and termField is specified (aggregate metric over top N termField) and selector params are undefined', async () => {
     await timeSeriesQuery({
       ...params,
       query: {
@@ -492,12 +473,94 @@ describe('timeSeriesQuery', () => {
                     },
                   },
                 },
+                sortValueAgg: {
+                  avg: {
+                    field: 'avg-field',
+                  },
+                },
+              },
+            },
+          },
+          query: {
+            bool: {
+              filter: {
+                range: {
+                  'time-field': {
+                    format: 'strict_date_time',
+                    gte: '2021-04-22T15:14:31.000Z',
+                    lt: '2021-04-22T15:20:31.000Z',
+                  },
+                },
+              },
+            },
+          },
+          size: 0,
+        },
+        ignore_unavailable: true,
+        index: 'index-name',
+      },
+      { ignore: [404], meta: true }
+    );
+  });
+
+  it('should create correct query when aggType!=count and termField is specified (aggregate metric over top N termField) and selector params are defined', async () => {
+    await timeSeriesQuery({
+      ...params,
+      query: {
+        ...params.query,
+        aggType: 'avg',
+        aggField: 'avg-field',
+        termField: 'the-field',
+        termSize: 20,
+      },
+      selector: {
+        termLimit: 1000,
+        conditionScript: `params.compareValue > 1`,
+      },
+    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        allow_no_indices: true,
+        body: {
+          aggs: {
+            groupAgg: {
+              terms: {
+                field: 'the-field',
+                order: {
+                  sortValueAgg: 'desc',
+                },
+                size: 20,
+              },
+              aggs: {
+                dateAgg: {
+                  date_range: {
+                    field: 'time-field',
+                    format: 'strict_date_time',
+                    ranges: [
+                      {
+                        from: '2021-04-22T15:14:31.000Z',
+                        to: '2021-04-22T15:19:31.000Z',
+                      },
+                      {
+                        from: '2021-04-22T15:15:31.000Z',
+                        to: '2021-04-22T15:20:31.000Z',
+                      },
+                    ],
+                  },
+                  aggs: {
+                    metricAgg: {
+                      avg: {
+                        field: 'avg-field',
+                      },
+                    },
+                  },
+                },
                 conditionSelector: {
                   bucket_selector: {
                     buckets_path: {
-                      metricValue: 'sortValueAgg',
+                      compareValue: 'sortValueAgg',
                     },
-                    script: 'params.metricValue >= 0',
+                    script: 'params.compareValue > 1',
                   },
                 },
                 sortValueAgg: {
@@ -535,7 +598,7 @@ describe('timeSeriesQuery', () => {
     );
   });
 
-  it('should apply the termLimit if specified', async () => {
+  it('should correctly apply the termLimit if specified', async () => {
     await timeSeriesQuery({
       ...params,
       query: {
@@ -543,7 +606,10 @@ describe('timeSeriesQuery', () => {
         termField: 'the-term',
         termSize: 100,
       },
-      termLimit: 5,
+      selector: {
+        termLimit: 5,
+        conditionScript: `params.compareValue > 1`,
+      },
     });
     expect(esClient.search).toHaveBeenCalledWith(
       {
@@ -553,15 +619,15 @@ describe('timeSeriesQuery', () => {
             groupAgg: {
               terms: {
                 field: 'the-term',
-                size: 5,
+                size: 6,
               },
               aggs: {
                 conditionSelector: {
                   bucket_selector: {
                     buckets_path: {
-                      docCount: '_count',
+                      compareValue: '_count',
                     },
-                    script: `params.docCount > 20`,
+                    script: `params.compareValue > 1`,
                   },
                 },
                 dateAgg: {
@@ -612,140 +678,135 @@ describe('timeSeriesQuery', () => {
 });
 
 describe('getResultFromEs', () => {
-  it('correctly parses time series results for count aggregation', () => {
+  it('correctly parses time series results for count over all aggregation', () => {
+    // results should be same whether isConditionInQuery is true or false
     expect(
-      getResultFromEs(true, false, {
-        took: 0,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-        aggregations: {
-          dateAgg: {
-            buckets: [
-              {
-                key: '2021-04-22T15:14:31.075Z-2021-04-22T15:19:31.075Z',
-                from: 1619104471075,
-                from_as_string: '2021-04-22T15:14:31.075Z',
-                to: 1619104771075,
-                to_as_string: '2021-04-22T15:19:31.075Z',
-                doc_count: 0,
-              },
-            ],
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: false,
+        isConditionInQuery: true,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            dateAgg: {
+              buckets: [
+                {
+                  key: '2022-09-20T00:14:31.000Z-2022-09-20T23:19:31.000Z',
+                  from: 1663632871000,
+                  from_as_string: '2022-09-20T00:14:31.000Z',
+                  to: 1663715971000,
+                  to_as_string: '2022-09-20T23:19:31.000Z',
+                  doc_count: 481,
+                },
+              ],
+            },
           },
         },
-      } as estypes.SearchResponse<unknown>)
+      })
     ).toEqual({
       results: [
         {
           group: 'all documents',
-          metrics: [['2021-04-22T15:19:31.075Z', 0]],
+          metrics: [['2022-09-20T23:19:31.000Z', 481]],
+        },
+      ],
+      truncated: false,
+    });
+
+    expect(
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: false,
+        isConditionInQuery: false,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            dateAgg: {
+              buckets: [
+                {
+                  key: '2022-09-20T00:14:31.000Z-2022-09-20T23:19:31.000Z',
+                  from: 1663632871000,
+                  from_as_string: '2022-09-20T00:14:31.000Z',
+                  to: 1663715971000,
+                  to_as_string: '2022-09-20T23:19:31.000Z',
+                  doc_count: 481,
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          metrics: [['2022-09-20T23:19:31.000Z', 481]],
         },
       ],
       truncated: false,
     });
   });
 
-  it('correctly parses time series results with no aggregation data for count aggregation', () => {
+  it('correctly parses time series results with no aggregation data for count over all aggregation', () => {
     // this could happen with cross cluster searches when cluster permissions are incorrect
     // the query completes but doesn't return any aggregations
+
+    // results should be same whether isConditionInQuery is true or false
     expect(
-      getResultFromEs(true, false, {
-        took: 0,
-        timed_out: false,
-        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-        _clusters: { total: 1, successful: 1, skipped: 0 },
-        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-      } as estypes.SearchResponse<unknown>)
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: false,
+        isConditionInQuery: true,
+        esResult: {
+          took: 0,
+          timed_out: false,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+        },
+      })
+    ).toEqual({
+      results: [],
+      truncated: false,
+    });
+
+    expect(
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: false,
+        isConditionInQuery: false,
+        esResult: {
+          took: 0,
+          timed_out: false,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+        },
+      })
     ).toEqual({
       results: [],
       truncated: false,
     });
   });
 
-  it('correctly parses time series results for group aggregation', () => {
+  it('correctly parses time series results for count over top N termField aggregation when isConditionInQuery = false', () => {
     expect(
-      getResultFromEs(false, true, {
-        took: 1,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: { total: { value: 298, relation: 'eq' }, hits: [] },
-        aggregations: {
-          groupCardinalityAgg: {
-            value: 2,
-          },
-          groupAgg: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'host-2',
-                doc_count: 149,
-                sortValueAgg: { value: 0.5000000018251423 },
-                dateAgg: {
-                  buckets: [
-                    {
-                      key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
-                      from: 1619104723191,
-                      from_as_string: '2021-04-22T15:18:43.191Z',
-                      to: 1619105023191,
-                      to_as_string: '2021-04-22T15:23:43.191Z',
-                      doc_count: 149,
-                      metricAgg: { value: 0.5000000018251423 },
-                    },
-                  ],
-                },
-              },
-              {
-                key: 'host-1',
-                doc_count: 149,
-                sortValueAgg: { value: 0.5000000011000857 },
-                dateAgg: {
-                  buckets: [
-                    {
-                      key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
-                      from: 1619104723191,
-                      from_as_string: '2021-04-22T15:18:43.191Z',
-                      to: 1619105023191,
-                      to_as_string: '2021-04-22T15:23:43.191Z',
-                      doc_count: 149,
-                      metricAgg: { value: 0.5000000011000857 },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      } as estypes.SearchResponse<unknown>)
-    ).toEqual({
-      results: [
-        {
-          group: 'host-2',
-          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000018251423]],
-        },
-        {
-          group: 'host-1',
-          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000011000857]],
-        },
-      ],
-      truncated: false,
-    });
-  });
-
-  it('correctly parses time series results for group aggregation when group cardinality is greater than termLimt', () => {
-    expect(
-      getResultFromEs(
-        false,
-        true,
-        {
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: true,
+        isConditionInQuery: false,
+        esResult: {
           took: 1,
           timed_out: false,
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { total: { value: 298, relation: 'eq' }, hits: [] },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
           aggregations: {
-            groupCardinalityAgg: {
-              value: 20,
-            },
             groupAgg: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -753,6 +814,480 @@ describe('getResultFromEs', () => {
                 {
                   key: 'host-2',
                   doc_count: 149,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 149,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-1',
+                  doc_count: 53,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 53,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'host-2',
+          metrics: [['2021-04-22T15:23:43.191Z', 149]],
+        },
+        {
+          group: 'host-1',
+          metrics: [['2021-04-22T15:23:43.191Z', 53]],
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses time series results for count over top N termField aggregation when isConditionInQuery = true', () => {
+    expect(
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: true,
+        isConditionInQuery: true,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'host-2',
+                  doc_count: 149,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 149,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-1',
+                  doc_count: 53,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 53,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            groupAggCount: {
+              count: 2,
+              min: 90,
+              max: 90,
+              avg: 90,
+              sum: 180,
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'host-2',
+          metrics: [['2021-04-22T15:23:43.191Z', 149]],
+        },
+        {
+          group: 'host-1',
+          metrics: [['2021-04-22T15:23:43.191Z', 53]],
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly returns truncated status for time series results for count over top N termField aggregation when isConditionInQuery = true', () => {
+    expect(
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: true,
+        isConditionInQuery: true,
+        termLimit: 5,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'host-2',
+                  doc_count: 149,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 149,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-1',
+                  doc_count: 53,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 53,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-3',
+                  doc_count: 40,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 40,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-6',
+                  doc_count: 55,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 55,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-9',
+                  doc_count: 54,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 54,
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-11',
+                  doc_count: 2,
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 2,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            groupAggCount: {
+              count: 6,
+              min: 90,
+              max: 90,
+              avg: 90,
+              sum: 180,
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'host-2',
+          metrics: [['2021-04-22T15:23:43.191Z', 149]],
+        },
+        {
+          group: 'host-1',
+          metrics: [['2021-04-22T15:23:43.191Z', 53]],
+        },
+        {
+          group: 'host-3',
+          metrics: [['2021-04-22T15:23:43.191Z', 40]],
+        },
+        {
+          group: 'host-6',
+          metrics: [['2021-04-22T15:23:43.191Z', 55]],
+        },
+        {
+          group: 'host-9',
+          metrics: [['2021-04-22T15:23:43.191Z', 54]],
+        },
+      ],
+      truncated: true,
+    });
+  });
+
+  it('correctly parses time series results with no aggregation data for count over top N termField aggregation', () => {
+    // this could happen with cross cluster searches when cluster permissions are incorrect
+    // the query completes but doesn't return any aggregations
+
+    // results should be same whether isConditionInQuery is true or false
+    expect(
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: true,
+        isConditionInQuery: true,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+        },
+      })
+    ).toEqual({
+      results: [],
+      truncated: false,
+    });
+
+    expect(
+      getResultFromEs({
+        isCountAgg: true,
+        isGroupAgg: true,
+        isConditionInQuery: false,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+        },
+      })
+    ).toEqual({
+      results: [],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses time series results for aggregate metric over all aggregation', () => {
+    // results should be same whether isConditionInQuery is true or false
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: false,
+        isConditionInQuery: true,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            sortValueAgg: { value: 0.5000000018251423 },
+            dateAgg: {
+              buckets: [
+                {
+                  key: '2022-09-20T00:14:31.000Z-2022-09-20T23:19:31.000Z',
+                  from: 1663632871000,
+                  from_as_string: '2022-09-20T00:14:31.000Z',
+                  to: 1663715971000,
+                  to_as_string: '2022-09-20T23:19:31.000Z',
+                  doc_count: 481,
+                  metricAgg: { value: 0.5000000018251423 },
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          metrics: [['2022-09-20T23:19:31.000Z', 0.5000000018251423]],
+        },
+      ],
+      truncated: false,
+    });
+
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: false,
+        isConditionInQuery: false,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            sortValueAgg: { value: 0.5000000018251423 },
+            dateAgg: {
+              buckets: [
+                {
+                  key: '2022-09-20T00:14:31.000Z-2022-09-20T23:19:31.000Z',
+                  from: 1663632871000,
+                  from_as_string: '2022-09-20T00:14:31.000Z',
+                  to: 1663715971000,
+                  to_as_string: '2022-09-20T23:19:31.000Z',
+                  doc_count: 481,
+                  metricAgg: { value: 0.5000000018251423 },
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          metrics: [['2022-09-20T23:19:31.000Z', 0.5000000018251423]],
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses time series results with no aggregation data for aggregate metric over all aggregation', () => {
+    // this could happen with cross cluster searches when cluster permissions are incorrect
+    // the query completes but doesn't return any aggregations
+
+    // results should be same whether isConditionInQuery is true or false
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: false,
+        isConditionInQuery: true,
+        esResult: {
+          took: 0,
+          timed_out: false,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+        },
+      })
+    ).toEqual({
+      results: [],
+      truncated: false,
+    });
+
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: false,
+        isConditionInQuery: false,
+        esResult: {
+          took: 0,
+          timed_out: false,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+        },
+      })
+    ).toEqual({
+      results: [],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses time series results for aggregate metric over top N termField aggregation when isConditionInQuery = false', () => {
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: true,
+        isConditionInQuery: false,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'host-2',
+                  doc_count: 149,
+                  sortValueAgg: { value: 0.7100000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 149,
+                        metricAgg: { value: 0.7100000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-1',
+                  doc_count: 53,
                   sortValueAgg: { value: 0.5000000018251423 },
                   dateAgg: {
                     buckets: [
@@ -762,16 +1297,52 @@ describe('getResultFromEs', () => {
                         from_as_string: '2021-04-22T15:18:43.191Z',
                         to: 1619105023191,
                         to_as_string: '2021-04-22T15:23:43.191Z',
-                        doc_count: 149,
+                        doc_count: 53,
                         metricAgg: { value: 0.5000000018251423 },
                       },
                     ],
                   },
                 },
+              ],
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'host-2',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.7100000018251423]],
+        },
+        {
+          group: 'host-1',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000018251423]],
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses time series results for aggregate metric over top N termField aggregation when isConditionInQuery = true', () => {
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: true,
+        isConditionInQuery: true,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
                 {
-                  key: 'host-1',
+                  key: 'host-2',
                   doc_count: 149,
-                  sortValueAgg: { value: 0.5000000011000857 },
+                  sortValueAgg: { value: 0.7100000018251423 },
                   dateAgg: {
                     buckets: [
                       {
@@ -781,43 +1352,254 @@ describe('getResultFromEs', () => {
                         to: 1619105023191,
                         to_as_string: '2021-04-22T15:23:43.191Z',
                         doc_count: 149,
-                        metricAgg: { value: 0.5000000011000857 },
+                        metricAgg: { value: 0.7100000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-1',
+                  doc_count: 53,
+                  sortValueAgg: { value: 0.5000000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 53,
+                        metricAgg: { value: 0.5000000018251423 },
                       },
                     ],
                   },
                 },
               ],
             },
+            groupAggCount: {
+              count: 2,
+              min: 75,
+              max: 90,
+              avg: 82.5,
+              sum: 165,
+            },
           },
-        } as estypes.SearchResponse<unknown>,
-        2
-      )
+        },
+      })
     ).toEqual({
       results: [
         {
           group: 'host-2',
-          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000018251423]],
+          metrics: [['2021-04-22T15:23:43.191Z', 0.7100000018251423]],
         },
         {
           group: 'host-1',
-          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000011000857]],
+          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000018251423]],
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly returns truncated status for time series results for aggregate metrics over top N termField aggregation when isConditionInQuery = true', () => {
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: true,
+        isConditionInQuery: true,
+        termLimit: 5,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'host-2',
+                  doc_count: 149,
+                  sortValueAgg: { value: 0.7100000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 149,
+                        metricAgg: { value: 0.7100000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-1',
+                  doc_count: 53,
+                  sortValueAgg: { value: 0.5000000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 53,
+                        metricAgg: { value: 0.5000000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-3',
+                  doc_count: 40,
+                  sortValueAgg: { value: 0.4900000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 40,
+                        metricAgg: { value: 0.4900000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-6',
+                  doc_count: 55,
+                  sortValueAgg: { value: 0.4600000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 55,
+                        metricAgg: { value: 0.4600000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-9',
+                  doc_count: 54,
+                  sortValueAgg: { value: 0.3300000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 54,
+                        metricAgg: { value: 0.3300000018251423 },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: 'host-11',
+                  doc_count: 2,
+                  sortValueAgg: { value: 0.1200000018251423 },
+                  dateAgg: {
+                    buckets: [
+                      {
+                        key: '2021-04-22T15:18:43.191Z-2021-04-22T15:23:43.191Z',
+                        from: 1619104723191,
+                        from_as_string: '2021-04-22T15:18:43.191Z',
+                        to: 1619105023191,
+                        to_as_string: '2021-04-22T15:23:43.191Z',
+                        doc_count: 2,
+                        metricAgg: { value: 0.1200000018251423 },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            groupAggCount: {
+              count: 6,
+              min: 75,
+              max: 90,
+              avg: 82.5,
+              sum: 165,
+            },
+          },
+        },
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'host-2',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.7100000018251423]],
+        },
+        {
+          group: 'host-1',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.5000000018251423]],
+        },
+        {
+          group: 'host-3',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.4900000018251423]],
+        },
+        {
+          group: 'host-6',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.4600000018251423]],
+        },
+        {
+          group: 'host-9',
+          metrics: [['2021-04-22T15:23:43.191Z', 0.3300000018251423]],
         },
       ],
       truncated: true,
     });
   });
 
-  it('correctly parses time series results with no aggregation data for group aggregation', () => {
+  it('correctly parses time series results with no aggregation data for aggregate metric over top N termField aggregation', () => {
     // this could happen with cross cluster searches when cluster permissions are incorrect
     // the query completes but doesn't return any aggregations
+
+    // results should be same whether isConditionInQuery is true or false
     expect(
-      getResultFromEs(false, true, {
-        took: 0,
-        timed_out: false,
-        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-        _clusters: { total: 1, successful: 1, skipped: 0 },
-        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-      } as estypes.SearchResponse<unknown>)
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: true,
+        isConditionInQuery: true,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+        },
+      })
+    ).toEqual({
+      results: [],
+      truncated: false,
+    });
+
+    expect(
+      getResultFromEs({
+        isCountAgg: false,
+        isGroupAgg: true,
+        isConditionInQuery: false,
+        esResult: {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 481, relation: 'eq' }, max_score: null, hits: [] },
+        },
+      })
     ).toEqual({
       results: [],
       truncated: false,

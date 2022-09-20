@@ -47,7 +47,7 @@ export const TimeSeriesQuerySchema = schema.object(
 
 export interface TimeSeriesSelectorParams {
   termLimit: number;
-  threshold: number[];
+  conditionScript: string;
 }
 
 // using direct type not allowed, circular reference, so body is typed to unknown

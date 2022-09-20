@@ -10,12 +10,14 @@ import { Logger } from '@kbn/core/server';
 import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
+  TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './rule_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import { getComparatorScript } from '../lib/comparator';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
@@ -175,7 +177,14 @@ export function getRuleType(
       logger,
       esClient,
       query: queryParams,
-      termLimit: alertLimit,
+      selector: {
+        termLimit: alertLimit,
+        conditionScript: getComparatorScript(
+          params.thresholdComparator,
+          params.threshold,
+          TIME_SERIES_BUCKET_SELECTOR_FIELD
+        ),
+      },
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
