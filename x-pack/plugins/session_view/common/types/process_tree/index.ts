@@ -69,14 +69,14 @@ export interface IOLine {
   value: string;
 }
 
-export interface ProcessEntityIdIOLine {
-  previous?: number;
-  value: number;
-  next?: number;
+export interface ProcessStartMarker {
+  event: ProcessEvent;
+  line: number;
 }
 
 export interface IOFields {
   text?: string;
+  max_bytes_per_process_exceeded?: boolean;
 }
 
 export interface ProcessFields {
@@ -125,6 +125,9 @@ export interface ProcessEventHost {
     name?: string;
     platform?: string;
     version?: string;
+  };
+  boot?: {
+    id?: string;
   };
 }
 

@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { MissingRequiredError } from '../error_missing_required';
 import { buildKibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
@@ -40,7 +40,7 @@ export function getKibanaInfo(
   const moduleType = 'kibana';
   const type = 'kibana_stats';
   const dataset = 'stats';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -65,7 +65,7 @@ export function getKibanaInfo(
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getKibanaDataset(dataset),
         metricset: dataset,
         clusterUuid,
         uuid: kibanaUuid,

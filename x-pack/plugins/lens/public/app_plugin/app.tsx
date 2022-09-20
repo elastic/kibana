@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -31,7 +32,7 @@ import { SaveModalContainer, runSaveLensVisualization } from './save_modal_conta
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { IndexPatternServiceAPI, createIndexPatternService } from '../indexpattern_service/service';
+import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -62,6 +63,9 @@ export function App({
 
   const {
     data,
+    dataViews,
+    uiActions,
+    uiSettings,
     chrome,
     inspector: lensInspector,
     application,
@@ -367,10 +371,11 @@ export function App({
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
-        dataViews: lensAppServices.dataViews,
-        uiSettings: lensAppServices.uiSettings,
-        uiActions: lensAppServices.uiActions,
-        core: { http, notifications },
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
+        contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
           if (options?.applyImmediately) {
@@ -384,7 +389,7 @@ export function App({
           }
         },
       }),
-    [dispatch, http, notifications, lensAppServices]
+    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
   );
 
   return (
@@ -400,6 +405,7 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}

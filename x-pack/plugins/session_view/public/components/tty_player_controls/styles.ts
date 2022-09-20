@@ -10,18 +10,27 @@ import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
-    const { size } = euiTheme;
+    const { size, border } = euiTheme;
+
+    const controlsPanel: CSSObject = {
+      paddingTop: size.s,
+      paddingBottom: size.s,
+      borderBottomLeftRadius: border.radius.medium,
+      borderBottomRightRadius: border.radius.medium,
+      backgroundColor: euiVars.terminalOutputBackground,
+    };
 
     const controlButton: CSSObject = {
       width: size.l,
     };
 
     return {
+      controlsPanel,
       controlButton,
     };
-  }, [euiTheme]);
+  }, [euiTheme, euiVars.terminalOutputBackground]);
 
   return cached;
 };

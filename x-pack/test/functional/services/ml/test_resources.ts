@@ -275,6 +275,24 @@ export function MachineLearningTestResourcesProvider(
       );
     },
 
+    async createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndLucene,
+        indexPatternTitle
+      );
+    },
+
+    async createSavedSearchFarequoteFilterTwoAndKueryIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndKuery,
+        indexPatternTitle
+      );
+    },
+
     async deleteSavedObjectById(id: string, objectType: SavedObjectType, force: boolean = false) {
       log.debug(`Deleting ${objectType} with id '${id}'...`);
 

@@ -167,6 +167,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:showLegacyFieldTopValues': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'discover:sampleSize': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -514,6 +518,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmLabsButton': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmProgressiveLoading': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -530,6 +538,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureHostsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -539,6 +551,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'enterpriseSearch:enableIndexTransformsTab': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'enterpriseSearch:enableBehavioralAnalyticsSection': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

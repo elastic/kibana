@@ -68,9 +68,8 @@ import type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  NavType,
   ChromeHelpMenuActions,
-} from './chrome';
+} from '@kbn/core-chrome-browser';
 import type {
   Plugin,
   PluginInitializer,
@@ -225,7 +224,7 @@ export type {
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
-export { URL_MAX_LENGTH } from './core_app';
+export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
@@ -362,7 +361,6 @@ export type {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
-  NavType,
 };
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';

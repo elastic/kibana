@@ -52,6 +52,7 @@ import type {
   Installation,
   Output,
   DeletePackagePoliciesResponse,
+  PackageInfo,
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
@@ -68,7 +69,7 @@ import {
   elasticAgentManagedManifest,
 } from './elastic_agent_manifest';
 
-import { getPackageInfo, bulkInstallPackages } from './epm/packages';
+import { bulkInstallPackages } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
@@ -122,7 +123,6 @@ class AgentPolicyService {
       existingAgentPolicy,
       this.hasAPMIntegration(existingAgentPolicy)
     );
-
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
@@ -469,8 +469,10 @@ class AgentPolicyService {
       await packagePolicyService.bulkCreate(
         soClient,
         esClient,
-        newPackagePolicies,
-        newAgentPolicy.id,
+        newPackagePolicies.map((newPackagePolicy) => ({
+          ...newPackagePolicy,
+          policy_id: newAgentPolicy.id,
+        })),
         {
           ...options,
           bumpRevision: false,
@@ -767,9 +769,15 @@ class AgentPolicyService {
         .map((fleetServerPolicy) =>
           // There are some potential performance concerns around using `agentPolicyService.update` in this context.
           // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-          agentPolicyService.update(soClient, esClient, fleetServerPolicy.policy_id, {
-            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-          })
+          agentPolicyService.update(
+            soClient,
+            esClient,
+            fleetServerPolicy.policy_id,
+            {
+              schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+            },
+            { force: true }
+          )
         )
     );
   }
@@ -957,18 +965,13 @@ export async function addPackageToAgentPolicy(
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
   defaultOutput: Output,
+  packageInfo: PackageInfo,
   packagePolicyName?: string,
   packagePolicyId?: string | number,
   packagePolicyDescription?: string,
   transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
   bumpAgentPolicyRevison = false
 ) {
-  const packageInfo = await getPackageInfo({
-    savedObjectsClient: soClient,
-    pkgName: packageToInstall.name,
-    pkgVersion: packageToInstall.version,
-  });
-
   const basePackagePolicy = packageToPackagePolicy(
     packageInfo,
     agentPolicy.id,
@@ -994,5 +997,6 @@ export async function addPackageToAgentPolicy(
     skipUniqueNameVerification: true,
     overwrite: true,
     force: true, // To add package to managed policy we need the force flag
+    packageInfo,
   });
 }

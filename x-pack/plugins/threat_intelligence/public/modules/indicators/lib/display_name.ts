@@ -5,228 +5,107 @@
  * 2.0.
  */
 
-import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { unwrapValue } from './unwrap_value';
-
-type IndicatorDisplayName = [RawIndicatorFieldId, string | null];
-interface IndicatorDisplayNameAsObject {
-  field: RawIndicatorFieldId;
-  value: string | null;
-}
-type IndicatorDisplayNameExtractor = (indicator: Indicator) => IndicatorDisplayName;
-type IndicatorTypePredicate = (indicatorType: string | null) => boolean;
-
-type MapperRule = [predicate: IndicatorTypePredicate, extract: IndicatorDisplayNameExtractor];
+import dedent from 'dedent';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 
 /**
- * Predicates to help identify indicator by type
+ * Mapping connects one ore more types to field values that should be used to generate threat.indicator.name field.
  */
-const isIpIndicator: IndicatorTypePredicate = (indicatorType) =>
-  !!indicatorType && ['ipv4-addr', 'ipv6-addr'].includes(indicatorType);
+type Mapping = [types: string[], paths: RawIndicatorFieldId[]];
 
-const isFileIndicator: IndicatorTypePredicate = (indicatorType) => indicatorType === 'file';
-const isUrlIndicator: IndicatorTypePredicate = (indicatorType) => indicatorType === 'url';
-const isEmailAddress: IndicatorTypePredicate = (indicatorType) => indicatorType === 'email-addr';
-const isDomain: IndicatorTypePredicate = (indicatorType) =>
-  !!indicatorType && ['domain', 'domain-name'].includes(indicatorType);
-const isX509Certificate: IndicatorTypePredicate = (indicatorType) =>
-  !!indicatorType && ['x509-certificate', 'x509 serial'].includes(indicatorType);
-const isUnknownIndicator: IndicatorTypePredicate = (indicatorType) =>
-  !!indicatorType && ['unknown', 'email', 'email-message'].includes(indicatorType);
-const isWindowsRegistryKey: IndicatorTypePredicate = (indicatorType) =>
-  indicatorType === 'windows-registry-key';
-const isAutonomousSystem: IndicatorTypePredicate = (indicatorType) =>
-  indicatorType === 'autonomous-system';
-const isMacAddress: IndicatorTypePredicate = (indicatorType) => indicatorType === 'mac-addr';
+type Mappings = Mapping[];
 
-/**
- * Display value extraction logic
- */
-const extractIp: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.Ip,
-  unwrapValue(indicator, RawIndicatorFieldId.Ip),
-];
-
-const extractUrl: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.UrlOriginal,
-  unwrapValue(indicator, RawIndicatorFieldId.UrlOriginal),
-];
-
-const extractId: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.Id,
-  unwrapValue(indicator, RawIndicatorFieldId.Id),
-];
-
-const extractFile: IndicatorDisplayNameExtractor = (indicator: Indicator) => {
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha256)) {
-    return [RawIndicatorFieldId.FileSha256, unwrapValue(indicator, RawIndicatorFieldId.FileSha256)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileMd5)) {
-    return [RawIndicatorFieldId.FileMd5, unwrapValue(indicator, RawIndicatorFieldId.FileMd5)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha1)) {
-    return [RawIndicatorFieldId.FileSha1, unwrapValue(indicator, RawIndicatorFieldId.FileSha1)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha512)) {
-    return [RawIndicatorFieldId.FileSha512, unwrapValue(indicator, RawIndicatorFieldId.FileSha512)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha224)) {
-    return [RawIndicatorFieldId.FileSha224, unwrapValue(indicator, RawIndicatorFieldId.FileSha224)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha384)) {
-    return [RawIndicatorFieldId.FileSha384, unwrapValue(indicator, RawIndicatorFieldId.FileSha384)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3224)) {
-    return [
+const mappingsArray: Mappings = [
+  [['ipv4-addr', 'ipv6-addr'], [RawIndicatorFieldId.Ip]],
+  // For example, `file` indicator will have `threat.indicator.name` computed out of the first
+  // hash value field defined below, in order of occurrence
+  [
+    ['file'],
+    [
+      RawIndicatorFieldId.FileSha256,
+      RawIndicatorFieldId.FileMd5,
+      RawIndicatorFieldId.FileSha1,
+      RawIndicatorFieldId.FileSha224,
       RawIndicatorFieldId.FileSha3224,
-      unwrapValue(indicator, RawIndicatorFieldId.FileSha3224),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3256)) {
-    return [
       RawIndicatorFieldId.FileSha3256,
-      unwrapValue(indicator, RawIndicatorFieldId.FileSha3256),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3384)) {
-    return [
+      RawIndicatorFieldId.FileSha384,
       RawIndicatorFieldId.FileSha3384,
-      unwrapValue(indicator, RawIndicatorFieldId.FileSha3384),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3512)) {
-    return [
+      RawIndicatorFieldId.FileSha512,
       RawIndicatorFieldId.FileSha3512,
-      unwrapValue(indicator, RawIndicatorFieldId.FileSha3512),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha512224)) {
-    return [
       RawIndicatorFieldId.FileSha512224,
-      unwrapValue(indicator, RawIndicatorFieldId.FileSha512224),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha512256)) {
-    return [
       RawIndicatorFieldId.FileSha512256,
-      unwrapValue(indicator, RawIndicatorFieldId.FileSha512256),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileSSDeep)) {
-    return [RawIndicatorFieldId.FileSSDeep, unwrapValue(indicator, RawIndicatorFieldId.FileSSDeep)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileTlsh)) {
-    return [RawIndicatorFieldId.FileTlsh, unwrapValue(indicator, RawIndicatorFieldId.FileTlsh)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileImpfuzzy)) {
-    return [
+      RawIndicatorFieldId.FileSSDeep,
+      RawIndicatorFieldId.FileTlsh,
       RawIndicatorFieldId.FileImpfuzzy,
-      unwrapValue(indicator, RawIndicatorFieldId.FileImpfuzzy),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileImphash)) {
-    return [
       RawIndicatorFieldId.FileImphash,
-      unwrapValue(indicator, RawIndicatorFieldId.FileImphash),
-    ];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FilePehash)) {
-    return [RawIndicatorFieldId.FilePehash, unwrapValue(indicator, RawIndicatorFieldId.FilePehash)];
-  }
-
-  if (unwrapValue(indicator, RawIndicatorFieldId.FileVhash)) {
-    return [RawIndicatorFieldId.FileVhash, unwrapValue(indicator, RawIndicatorFieldId.FileVhash)];
-  }
-
-  return extractId(indicator);
-};
-
-const extractEmailAddress: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.EmailAddress,
-  unwrapValue(indicator, RawIndicatorFieldId.EmailAddress),
-];
-
-const extractDomain: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.UrlDomain,
-  unwrapValue(indicator, RawIndicatorFieldId.UrlDomain),
-];
-
-const extractX509Serial: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.X509Serial,
-  unwrapValue(indicator, RawIndicatorFieldId.X509Serial),
-];
-
-const extractWindowsRegistryKey: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.WindowsRegistryKey,
-  unwrapValue(indicator, RawIndicatorFieldId.WindowsRegistryKey),
-];
-
-const extractAutonomousSystemNumber: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.AutonomousSystemNumber,
-  unwrapValue(indicator, RawIndicatorFieldId.AutonomousSystemNumber),
-];
-
-const extractMacAddress: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
-  RawIndicatorFieldId.MacAddress,
-  unwrapValue(indicator, RawIndicatorFieldId.MacAddress),
+      RawIndicatorFieldId.FilePehash,
+      RawIndicatorFieldId.FileVhash,
+    ],
+  ],
+  [['url'], [RawIndicatorFieldId.UrlFull]],
+  [['domain', 'domain-name'], [RawIndicatorFieldId.UrlDomain]],
+  [['x509-certificate', 'x509 serial'], [RawIndicatorFieldId.X509Serial]],
+  [['email-addr'], [RawIndicatorFieldId.EmailAddress]],
+  [['unknown', 'email', 'email-message'], [RawIndicatorFieldId.Id]],
+  [['windows-registry-key'], [RawIndicatorFieldId.WindowsRegistryKey]],
+  [['autonomous-system'], [RawIndicatorFieldId.AutonomousSystemNumber]],
+  [['mac-addr'], [RawIndicatorFieldId.MacAddress]],
 ];
 
 /**
- * Pairs rule condition with display value extraction logic
+ * Generates Painless condition checking if given `type` is matched
  */
-const rulesArray: MapperRule[] = [
-  [isIpIndicator, extractIp],
-  [isUrlIndicator, extractUrl],
-  [isFileIndicator, extractFile],
-  [isUnknownIndicator, extractId],
-  [isEmailAddress, extractEmailAddress],
-  [isDomain, extractDomain],
-  [isX509Certificate, extractX509Serial],
-  [isWindowsRegistryKey, extractWindowsRegistryKey],
-  [isAutonomousSystem, extractAutonomousSystemNumber],
-  [isMacAddress, extractMacAddress],
-];
+const fieldTypeCheck = (type: string) =>
+  `if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
 
 /**
- * Finds display value mapping function for given indicatorType
+ * Generates Painless condition checking if given `field` has value
  */
-const findMappingRule = (indicatorType: string | null): IndicatorDisplayNameExtractor => {
-  const [_, extract = extractId] = rulesArray.find(([check]) => check(indicatorType)) || [];
-  return extract;
+const fieldValueCheck = (field: string) => `if (doc['${field}'].value!=null)`;
+
+/**
+ * Converts Mapping to Painless script, computing `threat.indicator.name` value for given indicator types.
+ */
+const mappingToIndicatorNameScript = ([types, paths]: Mapping) => {
+  return dedent`${types
+    .map(
+      (t) =>
+        `${fieldTypeCheck(t)} { ${paths
+          .map((p) => `${fieldValueCheck(p)} { return emit(doc['${p}'].value) }`)
+          .join('\n')} }`
+    )
+    .join('\n')}`;
 };
 
 /**
- * Cached rules for indicator types
+ * Converts Mapping to Painless script, computing `threat.indicator.name_origin` used to determine which document field has
+ * been used to obtain `threat.indicator.name`.
  */
-const rules: Record<string, IndicatorDisplayNameExtractor> = {};
+const mappingToIndicatorNameOriginScript = ([types, paths]: Mapping) => {
+  return dedent`${types
+    .map(
+      (t) =>
+        `${fieldTypeCheck(t)} { ${paths
+          .map((p) => `${fieldValueCheck(p)} { return emit('${p}') }`)
+          .join('\n')} }`
+    )
+    .join('\n')}`;
+};
 
 /**
- * Find and return indicator display name structure {field, value}
+ * Generates the runtime field script computing display name for the given indicator
  */
-export const getDisplayName = (indicator: Indicator): IndicatorDisplayNameAsObject => {
-  const indicatorType = (unwrapValue(indicator, RawIndicatorFieldId.Type) || '').toLowerCase();
+export const threatIndicatorNamesScript = (mappings: Mappings = mappingsArray) => {
+  const combined = mappings.map(mappingToIndicatorNameScript).join('\n\n');
 
-  if (!rules[indicatorType]) {
-    rules[indicatorType] = findMappingRule(indicatorType);
-  }
+  return `${combined}\n\nreturn emit('')`;
+};
 
-  const [field, value] = rules[indicatorType](indicator);
+/**
+ * Generates the runtime field script computing the display name origin path for given indicator
+ */
+export const threatIndicatorNamesOriginScript = (mappings: Mappings = mappingsArray) => {
+  const combined = mappings.map(mappingToIndicatorNameOriginScript).join('\n\n');
 
-  return { field, value };
+  return `${combined}\n\nreturn emit('')`;
 };

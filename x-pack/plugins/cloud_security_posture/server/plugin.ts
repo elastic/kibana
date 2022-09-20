@@ -14,12 +14,17 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { DeepReadonly } from 'utility-types';
-import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
+import type { DeepReadonly } from 'utility-types';
+import type {
+  DeletePackagePoliciesResponse,
+  PackagePolicy,
+  NewPackagePolicy,
+} from '@kbn/fleet-plugin/common';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { isSubscriptionAllowed } from '../common/utils/subscription';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
@@ -32,13 +37,16 @@ import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
+  isCspPackage,
   isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
   removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
-import { updateAgentConfiguration } from './routes/configuration/update_rules_configuration';
-
+import {
+  updatePackagePolicyRuntimeCfgVar,
+  getCspRulesSO,
+} from './routes/configuration/update_rules_configuration';
 import {
   removeFindingsStatsTask,
   scheduleFindingsStatsTask,
@@ -55,6 +63,7 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+  private isCloudEnabled?: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -74,6 +83,8 @@ export class CspPlugin
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
 
+    this.isCloudEnabled = plugins.cloud.isCloudEnabled;
+
     return {};
   }
 
@@ -90,26 +101,50 @@ export class CspPlugin
       }
 
       plugins.fleet.registerExternalCallback(
+        'packagePolicyCreate',
+        async (
+          packagePolicy: NewPackagePolicy,
+          _context: RequestHandlerContext,
+          _request: KibanaRequest
+        ): Promise<NewPackagePolicy> => {
+          const license = await plugins.licensing.refresh();
+          if (isCspPackage(packagePolicy.package?.name)) {
+            if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
+              throw new Error(
+                'To use this feature you must upgrade your subscription or start a trial'
+              );
+            }
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
         'packagePolicyPostCreate',
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
-          if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+          if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
 
             const soClient = (await context.core).savedObjects.client;
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            const user = await plugins.security.authc.getCurrentUser(request);
+
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-            const userAuth = await plugins.security.authc.getCurrentUser(request);
-            const updatedPackagePolicy = await updateAgentConfiguration(
-              plugins.fleet.packagePolicyService,
+
+            const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
+              rules: await getCspRulesSO(soClient, packagePolicy.id, packagePolicy.policy_id),
               packagePolicy,
+              packagePolicyService: plugins.fleet.packagePolicyService,
               esClient,
               soClient,
-              userAuth
-            );
+              user,
+            });
+
             return updatedPackagePolicy;
           }
 
@@ -121,7 +156,7 @@ export class CspPlugin
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
-            if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+            if (isCspPackage(deletedPackagePolicy.package?.name)) {
               const soClient = core.savedObjects.createInternalRepository();
               await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
 

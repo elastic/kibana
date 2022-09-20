@@ -29,7 +29,8 @@ function fromExcludedClickTarget(event: Event) {
   ) {
     if (
       node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS) ||
-      node.classList!.contains('euiBody-hasPortalContent')
+      node.classList!.contains('euiBody-hasPortalContent') ||
+      node.getAttribute('data-euiportal') === 'true'
     ) {
       return true;
     }

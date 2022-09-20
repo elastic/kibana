@@ -15,7 +15,6 @@ import {
 import React from 'react';
 import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { Benchmark } from '../../../common/types';
@@ -74,18 +73,11 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
   },
   {
-    field: 'rules',
+    field: 'rules.enabled',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
       defaultMessage: 'Active Rules',
     }),
     truncateText: true,
-    render: ({ enabled, all }: Benchmark['rules']) => (
-      <FormattedMessage
-        id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
-        defaultMessage="{enabled} of {all}"
-        values={{ enabled, all }}
-      />
-    ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
   },
   {

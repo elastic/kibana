@@ -141,7 +141,22 @@ describe('Lens App', () => {
 
   it('renders the editor frame', async () => {
     const { frame } = await mountWith({});
-    expect(frame.EditorFrameContainer.mock.calls).toMatchSnapshot();
+    expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
+      {
+        indexPatternService: expect.any(Object),
+        lensInspector: {
+          adapters: {
+            expression: expect.any(Object),
+            requests: expect.any(Object),
+            tables: expect.any(Object),
+          },
+          close: expect.any(Function),
+          inspect: expect.any(Function),
+        },
+        showNoDataPopover: expect.any(Function),
+      },
+      {}
+    );
   });
 
   it('updates global filters with store state', async () => {
@@ -227,7 +242,7 @@ describe('Lens App', () => {
           topNavMenuEntryGenerators: [getterFn],
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
         },
         preloadedState,
@@ -237,7 +252,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
           visualizationState: preloadedState.visualization.state,
           visualizationId: preloadedState.visualization.activeId,
@@ -489,6 +504,7 @@ describe('Lens App', () => {
               isTimeBased: expect.any(Function),
               fields: [],
               isPersisted: expect.any(Function),
+              toSpec: expect.any(Function),
             },
           ],
         }),

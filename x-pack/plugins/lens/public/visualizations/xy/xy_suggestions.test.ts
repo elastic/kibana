@@ -24,6 +24,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../id_generator');
 
@@ -36,6 +37,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -549,9 +551,12 @@ describe('xy_suggestions', () => {
     const annotationLayer: XYAnnotationLayerConfig = {
       layerId: 'second',
       layerType: layerTypes.ANNOTATIONS,
+      indexPatternId: 'indexPattern1',
+      ignoreGlobalFilters: true,
       annotations: [
         {
           id: '1',
+          type: 'manual',
           key: {
             type: 'point_in_time',
             timestamp: '2020-20-22',

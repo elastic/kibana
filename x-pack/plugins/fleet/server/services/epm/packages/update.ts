@@ -8,9 +8,11 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { ExperimentalIndexingFeature } from '../../../../common/types';
+
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
-import { IngestManagerError } from '../../../errors';
+import { FleetError } from '../../../errors';
 
 import { getInstallationObject, getPackageInfo } from './get';
 
@@ -25,7 +27,7 @@ export async function updatePackage(
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
-    throw new IngestManagerError(`package ${pkgName} is not installed`);
+    throw new FleetError(`package ${pkgName} is not installed`);
   }
 
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
@@ -39,4 +41,22 @@ export async function updatePackage(
   });
 
   return packageInfo;
+}
+
+export async function updateDatastreamExperimentalFeatures(
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  dataStreamFeatureMapping: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>
+) {
+  await savedObjectsClient.update<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName,
+    {
+      experimental_data_stream_features: dataStreamFeatureMapping,
+    },
+    { refresh: 'wait_for' }
+  );
 }
