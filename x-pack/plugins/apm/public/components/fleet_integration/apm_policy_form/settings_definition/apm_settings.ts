@@ -194,6 +194,22 @@ export function getApmSettings(): SettingsRow[] {
             }
           ),
         },
+        {
+          key: 'service_metrics_enabled',
+          type: 'boolean',
+          labelAppend: OPTIONAL_LABEL,
+          rowTitle: i18n.translate(
+            'xpack.apm.fleet_integration.settings.apm.serviceMetricsEnabled',
+            { defaultMessage: 'Service Metrics' }
+          ),
+          rowDescription: i18n.translate(
+            'xpack.apm.fleet_integration.settings.apm.serviceMetricsEnabledDescription',
+            {
+              defaultMessage:
+                'Experimental: enables the collection of APM service metrics',
+            }
+          ),
+        },
       ],
     },
   ];
