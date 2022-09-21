@@ -11,10 +11,11 @@ import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const NLP_CONFIG_KEYS = [
+  'fill_mask',
   'ner',
-  'classification',
   'text_classification',
   'text_embedding',
+  'question_answering',
   'zero_shot_classification',
 ];
 export const isSupportedMLModel = (model: TrainedModelConfigResponse): boolean => {
