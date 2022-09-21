@@ -203,7 +203,7 @@ export async function mountApp(
       });
     }
   };
-  // get state from location, used for nanigating from Visualize/Discover to Lens
+  // get state from location, used for navigating from Visualize/Discover to Lens
   const initialContext =
     historyLocationState &&
     (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
