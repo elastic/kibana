@@ -3,8 +3,7 @@
 
 
 *Discover* displays your documents in table format, so you can
-best explore your data.
-Use the document table to resize columns, set row height,
+best explore your data. Resize columns, set row height,
 perform multi-column sorting, compare data, and more.
 
 [role="screenshot"]
