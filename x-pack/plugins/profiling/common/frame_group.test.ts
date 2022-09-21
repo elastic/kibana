@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compareFrameGroup, createFrameGroup, createFrameGroupID } from './frame_group';
+import { createFrameGroup, createFrameGroupID } from './frame_group';
 
 const nonSymbolizedFrameGroups = [
   createFrameGroup('0x0123456789ABCDEF', 102938, '', '', ''),
@@ -26,88 +26,6 @@ const symbolizedFrameGroups = [
 ];
 
 describe('Frame group operations', () => {
-  describe('check if a non-symbolized frame group is', () => {
-    test('less than another non-symbolized frame group', () => {
-      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], nonSymbolizedFrameGroups[0])).toEqual(
-        -1
-      );
-    });
-
-    test('equal to another non-symbolized frame group', () => {
-      expect(compareFrameGroup(nonSymbolizedFrameGroups[0], nonSymbolizedFrameGroups[0])).toEqual(
-        0
-      );
-    });
-
-    test('greater than another non-symbolized frame group', () => {
-      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], nonSymbolizedFrameGroups[2])).toEqual(
-        1
-      );
-    });
-
-    test('less than an ELF-symbolized frame group', () => {
-      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], elfSymbolizedFrameGroups[0])).toEqual(
-        -1
-      );
-    });
-
-    test('less than a symbolized frame group', () => {
-      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], symbolizedFrameGroups[0])).toEqual(-1);
-    });
-  });
-
-  describe('check if an ELF-symbolized frame group is', () => {
-    test('less than another ELF-symbolized frame group', () => {
-      expect(compareFrameGroup(elfSymbolizedFrameGroups[0], elfSymbolizedFrameGroups[1])).toEqual(
-        -1
-      );
-    });
-
-    test('equal to another ELF-symbolized frame group', () => {
-      expect(compareFrameGroup(elfSymbolizedFrameGroups[0], elfSymbolizedFrameGroups[0])).toEqual(
-        0
-      );
-    });
-
-    test('greater than another ELF-symbolized frame group', () => {
-      expect(compareFrameGroup(elfSymbolizedFrameGroups[1], elfSymbolizedFrameGroups[0])).toEqual(
-        1
-      );
-    });
-
-    test('greater than a non-symbolized frame group', () => {
-      expect(compareFrameGroup(elfSymbolizedFrameGroups[0], nonSymbolizedFrameGroups[0])).toEqual(
-        1
-      );
-    });
-
-    test('less than a symbolized frame group', () => {
-      expect(compareFrameGroup(elfSymbolizedFrameGroups[2], symbolizedFrameGroups[0])).toEqual(-1);
-    });
-  });
-
-  describe('check if a symbolized frame group is', () => {
-    test('less than another symbolized frame group', () => {
-      expect(compareFrameGroup(symbolizedFrameGroups[0], symbolizedFrameGroups[1])).toEqual(-1);
-    });
-
-    test('equal to another symbolized frame group', () => {
-      expect(compareFrameGroup(symbolizedFrameGroups[0], symbolizedFrameGroups[0])).toEqual(0);
-    });
-
-    test('greater than another symbolized frame group', () => {
-      expect(compareFrameGroup(symbolizedFrameGroups[1], symbolizedFrameGroups[0])).toEqual(1);
-    });
-
-    test('greater than a non-symbolized frame group', () => {
-      expect(compareFrameGroup(symbolizedFrameGroups[0], nonSymbolizedFrameGroups[0])).toEqual(1);
-    });
-
-    test('greater than an ELF-symbolized frame group', () => {
-      expect(compareFrameGroup(symbolizedFrameGroups[0], elfSymbolizedFrameGroups[2])).toEqual(1);
-    });
-  });
-
   describe('check serialization for', () => {
     test('non-symbolized frame', () => {
       expect(createFrameGroupID(nonSymbolizedFrameGroups[0])).toEqual(
