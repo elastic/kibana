@@ -44,6 +44,13 @@ export class UnenrollActionRunner extends ActionRunner {
   }
 }
 
+export function isAgentUnenrolled(agent: Agent, revoke?: boolean): boolean {
+  return Boolean(
+    (revoke && agent.unenrolled_at) ||
+      (!revoke && (agent.unenrollment_started_at || agent.unenrolled_at))
+  );
+}
+
 export async function unenrollBatch(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -63,10 +70,7 @@ export async function unenrollBatch(
   const agentsToUpdate = options.force
     ? givenAgents
     : givenAgents.reduce<Agent[]>((agents, agent) => {
-        if (
-          (options.revoke && agent.unenrolled_at) ||
-          (!options.revoke && (agent.unenrollment_started_at || agent.unenrolled_at))
-        ) {
+        if (isAgentUnenrolled(agent, options.revoke)) {
           outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
         } else if (isHostedAgent(hostedPolicies, agent)) {
           outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(

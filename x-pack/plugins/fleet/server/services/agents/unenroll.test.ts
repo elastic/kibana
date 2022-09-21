@@ -15,8 +15,10 @@ import { appContextService } from '../app_context';
 
 import { createAppContextStartContractMock } from '../../mocks';
 
+import type { Agent } from '../../types';
+
 import { unenrollAgent, unenrollAgents } from './unenroll';
-import { invalidateAPIKeysForAgents } from './unenroll_action_runner';
+import { invalidateAPIKeysForAgents, isAgentUnenrolled } from './unenroll_action_runner';
 import { createClientMock } from './action.mock';
 
 jest.mock('../api_keys');
@@ -366,5 +368,33 @@ describe('invalidateAPIKeysForAgents', () => {
       'defaultApiKeyHistory1',
       'defaultApiKeyHistory2',
     ]);
+  });
+});
+
+describe('isAgentUnenrolled', () => {
+  it('should return true if revoke and unenrolled_at set', () => {
+    expect(isAgentUnenrolled({ unenrolled_at: '2022-09-21' } as Agent, true)).toBe(true);
+  });
+
+  it('should return false if revoke and unenrolled_at null', () => {
+    expect(
+      isAgentUnenrolled({ unenrolled_at: null, unenrollment_started_at: '2022-09-21' } as any, true)
+    ).toBe(false);
+  });
+
+  it('should return true if unenrolled_at set', () => {
+    expect(isAgentUnenrolled({ unenrolled_at: '2022-09-21' } as Agent)).toBe(true);
+  });
+
+  it('should return true if unenrollment_started_at set and unenrolled_at null', () => {
+    expect(
+      isAgentUnenrolled({ unenrolled_at: null, unenrollment_started_at: '2022-09-21' } as any)
+    ).toBe(true);
+  });
+
+  it('should return false if unenrollment_started_at null and unenrolled_at null', () => {
+    expect(isAgentUnenrolled({ unenrolled_at: null, unenrollment_started_at: null } as any)).toBe(
+      false
+    );
   });
 });
