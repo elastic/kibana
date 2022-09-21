@@ -8,11 +8,11 @@ import React, { useCallback, ChangeEvent, MouseEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
-  EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
+  EuiButtonIconProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
 import { ProcessStartMarker, ProcessEvent } from '../../../common/types/process_tree';
@@ -26,6 +26,7 @@ import {
   TTY_START,
   VIEW_IN_SESSION,
 } from './translations';
+import { TTYPlayerControlsMarkers } from './tty_player_controls_markers';
 
 export interface TTYPlayerControlsDeps {
   currentProcessEvent: ProcessEvent | undefined;
@@ -54,6 +55,13 @@ export const TTYPlayerControls = ({
 }: TTYPlayerControlsDeps) => {
   const styles = useStyles();
 
+  const commonButtonProps: Partial<EuiButtonIconProps> = {
+    display: 'empty',
+    size: 's',
+    color: 'ghost',
+    css: styles.controlButton,
+  };
+
   const onLineChange = useCallback(
     (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
       const line = parseInt((event?.target as HTMLInputElement).value || '0', 10);
@@ -71,19 +79,12 @@ export const TTYPlayerControls = ({
   }, [linesLength, onSeekLine]);
 
   const seekToPrevProcess = useCallback(() => {
-    let index = findIndex(processStartMarkers, (marker) => {
-      if (marker.line > currentLine) {
-        return true;
-      }
+    const index =
+      currentLine > processStartMarkers[processStartMarkers.length - 1].line
+        ? processStartMarkers.length
+        : findIndex(processStartMarkers, (marker) => marker.line >= currentLine);
 
-      return false;
-    });
-
-    if (index === -1) {
-      index = processStartMarkers.length - 1;
-    }
-
-    const previousMarker = processStartMarkers[index - 2];
+    const previousMarker = processStartMarkers[index - 1];
     onSeekLine(previousMarker?.line || 0);
   }, [processStartMarkers, onSeekLine, currentLine]);
 
@@ -97,7 +98,7 @@ export const TTYPlayerControls = ({
     });
 
     const nextMarker = processStartMarkers[nextIndex];
-    onSeekLine(nextMarker?.line || linesLength);
+    onSeekLine(nextMarker?.line || linesLength - 1);
   }, [processStartMarkers, onSeekLine, linesLength, currentLine]);
 
   const handleViewInSession = useCallback(() => {
@@ -118,75 +119,65 @@ export const TTYPlayerControls = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_START}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsStart"
               iconType="arrowStart"
-              display="empty"
-              size="m"
               aria-label={TTY_START}
               onClick={seekToStart}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_PREVIOUS}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsPrevious"
               iconType="arrowLeft"
-              display="empty"
-              size="m"
               aria-label={TTY_PREVIOUS}
               onClick={seekToPrevProcess}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={isPlaying ? TTY_PAUSE : TTY_PLAY}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsPlay"
               iconType={isPlaying ? 'pause' : 'playFilled'}
-              display="empty"
-              size="m"
               aria-label={isPlaying ? TTY_PAUSE : TTY_PLAY}
               onClick={onTogglePlayback}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_NEXT}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsNext"
               iconType="arrowRight"
-              display="empty"
-              size="m"
               aria-label={TTY_NEXT}
               onClick={seekToNextProcess}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_END}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsEnd"
               iconType="arrowEnd"
-              display="empty"
-              size="m"
               aria-label={TTY_END}
               onClick={seekToEnd}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiRange
-            value={currentLine}
-            min={0}
-            max={Math.max(0, linesLength - 1)}
+        <EuiFlexItem style={{ position: 'relative' }}>
+          <TTYPlayerControlsMarkers
+            processStartMarkers={processStartMarkers}
+            linesLength={linesLength}
+            currentLine={currentLine}
             onChange={onLineChange}
-            fullWidth
+            onSeekLine={onSeekLine}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -196,6 +187,7 @@ export const TTYPlayerControls = ({
             onClick={handleViewInSession}
             iconType="arrowRight"
             aria-label={VIEW_IN_SESSION}
+            color="ghost"
           >
             {VIEW_IN_SESSION}
           </EuiButtonEmpty>

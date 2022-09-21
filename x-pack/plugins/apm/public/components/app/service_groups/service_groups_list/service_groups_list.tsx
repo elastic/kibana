@@ -16,10 +16,11 @@ import { useDefaultEnvironment } from '../../../../hooks/use_default_environment
 
 interface Props {
   items: SavedServiceGroup[];
+  servicesCounts: Record<string, number>;
   isLoading: boolean;
 }
 
-export function ServiceGroupsListItems({ items }: Props) {
+export function ServiceGroupsListItems({ items, servicesCounts }: Props) {
   const router = useApmRouter();
   const { query } = useApmParams('/service-groups');
 
@@ -30,6 +31,7 @@ export function ServiceGroupsListItems({ items }: Props) {
       {items.map((item) => (
         <ServiceGroupsCard
           serviceGroup={item}
+          servicesCount={servicesCounts[item.id]}
           href={router.link('/services', {
             query: {
               ...query,
@@ -52,7 +54,6 @@ export function ServiceGroupsListItems({ items }: Props) {
             'xpack.apm.serviceGroups.list.allServices.description',
             { defaultMessage: 'View all services' }
           ),
-          serviceNames: [],
           color: SERVICE_GROUP_COLOR_DEFAULT,
         }}
         hideServiceCount

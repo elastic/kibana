@@ -11,12 +11,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { useContext } from 'react';
 import { number } from 'io-ts';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
 import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
+import type { FindingsBaseEsQuery, Sort } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
@@ -33,11 +34,14 @@ export interface ResourceFindingsQuery {
 }
 
 type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type ResourceFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<CspFinding, Aggs>>;
+type ResourceFindingsResponse = IKibanaSearchResponse<
+  estypes.SearchResponse<CspFinding, ResourceFindingsResponseAggs>
+>;
 
-interface Aggs {
-  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
-}
+export type ResourceFindingsResponseAggs = Record<
+  'count' | 'clusterId' | 'resourceSubType' | 'resourceName',
+  estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>
+>;
 
 const getResourceFindingsQuery = ({
   query,
@@ -59,7 +63,18 @@ const getResourceFindingsQuery = ({
     },
     sort: [{ [sort.field]: sort.direction }],
     pit: { id: pitId },
-    aggs: getFindingsCountAggQuery(),
+    aggs: {
+      ...getFindingsCountAggQuery(),
+      clusterId: {
+        terms: { field: 'cluster_id' },
+      },
+      resourceSubType: {
+        terms: { field: 'resource.sub_type' },
+      },
+      resourceName: {
+        terms: { field: 'resource.name' },
+      },
+    },
   },
   ignore_unavailable: false,
 });
@@ -89,13 +104,18 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
       }: ResourceFindingsResponse) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
 
-        if (!Array.isArray(aggregations?.count.buckets))
-          throw new Error('expected buckets to be an array');
+        assertNonEmptyArray(aggregations.count.buckets);
+        assertNonEmptyArray(aggregations.clusterId.buckets);
+        assertNonEmptyArray(aggregations.resourceSubType.buckets);
+        assertNonEmptyArray(aggregations.resourceName.buckets);
 
         return {
           page: hits.hits.map((hit) => hit._source!),
           total: number.is(hits.total) ? hits.total : 0,
           count: getAggregationCount(aggregations.count.buckets),
+          clusterId: getFirstBucketKey(aggregations.clusterId.buckets),
+          resourceSubType: getFirstBucketKey(aggregations.resourceSubType.buckets),
+          resourceName: getFirstBucketKey(aggregations.resourceName.buckets),
           newPitId: newPitId!,
         };
       },
@@ -109,3 +129,12 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
     }
   );
 };
+
+function assertNonEmptyArray<T>(arr: unknown): asserts arr is T[] {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    throw new Error('expected a non empty array');
+  }
+}
+
+const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) =>
+  buckets[0].key;
