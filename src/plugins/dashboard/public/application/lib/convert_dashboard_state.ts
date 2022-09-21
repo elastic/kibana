@@ -9,16 +9,10 @@
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ControlGroupInput } from '@kbn/controls-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  isFilterPinned,
-  TimeRange,
-} from '@kbn/es-query';
+import { compareFilters, isFilterPinned, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
-import type { DashboardSavedObject } from '../../saved_dashboards';
+import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
 import { TimeRange } from '../../services/data';
