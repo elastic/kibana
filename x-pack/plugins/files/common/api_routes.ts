@@ -98,7 +98,7 @@ export type UpdateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
 
 export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
-  unknown,
+  { selfDestructOnAbort?: boolean },
   { body: unknown },
   {
     ok: true;
