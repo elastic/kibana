@@ -9,6 +9,7 @@
 import testSubjSelector from '@kbn/test-subj-selector';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrService } from '../../ftr_provider_context';
+import { TimeoutOpt } from './types';
 
 interface ExistsOptions {
   timeout?: number;
@@ -85,14 +86,33 @@ export class TestSubjects extends FtrService {
     await input.type(text);
   }
 
-  public async clickWhenNotDisabled(
-    selector: string,
-    { timeout = this.FIND_TIME }: { timeout?: number } = {}
-  ): Promise<void> {
+  /**
+   * Clicks on the element identified by the testSubject selector. If the retries
+   * automatically on "stale element" errors unlike clickWhenNotDisabledWithoutRetry.
+   * `opts.timeout` defaults to the 'timeouts.find' config, which defaults to 10 seconds
+   */
+  public async clickWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
     this.log.debug(`TestSubjects.clickWhenNotDisabled(${selector})`);
-    await this.findService.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), {
-      timeout,
-    });
+    await this.findService.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), opts);
+  }
+
+  /**
+   * Clicks on the element identified by the testSubject selector. Somewhat surprisingly,
+   * this method allows `stale element` errors to propogate, which is why it was renamed
+   * from `clickWhenNotDisabled()` and that method was re-implemented to be more consistent
+   * with the rest of the functions in this service.
+   *
+   * `opts.timeout` defaults to the 'timeouts.find' config, which defaults to 10 seconds
+   */
+  public async clickWhenNotDisabledWithoutRetry(
+    selector: string,
+    opts?: TimeoutOpt
+  ): Promise<void> {
+    this.log.debug(`TestSubjects.clickWhenNotDisabledWithoutRetry(${selector})`);
+    await this.findService.clickByCssSelectorWhenNotDisabledWithoutRetry(
+      testSubjSelector(selector),
+      opts
+    );
   }
 
   public async click(

@@ -112,6 +112,7 @@ export interface DocLinks {
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly languageAnalyzers: string;
+    readonly languageClients: string;
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly start: string;
@@ -338,6 +339,7 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
+    grantUserAccess: string;
   }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;

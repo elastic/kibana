@@ -56,6 +56,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldName',
       field: 'fieldName',
       name: i18n.translate(
         'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
@@ -64,6 +65,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldValue',
       field: 'fieldValue',
       name: i18n.translate(
         'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel',
@@ -73,6 +75,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnLogRate',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
@@ -105,6 +108,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: false,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
@@ -131,6 +135,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnImpact',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
@@ -210,6 +215,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   return (
     <EuiBasicTable
+      data-test-subj="aiopsSpikeAnalysisTable"
       compressed
       columns={columns}
       items={pageOfItems}
@@ -219,6 +225,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
         return {
+          'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
           onClick: () => {
             if (onPinnedChangePoint) {
               onPinnedChangePoint(changePoint);

@@ -1078,6 +1078,102 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         }
                       }
                     },
+                    "per_service": {
+                      "properties": {
+                        "service_id": {
+                          "type": "keyword"
+                        },
+                        "timed_out": {
+                          "type": "boolean"
+                        },
+                        "cloud": {
+                          "properties": {
+                            "availability_zones": {
+                              "type": "keyword"
+                            },
+                            "regions": {
+                              "type": "keyword"
+                            },
+                            "providers": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "faas": {
+                          "properties": {
+                            "trigger": {
+                              "properties": {
+                                "type": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "agent": {
+                          "properties": {
+                            "name": {
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "service": {
+                          "properties": {
+                            "language": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "framework": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "runtime": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "kubernetes": {
+                          "properties": {
+                            "pod": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "container": {
+                          "properties": {
+                            "id": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
                     "tasks": {
                       "properties": {
                         "aggregated_transactions": {
@@ -1224,6 +1320,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           }
                         },
                         "service_groups": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "per_service": {
                           "properties": {
                             "took": {
                               "properties": {

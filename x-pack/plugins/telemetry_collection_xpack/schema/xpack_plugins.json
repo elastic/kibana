@@ -4015,6 +4015,117 @@
             }
           }
         },
+        "per_service": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "service_id": {
+                "type": "keyword"
+              },
+              "timed_out": {
+                "type": "boolean"
+              },
+              "cloud": {
+                "properties": {
+                  "availability_zones": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "providers": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              },
+              "faas": {
+                "properties": {
+                  "trigger": {
+                    "properties": {
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "agent": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "service": {
+                "properties": {
+                  "language": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "framework": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "runtime": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "kubernetes": {
+                "properties": {
+                  "pod": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "container": {
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "tasks": {
           "properties": {
             "aggregated_transactions": {
@@ -4161,6 +4272,17 @@
               }
             },
             "service_groups": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "per_service": {
               "properties": {
                 "took": {
                   "properties": {

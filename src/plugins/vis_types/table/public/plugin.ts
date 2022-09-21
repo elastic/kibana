@@ -9,7 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { setFormatService } from './services';
@@ -19,13 +19,12 @@ import { registerTableVis } from './register_vis';
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
-  usageCollection?: UsageCollectionStart;
+  usageCollection: UsageCollectionStart;
 }
 
 /** @internal */

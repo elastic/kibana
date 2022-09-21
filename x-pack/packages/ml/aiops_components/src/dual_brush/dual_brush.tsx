@@ -234,6 +234,10 @@ export function DualBrush({
           .attr('id', (b: DualBrush) => {
             return 'aiops-brush-' + b.id;
           })
+          .attr('data-test-subj', (b: DualBrush) => {
+            // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
+            return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
+          })
           .each((brushObject: DualBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
             brushObject.brush(d3.select(n[i]));
@@ -314,6 +318,7 @@ export function DualBrush({
       {width > 0 && (
         <svg
           className="aiops-dual-brush"
+          data-test-subj="aiopsDualBrush"
           width={width}
           height={BRUSH_HEIGHT}
           style={{ marginLeft }}

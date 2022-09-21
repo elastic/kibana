@@ -443,5 +443,25 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.statusCode).to.equal(200);
       expect(response.body._source?.alert?.tags).to.eql(['test-tag-1', 'foo-tag']);
     });
+
+    it('8.4.1 removes IsSnoozedUntil', async () => {
+      const searchResult = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              term: {
+                _id: 'alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7',
+              },
+            },
+          },
+        },
+        { meta: true }
+      );
+
+      expect(searchResult.statusCode).to.equal(200);
+      const hit = searchResult.body.hits.hits[0];
+      expect((hit!._source!.alert! as RawRule).isSnoozedUntil).to.be(undefined);
+    });
   });
 }

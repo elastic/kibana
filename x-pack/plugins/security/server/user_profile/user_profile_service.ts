@@ -28,7 +28,7 @@ import { getPrintableSessionId } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
-const ACTIVATION_MAX_RETRIES = 3;
+const ACTIVATION_MAX_RETRIES = 10;
 const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
 const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
