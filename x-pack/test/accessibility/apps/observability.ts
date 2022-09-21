@@ -11,32 +11,31 @@ import { describe } from 'mocha';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-    const PageObjects = getPageObjects(['common', 'infraHome']);
-    const observability = getService('observability');
-    const a11y = getService('a11y');
-    const retry = getService('retry');
-    const testSubjects = getService('testSubjects');
-    const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['common', 'infraHome']);
+  const observability = getService('observability');
+  const a11y = getService('a11y');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
 
-    describe('Observability UI', () => {
-        before(async () => {
-            await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-            await PageObjects.common.navigateToApp('observability');
-        });
-
-        describe('Overview', async () => {
-            before(async () => {
-                await observability.overview.common.openAlertsSectionAndWaitToAppear();
-                await a11y.testAppSnapshot();
-            });
-            it('Guided Setup', async () => {
-                await PageObjects.infraHome.clickGuidedSetupButton();
-                await retry.waitFor('Guided setup header to be visible', async () => {
-                    return await testSubjects.isDisplayed('statusVisualizationFlyoutTitle');
-                });
-                await a11y.testAppSnapshot();
-            });
-        });
-        
+  describe('Observability UI', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await PageObjects.common.navigateToApp('observability');
     });
+
+    describe('Overview', async () => {
+      before(async () => {
+        await observability.overview.common.openAlertsSectionAndWaitToAppear();
+        await a11y.testAppSnapshot();
+      });
+      it('Guided Setup', async () => {
+        await PageObjects.infraHome.clickGuidedSetupButton();
+        await retry.waitFor('Guided setup header to be visible', async () => {
+          return await testSubjects.isDisplayed('statusVisualizationFlyoutTitle');
+        });
+        await a11y.testAppSnapshot();
+      });
+    });
+  });
 }
