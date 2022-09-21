@@ -28,97 +28,25 @@ describe('gainSightShipper', () => {
   });
 
   describe('extendContext', () => {
-    describe('FS.identify', () => {
+    describe('identify', () => {
       test('calls `identify` when the userId is provided', () => {
         const userId = 'test-user-id';
         gainSightShipper.extendContext({ userId });
-        expect(gainSightApiMock.identify).toHaveBeenCalledWith(userId);
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', userId);
       });
 
       test('calls `identify` again only if the userId changes', () => {
         const userId = 'test-user-id';
         gainSightShipper.extendContext({ userId });
-        expect(gainSightApiMock.identify).toHaveBeenCalledTimes(1);
-        expect(gainSightApiMock.identify).toHaveBeenCalledWith(userId);
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(1);
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', userId);
 
         gainSightShipper.extendContext({ userId });
-        expect(gainSightApiMock.identify).toHaveBeenCalledTimes(1); // still only called once
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(1); // still only called once
 
         gainSightShipper.extendContext({ userId: `${userId}-1` });
-        expect(gainSightApiMock.identify).toHaveBeenCalledTimes(2); // called again because the user changed
-        expect(gainSightApiMock.identify).toHaveBeenCalledWith(`${userId}-1`);
-      });
-    });
-
-    describe('FS.setUserVars', () => {
-      test('calls `setUserVars` when isElasticCloudUser: true is provided', () => {
-        gainSightShipper.extendContext({ isElasticCloudUser: true });
-        expect(gainSightApiMock.identify).toHaveBeenCalledWith({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          isElasticCloudUser_bool: true,
-        });
-      });
-
-      test('calls `setUserVars` when isElasticCloudUser: false is provided', () => {
-        gainSightShipper.extendContext({ isElasticCloudUser: false });
-        expect(gainSightApiMock.identify).toHaveBeenCalledWith({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          isElasticCloudUser_bool: false,
-        });
-      });
-    });
-
-    describe('FS.setVars', () => {
-      test('calls `setVars` when version is provided', () => {
-        gainSightShipper.extendContext({ version: '1.2.3' });
-        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
-          version_str: '1.2.3',
-          version_major_int: 1,
-          version_minor_int: 2,
-          version_patch_int: 3,
-        });
-      });
-
-      test('calls `setVars` when cloudId is provided', () => {
-        gainSightShipper.extendContext({ cloudId: 'test-es-org-id' });
-        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          cloudId_str: 'test-es-org-id',
-          org_id_str: 'test-es-org-id',
-        });
-      });
-
-      test('merges both: version and cloudId if both are provided', () => {
-        gainSightShipper.extendContext({ version: '1.2.3', cloudId: 'test-es-org-id' });
-        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          cloudId_str: 'test-es-org-id',
-          org_id_str: 'test-es-org-id',
-          version_str: '1.2.3',
-          version_major_int: 1,
-          version_minor_int: 2,
-          version_patch_int: 3,
-        });
-      });
-
-      test('adds the rest of the context to `setVars`', () => {
-        const context = {
-          userId: 'test-user-id',
-          version: '1.2.3',
-          cloudId: 'test-es-org-id',
-          foo: 'bar',
-        };
-        gainSightShipper.extendContext(context);
-        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
-          version_str: '1.2.3',
-          version_major_int: 1,
-          version_minor_int: 2,
-          version_patch_int: 3,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          cloudId_str: 'test-es-org-id',
-          org_id_str: 'test-es-org-id',
-          foo_str: 'bar',
-        });
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2); // called again because the user changed
+        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', `${userId}-1`);
       });
     });
   });
@@ -126,14 +54,12 @@ describe('gainSightShipper', () => {
   describe('optIn', () => {
     test('should call consent true and restart when isOptIn: true', () => {
       gainSightShipper.optIn(true);
-      expect(gainSightApiMock.consent).toHaveBeenCalledWith(true);
-      expect(gainSightApiMock.restart).toHaveBeenCalled();
+      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('config', 'enableTag', true);
     });
 
     test('should call consent false and shutdown when isOptIn: false', () => {
       gainSightShipper.optIn(false);
-      expect(gainSightApiMock.consent).toHaveBeenCalledWith(false);
-      expect(gainSightApiMock.shutdown).toHaveBeenCalled();
+      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('config', 'enableTag', false);
     });
   });
 
@@ -154,11 +80,11 @@ describe('gainSightShipper', () => {
         },
       ]);
 
-      expect(gainSightApiMock.track).toHaveBeenCalledTimes(2);
-      expect(gainSightApiMock.track).toHaveBeenCalledWith('test-event-1', {
+      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
+      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('track', 'test-event-1', {
         test_str: 'test-1',
       });
-      expect(gainSightApiMock.track).toHaveBeenCalledWith('test-event-2', {
+      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('track', 'test-event-2', {
         other_property_str: 'test-2',
       });
     });

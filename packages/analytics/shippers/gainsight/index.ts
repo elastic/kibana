@@ -7,5 +7,4 @@
  */
 
 export { GainSightShipper } from './src/gainsight_shipper';
-export type { GainSightShipperConfig } from './src/gainsight_shipper';
 export type { GainSightSnippetConfig } from './src/load_snippet';

@@ -8,19 +8,16 @@
 
 import moment from 'moment';
 
-// https://help.gainSight.com/hc/en-us/articles/360020623234#reserved-properties
 const GAINSIGHT_RESERVED_PROPERTIES = [
   'uid',
   'displayName',
   'email',
   'acctId',
   'website',
-  // https://developer.gainSight.com/page-variables
   'pageName',
 ];
 
 export function formatPayload(context: object): Record<string, unknown> {
-  // format context keys as required for env vars, see docs: https://help.gainSight.com/hc/en-us/articles/360020623234
   return Object.fromEntries(
     Object.entries(context)
       // Discard any undefined values

@@ -10,13 +10,10 @@ import type { GainSightApi } from './types';
 
 export const gainSightApiMock: jest.Mocked<GainSightApi> = {
   init: true,
-  identify: jest.fn(),
   aptrinsic: jest.fn(),
-  consent: jest.fn(),
-  track: jest.fn(),
-  restart: jest.fn(),
-  shutdown: jest.fn(),
 };
+
+
 jest.doMock('./load_snippet', () => {
   return {
     loadSnippet: () => gainSightApiMock,

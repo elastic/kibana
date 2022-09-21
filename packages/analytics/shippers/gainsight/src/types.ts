@@ -11,12 +11,15 @@
  */
 export interface GainSightApi {
   init: boolean;
-  aptrinsic: (functionId: string, options?: any) => void;
-  identify(userId: string, userVars?: Record<string, unknown>): void;
-  track(event: string, data?: any): void;
-  consent: (isOptedIn: boolean) => void;
-  restart: () => void;
-  shutdown: () => void;
+  aptrinsic: (functionId: keyof Mapping, ...options: any) => void;
+}
+
+type Mapping = {
+  identify: (userId: string, userVars?: Record<string, unknown>) => void,
+  track: (event: string, data?: any) => void
+  set: (event: string, data?: any) => void
+  reset: () => void
+  config: (options: any) => void
 }
 
 declare global {

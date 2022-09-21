@@ -18,17 +18,6 @@ import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
 
 /**
- * gainSight shipper configuration.
- */
-export interface GainSightShipperConfig extends GainSightSnippetConfig {
-  /**
-   * gainSight's custom events rate limit is very aggressive.
-   * If this setting is provided, it'll only send the event types specified in this list.
-   */
-  eventTypesAllowlist?: string[];
-}
-
-/**
  * gainSight shipper.
  */
 export class GainSightShipper implements IShipper {
@@ -37,24 +26,22 @@ export class GainSightShipper implements IShipper {
 
   private readonly gainSightApi: GainSightApi;
   private lastUserId: string | undefined;
-  private readonly eventTypesAllowlist?: string[];
 
   /**
    * Creates a new instance of the gainSightShipper.
-   * @param config {@link GainSightShipperConfig}
+   * @param config {@link GainSightSnippetConfig}
    * @param initContext {@link AnalyticsClientInitContext}
    */
   constructor(
-    config: GainSightShipperConfig,
+    config: GainSightSnippetConfig,
     private readonly initContext: AnalyticsClientInitContext
   ) {
-    const { eventTypesAllowlist, ...snippetConfig } = config;
+    const { ...snippetConfig } = config;
     this.gainSightApi = loadSnippet(snippetConfig);
-    this.eventTypesAllowlist = eventTypesAllowlist;
   }
 
   /**
-   * Calls `fs.identify`, `fs.setUserVars` and `fs.setVars` depending on the fields provided in the newContext.
+   * Calls track or set on the fields provided in the newContext.
    * @param newContext The full new context to set {@link EventContext}
    */
   public extendContext(newContext: EventContext): void {
@@ -65,7 +52,7 @@ export class GainSightShipper implements IShipper {
 
     // Call it only when the userId changes
     if (userId && userId !== this.lastUserId) {
-      this.initContext.logger.debug(`Calling FS.identify with userId ${userId}`);
+      this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
       this.gainSightApi.aptrinsic('identify', userId);
       this.lastUserId = userId;
@@ -78,31 +65,23 @@ export class GainSightShipper implements IShipper {
    */
   public optIn(isOptedIn: boolean): void {
     this.initContext.logger.debug(`Setting gainsight to optIn ${isOptedIn}`);
-    // gainSight uses 2 different opt-in methods:
-    // - `consent` is needed to allow collecting information about the components
-    //   declared as "Record with user consent".
-    //   We need to explicitly call `consent` if for the "Record with user content" feature to work.
-    this.gainSightApi.consent(isOptedIn);
-    // - `restart` and `shutdown` fully start/stop the collection of data.
+  
     if (isOptedIn) {
-      this.gainSightApi.restart();
+      this.gainSightApi.aptrinsic('config', 'enableTag', true);
     } else {
-      this.gainSightApi.shutdown();
+      this.gainSightApi.aptrinsic('config', 'enableTag', false);
     }
   }
 
   /**
-   * Filters the events by the eventTypesAllowlist from the config.
-   * Then it transforms the event into a FS valid format and calls `fs.event`.
+   * Transforms the event into a valid format and calls `track`.
    * @param events batched events {@link Event}
    */
   public reportEvents(events: Event[]): void {
-    this.initContext.logger.debug(`Reporting ${events.length} events to FS`);
-    events
-      .filter((event) => this.eventTypesAllowlist?.includes(event.event_type) ?? true)
-      .forEach((event) => {
+    this.initContext.logger.debug(`Reporting ${events.length} events to gainsight`);
+    events.forEach((event) => {
         // We only read event.properties and discard the rest because the context is already sent in the other APIs.
-        this.gainSightApi.track(event.event_type, formatPayload(event.properties));
+        this.gainSightApi.aptrinsic('track', event.event_type, formatPayload(event.properties));
       });
   }
 
