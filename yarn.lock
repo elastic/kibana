@@ -3044,6 +3044,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser":
   version "0.0.0"
   uid ""
@@ -7098,6 +7102,10 @@
   uid ""
 
 "@types/kbn__core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
