@@ -36,6 +36,7 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { groupByKey } from '../group_by_key';
+import { extractAggId } from '../../to_expression';
 
 const supportedTypes = new Set([
   'string',
@@ -246,6 +247,12 @@ export const cardinalityOperation: OperationDefinition<
       return groupKey;
     });
 
+    const termsFuncs = aggs
+      .map((agg) => agg.functions[0])
+      .filter((func) => func.name === 'aggTerms') as Array<
+      ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
+    >;
+
     // collapse them into a single expression builder
     Object.values(aggsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
@@ -272,6 +279,12 @@ export const cardinalityOperation: OperationDefinition<
         esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
 
         delete esAggsIdMap[currentEsAggsId];
+
+        termsFuncs.forEach((func) => {
+          if (func.getArgument('orderBy')?.[0] === extractAggId(currentEsAggsId)) {
+            func.replaceArgument('orderBy', [extractAggId(firstEsAggsId)]);
+          }
+        });
       });
     });
 

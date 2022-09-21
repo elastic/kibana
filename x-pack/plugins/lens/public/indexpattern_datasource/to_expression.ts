@@ -40,7 +40,7 @@ declare global {
 }
 
 // esAggs column ID manipulation functions
-const extractEsAggId = (id: string) => id.split('.')[0].split('-')[2];
+export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 const updatePositionIndex = (currentId: string, newIndex: number) => {
   const [fullId, percentile] = currentId.split('.');
   const idParts = fullId.split('-');
@@ -257,7 +257,7 @@ function getExpressionForLayer(
     const esAggsIds = Object.keys(esAggsIdMap);
     aggs.forEach((builder) => {
       const esAggId = builder.functions[0].getArgument('id')?.[0];
-      const matchingEsAggColumnIds = esAggsIds.filter((id) => extractEsAggId(id) === esAggId);
+      const matchingEsAggColumnIds = esAggsIds.filter((id) => extractAggId(id) === esAggId);
 
       matchingEsAggColumnIds.forEach((currentId) => {
         const currentColumn = esAggsIdMap[currentId][0];

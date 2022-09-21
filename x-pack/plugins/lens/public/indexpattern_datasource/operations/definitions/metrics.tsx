@@ -38,6 +38,7 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { groupByKey } from '../group_by_key';
+import { extractAggId } from '../../to_expression';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -264,6 +265,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         }
       );
 
+      const termsFuncs = aggs
+        .map((agg) => agg.functions[0])
+        .filter((func) => func.name === 'aggTerms') as Array<
+        ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
+      >;
+
       // collapse them into a single expression builder
       Object.values(metricExpressionsByArgs).forEach((expressionBuilders) => {
         if (expressionBuilders.length <= 1) {
@@ -290,6 +297,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
 
           delete esAggsIdMap[currentEsAggsId];
+
+          termsFuncs.forEach((func) => {
+            if (func.getArgument('orderBy')?.[0] === extractAggId(currentEsAggsId)) {
+              func.replaceArgument('orderBy', [extractAggId(firstEsAggsId)]);
+            }
+          });
         });
       });
 

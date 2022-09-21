@@ -40,6 +40,7 @@ import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { groupByKey } from '../group_by_key';
+import { extractAggId } from '../../to_expression';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -306,6 +307,12 @@ export const lastValueOperation: OperationDefinition<
       }
     });
 
+    const termsFuncs = aggs
+      .map((agg) => agg.functions[0])
+      .filter((func) => func.name === 'aggTerms') as Array<
+      ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
+    >;
+
     // collapse them into a single expression builder
     Object.values(aggsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
@@ -332,6 +339,12 @@ export const lastValueOperation: OperationDefinition<
         esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
 
         delete esAggsIdMap[currentEsAggsId];
+
+        termsFuncs.forEach((func) => {
+          if (func.getArgument('orderBy')?.[0] === extractAggId(currentEsAggsId)) {
+            func.replaceArgument('orderBy', [extractAggId(firstEsAggsId)]);
+          }
+        });
       });
     });
 
