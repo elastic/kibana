@@ -23,7 +23,7 @@ import { TestFailure } from './get_failures';
 interface JourneyMeta {
   journeyName: string;
 }
-function getJourneyMetdata(rootMeta: Record<string, unknown>): JourneyMeta | undefined {
+function getJourneyMetadata(rootMeta: Record<string, unknown>): JourneyMeta | undefined {
   const { journeyName } = rootMeta;
   if (typeof journeyName === 'string') {
     return { journeyName };
@@ -103,7 +103,7 @@ export async function reportFailuresToFile(
     return;
   }
 
-  const journeyMeta = getJourneyMetdata(rootMeta);
+  const journeyMeta = getJourneyMetadata(rootMeta);
 
   // Jest could, in theory, fail 1000s of tests and write 1000s of failures
   // So let's just write files for the first 20
