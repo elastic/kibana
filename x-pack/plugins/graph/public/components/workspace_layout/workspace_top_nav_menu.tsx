@@ -40,6 +40,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const location = useLocation();
   const history = useHistory();
   const allSavingDisabled = props.graphSavePolicy === 'none';
+  const isInspectDisabled = !props.workspace?.lastRequest || !props.workspace.lastRequest;
 
   // ===== Menubar configuration =========
   const { TopNavMenu } = props.navigation.ui;
@@ -107,7 +108,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   topNavMenu.push({
     key: 'inspect',
     disableButton() {
-      return props.workspace === null;
+      return isInspectDisabled;
     },
     label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
       defaultMessage: 'Inspect',
@@ -117,6 +118,13 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     }),
     run: () => {
       props.setShowInspect((prevShowInspect) => !prevShowInspect);
+    },
+    tooltip: () => {
+      if (isInspectDisabled) {
+        return i18n.translate('xpack.graph.topNavMenu.inspectButton.disabledTooltip', {
+          defaultMessage: 'Click Graph to enable Inspect',
+        });
+      }
     },
     testId: 'graphInspectButton',
   });
