@@ -19,9 +19,6 @@ import { AgentListPage } from '.';
 jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
   useConfirmForceInstall: () => <>confirmForceInstall</>,
 }));
-jest.mock('../../../../integrations/hooks/use_confirm_open_unverified', () => ({
-  useConfirmOpenUnverified: () => <>confirmOpenUnverified</>,
-}));
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   UIExtensionsContext: {

@@ -23,10 +23,6 @@ import {
   useGetPackageInfoByKey,
 } from '../../../../hooks';
 
-jest.mock('../../../../../integrations/hooks/use_confirm_open_unverified', () => ({
-  useConfirmOpenUnverified: () => <>confirmOpenUnverified</>,
-}));
-
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),

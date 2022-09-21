@@ -10,7 +10,9 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import React, { useCallback } from 'react';
 
-import { useStartServices } from '../../fleet/hooks';
+// Direct imports are important here, importing all hooks breaks unit tests
+// and increases bundle size because this is imported on first page load
+import { useStartServices } from '../../../hooks/use_core';
 import { ConfirmOpenUnverifiedModal } from '../components/confirm_open_unverified_modal';
 
 const confirmOpenUnverified = ({
