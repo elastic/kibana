@@ -15,6 +15,7 @@ import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { throttle } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -93,6 +94,13 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
+  /**
+   * Style of the submit button
+   * `iconOnly` - use IconButton
+   * `full` - use SuperUpdateButton
+   * (default) `auto` - `iconOnly` on smaller screens, and `full` on larger screens
+   */
+  submitButtonStyle?: 'auto' | 'iconOnly' | 'full';
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
@@ -142,18 +150,23 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
+    const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
+      props.submitButtonStyle ?? 'auto';
+    const submitButtonIconOnly =
+      submitButtonStyle === 'auto' ? !isXXLarge : submitButtonStyle === 'iconOnly';
 
     useEffect(() => {
-      function handleResize() {
-        setIsXXLarge(window.innerWidth >= 1440);
-      }
+      if (submitButtonStyle !== 'auto') return;
 
-      window.removeEventListener('resize', handleResize);
+      const handleResize = throttle(() => {
+        setIsXXLarge(window.innerWidth >= 1440);
+      }, 50);
+
       window.addEventListener('resize', handleResize);
       handleResize();
 
       return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [submitButtonStyle]);
 
     const {
       showQueryInput = true,
@@ -404,7 +417,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <EuiSuperUpdateButton
             iconType={props.isDirty ? iconDirty : 'refresh'}
-            iconOnly={!isXXLarge}
+            iconOnly={submitButtonIconOnly}
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
             isDisabled={isDateRangeInvalid || props.isDisabled}
             isLoading={props.isLoading}
