@@ -42,12 +42,13 @@ describe('unique values function', () => {
         ],
       ].map((group) => group.map(expressionToKey));
 
-      for (const thisGroup of keys) {
+      keys.forEach((thisGroup) => {
         expect(thisGroup[0]).toEqual(thisGroup[1]);
-        for (const otherGroup of keys.filter((group) => group !== group)) {
+        const otherGroups = keys.filter((group) => group !== thisGroup);
+        for (const otherGroup of otherGroups) {
           expect(thisGroup[0]).not.toEqual(otherGroup[0]);
         }
-      }
+      });
 
       expect(keys).toMatchInlineSnapshot(`
         Array [

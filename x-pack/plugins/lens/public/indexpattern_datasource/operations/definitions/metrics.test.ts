@@ -11,7 +11,7 @@ import { operationDefinitionMap } from '.';
 const sumOperation = operationDefinitionMap.sum;
 
 describe('metrics', () => {
-  describe('optimizeEsAggs', () => {
+  describe('getGroupByKey', () => {
     const getKey = sumOperation.getGroupByKey!;
     const expressionToKey = (expression: string) =>
       getKey(buildExpression(parseExpression(expression)));
@@ -38,10 +38,6 @@ describe('metrics', () => {
           'aggSum id="9" enabled=true schema="metric" field="machine.ram" timeShift="2h" emptyAsNull=false',
         ],
         [
-          'aggSum id="10" enabled=true schema="metric" field="bytes" emptyAsNull=false',
-          'aggSum id="11" enabled=true schema="metric" field="bytes" emptyAsNull=false',
-        ],
-        [
           'aggFilteredMetric id="12" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
           'aggFilteredMetric id="13" enabled=true schema="metric" \n  customBucket={aggFilter id="3-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="3-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
         ],
@@ -59,12 +55,13 @@ describe('metrics', () => {
         ],
       ].map((group) => group.map(expressionToKey));
 
-      for (const thisGroup of keys) {
+      keys.forEach((thisGroup) => {
         expect(thisGroup[0]).toEqual(thisGroup[1]);
-        for (const otherGroup of keys.filter((group) => group !== group)) {
+        const otherGroups = keys.filter((group) => group !== thisGroup);
+        for (const otherGroup of otherGroups) {
           expect(thisGroup[0]).not.toEqual(otherGroup[0]);
         }
-      }
+      });
 
       expect(keys).toMatchInlineSnapshot(`
         Array [
@@ -87,10 +84,6 @@ describe('metrics', () => {
           Array [
             "machine.ram-2h-false",
             "machine.ram-2h-false",
-          ],
-          Array [
-            "bytes-undefined-false",
-            "bytes-undefined-false",
           ],
           Array [
             "undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
