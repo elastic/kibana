@@ -22,10 +22,6 @@ const gatlingProjectRootPath: string =
   process.env.GATLING_PROJECT_PATH || path.resolve(REPO_ROOT, '../kibana-load-testing');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = (
-    await readConfigFile(require.resolve('../functional/config.base.js'))
-  ).getAll();
-
   if (!fs.existsSync(gatlingProjectRootPath)) {
     throw createFlagError(
       `Incorrect path to load testing project: '${gatlingProjectRootPath}'\n
@@ -39,10 +35,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     );
   }
 
+  const baseConfig = (
+    await readConfigFile(require.resolve('../../performance/journeys/login.ts'))
+  ).getAll();
+
   return {
     ...baseConfig,
 
     services: commonFunctionalServices,
+    pageObjects: {},
 
     testRunner: (context: FtrProviderContext) =>
       ScalabilityTestRunner(context, scalabilityJsonPath, gatlingProjectRootPath),

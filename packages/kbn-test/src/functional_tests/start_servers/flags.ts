@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Flags } from '@kbn/dev-cli-runner';
+import { FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { parseFlags as parseRunTestFlags } from '../run_tests/flags';
 
 export type StartServerOptions = ReturnType<typeof parseFlags>;
 
-export function parseFlags(flags: Flags) {
+export function parseFlags(flags: FlagsReader) {
   const { configs, esFrom, esVersion, installDir, logsDir } = parseRunTestFlags(flags);
 
   if (configs.length !== 1) {

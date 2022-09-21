@@ -18,8 +18,9 @@ import { startServers } from './start_servers';
  */
 export function startServersCli() {
   run(
-    async ({ flags, log }) => {
+    async ({ flagsReader: flags, log }) => {
       const options = parseFlags(flags);
+
       if (options.logsDir) {
         initLogsDir(log, options.logsDir);
       }
