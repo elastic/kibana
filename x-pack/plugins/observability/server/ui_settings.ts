@@ -24,6 +24,7 @@ import {
   apmLabsButton,
   enableInfrastructureHostsView,
   enableServiceMetrics,
+  enableAwsLambdaMetrics,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -269,5 +270,27 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Enable the Hosts view in the Infrastructure app',
     }),
     schema: schema.boolean(),
+  },
+  [enableAwsLambdaMetrics]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
+      defaultMessage: 'AWS Lambda Metrics',
+    }),
+    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
+      defaultMessage: 'Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+      values: {
+        feedbackLink:
+          '<a href="https://ela.st/feedback-aws-lambda" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('xpack.observability.awsLambdaDescription', {
+            defaultMessage: 'Send feedback',
+          }) +
+          '</a>',
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
   },
 };

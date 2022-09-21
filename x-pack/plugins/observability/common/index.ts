@@ -26,6 +26,7 @@ export {
   apmLabsButton,
   enableInfrastructureHostsView,
   enableServiceMetrics,
+  enableAwsLambdaMetrics,
 } from './ui_settings_keys';
 
 export {
