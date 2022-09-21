@@ -49,6 +49,7 @@ describe('syncEditedMonitor', () => {
       },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
+        getByIDs: jest.fn().mockReturnValue([]),
         buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
@@ -79,7 +80,9 @@ describe('syncEditedMonitor', () => {
 
   const previousMonitor = {
     id: 'saved-obj-id',
-    attributes: { name: editedMonitor.name },
+    attributes: { name: editedMonitor.name, locations: [] } as any,
+    type: 'synthetics-monitor',
+    references: [],
   } as SavedObject<EncryptedSyntheticsMonitor>;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -104,9 +107,11 @@ describe('syncEditedMonitor', () => {
     });
 
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'saved-obj-id',
-      })
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'saved-obj-id',
+        }),
+      ])
     );
 
     expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(

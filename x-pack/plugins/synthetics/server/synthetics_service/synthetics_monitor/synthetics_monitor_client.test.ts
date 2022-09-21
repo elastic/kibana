@@ -121,12 +121,23 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitor = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn();
 
-    await client.editMonitor(monitor, id, mockRequest, savedObjectsClientMock, 'test-space');
+    await client.editMonitors(
+      [
+        {
+          monitor,
+          id,
+        },
+      ],
+      mockRequest,
+      savedObjectsClientMock,
+      privateLocations,
+      'test-space'
+    );
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.editMonitor).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
 
   it('should delete a monitor', async () => {
