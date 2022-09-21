@@ -290,7 +290,18 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?statuses=pending,failed');
     });
 
-    // TODO: add tests for users when that filter is added
+    it('should set selected users search input strings to URL params ', () => {
+      const filterPrefix = 'users-filter';
+      reactTestingLibrary.act(() => {
+        history.push('/administration/action_history?users=userX,userY');
+      });
+
+      render();
+      const { getByTestId } = renderResult;
+      const usersInput = getByTestId(`${testPrefix}-${filterPrefix}-search`);
+      expect(usersInput).toHaveValue('userX,userY');
+      expect(history.location.search).toEqual('?users=userX,userY');
+    });
 
     it('should read and set relative date ranges filter values from URL params', () => {
       reactTestingLibrary.act(() => {
@@ -398,7 +409,16 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
     });
 
-    // TODO: add tests for users when that filter is added
+    it('should set selected users search input strings to URL params ', () => {
+      const filterPrefix = 'users-filter';
+      render();
+      const { getByTestId } = renderResult;
+      const usersInput = getByTestId(`${testPrefix}-${filterPrefix}-search`);
+      userEvent.type(usersInput, '   , userX , userY, ,');
+      userEvent.type(usersInput, '{enter}');
+
+      expect(history.location.search).toEqual('?users=userX%2CuserY');
+    });
 
     it('should set selected relative date range filter options to URL params ', async () => {
       const { getByTestId } = render();
