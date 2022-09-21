@@ -69,7 +69,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   data: SimplifiedPackagePolicy,
   packageInfo: PackageInfo,
   options?: {
-    experimental_data_stream_features: ExperimentalDataStreamFeature[];
+    experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   }
 ): NewPackagePolicy {
   const {
