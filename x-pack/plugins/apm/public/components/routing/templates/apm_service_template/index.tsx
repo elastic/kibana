@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { EuiBetaBadge } from '@elastic/eui';
 import {
   isMobileAgentName,
   isJavaAgentName,
@@ -36,6 +35,7 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
+import { BetaBadge } from '../../../shared/beta_badge';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -276,22 +276,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: (
-        <EuiBetaBadge
-          iconType="editorBold"
-          label={i18n.translate('xpack.apm.home.infrastructureBetaLabel', {
-            defaultMessage: 'Beta',
-          })}
-          title={i18n.translate('xpack.apm.home.infrastructureBetaTitle', {
-            defaultMessage: 'Beta',
-          })}
-          color="hollow"
-          tooltipContent={i18n.translate('xpack.apm.labs.reload', {
-            defaultMessage:
-              'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-          })}
-        />
-      ),
+      append: <BetaBadge icon="editorBold" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
