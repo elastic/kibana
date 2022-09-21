@@ -49,14 +49,5 @@ export const securityConfig: GuideConfig = {
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
     },
-    {
-      id: 'do_more',
-      title: 'Do more with Elastic Security',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
-    },
   ],
 };

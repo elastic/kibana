@@ -30,8 +30,8 @@ export const searchConfig: GuideConfig = {
       },
     },
     {
-      id: 'search_experience',
-      title: 'Build a search experience',
+      id: 'browse_docs',
+      title: 'Browse your documents',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
@@ -43,17 +43,8 @@ export const searchConfig: GuideConfig = {
       },
     },
     {
-      id: 'optimize',
-      title: 'Optimize your search relevance',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
-    },
-    {
-      id: 'review',
-      title: 'Review your search analytics',
+      id: 'search_experience',
+      title: 'Build a search experience',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
