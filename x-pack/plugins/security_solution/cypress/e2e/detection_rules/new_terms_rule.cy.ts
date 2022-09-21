@@ -6,6 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
+import type { Mitre } from '../../objects/rule';
 import { getNewTermsRule, getIndexPatterns } from '../../objects/rule';
 
 import { ALERT_DATA_GRID } from '../../screens/alerts';
@@ -60,6 +61,7 @@ import {
 import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 describe('New Terms rules', () => {
   before(() => {
@@ -67,19 +69,21 @@ describe('New Terms rules', () => {
     login();
   });
   describe('Detection rules, New Terms', () => {
-    const expectedUrls = getNewTermsRule().referenceUrls.join('');
-    const expectedFalsePositives = getNewTermsRule().falsePositivesExamples.join('');
-    const expectedTags = getNewTermsRule().tags.join('');
-    const expectedMitre = formatMitreAttackDescription(getNewTermsRule().mitre);
+    const expectedUrls = getNewTermsRule().referenceUrls?.join('');
+    const expectedFalsePositives = getNewTermsRule().falsePositivesExamples?.join('');
+    const expectedTags = getNewTermsRule().tags?.join('');
+    const mitreAttack = getNewTermsRule().mitre as Mitre[];
+    const expectedMitre = formatMitreAttackDescription(mitreAttack);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
+      const timeline = getNewTermsRule().timeline as CompleteTimeline;
       deleteAlertsAndRules();
-      createTimeline(getNewTermsRule().timeline).then((response) => {
+      createTimeline(timeline).then((response) => {
         cy.wrap({
           ...getNewTermsRule(),
           timeline: {
-            ...getNewTermsRule().timeline,
+            ...timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         }).as('rule');
