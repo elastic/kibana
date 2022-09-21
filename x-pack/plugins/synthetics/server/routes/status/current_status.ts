@@ -157,7 +157,7 @@ export async function getStatus(
     page++;
     monitors.saved_objects.forEach((monitor) => {
       if (monitor.attributes[ConfigKey.ENABLED] === false) {
-        disabledCount += monitor.attributes[ConfigKey.ENABLED].length;
+        disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
       } else {
         enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
         maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
