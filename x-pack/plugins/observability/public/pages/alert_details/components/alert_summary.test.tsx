@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
@@ -15,7 +14,6 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { useKibana } from '../../../utils/kibana_react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { waitFor } from '@testing-library/react';
-import { DEFAULT_DATE_FORMAT } from '../constants';
 import { alertWithTags, alertWithNoData, tags } from '../mock';
 
 jest.mock('react-router-dom', () => ({
@@ -52,16 +50,9 @@ describe('Alert summary', () => {
     expect(alertSummary.queryByText('1957')).toBeInTheDocument();
     expect(alertSummary.queryByText(asDuration(882076000))).toBeInTheDocument();
     expect(alertSummary.queryByText('Active')).toBeInTheDocument();
-
-    expect(
-      alertSummary.queryByText(moment('2021-09-02T12:54:09.674Z').format(DEFAULT_DATE_FORMAT))
-    ).toBeInTheDocument();
-
-    const lastStatusUpdate = moment('2021-09-02T13:08:51.750Z').format(DEFAULT_DATE_FORMAT);
-    expect(alertSummary.getByText(lastStatusUpdate, { exact: false })).toBeInTheDocument();
-
+    expect(alertSummary.queryByText('Sep 2, 2021 @ 08:54:09.674')).toBeInTheDocument();
+    expect(alertSummary.getByText('Sep 2, 2021 @ 09:08:51.750', { exact: false })).toBeInTheDocument();
     await waitFor(() => expect(alertSummary.queryByTestId('tagsOutPopover')).toBeInTheDocument());
-
     expect(alertSummary.queryByText(tags[0])).toBeInTheDocument();
   });
 
@@ -70,9 +61,6 @@ describe('Alert summary', () => {
 
     expect(alertSummary.queryByTestId('noAlertStatus')).toBeInTheDocument();
     expect(alertSummary.queryByTestId('noAlertStatus')).toHaveTextContent('-');
-
-    await waitFor(() =>
-      expect(alertSummary.queryByTestId('tagsOutPopover')).not.toBeInTheDocument()
-    );
+    await waitFor(() => expect(alertSummary.queryByTestId('tagsOutPopover')).not.toBeInTheDocument());
   });
 });
