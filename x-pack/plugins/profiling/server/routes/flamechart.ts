@@ -55,22 +55,22 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           });
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-          const t1 = new Date().getTime();
+          const t0 = new Date().getTime();
           const graph = createCallerCalleeGraph(
             stackTraceEvents,
             stackTraces,
             stackFrames,
             executables
           );
-          logger.info(`creating caller-callee graph took ${new Date().getTime() - t1} ms`);
+          logger.info(`creating caller-callee graph took ${new Date().getTime() - t0} ms`);
+
+          const t1 = new Date().getTime();
+          const columnar = createColumnarCallerCallee(graph);
+          logger.info(`creating columnar caller-callee graph took ${new Date().getTime() - t1} ms`);
 
           const t2 = new Date().getTime();
-          const columnar = createColumnarCallerCallee(graph);
-          logger.info(`creating columnar caller-callee graph took ${new Date().getTime() - t2} ms`);
-
-          const t3 = new Date().getTime();
           const fg = createFlameGraph(columnar);
-          logger.info(`creating flamegraph took ${new Date().getTime() - t3} ms`);
+          logger.info(`creating flamegraph took ${new Date().getTime() - t2} ms`);
 
           return fg;
         });
