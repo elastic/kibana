@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import type { CommonProps } from '@elastic/eui';
 
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page';
 
 const Wrapper = styled.div`
@@ -26,9 +25,6 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
-  }
-  &.securitySolutionWrapper--withTimeline {
-    padding-bottom: ${gutterTimeline};
   }
 `;
 

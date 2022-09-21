@@ -11,7 +11,7 @@ import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
@@ -39,7 +39,7 @@ export async function fetchCpuUsageNodeStats(
   // but minutes does
   const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
 
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
@@ -58,7 +58,7 @@ export async function fetchCpuUsageNodeStats(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {

@@ -15,6 +15,7 @@ import {
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -32,6 +33,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces: SpacesPluginStart;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -72,7 +74,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -142,6 +144,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
+    const { spacesService } = plugins.spaces;
     const { ruleDataService } = plugins.ruleRegistry;
 
     registerRoutes({
@@ -152,6 +155,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
+      spacesService,
     });
 
     return {

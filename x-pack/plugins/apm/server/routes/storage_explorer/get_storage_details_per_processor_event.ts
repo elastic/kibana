@@ -54,7 +54,7 @@ export async function getStorageDetailsPerProcessorEvent({
 }) {
   const { apmEventClient } = setup;
 
-  const [allIndicesStats, response] = await Promise.all([
+  const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ setup, context }),
     apmEventClient.search('get_storage_details_per_processor_event', {
       apm: {
@@ -67,6 +67,7 @@ export async function getStorageDetailsPerProcessorEvent({
       },
       body: {
         size: 0,
+        track_total_hits: false,
         query: {
           bool: {
             filter: [
@@ -132,10 +133,7 @@ export async function getStorageDetailsPerProcessorEvent({
       );
 
     return {
-      processorEvent: processorEvent as Exclude<
-        ProcessorEvent,
-        ProcessorEvent.profile
-      >,
+      processorEvent,
       docs:
         bucketForProcessorEvent?.number_of_metric_docs_for_processor_event
           .value ?? 0,

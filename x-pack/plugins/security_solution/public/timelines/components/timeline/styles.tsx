@@ -292,7 +292,8 @@ export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width 
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trSupplement ${className}` as string,
-}))<{ className: string }>`
+}))<{ className: string; $display?: 'block' | 'inline-block' }>`
+  display: ${({ $display }) => $display ?? 'inline-block'};
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   padding-left: ${({ theme }) => theme.eui.euiSizeM};

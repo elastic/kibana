@@ -18,6 +18,8 @@
 export {
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
+  GENERAL_CASES_OWNER,
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
   PUSH_CASES_CAPABILITY,
@@ -25,7 +27,13 @@ export {
   UPDATE_CASES_CAPABILITY,
 } from './constants';
 
-export { CommentType, CaseStatuses, getCasesFromAlertsUrl, throwErrors } from './api';
+export {
+  CommentType,
+  CaseStatuses,
+  getCasesFromAlertsUrl,
+  throwErrors,
+  ExternalReferenceStorageType,
+} from './api';
 
 export type {
   Case,

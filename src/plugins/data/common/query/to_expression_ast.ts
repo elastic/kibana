@@ -52,7 +52,6 @@ export async function queryStateToExpressionAst({
     filters: filters && filtersToAst(filters),
   });
   const ast = buildExpression([kibana, kibanaContext]).toAst();
-
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
     // sql query
@@ -60,6 +59,7 @@ export async function queryStateToExpressionAst({
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
       const idsTitles = await dataViewsService.getIdsWithTitle();
       const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
+
       if (dataViewIdTitle) {
         const dataView = await dataViewsService.get(dataViewIdTitle.id);
         const timeFieldName = dataView.timeFieldName;

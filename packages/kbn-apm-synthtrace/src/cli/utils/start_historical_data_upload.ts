@@ -211,7 +211,7 @@ export async function startHistoricalDataUpload(
   return Promise.all(workers.map((worker) => limiter(() => worker())))
     .then(async () => {
       if (!runOptions.dryRun) {
-        await esClient.refresh();
+        await esClient.refresh(runOptions.apm ? ['metrics-apm.service-*'] : []);
       }
     })
     .then(() => {

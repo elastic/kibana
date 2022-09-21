@@ -9,6 +9,7 @@ import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -50,8 +51,8 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     const usageCollection = getUsageCollection();
     usageCollection?.reportUiCounter(
       APP_ID,
-      'visualize_geo_field',
-      context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'
+      METRIC_TYPE.CLICK,
+      `create_maps_vis_${context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'}`
     );
 
     getCore().application.navigateToApp(app, {
@@ -62,7 +63,7 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
 });
 
 const getMapsLink = async (context: VisualizeFieldContext) => {
-  const indexPattern = await getIndexPatternService().get(context.indexPatternId);
+  const indexPattern = await getIndexPatternService().get(context.dataViewSpec.id!);
   // create initial layer descriptor
   const hasTooltips =
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
@@ -76,7 +77,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
         type: SOURCE_TYPES.ES_SEARCH,
         tooltipProperties: hasTooltips ? context.contextualFields : [],
         label: indexPattern.title,
-        indexPatternId: context.indexPatternId,
+        indexPatternId: context.dataViewSpec.id,
         geoField: context.fieldName,
         scalingType: SCALING_TYPES.MVT,
       },
@@ -89,6 +90,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     query: getData().query.queryString.getQuery() as Query,
     initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
+    dataViewSpec: context.dataViewSpec,
   });
 
   return location;
