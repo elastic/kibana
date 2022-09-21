@@ -83,6 +83,8 @@
                   "BaseIncrementOptions",
                   "]>; incrementSavedObjectsBulkUpdate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
+                  "]>; incrementSavedObjectsBulkDelete: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
                   "]>; incrementSavedObjectsCreate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
                   "]>; incrementSavedObjectsDelete: jest.MockInstance<Promise<void>, [options: ",

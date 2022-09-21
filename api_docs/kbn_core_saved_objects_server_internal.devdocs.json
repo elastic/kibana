@@ -214,6 +214,56 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.registerBulkDeleteRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "registerBulkDeleteRoute",
+        "description": [],
+        "signature": [
+          "(router: ",
+          "InternalSavedObjectRouter",
+          ", { coreUsageData }: RouteDependencies) => void"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.registerBulkDeleteRoute.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "router",
+            "description": [],
+            "signature": [
+              "InternalSavedObjectRouter"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.registerBulkDeleteRoute.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ coreUsageData }",
+            "description": [],
+            "signature": [
+              "RouteDependencies"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
         "id": "def-server.registerBulkGetRoute",
         "type": "Function",
         "tags": [],

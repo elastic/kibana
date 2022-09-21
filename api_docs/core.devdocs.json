@@ -11220,6 +11220,14 @@
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
+          },
+          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
           },
@@ -11898,6 +11906,69 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsClientContract.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDeletes multiple documents at once"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectTypeIdTuple",
+              "[], options?: ",
+              "SavedObjectsBulkDeleteOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkDeleteResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.SavedObjectsClientContract.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id, type"
+                ],
+                "signature": [
+                  "SavedObjectTypeIdTuple",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.SavedObjectsClientContract.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- optional force argument to force deletion of objects in a namespace other than the scoped client"
+                ],
+                "signature": [
+                  "SavedObjectsBulkDeleteOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "The bulk delete result for the saved objects for the given types and ids."
+            ]
           },
           {
             "parentPluginId": "core",
@@ -15423,7 +15494,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
           "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
           "MountPoint",
@@ -15464,7 +15535,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\" | \"css\"> & { title?: string | ",
           "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
           "MountPoint",
@@ -17821,6 +17892,63 @@
                 "description": [],
                 "signature": [
                   "SavedObjectsDeleteOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\n {@inheritDoc ISavedObjectsRepository.bulkDelete}"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsBulkDeleteObject",
+              "[], options?: ",
+              "SavedObjectsBulkDeleteOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkDeleteResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteObject",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteOptions",
                   " | undefined"
                 ],
                 "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
@@ -22637,6 +22765,104 @@
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no'",
             "description": [],
             "signature": [
               "number | undefined"
@@ -30441,6 +30667,67 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ISavedObjectsRepository.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDeletes multiple documents at once"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsBulkDeleteObject",
+              "[], options?: ",
+              "SavedObjectsBulkDeleteOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkDeleteResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ISavedObjectsRepository.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id and type"
+                ],
+                "signature": [
+                  "SavedObjectsBulkDeleteObject",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ISavedObjectsRepository.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "- { statuses: [{ id, type, success, error: { message } }] }"
+            ]
           },
           {
             "parentPluginId": "core",
@@ -40566,6 +40853,14 @@
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
+          },
+          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
           },
@@ -41254,6 +41549,131 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkDeleteObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteObject",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "SavedObjectsBulkDeleteObject"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkDeleteObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkDeleteObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkDeleteOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteOptions",
+        "description": [],
+        "signature": [
+          "SavedObjectsBulkDeleteOptions",
+          " extends ",
+          "SavedObjectsBaseOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkDeleteOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "The Elasticsearch Refresh setting for this operation"
+            ],
+            "signature": [
+              "MutatingOperationRefreshSetting",
+              " | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkDeleteOptions.force",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "force",
+            "description": [
+              "\nForce deletion of all objects that exists in multiple namespaces, applied to all objects."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkDeleteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteResponse",
+        "description": [],
+        "signature": [
+          "SavedObjectsBulkDeleteResponse"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkDeleteResponse.statuses",
+            "type": "Array",
+            "tags": [],
+            "label": "statuses",
+            "description": [],
+            "signature": [
+              "SavedObjectsBulkDeleteStatus",
+              "[]"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.SavedObjectsBulkGetObject",
         "type": "Interface",
         "tags": [],
@@ -41921,6 +42341,63 @@
                 "description": [],
                 "signature": [
                   "SavedObjectsDeleteOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsClientContract.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDeletes multiple SavedObjects batched together as a single request\n"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsBulkDeleteObject",
+              "[], options?: ",
+              "SavedObjectsBulkDeleteOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkDeleteResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsClientContract.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteObject",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsClientContract.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteOptions",
                   " | undefined"
                 ],
                 "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",

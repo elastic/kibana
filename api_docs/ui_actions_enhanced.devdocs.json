@@ -2854,7 +2854,7 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [
-              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user."
+              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user as the name of drilldown factory when configuring a drilldown."
             ],
             "signature": [
               "() => string"
@@ -2864,6 +2864,45 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DrilldownDefinition.actionMenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "actionMenuItem",
+            "description": [
+              "\nName of the drilldown instance displayed to the user at the moment of\ndrilldown execution. Should be internationalized."
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.UiComponent",
+                "text": "UiComponent"
+              },
+              "<{ config: Omit<",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "common",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-common.SerializedAction",
+                "text": "SerializedAction"
+              },
+              "<Config>, \"factoryId\">; context: ExecutionContext | ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionContext",
+                "text": "ActionExecutionContext"
+              },
+              "<ExecutionContext>; }> | undefined"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",

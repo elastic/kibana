@@ -280,6 +280,62 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\n {@inheritDoc ISavedObjectsRepository.bulkDelete}"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsBulkDeleteObject",
+              "[], options?: ",
+              "SavedObjectsBulkDeleteOptions",
+              ") => Promise<",
+              "SavedObjectsBulkDeleteResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteObject",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkDeleteOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
             "id": "def-server.SavedObjectsRepository.deleteByNamespace",
             "type": "Function",
             "tags": [],
