@@ -43,26 +43,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should copy as curl and show toast when copy as curl button is clicked', async () => {
       await PageObjects.console.clickContextMenu();
-      await retry.waitFor('context menu to be visible', async () => {
-        return await PageObjects.console.isContextMenuOpen();
-      });
       await PageObjects.console.clickCopyAsCurlButton();
 
-      await retry.waitFor('toast to be visible', async () => {
-        const resultToast = await toasts.getToastElement(1);
-        const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-        const title: string = await titleElement.getVisibleText();
-        return title === 'Request copied as cURL';
-      });
+      const resultToast = await toasts.getToastElement(1);
+      const toastText = await resultToast.getVisibleText();
+
+      if (toastText.includes('Write permission denied')) {
+        log.debug('Write permission denied, skipping test');
+        return;
+      }
+
+      expect(toastText).to.be('Request copied as cURL');
 
       const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
       if (canReadClipboard) {
         const clipboardText = await browser.getClipboardValue();
         expect(clipboardText).to.contain('curl -XGET');
       }
-
-      expect(await toasts.getToastCount()).to.be(1);
-      await toasts.dismissAllToasts();
     });
 
     it('should open documentation when open documentation button is clicked', async () => {
