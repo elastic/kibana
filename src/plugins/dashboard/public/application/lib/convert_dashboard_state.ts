@@ -11,12 +11,14 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ControlGroupInput } from '@kbn/controls-plugin/public';
 import {
   compareFilters,
-  isFilterPinned,
-  migrateFilter,
   COMPARE_ALL_OPTIONS,
-  type Filter,
+  Filter,
+  isFilterPinned,
+  TimeRange,
 } from '@kbn/es-query';
-import { DashboardSavedObject } from '../../saved_dashboards';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+
+import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
 import { TimeRange } from '../../services/data';
@@ -85,6 +87,7 @@ export const savedObjectToDashboardState = ({
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
   }
+
   rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
     savedDashboard
   ) as ControlGroupInput;
@@ -120,6 +123,7 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
+  const migratedDashboardFilters = mapAndFlattenFilters(_.cloneDeep(dashboardFilters));
   return {
     refreshConfig: timefilter.getRefreshInterval(),
     filters: filterManager
@@ -127,8 +131,8 @@ export const stateToDashboardContainerInput = ({
       .filter(
         (filter) =>
           isFilterPinned(filter) ||
-          dashboardFilters.some((dashboardFilter) =>
-            filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
+          migratedDashboardFilters.some((dashboardFilter) =>
+            filtersAreEqual(dashboardFilter, filter)
           )
       ),
     isFullScreenMode: fullScreenMode,
