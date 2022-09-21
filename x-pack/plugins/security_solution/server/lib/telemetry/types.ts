@@ -412,3 +412,12 @@ export interface ValueListIndicatorMatchResponseAggregation {
     vl_used_in_indicator_match_rule_count: { value: number };
   };
 }
+
+export interface TaskMetric {
+  name: string;
+  passed: boolean;
+  time_executed_in_ms: number;
+  start_time: number;
+  end_time: number;
+  error_message?: string;
+}

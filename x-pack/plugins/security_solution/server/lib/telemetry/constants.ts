@@ -33,6 +33,8 @@ export const LIST_TRUSTED_APPLICATION = 'trusted_application';
 
 export const INSIGHTS_CHANNEL = 'security-insights-v1';
 
+export const TASK_METRICS_CHANNEL = 'task-metrics';
+
 export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {
     advanced: {
