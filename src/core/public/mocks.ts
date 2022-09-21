@@ -25,7 +25,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import type { PluginInitializerContext } from '.';
+import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
@@ -101,31 +101,6 @@ function createCoreStartMock({ basePath = '' } = {}) {
   return mock;
 }
 
-function pluginInitializerContextMock(config: any = {}) {
-  const mock: PluginInitializerContext = {
-    opaqueId: Symbol(),
-    env: {
-      mode: {
-        dev: true,
-        name: 'development',
-        prod: false,
-      },
-      packageInfo: {
-        version: 'version',
-        branch: 'branch',
-        buildNum: 100,
-        buildSha: 'buildSha',
-        dist: false,
-      },
-    },
-    config: {
-      get: <T>() => config as T,
-    },
-  };
-
-  return mock;
-}
-
 function createStorageMock() {
   const storageMock: jest.Mocked<Storage> = {
     getItem: jest.fn(),
@@ -160,7 +135,7 @@ export const coreMock = {
   createCoreContext: coreContextMock.create,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
-  createPluginInitializerContext: pluginInitializerContextMock,
+  createPluginInitializerContext: pluginsServiceMock.createPluginInitializerContext,
   createStorage: createStorageMock,
   createAppMountParameters: createAppMountParametersMock,
 };

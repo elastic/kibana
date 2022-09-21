@@ -20,7 +20,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { coreMock } from '../mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 
 import {
   PluginsService,
@@ -51,7 +51,7 @@ let plugins: InjectedMetadataPlugin[];
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
-const mockCoreContext = coreMock.createCoreContext();
+const mockCoreContext = coreContextMock.create();
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
 let mockSetupContext: DeeplyMocked<CoreSetup>;
 let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
