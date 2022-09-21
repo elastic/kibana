@@ -17,6 +17,7 @@ import {
   getValidColumns,
   isColumnWithMeta,
   isSchemaConfig,
+  isSiblingPipeline,
 } from './utils';
 
 describe('getLabel', () => {
@@ -191,5 +192,29 @@ describe('isColumnWithMeta', () => {
 
   test('should return true if column with meta', () => {
     expect(isColumnWithMeta(columnWithMeta)).toBeTruthy();
+  });
+});
+
+describe('isSiblingPipeline', () => {
+  const metric: Omit<SchemaConfig, 'aggType'> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  test.each<[METRIC_TYPES, boolean]>([
+    [METRIC_TYPES.AVG_BUCKET, true],
+    [METRIC_TYPES.SUM_BUCKET, true],
+    [METRIC_TYPES.MAX_BUCKET, true],
+    [METRIC_TYPES.MIN_BUCKET, true],
+    [METRIC_TYPES.CUMULATIVE_SUM, false],
+  ])('for %s should return %s', (aggType, expected) => {
+    expect(isSiblingPipeline({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(
+      expected
+    );
   });
 });
