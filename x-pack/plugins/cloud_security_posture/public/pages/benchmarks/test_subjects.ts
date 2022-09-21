@@ -8,6 +8,8 @@
 export const BENCHMARKS_PAGE_HEADER = 'benchmarks-page-header';
 export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'csp_benchmarks_table';
 export const ADD_INTEGRATION_TEST_SUBJ = 'csp_add_integration';
+export const BENCHMARK_SEARCH_FIELD = 'benchmark-search-field';
+export const BENCHMARK_INTEGRATIONS_COUNT = 'benchmark-integrations-count';
 export const BENCHMARKS_TABLE_COLUMNS = {
   INTEGRATION_NAME: 'benchmarks-table-column-integration-name',
   DEPLOYMENT_TYPE: 'benchmarks-table-column-deployment-type',
