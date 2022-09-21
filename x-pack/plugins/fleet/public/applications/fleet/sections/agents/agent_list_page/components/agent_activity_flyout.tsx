@@ -238,6 +238,11 @@ const actionNames: {
     completedText: 'unenrolled',
     cancelledText: 'unenrollment',
   },
+  FORCE_UNENROLL: {
+    inProgressText: 'Force unenrolling',
+    completedText: 'force unenrolled',
+    cancelledText: 'force unenrollment',
+  },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
