@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -88,6 +89,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
   }, []);
+
+  const input = useObservable(embeddableInput);
 
   useEffect(() => {
     onInputChange({
@@ -201,6 +204,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
               chartsService={chartsService}
+              timeRange={input?.timeRange}
             />
           )}
         </div>
