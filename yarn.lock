@@ -3124,6 +3124,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal":
   version "0.0.0"
   uid ""
@@ -7166,6 +7174,14 @@
   uid ""
 
 "@types/kbn__core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
