@@ -143,7 +143,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                   body={
                     <FormattedMessage
                       id="xpack.fleet.agentActivityFlyout.noActivityDescription"
-                      defaultMessage="Activity feed will appear here as agents get enrolled, upgraded, or configured."
+                      defaultMessage="Activity feed will appear here as agents are reassigned, upgraded, or unenrolled."
                     />
                   }
                 />
