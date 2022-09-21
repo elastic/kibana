@@ -29,6 +29,7 @@ const DEFAULT_VALUES = {
   mlInferencePipelineProcessors: undefined,
   pipelineState: DEFAULT_PIPELINE_VALUES,
   showModal: false,
+  showAddMlInferencePipelineModal: false,
 };
 
 describe('PipelinesLogic', () => {

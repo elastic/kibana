@@ -257,8 +257,8 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: HeartbeatConfig) {
-    const monitors = this.formatConfigs([config]);
+  async addConfig(config: HeartbeatConfig | HeartbeatConfig[]) {
+    const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
 
     this.apiKey = await this.getApiKey();
 
@@ -282,8 +282,10 @@ export class SyntheticsService {
     }
   }
 
-  async editConfig(monitorConfig: HeartbeatConfig) {
-    const monitors = this.formatConfigs([monitorConfig]);
+  async editConfig(monitorConfig: HeartbeatConfig | HeartbeatConfig[]) {
+    const monitors = this.formatConfigs(
+      Array.isArray(monitorConfig) ? monitorConfig : [monitorConfig]
+    );
 
     this.apiKey = await this.getApiKey();
 
