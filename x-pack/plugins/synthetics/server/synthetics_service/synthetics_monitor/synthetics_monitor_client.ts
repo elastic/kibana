@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
@@ -14,6 +14,8 @@ import {
   MonitorFields,
   SyntheticsMonitorWithId,
   HeartbeatConfig,
+  PrivateLocation,
+  EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
 
 export class SyntheticsMonitorClient {
@@ -26,61 +28,123 @@ export class SyntheticsMonitorClient {
     this.privateLocationAPI = new SyntheticsPrivateLocation(server);
   }
 
-  async addMonitor(
-    monitor: MonitorFields,
-    id: string,
+  async addMonitors(
+    monitors: Array<{ monitor: MonitorFields; id: string }>,
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    allPrivateLocations: PrivateLocation[],
+    spaceId: string
   ) {
-    await this.syntheticsService.setupIndexTemplates();
+    const privateConfigs: HeartbeatConfig[] = [];
+    const publicConfigs: HeartbeatConfig[] = [];
 
-    const config = formatHeartbeatRequest({
-      monitor,
-      monitorId: id,
-      customHeartbeatId: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID],
-    });
+    for (const monitorObj of monitors) {
+      const { monitor, id } = monitorObj;
+      const config = formatHeartbeatRequest({
+        monitor,
+        monitorId: id,
+        customHeartbeatId: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      });
 
-    const { privateLocations, publicLocations } = this.parseLocations(config);
+      const { privateLocations, publicLocations } = this.parseLocations(config);
+      if (privateLocations.length > 0) {
+        privateConfigs.push(config);
+      }
 
-    if (privateLocations.length > 0) {
-      await this.privateLocationAPI.createMonitor(config, request, savedObjectsClient);
+      if (publicLocations.length > 0) {
+        publicConfigs.push(config);
+      }
     }
 
-    if (publicLocations.length > 0) {
-      return await this.syntheticsService.addConfig(config);
+    let newPolicies;
+
+    if (privateConfigs.length > 0) {
+      newPolicies = await this.privateLocationAPI.createMonitors(
+        privateConfigs,
+        request,
+        savedObjectsClient,
+        allPrivateLocations,
+        spaceId
+      );
     }
+
+    let syncErrors;
+
+    if (publicConfigs.length > 0) {
+      syncErrors = await this.syntheticsService.addConfig(publicConfigs);
+    }
+
+    return { newPolicies, syncErrors };
   }
 
-  async editMonitor(
-    editedMonitor: MonitorFields,
-    id: string,
+  async editMonitors(
+    monitors: Array<{
+      monitor: MonitorFields;
+      id: string;
+      previousMonitor?: SavedObject<EncryptedSyntheticsMonitor>;
+    }>,
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    allPrivateLocations: PrivateLocation[],
+    spaceId: string
   ) {
-    const editedConfig = formatHeartbeatRequest({
-      monitor: editedMonitor,
-      monitorId: id,
-      customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
-    });
+    const privateConfigs: HeartbeatConfig[] = [];
+    const publicConfigs: HeartbeatConfig[] = [];
 
-    const { publicLocations } = this.parseLocations(editedConfig);
+    for (const editedMonitor of monitors) {
+      const editedConfig = formatHeartbeatRequest({
+        monitor: editedMonitor.monitor,
+        monitorId: editedMonitor.id,
+        customHeartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      });
+      const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
+      if (publicLocations.length > 0) {
+        publicConfigs.push(editedConfig);
+      }
 
-    await this.privateLocationAPI.editMonitor(editedConfig, request, savedObjectsClient);
-
-    if (publicLocations.length > 0) {
-      return await this.syntheticsService.editConfig(editedConfig);
+      if (privateLocations.length > 0 || this.hasPrivateLocations(editedMonitor.previousMonitor)) {
+        privateConfigs.push(editedConfig);
+      }
     }
 
-    await this.syntheticsService.editConfig(editedConfig);
+    await this.privateLocationAPI.editMonitors(
+      privateConfigs,
+      request,
+      savedObjectsClient,
+      allPrivateLocations,
+      spaceId
+    );
+
+    if (publicConfigs.length > 0) {
+      return await this.syntheticsService.editConfig(publicConfigs);
+    }
+  }
+  async deleteMonitors(
+    monitors: SyntheticsMonitorWithId[],
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract,
+    spaceId: string
+  ) {
+    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
+      monitors,
+      request,
+      savedObjectsClient,
+      spaceId
+    );
+
+    const publicDeletePromise = this.syntheticsService.deleteConfigs(monitors);
+    const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
+
+    return pubicResponse;
   }
 
-  async deleteMonitor(
-    monitor: SyntheticsMonitorWithId,
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
-  ) {
-    await this.privateLocationAPI.deleteMonitor(monitor, request, savedObjectsClient);
-    return await this.syntheticsService.deleteConfigs([monitor]);
+  hasPrivateLocations(previousMonitor?: SavedObject<EncryptedSyntheticsMonitor>) {
+    if (!previousMonitor) {
+      return false;
+    }
+    const { locations } = previousMonitor.attributes;
+
+    return locations.some((loc) => !loc.isServiceManaged);
   }
 
   parseLocations(config: HeartbeatConfig) {

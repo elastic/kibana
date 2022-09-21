@@ -9,17 +9,18 @@ import { navigateTo } from '../../tasks/navigation';
 
 import { login } from '../../tasks/login';
 import { ROLES } from '../../test';
+import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
+import { getRandomInt } from '../../tasks/helpers';
 
 describe('ALL - Saved queries', () => {
-  // const randomNumber = getRandomInt();
-  // const SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
-  // const SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+  const randomNumber = getRandomInt();
+  const SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
+  const SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
 
   beforeEach(() => {
     login(ROLES.soc_manager);
     navigateTo('/app/osquery');
   });
 
-  // TODO usnkip after FF
-  // getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+  getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
 });
