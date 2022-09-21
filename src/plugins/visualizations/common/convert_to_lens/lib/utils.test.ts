@@ -8,7 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../types';
-import { getLabel } from './utils';
+import { getLabel, getLabelForPercentile } from './utils';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -40,5 +40,35 @@ describe('getLabel', () => {
     const aggParams = { ...agg.aggParams!, customLabel };
     const aggWithCustomLabel = { ...agg, aggParams };
     expect(getLabel(aggWithCustomLabel)).toEqual(customLabel);
+  });
+});
+
+describe('getLabelForPercentile', () => {
+  const label = 'some label';
+  const customLabel = 'some custom label';
+
+  const agg: SchemaConfig<METRIC_TYPES.PERCENTILES> = {
+    accessor: 0,
+    label,
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.PERCENTILES,
+    aggId: 'id',
+    aggParams: { field: 'some-field' },
+  };
+
+  test('should return empty string if no custom label is specified', () => {
+    const { aggParams, ...aggWithoutAggParams } = agg;
+    expect(getLabelForPercentile(aggWithoutAggParams)).toEqual('');
+    expect(getLabel({ ...agg, aggParams: { ...aggParams!, customLabel: '' } })).toEqual('');
+  });
+
+  test('should return label if custom label is specified', () => {
+    const aggParams = { ...agg.aggParams!, customLabel };
+    const aggWithCustomLabel = { ...agg, aggParams };
+    expect(getLabelForPercentile(aggWithCustomLabel)).toEqual(label);
   });
 });
