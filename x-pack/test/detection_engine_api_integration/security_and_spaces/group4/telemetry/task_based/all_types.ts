@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { unset } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
