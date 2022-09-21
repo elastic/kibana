@@ -147,6 +147,7 @@ export default function ({ getService }) {
         'authentication_provider',
         'authentication_type',
         'elastic_cloud_user',
+        'profile_uid',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
       expect(apiResponse.body.authentication_provider).to.eql({ type: 'http', name: '__http__' });
@@ -194,6 +195,7 @@ export default function ({ getService }) {
           'authentication_provider',
           'authentication_type',
           'elastic_cloud_user',
+          'profile_uid',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
         expect(apiResponse.body.authentication_provider).to.eql({ type: 'basic', name: 'basic' });

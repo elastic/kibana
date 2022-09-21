@@ -229,6 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_provider',
           'authentication_type',
           'elastic_cloud_user',
+          'profile_uid',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
@@ -283,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_provider',
           'authentication_type',
           'elastic_cloud_user',
+          'profile_uid',
         ]);
 
         expect(apiResponse.body.username).to.be('user2');
