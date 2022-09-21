@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { XYAnnotationsLayerConfig, XYLayerConfig } from './types';
+import { Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYAnnotationsLayerConfig => layer.layerType === 'annotations';
+
+export const getIndexPatternIds = (layers: Layer[]) =>
+  layers.map(({ indexPatternId }) => indexPatternId);

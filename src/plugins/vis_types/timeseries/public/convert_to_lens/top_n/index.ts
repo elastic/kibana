@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -80,10 +80,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   }
 
   const configLayers = await getLayers(extendedLayers, model, dataViews);
-
+  const layers = Object.values(excludeMetaFromLayers(extendedLayers));
   return {
     type: 'lnsXY',
-    layers: Object.values(excludeMetaFromLayers(extendedLayers)),
+    layers,
     configuration: getConfiguration(model, configLayers),
+    indexPatternIds: getIndexPatternIds(layers),
   };
 };
