@@ -71,7 +71,7 @@ describe('Rule actions', () => {
     cy.get(NUMBER_OF_ALERTS)
       .invoke('text')
       .should('match', /^[1-9].+$/);
-    cy.get(ALERT_GRID_CELL).contains(this.rule.name);
+    cy.get(ALERT_GRID_CELL).contains(rule.name);
 
     const expectedJson = JSON.parse(rule.actions.connectors[0].document);
     cy.request({

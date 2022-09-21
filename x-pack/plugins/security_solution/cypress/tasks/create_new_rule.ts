@@ -341,7 +341,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const typeThresholdField = ($el: Cypress.ObjectLike) =>
     cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   fillCustomQuery(rule);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
@@ -382,7 +381,6 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
 };
 
 export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRule) => {
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   fillCustomQuery(rule);
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.newTermsFields[0], { delay: 35 });
   cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
