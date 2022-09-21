@@ -940,7 +940,12 @@ describe('test create task metrics', () => {
     const stubStartTime = Date.now();
     await new Promise((r) => setTimeout(r, 11));
     const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime);
-    const { time_executed_in_ms: timeExecutedInMs, start_time: startTime, end_time: endTime, ...rest } = response;
+    const {
+      time_executed_in_ms: timeExecutedInMs,
+      start_time: startTime,
+      end_time: endTime,
+      ...rest
+    } = response;
     expect(timeExecutedInMs).toBeGreaterThan(10);
     expect(rest).toEqual({
       name: 'test',
@@ -953,7 +958,12 @@ describe('test create task metrics', () => {
     const stubStartTime = Date.now();
     const errorMessage = 'failed';
     const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime, errorMessage);
-    const { time_executed_in_ms: timeExecutedInMs, start_time: startTime, end_time: endTime, ...rest } = response;
+    const {
+      time_executed_in_ms: timeExecutedInMs,
+      start_time: startTime,
+      end_time: endTime,
+      ...rest
+    } = response;
     expect(rest).toEqual({
       name: 'test',
       passed: false,

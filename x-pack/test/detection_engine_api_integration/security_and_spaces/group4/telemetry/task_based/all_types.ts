@@ -54,34 +54,34 @@ export default ({ getService }: FtrProviderContext) => {
           detection_rules: [
             [
               {
-                "name": "Security Solution Detection Rule Lists Telemetry",
-                "passed": true,
-              }
-            ]
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
           ],
           security_lists: [
             [
               {
-                "name": "Security Solution Lists Telemetry",
-                "passed": true,
-              }
-            ]
+                name: 'Security Solution Lists Telemetry',
+                passed: true,
+              },
+            ],
           ],
           endpoints: [
             [
               {
-                "name": "Security Solution Telemetry Endpoint Metrics and Info task",
-                "passed": true,
-              }
-            ]
+                name: 'Security Solution Telemetry Endpoint Metrics and Info task',
+                passed: true,
+              },
+            ],
           ],
           diagnostics: [
             [
               {
-                "name": "Security Solution Telemetry Diagnostics task",
-                "passed": true,
-              }
-            ]
+                name: 'Security Solution Telemetry Diagnostics task',
+                passed: true,
+              },
+            ],
           ],
         });
       });
