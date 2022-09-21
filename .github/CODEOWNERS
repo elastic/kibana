@@ -754,6 +754,7 @@ packages/core/integrations/core-integrations-browser-internal @elastic/kibana-co
 packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-internal @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
