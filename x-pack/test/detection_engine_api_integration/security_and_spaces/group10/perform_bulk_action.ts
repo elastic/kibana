@@ -1514,7 +1514,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         describe('throttle', () => {
           // Notice that for bulk editing of rule actions, NOTIFICATION_THROTTLE_NO_ACTIONS
-          // is not available as "Perform No Actions" is not a valid option
+          // is not available as payload, because "Perform No Actions" is not a valid option
           const casesForEmptyActions = [
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
@@ -1611,12 +1611,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('notifyWhen', () => {
+          // Notice that for bulk editing of rule actions, NOTIFICATION_THROTTLE_NO_ACTIONS
+          // is not available as payload, because "Perform No Actions" is not a valid option
           const cases = [
-            {
-              payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
-              // keeps existing default value which is onActiveAlert
-              expected: { notifyWhen: 'onActiveAlert' },
-            },
             {
               payload: { throttle: '1d' },
               expected: { notifyWhen: 'onThrottleInterval' },
