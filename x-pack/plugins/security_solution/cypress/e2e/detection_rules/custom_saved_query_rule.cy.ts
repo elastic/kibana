@@ -42,6 +42,7 @@ import { getDetails } from '../../tasks/rule_details';
 import { createSavedQueryRule, createCustomRule } from '../../tasks/api_calls/rules';
 
 import { RULE_CREATION, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
@@ -56,11 +57,12 @@ describe('Custom saved_query rules', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       deleteSavedQueries();
-      createTimeline(getNewRule().timeline).then((response) => {
+      const timeline = getNewRule().timeline as CompleteTimeline;
+      createTimeline(timeline).then((response) => {
         cy.wrap({
           ...getNewRule(),
           timeline: {
-            ...getNewRule().timeline,
+            ...timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         }).as('rule');
