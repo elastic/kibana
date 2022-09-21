@@ -11,7 +11,6 @@ export interface TextBasedLanguagesLayerColumn {
   columnId: string;
   fieldName: string;
   meta?: DatatableColumn['meta'];
-  customLabel?: string;
 }
 
 export interface TextBasedLanguageField {

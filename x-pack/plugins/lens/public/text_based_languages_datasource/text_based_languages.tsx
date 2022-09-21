@@ -19,12 +19,12 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   DatasourceDimensionEditorProps,
-  DatasourceDimensionTriggerProps,
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
   TableChangeType,
+  DatasourceDimensionTriggerProps,
 } from '../types';
 import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
@@ -266,11 +266,16 @@ export function getTextBasedLanguagesDatasource({
       props: DatasourceDimensionTriggerProps<TextBasedLanguagesPrivateState>
     ) => {
       const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(props.state);
+      let customLabel = columnLabelMap[props.columnId];
+      if (!customLabel) {
+        const layer = props.state.layers[props.layerId];
+        const selectedField = layer?.allColumns?.find(
+          (column) => column.columnId === props.columnId
+        )!;
+        customLabel = selectedField.fieldName;
+      }
 
-      render(
-        <EuiButtonEmpty onClick={() => {}}>{columnLabelMap[props.columnId]}</EuiButtonEmpty>,
-        domElement
-      );
+      render(<EuiButtonEmpty onClick={() => {}}>{customLabel}</EuiButtonEmpty>, domElement);
     },
 
     getRenderEventCounters(state: TextBasedLanguagesPrivateState): string[] {
