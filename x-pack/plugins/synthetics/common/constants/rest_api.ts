@@ -18,7 +18,7 @@ export enum API_URLS {
   PING_HISTOGRAM = `/internal/uptime/ping/histogram`,
   SNAPSHOT_COUNT = `/internal/uptime/snapshot/count`,
   SYNTHETICS_SUCCESSFUL_CHECK = `/internal/uptime/synthetics/check/success`,
-  JOURNEY_CREATE = `/internal/uptime/journey/{checkGroup}`,
+  JOURNEY = `/internal/uptime/journey/{checkGroup}`,
   JOURNEY_FAILED_STEPS = `/internal/uptime/journeys/failed_steps`,
   JOURNEY_SCREENSHOT = `/internal/uptime/journey/screenshot/{checkGroup}/{stepIndex}`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/uptime/journey/screenshot/block`,
