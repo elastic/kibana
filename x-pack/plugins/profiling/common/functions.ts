@@ -5,10 +5,10 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { FrameGroupID } from './frame_group';
+import { createFrameGroup, createFrameGroupID, FrameGroupID } from './frame_group';
 import {
-  createLazyStackTraceMap,
   createStackFrameMetadata,
+  emptyStackTrace,
   Executable,
   FileID,
   StackFrame,
@@ -43,8 +43,6 @@ export function createTopNFunctions(
   startIndex: number,
   endIndex: number
 ): TopNFunctions {
-  const lazyStackTraceMap = createLazyStackTraceMap(stackTraces, stackFrames, executables);
-
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
   // frame may appear multiple times in a trace, and thus to avoid
@@ -61,25 +59,33 @@ export function createTopNFunctions(
 
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
-    const lazyFrames = lazyStackTraceMap.get(stackTraceID) ?? [];
-    const numLazyFrames = lazyFrames.length;
-    for (let i = 0; i < numLazyFrames; i++) {
-      const lazyFrame = lazyFrames[i];
+    const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
+    const lenStackTrace = stackTrace.FrameIDs.length;
 
-      if (!topNFunctions.has(lazyFrame.FrameGroupID)) {
-        const j = lazyFrame.StackTraceIndex;
-        const stackTrace = stackTraces.get(stackTraceID)!;
-        const frameID = stackTrace.FrameIDs[j];
-        const fileID = stackTrace.FileIDs[j];
-        const addressOrLine = stackTrace.AddressOrLines[j];
-        const frame = stackFrames.get(frameID)!;
-        const executable = executables.get(fileID)!;
+    for (let i = 0; i < lenStackTrace; i++) {
+      const frameID = stackTrace.FrameIDs[i];
+      const fileID = stackTrace.FileIDs[i];
+      const addressOrLine = stackTrace.AddressOrLines[i];
+      const frame = stackFrames.get(frameID)!;
+      const executable = executables.get(fileID)!;
 
+      const frameGroup = createFrameGroup(
+        fileID,
+        addressOrLine,
+        executable.FileName,
+        frame.FileName,
+        frame.FunctionName
+      );
+      const frameGroupID = createFrameGroupID(frameGroup);
+
+      let topNFunction = topNFunctions.get(frameGroupID);
+
+      if (topNFunction === undefined) {
         const metadata = createStackFrameMetadata({
           FrameID: frameID,
           FileID: fileID,
           AddressOrLine: addressOrLine,
-          FrameType: stackTrace.Types[j],
+          FrameType: stackTrace.Types[i],
           FunctionName: frame.FunctionName,
           FunctionOffset: frame.FunctionOffset,
           SourceLine: frame.LineNumber,
@@ -87,22 +93,22 @@ export function createTopNFunctions(
           ExeFileName: executable.FileName,
         });
 
-        topNFunctions.set(lazyFrame.FrameGroupID, {
+        topNFunction = {
           Frame: metadata,
-          FrameGroupID: lazyFrame.FrameGroupID,
+          FrameGroupID: frameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
-        });
+        };
+
+        topNFunctions.set(frameGroupID, topNFunction);
       }
 
-      const topNFunction = topNFunctions.get(lazyFrame.FrameGroupID)!;
-
-      if (!uniqueFrameGroupsPerEvent.has(lazyFrame.FrameGroupID)) {
-        uniqueFrameGroupsPerEvent.add(lazyFrame.FrameGroupID);
+      if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
+        uniqueFrameGroupsPerEvent.add(frameGroupID);
         topNFunction.CountInclusive += count;
       }
 
-      if (i === numLazyFrames - 1) {
+      if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         topNFunction.CountExclusive += count;
       }

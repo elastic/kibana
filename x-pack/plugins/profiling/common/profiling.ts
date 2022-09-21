@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { createFrameGroup, createFrameGroupID, FrameGroup, FrameGroupID } from './frame_group';
-
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
@@ -55,6 +53,13 @@ export interface StackTrace {
   AddressOrLines: number[];
   Types: number[];
 }
+
+export const emptyStackTrace: StackTrace = {
+  FrameIDs: [],
+  FileIDs: [],
+  AddressOrLines: [],
+  Types: [],
+};
 
 export interface StackFrame {
   FileName: string;
@@ -234,50 +239,4 @@ export function groupStackFrameMetadataByStackTrace(
     stackTraceMap[stackTraceID] = frameMetadata;
   }
   return stackTraceMap;
-}
-
-export interface LazyStackFrameMetadata {
-  FrameGroup: FrameGroup;
-  FrameGroupID: FrameGroupID;
-  StackTraceIndex: number;
-}
-
-// createLazyStackTraceMap collects all of the per-stack-frame metadata for a
-// given set of trace IDs and their respective stack frames.
-export function createLazyStackTraceMap(
-  stackTraces: Map<StackTraceID, StackTrace>,
-  stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>
-): Map<StackTraceID, LazyStackFrameMetadata[]> {
-  const lazyStackTraceMap = new Map<StackTraceID, LazyStackFrameMetadata[]>();
-  for (const [stackTraceID, trace] of stackTraces) {
-    const numFramesPerTrace = trace.FrameIDs.length;
-    const lazyFrameMetadata = new Array<LazyStackFrameMetadata>(numFramesPerTrace);
-    for (let i = 0; i < numFramesPerTrace; i++) {
-      const frameID = trace.FrameIDs[i];
-      const fileID = trace.FileIDs[i];
-      const addressOrLine = trace.AddressOrLines[i];
-      const frame = stackFrames.get(frameID)!;
-      const executable = executables.get(fileID)!;
-
-      const frameGroup = createFrameGroup(
-        fileID,
-        addressOrLine,
-        executable.FileName,
-        frame.FileName,
-        frame.FunctionName
-      );
-      const frameGroupID = createFrameGroupID(frameGroup);
-
-      const metadata: LazyStackFrameMetadata = {
-        FrameGroup: frameGroup,
-        FrameGroupID: frameGroupID,
-        StackTraceIndex: i,
-      };
-
-      lazyFrameMetadata[i] = metadata;
-    }
-    lazyStackTraceMap.set(stackTraceID, lazyFrameMetadata);
-  }
-  return lazyStackTraceMap;
 }

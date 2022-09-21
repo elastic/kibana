@@ -10,7 +10,6 @@ import {
   createStackFrameMetadata,
   Executable,
   FileID,
-  LazyStackFrameMetadata,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
