@@ -7,10 +7,10 @@
  */
 
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
-import { Flags } from '@kbn/dev-cli-runner';
+import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 
 import { EsVersion } from '../../functional_test_runner';
-import { parseFlags } from './flags';
+import { parseFlags, FLAG_OPTIONS } from './flags';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(
@@ -25,27 +25,21 @@ afterEach(() => {
   process.env.TEST_ES_FROM = INITIAL_TEST_ES_FROM;
 });
 
-const defaults = {
-  _: [],
-  debug: false,
-  help: false,
-  quiet: false,
-  silent: false,
-  unexpected: [],
-  verbose: false,
-  config: 'foo',
-} as Flags;
+const defaults = getFlags(['--config=foo'], FLAG_OPTIONS);
+
+const test = (opts: Record<string, string | string[] | boolean | undefined>) =>
+  parseFlags(new FlagsReader({ ...defaults, ...opts }));
 
 describe('parse runTest flags', () => {
   it('validates defaults', () => {
-    expect(parseFlags(defaults)).toMatchInlineSnapshot(`
+    expect(test({})).toMatchInlineSnapshot(`
       Object {
         "bail": false,
         "configs": Array [
           <absolute path>/foo,
         ],
         "dryRun": false,
-        "esFrom": undefined,
+        "esFrom": "snapshot",
         "esVersion": <EsVersion 9.9.9>,
         "grep": undefined,
         "installDir": undefined,
@@ -65,26 +59,24 @@ describe('parse runTest flags', () => {
   });
 
   it('allows combinations of config and journey', () => {
-    expect(() => parseFlags({ ...defaults, config: undefined })).toThrowErrorMatchingInlineSnapshot(
+    expect(() => test({ config: undefined })).toThrowErrorMatchingInlineSnapshot(
       `"At least one --config or --journey flag is required"`
     );
 
-    expect(parseFlags({ ...defaults, config: ['configFoo'], journey: 'journeyFoo' }).configs)
-      .toMatchInlineSnapshot(`
+    expect(test({ config: ['configFoo'], journey: 'journeyFoo' }).configs).toMatchInlineSnapshot(`
       Array [
         <absolute path>/configFoo,
         <absolute path>/journeyFoo,
       ]
     `);
 
-    expect(parseFlags({ ...defaults, config: undefined, journey: 'foo' }).configs)
-      .toMatchInlineSnapshot(`
+    expect(test({ config: undefined, journey: 'foo' }).configs).toMatchInlineSnapshot(`
       Array [
         <absolute path>/foo,
       ]
     `);
 
-    expect(parseFlags({ ...defaults, config: undefined, journey: ['foo', 'bar', 'baz'] }).configs)
+    expect(test({ config: undefined, journey: ['foo', 'bar', 'baz'] }).configs)
       .toMatchInlineSnapshot(`
       Array [
         <absolute path>/foo,
@@ -93,8 +85,7 @@ describe('parse runTest flags', () => {
       ]
     `);
 
-    expect(parseFlags({ ...defaults, config: ['bar'], journey: ['foo', 'baz'] }).configs)
-      .toMatchInlineSnapshot(`
+    expect(test({ config: ['bar'], journey: ['foo', 'baz'] }).configs).toMatchInlineSnapshot(`
       Array [
         <absolute path>/bar,
         <absolute path>/foo,
@@ -104,7 +95,7 @@ describe('parse runTest flags', () => {
   });
 
   it('updates all with updateAll', () => {
-    const { updateBaselines, updateSnapshots } = parseFlags({ ...defaults, updateAll: true });
+    const { updateBaselines, updateSnapshots } = test({ updateAll: true });
     expect({ updateBaselines, updateSnapshots }).toMatchInlineSnapshot(`
       Object {
         "updateBaselines": true,
@@ -114,27 +105,27 @@ describe('parse runTest flags', () => {
   });
 
   it('validates esFrom', () => {
-    expect(() => parseFlags({ ...defaults, esFrom: 'foo' })).toThrowErrorMatchingInlineSnapshot(
-      `"invalid --esFrom, expected either \\"snapshot\\" or \\"source\\""`
+    expect(() => test({ esFrom: 'foo' })).toThrowErrorMatchingInlineSnapshot(
+      `"invalid --esFrom, expected one of \\"snapshot\\", \\"source\\""`
     );
   });
 
   it('accepts multiple tags', () => {
-    const { suiteFilters, suiteTags } = parseFlags({
-      ...defaults,
+    const { suiteFilters, suiteTags } = test({
       'include-tag': ['foo', 'bar'],
       include: 'path',
       exclude: ['foo'],
       'exclude-tag': ['foo'],
     });
+
     expect({ suiteFilters, suiteTags }).toMatchInlineSnapshot(`
       Object {
         "suiteFilters": Object {
           "exclude": Array [
-            "foo",
+            <absolute path>/foo,
           ],
           "include": Array [
-            "path",
+            <absolute path>/path,
           ],
         },
         "suiteTags": Object {

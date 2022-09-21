@@ -9,7 +9,7 @@
 import Path from 'path';
 import { inspect } from 'util';
 
-import { run, Flags } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -17,32 +17,6 @@ import exitHook from 'exit-hook';
 
 import { readConfigFile, EsVersion } from './lib';
 import { FunctionalTestRunner } from './functional_test_runner';
-
-const makeAbsolutePath = (v: string) => Path.resolve(process.cwd(), v);
-const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
-const parseInstallDir = (flags: Flags) => {
-  const flag = flags['kibana-install-dir'];
-
-  if (typeof flag !== 'string' && flag !== undefined) {
-    throw createFlagError('--kibana-install-dir must be a string or not defined');
-  }
-
-  return flag ? makeAbsolutePath(flag) : undefined;
-};
-
-function toArr(flags: Flags, key: string) {
-  const value = flags[key] || undefined;
-  if (value === undefined) {
-    return [];
-  }
-  if (Array.isArray(value)) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    return [value];
-  }
-  throw createFlagError(`expected --${key} to be a string`);
-}
 
 export function runFtrCli() {
   const runStartTime = Date.now();
@@ -52,15 +26,13 @@ export function runFtrCli() {
   });
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
-    async ({ flags, log }) => {
-      const esVersionInput = flags['es-version'] || undefined; // convert "" to undefined
-      if (esVersionInput !== undefined && typeof esVersionInput !== 'string') {
-        throw createFlagError('expected --es-version to be a string');
-      }
+    async ({ flagsReader, log }) => {
+      const esVersionInput = flagsReader.string('es-version');
 
-      const configPaths = [...toArr(flags, 'config'), ...toArr(flags, 'journey')].map((rel) =>
-        Path.resolve(rel)
-      );
+      const configPaths = [
+        ...(flagsReader.arrayOfStrings('config') ?? []),
+        ...(flagsReader.arrayOfStrings('journey') ?? []),
+      ].map((rel) => Path.resolve(rel));
       if (configPaths.length !== 1) {
         throw createFlagError(`Expected there to be exactly one --config/--journey flag`);
       }
@@ -68,35 +40,35 @@ export function runFtrCli() {
       const esVersion = esVersionInput ? new EsVersion(esVersionInput) : EsVersion.getDefault();
       const settingOverrides = {
         mochaOpts: {
-          bail: flags.bail,
-          dryRun: flags['dry-run'],
-          grep: flags.grep || undefined,
-          invert: flags.invert,
+          bail: flagsReader.boolean('bail'),
+          dryRun: flagsReader.boolean('dry-run'),
+          grep: flagsReader.string('grep'),
+          invert: flagsReader.boolean('invert'),
         },
         kbnTestServer: {
-          installDir: parseInstallDir(flags),
+          installDir: flagsReader.path('kibana-install-dir'),
         },
         suiteFiles: {
-          include: toArray(flags.include as string | string[]).map(makeAbsolutePath),
-          exclude: toArray(flags.exclude as string | string[]).map(makeAbsolutePath),
+          include: flagsReader.arrayOfPaths('include') ?? [],
+          exclude: flagsReader.arrayOfPaths('exclude') ?? [],
         },
         suiteTags: {
-          include: toArray(flags['include-tag'] as string | string[]),
-          exclude: toArray(flags['exclude-tag'] as string | string[]),
+          include: flagsReader.arrayOfStrings('include-tag') ?? [],
+          exclude: flagsReader.arrayOfStrings('exclude-tag') ?? [],
         },
-        updateBaselines: flags.updateBaselines || flags.u,
-        updateSnapshots: flags.updateSnapshots || flags.u,
+        updateBaselines: flagsReader.boolean('updateBaselines') || flagsReader.boolean('u'),
+        updateSnapshots: flagsReader.boolean('updateSnapshots') || flagsReader.boolean('u'),
       };
 
       const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
 
       const functionalTestRunner = new FunctionalTestRunner(log, config, esVersion);
 
-      if (flags.throttle) {
+      if (flagsReader.boolean('throttle')) {
         process.env.TEST_THROTTLE_NETWORK = '1';
       }
 
-      if (flags.headless) {
+      if (flagsReader.boolean('headless')) {
         process.env.TEST_BROWSER_HEADLESS = '1';
       }
 
@@ -109,7 +81,7 @@ export function runFtrCli() {
           await reportTime(runStartTime, 'total', {
             success: false,
             err: err.message,
-            ...flags,
+            ...Object.fromEntries(flagsReader.getUsed().entries()),
           });
           log.indent(-log.getIndent());
           log.error(err);
@@ -117,7 +89,7 @@ export function runFtrCli() {
         } else {
           await reportTime(runStartTime, 'total', {
             success: true,
-            ...flags,
+            ...Object.fromEntries(flagsReader.getUsed().entries()),
           });
         }
 
@@ -132,7 +104,7 @@ export function runFtrCli() {
       exitHook(teardown);
 
       try {
-        if (flags['test-stats']) {
+        if (flagsReader.boolean('test-stats')) {
           process.stderr.write(
             JSON.stringify(await functionalTestRunner.getTestStats(), null, 2) + '\n'
           );

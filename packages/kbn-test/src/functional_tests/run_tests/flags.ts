@@ -10,87 +10,80 @@ import Path from 'path';
 
 import { v4 as uuidV4 } from 'uuid';
 import { REPO_ROOT } from '@kbn/utils';
-import { Flags } from '@kbn/dev-cli-runner';
+import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { EsVersion } from '../../functional_test_runner';
-import { parseConfigPaths } from '../lib/config_path';
-
-type EsFrom = 'snapshot' | 'source';
-const isValidEsFrom = (v: unknown): v is EsFrom => v === 'snapshot' || v === 'source';
-
-const getArrayOfStrings = (flags: Flags, key: string) => {
-  const value = flags[key];
-
-  if (value === undefined) {
-    return [];
-  }
-
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    return [value];
-  }
-
-  throw createFlagError(`When specified, --${key} must be a string`);
-};
 
 export type RunTestsOptions = ReturnType<typeof parseFlags>;
 
-export function parseFlags(flags: Flags) {
-  const bail = !!flags.bail;
-  const dryRun = !!flags.dryRun;
-  const updateBaselines = !!flags.updateBaselines || !!flags.updateAll;
-  const updateSnapshots = !!flags.updateSnapshots || !!flags.updateAll;
+export const FLAG_OPTIONS: FlagOptions = {
+  boolean: ['bail', 'logToFile', 'dry-run', 'updateBaselines', 'updateSnapshots', 'updateAll'],
+  string: [
+    'config',
+    'journey',
+    'esFrom',
+    'kibana-install-dir',
+    'grep',
+    'include-tag',
+    'exclude-tag',
+    'include',
+    'exclude',
+  ],
+  alias: {
+    updateAll: 'u',
+  },
+  help: `
+    --config             Define a FTR config that should be executed. Can be specified multiple times
+    --journey            Define a Journey that should be executed. Can be specified multiple times
+    --esFrom             Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or "snapshot"
+    --include-tag        Tags that suites must include to be run, can be included multiple times
+    --exclude-tag        Tags that suites must NOT include to be run, can be included multiple times
+    --include            Files that must included to be run, can be included multiple times
+    --exclude            Files that must NOT be included to be run, can be included multiple times
+    --grep               Pattern to select which tests to run
+    --kibana-install-dir Run Kibana from existing install directory instead of from source
+    --bail               Stop the test run at the first failure
+    --logToFile          Write the log output from Kibana/ES to files instead of to stdout
+    --dry-run            Report tests without executing them
+    --updateBaselines    Replace baseline screenshots with whatever is generated from the test
+    --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
+    --updateAll, -u      Replace both baseline screenshots and snapshots
+  `,
+};
 
-  const logsDir = !!flags.logToFile
-    ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-    : undefined;
+export function parseFlags(flags: FlagsReader) {
+  const configs = [
+    ...(flags.arrayOfPaths('config') ?? []),
+    ...(flags.arrayOfPaths('journey') ?? []),
+  ];
 
-  const configs = parseConfigPaths(flags);
   if (!configs.length) {
     throw createFlagError('At least one --config or --journey flag is required');
   }
 
-  const esFrom = flags.esFrom || undefined;
-  if (esFrom !== undefined && !isValidEsFrom(esFrom)) {
-    throw createFlagError(`invalid --esFrom, expected either "snapshot" or "source"`);
-  }
-
-  const installDir = flags['kibana-install-dir'] || undefined;
-  if (installDir !== undefined && typeof installDir !== 'string') {
-    throw createFlagError('When specified, --kibana-install-dir must be a single string');
-  }
-
-  const grep = flags.grep || undefined;
-  if (grep !== undefined && typeof grep !== 'string') {
-    throw createFlagError('When specified, --grep must be a single string');
-  }
-
-  const suiteTags = {
-    include: getArrayOfStrings(flags, 'include-tag'),
-    exclude: getArrayOfStrings(flags, 'exclude-tag'),
-  };
-
-  const suiteFilters = {
-    include: getArrayOfStrings(flags, 'include'),
-    exclude: getArrayOfStrings(flags, 'exclude'),
-  };
+  const esVersionString = flags.string('es-version');
 
   return {
     configs,
-    esVersion: EsVersion.getDefault(),
-    bail,
-    dryRun,
-    updateBaselines,
-    updateSnapshots,
-    logsDir,
-    esFrom,
-    installDir,
-    grep,
-    suiteTags,
-    suiteFilters,
+    esVersion: esVersionString ? new EsVersion(esVersionString) : EsVersion.getDefault(),
+    bail: flags.boolean('bail'),
+    dryRun: flags.boolean('dry-run'),
+    updateBaselines: flags.boolean('updateBaselines') || flags.boolean('updateAll'),
+    updateSnapshots: flags.boolean('updateSnapshots') || flags.boolean('updateAll'),
+    logsDir: flags.boolean('logToFile')
+      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+      : undefined,
+    esFrom: flags.enum('esFrom', ['snapshot', 'source']) ?? 'snapshot',
+    installDir: flags.path('kibana-install-dir'),
+    grep: flags.string('grep'),
+    suiteTags: {
+      include: flags.arrayOfStrings('include-tag'),
+      exclude: flags.arrayOfStrings('exclude-tag'),
+    },
+    suiteFilters: {
+      include: flags.arrayOfPaths('include'),
+      exclude: flags.arrayOfPaths('exclude'),
+    },
   };
 }
