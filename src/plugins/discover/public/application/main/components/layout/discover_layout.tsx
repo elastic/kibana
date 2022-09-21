@@ -316,7 +316,9 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => stateContainer.dataStateContainer.fetch()} />
+                <DiscoverUninitialized
+                  onRefresh={() => stateContainer.dataStateContainer.fetch()}
+                />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (

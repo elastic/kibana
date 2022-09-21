@@ -38,6 +38,8 @@ import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/data-plugin/common';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { persistSavedSearch } from '../utils/persist_saved_search';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { FetchStatus } from '../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -65,8 +67,6 @@ import {
   DataTotalHitsMsg,
   SavedSearchData,
 } from '../hooks/use_saved_search';
-import { persistSavedSearch } from '@kbn/discover-plugin/public/application/main/utils/persist_saved_search';
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 export interface AppState {
   /**
@@ -277,7 +277,7 @@ function getSavedSearchContainer({
       dataView: savedSearch.searchSource.getField('index')!,
       onError,
       onSuccess,
-      state: state,
+      state,
       services,
       saveOptions,
     });
@@ -654,7 +654,8 @@ function getDataStateContainer({
   const refetch$ = new Subject<DataRefetchMsg>();
   const shouldSearchOnPageLoad =
     services.uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-    savedSearch$.getValue().id !== undefined || !services.timefilter.getRefreshInterval().pause ||
+    savedSearch$.getValue().id !== undefined ||
+    !services.timefilter.getRefreshInterval().pause ||
     searchSessionManager.hasSearchSessionIdInURL();
   const initialFetchStatus = shouldSearchOnPageLoad
     ? FetchStatus.LOADING

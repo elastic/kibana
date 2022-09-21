@@ -174,7 +174,12 @@ export function useDiscoverState({
     if (dataView && stateContainer.dataStateContainer.initialFetchStatus === FetchStatus.LOADING) {
       stateContainer.dataStateContainer.refetch$.next(undefined);
     }
-  }, [dataView, savedSearch.id, stateContainer.dataStateContainer.initialFetchStatus, stateContainer.dataStateContainer.refetch$]);
+  }, [
+    dataView,
+    savedSearch.id,
+    stateContainer.dataStateContainer.initialFetchStatus,
+    stateContainer.dataStateContainer.refetch$,
+  ]);
 
   /**
    * We need to make sure the auto refresh interval is disabled for

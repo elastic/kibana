@@ -81,7 +81,7 @@ async function saveDataSource({
     onError,
     onSuccess,
     saveOptions,
-  })
+  });
 }
 
 export async function onSaveSearch({
