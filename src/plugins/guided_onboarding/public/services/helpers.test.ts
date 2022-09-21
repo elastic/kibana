@@ -6,26 +6,32 @@
  * Side Public License, v 1.
  */
 
+import { guidesConfig } from '../constants/guides_config';
 import { getNextStep, isLastStep } from './helpers';
+
+const searchGuide = 'search';
+const firstStep = guidesConfig[searchGuide].steps[0].id;
+const secondStep = guidesConfig[searchGuide].steps[1].id;
+const lastStep = guidesConfig[searchGuide].steps[2].id;
 
 describe('GuidedOnboarding ApiService helpers', () => {
   // this test suite depends on the guides config
   describe('isLastStepActive', () => {
     it('returns true if the passed params are for the last step', () => {
-      const result = isLastStep('search', 'review');
+      const result = isLastStep(searchGuide, lastStep);
       expect(result).toBe(true);
     });
 
     it('returns false if the passed params are not for the last step', () => {
-      const result = isLastStep('search', 'add_data');
+      const result = isLastStep(searchGuide, firstStep);
       expect(result).toBe(false);
     });
   });
 
   describe('getNextStep', () => {
     it('returns id of the next step', () => {
-      const result = getNextStep('search', 'add_data');
-      expect(result).toEqual('search_experience');
+      const result = getNextStep(searchGuide, firstStep);
+      expect(result).toEqual(secondStep);
     });
 
     it('returns undefined if the params are not part of the config', () => {
@@ -34,7 +40,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     });
 
     it(`returns undefined if it's the last step`, () => {
-      const result = getNextStep('search', 'review');
+      const result = getNextStep(searchGuide, lastStep);
       expect(result).toBeUndefined();
     });
   });
