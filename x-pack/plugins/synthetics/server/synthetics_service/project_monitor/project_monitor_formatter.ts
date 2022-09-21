@@ -13,30 +13,34 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { syncNewMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
-import { deleteMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/delete_monitor_bulk';
-import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
+import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
+import { deleteMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
   ConfigKey,
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
   ServiceLocationErrors,
-  ProjectBrowserMonitor,
+  ProjectMonitor,
   Locations,
   SyntheticsMonitor,
   MonitorFields,
   PrivateLocation,
-} from '../../common/runtime_types';
+} from '../../../common/runtime_types';
 import {
   syntheticsMonitorType,
   syntheticsMonitor,
-} from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { normalizeProjectMonitor } from './normalizers/browser';
-import { formatSecrets, normalizeSecrets } from './utils/secrets';
-import { syncEditedMonitor } from '../routes/monitor_cruds/edit_monitor';
-import { validateProjectMonitor } from '../routes/monitor_cruds/monitor_validation';
-import type { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
+} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { formatSecrets, normalizeSecrets } from '../utils/secrets';
+import { syncEditedMonitor } from '../../routes/monitor_cruds/edit_monitor';
+import {
+  validateProjectMonitor,
+  validateMonitor,
+  ValidationResult,
+} from '../../routes/monitor_cruds/monitor_validation';
+import { normalizeProjectMonitor } from './normalizers';
 
 interface StaleMonitor {
   stale: boolean;
@@ -44,7 +48,7 @@ interface StaleMonitor {
   savedObjectId: string;
 }
 type StaleMonitorMap = Record<string, StaleMonitor>;
-type FailedMonitors = Array<{ id?: string; reason: string; details: string; payload?: object }>;
+type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
 export const INSUFFICIENT_FLEET_PERMISSIONS =
   'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.';
@@ -58,13 +62,13 @@ export class ProjectMonitorFormatter {
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private staleMonitorsMap: StaleMonitorMap = {};
-  private monitors: ProjectBrowserMonitor[] = [];
+  private monitors: ProjectMonitor[] = [];
   public createdMonitors: string[] = [];
   public deletedMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public staleMonitors: string[] = [];
-  public failedMonitors: FailedMonitors = [];
-  public failedStaleMonitors: FailedMonitors = [];
+  public failedMonitors: FailedError = [];
+  public failedStaleMonitors: FailedError = [];
   private server: UptimeServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -94,7 +98,7 @@ export class ProjectMonitorFormatter {
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
     spaceId: string;
-    monitors: ProjectBrowserMonitor[];
+    monitors: ProjectMonitor[];
     server: UptimeServerSetup;
     syntheticsMonitorClient: SyntheticsMonitorClient;
     request: KibanaRequest;
@@ -138,9 +142,9 @@ export class ProjectMonitorFormatter {
           if (this.staleMonitorsMap[monitor.id]) {
             this.staleMonitorsMap[monitor.id].stale = false;
           }
-          normalizedUpdateMonitors.push(normM);
+          normalizedUpdateMonitors.push(normM as MonitorFields);
         } else {
-          normalizedNewMonitors.push(normM);
+          normalizedNewMonitors.push(normM as MonitorFields);
         }
       }
     }
@@ -152,7 +156,7 @@ export class ProjectMonitorFormatter {
     await this.handleStaleMonitors();
   };
 
-  validatePermissions = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
+  validatePermissions = async ({ monitor }: { monitor: ProjectMonitor }) => {
     if (this.writeIntegrationPoliciesPermissions || (monitor.privateLocations ?? []).length === 0) {
       return;
     }
@@ -167,11 +171,11 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  validateProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
+  validateProjectMonitor = async ({ monitor }: { monitor: ProjectMonitor }) => {
     try {
       await this.validatePermissions({ monitor });
 
-      const normalizedMonitor = normalizeProjectMonitor({
+      const { normalizedFields: normalizedMonitor, unsupportedKeys } = normalizeProjectMonitor({
         monitor,
         locations: this.locations,
         privateLocations: this.privateLocations,
@@ -179,19 +183,40 @@ export class ProjectMonitorFormatter {
         namespace: this.spaceId,
       });
 
-      const validationResult = validateProjectMonitor(monitor, this.projectId);
-
-      if (!validationResult.valid) {
-        const { reason: message, details, payload } = validationResult;
+      if (unsupportedKeys.length) {
         this.failedMonitors.push({
           id: monitor.id,
-          reason: message,
-          details,
-          payload,
+          reason: 'Unsupported Heartbeat option',
+          details: `The following Heartbeat options are not supported for ${
+            monitor.type
+          } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
         });
-        if (this.staleMonitorsMap[monitor.id]) {
-          this.staleMonitorsMap[monitor.id].stale = false;
-        }
+        this.handleStreamingMessage({
+          message: `${monitor.id}: failed to create or update monitor`,
+        });
+        return null;
+      }
+
+      /* Validates that the payload sent from the synthetics agent is valid */
+      const { valid: isMonitorPayloadValid } = this.validateMonitor({
+        validationResult: validateProjectMonitor({
+          ...monitor,
+          type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+        }),
+        monitorId: monitor.id,
+      });
+
+      if (!isMonitorPayloadValid) {
+        return null;
+      }
+
+      /* Validates that the normalized monitor is a valid monitor saved object type */
+      const { valid: isNormalizedMonitorValid } = this.validateMonitor({
+        validationResult: validateMonitor(normalizedMonitor as MonitorFields),
+        monitorId: monitor.id,
+      });
+
+      if (!isNormalizedMonitorValid) {
         return null;
       }
 
@@ -310,7 +335,7 @@ export class ProjectMonitorFormatter {
     try {
       for (const monitor of monitors) {
         const previousMonitor = await this.getExistingMonitor(monitor[ConfigKey.JOURNEY_ID]!);
-        await this.updateMonitor(previousMonitor, monitor);
+        await this.updateMonitor(previousMonitor, monitor as MonitorFields);
       }
 
       if (monitors.length > 0) {
@@ -335,7 +360,7 @@ export class ProjectMonitorFormatter {
 
   private updateMonitor = async (
     previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
-    normalizedMonitor: BrowserFields
+    normalizedMonitor: MonitorFields
   ): Promise<{
     editedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
     errors: ServiceLocationErrors;
@@ -477,5 +502,27 @@ export class ProjectMonitorFormatter {
     if (this.subject) {
       this.subject?.next(message);
     }
+  };
+
+  private validateMonitor = ({
+    validationResult,
+    monitorId,
+  }: {
+    validationResult: ValidationResult;
+    monitorId: string;
+  }) => {
+    const { reason: message, details, payload: validationPayload, valid } = validationResult;
+    if (!valid) {
+      this.failedMonitors.push({
+        id: monitorId,
+        reason: message,
+        details,
+        payload: validationPayload,
+      });
+      if (this.staleMonitorsMap[monitorId]) {
+        this.staleMonitorsMap[monitorId].stale = false;
+      }
+    }
+    return validationResult;
   };
 }

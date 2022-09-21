@@ -21,7 +21,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[POST] /internal/uptime/service/monitors', function () {
+  describe('AddNewMonitors', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
