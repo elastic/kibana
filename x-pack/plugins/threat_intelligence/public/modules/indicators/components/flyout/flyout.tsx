@@ -24,10 +24,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { InvestigateInTimelineButton } from '../../../timeline/components/investigate_in_timeline_button';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorFlyoutJson } from './tabs/flyout_json';
-import { IndicatorFlyoutTable } from './tabs/flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { IndicatorFlyoutOverview } from './tabs/flyout_overview';
+import { IndicatorFlyoutJsonTab } from './components/json_tab';
+import { IndicatorFlyoutTableTab } from './components/table_tab';
+import { IndicatorFlyoutOverviewTab } from './components/overview_tab';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
@@ -68,7 +68,7 @@ export const IndicatorFlyout: VFC<IndicatorFlyoutProps> = ({ indicator, closeFly
           />
         ),
         content: (
-          <IndicatorFlyoutOverview
+          <IndicatorFlyoutOverviewTab
             indicator={indicator}
             onViewAllFieldsInTable={() => setSelectedTabId(TAB_IDS.table)}
           />
@@ -82,7 +82,7 @@ export const IndicatorFlyout: VFC<IndicatorFlyoutProps> = ({ indicator, closeFly
             defaultMessage="Table"
           />
         ),
-        content: <IndicatorFlyoutTable indicator={indicator} />,
+        content: <IndicatorFlyoutTableTab indicator={indicator} />,
       },
       {
         id: TAB_IDS.json,
@@ -92,7 +92,7 @@ export const IndicatorFlyout: VFC<IndicatorFlyoutProps> = ({ indicator, closeFly
             defaultMessage="JSON"
           />
         ),
-        content: <IndicatorFlyoutJson indicator={indicator} />,
+        content: <IndicatorFlyoutJsonTab indicator={indicator} />,
       },
     ],
     [indicator]

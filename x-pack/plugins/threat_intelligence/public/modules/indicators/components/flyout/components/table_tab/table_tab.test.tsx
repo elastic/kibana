@@ -13,17 +13,17 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../../../../common/types/indicator';
-import { IndicatorFlyoutTable, TABLE_TEST_ID } from '.';
+import { IndicatorFlyoutTableTab, TABLE_TEST_ID } from '.';
 import { unwrapValue } from '../../../../lib/unwrap_value';
-import { EMPTY_PROMPT_TEST_ID } from '../../components/empty_prompt';
+import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
-describe('<IndicatorFlyoutTable />', () => {
+describe('<IndicatorFlyoutTableTab />', () => {
   it('should render fields and values in table', () => {
     const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
-        <IndicatorFlyoutTable indicator={mockIndicator} />
+        <IndicatorFlyoutTableTab indicator={mockIndicator} />
       </TestProvidersComponent>
     );
 
@@ -44,7 +44,7 @@ describe('<IndicatorFlyoutTable />', () => {
   it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
       <TestProvidersComponent>
-        <IndicatorFlyoutTable indicator={{ fields: {} }} />
+        <IndicatorFlyoutTableTab indicator={{ fields: {} }} />
       </TestProvidersComponent>
     );
 

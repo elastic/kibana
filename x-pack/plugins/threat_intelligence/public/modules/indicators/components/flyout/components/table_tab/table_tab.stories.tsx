@@ -13,12 +13,12 @@ import { mockIndicatorsFiltersContext } from '../../../../../../common/mocks/moc
 import { mockUiSettingsService } from '../../../../../../common/mocks/mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from '../../../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
-import { IndicatorFlyoutTable } from '.';
+import { IndicatorFlyoutTableTab } from '.';
 import { FiltersContext } from '../../../../contexts';
 
 export default {
-  component: IndicatorFlyoutTable,
-  title: 'IndicatorFlyoutTable',
+  component: IndicatorFlyoutTableTab,
+  title: 'IndicatorFlyoutTableTab',
 };
 
 export const Default: Story<void> = () => {
@@ -32,12 +32,12 @@ export const Default: Story<void> = () => {
   return (
     <KibanaReactContext.Provider>
       <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
-        <IndicatorFlyoutTable indicator={mockIndicator} />
+        <IndicatorFlyoutTableTab indicator={mockIndicator} />
       </FiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 };
 
 export const EmptyIndicator: Story<void> = () => {
-  return <IndicatorFlyoutTable indicator={{ fields: {} } as unknown as Indicator} />;
+  return <IndicatorFlyoutTableTab indicator={{ fields: {} } as unknown as Indicator} />;
 };

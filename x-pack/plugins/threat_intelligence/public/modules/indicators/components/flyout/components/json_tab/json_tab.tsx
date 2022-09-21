@@ -8,11 +8,11 @@
 import React, { VFC } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import { Indicator } from '../../../../../../../common/types/indicator';
-import { IndicatorEmptyPrompt } from '../../components/empty_prompt';
+import { IndicatorEmptyPrompt } from '../empty_prompt';
 
 export const CODE_BLOCK_TEST_ID = 'tiFlyoutJsonCodeBlock';
 
-export interface IndicatorFlyoutJsonProps {
+export interface IndicatorFlyoutJsonTabProps {
   /**
    * Indicator to display in json format.
    */
@@ -23,7 +23,7 @@ export interface IndicatorFlyoutJsonProps {
  * Displays all the properties and values of an {@link Indicator} in json view,
  * using the {@link EuiCodeBlock} from the @elastic/eui library.
  */
-export const IndicatorFlyoutJson: VFC<IndicatorFlyoutJsonProps> = ({ indicator }) => {
+export const IndicatorFlyoutJsonTab: VFC<IndicatorFlyoutJsonTabProps> = ({ indicator }) => {
   return Object.keys(indicator).length === 0 ? (
     <IndicatorEmptyPrompt />
   ) : (

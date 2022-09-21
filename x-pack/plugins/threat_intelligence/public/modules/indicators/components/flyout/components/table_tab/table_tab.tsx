@@ -7,8 +7,8 @@
 
 import React, { VFC } from 'react';
 import { Indicator } from '../../../../../../../common/types/indicator';
-import { IndicatorEmptyPrompt } from '../../components/empty_prompt';
-import { IndicatorFieldsTable } from '../../components/fields_table';
+import { IndicatorEmptyPrompt } from '../empty_prompt';
+import { IndicatorFieldsTable } from '../fields_table';
 
 export const TABLE_TEST_ID = 'tiFlyoutTableTabRow';
 
@@ -19,7 +19,7 @@ const search = {
   },
 };
 
-export interface IndicatorFlyoutTableProps {
+export interface IndicatorFlyoutTableTabProps {
   /**
    * Indicator to display in table view.
    */
@@ -30,7 +30,7 @@ export interface IndicatorFlyoutTableProps {
  * Displays all the properties and values of an {@link Indicator} in table view,
  * using the {@link EuiInMemoryTable} from the @elastic/eui library.
  */
-export const IndicatorFlyoutTable: VFC<IndicatorFlyoutTableProps> = ({ indicator }) => {
+export const IndicatorFlyoutTableTab: VFC<IndicatorFlyoutTableTabProps> = ({ indicator }) => {
   const items: string[] = Object.keys(indicator.fields);
 
   return items.length === 0 ? (

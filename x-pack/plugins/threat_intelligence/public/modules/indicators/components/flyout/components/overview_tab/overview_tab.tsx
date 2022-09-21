@@ -20,7 +20,7 @@ import { VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
 import { unwrapValue } from '../../../../lib/unwrap_value';
-import { IndicatorEmptyPrompt } from '../../components/empty_prompt';
+import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorBlock } from './components/block';
 import { HighlightedValuesTable } from './components/highlighted_values_table';
 
@@ -34,12 +34,12 @@ const highLevelFields = [
 export const TI_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
 export const TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
 
-export interface IndicatorFlyoutOverviewProps {
+export interface IndicatorFlyoutOverviewTabProps {
   indicator: Indicator;
   onViewAllFieldsInTable: VoidFunction;
 }
 
-export const IndicatorFlyoutOverview: VFC<IndicatorFlyoutOverviewProps> = ({
+export const IndicatorFlyoutOverviewTab: VFC<IndicatorFlyoutOverviewTabProps> = ({
   indicator,
   onViewAllFieldsInTable,
 }) => {

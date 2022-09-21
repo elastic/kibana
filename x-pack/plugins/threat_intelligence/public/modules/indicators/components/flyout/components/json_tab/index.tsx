@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './flyout_table';
+export * from './json_tab';

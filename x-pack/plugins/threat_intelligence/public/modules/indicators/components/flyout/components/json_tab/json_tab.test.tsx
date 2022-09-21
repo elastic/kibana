@@ -9,16 +9,16 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
-import { CODE_BLOCK_TEST_ID, IndicatorFlyoutJson } from '.';
-import { EMPTY_PROMPT_TEST_ID } from '../../components/empty_prompt';
+import { CODE_BLOCK_TEST_ID, IndicatorFlyoutJsonTab } from '.';
+import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
-describe('<IndicatorFlyoutJson />', () => {
+describe('<IndicatorFlyoutJsonTab />', () => {
   it('should render code block component on valid indicator', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <IndicatorFlyoutJson indicator={mockIndicator} />
+        <IndicatorFlyoutJsonTab indicator={mockIndicator} />
       </TestProvidersComponent>
     );
 
@@ -28,7 +28,7 @@ describe('<IndicatorFlyoutJson />', () => {
   it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
       <TestProvidersComponent>
-        <IndicatorFlyoutJson indicator={{} as unknown as Indicator} />
+        <IndicatorFlyoutJsonTab indicator={{} as unknown as Indicator} />
       </TestProvidersComponent>
     );
 

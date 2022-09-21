@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './flyout_overview';
+export * from './table_tab';

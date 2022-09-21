@@ -10,18 +10,18 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
 import {
-  IndicatorFlyoutOverview,
+  IndicatorFlyoutOverviewTab,
   TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
   TI_FLYOUT_OVERVIEW_TABLE,
 } from '.';
-import { EMPTY_PROMPT_TEST_ID } from '../../components/empty_prompt';
+import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 
 describe('<IndicatorFlyoutOverview />', () => {
   describe('invalid indicator', () => {
     it('should render error message on invalid indicator', () => {
       render(
         <TestProvidersComponent>
-          <IndicatorFlyoutOverview
+          <IndicatorFlyoutOverviewTab
             onViewAllFieldsInTable={() => {}}
             indicator={{ fields: {} } as unknown as Indicator}
           />
@@ -35,7 +35,7 @@ describe('<IndicatorFlyoutOverview />', () => {
   it('should render the highlighted blocks and table when valid indicator is passed', () => {
     render(
       <TestProvidersComponent>
-        <IndicatorFlyoutOverview
+        <IndicatorFlyoutOverviewTab
           onViewAllFieldsInTable={() => {}}
           indicator={generateMockIndicator()}
         />

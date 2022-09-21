@@ -9,12 +9,12 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
-import { IndicatorFlyoutOverview } from '.';
+import { IndicatorFlyoutOverviewTab } from '.';
 import { FiltersContext } from '../../../../contexts';
 
 export default {
-  component: IndicatorFlyoutOverview,
-  title: 'IndicatorFlyoutOverview',
+  component: IndicatorFlyoutOverviewTab,
+  title: 'IndicatorFlyoutOverviewTab',
   parameters: {
     backgrounds: {
       default: 'white',
@@ -29,7 +29,7 @@ export const Default: Story<void> = () => {
   return (
     <StoryProvidersComponent>
       <FiltersContext.Provider value={{} as any}>
-        <IndicatorFlyoutOverview onViewAllFieldsInTable={() => {}} indicator={mockIndicator} />
+        <IndicatorFlyoutOverviewTab onViewAllFieldsInTable={() => {}} indicator={mockIndicator} />
       </FiltersContext.Provider>
     </StoryProvidersComponent>
   );

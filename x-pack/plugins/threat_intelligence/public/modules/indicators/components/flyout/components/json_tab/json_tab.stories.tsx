@@ -8,19 +8,19 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
-import { IndicatorFlyoutJson } from '.';
+import { IndicatorFlyoutJsonTab } from '.';
 
 export default {
-  component: IndicatorFlyoutJson,
-  title: 'IndicatorFlyoutJson',
+  component: IndicatorFlyoutJsonTab,
+  title: 'IndicatorFlyoutJsonTab',
 };
 
 export const Default: Story<void> = () => {
   const mockIndicator: Indicator = generateMockIndicator();
 
-  return <IndicatorFlyoutJson indicator={mockIndicator} />;
+  return <IndicatorFlyoutJsonTab indicator={mockIndicator} />;
 };
 
 export const EmptyIndicator: Story<void> = () => {
-  return <IndicatorFlyoutJson indicator={{} as unknown as Indicator} />;
+  return <IndicatorFlyoutJsonTab indicator={{} as unknown as Indicator} />;
 };
