@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC, useState, useMemo } from 'react';
+import React, { useMemo, useState, VFC } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridColumnCellActionProps,

@@ -6,9 +6,8 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { useContext, useEffect } from 'react';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../types/indicator';
 import { IndicatorFieldValue } from '../../field_value';

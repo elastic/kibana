@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiDataGridColumn, EuiText } from '@elastic/eui';
 import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { IndicatorsFieldBrowser } from '../components/field_browser';

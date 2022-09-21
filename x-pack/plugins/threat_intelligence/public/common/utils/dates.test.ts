@@ -8,10 +8,10 @@
 import moment from 'moment-timezone';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import {
-  dateFormatter,
-  getDateDifferenceInDays,
   barChartTimeAxisLabelFormatter,
   calculateBarchartColumnTimeInterval,
+  dateFormatter,
+  getDateDifferenceInDays,
 } from './dates';
 import { EMPTY_VALUE } from '../constants';
 

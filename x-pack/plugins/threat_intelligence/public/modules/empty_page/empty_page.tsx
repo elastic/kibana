@@ -7,7 +7,7 @@
 
 import React, { VFC } from 'react';
 
-import { EuiEmptyPrompt, EuiImage, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';

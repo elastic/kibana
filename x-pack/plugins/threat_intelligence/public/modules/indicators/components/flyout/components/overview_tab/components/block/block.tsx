@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { VFC } from 'react';
-import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
+import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Indicator } from '../../../../../../../../types/indicator';
 import { IndicatorFieldValue } from '../../../../../field_value';
 import { IndicatorFieldLabel } from '../../../../../field_label';

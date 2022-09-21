@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { FieldTypesContext, FieldTypesContextValue } from '../contexts';
 import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
 

@@ -12,11 +12,11 @@ import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
+  SecuritySolutionPluginContext,
   Services,
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
-  SecuritySolutionPluginContext,
 } from './types';
 import { SecuritySolutionContext } from './contexts/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';

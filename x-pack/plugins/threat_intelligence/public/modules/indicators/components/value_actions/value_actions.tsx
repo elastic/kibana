@@ -6,8 +6,8 @@
  */
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import React, { VFC } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
+import React, { VFC } from 'react';
 import { Indicator } from '../../../../types/indicator';
 import { FilterIn } from '../../../query_bar/components/filter_in';
 import { FilterOut } from '../../../query_bar/components/filter_out';

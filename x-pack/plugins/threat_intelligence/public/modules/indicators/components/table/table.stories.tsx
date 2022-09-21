@@ -36,6 +36,7 @@ const columnSettings = {
     onSort: stub,
   },
 };
+
 export function WithIndicators() {
   const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
 

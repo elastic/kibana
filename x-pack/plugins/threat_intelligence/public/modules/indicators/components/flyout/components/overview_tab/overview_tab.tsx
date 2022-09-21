@@ -15,8 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-import { VFC } from 'react';
+import React, { useMemo, VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../types/indicator';
 import { unwrapValue } from '../../../../lib/unwrap_value';

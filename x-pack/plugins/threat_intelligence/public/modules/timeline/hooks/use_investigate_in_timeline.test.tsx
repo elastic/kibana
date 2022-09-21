@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult, Renderer } from '@testing-library/react-hooks';
+import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import {
   useInvestigateInTimeline,
   UseInvestigateInTimelineValue,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   FilterManager,
-  TimeHistory,
   SavedQuery,
   SavedQueryTimeFilter,
+  TimeHistory,
 } from '@kbn/data-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';

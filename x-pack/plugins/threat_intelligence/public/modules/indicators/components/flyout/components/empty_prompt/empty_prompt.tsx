@@ -7,8 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { VFC } from 'react';
+import React, { VFC } from 'react';
 
 export const EMPTY_PROMPT_TEST_ID = 'indicatorEmptyPrompt';
 

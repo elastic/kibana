@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestProvidersComponent, mockedSearchService } from '../../../common/mocks/test_providers';
+import { mockedSearchService, TestProvidersComponent } from '../../../common/mocks/test_providers';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_indicators_total_count';

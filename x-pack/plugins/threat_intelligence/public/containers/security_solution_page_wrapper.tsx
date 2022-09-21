@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { useSecurityContext } from '../hooks/use_security_context';
 
 /**

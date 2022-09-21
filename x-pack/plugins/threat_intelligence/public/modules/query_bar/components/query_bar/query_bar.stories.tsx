@@ -28,7 +28,9 @@ export default {
 const services = {
   data: { query: {} },
   storage: new Storage(localStorage),
-  uiSettings: { get: () => {} },
+  uiSettings: {
+    get: () => {},
+  },
 };
 
 const Template: ComponentStory<typeof QueryBar> = (args) => (

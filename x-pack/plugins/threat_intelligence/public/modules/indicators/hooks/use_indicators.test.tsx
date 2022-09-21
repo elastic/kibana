@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import {
-  useIndicators,
   RawIndicatorsResponse,
+  useIndicators,
   UseIndicatorsParams,
   UseIndicatorsValue,
 } from './use_indicators';
 import { BehaviorSubject, throwError } from 'rxjs';
-import { TestProvidersComponent, mockedSearchService } from '../../../common/mocks/test_providers';
+import { mockedSearchService, TestProvidersComponent } from '../../../common/mocks/test_providers';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };

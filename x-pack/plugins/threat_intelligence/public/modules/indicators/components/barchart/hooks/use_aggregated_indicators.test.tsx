@@ -17,9 +17,9 @@ import {
 } from './use_aggregated_indicators';
 import { DEFAULT_TIME_RANGE } from '../../../../query_bar/hooks/use_filters/utils';
 import {
-  TestProvidersComponent,
   mockedSearchService,
   mockedTimefilterService,
+  TestProvidersComponent,
 } from '../../../../../common/mocks/test_providers';
 import { useFilters } from '../../../../query_bar/hooks/use_filters';
 
