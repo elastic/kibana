@@ -32,7 +32,6 @@ import { removeMultilines } from '../../../common/utils/build_query/remove_multi
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
-import { SECURITY_APP_NAME } from '../../timelines/get_add_to_timeline';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 
