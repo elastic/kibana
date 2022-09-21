@@ -37,7 +37,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
   trainedModelName,
   isDeployed,
-  modelType,
+  types,
 }) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
@@ -48,11 +48,6 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   const deployedText = i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.isDeployed', {
     defaultMessage: 'Deployed',
   });
-
-  const notDeployedText = i18n.translate(
-    'xpack.enterpriseSearch.inferencePipelineCard.isNotDeployed',
-    { defaultMessage: 'Not deployed' }
-  );
 
   const actionButton = (
     <EuiButtonEmpty
@@ -135,18 +130,20 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color={isDeployed ? 'success' : 'accent'}>
-                    {isDeployed ? deployedText : notDeployedText}
-                  </EuiHealth>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiBadge color="hollow">{modelType}</EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+                {isDeployed && (
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth color="success">{deployedText}</EuiHealth>
+                  </EuiFlexItem>
+                )}
+                {types.map((type) => (
+                  <EuiFlexItem grow={false} key={type}>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <EuiBadge color="hollow">{type}</EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
