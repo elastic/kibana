@@ -43,6 +43,7 @@ export const storybookAliases = {
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   shared_ux: 'packages/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
+  triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
 };
