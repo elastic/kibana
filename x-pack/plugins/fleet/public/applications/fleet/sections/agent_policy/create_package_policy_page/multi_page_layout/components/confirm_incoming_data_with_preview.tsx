@@ -54,7 +54,7 @@ const DATA_PREVIEW_OMIT_KEYS = [
 ];
 
 const CleanOverflowDescriptionList = styled(EuiDescriptionList)`
-  overflow: hidden;
+  overflow: scroll;
   max-height: 125px;
   word-break: break-all;
   white-space: pre-wrap;
@@ -75,7 +75,8 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
   const listItems = Object.entries(hitForDisplay).map(([key, value]) => ({
     title: `${key}:`,
-    description: value,
+    // Ensures arrays and collections of nested objects are displayed correctly
+    description: JSON.stringify(value),
   }));
 
   return (
