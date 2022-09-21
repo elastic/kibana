@@ -8,7 +8,7 @@
 import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 import { queryMonitorStatus, periodToMs } from './current_status';
 
-jest.mock('../util', () => ({
+jest.mock('../common', () => ({
   getMonitors: jest.fn().mockReturnValue({
     per_page: 10,
     saved_objects: [
@@ -133,16 +133,6 @@ describe('current status route', () => {
       );
       expect(await queryMonitorStatus(uptimeEsClient, 3, 140000, ['id1', 'id2'])).toEqual({
         down: 1,
-        locationMap: {
-          id1: {
-            'Asia/Pacific - Japan': 'up',
-          },
-          id2: {
-            'Asia/Pacific - Japan': 'up',
-            'Europe - Germany': 'down',
-          },
-        },
-        total: 3,
         up: 2,
       });
     });
@@ -227,16 +217,6 @@ describe('current status route', () => {
        */
       expect(await queryMonitorStatus(uptimeEsClient, 10000, 2500, ['id1', 'id2'])).toEqual({
         down: 1,
-        locationMap: {
-          id1: {
-            'Asia/Pacific - Japan': 'up',
-          },
-          id2: {
-            'Asia/Pacific - Japan': 'up',
-            'Europe - Germany': 'down',
-          },
-        },
-        total: 3,
         up: 2,
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
