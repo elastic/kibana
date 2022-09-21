@@ -209,7 +209,6 @@ const result = await actionsClient.execute({
   }),
 });
 ```
-
 # Command Line Utility
 
 The [`kbn-action`](https://github.com/pmuellr/kbn-action) tool can be used to send HTTP requests to the Actions plugin. For instance, to create a Slack action from the `.slack` Action Type, use the following command:
