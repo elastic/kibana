@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import uuid from 'uuid';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
@@ -13,10 +13,12 @@ import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { invalidateAPIKeys } from '../api_keys';
 
+import { appContextService } from '../app_context';
+
 import { ActionRunner } from './action_runner';
 
 import { errorsToResults, bulkUpdateAgents } from './crud';
-import { createAgentAction } from './actions';
+import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -72,6 +74,10 @@ export async function unenrollBatch(
         return agents;
       }, []);
 
+  const actionId = options.actionId ?? uuid();
+  const errorCount = Object.keys(outgoingErrors).length;
+  const total = options.total ?? agentsToUpdate.length + errorCount;
+
   const now = new Date().toISOString();
   if (options.revoke) {
     // Get all API keys that need to be invalidated
@@ -79,12 +85,30 @@ export async function unenrollBatch(
   } else {
     // Create unenroll action for each agent
     await createAgentAction(esClient, {
-      id: options.actionId,
+      id: actionId,
       agents: agentsToUpdate.map((agent) => agent.id),
       created_at: now,
       type: 'UNENROLL',
-      total: options.total,
+      total,
     });
+
+    if (errorCount > 0) {
+      appContextService
+        .getLogger()
+        .info(
+          `Skipping ${errorCount} agents, as failed validation (cannot unenroll from a hosted policy)`
+        );
+
+      // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
+      await bulkCreateAgentActionResults(
+        esClient,
+        Object.keys(outgoingErrors).map((agentId) => ({
+          agentId,
+          actionId,
+          error: outgoingErrors[agentId].message,
+        }))
+      );
+    }
   }
 
   // Update the necessary agents

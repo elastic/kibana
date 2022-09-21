@@ -10,7 +10,8 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -35,6 +36,7 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
+import { RiskScoreHeaderTitle } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -54,7 +56,7 @@ export interface UserSummaryProps {
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
   padding-top: ${({ theme }) => theme.eui.euiSizeM};
-  width: 66.6%;
+  width: ${({ $width }: { $width: string }) => $width};
 `;
 
 export const UserOverview = React.memo<UserSummaryProps>(
@@ -80,9 +82,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
     );
+
+    const { from, to } = useGlobalTime();
+
     const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
       filterQuery,
       skip: userName == null,
+      timerange: { to, from },
     });
 
     const getDefaultRenderer = useCallback(
@@ -101,7 +107,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
       const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
       return [
         {
-          title: i18n.USER_RISK_SCORE,
+          title: (
+            <RiskScoreHeaderTitle
+              title={i18n.USER_RISK_SCORE}
+              riskScoreEntity={RiskScoreEntity.user}
+              showTooltip={false}
+            />
+          ),
           description: (
             <>
               {userRiskData
@@ -111,7 +123,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
           ),
         },
         {
-          title: i18n.USER_RISK_CLASSIFICATION,
+          title: (
+            <RiskScoreHeaderTitle
+              title={i18n.USER_RISK_CLASSIFICATION}
+              riskScoreEntity={RiskScoreEntity.host}
+              showTooltip={false}
+            />
+          ),
           description: (
             <>
               {userRiskData ? (
@@ -253,6 +271,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="user-risk-overview"
+            $width={isInDetailsSidePanel ? '100%' : '66.6%'}
           >
             <EuiFlexItem>
               <DescriptionListStyled listItems={[userRiskScore]} />

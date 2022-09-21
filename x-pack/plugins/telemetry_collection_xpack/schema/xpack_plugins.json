@@ -1,12 +1,5 @@
 {
   "properties": {
-    "discoverEnhanced": {
-      "properties": {
-        "exploreDataInChartActionEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "actions": {
       "properties": {
         "has_errors": {
@@ -270,6 +263,23 @@
             },
             "__teams": {
               "type": "long"
+            }
+          }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
             }
           }
         }
@@ -1651,6 +1661,68 @@
             }
           }
         },
+        "count_rules_by_execution_status": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "warning": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_with_tags": {
+          "type": "long"
+        },
+        "count_rules_by_notify_when": {
+          "properties": {
+            "on_action_group_change": {
+              "type": "long"
+            },
+            "on_active_alert": {
+              "type": "long"
+            },
+            "on_throttle_interval": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_snoozed": {
+          "type": "long"
+        },
+        "count_rules_muted": {
+          "type": "long"
+        },
+        "count_rules_with_muted_alerts": {
+          "type": "long"
+        },
+        "count_connector_types_by_consumers": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "count_rules_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
         "avg_execution_time_per_day": {
           "type": "long"
         },
@@ -2623,6 +2695,1739 @@
         }
       }
     },
+    "apm": {
+      "properties": {
+        "services_per_agent": {
+          "properties": {
+            "android/java": {
+              "type": "long"
+            },
+            "dotnet": {
+              "type": "long"
+            },
+            "iOS/swift": {
+              "type": "long"
+            },
+            "go": {
+              "type": "long"
+            },
+            "java": {
+              "type": "long"
+            },
+            "js-base": {
+              "type": "long"
+            },
+            "nodejs": {
+              "type": "long"
+            },
+            "php": {
+              "type": "long"
+            },
+            "python": {
+              "type": "long"
+            },
+            "ruby": {
+              "type": "long"
+            },
+            "rum-js": {
+              "type": "long"
+            },
+            "otlp": {
+              "type": "long"
+            },
+            "opentelemetry/cpp": {
+              "type": "long"
+            },
+            "opentelemetry/dotnet": {
+              "type": "long"
+            },
+            "opentelemetry/erlang": {
+              "type": "long"
+            },
+            "opentelemetry/go": {
+              "type": "long"
+            },
+            "opentelemetry/java": {
+              "type": "long"
+            },
+            "opentelemetry/nodejs": {
+              "type": "long"
+            },
+            "opentelemetry/php": {
+              "type": "long"
+            },
+            "opentelemetry/python": {
+              "type": "long"
+            },
+            "opentelemetry/ruby": {
+              "type": "long"
+            },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
+            "opentelemetry/webjs": {
+              "type": "long"
+            }
+          }
+        },
+        "agents": {
+          "properties": {
+            "android/java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "go": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "js-base": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "nodejs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "php": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "python": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ruby": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "rum-js": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "has_any_services": {
+          "type": "boolean"
+        },
+        "version": {
+          "properties": {
+            "apm_server": {
+              "properties": {
+                "major": {
+                  "type": "long"
+                },
+                "minor": {
+                  "type": "long"
+                },
+                "patch": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "environments": {
+          "properties": {
+            "services_without_environment": {
+              "type": "long"
+            },
+            "services_with_multiple_environments": {
+              "type": "long"
+            },
+            "top_environments": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "aggregated_transactions": {
+          "properties": {
+            "current_implementation": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "no_observer_name": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "no_rum": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "no_rum_no_observer_name": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "only_rum": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "only_rum_no_observer_name": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "cloud": {
+          "properties": {
+            "availability_zone": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            },
+            "provider": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            },
+            "region": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "counts": {
+          "properties": {
+            "transaction": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "span": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "metric": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "sourcemap": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "onboarding": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "agent_configuration": {
+              "properties": {
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "max_transaction_groups_per_service": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "max_error_groups_per_service": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "traces": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "services": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "cardinality": {
+          "properties": {
+            "client": {
+              "properties": {
+                "geo": {
+                  "properties": {
+                    "country_iso_code": {
+                      "properties": {
+                        "rum": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "user_agent": {
+              "properties": {
+                "original": {
+                  "properties": {
+                    "all_agents": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rum": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "transaction": {
+              "properties": {
+                "name": {
+                  "properties": {
+                    "all_agents": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rum": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "retainment": {
+          "properties": {
+            "span": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "transaction": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "metric": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "sourcemap": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "onboarding": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "integrations": {
+          "properties": {
+            "ml": {
+              "properties": {
+                "all_jobs_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "indices": {
+          "properties": {
+            "shards": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "all": {
+              "properties": {
+                "total": {
+                  "properties": {
+                    "docs": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "store": {
+                      "properties": {
+                        "size_in_bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "service_groups": {
+          "properties": {
+            "kuery_fields": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "per_service": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "service_id": {
+                "type": "keyword"
+              },
+              "timed_out": {
+                "type": "boolean"
+              },
+              "cloud": {
+                "properties": {
+                  "availability_zones": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "providers": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              },
+              "faas": {
+                "properties": {
+                  "trigger": {
+                    "properties": {
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "agent": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "service": {
+                "properties": {
+                  "language": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "framework": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "runtime": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "kubernetes": {
+                "properties": {
+                  "pod": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "container": {
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tasks": {
+          "properties": {
+            "aggregated_transactions": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "processor_events": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "agent_configuration": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "services": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "versions": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "groupings": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "agents": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "indices_stats": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "cardinality": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "environments": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "service_groups": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "per_service": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "app_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "engines_overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "create_first_engine_button": {
+              "type": "long"
+            },
+            "engine_table_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "canvas": {
       "properties": {
         "workpads": {
@@ -2830,13 +4635,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "cloud": {
-      "properties": {
-        "isCloudEnabled": {
-          "type": "boolean"
         }
       }
     },
@@ -3113,6 +4911,136 @@
         }
       }
     },
+    "cloud": {
+      "properties": {
+        "isCloudEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "cloudExperiments": {
+      "properties": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Flags received by the client"
+              }
+            }
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
+    "cloud_security_posture": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "score": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "discoverEnhanced": {
+      "properties": {
+        "exploreDataInChartActionEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "enterprise_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "overview": {
+              "type": "long"
+            },
+            "setup_guide": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "app_search": {
+              "type": "long"
+            },
+            "workplace_search": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "fileUpload": {
       "properties": {
         "file_upload": {
@@ -3334,6 +5262,892 @@
         }
       }
     },
+    "kibana_settings": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "default_admin_email": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "maps": {
+      "properties": {
+        "indexPatternsWithGeoFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoPointFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoShapeFieldCount": {
+          "type": "long"
+        },
+        "geoShapeAggLayersCount": {
+          "type": "long"
+        },
+        "mapsTotalCount": {
+          "type": "long"
+        },
+        "timeCaptured": {
+          "type": "date"
+        },
+        "layerTypes": {
+          "properties": {
+            "ems_basemap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers in cluster"
+                  }
+                }
+              }
+            },
+            "ems_region": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems file layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems file layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems file layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of file layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_clusters": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es cluster layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es cluster layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es cluster layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es cluster layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_grids": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es grid layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es grid layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es grid layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es grid layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_hexagons": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es hexagon layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es hexagon layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es hexagon layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es hexagon layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_heatmap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es heatmap layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es heatmap layers  per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es heatmap layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es heatmap layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_top_hits": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es top hits layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es top hits layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es top hits layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es top hits layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_docs": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es document layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es document layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es document layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es document layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_ml_anomalies": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es machine learning anomaly layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es machine learning anomaly layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es machine learning anomaly layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_point_to_point": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es point-to-point layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es point-to-point layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es point-to-point layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es point-to-point layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_tracks": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es track layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es track layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es track layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es track layers in cluster"
+                  }
+                }
+              }
+            },
+            "kbn_tms_raster": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of kbn tms layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of kbn tms layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of kbn tms layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of kbn tms layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_tms_mvt": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux tms-mvt layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux tms-mvt layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux tms-mvt layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux tms-mvt layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_tms_raster": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux tms-raster layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux tms-raster layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux tms-raster layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux-tms raster layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_wms": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux wms layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux wms layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux wms layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux wms layers in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scalingOptions": {
+          "properties": {
+            "limit": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with limit scaling option in cluster"
+                  }
+                }
+              }
+            },
+            "clusters": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with blended scaling option in cluster"
+                  }
+                }
+              }
+            },
+            "mvt": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with mvt scaling option in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "resolutions": {
+          "properties": {
+            "coarse": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with coarse resolution"
+                  }
+                }
+              }
+            },
+            "fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with fine resolution"
+                  }
+                }
+              }
+            },
+            "most_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with most_fine resolution"
+                  }
+                }
+              }
+            },
+            "super_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with super_fine resolution"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "joins": {
+          "properties": {
+            "term": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of layers with term joins per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of layers with term joins per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of layers with term joins per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of layers with term joins in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "basemaps": {
+          "properties": {
+            "auto": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with auto-style in cluster"
+                  }
+                }
+              }
+            },
+            "dark": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with dark-style in cluster"
+                  }
+                }
+              }
+            },
+            "roadmap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with roadmap-style in cluster"
+                  }
+                }
+              }
+            },
+            "roadmap_desaturated": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with desaturated-style in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "attributesPerMap": {
+          "properties": {
+            "dataSourcesCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layersCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layerTypesCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "emsVectorLayersCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "customIconsCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "ml": {
       "properties": {
         "alertRules": {
@@ -3392,6 +6206,94 @@
                         "description": "total number of alerting rules performing the error messages health check"
                       }
                     }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "properties": {
+        "hasMonitoringData": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "license": {
+                "type": "keyword"
+              },
+              "clusterUuid": {
+                "type": "keyword"
+              },
+              "metricbeatUsed": {
+                "type": "boolean"
+              },
+              "elasticsearch": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "kibana": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "logstash": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "beats": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "apm": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -3514,62 +6416,6 @@
                     }
                   }
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "rollups": {
-      "properties": {
-        "index_patterns": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the rollup index patterns"
-              }
-            }
-          }
-        },
-        "saved_searches": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the rollup saved searches"
-              }
-            }
-          }
-        },
-        "visualizations": {
-          "properties": {
-            "saved_searches": {
-              "properties": {
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Counts all the visualizations that are based on rollup saved searches"
-                  }
-                },
-                "lens_total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
-                  }
-                }
-              }
-            },
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the visualizations that are based on rollup index patterns"
-              }
-            },
-            "lens_total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the lens visualizations that are based on rollup index patterns"
               }
             }
           }
@@ -6324,6 +9170,62 @@
                 "avg": {
                   "type": "float"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rollups": {
+      "properties": {
+        "index_patterns": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
+            }
+          }
+        },
+        "saved_searches": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
+            }
+          }
+        },
+        "visualizations": {
+          "properties": {
+            "saved_searches": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
+                }
+              }
+            },
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
               }
             }
           }
@@ -9996,2784 +12898,6 @@
         }
       }
     },
-    "apm": {
-      "properties": {
-        "services_per_agent": {
-          "properties": {
-            "android/java": {
-              "type": "long"
-            },
-            "dotnet": {
-              "type": "long"
-            },
-            "iOS/swift": {
-              "type": "long"
-            },
-            "go": {
-              "type": "long"
-            },
-            "java": {
-              "type": "long"
-            },
-            "js-base": {
-              "type": "long"
-            },
-            "nodejs": {
-              "type": "long"
-            },
-            "php": {
-              "type": "long"
-            },
-            "python": {
-              "type": "long"
-            },
-            "ruby": {
-              "type": "long"
-            },
-            "rum-js": {
-              "type": "long"
-            },
-            "otlp": {
-              "type": "long"
-            },
-            "opentelemetry/cpp": {
-              "type": "long"
-            },
-            "opentelemetry/dotnet": {
-              "type": "long"
-            },
-            "opentelemetry/erlang": {
-              "type": "long"
-            },
-            "opentelemetry/go": {
-              "type": "long"
-            },
-            "opentelemetry/java": {
-              "type": "long"
-            },
-            "opentelemetry/nodejs": {
-              "type": "long"
-            },
-            "opentelemetry/php": {
-              "type": "long"
-            },
-            "opentelemetry/python": {
-              "type": "long"
-            },
-            "opentelemetry/ruby": {
-              "type": "long"
-            },
-            "opentelemetry/swift": {
-              "type": "long"
-            },
-            "opentelemetry/webjs": {
-              "type": "long"
-            }
-          }
-        },
-        "agents": {
-          "properties": {
-            "android/java": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "dotnet": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "iOS/swift": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "go": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "java": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "js-base": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "nodejs": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "php": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "python": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "ruby": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "rum-js": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "has_any_services": {
-          "type": "boolean"
-        },
-        "version": {
-          "properties": {
-            "apm_server": {
-              "properties": {
-                "major": {
-                  "type": "long"
-                },
-                "minor": {
-                  "type": "long"
-                },
-                "patch": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "environments": {
-          "properties": {
-            "services_without_environment": {
-              "type": "long"
-            },
-            "services_with_multiple_environments": {
-              "type": "long"
-            },
-            "top_environments": {
-              "type": "array",
-              "items": {
-                "type": "keyword"
-              }
-            }
-          }
-        },
-        "aggregated_transactions": {
-          "properties": {
-            "current_implementation": {
-              "properties": {
-                "expected_metric_document_count": {
-                  "type": "long"
-                },
-                "transaction_count": {
-                  "type": "long"
-                }
-              }
-            },
-            "no_observer_name": {
-              "properties": {
-                "expected_metric_document_count": {
-                  "type": "long"
-                },
-                "transaction_count": {
-                  "type": "long"
-                }
-              }
-            },
-            "no_rum": {
-              "properties": {
-                "expected_metric_document_count": {
-                  "type": "long"
-                },
-                "transaction_count": {
-                  "type": "long"
-                }
-              }
-            },
-            "no_rum_no_observer_name": {
-              "properties": {
-                "expected_metric_document_count": {
-                  "type": "long"
-                },
-                "transaction_count": {
-                  "type": "long"
-                }
-              }
-            },
-            "only_rum": {
-              "properties": {
-                "expected_metric_document_count": {
-                  "type": "long"
-                },
-                "transaction_count": {
-                  "type": "long"
-                }
-              }
-            },
-            "only_rum_no_observer_name": {
-              "properties": {
-                "expected_metric_document_count": {
-                  "type": "long"
-                },
-                "transaction_count": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "cloud": {
-          "properties": {
-            "availability_zone": {
-              "type": "array",
-              "items": {
-                "type": "keyword"
-              }
-            },
-            "provider": {
-              "type": "array",
-              "items": {
-                "type": "keyword"
-              }
-            },
-            "region": {
-              "type": "array",
-              "items": {
-                "type": "keyword"
-              }
-            }
-          }
-        },
-        "host": {
-          "properties": {
-            "os": {
-              "properties": {
-                "platform": {
-                  "type": "array",
-                  "items": {
-                    "type": "keyword"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "counts": {
-          "properties": {
-            "transaction": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "span": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "error": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "metric": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "sourcemap": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "onboarding": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "agent_configuration": {
-              "properties": {
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "max_transaction_groups_per_service": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "max_error_groups_per_service": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "traces": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
-            "services": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "cardinality": {
-          "properties": {
-            "client": {
-              "properties": {
-                "geo": {
-                  "properties": {
-                    "country_iso_code": {
-                      "properties": {
-                        "rum": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "user_agent": {
-              "properties": {
-                "original": {
-                  "properties": {
-                    "all_agents": {
-                      "properties": {
-                        "1d": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "rum": {
-                      "properties": {
-                        "1d": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "transaction": {
-              "properties": {
-                "name": {
-                  "properties": {
-                    "all_agents": {
-                      "properties": {
-                        "1d": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "rum": {
-                      "properties": {
-                        "1d": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "retainment": {
-          "properties": {
-            "span": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
-            "transaction": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
-            "error": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
-            "metric": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
-            "sourcemap": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
-            "onboarding": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "integrations": {
-          "properties": {
-            "ml": {
-              "properties": {
-                "all_jobs_count": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "indices": {
-          "properties": {
-            "shards": {
-              "properties": {
-                "total": {
-                  "type": "long"
-                }
-              }
-            },
-            "all": {
-              "properties": {
-                "total": {
-                  "properties": {
-                    "docs": {
-                      "properties": {
-                        "count": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "store": {
-                      "properties": {
-                        "size_in_bytes": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "service_groups": {
-          "properties": {
-            "kuery_fields": {
-              "type": "array",
-              "items": {
-                "type": "keyword"
-              }
-            }
-          }
-        },
-        "per_service": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "service_id": {
-                "type": "keyword"
-              },
-              "timed_out": {
-                "type": "boolean"
-              },
-              "cloud": {
-                "properties": {
-                  "availability_zones": {
-                    "type": "array",
-                    "items": {
-                      "type": "keyword"
-                    }
-                  },
-                  "regions": {
-                    "type": "array",
-                    "items": {
-                      "type": "keyword"
-                    }
-                  },
-                  "providers": {
-                    "type": "array",
-                    "items": {
-                      "type": "keyword"
-                    }
-                  }
-                }
-              },
-              "faas": {
-                "properties": {
-                  "trigger": {
-                    "properties": {
-                      "type": {
-                        "type": "array",
-                        "items": {
-                          "type": "keyword"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "agent": {
-                "properties": {
-                  "name": {
-                    "type": "keyword"
-                  },
-                  "version": {
-                    "type": "keyword"
-                  }
-                }
-              },
-              "service": {
-                "properties": {
-                  "language": {
-                    "properties": {
-                      "name": {
-                        "type": "keyword"
-                      },
-                      "version": {
-                        "type": "keyword"
-                      }
-                    }
-                  },
-                  "framework": {
-                    "properties": {
-                      "name": {
-                        "type": "keyword"
-                      },
-                      "version": {
-                        "type": "keyword"
-                      }
-                    }
-                  },
-                  "runtime": {
-                    "properties": {
-                      "name": {
-                        "type": "keyword"
-                      },
-                      "version": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                }
-              },
-              "kubernetes": {
-                "properties": {
-                  "pod": {
-                    "properties": {
-                      "name": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                }
-              },
-              "container": {
-                "properties": {
-                  "id": {
-                    "type": "keyword"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tasks": {
-          "properties": {
-            "aggregated_transactions": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "cloud": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "host": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "processor_events": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "agent_configuration": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "services": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "versions": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "groupings": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "integrations": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "agents": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "indices_stats": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "cardinality": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "environments": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "service_groups": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "per_service": {
-              "properties": {
-                "took": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "app_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "engines_overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "create_first_engine_button": {
-              "type": "long"
-            },
-            "engine_table_link": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "enterprise_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "overview": {
-              "type": "long"
-            },
-            "setup_guide": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "app_search": {
-              "type": "long"
-            },
-            "workplace_search": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "workplace_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "header_launch_button": {
-              "type": "long"
-            },
-            "org_name_change_button": {
-              "type": "long"
-            },
-            "onboarding_card_button": {
-              "type": "long"
-            },
-            "recent_activity_source_details_link": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "maps": {
-      "properties": {
-        "indexPatternsWithGeoFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoPointFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoShapeFieldCount": {
-          "type": "long"
-        },
-        "geoShapeAggLayersCount": {
-          "type": "long"
-        },
-        "mapsTotalCount": {
-          "type": "long"
-        },
-        "timeCaptured": {
-          "type": "date"
-        },
-        "layerTypes": {
-          "properties": {
-            "ems_basemap": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ems basemap layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ems basemap layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ems basemap layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ems basemap layers in cluster"
-                  }
-                }
-              }
-            },
-            "ems_region": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ems file layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ems file layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ems file layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of file layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_agg_clusters": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es cluster layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es cluster layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es cluster layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es cluster layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_agg_grids": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es grid layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es grid layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es grid layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es grid layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_agg_hexagons": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es hexagon layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es hexagon layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es hexagon layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es hexagon layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_agg_heatmap": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es heatmap layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es heatmap layers  per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es heatmap layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es heatmap layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_top_hits": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es top hits layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es top hits layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es top hits layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es top hits layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_docs": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es document layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es document layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es document layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es document layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_ml_anomalies": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es machine learning anomaly layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es machine learning anomaly layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es machine learning anomaly layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es machine learning anomaly layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_point_to_point": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es point-to-point layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es point-to-point layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es point-to-point layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es point-to-point layers in cluster"
-                  }
-                }
-              }
-            },
-            "es_tracks": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es track layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es track layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es track layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es track layers in cluster"
-                  }
-                }
-              }
-            },
-            "kbn_tms_raster": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of kbn tms layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of kbn tms layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of kbn tms layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of kbn tms layers in cluster"
-                  }
-                }
-              }
-            },
-            "ux_tms_mvt": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ux tms-mvt layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ux tms-mvt layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ux tms-mvt layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ux tms-mvt layers in cluster"
-                  }
-                }
-              }
-            },
-            "ux_tms_raster": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ux tms-raster layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ux tms-raster layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ux tms-raster layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ux-tms raster layers in cluster"
-                  }
-                }
-              }
-            },
-            "ux_wms": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ux wms layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ux wms layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ux wms layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ux wms layers in cluster"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "scalingOptions": {
-          "properties": {
-            "limit": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es doc layers with limit scaling option per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es doc layers with limit scaling option per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es doc layers with limit scaling option per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es doc layers with limit scaling option in cluster"
-                  }
-                }
-              }
-            },
-            "clusters": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es doc layers with blended scaling option per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es doc layers with blended scaling option per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es doc layers with blended scaling option per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es doc layers with blended scaling option in cluster"
-                  }
-                }
-              }
-            },
-            "mvt": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of es doc layers with mvt scaling option per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of es doc layers with mvt scaling option per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of es doc layers with mvt scaling option per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of es doc layers with mvt scaling option in cluster"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "resolutions": {
-          "properties": {
-            "coarse": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of grid-agg layers with coarse resolution"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of grid-agg layers with coarse resolution"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of grid-agg layers with coarse resolution"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of grid-agg layers with coarse resolution"
-                  }
-                }
-              }
-            },
-            "fine": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of grid-agg layers with fine resolution"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of grid-agg layers with fine resolution"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of grid-agg layers with fine resolution"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of grid-agg layers with fine resolution"
-                  }
-                }
-              }
-            },
-            "most_fine": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of grid-agg layers with most_fine resolution"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of grid-agg layers with most_fine resolution"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of grid-agg layers with most_fine resolution"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of grid-agg layers with most_fine resolution"
-                  }
-                }
-              }
-            },
-            "super_fine": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of grid-agg layers with super_fine resolution"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of grid-agg layers with super_fine resolution"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of grid-agg layers with super_fine resolution"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of grid-agg layers with super_fine resolution"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "joins": {
-          "properties": {
-            "term": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of layers with term joins per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of layers with term joins per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of layers with term joins per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of layers with term joins in cluster"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "basemaps": {
-          "properties": {
-            "auto": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ems basemap layers with auto-style per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ems basemap layers with auto-style per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ems basemap layers with auto-style per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ems basemap layers with auto-style in cluster"
-                  }
-                }
-              }
-            },
-            "dark": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ems basemap layers with dark-style per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ems basemap layers with dark-style per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ems basemap layers with dark-style per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ems basemap layers with dark-style in cluster"
-                  }
-                }
-              }
-            },
-            "roadmap": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ems basemap layers with roadmap-style per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ems basemap layers with roadmap-style per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ems basemap layers with roadmap-style per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ems basemap layers with roadmap-style in cluster"
-                  }
-                }
-              }
-            },
-            "roadmap_desaturated": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of ems basemap layers with desaturated-style per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of ems basemap layers with desaturated-style per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of ems basemap layers with desaturated-style per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of ems basemap layers with desaturated-style in cluster"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "attributesPerMap": {
-          "properties": {
-            "dataSourcesCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "layersCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "layerTypesCount": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                }
-              }
-            },
-            "emsVectorLayersCount": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                }
-              }
-            },
-            "customIconsCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "kibana_settings": {
-      "properties": {
-        "xpack": {
-          "properties": {
-            "default_admin_email": {
-              "type": "text"
-            }
-          }
-        }
-      }
-    },
-    "monitoring": {
-      "properties": {
-        "hasMonitoringData": {
-          "type": "boolean"
-        },
-        "clusters": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "license": {
-                "type": "keyword"
-              },
-              "clusterUuid": {
-                "type": "keyword"
-              },
-              "metricbeatUsed": {
-                "type": "boolean"
-              },
-              "elasticsearch": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "kibana": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "logstash": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "beats": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "apm": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "upgrade-assistant-telemetry": {
       "properties": {
         "features": {
@@ -12928,6 +13052,46 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "workplace_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "header_launch_button": {
+              "type": "long"
+            },
+            "org_name_change_button": {
+              "type": "long"
+            },
+            "onboarding_card_button": {
+              "type": "long"
+            },
+            "recent_activity_source_details_link": {
+              "type": "long"
             }
           }
         }

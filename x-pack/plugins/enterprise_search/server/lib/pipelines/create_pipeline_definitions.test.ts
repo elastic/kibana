@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
@@ -20,7 +22,7 @@ describe('createIndexPipelineDefinitions util function', () => {
   };
 
   const expectedResult = {
-    created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`],
+    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
   };
 
   beforeEach(() => {
@@ -70,7 +72,7 @@ describe('formatMlPipelineBody util function', () => {
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
-              sourceField: modelInputField,
+              [sourceField]: modelInputField,
             },
           },
         },
@@ -113,20 +115,8 @@ describe('formatMlPipelineBody util function', () => {
   });
 
   it('should raise an error if no model found', async () => {
-    const mockResponse = {
-      error: {
-        root_cause: [
-          {
-            type: 'resource_not_found_exception',
-            reason: 'No known trained model with model_id [my-model-id]',
-          },
-        ],
-        type: 'resource_not_found_exception',
-        reason: 'No known trained model with model_id [my-model-id]',
-      },
-      status: 404,
-    };
-    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
+    const mockError = new Error('No known trained model with model_id [my-model-id]');
+    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.reject(mockError));
     const asyncCall = formatMlPipelineBody(
       modelId,
       sourceField,
@@ -154,7 +144,7 @@ describe('formatMlPipelineBody util function', () => {
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
-              sourceField: modelInputField,
+              [sourceField]: modelInputField,
             },
           },
         },

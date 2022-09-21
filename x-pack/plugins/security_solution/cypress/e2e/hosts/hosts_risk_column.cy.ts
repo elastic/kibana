@@ -16,12 +16,12 @@ import { kqlSearch } from '../../tasks/security_header';
 describe('All hosts table', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risky_hosts');
+    esArchiverLoad('risk_hosts');
     login();
   });
 
   after(() => {
-    esArchiverUnload('risky_hosts');
+    esArchiverUnload('risk_hosts');
   });
 
   it('it renders risk column', () => {

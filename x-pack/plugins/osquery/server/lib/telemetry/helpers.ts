@@ -63,6 +63,8 @@ export const templateSavedQueries = (
     interval: isString(item.attributes.interval)
       ? parseInt(item.attributes.interval, 10)
       : item.attributes.interval,
+    ...(!isEmpty(item.attributes.snapshot) ? { snapshot: item.attributes.snapshot } : {}),
+    ...(!isEmpty(item.attributes.removed) ? { snapshot: item.attributes.removed } : {}),
     ...(!isEmpty(item.attributes.ecs_mapping) ? { ecs_mapping: item.attributes.ecs_mapping } : {}),
     prebuilt: prebuiltSavedQueryIds.includes(item.id),
   }));
