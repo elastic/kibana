@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getIntervalAndTimefield } from './get_interval_and_timefield';
+import { getInterval } from './get_interval';
 import { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 
-describe('getIntervalAndTimefield(panel, series)', () => {
+describe('getInterval', () => {
   const index: FetchedIndexPattern = {} as FetchedIndexPattern;
   const params = {
     min: '2017-01-01T00:00:00Z',
@@ -17,17 +17,16 @@ describe('getIntervalAndTimefield(panel, series)', () => {
     maxBuckets: 1000,
   };
 
-  test('returns the panel interval and timefield', () => {
+  test('returns the panel interval', () => {
     const panel = { time_field: '@timestamp', interval: 'auto' } as Panel;
     const series = {} as Series;
 
-    expect(getIntervalAndTimefield(panel, index, params, series)).toEqual({
-      timeField: '@timestamp',
+    expect(getInterval('@timestamp', panel, index, params, series)).toEqual({
       interval: 'auto',
     });
   });
 
-  test('returns the series interval and timefield', () => {
+  test('returns the series interval', () => {
     const panel = { time_field: '@timestamp', interval: 'auto' } as Panel;
     const series = {
       override_index_pattern: true,
@@ -35,8 +34,7 @@ describe('getIntervalAndTimefield(panel, series)', () => {
       series_time_field: 'time',
     } as unknown as Series;
 
-    expect(getIntervalAndTimefield(panel, index, params, series)).toEqual({
-      timeField: 'time',
+    expect(getInterval('@timestamp', panel, index, params, series)).toEqual({
       interval: '1m',
     });
   });
