@@ -12,10 +12,6 @@ import { MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
-import {
-  convertMetricAggregationColumnWithoutSpecialParams,
-  MetricAggregationColumnWithoutSpecialParams,
-} from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import {
   MovingAverageColumn,
@@ -43,11 +39,8 @@ export const convertToOtherParentPipelineAggColumns = (
 ): FormulaColumn | [ParentPipelineAggColumn, AggBasedColumn] | null => {
   const { aggType } = agg;
   const op = SUPPORTED_METRICS[aggType];
-  if (!op) {
-    return null;
-  }
-
   const metric = getMetricFromParentPipelineAgg(agg, aggs);
+
   if (!metric) {
     return null;
   }
@@ -92,10 +85,7 @@ export const convertToOtherParentPipelineAggColumns = (
 export const convertToCumulativeSumAggColumn = (
   { agg, dataView, aggs }: ExtendedColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
   reducedTimeRange?: string
-):
-  | FormulaColumn
-  | [ParentPipelineAggColumn, MetricAggregationColumnWithoutSpecialParams]
-  | null => {
+): FormulaColumn | [ParentPipelineAggColumn, AggBasedColumn] | null => {
   const { aggParams, aggType } = agg;
   if (!aggParams) {
     return null;
@@ -117,30 +107,22 @@ export const convertToCumulativeSumAggColumn = (
 
   if (metric.aggType === METRIC_TYPES.COUNT || subAgg.name === 'sum') {
     // create column for sum or count
-    const subMetric = convertMetricAggregationColumnWithoutSpecialParams(
-      subAgg,
-      { agg: metric as SchemaConfig<METRIC_TYPES.SUM | METRIC_TYPES.COUNT>, dataView },
-      reducedTimeRange
-    );
+    const subMetric = convertMetricToColumns(metric, dataView, aggs);
     if (subMetric === null) {
       return null;
     }
 
     const op = SUPPORTED_METRICS[aggType];
-    if (!op) {
-      return null;
-    }
 
     return [
       {
         operationType: op.name,
-        references: [subMetric?.columnId],
+        references: [subMetric[0]?.columnId],
         ...createColumn(agg),
         params: {},
         timeShift: agg.aggParams?.timeShift,
       } as ParentPipelineAggColumn,
-
-      subMetric,
+      subMetric[0],
     ];
   } else {
     const formula = getFormulaForPipelineAgg(agg, aggs);
