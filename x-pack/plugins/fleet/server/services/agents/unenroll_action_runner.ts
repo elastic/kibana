@@ -9,6 +9,8 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { intersection } from 'lodash';
 
+import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+
 import type { Agent, BulkActionResult } from '../../types';
 
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
@@ -97,24 +99,24 @@ export async function unenrollBatch(
       type: 'UNENROLL',
       total,
     });
+  }
 
-    if (errorCount > 0) {
-      appContextService
-        .getLogger()
-        .info(
-          `Skipping ${errorCount} agents, as failed validation (cannot unenroll from a hosted policy)`
-        );
-
-      // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-      await bulkCreateAgentActionResults(
-        esClient,
-        Object.keys(outgoingErrors).map((agentId) => ({
-          agentId,
-          actionId,
-          error: outgoingErrors[agentId].message,
-        }))
+  if (errorCount > 0) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping ${errorCount} agents, as failed validation (cannot unenroll from a hosted policy or already unenrolled)`
       );
-    }
+
+    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
+    await bulkCreateAgentActionResults(
+      esClient,
+      Object.keys(outgoingErrors).map((agentId) => ({
+        agentId,
+        actionId,
+        error: outgoingErrors[agentId].message,
+      }))
+    );
   }
 
   // Update the necessary agents
@@ -159,15 +161,43 @@ export async function updateActionsForForceUnenroll(
   for (const action of unenrollActions) {
     const commonAgents = intersection(action.agents, agentIds);
     if (commonAgents.length > 0) {
-      await bulkCreateAgentActionResults(
+      // filtering out agents with action results
+      const agentsToUpdate = await getAgentsWithoutActionResults(
         esClient,
-        commonAgents.map((agentId) => ({
-          agentId,
-          actionId: action.action_id!,
-        }))
+        action.action_id!,
+        commonAgents
       );
+      if (agentsToUpdate.length > 0) {
+        await bulkCreateAgentActionResults(
+          esClient,
+          agentsToUpdate.map((agentId) => ({
+            agentId,
+            actionId: action.action_id!,
+          }))
+        );
+      }
     }
   }
+}
+
+async function getAgentsWithoutActionResults(
+  esClient: ElasticsearchClient,
+  actionId: string,
+  commonAgents: string[]
+) {
+  const res = await esClient.search({
+    index: AGENT_ACTIONS_RESULTS_INDEX,
+    query: {
+      bool: {
+        must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
+      },
+    },
+    size: commonAgents.length,
+  });
+  const agentsToUpdate = commonAgents.filter(
+    (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
+  );
+  return agentsToUpdate;
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {
