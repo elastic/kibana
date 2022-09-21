@@ -9,8 +9,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import {
+  AggFunctionsMapping,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
+} from '@kbn/data-plugin/public';
+import {
+  AnyExpressionFunctionDefinition,
+  buildExpressionFunction,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunctionBuilder,
+} from '@kbn/expressions-plugin/public';
 import { TimeScaleUnit } from '../../../../common/expressions';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
@@ -205,6 +214,53 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     }
+  },
+  getGroupByKey: (agg) => {
+    const {
+      functions: [fnBuilder],
+    } = agg;
+
+    let groupKey;
+
+    const isCountFn = (name: string) => ['aggCount', 'aggValueCount'].includes(name);
+
+    if (isCountFn(fnBuilder.name)) {
+      groupKey = `${fnBuilder.name}-${fnBuilder.getArgument('field')?.[0]}-${
+        fnBuilder.getArgument('timeShift')?.[0]
+      }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`;
+    }
+
+    if (fnBuilder.name === 'aggFilteredMetric') {
+      const metricFnBuilder = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
+        | ExpressionAstFunctionBuilder<AnyExpressionFunctionDefinition>
+        | undefined;
+
+      if (metricFnBuilder?.name && isCountFn(metricFnBuilder.name)) {
+        const aggFilterFnBuilder = (
+          fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
+        ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
+
+        groupKey = `filtered-${metricFnBuilder.name}-${aggFilterFnBuilder.getArgument(
+          'timeWindow'
+        )}-${metricFnBuilder.getArgument('field')?.[0]}-${
+          fnBuilder.getArgument('timeShift')?.[0]
+        }-${metricFnBuilder.getArgument('emptyAsNull')?.[0]}`;
+
+        const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
+          | ExpressionAstExpressionBuilder
+          | undefined;
+
+        if (filterExpression) {
+          const filterFnBuilder = filterExpression.functions[0] as
+            | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
+            | undefined;
+
+          groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
+        }
+      }
+    }
+
+    return groupKey;
   },
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
