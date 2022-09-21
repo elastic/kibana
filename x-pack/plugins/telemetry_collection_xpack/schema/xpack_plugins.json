@@ -4644,6 +4644,19 @@
           "properties": {
             "all": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4707,6 +4720,19 @@
             },
             "sec": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4723,6 +4749,19 @@
             },
             "obs": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4739,6 +4778,19 @@
             },
             "main": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
