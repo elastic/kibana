@@ -10,7 +10,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'unifiedSearch', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'header',
+    'unifiedSearch',
+    'dashboard',
+    'common',
+  ]);
   const elasticChart = getService('elasticChart');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
@@ -47,18 +54,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow adding and using a field', async () => {
+      await PageObjects.lens.switchToVisualization('lnsMetric');
       await PageObjects.lens.configureTextBasedLanguagesDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        field: 'extension',
-      });
-
-      await PageObjects.lens.configureTextBasedLanguagesDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
         field: 'bytes',
       });
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data!);
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+      const metricData = await PageObjects.lens.getMetricVisualizationData();
+      expect(metricData[0].value).to.eql('4.13K');
     });
 
     it('should allow switching to another query', async () => {
@@ -67,6 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.switchToVisualization('bar');
       await PageObjects.lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         field: 'extension',
