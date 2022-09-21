@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { Image, type ImageProps } from './image';
-export { UploadFile, type UploadFileProps } from './upload_file';
-export { FilesContext } from './context';
+export { ControlButton } from './control_button';
+export { ClearButton } from './clear_button';

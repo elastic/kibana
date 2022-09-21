@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import type { UploadState } from './upload_state';
 
-export { Image, type ImageProps } from './image';
-export { UploadFile, type UploadFileProps } from './upload_file';
-export { FilesContext } from './context';
+export const context = React.createContext<UploadState | null>(null);
+export const useUploadState = () => React.useContext(context)!;
