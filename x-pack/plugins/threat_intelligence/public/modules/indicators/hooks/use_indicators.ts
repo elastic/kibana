@@ -18,7 +18,10 @@ import { Indicator } from '../../../types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { THREAT_QUERY_BASE } from '../../../common/constants';
 import { useSourcererDataView } from './use_sourcerer_data_view';
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
+import {
+  threatIndicatorNamesOriginScript,
+  threatIndicatorNamesScript,
+} from '../utils/display_name';
 
 const PAGE_SIZES = [10, 25, 50];
 

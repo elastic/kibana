@@ -26,7 +26,7 @@ import { useSourcererDataView } from '../../../hooks/use_sourcerer_data_view';
 import {
   threatIndicatorNamesOriginScript,
   threatIndicatorNamesScript,
-} from '../../../lib/display_name';
+} from '../../../utils/display_name';
 
 export interface UseAggregatedIndicatorsParam {
   /**
