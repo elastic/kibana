@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
-import { DEFAULT_HEADERS } from './headers';
+import { DEFAULT_HEADERS, getDefaultHeaders } from './headers';
 import { AgentManager } from './agent_manager';
 
 const createConfig = (
@@ -36,6 +36,7 @@ const createConfig = (
 };
 
 const kibanaVersion = '1.0.0';
+const defaultHeaders = getDefaultHeaders(kibanaVersion);
 
 const createClient = () =>
   ({ close: jest.fn(), child: jest.fn() } as unknown as jest.Mocked<Client>);
@@ -251,7 +252,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, foo: 'bar', 'x-opaque-id': expect.any(String) },
+          headers: { ...defaultHeaders, foo: 'bar', 'x-opaque-id': expect.any(String) },
         })
       );
     });
@@ -281,8 +282,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             authorization: 'auth',
             other: 'yep',
             'x-opaque-id': expect.any(String),
@@ -320,8 +320,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             authorization: 'auth',
             other: 'yep',
             'x-opaque-id': expect.any(String),
@@ -356,8 +355,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             foo: 'bar',
             hello: 'dolly',
             'x-opaque-id': expect.any(String),
@@ -388,8 +386,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             'x-opaque-id': 'my-fake-id',
           },
         })
@@ -424,8 +421,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             foo: 'auth',
             hello: 'dolly',
             'x-opaque-id': expect.any(String),
@@ -462,8 +458,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             foo: 'request',
             hello: 'dolly',
             'x-opaque-id': expect.any(String),
@@ -476,6 +471,7 @@ describe('ClusterClient', () => {
       const headerKey = Object.keys(DEFAULT_HEADERS)[0];
       const config = createConfig({
         customHeaders: {
+          ...defaultHeaders,
           [headerKey]: 'foo',
         },
       });
@@ -497,8 +493,8 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
+            ...defaultHeaders,
             [headerKey]: 'foo',
-            'user-agent': 'Kibana/1.0.0',
             'x-opaque-id': expect.any(String),
           },
         })
@@ -530,8 +526,8 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
+            ...defaultHeaders,
             [headerKey]: 'foo',
-            'user-agent': 'Kibana/1.0.0',
             'x-opaque-id': expect.any(String),
           },
         })
@@ -565,8 +561,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
-            'user-agent': 'Kibana/1.0.0',
+            ...defaultHeaders,
             'x-opaque-id': 'from request',
           },
         })
@@ -599,7 +594,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, 'user-agent': 'Kibana/1.0.0', authorization: 'auth' },
+          headers: { ...defaultHeaders, authorization: 'auth' },
         })
       );
     });
@@ -632,7 +627,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, 'user-agent': 'Kibana/1.0.0', foo: 'bar' },
+          headers: { ...defaultHeaders, foo: 'bar' },
         })
       );
     });

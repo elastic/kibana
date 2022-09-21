@@ -11,7 +11,7 @@ import { URL } from 'url';
 import { Duration } from 'moment';
 import type { ClientOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { DEFAULT_HEADERS, USER_AGENT_HEADER } from './headers';
+import { getDefaultHeaders } from './headers';
 
 export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: HttpAgentOptions };
 
@@ -31,8 +31,7 @@ export function parseClientOptions(
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {
-      ...DEFAULT_HEADERS,
-      ...{ [USER_AGENT_HEADER]: `Kibana/${kibanaVersion}` },
+      ...getDefaultHeaders(kibanaVersion),
       ...config.customHeaders,
     },
     // do not make assumption on user-supplied data content

@@ -36,3 +36,13 @@ export const DEFAULT_HEADERS = deepFreeze({
   // access system indices using the standard ES APIs.
   [PRODUCT_ORIGIN_HEADER]: 'kibana',
 });
+
+/**
+ * @internal
+ */
+export function getDefaultHeaders(kibanaVersion: string) {
+  return {
+    ...DEFAULT_HEADERS,
+    [USER_AGENT_HEADER]: `Kibana/${kibanaVersion}`,
+  };
+}

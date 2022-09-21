@@ -83,14 +83,14 @@ describe('configureClient', () => {
     configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
-    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false);
+    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false, kibanaVersion);
 
     parseClientOptionsMock.mockClear();
 
     configureClient(config, { logger, type: 'test', scoped: true, agentManager, kibanaVersion });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
-    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true);
+    expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true, kibanaVersion);
   });
 
   it('constructs a client using the options returned by `parseClientOptions`', () => {
