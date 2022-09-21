@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { PluginsService } from './src';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './src';

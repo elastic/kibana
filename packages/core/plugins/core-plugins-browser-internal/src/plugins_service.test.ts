@@ -36,7 +36,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { PluginInitializerContext } from './plugin_context';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';

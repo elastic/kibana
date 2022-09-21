@@ -7,5 +7,9 @@
  */
 
 export { PluginsService } from './plugins_service';
-export type { Plugin, PluginInitializer } from './plugin';
-export type { PluginInitializerContext } from './plugin_context';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';

@@ -7,7 +7,7 @@
  */
 
 import type { PluginName } from '@kbn/core-base-common';
-import { Plugin } from './plugin';
+import type { Plugin } from '@kbn/core-plugins-browser';
 
 export type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;
 

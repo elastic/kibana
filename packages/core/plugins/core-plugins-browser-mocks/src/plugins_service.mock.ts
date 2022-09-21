@@ -7,7 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginsService, PluginsServiceSetup } from './plugins_service';
+import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<PluginsServiceSetup> = {

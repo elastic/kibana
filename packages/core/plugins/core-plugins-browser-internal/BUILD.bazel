@@ -52,6 +52,8 @@ TYPES_DEPS = [
   "//packages/core/base/core-base-browser-internal:npm_module_types",
   "//packages/core/injected-metadata/core-injected-metadata-common-internal:npm_module_types",
   "//packages/core/lifecycle/core-lifecycle-browser:npm_module_types",
+  "//packages/core/lifecycle/core-lifecycle-browser-internal:npm_module_types",
+  "//packages/core/plugins/core-plugins-browser:npm_module_types",
 ]
 
 jsts_transpiler(

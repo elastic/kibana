@@ -3132,6 +3132,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal":
   version "0.0.0"
   uid ""
@@ -7182,6 +7186,10 @@
   uid ""
 
 "@types/kbn__core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
