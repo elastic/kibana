@@ -36,7 +36,7 @@ export const SampleDataCard = ({
   const { name: title, description, id } = sampleDataSet;
 
   const betaBadgeProps = {
-    label: sampleDataSet.status === INSTALLED_STATUS ? INSTALLED_STATUS : null,
+    label: sampleDataSet.status === INSTALLED_STATUS ? INSTALLED_STATUS : '',
   };
 
   const footer = <Footer {...{ sampleDataSet, onAction }} />;
