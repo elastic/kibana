@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   CSP_INGEST_TIMESTAMP_PIPELINE,
   CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE,

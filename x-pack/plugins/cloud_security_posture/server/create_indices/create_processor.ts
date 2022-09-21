@@ -9,8 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * @param pipelineConf - ingest pipeline configuration
  * @param logger - logger
+ * @param pipelineConf - ingest pipeline configuration
  * @param esClient - the elasticsearch client
  * @return true if the pipeline exits or created, false otherwise.
  */

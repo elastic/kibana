@@ -23,8 +23,10 @@ import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from '.
 // TODO: Add integration tests
 
 export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
-  await createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger);
-  await createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger);
+  await Promise.all([
+    createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
+    createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
+  ]);
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
