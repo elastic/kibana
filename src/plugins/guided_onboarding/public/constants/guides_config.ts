@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { GuidesConfig } from '../types';
 import { securityConfig } from './security';
 import { observabilityConfig } from './observability';
 import { searchConfig } from './search';
-import type { GuideConfig, UseCase } from '../types';
-
-type GuidesConfig = {
-  [key in UseCase]: GuideConfig;
-};
 
 export const guidesConfig: GuidesConfig = {
   security: securityConfig,
