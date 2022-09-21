@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { IndicatorFieldValue } from './indicator_field_value';
+import { IndicatorFieldValue } from '.';
 import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';

@@ -11,7 +11,7 @@ import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-th
 import React from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorFieldValue } from '../../indicator_field_value/indicator_field_value';
+import { IndicatorFieldValue } from '../../field_value';
 import { IndicatorsTableContext } from '../contexts/context';
 import { ActionsRowCell } from '.';
 
