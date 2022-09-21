@@ -1689,6 +1689,11 @@ export function updatePackageInputs(
     }
 
     if (update.streams) {
+      const isInputPkgUpdate =
+        packageInfo.type === 'input' &&
+        update.streams.length === 1 &&
+        originalInput?.streams.length === 1;
+
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -1696,7 +1701,7 @@ export function updatePackageInputs(
 
         // this handles the input only pkg case where the new stream cannot have a dataset name
         // so will never match. Input only packages only ever have one stream.
-        if (!originalStream && update.streams.length === 1 && originalInput?.streams.length === 1) {
+        if (!originalStream && isInputPkgUpdate) {
           originalStream = {
             ...update.streams[0],
             vars: originalInput?.streams[0].vars,
@@ -1713,8 +1718,10 @@ export function updatePackageInputs(
         }
 
         if (stream.vars) {
-          const indexOfStream =
-            originalInput.streams.length === 1 ? 0 : originalInput.streams.indexOf(originalStream);
+          // streams wont match for input pkgs
+          const indexOfStream = isInputPkgUpdate
+            ? 0
+            : originalInput.streams.indexOf(originalStream);
           originalInput.streams[indexOfStream] = deepMergeVars(
             originalStream,
             stream as InputsOverride,
@@ -1726,17 +1733,12 @@ export function updatePackageInputs(
     }
 
     // Filter all stream that have been removed from the input
-    const filteredStreams = originalInput.streams.filter((originalStream) => {
+    originalInput.streams = originalInput.streams.filter((originalStream) => {
       return (
         update.streams?.some((s) => s.data_stream.dataset === originalStream.data_stream.dataset) ??
         false
       );
     });
-
-    originalInput.streams =
-      filteredStreams.length === 0 && originalInput.streams.length === 1
-        ? originalInput.streams
-        : filteredStreams;
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {
