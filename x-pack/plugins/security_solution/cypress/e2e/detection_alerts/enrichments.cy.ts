@@ -30,7 +30,7 @@ import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Enrichment', () => {
+describe('Enrichment', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risky_users');
