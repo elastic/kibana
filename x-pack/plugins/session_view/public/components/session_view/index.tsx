@@ -278,7 +278,7 @@ export const SessionView = ({
             <EuiToolTip
               title={
                 <FormattedMessage
-                  id="xpack.sessionView.ttyToggle"
+                  id="xpack.sessionView.ttyToggleTip"
                   defaultMessage="{value} {unit} of TTY output"
                   values={bytesOfOutput}
                 />
