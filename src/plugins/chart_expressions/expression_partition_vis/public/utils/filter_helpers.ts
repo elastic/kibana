@@ -36,8 +36,9 @@ export const getFilterClickData = (
   const matchingIndex = visData.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
-      if (!columnId) return;
-      const isCurrentLayer = row[columnId] === layer.groupByRollup;
+      if (!columnId && !splitChartDimension) return;
+      // if there is no column id it means there is no actual bucket column, just the metric column and potentially a split chart column
+      const isCurrentLayer = !columnId || row[columnId] === layer.groupByRollup;
       if (!splitChartDimension) {
         return isCurrentLayer;
       }
