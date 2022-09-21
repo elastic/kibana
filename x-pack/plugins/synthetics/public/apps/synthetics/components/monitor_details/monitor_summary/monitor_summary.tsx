@@ -26,7 +26,7 @@ import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LastTenTestRuns } from './last_ten_test_runs';
 
-export const SummaryTabContent = () => {
+export const MonitorSummary = () => {
   const { euiTheme } = useEuiTheme();
 
   return (

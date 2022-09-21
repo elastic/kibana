@@ -100,6 +100,8 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
       mobileOptions: { show: false },
       render: (_val: string, item) => (
         <EuiButtonIcon
+          aria-label={VIEW_DETAILS}
+          title={VIEW_DETAILS}
           size="s"
           href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
           target="_blank"
@@ -166,6 +168,10 @@ const STEP_LABEL = i18n.translate('xpack.synthetics.monitor.step.label', {
   defaultMessage: 'Step',
 });
 
-const STEP_DURATION = i18n.translate('xpack.synthetics.monitor.step.durationLabel', {
+const STEP_DURATION = i18n.translate('xpack.synthetics.monitor.step.duration.label', {
   defaultMessage: 'Duration',
+});
+
+const VIEW_DETAILS = i18n.translate('xpack.synthetics.monitor.step.viewDetails', {
+  defaultMessage: 'View Details',
 });

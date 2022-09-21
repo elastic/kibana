@@ -265,13 +265,13 @@ export const PageRouter: FC = () => {
     <Switch>
       {routes.map(
         ({
-           title,
-           path,
-           component: RouteComponent,
-           dataTestSubj,
-           pageHeader,
-           ...pageTemplateProps
-         }: RouteProps) => (
+          title,
+          path,
+          component: RouteComponent,
+          dataTestSubj,
+          pageHeader,
+          ...pageTemplateProps
+        }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
