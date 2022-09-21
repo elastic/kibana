@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+import { createCoreSetupMock } from './core_setup.mock';
+import { createCoreStartMock } from './core_start.mock';
+
+export const coreLifecycleMock = {
+  createCoreSetup: createCoreSetupMock,
+  createCoreStart: createCoreStartMock,
+};

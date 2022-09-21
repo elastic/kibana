@@ -12,7 +12,6 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.config.js",
-    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
     "**/__snapshots__/**",
@@ -36,33 +35,42 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-# In this array place runtime dependencies, including other packages and NPM packages
-# which must be available for this code to run.
-#
-#  To reference other packages use:
-#    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
-#
-#  To reference a NPM package use:
-#    "@npm//name-of-package"
-#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "//packages/core/injected-metadata/core-injected-metadata-browser-mocks",
+  "//packages/core/doc-links/core-doc-links-browser-mocks",
+  "//packages/core/theme/core-theme-browser-mocks",
+  "//packages/core/analytics/core-analytics-browser-mocks",
+  "//packages/core/execution-context/core-execution-context-browser-mocks",
+  "//packages/core/i18n/core-i18n-browser-mocks",
+  "//packages/core/fatal-errors/core-fatal-errors-browser-mocks",
+  "//packages/core/http/core-http-browser-mocks",
+  "//packages/core/ui-settings/core-ui-settings-browser-mocks",
+  "//packages/core/deprecations/core-deprecations-browser-mocks",
+  "//packages/core/overlays/core-overlays-browser-mocks",
+  "//packages/core/saved-objects/core-saved-objects-browser-mocks",
+  "//packages/core/notifications/core-notifications-browser-mocks",
+  "//packages/core/application/core-application-browser-mocks",
+  "//packages/core/chrome/core-chrome-browser-mocks",
 ]
 
-# In this array place dependencies necessary to build the types, which will include the
-# :npm_module_types target of other packages and packages from NPM, including @types/*
-# packages.
-#
-#  To reference the types for another package use:
-#    "//repo/relative/path/to/package:npm_module_types"
-#    eg. "//packages/kbn-utils:npm_module_types"
-#
-#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "//packages/core/injected-metadata/core-injected-metadata-browser-mocks:npm_module_types",
+  "//packages/core/doc-links/core-doc-links-browser-mocks:npm_module_types",
+  "//packages/core/theme/core-theme-browser-mocks:npm_module_types",
+  "//packages/core/analytics/core-analytics-browser-mocks:npm_module_types",
+  "//packages/core/execution-context/core-execution-context-browser-mocks:npm_module_types",
+  "//packages/core/i18n/core-i18n-browser-mocks:npm_module_types",
+  "//packages/core/fatal-errors/core-fatal-errors-browser-mocks:npm_module_types",
+  "//packages/core/http/core-http-browser-mocks:npm_module_types",
+  "//packages/core/ui-settings/core-ui-settings-browser-mocks:npm_module_types",
+  "//packages/core/deprecations/core-deprecations-browser-mocks:npm_module_types",
+  "//packages/core/overlays/core-overlays-browser-mocks:npm_module_types",
+  "//packages/core/saved-objects/core-saved-objects-browser-mocks:npm_module_types",
+  "//packages/core/notifications/core-notifications-browser-mocks:npm_module_types",
+  "//packages/core/application/core-application-browser-mocks:npm_module_types",
+  "//packages/core/chrome/core-chrome-browser-mocks:npm_module_types",
 ]
 
 jsts_transpiler(
