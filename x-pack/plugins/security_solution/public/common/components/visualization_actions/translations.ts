@@ -73,3 +73,17 @@ export const FAIL_CHART_LABEL = i18n.translate(
     defaultMessage: 'Fail',
   }
 );
+
+export const UNIQUE_COUNT = (field: string) =>
+  i18n.translate('xpack.securitySolution.visualizationActions.uniqueCountLabel', {
+    values: { field },
+
+    defaultMessage: 'Unique count of {field}',
+  });
+
+export const TOP_VALUE = (field: string) =>
+  i18n.translate('xpack.securitySolution.visualizationActions.topValueLabel', {
+    values: { field },
+
+    defaultMessage: 'Top values of {field}',
+  });
