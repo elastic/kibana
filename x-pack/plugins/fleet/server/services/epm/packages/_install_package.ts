@@ -42,7 +42,7 @@ import {
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installTransform } from '../elasticsearch/transform/install';
+import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
@@ -219,7 +219,7 @@ export async function _installPackage({
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransform(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installTransforms(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines

@@ -19,9 +19,13 @@ import {
   HOSTS_DONUT_CHART,
   HOSTS_TABLE,
   HOSTS_TABLE_ROWS,
+  HOST_RISK_SCORE_NO_DATA_DETECTED,
+  UPGRADE_HOST_RISK_SCORE_BUTTON,
+  UPGRADE_USER_RISK_SCORE_BUTTON,
   USERS_DONUT_CHART,
   USERS_TABLE,
   USERS_TABLE_ROWS,
+  USER_RISK_SCORE_NO_DATA_DETECTED,
 } from '../../screens/entity_analytics';
 import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
 
@@ -45,14 +49,58 @@ describe('Entity Analytics Dashboard', () => {
     });
   });
 
-  describe('With host risk data', () => {
+  describe('Risk Score enabled but still no data', () => {
     before(() => {
-      esArchiverLoad('risky_hosts');
+      esArchiverLoad('risk_hosts_no_data');
+      esArchiverLoad('risk_users_no_data');
+
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_hosts');
+      esArchiverUnload('risk_hosts_no_data');
+      esArchiverUnload('risk_users_no_data');
+    });
+
+    it('shows no data detected propmpt for host risk score module', () => {
+      cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+    });
+
+    it('shows no data detected propmpt for user risk score module', () => {
+      cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+    });
+  });
+
+  describe('With Legacy data', () => {
+    before(() => {
+      esArchiverLoad('risk_hosts_legacy_data');
+      esArchiverLoad('risk_users_legacy_data');
+
+      visit(ENTITY_ANALYTICS_URL);
+    });
+
+    after(() => {
+      esArchiverUnload('risk_hosts_legacy_data');
+      esArchiverUnload('risk_users_legacy_data');
+    });
+
+    it('shows upgrade host risk button', () => {
+      cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.visible');
+    });
+
+    it('shows upgrade user risk button', () => {
+      cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
+    });
+  });
+
+  describe('With host risk data', () => {
+    before(() => {
+      esArchiverLoad('risk_hosts');
+      visit(ENTITY_ANALYTICS_URL);
+    });
+
+    after(() => {
+      esArchiverUnload('risk_hosts');
     });
 
     it('renders donut chart', () => {
@@ -74,16 +122,16 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With user risk data', () => {
     before(() => {
-      esArchiverLoad('risky_users');
+      esArchiverLoad('risk_users');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_users');
+      esArchiverUnload('risk_users');
     });
 
     it('renders donut chart', () => {
-      cy.get(USERS_DONUT_CHART).should('include.text', '6Total');
+      cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
     });
 
     it('renders table', () => {
@@ -94,8 +142,8 @@ describe('Entity Analytics Dashboard', () => {
     it('filters by risk classification', () => {
       openRiskTableFilterAndSelectTheLowOption();
 
-      cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
-      cy.get(USERS_TABLE_ROWS).should('have.length', 1);
+      cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
+      cy.get(USERS_TABLE_ROWS).should('have.length', 2);
     });
   });
 

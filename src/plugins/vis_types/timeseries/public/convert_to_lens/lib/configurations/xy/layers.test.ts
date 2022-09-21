@@ -17,6 +17,12 @@ import {
 } from '../../convert';
 import { getLayers } from './layers';
 import { createPanel, createSeries } from '../../__mocks__';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
+jest.mock('uuid', () => ({
+  v4: () => 'test-id',
+}));
 
 describe('getLayers', () => {
   const dataSourceLayers: Record<number, Layer> = [
@@ -200,6 +206,84 @@ describe('getLayers', () => {
   const panelWithPercentileRankMetric = createPanel({
     series: [createSeries({ metrics: percentileRankMetrics })],
   });
+  const panelWithSingleAnnotation = createPanel({
+    annotations: [
+      {
+        fields: 'geo.src,host',
+        template: 'Security Error from {{geo.src}} on {{host}}',
+        query_string: {
+          query: 'tags:error AND tags:security',
+          language: 'lucene',
+        },
+        id: 'ann1',
+        color: 'rgba(211,49,21,0.7)',
+        time_field: 'timestamp',
+        icon: 'fa-asterisk',
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        hidden: true,
+        index_pattern: {
+          id: 'test',
+        },
+      },
+    ],
+    series: [createSeries({ metrics: staticValueMetric })],
+  });
+  const panelWithMultiAnnotations = createPanel({
+    annotations: [
+      {
+        fields: 'geo.src,host',
+        template: 'Security Error from {{geo.src}} on {{host}}',
+        query_string: {
+          query: 'tags:error AND tags:security',
+          language: 'lucene',
+        },
+        id: 'ann1',
+        color: 'rgba(211,49,21,0.7)',
+        time_field: 'timestamp',
+        icon: 'fa-asterisk',
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        hidden: true,
+        index_pattern: {
+          id: 'test',
+        },
+      },
+      {
+        query_string: {
+          query: 'tags: error AND tags: security',
+          language: 'kql',
+        },
+        id: 'ann2',
+        color: 'blue',
+        time_field: 'timestamp',
+        icon: 'error-icon',
+        ignore_global_filters: 0, // todo test ignore when PR is r
+        ignore_panel_filters: 0,
+        index_pattern: {
+          id: 'test',
+        },
+      },
+      {
+        fields: 'category.keyword,price',
+        template: 'Will be ignored',
+        query_string: {
+          query: 'category.keyword:*',
+          language: 'kql',
+        },
+        id: 'ann3',
+        color: 'red',
+        time_field: 'order_date',
+        icon: undefined,
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        index_pattern: {
+          id: 'test2',
+        },
+      },
+    ],
+    series: [createSeries({ metrics: staticValueMetric })],
+  });
 
   test.each<[string, [Record<number, Layer>, Panel], Array<Partial<XYLayerConfig>>]>([
     [
@@ -282,7 +366,159 @@ describe('getLayers', () => {
         },
       ],
     ],
-  ])('should return %s', (_, input, expected) => {
-    expect(getLayers(...input)).toEqual(expected.map(expect.objectContaining));
+    [
+      'annotation layer gets correct params and converts color, extraFields and icons',
+      [dataSourceLayersWithStatic, panelWithSingleAnnotation],
+      [
+        {
+          layerType: 'referenceLine',
+          accessors: ['column-id-1'],
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'right',
+              color: '#68BC00',
+              fill: 'below',
+            },
+          ],
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#D33115',
+              extraFields: ['geo.src'],
+              filter: {
+                language: 'lucene',
+                query: 'tags:error AND tags:security',
+                type: 'kibana_query',
+              },
+              icon: 'asterisk',
+              id: 'ann1',
+              isHidden: true,
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'timestamp',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'test',
+        },
+      ],
+    ],
+    [
+      'multiple annotations with different data views create separate layers',
+      [dataSourceLayersWithStatic, panelWithMultiAnnotations],
+      [
+        {
+          layerType: 'referenceLine',
+          accessors: ['column-id-1'],
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'right',
+              color: '#68BC00',
+              fill: 'below',
+            },
+          ],
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#D33115',
+              extraFields: ['geo.src'],
+              filter: {
+                language: 'lucene',
+                query: 'tags:error AND tags:security',
+                type: 'kibana_query',
+              },
+              icon: 'asterisk',
+              id: 'ann1',
+              isHidden: true,
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'timestamp',
+              type: 'query',
+            },
+            {
+              color: '#0000FF',
+              filter: {
+                language: 'kql',
+                query: 'tags: error AND tags: security',
+                type: 'kibana_query',
+              },
+              icon: 'triangle',
+              id: 'ann2',
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'timestamp',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'test',
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#FF0000',
+              extraFields: ['category.keyword', 'price'],
+              filter: {
+                language: 'kql',
+                query: 'category.keyword:*',
+                type: 'kibana_query',
+              },
+              icon: 'triangle',
+              id: 'ann3',
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'order_date',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'test2',
+        },
+      ],
+    ],
+  ])('should return %s', async (_, input, expected) => {
+    const layers = await getLayers(...input, indexPatternsService as DataViewsPublicPluginStart);
+    expect(layers).toEqual(expected.map(expect.objectContaining));
   });
 });
+
+const mockedIndices = [
+  {
+    id: 'test',
+    title: 'test',
+    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+  },
+] as unknown as DataView[];
+
+const indexPatternsService = {
+  getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+  get: jest.fn(() => Promise.resolve(mockedIndices[0])),
+  find: jest.fn((search: string, size: number) => {
+    if (size !== 1) {
+      // shouldn't request more than one data view since there is a significant performance penalty
+      throw new Error('trying to fetch too many data views');
+    }
+    return Promise.resolve(mockedIndices || []);
+  }),
+} as unknown as DataViewsPublicPluginStart;
