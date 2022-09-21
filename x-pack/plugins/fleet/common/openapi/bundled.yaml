@@ -350,6 +350,14 @@ paths:
                           - install_failed
                           - not_installed
                       savedObject:
+                        type: object
+                      latestVersion:
+                        type: string
+                      keepPoliciesUpToDate:
+                        type: boolean
+                      notice:
+                        type: string
+                      licensePath:
                         type: string
                     required:
                       - status
@@ -368,6 +376,12 @@ paths:
         name: pkgVersion
         in: path
         required: true
+      - schema:
+          type: boolean
+        name: ignoreUnverified
+        description: Ignore if the package is fails signature verification
+        in: query
+    required: true
     post:
       summary: Packages - Install
       tags: []
@@ -1312,6 +1326,13 @@ paths:
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/page_index'
         - $ref: '#/components/parameters/kuery'
+        - schema:
+            type: boolean
+          in: query
+          name: full
+          description: >-
+            When set to true, retrieve the related package policies for each
+            agent policy/
       description: ''
     post:
       summary: Agent policy - Create
@@ -2616,6 +2637,20 @@ components:
           type: string
         version:
           type: string
+        release:
+          type: string
+          enum:
+            - experimental
+            - beta
+            - ga
+        source:
+          type: object
+          properties:
+            license:
+              type: string
+              enum:
+                - Apache-2.0
+                - Elastic-2.0
         readme:
           type: string
         description:
@@ -2626,21 +2661,24 @@ components:
           type: array
           items:
             type: string
-        requirement:
-          oneOf:
-            - properties:
-                kibana:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
-            - properties:
-                elasticsearch:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
+        conditions:
           type: object
+          properties:
+            kibana:
+              type: object
+              properties:
+                versions:
+                  type: string
+            elasticsearch:
+              type: object
+              properties:
+                subscription:
+                  type: string
+                  enum:
+                    - basic
+                    - gold
+                    - platinum
+                    - enterprise
         screenshots:
           type: array
           items:
@@ -2711,6 +2749,16 @@ components:
           type: string
         path:
           type: string
+        elasticsearch:
+          type: object
+          properties:
+            privileges:
+              type: object
+              properties:
+                cluster:
+                  type: array
+                  items:
+                    type: string
       required:
         - name
         - title
@@ -2718,7 +2766,7 @@ components:
         - description
         - type
         - categories
-        - requirement
+        - conditions
         - assets
         - format_version
         - download
@@ -3107,14 +3155,14 @@ components:
               enum:
                 - active
                 - inactive
-            packagePolicies:
-              oneOf:
-                - type: array
-                  items:
-                    type: string
-                - type: array
-                  items:
-                    $ref: '#/components/schemas/package_policy'
+            package_policies:
+              description: >-
+                This field is present only when retrieving a single agent
+                policy, or when retrieving a list of agent policy with the
+                ?full=true parameter
+              type: array
+              items:
+                $ref: '#/components/schemas/package_policy'
             updated_on:
               type: string
               format: date-time
