@@ -14,7 +14,6 @@ import {
   createFlameGraph,
   ElasticFlameGraph,
 } from '../../common/flamegraph';
-import { createStackFrameMetadata } from '../../common/profiling';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -57,9 +56,7 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
           const t1 = new Date().getTime();
-          const rootFrame = createStackFrameMetadata();
           const graph = createCallerCalleeGraph(
-            rootFrame,
             stackTraceEvents,
             stackTraces,
             stackFrames,

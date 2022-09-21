@@ -7,7 +7,6 @@
 
 import { sum } from 'lodash';
 import { createCallerCalleeGraph } from './callercallee';
-import { createStackFrameMetadata } from './profiling';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
@@ -15,8 +14,7 @@ describe('Caller-callee operations', () => {
   test('1', () => {
     const totalSamples = sum([...events.values()]);
 
-    const rootFrame = createStackFrameMetadata();
-    const graph = createCallerCalleeGraph(rootFrame, events, stackTraces, stackFrames, executables);
+    const graph = createCallerCalleeGraph(events, stackTraces, stackFrames, executables);
 
     expect(graph.root.Samples).toEqual(totalSamples);
     expect(graph.root.CountInclusive).toEqual(totalSamples);

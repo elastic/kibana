@@ -56,13 +56,13 @@ export interface CallerCalleeGraph {
 // The resulting data structure contains all of the data, but is not yet in the
 // form most easily digestible by others.
 export function createCallerCalleeGraph(
-  rootFrame: StackFrameMetadata,
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>
 ): CallerCalleeGraph {
-  // Create a node for the centered frame
+  // Create a root node for the graph
+  const rootFrame = createStackFrameMetadata();
   const rootFrameGroup = createFrameGroup(
     rootFrame.FileID,
     rootFrame.AddressOrLine,
