@@ -31,7 +31,7 @@ import {
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { guidesConfig } from '../constants';
+import { guidesConfig } from '../constants/guides_config';
 import type { GuideConfig, StepStatus, GuidedOnboardingState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 

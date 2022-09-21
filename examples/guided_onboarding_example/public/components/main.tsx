@@ -10,9 +10,10 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core/public';
 import {
   EuiButton,
-  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -29,7 +30,6 @@ import {
   GuidedOnboardingState,
   UseCase,
 } from '@kbn/guided-onboarding-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 
 interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -51,9 +51,11 @@ export const Main = (props: MainProps) => {
   );
 
   useEffect(() => {
-    const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {
-      setGuideState(newState);
-    });
+    const subscription = guidedOnboardingApi
+      ?.fetchGuideState$()
+      .subscribe((newState: GuidedOnboardingState) => {
+        setGuideState(newState);
+      });
     return () => subscription?.unsubscribe();
   }, [guidedOnboardingApi]);
 
@@ -208,7 +210,7 @@ export const Main = (props: MainProps) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow label="Step">
-              <EuiFieldNumber
+              <EuiFieldText
                 value={selectedStep}
                 onChange={(e) => setSelectedStep(e.target.value)}
               />

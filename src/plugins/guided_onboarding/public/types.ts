@@ -44,9 +44,13 @@ export interface GuideConfig {
   steps: StepConfig[];
 }
 
+export type GuidesConfig = {
+  [key in UseCase]: GuideConfig;
+};
+
 export interface GuidedOnboardingState {
   activeGuide: UseCase | 'unset';
-  activeStep: string | 'unset';
+  activeStep: string | 'unset' | 'completed';
 }
 
 export interface ClientConfigType {
