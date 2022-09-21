@@ -22,7 +22,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
   onClick,
 }) => {
   const { capabilities } = useValues(KibanaLogic);
-  const { canUseMlInferencePipeline } = useValues(PipelinesLogic);
+  const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
   const hasMLPermissions = capabilities?.ml?.canAccessML ?? false;
   if (!hasMLPermissions) {
     return (
@@ -30,6 +30,21 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
         content={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButton.mlPermissions.disabledTooltip',
           { defaultMessage: 'You do not have permission to Machine Learning on this cluster.' }
+        )}
+      >
+        <AddButton disabled />
+      </EuiToolTip>
+    );
+  }
+  if (!hasIndexIngestionPipeline) {
+    return (
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButton.defaultIngestPipeline.disabledTooltip',
+          {
+            defaultMessage:
+              'You cannot add machine learning inference pipeline processors to the default ingest pipeline. You must first copy and customize the default ingest pipeline to add machine learning inference pipeline processors.',
+          }
         )}
       >
         <AddButton disabled />
