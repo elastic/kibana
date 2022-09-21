@@ -482,7 +482,11 @@ export const ExceptionListsTable = React.memo(() => {
               onRefresh={handleRefresh}
             />
             {exceptionListsWithRuleRefs.map((excList) => (
-              <ExceptionsListCard http={http} exceptionsList={excList} />
+              <ExceptionsListCard
+                http={http}
+                exceptionsList={excList}
+                handleDelete={handleDelete}
+              />
             ))}
           </>
         )}
