@@ -24,7 +24,7 @@ describe('AnalyticsService', () => {
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
     ).toMatchInlineSnapshot(
       {
-        branch: 'main',
+        branch: expect.any(String),
         buildNum: 9007199254740991,
         buildSha: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
         isDev: true,
@@ -33,7 +33,7 @@ describe('AnalyticsService', () => {
       },
       `
             Object {
-              "branch": "main",
+              "branch": Any<String>,
               "buildNum": 9007199254740991,
               "buildSha": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
               "isDev": true,
