@@ -12,6 +12,8 @@ import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 import { EsVersion } from '../../functional_test_runner';
 import { parseFlags, FLAG_OPTIONS } from './flags';
 
+jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
+
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(
   createAnyInstanceSerializer(EsVersion, (v: EsVersion) => `EsVersion ${v.toString()}`)
@@ -140,4 +142,10 @@ describe('parse runTest flags', () => {
       }
     `);
   });
+});
+
+it('supports logsDir', () => {
+  expect(test({ logToFile: true }).logsDir).toMatchInlineSnapshot(
+    `<absolute path>/data/ftr_servers_logs/some-uuid`
+  );
 });

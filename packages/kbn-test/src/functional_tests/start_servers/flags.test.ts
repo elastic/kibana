@@ -6,31 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { getFlags, FlagsReader } from '@kbn/dev-cli-runner';
 import { createAnyInstanceSerializer, createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import { Flags } from '@kbn/dev-cli-runner';
 import { EsVersion } from '../../functional_test_runner';
-import { parseFlags } from './flags';
+import { parseFlags, FLAG_OPTIONS } from './flags';
+
+jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
 
 expect.addSnapshotSerializer(
   createAnyInstanceSerializer(EsVersion, (v: EsVersion) => `EsVersion ${v.toString()}`)
 );
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const defaults = {
-  _: [],
-  debug: false,
-  help: false,
-  quiet: false,
-  silent: false,
-  unexpected: [],
-  verbose: false,
-  config: 'foo',
-} as Flags;
+const defaults = getFlags(['--config=foo'], FLAG_OPTIONS);
+
+const test = (opts: Record<string, string | string[] | boolean | undefined>) =>
+  parseFlags(new FlagsReader({ ...defaults, ...opts }));
 
 it('parses a subset of the flags from runTests', () => {
-  expect(parseFlags({ ...defaults, config: 'foo' })).toMatchInlineSnapshot(`
+  expect(test({ config: 'foo' })).toMatchInlineSnapshot(`
     Object {
-      "config": <absolute path>/foo,
+      "config": "foo",
       "esFrom": undefined,
       "esVersion": <EsVersion 9.9.9>,
       "installDir": undefined,
@@ -40,13 +36,19 @@ it('parses a subset of the flags from runTests', () => {
 });
 
 it('rejects zero configs', () => {
-  expect(() => parseFlags({ ...defaults, config: [] })).toThrowErrorMatchingInlineSnapshot(
-    `"At least one --config or --journey flag is required"`
+  expect(() => test({ config: [] })).toThrowErrorMatchingInlineSnapshot(
+    `"expected exactly one --config or --journey flag"`
   );
 });
 
 it('rejects two configs', () => {
-  expect(() =>
-    parseFlags({ ...defaults, config: ['foo'], journey: ['bar'] })
-  ).toThrowErrorMatchingInlineSnapshot(`"expected exactly one --config or --journey flag"`);
+  expect(() => test({ config: ['foo'], journey: ['bar'] })).toThrowErrorMatchingInlineSnapshot(
+    `"expected exactly one --config or --journey flag"`
+  );
+});
+
+it('supports logsDir', () => {
+  expect(test({ logToFile: true }).logsDir).toMatchInlineSnapshot(
+    `<absolute path>/data/ftr_servers_logs/some-uuid`
+  );
 });
