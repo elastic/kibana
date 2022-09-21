@@ -66,8 +66,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('enable simple status alert', async () => {
-      await pageObjects.uptime.goToUptimeOverviewAndLoadData(DEFAULT_DATE_START, DEFAULT_DATE_END);
-      await testSubjects.click('uptimeEnableSimpleDownAlert' + monitorId);
+      await retry.try(async () => {
+        await pageObjects.uptime.goToUptimeOverviewAndLoadData(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await testSubjects.click('uptimeEnableSimpleDownAlert' + monitorId);
+      });
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
