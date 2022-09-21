@@ -40,7 +40,7 @@ export const kpiUniqueIpsSourceMetricLensAttributes: LensAttributes = {
     },
   },
   title: '[Host] Unique IPs - source metric',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   references: [
     {
       id: '{dataViewId}',

@@ -39,7 +39,7 @@ export const kpiTotalUsersMetricLensAttributes: LensAttributes = {
     },
   },
   title: '[User] Users - metric',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   references: [
     {
       id: '{dataViewId}',
