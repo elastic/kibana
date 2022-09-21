@@ -23,7 +23,7 @@ import {
 } from '../../../../../../../shared_imports';
 import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../../../common/constants';
+import { NOTIFICATION_THROTTLE_RULE } from '../../../../../../../../common/constants';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
@@ -68,7 +68,7 @@ const getFormSchema = (
 });
 
 const defaultFormData: RuleActionsFormData = {
-  throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
+  throttle: NOTIFICATION_THROTTLE_RULE,
   actions: [],
   overwrite: false,
 };
@@ -93,7 +93,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     defaultValue: defaultFormData,
   });
 
-  const [{ overwrite, throttle }] = useFormData({ form, watch: ['overwrite', 'throttle'] });
+  const [{ overwrite }] = useFormData({ form, watch: ['overwrite', 'throttle'] });
 
   const handleSubmit = useCallback(async () => {
     const { data, isValid } = await form.submit();
@@ -129,8 +129,6 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
 
   const messageVariables = useMemo(() => getAllActionMessageParams(), []);
 
-  const showActionsSelect = throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS;
-
   return (
     <BulkEditFormWrapper
       form={form}
@@ -157,30 +155,6 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
               defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
             />
           </li>
-          <li>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
-              defaultMessage="To delete actions for all selected rules, select {noActionsOption} in the menu and check {overwriteActionsCheckbox}."
-              values={{
-                noActionsOption: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.menuOptionLabel"
-                      defaultMessage="Perform no actions"
-                    />
-                  </strong>
-                ),
-                overwriteActionsCheckbox: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.overwriteActionsCheckboxLabel"
-                      defaultMessage="Overwrite all selected rule actions"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </li>
           <li>{i18n.RULE_VARIABLES_DETAIL}</li>
         </ul>
       </EuiCallOut>
@@ -193,18 +167,16 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       />
       <EuiSpacer size="m" />
 
-      {showActionsSelect && (
-        <>
-          <UseField
-            path="actions"
-            component={RuleActionsField}
-            componentProps={{
-              messageVariables,
-            }}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <>
+        <UseField
+          path="actions"
+          component={RuleActionsField}
+          componentProps={{
+            messageVariables,
+          }}
+        />
+        <EuiSpacer size="m" />
+      </>
 
       <CommonUseField
         path="overwrite"
