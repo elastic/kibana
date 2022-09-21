@@ -34,8 +34,8 @@ import { ApplicationService } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import { PluginsService } from '@kbn/core-plugins-browser';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
-import { PluginsService } from './plugins';
 
 import {
   LOAD_SETUP_DONE,

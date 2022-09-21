@@ -59,7 +59,11 @@ export type {
   ChromeUserBanner,
   ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
-export type { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
+export type {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+} from '@kbn/core-plugins-browser';
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
