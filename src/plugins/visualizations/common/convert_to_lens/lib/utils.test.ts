@@ -8,13 +8,14 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { AggBasedColumn, Operations } from '../..';
+import { AggBasedColumn, ColumnWithMeta, Operations } from '../..';
 import { SchemaConfig } from '../../types';
 import {
   getFieldNameFromField,
   getLabel,
   getLabelForPercentile,
   getValidColumns,
+  isColumnWithMeta,
   isSchemaConfig,
 } from './utils';
 
@@ -160,5 +161,35 @@ describe('isSchemaConfig', () => {
 
   test('should be false if is SchemaConfig', () => {
     expect(isSchemaConfig(schemaConfig)).toBeTruthy();
+  });
+});
+
+describe('isColumnWithMeta', () => {
+  const column: AggBasedColumn = {
+    sourceField: '',
+    columnId: '',
+    operationType: 'terms',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+  } as AggBasedColumn;
+
+  const columnWithMeta: ColumnWithMeta = {
+    sourceField: '',
+    columnId: '',
+    operationType: 'average',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: 'some-agg-id' },
+  };
+
+  test('should return false if column without meta', () => {
+    expect(isColumnWithMeta(column)).toBeFalsy();
+  });
+
+  test('should return true if column with meta', () => {
+    expect(isColumnWithMeta(columnWithMeta)).toBeTruthy();
   });
 });
