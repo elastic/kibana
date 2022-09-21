@@ -26,15 +26,18 @@ import {
   tryDestroyDashboardContainer,
   loadDashboardHistoryLocationState,
 } from '../lib';
+import {
+  dashboardStateLoadWasSuccessful,
+  LoadDashboardFromSavedObjectReturn,
+} from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 import { DashboardConstants } from '../..';
 import { DashboardAppLocatorParams } from '../../locator';
-import { getNewDashboardTitle } from '../../dashboard_strings';
+import { dashboardSavedObjectErrorStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
 import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
 import type { DashboardBuildContext, DashboardAppState, DashboardState } from '../../types';
-import { dashboardStateLoadWasSuccessful } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -78,7 +81,7 @@ export const useDashboardAppState = ({
   const { scopedHistory } = useDashboardMountContext();
   const {
     embeddable,
-    notifications,
+    notifications: { toasts },
     chrome: { docTitle },
     dashboardCapabilities,
     dashboardSessionStorage,
@@ -139,16 +142,22 @@ export const useDashboardAppState = ({
       /**
        * Load and unpack state from dashboard saved object.
        */
-      const loadSavedDashboardResult = await loadDashboardStateFromSavedObject({
-        getScopedHistory: scopedHistory,
-        id: savedDashboardId,
-      });
-
-      if (canceled || !loadSavedDashboardResult) return;
-      if (!dashboardStateLoadWasSuccessful(loadSavedDashboardResult)) {
-        // Early return if the saved object has an aliasMatch and has redirected to it.
+      let loadSavedDashboardResult: LoadDashboardFromSavedObjectReturn;
+      try {
+        loadSavedDashboardResult = await loadDashboardStateFromSavedObject({
+          getScopedHistory: scopedHistory,
+          id: savedDashboardId,
+        });
+      } catch (error) {
+        // redirect back to landing page if dashboard could not be loaded.
+        toasts.addDanger(dashboardSavedObjectErrorStrings.getDashboardLoadError(error.message));
+        history.push(DashboardConstants.LANDING_PAGE_PATH);
         return;
       }
+      if (canceled || !dashboardStateLoadWasSuccessful(loadSavedDashboardResult)) {
+        return;
+      }
+
       const { dashboardState: savedDashboardState, createConflictWarning } =
         loadSavedDashboardResult;
 
@@ -335,12 +344,12 @@ export const useDashboardAppState = ({
     getStateTransfer,
     showNoDataPage,
     scopedHistory,
-    notifications,
     kibanaVersion,
     dataViews,
     embeddable,
     docTitle,
     history,
+    toasts,
     search,
     query,
   ]);

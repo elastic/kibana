@@ -44,9 +44,9 @@ type SuccessfulLoadDashboardFromSavedObjectReturn = LoadDashboardFromSavedObject
 };
 
 export const dashboardStateLoadWasSuccessful = (
-  incoming: LoadDashboardFromSavedObjectReturn
+  incoming?: LoadDashboardFromSavedObjectReturn
 ): incoming is SuccessfulLoadDashboardFromSavedObjectReturn => {
-  return Boolean(incoming.dashboardState) && !incoming.redirectedToAlias;
+  return Boolean(incoming && incoming?.dashboardState && !incoming.redirectedToAlias);
 };
 
 export const loadDashboardStateFromSavedObject = async ({
