@@ -13,8 +13,8 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
 
+import { guidesConfig } from '../../common/guides_config';
 import { apiService } from '../services/api';
-import { guidesConfig } from '../constants/guides_config';
 import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 

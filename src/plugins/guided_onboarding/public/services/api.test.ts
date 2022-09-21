@@ -10,10 +10,10 @@ import { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common';
-import { ApiService } from './api';
+import { API_BASE_PATH } from '../../common/constants';
+import { guidesConfig } from '../../common/guides_config';
 import { GuidedOnboardingState } from '..';
-import { guidesConfig } from '../constants/guides_config';
+import { ApiService } from './api';
 
 const searchGuide = 'search';
 const firstStep = guidesConfig[searchGuide].steps[0].id;

@@ -9,8 +9,9 @@
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common';
-import { GuidedOnboardingState, UseCase } from '../types';
+import { API_BASE_PATH } from '../../common/constants';
+import { UseCase } from '../../common/types';
+import { GuidedOnboardingState } from '../types';
 import { getNextStep, isLastStep } from './helpers';
 
 export class ApiService {
