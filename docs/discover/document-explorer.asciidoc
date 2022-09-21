@@ -3,23 +3,11 @@
 
 
 *Discover* displays your documents in table format, so you can
-best explore your data.
-Use the document table to resize columns, set row height,
+best explore your data. Resize columns, set row height,
 perform multi-column sorting, compare data, and more.
 
-++++
-<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
-</script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/KbZQP6Y7msjevAm1JGbKeG.jpg"
-data-uuid="KbZQP6Y7msjevAm1JGbKeG"
-data-v="4"
-data-type="inline"
-/>
-</br>
-++++
+[role="screenshot"]
+image:images/customer.png[Customer last name, first initial in the document table]
 
 [float]
 [[document-explorer-columns]]
