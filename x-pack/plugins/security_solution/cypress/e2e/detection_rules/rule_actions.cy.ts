@@ -7,6 +7,7 @@
 
 import { getIndexConnector } from '../../objects/connector';
 import { getSimpleRule } from '../../objects/rule';
+import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createEmptyDocument, createIndex, deleteIndex } from '../../tasks/api_calls';
@@ -66,6 +67,11 @@ describe('Rule actions', () => {
     goToRuleDetails();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
+
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .should('match', /^[1-9].+$/);
+    cy.get(ALERT_GRID_CELL).contains(this.rule.name);
 
     const expectedJson = JSON.parse(rule.actions.connectors[0].document);
     cy.request({
