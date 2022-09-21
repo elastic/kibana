@@ -27,6 +27,7 @@ import { includeFieldsRequiredForAuthentication } from '../../authorization/util
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
 import { ConstructQueryParams } from '../types';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -66,6 +67,8 @@ export const find = async (
           'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
         );
       }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
     const queryArgs: ConstructQueryParams = {

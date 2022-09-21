@@ -20,6 +20,7 @@ import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../comm
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 const MAX_PROFILES_SIZE = 100;
 const MIN_PROFILES_SIZE = 0;
@@ -89,6 +90,8 @@ export class UserProfileService {
           'In order to retrieve suggested user profiles, you must be subscribed to an Elastic Platinum license'
         );
       }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
 
       const { spaces } = this.options;
 

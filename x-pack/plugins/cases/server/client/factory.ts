@@ -156,6 +156,7 @@ export class CasesClientFactory {
     });
 
     const licensingService = new LicensingService(this.options.licensingPluginStart.license$);
+    licensingService.setNotifyUsage(this.options.licensingPluginStart.featureUsage.notifyUsage);
 
     return {
       alertsService: new AlertService(esClient, this.logger),
