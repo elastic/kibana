@@ -27,6 +27,11 @@ export const registerRenderExpression = ({ core, router }: Params) => {
         body: schema.object({
           expression: schema.string(),
           input: schema.maybe(schema.any()),
+          params: schema.maybe(
+            schema.object({}, {
+              unknowns: 'allow',
+            })
+          ),
           format: schema.string({
             defaultValue: 'png',
             validate: (value) => {
@@ -40,7 +45,7 @@ export const registerRenderExpression = ({ core, router }: Params) => {
       },
     },
     async (context, request, response) => {
-      const { expression, input } = request.body;
+      const { expression, input, params } = request.body;
       const format = request.body.format as 'png' | 'pdf';
       const [, , screenshotting] = await core.getStartServices();
       const capture = await firstValueFrom(
@@ -49,6 +54,7 @@ export const registerRenderExpression = ({ core, router }: Params) => {
           input,
           format,
           request,
+          params,
         })
       ) as PdfScreenshotResult | PngScreenshotResult;
 
