@@ -60,12 +60,21 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
           docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
           disabled={isGated}
           error={errorToText(error)}
-          title={i18n.translate(
-            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
-            {
-              defaultMessage: 'Build a connector',
-            }
-          )}
+          title={
+            isNative
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.title',
+                  {
+                    defaultMessage: 'Index using a connector',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
+                  {
+                    defaultMessage: 'Build a connector',
+                  }
+                )
+          }
           type="connector"
           onNameChange={() => {
             apiReset();
@@ -83,7 +92,19 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
                         <p>
                           <FormattedMessage
                             id="xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.content"
-                            defaultMessage="Using our built-in connectors, you’ll be able to ingest data into your Elasticsearch index easily and swiftly using a number of Elastic-developed connectors."
+                            defaultMessage="Choose from our catalog of native connectors to start extracting searchable content from supported data sources like MongoDB. If you need to customize a connector’s behavior, you can always deploy the self-managed connector client version and register it via the {buildAConnectorLabel} workflow."
+                            values={{
+                              buildAConnectorLabel: (
+                                <strong>
+                                  {i18n.translate(
+                                    'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title',
+                                    {
+                                      defaultMessage: 'Build a connector',
+                                    }
+                                  )}
+                                </strong>
+                              ),
+                            }}
                           />
                         </p>
                       </EuiText>
@@ -92,22 +113,13 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
                     title: i18n.translate(
                       'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.nativeConnector.title',
                       {
-                        defaultMessage: 'Use a pre-built connector to populate your index',
+                        defaultMessage: 'Configure a connector',
                       }
                     ),
                     titleSize: 'xs',
                   }
                 : {
-                    children: isNative ? (
-                      <EuiText size="s">
-                        <p>
-                          <FormattedMessage
-                            id="xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.content"
-                            defaultMessage="Using our built-in connectors, you’ll be able to ingest data into your Elasticsearch index easily and swiftly using a number of Elastic-developed connectors."
-                          />
-                        </p>
-                      </EuiText>
-                    ) : (
+                    children: (
                       <EuiText size="s">
                         <p>
                           <FormattedMessage

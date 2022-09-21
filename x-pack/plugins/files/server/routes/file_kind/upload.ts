@@ -61,6 +61,7 @@ export const handler: FileKindsRequestHandler<Params, Query, Body> = async (
     ) {
       return res.badRequest({ body: { message: e.message } });
     } else if (e instanceof fileErrors.AbortedUploadError) {
+      fileService.usageCounter?.('UPLOAD_ERROR_ABORT');
       fileService.logger.error(e);
       if (req.query.selfDestructOnAbort) {
         logger.info(

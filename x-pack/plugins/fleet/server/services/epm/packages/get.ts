@@ -23,11 +23,7 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import {
-  IngestManagerError,
-  PackageFailedVerificationError,
-  PackageNotFoundError,
-} from '../../../errors';
+import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -185,6 +181,7 @@ export async function getPackageInfo({
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     notice: Registry.getNoticePath(paths || []),
+    licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
@@ -297,7 +294,7 @@ export async function getPackageFromSource(options: {
     logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {
-    throw new IngestManagerError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,
