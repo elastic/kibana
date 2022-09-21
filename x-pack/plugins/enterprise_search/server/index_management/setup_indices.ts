@@ -70,7 +70,7 @@ export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
   default_extract_binary_content: true,
   default_name: 'ent-search-generic-ingestion',
   default_reduce_whitespace: true,
-  default_run_ml_inference: false,
+  default_run_ml_inference: true,
 };
 
 const indices: IndexDefinition[] = [

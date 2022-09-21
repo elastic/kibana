@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import { enableServiceMetrics } from '@kbn/observability-plugin/common';
 import * as t from 'io-ts';
 import { uniq, mergeWith } from 'lodash';
 import {
@@ -122,6 +123,7 @@ const servicesRoute = createApmServerRoute({
       probability,
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
+    const coreContext = await resources.context.core;
 
     const [setup, serviceGroup, randomSampler] = await Promise.all([
       setupRequest(resources),
@@ -132,8 +134,13 @@ const servicesRoute = createApmServerRoute({
     ]);
 
     const { apmEventClient, config } = setup;
+
+    const serviceMetricsEnabled =
+      await coreContext.uiSettings.client.get<boolean>(enableServiceMetrics);
+
     const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
       await getServiceInventorySearchSource({
+        serviceMetricsEnabled,
         config,
         apmEventClient,
         kuery,
@@ -208,6 +215,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       request,
       plugins: { security },
     } = resources;
+    const coreContext = await resources.context.core;
 
     const { environment, kuery, offset, start, end, probability } =
       params.query;
@@ -220,8 +228,13 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
     ]);
 
     const { apmEventClient, config } = setup;
+
+    const serviceMetricsEnabled =
+      await coreContext.uiSettings.client.get<boolean>(enableServiceMetrics);
+
     const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
       await getServiceInventorySearchSource({
+        serviceMetricsEnabled,
         config,
         apmEventClient,
         kuery,
