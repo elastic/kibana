@@ -34,6 +34,11 @@ const getContextProvider: () => React.FC =
 
 const createStartMock = (): jest.Mocked<CloudStart> => ({
   CloudContextProvider: jest.fn(getContextProvider()),
+  cloudId: 'mock-cloud-id',
+  isCloudEnabled: true,
+  deploymentUrl: 'deployment-url',
+  profileUrl: 'profile-url',
+  organizationUrl: 'organization-url',
 });
 
 export const cloudMock = {

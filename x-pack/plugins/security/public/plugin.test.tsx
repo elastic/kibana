@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { maybeAddCloudLinksMock } from './plugin.test.mocks';
+
 import { Observable } from 'rxjs';
 
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -78,6 +81,10 @@ describe('Security Plugin', () => {
   });
 
   describe('#start', () => {
+    beforeEach(() => {
+      maybeAddCloudLinksMock.mockReset();
+    });
+
     it('should be able to setup if optional plugins are not available', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(
@@ -141,6 +148,54 @@ describe('Security Plugin', () => {
       });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('tries to add cloud links if isCloudEnabled is true and not in an anonymous path', () => {
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(coreMock.createSetup({ basePath: '/some-base-path' }), {
+        licensing: licensingMock.createSetup(),
+      });
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+        cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      });
+      expect(maybeAddCloudLinksMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not try to add cloud links if isCloudEnabled is true but it is an anonymous path', () => {
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(coreMock.createSetup({ basePath: '/some-base-path' }), {
+        licensing: licensingMock.createSetup(),
+      });
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+        cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      });
+      expect(maybeAddCloudLinksMock).not.toHaveBeenCalled();
+    });
+
+    it('does not try to add cloud links if isCloudEnabled is false', () => {
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(coreMock.createSetup({ basePath: '/some-base-path' }), {
+        licensing: licensingMock.createSetup(),
+      });
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+        cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
+      });
+      expect(maybeAddCloudLinksMock).not.toHaveBeenCalled();
     });
   });
 

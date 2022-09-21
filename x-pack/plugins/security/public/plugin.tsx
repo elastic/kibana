@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -28,6 +29,7 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
+import { maybeAddCloudLinks } from './cloud_ui_tweaks';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -43,6 +45,7 @@ export interface PluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   share?: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -51,6 +54,7 @@ export interface PluginStartDependencies {
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
+  cloud?: CloudStart;
 }
 
 export class SecurityPlugin
@@ -81,7 +85,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, share }: PluginSetupDependencies
+    { cloud, home, licensing, management, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -106,7 +110,12 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    this.analyticsService.setup({ securityLicense: license });
+    this.analyticsService.setup({
+      analytics: core.analytics,
+      authc: this.authc,
+      cloudId: cloud?.cloudId,
+      securityLicense: license,
+    });
 
     accountManagementApp.create({
       authc: this.authc,
@@ -154,7 +163,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { management, share }: PluginStartDependencies
+    { cloud, management, share }: PluginStartDependencies
   ): SecurityPluginStart {
     const { application, http, notifications, docLinks } = core;
     const { anonymousPaths } = http;
@@ -179,9 +188,15 @@ export class SecurityPlugin
 
     this.analyticsService.start({ http: core.http });
 
+    const navControlService = this.navControlService.start({ core, authc: this.authc });
+
+    if (cloud?.isCloudEnabled && core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      maybeAddCloudLinks({ authc: this.authc, chrome: core.chrome, cloud, navControlService });
+    }
+
     return {
       uiApi: getUiApi({ core }),
-      navControlService: this.navControlService.start({ core, authc: this.authc }),
+      navControlService,
       authc: this.authc as AuthenticationServiceStart,
       userProfiles: {
         getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(

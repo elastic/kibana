@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
@@ -16,7 +15,6 @@ import { parseDeploymentIdFromDeploymentUrl } from './utils';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
-  security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -32,23 +30,16 @@ export interface CloudSetup {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  private readonly logger: Logger;
   private readonly config: CloudConfigType;
 
   constructor(private readonly context: PluginInitializerContext) {
-    this.logger = this.context.logger.get();
     this.config = this.context.config.get<CloudConfigType>();
   }
 
-  public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup): CloudSetup {
-    this.logger.debug('Setting up Cloud plugin');
+  public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
-
-    if (isCloudEnabled) {
-      security?.setIsElasticCloudDeployment();
-    }
 
     return {
       cloudId: this.config.id,

@@ -8,6 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -88,12 +89,6 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
-
-  /**
-   * Sets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be
-   * set by the Cloud plugin and can be only once.
-   */
-  setIsElasticCloudDeployment: () => void;
 }
 
 /**
@@ -118,6 +113,7 @@ export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
+  cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
 }
@@ -213,13 +209,6 @@ export class SecurityPlugin
    */
   private isElasticCloudDeployment?: boolean;
   private readonly getIsElasticCloudDeployment = () => this.isElasticCloudDeployment === true;
-  private readonly setIsElasticCloudDeployment = () => {
-    if (this.isElasticCloudDeployment !== undefined) {
-      throw new Error(`The Elastic Cloud deployment flag has been set already!`);
-    }
-
-    this.isElasticCloudDeployment = true;
-  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -246,8 +235,9 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { cloud, features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
+    this.isElasticCloudDeployment = cloud?.isCloudEnabled;
     this.kibanaIndexName = core.savedObjects.getKibanaIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
@@ -374,7 +364,6 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
-      setIsElasticCloudDeployment: this.setIsElasticCloudDeployment,
     });
   }
 
