@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
+import { EuiFilePicker } from '@elastic/eui';
 
 import {
   FileKindsRegistryImpl,
@@ -20,7 +21,6 @@ import { createMockFilesClient } from '../../mocks';
 import { FileJSON } from '../../../common';
 import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
-import { UploadFile as Component } from './upload_file.component';
 
 describe('UploadFile', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -59,7 +59,7 @@ describe('UploadFile', () => {
       actions: {
         addFiles: (files: File[]) =>
           act(async () => {
-            testBed.component.find(Component).props().onChange(files);
+            testBed.component.find(EuiFilePicker).props().onChange!(files as unknown as FileList);
             await sleep(1);
             testBed.component.update();
           }),
