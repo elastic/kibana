@@ -16,7 +16,6 @@ export const executionLogSortableColumns = [
   'num_active_alerts',
   'num_recovered_alerts',
   'num_new_alerts',
-  'num_errored_actions',
 ] as const;
 
 export const actionErrorLogSortableColumns = [

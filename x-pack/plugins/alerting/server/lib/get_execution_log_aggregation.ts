@@ -228,18 +228,6 @@ export function getExecutionLogAggregation({
 
   const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
 
-  const termSort = (sort as estypes.SortCombinations[]).filter(
-    (s) => !Object.keys(s).includes('num_errored_actions')
-  );
-
-  if (!termSort.length) {
-    termSort.push({
-      timestamp: {
-        order: 'desc',
-      },
-    });
-  }
-
   return {
     excludeExecuteStart: {
       filter: {
@@ -275,32 +263,9 @@ export function getExecutionLogAggregation({
           terms: {
             field: EXECUTION_UUID_FIELD,
             size: DEFAULT_MAX_BUCKETS_LIMIT,
-            order: formatSortForTermSort(termSort),
+            order: formatSortForTermSort(sort),
           },
           aggs: {
-            numErroredActions: {
-              filter: {
-                bool: {
-                  must: [
-                    {
-                      match: {
-                        [ACTION_FIELD]: 'execute',
-                      },
-                    },
-                    {
-                      match: {
-                        [PROVIDER_FIELD]: 'actions',
-                      },
-                    },
-                    {
-                      match: {
-                        [OUTCOME_FIELD]: 'failure',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
             // Bucket sort to allow paging through executions
             executionUuidSorted: {
               bucket_sort: {
