@@ -10,57 +10,60 @@ import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtu
 import {
   createResourceInstallerMock,
   createSLORepositoryMock,
-  createTransformInstallerMock,
+  createTransformManagerMock,
 } from './mocks';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
-import { TransformInstaller } from './transform_installer';
+import { TransformManager } from './transform_manager';
 
-const SPACE_ID = 'some-space-id';
-
-describe('createSLO', () => {
+describe('CreateSLO', () => {
   let mockResourceInstaller: jest.Mocked<ResourceInstaller>;
   let mockRepository: jest.Mocked<SLORepository>;
-  let mockTransformInstaller: jest.Mocked<TransformInstaller>;
+  let mockTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
   beforeEach(() => {
     mockResourceInstaller = createResourceInstallerMock();
     mockRepository = createSLORepositoryMock();
-    mockTransformInstaller = createTransformInstallerMock();
-    createSLO = new CreateSLO(
-      mockResourceInstaller,
-      mockRepository,
-      mockTransformInstaller,
-      SPACE_ID
-    );
+    mockTransformManager = createTransformManagerMock();
+    createSLO = new CreateSLO(mockResourceInstaller, mockRepository, mockTransformManager);
   });
 
   describe('happy path', () => {
     it('calls the expected services', async () => {
       const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
       const response = await createSLO.execute(sloParams);
 
-      expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalledWith(SPACE_ID);
+      expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalled();
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ ...sloParams, id: expect.any(String) })
       );
-      expect(mockTransformInstaller.installAndStartTransform).toHaveBeenCalledWith(
-        expect.objectContaining({ ...sloParams, id: expect.any(String) }),
-        SPACE_ID
+      expect(mockTransformManager.install).toHaveBeenCalledWith(
+        expect.objectContaining({ ...sloParams, id: expect.any(String) })
       );
+      expect(mockTransformManager.start).toHaveBeenCalledWith('slo-transform-id');
       expect(response).toEqual(expect.objectContaining({ id: expect.any(String) }));
     });
   });
 
   describe('unhappy path', () => {
-    it('deletes the SLO saved objects when transform installation fails', async () => {
-      mockTransformInstaller.installAndStartTransform.mockRejectedValue(
-        new Error('Transform Error')
-      );
+    it('deletes the SLO when transform installation fails', async () => {
+      mockTransformManager.install.mockRejectedValue(new Error('Transform install error'));
       const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform Error');
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform install error');
+      expect(mockRepository.deleteById).toBeCalled();
+    });
+
+    it('removes the transform and deletes the SLO when transform start fails', async () => {
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+      mockTransformManager.start.mockRejectedValue(new Error('Transform start error'));
+      const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform start error');
+      expect(mockTransformManager.uninstall).toBeCalledWith('slo-transform-id');
       expect(mockRepository.deleteById).toBeCalled();
     });
   });
