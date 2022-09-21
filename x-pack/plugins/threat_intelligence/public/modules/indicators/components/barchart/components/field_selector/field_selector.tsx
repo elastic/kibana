@@ -10,7 +10,7 @@ import { EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { SecuritySolutionDataViewBase } from '../../../../../../types';
-import { RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../../types/indicator';
 
 export const DROPDOWN_TEST_ID = 'tiIndicatorFieldSelectorDropdown';
 

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { FieldTypesContext } from '../containers/field_types_provider';
+import { createContext } from 'react';
 
-export const useFieldTypes = () => {
-  return useContext(FieldTypesContext) || {};
-};
+export type FieldTypesContextValue = Record<string, string | undefined>;
+
+export const FieldTypesContext = createContext<FieldTypesContextValue | undefined>({});

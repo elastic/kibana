@@ -12,7 +12,7 @@ import {
   generateMockIndicator,
   Indicator,
   RawIndicatorFieldId,
-} from '../../../../../../../common/types/indicator';
+} from '../../../../../../types/indicator';
 import { IndicatorFlyoutTableTab, TABLE_TEST_ID } from '.';
 import { unwrapValue } from '../../../../lib/unwrap_value';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';

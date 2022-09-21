@@ -7,8 +7,8 @@
 
 import React, { VFC } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { ComponentType } from '../../../../../../common/types/component_type';
-import { Indicator } from '../../../../../../common/types/indicator';
+import { ComponentType } from '../../../../../types/component_type';
+import { Indicator } from '../../../../../types/indicator';
 import { Pagination } from '../../../hooks/use_indicators';
 import { AddToTimeline } from '../../../../timeline/components/add_to_timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../lib/field_value';

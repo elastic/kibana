@@ -11,8 +11,8 @@ import {
   generateMockIndicator,
   generateMockUrlIndicator,
   Indicator,
-} from '../../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+} from '../../../../types/indicator';
+import { EMPTY_VALUE } from '../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { InvestigateInTimelineButtonIcon } from './investigate_in_timeline_button_icon';
 

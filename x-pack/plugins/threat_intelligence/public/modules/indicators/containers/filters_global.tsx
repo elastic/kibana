@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FC } from 'react';
-import { useSecurityContext } from '../hooks/use_security_context';
+import { useSecurityContext } from '../../../hooks/use_security_context';
 
 export const FiltersGlobal: FC = ({ children }) => {
   const contextValue = useSecurityContext();

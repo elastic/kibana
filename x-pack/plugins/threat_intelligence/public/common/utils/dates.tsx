@@ -10,7 +10,7 @@ moment.suppressDeprecationWarnings = true;
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
 import { TickFormatter } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../constants';
 
 export const FULL_DATE = 'MMMM Do YYYY @ HH:mm:ss';
 export const BARCHART_NUMBER_OF_COLUMNS = 16;

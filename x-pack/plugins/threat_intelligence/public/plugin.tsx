@@ -18,7 +18,7 @@ import {
   ThreatIntelligencePluginStartDeps,
   SecuritySolutionPluginContext,
 } from './types';
-import { SecuritySolutionContext } from './containers/security_solution_context';
+import { SecuritySolutionContext } from './contexts/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
 import { IntegrationsGuard } from './containers/integrations_guard';

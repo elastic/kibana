@@ -14,9 +14,9 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { THREAT_QUERY_BASE } from '../../../../common/constants';
+import { THREAT_QUERY_BASE } from '../../../common/constants';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
 

@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../types/indicator';
 
 export interface InvestigateInTimelineButtonProps {
   /**

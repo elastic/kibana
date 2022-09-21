@@ -12,10 +12,10 @@ import { IndicatorsTable } from './components/table';
 import { useIndicators } from './hooks/use_indicators';
 import { DefaultPageLayout } from '../../components/layout';
 import { useFilters } from '../query_bar/hooks/use_filters';
-import { FiltersGlobal } from '../../containers/filters_global';
+import { FiltersGlobal } from './containers/filters_global';
 import QueryBar from '../query_bar/components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
-import { FieldTypesProvider } from '../../containers/field_types_provider';
+import { FieldTypes } from './containers/field_types';
 import { useColumnSettings } from './components/table/hooks/use_column_settings';
 
 export const IndicatorsPage: VFC = () => {
@@ -42,7 +42,7 @@ export const IndicatorsPage: VFC = () => {
   });
 
   return (
-    <FieldTypesProvider>
+    <FieldTypes>
       <DefaultPageLayout pageTitle="Indicators">
         <FiltersGlobal>
           <QueryBar
@@ -71,7 +71,7 @@ export const IndicatorsPage: VFC = () => {
           />
         </FiltersContextProvider>
       </DefaultPageLayout>
-    </FieldTypesProvider>
+    </FieldTypes>
   );
 };
 

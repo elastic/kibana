@@ -13,7 +13,7 @@ import {
   barChartTimeAxisLabelFormatter,
   calculateBarchartColumnTimeInterval,
 } from './dates';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../constants';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
 const mockInvalidStringDate = 'invalid date';

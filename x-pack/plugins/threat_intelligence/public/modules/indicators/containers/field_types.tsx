@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FC } from 'react';
-import { useSourcererDataView } from '../modules/indicators/hooks/use_sourcerer_data_view';
-
-export type FieldTypesContextValue = Record<string, string | undefined>;
-
-export const FieldTypesContext = createContext<FieldTypesContextValue | undefined>({});
+import { FieldTypesContext, FieldTypesContextValue } from '../contexts';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
 
 /**
  * Exposes mapped field types for threat intel shared use
  */
-export const FieldTypesProvider: FC = ({ children }) => {
+export const FieldTypes: FC = ({ children }) => {
   const { indexPattern } = useSourcererDataView();
 
   // field name to field type map to allow the cell_renderer to format dates

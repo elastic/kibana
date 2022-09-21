@@ -20,10 +20,9 @@ import { KibanaContext } from '../../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_settings_service';
-import { SecuritySolutionContext } from '../../containers/security_solution_context';
-import { FiltersContext } from '../../modules/indicators/contexts';
+import { SecuritySolutionContext } from '../../contexts/security_solution_context';
+import { FieldTypesContext, FiltersContext } from '../../modules/indicators/contexts';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
-import { FieldTypesContext } from '../../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
 
 export const localStorageMock = (): IStorage => {

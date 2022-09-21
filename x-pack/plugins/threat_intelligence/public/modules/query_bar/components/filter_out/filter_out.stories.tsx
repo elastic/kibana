@@ -8,7 +8,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../../types/indicator';
 import { FiltersContext } from '../../../indicators/contexts';
 import { FilterOut } from '.';
 

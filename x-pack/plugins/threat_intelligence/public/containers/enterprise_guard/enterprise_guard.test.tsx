@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { SecuritySolutionPluginContext } from '../../types';
-import { SecuritySolutionContext } from '../security_solution_context';
+import { SecuritySolutionContext } from '../../contexts/security_solution_context';
 import { EnterpriseGuard } from './enterprise_guard';
 
 describe('<EnterpriseGuard />', () => {

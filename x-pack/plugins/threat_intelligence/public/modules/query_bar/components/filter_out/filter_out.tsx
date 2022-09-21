@@ -9,11 +9,11 @@ import React, { useCallback, VFC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { ComponentType } from '../../../../../common/types/component_type';
+import { ComponentType } from '../../../../types/component_type';
 import { useIndicatorFiltersContext } from '../../../indicators/hooks/use_filters_context';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { FilterOut as FilterOutConst, updateFiltersArray } from '../../lib/filter';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../types/indicator';
 import { useStyles } from './styles';
 
 const ICON_TYPE = 'minusInCircle';

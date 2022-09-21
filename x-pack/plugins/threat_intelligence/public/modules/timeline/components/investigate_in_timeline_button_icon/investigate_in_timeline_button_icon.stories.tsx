@@ -8,7 +8,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
-import { generateMockUrlIndicator } from '../../../../../common/types/indicator';
+import { generateMockUrlIndicator } from '../../../../types/indicator';
 import { InvestigateInTimelineButtonIcon } from './investigate_in_timeline_button_icon';
 
 export default {

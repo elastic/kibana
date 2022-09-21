@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './field_types';
-export * from './filters_context';
-export * from './filters_global';
+import { useContext } from 'react';
+import { FieldTypesContext } from '../contexts';
+
+export const useFieldTypes = () => {
+  return useContext(FieldTypesContext) || {};
+};

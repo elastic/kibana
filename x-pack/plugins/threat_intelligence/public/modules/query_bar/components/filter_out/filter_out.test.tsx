@@ -8,11 +8,11 @@
 import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../../types/indicator';
 import { useIndicatorFiltersContext } from '../../../indicators/hooks/use_filters_context';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
 import { FilterOut } from '.';
-import { ComponentType } from '../../../../../common/types/component_type';
+import { ComponentType } from '../../../../types/component_type';
 
 jest.mock('../../../indicators/hooks/use_filters_context');
 

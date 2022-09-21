@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { SecuritySolutionContext } from '../containers/security_solution_context';
+import { SecuritySolutionContext } from '../contexts/security_solution_context';
 import { SecuritySolutionPluginContext } from '../types';
 
 export const useSecurityContext = (): SecuritySolutionPluginContext => {

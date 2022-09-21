@@ -8,7 +8,7 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React, { VFC } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../types/indicator';
 import { FilterIn } from '../../../query_bar/components/filter_in';
 import { FilterOut } from '../../../query_bar/components/filter_out';
 import { AddToTimeline } from '../../../timeline/components/add_to_timeline';

@@ -10,10 +10,7 @@ import {
   useInvestigateInTimeline,
   UseInvestigateInTimelineValue,
 } from './use_investigate_in_timeline';
-import {
-  generateMockIndicator,
-  generateMockUrlIndicator,
-} from '../../../../common/types/indicator';
+import { generateMockIndicator, generateMockUrlIndicator } from '../../../types/indicator';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 
 describe('useInvestigateInTimeline()', () => {

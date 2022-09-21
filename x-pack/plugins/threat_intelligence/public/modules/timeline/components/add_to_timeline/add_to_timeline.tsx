@@ -13,10 +13,10 @@ import { EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generateDataProvider } from '../../lib/data_provider';
-import { ComponentType } from '../../../../../common/types/component_type';
+import { ComponentType } from '../../../../types/component_type';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../types/indicator';
 import { useStyles } from './styles';
 
 export interface AddToTimelineProps {

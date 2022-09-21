@@ -10,7 +10,7 @@ import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { Indicator } from '../../../../../../common/types/indicator';
+import { Indicator } from '../../../../../types/indicator';
 import { IndicatorFieldValue } from '../../field_value';
 import { IndicatorsTableContext } from '../contexts/context';
 import { ActionsRowCell } from '.';

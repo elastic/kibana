@@ -8,7 +8,7 @@
 import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import negate from 'lodash/negate';
-import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../types/indicator';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { translateFieldLabel } from '../../field_label';
 

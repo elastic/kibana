@@ -6,7 +6,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../constants';
 
 /**
  * Creates an object to pass to the uiSettings property when creating a KibanaReacrContext (see src/plugins/kibana_react/public/context/context.tsx).

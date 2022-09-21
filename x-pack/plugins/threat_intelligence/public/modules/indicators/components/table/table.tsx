@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { CellActions } from './components/cell_actions';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../../../../types/indicator';
 import { cellRendererFactory } from './components/cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts/context';
@@ -27,7 +27,7 @@ import { IndicatorFlyout } from '../flyout';
 import { Pagination } from '../../hooks/use_indicators';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
 import { ColumnSettingsValue } from './hooks/use_column_settings';
-import { useFieldTypes } from '../../../../hooks/use_field_types';
+import { useFieldTypes } from '../../hooks/use_field_types';
 import { getFieldSchema } from '../../lib/get_field_schema';
 
 export interface IndicatorsTableProps {

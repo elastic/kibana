@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InvestigateInTimelineButton } from '../../../timeline/components/investigate_in_timeline_button';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../../../../types/indicator';
 import { unwrapValue } from '../../lib/unwrap_value';
 import { IndicatorFlyoutJsonTab } from './components/json_tab';
 import { IndicatorFlyoutTableTab } from './components/table_tab';

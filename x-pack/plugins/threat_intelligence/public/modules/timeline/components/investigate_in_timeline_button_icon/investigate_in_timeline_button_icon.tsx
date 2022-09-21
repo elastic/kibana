@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../types/indicator';
 
 const BUTTON_LABEL: string = i18n.translate(
   'xpack.threatIntelligence.investigateInTimelineButtonIcon',

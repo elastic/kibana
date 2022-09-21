@@ -8,7 +8,7 @@
 import moment from 'moment';
 moment.suppressDeprecationWarnings = true;
 import React, { VFC } from 'react';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../../common/constants';
 import { dateFormatter } from '../../common/utils/dates';
 import { useDateFormat, useTimeZone } from '../../hooks/use_kibana_ui_settings';
 
