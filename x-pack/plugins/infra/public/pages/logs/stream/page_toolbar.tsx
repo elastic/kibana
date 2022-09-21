@@ -12,6 +12,7 @@ import React from 'react';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -31,6 +32,8 @@ export const LogsToolbar = () => {
   const { filterQueryDraft, isFilterQueryDraftValid, applyLogFilterQuery, setLogFilterQueryDraft } =
     useLogFilterStateContext();
   const { setSurroundingLogsId } = useLogEntryFlyoutContext();
+  const { http, notifications, docLinks, uiSettings, data, storage, unifiedSearch } =
+    useKibanaContextForPlugin().services;
 
   const {
     setHighlightTerms,
@@ -71,6 +74,10 @@ export const LogsToolbar = () => {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
             query={filterQueryDraft}
+            appName={i18n.translate('xpack.infra.appName', {
+              defaultMessage: 'Infra logs',
+            })}
+            deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
           />
         </QueryBarFlexItem>
         <EuiFlexItem grow={false}>

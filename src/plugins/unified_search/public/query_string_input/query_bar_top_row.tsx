@@ -31,7 +31,7 @@ import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
-import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IUnifiedSearchPluginServices } from '../types';
 import QueryStringInputUI from './query_string_input';
@@ -51,8 +51,6 @@ import './query_bar.scss';
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-
-const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -179,7 +177,19 @@ export const QueryBarTopRow = React.memo(
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
     const kibana = useKibana<IUnifiedSearchPluginServices>();
-    const { uiSettings, storage, appName } = kibana.services;
+
+    const {
+      uiSettings,
+      storage,
+      appName,
+      data,
+      usageCollection,
+      unifiedSearch,
+      notifications,
+      docLinks,
+      http,
+    } = kibana.services;
+
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
@@ -511,7 +521,7 @@ export const QueryBarTopRow = React.memo(
           {!renderFilterMenuOnly() && renderFilterButtonGroup()}
           {shouldRenderQueryInput() && (
             <EuiFlexItem data-test-subj="unifiedQueryInput">
-              <QueryStringInput
+              <QueryStringInputUI
                 disableAutoFocus={props.disableAutoFocus}
                 indexPatterns={props.indexPatterns!}
                 query={props.query! as Query}
@@ -530,6 +540,17 @@ export const QueryBarTopRow = React.memo(
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
                 isDisabled={props.isDisabled}
+                appName={appName}
+                deps={{
+                  unifiedSearch,
+                  data,
+                  storage,
+                  usageCollection,
+                  notifications,
+                  docLinks,
+                  http,
+                  uiSettings,
+                }}
               />
             </EuiFlexItem>
           )}

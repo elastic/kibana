@@ -15,6 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
+import { useMlKibana } from '../../../contexts/kibana';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
 
@@ -111,6 +112,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   updateLanguage,
 }) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
+  const { services } = useMlKibana();
+  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
+    services;
 
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
@@ -166,6 +170,8 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           disableAutoFocus
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
+          appName={appName}
+          deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
         />
       }
       isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}

@@ -37,6 +37,7 @@ export const WorkspaceRoute = ({
     capabilities,
     storage,
     data,
+    unifiedSearch,
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
@@ -73,9 +74,10 @@ export const WorkspaceRoute = ({
       appName: 'graph',
       storage,
       data,
+      unifiedSearch,
       ...coreStart,
     }),
-    [coreStart, data, storage]
+    [coreStart, data, storage, unifiedSearch]
   );
 
   const [store] = useState(() =>
