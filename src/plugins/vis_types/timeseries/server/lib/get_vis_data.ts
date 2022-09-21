@@ -66,7 +66,10 @@ export async function getVisData(
           (series?.override_index_pattern ? series.series_time_field : panel.time_field) ||
           index.indexPattern?.timeFieldName;
 
-        // should use @timestamp as default timeField for es indeces if user doesn't provide timeField
+        /** This code is historically in TSVB and for backward compatibility 
+         *  we cannot remove it while we support String Indexes.
+         *  Case: only for String Indexes mode + if user doesn't provide timeField 
+         *  we should use @timestamp as default timeField **/
         if (!panel.use_kibana_indexes && !timeField) {
           timeField = '@timestamp';
         }
