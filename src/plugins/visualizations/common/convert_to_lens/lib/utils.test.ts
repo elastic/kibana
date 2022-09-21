@@ -7,10 +7,16 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { AggBasedColumn, Operations } from '../..';
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../types';
-import { getFieldNameFromField, getLabel, getLabelForPercentile, getValidColumns } from './utils';
+import {
+  getFieldNameFromField,
+  getLabel,
+  getLabelForPercentile,
+  getValidColumns,
+  isSchemaConfig,
+} from './utils';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -127,5 +133,32 @@ describe('getFieldNameFromField', () => {
   test('should return field name if field is DataViewField', () => {
     const field = stubLogstashDataView.fields[0];
     expect(getFieldNameFromField(field)).toEqual(field.name);
+  });
+});
+
+describe('isSchemaConfig', () => {
+  const iAggConfig = {
+    id: '',
+    enabled: false,
+    params: {},
+  } as IAggConfig;
+
+  const schemaConfig: SchemaConfig<METRIC_TYPES.AVG> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.AVG,
+  };
+
+  test('should be false if is IAggConfig', () => {
+    expect(isSchemaConfig(iAggConfig)).toBeFalsy();
+  });
+
+  test('should be false if is SchemaConfig', () => {
+    expect(isSchemaConfig(schemaConfig)).toBeTruthy();
   });
 });
