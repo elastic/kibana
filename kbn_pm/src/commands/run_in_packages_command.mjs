@@ -9,6 +9,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '../lib/paths.mjs';
+import { packageDiscovery } from '../lib/package_discovery.mjs';
 import { run, spawnStreaming } from '../lib/spawn.mjs';
 
 /** @type {import('../lib/command').Command} */
@@ -39,8 +40,7 @@ export const command = {
     const exclude = args.getStringValues('exclude') ?? [];
     const include = args.getStringValues('include') ?? [];
 
-    const { discoverBazelPackages } = await import('@kbn/bazel-packages');
-    const packages = await discoverBazelPackages(REPO_ROOT);
+    const packages = await packageDiscovery();
     for (const { manifest, pkg, normalizedRepoRelativeDir } of packages) {
       if (
         exclude.includes(manifest.id) ||

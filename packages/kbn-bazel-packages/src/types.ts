@@ -73,6 +73,14 @@ interface PackageManifestBaseFields {
    * other devOnly packages) and will never be included in the distributable
    */
   devOnly?: boolean;
+  /**
+   * A place for deprecated and undocumented fields to be placed, do not put anything
+   * in here or use these features unless instructed to by Kibana Operations. We're
+   * actively working on removing as much unnecessary variation as possible in packages
+   * and that includes removing all uses of this property.
+   * @deprecated
+   */
+  __deprecated__TalkToOperationsIfYouThinkYouNeedThis?: Record<string, unknown>;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {

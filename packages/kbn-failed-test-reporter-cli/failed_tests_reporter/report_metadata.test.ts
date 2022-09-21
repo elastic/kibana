@@ -8,7 +8,7 @@
 
 import { getReportMessageIter } from './report_metadata';
 import { parseTestReport } from './test_report';
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './test_helpers/fixtures';
 
 it('reads messages and screenshots from metadata-json properties', async () => {
   const ftrReport = await parseTestReport(FTR_REPORT);

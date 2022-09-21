@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-/** @typedef {import('./src/bazel_package').BazelPackage} BazelPackage */
 /** @typedef {import('./src/types').KibanaPackageManifest} KibanaPackageManifest */
 /** @typedef {import('./src/types').KibanaPackageType} KibanaPackageType */
 /** @typedef {import('./src/types').ParsedPackageJson} ParsedPackageJson */
 
 const { BAZEL_PACKAGE_DIRS, getAllBazelPackageDirs } = require('./src/bazel_package_dirs');
 const { discoverPackageManifestPaths, discoverBazelPackages } = require('./src/discover_packages');
+const { BazelPackage } = require('./src/bazel_package');
 const {
   parsePackageManifest,
   readPackageManifest,
@@ -28,5 +28,6 @@ module.exports = {
   parsePackageManifest,
   readPackageManifest,
   validatePackageManifest,
+  BazelPackage,
   Jsonc,
 };

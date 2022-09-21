@@ -4,5 +4,10 @@
   "owner": <%- json(pkg.owner) %>,<% if (pkg.dev) { %>
   "devOnly": true,<% } %>
   "runtimeDeps": [],
-  "typeDeps": [],
+  "typeDeps": [],<% if (pkg.web) { %>
+  "__deprecated__TalkToOperationsIfYouThinkYouNeedThis": {
+    "pkgJsonOverrides": {
+      "browser": "./target_web/index.js",
+    },
+  },<% } %>
 }

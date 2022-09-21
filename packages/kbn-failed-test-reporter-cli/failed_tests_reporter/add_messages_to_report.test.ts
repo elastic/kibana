@@ -28,7 +28,7 @@ jest.mock('fs', () => {
   };
 });
 
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, CYPRESS_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, CYPRESS_REPORT } from './test_helpers/fixtures';
 import { parseTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 

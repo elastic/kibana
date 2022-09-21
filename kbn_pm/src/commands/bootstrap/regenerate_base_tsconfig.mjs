@@ -10,8 +10,8 @@ import Path from 'path';
 import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
+import { normalizePath } from '../../lib/normalize_path.mjs';
 import { convertPluginIdToPackageId } from './plugins.mjs';
-import { normalizePath } from './normalize_path.mjs';
 
 /**
  * @param {import('@kbn/plugin-discovery').KibanaPlatformPlugin[]} plugins

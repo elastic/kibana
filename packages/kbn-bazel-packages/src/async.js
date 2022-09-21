@@ -15,7 +15,7 @@
  * @returns {Promise<PromiseSettledResult<T2>>}
  */
 const settle = async (fn, item) => {
-  const [result] = await Promise.allSettled([(async () => fn(item))()]);
+  const [result] = await Promise.allSettled([(async () => await fn(item))()]);
   return result;
 };
 

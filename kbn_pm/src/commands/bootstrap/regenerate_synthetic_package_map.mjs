@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { normalizePath } from './normalize_path.mjs';
+import { normalizePath } from '../../lib/normalize_path.mjs';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { convertPluginIdToPackageId } from './plugins.mjs';
 

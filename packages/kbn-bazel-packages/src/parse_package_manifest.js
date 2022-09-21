@@ -122,8 +122,18 @@ function validatePackageManifest(parsed) {
     throw new Error('expected manifest root to be an object');
   }
 
-  const { type, id, owner, typeDeps, runtimeDeps, devOnly, plugin, sharedBrowserBundle, ...extra } =
-    parsed;
+  const {
+    type,
+    id,
+    owner,
+    typeDeps,
+    runtimeDeps,
+    devOnly,
+    plugin,
+    sharedBrowserBundle,
+    __deprecated__TalkToOperationsIfYouThinkYouNeedThis: deprecated,
+    ...extra
+  } = parsed;
 
   const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
@@ -161,12 +171,25 @@ function validatePackageManifest(parsed) {
     throw err(`devOnly`, devOnly, `must be a boolean when defined`);
   }
 
+  if (
+    // eslint-disable-next-line camelcase
+    deprecated !== undefined &&
+    !isObj(deprecated)
+  ) {
+    throw err(
+      `__deprecated__TalkToOperationsIfYouThinkYouNeedThis`,
+      deprecated,
+      'must be an object'
+    );
+  }
+
   const base = {
     id,
     owner: Array.isArray(owner) ? owner : [owner],
     typeDeps,
     runtimeDeps,
     devOnly,
+    __deprecated__TalkToOperationsIfYouThinkYouNeedThis: deprecated,
   };
 
   // return if this is one of the more basic types of package types

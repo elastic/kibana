@@ -8,11 +8,14 @@
 
 import { run } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
+import { packageDiscovery } from '../../lib/package_discovery.mjs';
 import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { regenerateSyntheticPackageMap } from './regenerate_synthetic_package_map.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { pluginDiscovery } from './plugins.mjs';
+import { generatePackageJsons } from '../../config_generation/generate_package_json.mjs';
+import { generateTsconfigs } from '../../config_generation/generate_tsconfig.mjs';
 import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 
 /** @type {import('../../lib/command').Command} */
@@ -58,13 +61,27 @@ export const command = {
     const forceInstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
 
-    await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
+    const [plugins] = await Promise.all([
+      time('plugin discovery', async () => {
+        return await pluginDiscovery();
+      }),
 
-    // Install bazel machinery tools if needed
-    await Bazel.ensureInstalled(log);
+      (async () => {
+        const pkgs = await time('package discovery', packageDiscovery);
+        await Promise.all([
+          time('generate package.json files', async () => await generatePackageJsons(pkgs)),
+          time('generate tsconfig.json files', async () => await generateTsconfigs(pkgs)),
+        ]);
+      })(),
 
-    // Setup remote cache settings in .bazelrc.cache if needed
-    await setupRemoteCache(log);
+      (async () => {
+        await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
+        // Install bazel machinery tools if needed
+        await Bazel.ensureInstalled(log);
+        // Setup remote cache settings in .bazelrc.cache if needed
+        await setupRemoteCache(log);
+      })(),
+    ]);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -81,10 +98,6 @@ export const command = {
         await Bazel.installYarnDeps(log, { offline, quiet });
       });
     }
-
-    const plugins = await time('plugin discovery', async () => {
-      return await pluginDiscovery();
-    });
 
     // generate the synthetic package map which powers several other features, needed
     // as an input to the package build

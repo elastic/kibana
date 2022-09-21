@@ -8,11 +8,11 @@
 
 export const COMMANDS = [
   (await import('./bootstrap/bootstrap_command.mjs')).command,
-  (await import('./watch_command.mjs')).command,
+  (await import('./watch/watch_command.mjs')).command,
   (await import('./run_in_packages_command.mjs')).command,
   (await import('./clean_command.mjs')).command,
   (await import('./reset_command.mjs')).command,
-  (await import('./test_command.mjs')).command,
+  (await import('./x_command.mjs')).command,
 ];
 
 /**

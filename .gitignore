@@ -103,3 +103,8 @@ elastic-agent.yml
 fleet-server.yml
 /packages/kbn-synthetic-package-map/synthetic-packages.json
 
+# ignore automatically generated package.json files
+packages/**/package.json
+packages/**/tsconfig.json
+x-pack/packages/**/package.json
+x-pack/packages/**/tsconfig.json
