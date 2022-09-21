@@ -30,11 +30,11 @@ export function loadSnippet({
     var i = 'aptrinsic';
     // @ts-expect-error
     (n[i] =
-          // @ts-expect-error
+      // @ts-expect-error
 
       n[i] ||
       function () {
-            // @ts-expect-error
+        // @ts-expect-error
         (n[i].q = n[i].q || []).push(arguments);
       }),
       // @ts-expect-error

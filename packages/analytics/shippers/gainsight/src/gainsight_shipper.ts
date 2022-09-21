@@ -65,7 +65,7 @@ export class GainSightShipper implements IShipper {
    */
   public optIn(isOptedIn: boolean): void {
     this.initContext.logger.debug(`Setting gainsight to optIn ${isOptedIn}`);
-  
+
     if (isOptedIn) {
       this.gainSightApi.aptrinsic('config', 'enableTag', true);
     } else {
@@ -80,9 +80,9 @@ export class GainSightShipper implements IShipper {
   public reportEvents(events: Event[]): void {
     this.initContext.logger.debug(`Reporting ${events.length} events to gainsight`);
     events.forEach((event) => {
-        // We only read event.properties and discard the rest because the context is already sent in the other APIs.
-        this.gainSightApi.aptrinsic('track', event.event_type, formatPayload(event.properties));
-      });
+      // We only read event.properties and discard the rest because the context is already sent in the other APIs.
+      this.gainSightApi.aptrinsic('track', event.event_type, formatPayload(event.properties));
+    });
   }
 
   /**

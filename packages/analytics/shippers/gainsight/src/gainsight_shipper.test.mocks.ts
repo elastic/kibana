@@ -13,7 +13,6 @@ export const gainSightApiMock: jest.Mocked<GainSightApi> = {
   aptrinsic: jest.fn(),
 };
 
-
 jest.doMock('./load_snippet', () => {
   return {
     loadSnippet: () => gainSightApiMock,
