@@ -17,8 +17,8 @@ export const tableByIdSelector = createSelector(selectTableById, (tableById) => 
 
 export const selectTable = (state: State, tableId: string): TGridModel => {
   const v = state.dataTable.tableById[tableId];
-  console.log(v)
+  console.log(v);
   return v ?? tableDefaults;
-}
+};
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);
