@@ -923,7 +923,8 @@ describe('last_value', () => {
     const getKey = lastValueOperation.getGroupByKey!;
     const expressionToKey = (expression: string) =>
       getKey(buildExpression(parseExpression(expression)));
-    it('collapses duplicate aggs', () => {
+
+    describe('collapses duplicate aggs', () => {
       const keys = [
         [
           'aggFilteredMetric id="0" enabled=true schema="metric" \n  customBucket={aggFilter id="0-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopMetrics id="0-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
@@ -960,7 +961,7 @@ describe('last_value', () => {
         ],
       ].map((group) => group.map(expressionToKey));
 
-      keys.forEach((thisGroup) => {
+      it.each(keys.map((group, i) => ({ group })))('%#', ({ group: thisGroup }) => {
         expect(thisGroup[0]).toEqual(thisGroup[1]);
         const otherGroups = keys.filter((group) => group !== thisGroup);
         for (const otherGroup of otherGroups) {
@@ -968,7 +969,8 @@ describe('last_value', () => {
         }
       });
 
-      expect(keys).toMatchInlineSnapshot(`
+      it('snapshot', () => {
+        expect(keys).toMatchInlineSnapshot(`
         Array [
           Array [
             "aggTopMetrics-undefined-bytes-undefined-kql-bytes: *",
@@ -1004,6 +1006,7 @@ describe('last_value', () => {
           ],
         ]
       `);
+      });
     });
 
     it('returns undefined for aggs from different operation classes', () => {

@@ -15,7 +15,8 @@ describe('metrics', () => {
     const getKey = sumOperation.getGroupByKey!;
     const expressionToKey = (expression: string) =>
       getKey(buildExpression(parseExpression(expression)));
-    it('should collapse filtered aggs with matching parameters', () => {
+
+    describe('should collapse filtered aggs with matching parameters', () => {
       const keys = [
         [
           'aggSum id="0" enabled=true schema="metric" field="bytes" emptyAsNull=false',
@@ -38,6 +39,10 @@ describe('metrics', () => {
           'aggSum id="9" enabled=true schema="metric" field="machine.ram" timeShift="2h" emptyAsNull=false',
         ],
         [
+          'aggFilteredMetric id="10" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=true}',
+          'aggFilteredMetric id="11" enabled=true schema="metric" \n  customBucket={aggFilter id="3-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="3-metric" enabled=true schema="metric" field="bytes" emptyAsNull=true}',
+        ],
+        [
           'aggFilteredMetric id="12" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
           'aggFilteredMetric id="13" enabled=true schema="metric" \n  customBucket={aggFilter id="3-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="3-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
         ],
@@ -55,7 +60,7 @@ describe('metrics', () => {
         ],
       ].map((group) => group.map(expressionToKey));
 
-      keys.forEach((thisGroup) => {
+      it.each(keys.map((group, i) => ({ group })))('%#', ({ group: thisGroup }) => {
         expect(thisGroup[0]).toEqual(thisGroup[1]);
         const otherGroups = keys.filter((group) => group !== thisGroup);
         for (const otherGroup of otherGroups) {
@@ -63,7 +68,8 @@ describe('metrics', () => {
         }
       });
 
-      expect(keys).toMatchInlineSnapshot(`
+      it('snapshot', () => {
+        expect(keys).toMatchInlineSnapshot(`
         Array [
           Array [
             "bytes-undefined-false",
@@ -86,6 +92,10 @@ describe('metrics', () => {
             "machine.ram-2h-false",
           ],
           Array [
+            "undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
+            "undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
+          ],
+          Array [
             "undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
             "undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
           ],
@@ -102,7 +112,8 @@ describe('metrics', () => {
             "1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
           ],
         ]
-      `);
+        `);
+      });
     });
 
     it('returns undefined for aggs from different operation classes', () => {
