@@ -16,12 +16,12 @@ function getExpressionForLayer(
   refs: IndexPatternRef[],
   timeRange?: TimeRange
 ): Ast | null {
-  if (!layer.allColumns || layer.allColumns?.length === 0) {
+  if (!layer.columns || layer.columns?.length === 0) {
     return null;
   }
 
   let idMapper: Record<string, OriginalColumn[]> = {};
-  layer.allColumns.forEach((col) => {
+  layer.columns.forEach((col) => {
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push({
         id: col.columnId,
