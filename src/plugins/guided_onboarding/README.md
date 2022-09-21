@@ -71,5 +71,7 @@ otherwise an updated `GuidedOnboardingState` is returned *(This is WIP and will 
 await guidedOnboardingApi?.completeGuideStep('security', 'add_data');
 ```
 
+## Guides config
+To use the API service, you need to know a guide ID (one of `search`, `observability`, `security`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). Refer to guides config files in the folder `./public/constants` for more information. 
 
 
