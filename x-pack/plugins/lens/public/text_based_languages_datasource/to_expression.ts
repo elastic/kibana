@@ -16,7 +16,7 @@ function getExpressionForLayer(
   refs: IndexPatternRef[],
   timeRange?: TimeRange
 ): Ast | null {
-  if (!layer.columns || layer.columns?.length === 0) {
+  if (!layer.allColumns || layer.allColumns?.length === 0) {
     return null;
   }
 
