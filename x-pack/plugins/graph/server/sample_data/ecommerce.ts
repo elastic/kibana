@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { APP_ICON, createWorkspacePath } from '../../common/constants';
-import { prepareWorkplaceState } from './utils';
 
 const datasetId = 'ecommerce';
 
@@ -352,10 +350,7 @@ const wsState: any = {
   },
 };
 
-export function registerEcommerceSampleData(
-  sampleDataRegistry: SampleDataRegistrySetup,
-  core: CoreSetup
-) {
+export function registerEcommerceSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addSavedObjectsToSampleDataset(datasetId, [
     {
       type: 'graph-workspace',
@@ -368,7 +363,7 @@ export function registerEcommerceSampleData(
         numLinks: 57,
         numVertices: 12,
         version: 1,
-        wsState: prepareWorkplaceState(wsState, core),
+        wsState: JSON.stringify(JSON.stringify(wsState)),
         legacyIndexPatternRef: 'kibana_sample_data_ecommerce',
       },
       references: [],

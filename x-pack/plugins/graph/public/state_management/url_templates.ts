@@ -17,7 +17,7 @@ import { UrlTemplate } from '../types';
 import { reset } from './global';
 import { setDatasource, IndexpatternDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
-import { urlTemplatePlaceholder } from '../../common/constants';
+import { urlTemplatePlaceholder } from '../helpers/url_template';
 import { matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');

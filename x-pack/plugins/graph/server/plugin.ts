@@ -39,7 +39,7 @@ export class GraphPlugin implements Plugin {
     licensing.featureUsage.register('Graph', 'platinum');
 
     if (home) {
-      registerSampleData(home.sampleData, licenseState, core);
+      registerSampleData(home.sampleData, licenseState);
     }
 
     if (features) {

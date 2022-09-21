@@ -6,7 +6,6 @@
  */
 
 export const APP_ICON = 'graphApp';
-export const urlTemplatePlaceholder = '{{gquery}}';
 
 export function createWorkspacePath(id: string) {
   return `/app/graph#/workspace/${id}`;
