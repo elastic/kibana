@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsQuery, TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 import {
@@ -15,15 +15,16 @@ import {
   isErrorResponse,
   TimeRangeBounds,
 } from '@kbn/data-plugin/common';
+import { useInspector } from '../../../hooks/use_inspector';
 import { useFilters } from '../../query_bar/hooks/use_filters';
 import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { THREAT_QUERY_BASE } from '../../../../common/constants';
 import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from './use_sourcerer_data_view';
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
+import { getRuntimeMappings } from '../lib/get_runtime_mappings';
+import { getIndicatorsQuery } from '../lib/get_indicators_query';
 
 export interface UseAggregatedIndicatorsParam {
   /**
@@ -97,98 +98,73 @@ export const useAggregatedIndicators = ({
 
   const { selectedPatterns } = useSourcererDataView();
 
+  const { inspectorAdapters } = useInspector();
+
   const searchSubscription$ = useRef(new Subscription());
   const abortController = useRef(new AbortController());
 
   const [indicators, setIndicators] = useState<ChartSeries[]>([]);
   const [field, setField] = useState<string>(DEFAULT_FIELD);
+  const { filters, filterQuery } = useFilters();
 
   const dateRange: TimeRangeBounds = useMemo(
     () => queryService.timefilter.timefilter.calculateBounds(timeRange),
     [queryService, timeRange]
   );
 
-  const { filters, filterQuery } = useFilters();
+  const queryToExecute = useMemo(() => {
+    return getIndicatorsQuery({ timeRange, filters, filterQuery });
+  }, [filterQuery, filters, timeRange]);
 
   const loadData = useCallback(async () => {
     const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
     const dateTo: number = (dateRange.max as moment.Moment).toDate().getTime();
     const interval = calculateBarchartColumnTimeInterval(dateFrom, dateTo);
 
+    const request = inspectorAdapters.requests.start('Indicator barchart', {});
+
+    request.stats({
+      indexPattern: {
+        label: 'Index patterns',
+        value: selectedPatterns,
+      },
+    });
+
     abortController.current = new AbortController();
 
-    const queryToExecute = buildEsQuery(
-      undefined,
-      [
-        {
-          query: THREAT_QUERY_BASE,
-          language: 'kuery',
-        },
-        {
-          query: filterQuery.query as string,
-          language: 'kuery',
-        },
-      ],
-      [
-        ...filters,
-        {
-          query: {
-            range: {
-              [TIMESTAMP_FIELD]: {
-                gte: timeRange.from,
-                lte: timeRange.to,
+    const requestBody = {
+      aggregations: {
+        [AGGREGATION_NAME]: {
+          terms: {
+            field,
+          },
+          aggs: {
+            events: {
+              date_histogram: {
+                field: TIMESTAMP_FIELD,
+                fixed_interval: interval,
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: dateFrom,
+                  max: dateTo,
+                },
               },
             },
           },
-          meta: {},
         },
-      ]
-    );
+      },
+      fields: [TIMESTAMP_FIELD, field],
+      size: 0,
+      query: queryToExecute,
+      runtime_mappings: getRuntimeMappings(),
+    };
 
     searchSubscription$.current = searchService
       .search<IEsSearchRequest, IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>(
         {
           params: {
             index: selectedPatterns,
-            body: {
-              aggregations: {
-                [AGGREGATION_NAME]: {
-                  terms: {
-                    field,
-                  },
-                  aggs: {
-                    events: {
-                      date_histogram: {
-                        field: TIMESTAMP_FIELD,
-                        fixed_interval: interval,
-                        min_doc_count: 0,
-                        extended_bounds: {
-                          min: dateFrom,
-                          max: dateTo,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              fields: [TIMESTAMP_FIELD, field], // limit the response to only the fields we need
-              size: 0, // we don't need hits, just aggregations
-              query: queryToExecute,
-              runtime_mappings: {
-                'threat.indicator.name': {
-                  type: 'keyword',
-                  script: {
-                    source: threatIndicatorNamesScript(),
-                  },
-                },
-                'threat.indicator.name_origin': {
-                  type: 'keyword',
-                  script: {
-                    source: threatIndicatorNamesOriginScript(),
-                  },
-                },
-              },
-            },
+            body: requestBody,
           },
         },
         {
@@ -202,27 +178,34 @@ export const useAggregatedIndicators = ({
               response.rawResponse.aggregations[AGGREGATION_NAME]?.buckets;
             const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
             setIndicators(chartSeries);
-
             searchSubscription$.current.unsubscribe();
+
+            request.stats({}).ok({ json: response });
+            request.json(requestBody);
           } else if (isErrorResponse(response)) {
+            request.error({ json: response });
             searchSubscription$.current.unsubscribe();
           }
         },
-        error: (msg) => {
-          searchService.showError(msg);
+        error: (requestError) => {
+          searchService.showError(requestError);
           searchSubscription$.current.unsubscribe();
+
+          if (requestError instanceof Error && requestError.name.includes('Abort')) {
+            inspectorAdapters.requests.reset();
+          } else {
+            request.error({ json: requestError });
+          }
         },
       });
   }, [
     dateRange.max,
     dateRange.min,
     field,
-    filterQuery,
-    filters,
+    inspectorAdapters.requests,
+    queryToExecute,
     searchService,
     selectedPatterns,
-    timeRange.from,
-    timeRange.to,
   ]);
 
   const onFieldChange = useCallback(
