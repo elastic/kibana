@@ -159,9 +159,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboardControls.optionsListOpenPopover(optionsListControl);
           await PageObjects.dashboardControls.optionsListPopoverSelectOption('CN');
           await PageObjects.dashboardControls.optionsListPopoverSelectOption('US');
+          await PageObjects.dashboardControls.rangeSliderWaitForLoading(); // wait for range slider to respond to options list selections before proceeding
           await PageObjects.dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
           await PageObjects.dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
           await PageObjects.dashboard.clickQuickSave();
+          await PageObjects.dashboard.waitForRenderComplete();
 
           /** Destination Dashboard */
           await addControls(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, [
@@ -296,14 +298,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await drilldownAction(DRILLDOWN_TO_AREA_CHART_NAME);
         });
         // checking that href is at least pointing to the same dashboard that we are navigated to by regular click
-        const successfullyNavigated =
-          dashboardIdFromHref === (await PageObjects.dashboard.getDashboardIdFromCurrentUrl());
-        expect(successfullyNavigated).to.be(true);
+        expect(dashboardIdFromHref).to.be(
+          await PageObjects.dashboard.getDashboardIdFromCurrentUrl()
+        );
 
         // check that we drilled-down with filter from pie chart
         expect(await filterBar.hasFilter('memory', '40,000 to 80,000')).to.be(true);
-
-        return successfullyNavigated;
       };
     });
 
