@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  GENERAL_CASES_OWNER,
-  OBSERVABILITY_OWNER,
-  SECURITY_SOLUTION_OWNER,
-} from '@kbn/cases-plugin/common';
+import { GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common';
 
 /**
  * This should only be used within telemetry
