@@ -27,6 +27,7 @@ import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './oper
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../types';
+import { dedupeAggs } from './dedupe_aggs';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -214,10 +215,18 @@ function getExpressionForLayer(
       );
     }
 
-    uniq(esAggEntries.map(([_, column]) => column.operationType)).forEach((type) => {
-      const optimizeAggs = operationDefinitionMap[type].optimizeEsAggs?.bind(
-        operationDefinitionMap[type]
-      );
+    const allOperations = uniq(
+      esAggEntries.map(([_, column]) => operationDefinitionMap[column.operationType])
+    );
+
+    // De-duplicate aggs for supported operations
+    const dedupedResult = dedupeAggs(aggs, esAggsIdMap, aggExpressionToEsAggsIdMap, allOperations);
+    aggs = dedupedResult.aggs;
+    esAggsIdMap = dedupedResult.esAggsIdMap;
+
+    // Apply any operation-specific custom optimizations
+    allOperations.forEach((operation) => {
+      const optimizeAggs = operation.optimizeEsAggs?.bind(operation);
       if (optimizeAggs) {
         const { aggs: newAggs, esAggsIdMap: newIdMap } = optimizeAggs(
           aggs,
