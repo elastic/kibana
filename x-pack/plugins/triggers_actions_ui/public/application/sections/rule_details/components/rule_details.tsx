@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { updateAPIKey, deleteRules } from '../../../lib/rule_api';
+import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
@@ -61,6 +61,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { runRule } from '../../../lib/run_rule';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -164,6 +165,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const ruleActions = rule.actions;
   const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
+  };
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -294,7 +298,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           setRulesToUpdateAPIKey([]);
         }}
         idsToUpdate={rulesToUpdateAPIKey}
-        apiUpdateApiKeyCall={updateAPIKey}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={() => {}}
         onUpdated={async () => {
           setRulesToUpdateAPIKey([]);
@@ -411,6 +415,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }
               requestRefresh();
             }}
+            onRunRule={onRunRule}
           />,
           editButton,
           <EuiButtonEmpty

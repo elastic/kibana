@@ -6,6 +6,7 @@
  */
 
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getAlertingCapabilities } from '../../alerting/get_alerting_capabilities';
@@ -15,6 +16,7 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
+import { Labs } from './labs';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -40,8 +42,14 @@ export function ApmHeaderActionMenu() {
     return basePath.prepend(path);
   }
 
+  const isLabsButtonEnabled = core.uiSettings.get<boolean>(
+    apmLabsButton,
+    false
+  );
+
   return (
     <EuiHeaderLinks gutterSize="xs">
+      {isLabsButtonEnabled && <Labs />}
       <EuiHeaderLink
         color="text"
         href={apmHref('/storage-explorer')}

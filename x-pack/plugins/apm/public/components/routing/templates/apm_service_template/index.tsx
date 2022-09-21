@@ -14,10 +14,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import {
-  isMobileAgentName,
   isJavaAgentName,
   isJRubyAgent,
+  isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
@@ -29,13 +30,13 @@ import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/ser
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { SearchBar } from '../../../shared/search_bar';
-import { ServiceIcons } from '../../../shared/service_icons';
-import { ApmMainTemplate } from '../apm_main_template';
-import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
+import { SearchBar } from '../../../shared/search_bar';
+import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
+import { ApmMainTemplate } from '../apm_main_template';
+import { AnalyzeDataButton } from './analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -48,7 +49,6 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling'
     | 'alerts';
   hidden?: boolean;
 };
@@ -140,17 +140,21 @@ function TemplateWithContext({
 export function isMetricsTabHidden({
   agentName,
   runtimeName,
+  isAwsLambdaEnabled,
 }: {
   agentName?: string;
   runtimeName?: string;
+  isAwsLambdaEnabled?: boolean;
 }) {
+  if (isServerlessAgent(runtimeName)) {
+    return !isAwsLambdaEnabled;
+  }
   return (
     !agentName ||
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
     isMobileAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName) ||
-    isServerlessAgent(runtimeName)
+    isJRubyAgent(agentName, runtimeName)
   );
 }
 
@@ -184,7 +188,7 @@ export function isInfraTabHidden({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config, core, plugins } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
     plugins,
@@ -192,6 +196,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   );
 
   const router = useApmRouter();
+
+  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(
+    enableAwsLambdaMetrics,
+    true
+  );
 
   const {
     path: { serviceName },
@@ -258,7 +267,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      hidden: isMetricsTabHidden({ agentName, runtimeName }),
+      append: isServerlessAgent(runtimeName) ? (
+        <TechnicalPreviewBadge icon="beaker" />
+      ) : undefined,
+      hidden: isMetricsTabHidden({
+        agentName,
+        runtimeName,
+        isAwsLambdaEnabled,
+      }),
     },
     {
       key: 'nodes',
@@ -304,20 +320,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       hidden:
         !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
-    },
-    {
-      key: 'profiling',
-      href: router.link('/services/{serviceName}/profiling', {
-        path: {
-          serviceName,
-        },
-        query,
-      }),
-      hidden: !config.profilingEnabled,
-      append: <TechnicalPreviewBadge icon="beaker" />,
-      label: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-        defaultMessage: 'Profiling',
-      }),
     },
     {
       key: 'alerts',
