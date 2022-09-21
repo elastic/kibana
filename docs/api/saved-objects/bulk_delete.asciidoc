@@ -34,7 +34,7 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
 +
 TIP: Use this if you attempted to delete objects and received an HTTP 400 error with the following message: _"Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway"_
 +
-WARNING: When you bulk delete objects that exist in multiple namespaces, the API also deletes <<legacy-url-aliases, legacy url aliases>> that reference the object. These requests are batched to minimise the impact but they can place a heavy load on {kib}. Make sure you limit the number of objects that exist in multiple namespaces in a single bulk delete opertation.
+WARNING: When you bulk delete objects that exist in multiple namespaces, the API also deletes <<legacy-url-aliases, legacy url aliases>> that reference the object. These requests are batched to minimise the impact but they can place a heavy load on {kib}. Make sure you limit the number of objects that exist in multiple namespaces in a single bulk delete operation.
 
 ==== Response code
 `200`::
