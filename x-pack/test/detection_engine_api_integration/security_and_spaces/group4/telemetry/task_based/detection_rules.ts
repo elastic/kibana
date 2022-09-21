@@ -21,7 +21,7 @@ import {
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
-  removeTimeFieldsFromTelemetryStats
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 
@@ -105,10 +105,10 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules).to.eql([
             [
               {
-                "name": "Security Solution Detection Rule Lists Telemetry",
-                "passed": true,
-              }
-            ]
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
           ]);
         });
       });
@@ -452,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -528,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -604,7 +604,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -680,7 +680,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -756,7 +756,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -856,7 +856,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.detection_rule)
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
               return obj1?.entries?.name - obj2?.entries?.name;
             });

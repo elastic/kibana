@@ -12,7 +12,7 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   getSecurityTelemetryStats,
-  removeTimeFieldsFromTelemetryStats
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 

@@ -19,7 +19,7 @@ import {
   getSecurityTelemetryStats,
   createExceptionListItem,
   createExceptionList,
-  removeTimeFieldsFromTelemetryStats
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.trusted_application);
+            .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application));
           expect(trustedApplication).to.eql([
             {
               created_at: trustedApplication[0].created_at,
@@ -97,9 +97,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
-              "name": "Security Solution Lists Telemetry",
-              "passed": true,
-            }
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.trusted_application)
+            .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
               return obj1?.entries?.name - obj2?.entries?.name;
             });
@@ -189,9 +189,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
-              "name": "Security Solution Lists Telemetry",
-              "passed": true,
-            }
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -222,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.endpoint_exception);
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception));
           expect(securityLists).to.eql([
             {
               created_at: securityLists[0].created_at,
@@ -239,9 +239,9 @@ export default ({ getService }: FtrProviderContext) => {
               os_types: [],
             },
             {
-              "name": "Security Solution Lists Telemetry",
-              "passed": true,
-            }
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -288,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.endpoint_exception)
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
               return obj1?.entries?.name - obj2?.entries?.name;
             });
@@ -323,9 +323,9 @@ export default ({ getService }: FtrProviderContext) => {
               os_types: [],
             },
             {
-              "name": "Security Solution Lists Telemetry",
-              "passed": true,
-            }
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -368,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.endpoint_event_filter);
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter));
 
           expect(endPointEventFilter).to.eql([
             {
@@ -386,9 +386,9 @@ export default ({ getService }: FtrProviderContext) => {
               os_types: ['linux'],
             },
             {
-              "name": "Security Solution Lists Telemetry",
-              "passed": true,
-            }
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -435,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
           removeTimeFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
-            .map((obj: any) => obj.passed != null ? obj: obj.endpoint_event_filter)
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
               return obj1?.entries?.name - obj2?.entries?.name;
             });
@@ -470,9 +470,9 @@ export default ({ getService }: FtrProviderContext) => {
               os_types: ['macos'],
             },
             {
-              "name": "Security Solution Lists Telemetry",
-              "passed": true,
-            }
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
