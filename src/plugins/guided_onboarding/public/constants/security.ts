@@ -34,10 +34,5 @@ export const securityConfig: GuideConfig = {
       title: 'Cases and investigations',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     },
-    {
-      id: 'do_more',
-      title: 'Do more with Elastic Security',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    },
   ],
 };
