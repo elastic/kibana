@@ -613,7 +613,8 @@ POST api/actions/connector/a4746470-2f94-11ed-b0e0-87533c532698/_execute
     "subActionParams":{
       "incident":{
         "description":"Description of the incident",
-        "caseName":"Case name"
+        "caseName":"Case name",
+        "caseId":"1000"
       },
       "comments":[
         {"commentId":"1","comment":"A comment about the incident"}
@@ -628,7 +629,7 @@ POST api/actions/connector/a4746470-2f94-11ed-b0e0-87533c532698/_execute
     "subAction":"pushToService",
     "subActionParams":{
       "incident":{
-        "caseId":"aKPmBHWzmdRQtx6Mx",
+        "caseId":"1000",
         "caseName":"A new case name"
       }
     }
