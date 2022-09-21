@@ -52,7 +52,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnSolutionNav__sidebar kbnStickyMenu",
+      "className": "kbnStickyMenu",
       "css": Object {
         "map": undefined,
         "name": "sx7fqw",
@@ -125,7 +125,7 @@ exports[`WithSolutionNav with children 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnSolutionNav__sidebar kbnStickyMenu",
+      "className": "kbnStickyMenu",
       "css": Object {
         "map": undefined,
         "name": "sx7fqw",
