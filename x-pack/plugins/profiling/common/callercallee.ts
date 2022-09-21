@@ -8,6 +8,7 @@
 import { createFrameGroup, createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
+  emptyStackTrace,
   Executable,
   FileID,
   StackFrame,
@@ -93,7 +94,10 @@ export function createCallerCalleeGraph(
     // callers, and the "second part" are the callees.
     //
     // We currently assume there are no callers.
-    const stackTrace = stackTraces.get(stackTraceID)!;
+
+    // It is possible that we do not have a stacktrace for an event,
+    // e.g. when stopping the host agent or on network errors.
+    const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
     const lenStackTrace = stackTrace.FrameIDs.length;
     const samples = events.get(stackTraceID)!;
 
