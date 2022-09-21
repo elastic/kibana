@@ -67,10 +67,24 @@ export const SUCCESS_CHART_LABEL = i18n.translate(
   }
 );
 
+export const AUTHENCICATION_SUCCESS_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.authentication.successChartLabel',
+  {
+    defaultMessage: 'Success',
+  }
+);
+
 export const FAIL_CHART_LABEL = i18n.translate(
   'xpack.securitySolution.visualizationActions.userAuthentications.failChartLabel',
   {
     defaultMessage: 'Fail',
+  }
+);
+
+export const AUTHENCICATION_FAILURE_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.authentication.failureChartLabel',
+  {
+    defaultMessage: 'Failure',
   }
 );
 
@@ -87,3 +101,7 @@ export const TOP_VALUE = (field: string) =>
 
     defaultMessage: 'Top values of {field}',
   });
+
+export const COUNT = i18n.translate('xpack.securitySolution.visualizationActions.countLabel', {
+  defaultMessage: 'Count of records',
+});
