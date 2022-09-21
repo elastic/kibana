@@ -35,31 +35,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test on inputs on rules panel - name', async () => {
       await testSubjects.setValue('ruleNameInput', 'testRule');
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test on inputs on rules panel - tags', async () => {
       await testSubjects.setValue('comboBoxInput', 'ruleTag');
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test on inputs on rules panel - interval form', async () => {
       await testSubjects.click('intervalFormRow');
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test on inputs on rules panel - notify panel', async () => {
       await testSubjects.click('notifyWhenSelect');
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test on inputs on rules panel - filter solutions panel', async () => {
       await testSubjects.click('onActionGroupChange');
       await testSubjects.click('solutionsFilterButton');
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test on inputs on rules panel after selecting apm anomaly', async () => {
       await testSubjects.click('apm.anomaly-SelectOption');
       await a11y.testAppSnapshot();
     });
@@ -71,6 +51,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test on alerts and connectors page with one rule populated', async () => {
       await testSubjects.click('confirmModalConfirmButton');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on actions panel on one rule', async () => {
+      await testSubjects.click('selectActionButton');
       await a11y.testAppSnapshot();
     });
 
