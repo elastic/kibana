@@ -13,11 +13,12 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { API_BASE_PATH } from '../../common';
 import { ApiService } from './api';
 import { GuidedOnboardingState } from '..';
+import { guidesConfig } from '../constants/guides_config';
 
 const searchGuide = 'search';
-const firstStep = 'add_data';
-const secondStep = 'search_experience';
-const lastStep = 'review';
+const firstStep = guidesConfig[searchGuide].steps[0].id;
+const secondStep = guidesConfig[searchGuide].steps[1].id;
+const lastStep = guidesConfig[searchGuide].steps[2].id;
 
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
