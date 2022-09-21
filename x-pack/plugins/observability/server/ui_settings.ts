@@ -164,7 +164,7 @@ export const uiSettings: Record<string, UiSettings> = {
         feedbackLink:
           '<a href="https://ela.st/feedback-service-groups" target="_blank" rel="noopener noreferrer">' +
           i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
-            defaultMessage: 'Send feedback',
+            defaultMessage: 'Give feedback',
           }) +
           '</a>',
       },
@@ -187,7 +187,7 @@ export const uiSettings: Record<string, UiSettings> = {
           feedbackLink:
             '<a href="https://ela.st/feedback-apm-page-performance" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
-              defaultMessage: 'Send feedback',
+              defaultMessage: 'Give feedback',
             }) +
             '</a>',
         },
@@ -222,7 +222,7 @@ export const uiSettings: Record<string, UiSettings> = {
         feedbackLink:
           '<a href="https://ela.st/feedback-trace-explorer" target="_blank" rel="noopener noreferrer">' +
           i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
-            defaultMessage: 'Send feedback',
+            defaultMessage: 'Give feedback',
           }) +
           '</a>',
       },
@@ -245,7 +245,7 @@ export const uiSettings: Record<string, UiSettings> = {
         feedbackLink:
           '<a href="https://ela.st/feedback-operations-breakdown" target="_blank" rel="noopener noreferrer">' +
           i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
-            defaultMessage: 'Send feedback',
+            defaultMessage: 'Give feedback',
           }) +
           '</a>',
       },

@@ -279,10 +279,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: (
         <EuiBetaBadge
           iconType="editorBold"
-          label={i18n.translate('xpack.apm.labs.reload', {
+          label={i18n.translate('xpack.apm.home.infrastructureBetaLabel', {
             defaultMessage: 'Beta',
           })}
-          title={i18n.translate('xpack.apm.labs.reload', {
+          title={i18n.translate('xpack.apm.home.infrastructureBetaTitle', {
             defaultMessage: 'Beta',
           })}
           color="hollow"

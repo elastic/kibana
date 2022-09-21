@@ -101,7 +101,7 @@ export function LabsFlyout({ onClose }: Props) {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText>
-          {i18n.translate('xpack.apm.labs.reload', {
+          {i18n.translate('xpack.apm.labs.description', {
             defaultMessage:
               'Try out the APM features that are under technical preview and in progress.',
           })}
