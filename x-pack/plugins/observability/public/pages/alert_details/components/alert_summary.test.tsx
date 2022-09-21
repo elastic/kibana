@@ -51,7 +51,9 @@ describe('Alert summary', () => {
     expect(alertSummary.queryByText(asDuration(882076000))).toBeInTheDocument();
     expect(alertSummary.queryByText('Active')).toBeInTheDocument();
     expect(alertSummary.queryByText('Sep 2, 2021 @ 08:54:09.674')).toBeInTheDocument();
-    expect(alertSummary.getByText('Sep 2, 2021 @ 09:08:51.750', { exact: false })).toBeInTheDocument();
+    expect(
+      alertSummary.getByText('Sep 2, 2021 @ 09:08:51.750', { exact: false })
+    ).toBeInTheDocument();
     await waitFor(() => expect(alertSummary.queryByTestId('tagsOutPopover')).toBeInTheDocument());
     expect(alertSummary.queryByText(tags[0])).toBeInTheDocument();
   });
@@ -61,6 +63,8 @@ describe('Alert summary', () => {
 
     expect(alertSummary.queryByTestId('noAlertStatus')).toBeInTheDocument();
     expect(alertSummary.queryByTestId('noAlertStatus')).toHaveTextContent('-');
-    await waitFor(() => expect(alertSummary.queryByTestId('tagsOutPopover')).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(alertSummary.queryByTestId('tagsOutPopover')).not.toBeInTheDocument()
+    );
   });
 });
