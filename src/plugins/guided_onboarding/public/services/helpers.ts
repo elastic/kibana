@@ -9,7 +9,7 @@
 import { guidesConfig } from '../constants/guides_config';
 import { GuideConfig, StepConfig, UseCase } from '../types';
 
-const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
+export const getGuideConfig = (guideID?: string): GuideConfig | undefined => {
   if (guideID && Object.keys(guidesConfig).includes(guideID)) {
     return guidesConfig[guideID as UseCase];
   }
