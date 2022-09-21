@@ -42,6 +42,11 @@ describe('Rule actions', () => {
     postDataView(INDEX_CONNECTOR.index);
   });
 
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    deleteConnectors();
+  });
+
   after(() => {
     deleteIndex(INDEX_CONNECTOR.index);
     deleteDataView(INDEX_CONNECTOR.index);
@@ -51,11 +56,6 @@ describe('Rule actions', () => {
     ...getSimpleRule(),
     actions: { interval: 'rule', connectors: [INDEX_CONNECTOR] },
   };
-
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    deleteConnectors();
-  });
 
   it('Creates a custom query rule with an index action ', function () {
     visit(RULE_CREATION);
