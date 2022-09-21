@@ -277,11 +277,14 @@ export const SessionView = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               title={
-                <FormattedMessage
-                  id="xpack.sessionView.ttyToggleTip"
-                  defaultMessage="{value} {unit} of TTY output"
-                  values={bytesOfOutput}
-                />
+                <>
+                  {bytesOfOutput.value} {bytesOfOutput.unit}
+                  <FormattedMessage
+                    id="xpack.sessionView.ttyToggleTip"
+                    defaultMessage=" of TTY output"
+                    values={bytesOfOutput}
+                  />
+                </>
               }
             >
               <EuiButtonIcon
