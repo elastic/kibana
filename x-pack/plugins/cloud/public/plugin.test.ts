@@ -6,7 +6,6 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { CloudPlugin } from './plugin';
 
 const baseConfig = {
@@ -28,7 +27,7 @@ describe('Cloud Plugin', () => {
         const plugin = new CloudPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
-        const setup = plugin.setup(coreSetup, {});
+        const setup = plugin.setup(coreSetup);
 
         return { setup };
       };
@@ -98,9 +97,8 @@ describe('Cloud Plugin', () => {
         })
       );
       const coreSetup = coreMock.createSetup();
-      const homeSetup = homePluginMock.createSetupContract();
 
-      plugin.setup(coreSetup, { home: homeSetup });
+      plugin.setup(coreSetup);
 
       return { coreSetup, plugin };
     };

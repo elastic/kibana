@@ -8,7 +8,6 @@
 import React, { FC } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
@@ -27,10 +26,6 @@ export interface CloudConfigType {
     org_id?: string;
     eventTypesAllowlist?: string[];
   };
-}
-
-interface CloudSetupDependencies {
-  home?: HomePublicPluginSetup;
 }
 
 export interface CloudStart {
@@ -89,23 +84,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
   }
 
-  public setup(core: CoreSetup, { home }: CloudSetupDependencies): CloudSetup {
+  public setup(core: CoreSetup): CloudSetup {
     registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
 
-    const {
-      id,
-      cname,
-      profile_url: profileUrl,
-      deployment_url: deploymentUrl,
-      base_url: baseUrl,
-    } = this.config;
-
-    if (home) {
-      home.environment.update({ cloud: this.isCloudEnabled });
-      if (this.isCloudEnabled) {
-        home.tutorials.setVariable('cloud', { id, baseUrl, profileUrl, deploymentUrl });
-      }
-    }
+    const { id, cname, base_url: baseUrl } = this.config;
 
     return {
       cloudId: id,
