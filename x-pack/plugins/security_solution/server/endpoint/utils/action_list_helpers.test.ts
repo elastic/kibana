@@ -33,15 +33,21 @@ describe('action helpers', () => {
           body: {
             query: {
               bool: {
-                filter: [
+                must: [
                   {
-                    term: {
-                      input_type: 'endpoint',
-                    },
-                  },
-                  {
-                    term: {
-                      type: 'INPUT_ACTION',
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            input_type: 'endpoint',
+                          },
+                        },
+                        {
+                          term: {
+                            type: 'INPUT_ACTION',
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -77,7 +83,7 @@ describe('action helpers', () => {
         elasticAgentIds: ['agent-123', 'agent-456'],
         endDate: 'now',
         commands: ['isolate', 'unisolate', 'get-file'],
-        userIds: ['elastic'],
+        userIds: ['elastic', 'kibana'],
       });
 
       expect(esClient.search).toHaveBeenCalledWith(
@@ -85,44 +91,78 @@ describe('action helpers', () => {
           body: {
             query: {
               bool: {
-                filter: [
+                must: [
                   {
-                    term: {
-                      input_type: 'endpoint',
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            input_type: 'endpoint',
+                          },
+                        },
+                        {
+                          term: {
+                            type: 'INPUT_ACTION',
+                          },
+                        },
+                        {
+                          range: {
+                            '@timestamp': {
+                              gte: 'now-10d',
+                            },
+                          },
+                        },
+                        {
+                          range: {
+                            '@timestamp': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                        {
+                          terms: {
+                            'data.command': ['isolate', 'unisolate', 'get-file'],
+                          },
+                        },
+                        {
+                          terms: {
+                            agents: ['agent-123', 'agent-456'],
+                          },
+                        },
+                      ],
                     },
                   },
                   {
-                    term: {
-                      type: 'INPUT_ACTION',
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-10d',
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        lte: 'now',
-                      },
-                    },
-                  },
-                  {
-                    terms: {
-                      'data.command': ['isolate', 'unisolate', 'get-file'],
-                    },
-                  },
-                  {
-                    terms: {
-                      user_id: ['elastic'],
-                    },
-                  },
-                  {
-                    terms: {
-                      agents: ['agent-123', 'agent-456'],
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [
+                              {
+                                query_string: {
+                                  fields: ['user_id'],
+                                  query: '*elastic*',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              {
+                                query_string: {
+                                  fields: ['user_id'],
+                                  query: '*kibana*',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
                     },
                   },
                 ],

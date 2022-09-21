@@ -230,48 +230,62 @@ describe('When using `getActionList()', () => {
 
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({
+      {
         body: {
           query: {
             bool: {
-              filter: [
+              must: [
                 {
-                  term: {
-                    input_type: 'endpoint',
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          input_type: 'endpoint',
+                        },
+                      },
+                      {
+                        term: {
+                          type: 'INPUT_ACTION',
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            gte: 'now-10d',
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            lte: 'now',
+                          },
+                        },
+                      },
+                      {
+                        terms: {
+                          'data.command': ['isolate', 'unisolate', 'get-file'],
+                        },
+                      },
+                      {
+                        terms: {
+                          agents: ['123'],
+                        },
+                      },
+                    ],
                   },
                 },
                 {
-                  term: {
-                    type: 'INPUT_ACTION',
-                  },
-                },
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: 'now-10d',
-                    },
-                  },
-                },
-                {
-                  range: {
-                    '@timestamp': {
-                      lte: 'now',
-                    },
-                  },
-                },
-                {
-                  terms: {
-                    'data.command': ['isolate', 'unisolate', 'get-file'],
-                  },
-                },
-                {
-                  terms: {
-                    user_id: ['elastic'],
-                  },
-                },
-                {
-                  terms: {
-                    agents: ['123'],
+                  bool: {
+                    should: [
+                      {
+                        query_string: {
+                          fields: ['user_id'],
+                          query: '*elastic*',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
                   },
                 },
               ],
@@ -288,11 +302,8 @@ describe('When using `getActionList()', () => {
         from: 0,
         index: '.logs-endpoint.actions-default',
         size: 20,
-      }),
-      expect.objectContaining({
-        ignore: [404],
-        meta: true,
-      })
+      },
+      { ignore: [404], meta: true }
     );
   });
 

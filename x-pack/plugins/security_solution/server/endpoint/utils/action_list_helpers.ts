@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import type {
@@ -49,10 +50,6 @@ export const getActions = async ({
     });
   }
 
-  if (userIds?.length) {
-    additionalFilters.push({ terms: { user_id: userIds } });
-  }
-
   if (elasticAgentIds?.length) {
     additionalFilters.push({ terms: { agents: elasticAgentIds } });
   }
@@ -70,15 +67,27 @@ export const getActions = async ({
     ...additionalFilters,
   ];
 
+  const must: SearchRequest = [
+    {
+      bool: {
+        filter: actionsFilters,
+      },
+    },
+  ];
+
+  if (userIds?.length) {
+    const kql = userIds.map((userId) => `user_id:*${userId}*`).join(' or ');
+    const query = toElasticsearchQuery(fromKueryExpression(kql));
+    must.push(query);
+  }
+
   const actionsSearchQuery: SearchRequest = {
     index: ENDPOINT_ACTIONS_INDEX,
     size,
     from,
     body: {
       query: {
-        bool: {
-          filter: actionsFilters,
-        },
+        bool: { must },
       },
       sort: [
         {
