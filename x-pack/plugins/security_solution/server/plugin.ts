@@ -101,7 +101,7 @@ import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { artifactService } from '../server/lib/telemetry/artifact';
+import { artifactService } from './lib/telemetry/artifact';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -472,7 +472,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
     });
-
 
     this.telemetryReceiver.start(
       core,

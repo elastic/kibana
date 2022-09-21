@@ -30,8 +30,11 @@ export function createTelemetryConfigurationTaskConfig() {
     ) => {
       try {
         const artifactName = 'telemetry-configuration-v1';
-        const configArtifact = await artifactService.getArtifact(artifactName) as unknown as TelemetryConfiguration;
-        telemetryConfiguration.max_detection_alerts_batch = configArtifact.max_detection_alerts_batch;
+        const configArtifact = (await artifactService.getArtifact(
+          artifactName
+        )) as unknown as TelemetryConfiguration;
+        telemetryConfiguration.max_detection_alerts_batch =
+          configArtifact.max_detection_alerts_batch;
         telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
         telemetryConfiguration.max_detection_rule_telemetry_batch =
           configArtifact.max_detection_rule_telemetry_batch;

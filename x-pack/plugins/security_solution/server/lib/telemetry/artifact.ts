@@ -1,10 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-
-import axios from "axios";
-import { ITelemetryReceiver } from "./receiver";
-import { ESClusterInfo } from "./types";
+import axios from 'axios';
 import AdmZip from 'adm-zip';
-
+import type { ITelemetryReceiver } from './receiver';
+import type { ESClusterInfo } from './types';
 
 export interface IArtifact {
   start(receiver: ITelemetryReceiver): Promise<void>;
@@ -25,14 +29,16 @@ class Artifact implements IArtifact {
     this.manifestUrl = `${this.CDN_URL}/downloads/endpoint/manifest/artifacts-${version}.zip`;
   }
 
-
   public async getArtifact(name: string): Promise<unknown> {
     if (this.manifestUrl) {
-      const response = await axios.get(this.manifestUrl, { timeout: this.AXIOS_TIMEOUT_MS, responseType: 'arraybuffer' });
+      const response = await axios.get(this.manifestUrl, {
+        timeout: this.AXIOS_TIMEOUT_MS,
+        responseType: 'arraybuffer',
+      });
       const zip = new AdmZip(response.data);
       const entries = zip.getEntries();
       const manifest = JSON.parse(entries[0].getData().toString());
-      const relativeUrl = manifest['artifacts'][name]['relative_url'];
+      const relativeUrl = manifest.artifacts[name].relative_url;
       if (relativeUrl) {
         const url = `${this.CDN_URL}${relativeUrl}`;
         const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
@@ -44,7 +50,6 @@ class Artifact implements IArtifact {
       throw Error('No manifest url');
     }
   }
-
 }
 
 export const artifactService = new Artifact();
