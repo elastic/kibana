@@ -101,7 +101,11 @@ export class ListingTableService extends FtrService {
    * Types name into search field on Landing page and waits till search completed
    * @param name item name
    */
-  public async searchForItemWithName(name: string, { escape = true }: { escape?: boolean } = {}) {
+  public async searchForItemWithName(_name: string, { escape = true }: { escape?: boolean } = {}) {
+    // There is an issue with Selenium and the EuiHighlight, when the text is completely highlighted
+    // it is invisible to Selenium which then throws an error. We'll leave 1 char **not** highlighted
+    // to avoid this issue.
+    let name = _name.substring(0, _name.length - 2);
     this.log.debug(`searchForItemWithName: ${name}`);
 
     await this.retry.try(async () => {
@@ -119,6 +123,8 @@ export class ListingTableService extends FtrService {
 
       await searchFilter.type(name);
       await this.common.pressEnterKey();
+
+      await this.common.sleep(1000);
     });
 
     await this.header.waitUntilLoadingHasFinished();
@@ -128,12 +134,7 @@ export class ListingTableService extends FtrService {
    * Searches for item on Landing page and retruns items count that match `ListingTitleLink-${name}` pattern
    */
   public async searchAndExpectItemsCount(appName: AppName, name: string, count: number) {
-    // There is an issue with Selenium and the EuiHighlight, when the text is completely highlighted
-    // it is invisible to Selenium which then throws an error. We'll leave 1 char **not** highlighted
-    // to avoid this issue.
-    const nameShortened = name.substring(0, name.length - 2);
-
-    await this.searchForItemWithName(nameShortened);
+    await this.searchForItemWithName(name);
     await this.retry.try(async () => {
       const links = await this.testSubjects.findAll(
         `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
