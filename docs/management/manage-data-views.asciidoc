@@ -120,7 +120,7 @@ Return keyworld and double type subfields. Note that the first argument for `emi
 [source,text]
 ----
 emit('subfield_a', 'Hello');
-emit('sufield_b', 42);
+emit('subfield_b', 42);
 ----
 
 image:management/images/runtime_field_composite.png[Runtime field with composite type]
