@@ -14,7 +14,6 @@ export type MlAnomalyCharts = ProvidedType<typeof AnomalyChartsProvider>;
 export function AnomalyChartsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   return {
     async assertAnomalyExplorerChartsCount(
@@ -30,7 +29,7 @@ export function AnomalyChartsProvider({ getService }: FtrProviderContext) {
         const chartsContainer =
           chartsContainerSubj !== undefined
             ? await testSubjects.find(chartsContainerSubj)
-            : await find.byCssSelector('[class="mlAnomalyExplorerEmbeddableWrapper"]');
+            : await testSubjects.find('mlExplorerChartsContainer');
         const actualChartsCount = (
           await chartsContainer?.findAllByClassName('ml-explorer-chart-container', 3000)
         ).length;
