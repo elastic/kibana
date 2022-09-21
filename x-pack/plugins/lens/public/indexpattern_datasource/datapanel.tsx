@@ -312,7 +312,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
     if (!currentIndexPattern) return [];
-    return visualizeGeoFieldTrigger && currentIndexPattern.isPersisted
+    return visualizeGeoFieldTrigger
       ? currentIndexPattern.fields
       : currentIndexPattern.fields.filter(
           ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
