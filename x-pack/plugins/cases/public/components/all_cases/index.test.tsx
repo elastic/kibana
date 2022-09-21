@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
@@ -14,7 +13,6 @@ import {
   AppMockRenderer,
   createAppMockRenderer,
   noCreateCasesPermissions,
-  TestProviders,
 } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
@@ -125,58 +123,33 @@ describe('AllCases', () => {
       ...defaultGetCases,
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="openStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="openStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('20');
+      expect(result.getByTestId('openStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('20')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find('[data-test-subj="inProgressStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="inProgressStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('40');
+    await waitFor(() => {
+      expect(result.getByTestId('inProgressStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('40')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find('[data-test-subj="closedStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="closedStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('130');
+    await waitFor(() => {
+      expect(result.getByTestId('closedStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('130')).toBeInTheDocument();
     });
   });
 
   it('should render the loading spinner when loading stats', async () => {
     useGetCasesStatusMock.mockReturnValue({ ...defaultCasesStatus, isLoading: true });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="openStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="inProgressStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="closedStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
+      expect(result.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(result.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(result.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
     });
   });
 
@@ -193,16 +166,10 @@ describe('AllCases', () => {
       },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
-      ).toBeTruthy();
+      expect(result.getByTestId('configure-case-button')).toBeDisabled();
     });
   });
 
@@ -219,16 +186,17 @@ describe('AllCases', () => {
       },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
-      ).toBeFalsy();
+      expect(result.getByTestId('configure-case-button')).not.toBeDisabled();
+    });
+  });
+
+  it('should render the case callouts', async () => {
+    const result = appMockRender.render(<AllCases />);
+    await waitFor(() => {
+      expect(result.getByTestId('case-callouts')).toBeInTheDocument();
     });
   });
 });

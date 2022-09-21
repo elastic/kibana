@@ -7,6 +7,8 @@
 
 export {
   addChangePointsAction,
+  addChangePointsGroupAction,
+  addChangePointsGroupHistogramAction,
   addChangePointsHistogramAction,
   addErrorAction,
   resetAction,

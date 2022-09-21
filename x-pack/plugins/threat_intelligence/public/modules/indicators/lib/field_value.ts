@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EMPTY_VALUE } from '../../../../common/constants';
 import { unwrapValue } from './unwrap_value';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 
@@ -29,3 +30,12 @@ export const getIndicatorFieldAndValue = (
     value,
   };
 };
+
+/**
+ * Checks if field and value are correct
+ * @param field Indicator string field
+ * @param value Indicator string|null value for the field
+ * @returns true if correct, false if not
+ */
+export const fieldAndValueValid = (field: string | null, value: string | null): boolean =>
+  !!value && value !== EMPTY_VALUE && !!field;
