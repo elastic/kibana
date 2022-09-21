@@ -393,7 +393,7 @@ export const ExceptionListsTable = React.memo(() => {
               noItemsMessage={emptyPrompt}
               onChange={handlePaginationChange}
               pagination={paginationMemo}
-              onClick={() => {
+              onClick={(args) => {
                 // TODO: need the clickedItem
                 setShowDetails(!showDetails);
               }}
@@ -418,7 +418,7 @@ export const ExceptionListsTable = React.memo(() => {
           titleText={i18n.REFERENCE_MODAL_TITLE}
         />
       </div>
-      {showDetails && <ExceptionListDetails list={tableItems[0]} />}
+      {showDetails && <ExceptionListDetails list={tableItems[2]} />}
     </>
   );
 });

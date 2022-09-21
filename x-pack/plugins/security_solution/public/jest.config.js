@@ -21,6 +21,7 @@ module.exports = {
     '!<rootDir>/x-pack/plugins/security_solution/public/*mock*.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/security_solution/public/*.test.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/security_solution/public/*.d.ts',
+    '!<rootDir>/x-pack/plugins/security_solution/public/*.config.ts',
     '!<rootDir>/x-pack/plugins/security_solution/public/index.{js,ts,tsx}',
   ],
 

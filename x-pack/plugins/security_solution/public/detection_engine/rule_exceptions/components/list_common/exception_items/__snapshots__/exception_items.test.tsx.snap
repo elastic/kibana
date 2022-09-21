@@ -292,19 +292,32 @@ Object {
   vertical-align: middle !important;
 }
 
-.c12 {
-  margin-bottom: 6px !important;
-  margin-top: 6px !important;
-}
-
-.c13 {
-  margin-right: 6px;
-}
-
 .c11 {
   border: 1px;
   border-color: #d3dae6;
   border-style: solid;
+}
+
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c10 {
@@ -700,73 +713,115 @@ Object {
                     data-test-subj="exceptionItemCard-condition"
                   >
                     <div
-                      class="euiPanel euiPanel--subdued euiPanel--paddingMedium c11 emotion-euiPanel-grow-m-m-subdued"
+                      class="euiPanel euiPanel--subdued euiPanel--paddingMedium c11 eui-xScroll emotion-euiPanel-grow-m-m-subdued"
                       data-test-subj="exceptionItemCardConditions"
                     >
-                      <div
-                        data-test-subj="exceptionItemCardConditions-condition"
-                      >
+                      <div>
                         <div
-                          class="eui-xScroll"
-                        >
-                          <span
-                            class="euiExpression emotion-euiExpression-primary"
-                          >
-                            <span
-                              class="euiExpression__description emotion-euiExpression__description-primary-isUppercase"
-                            />
-                             
-                            <span
-                              class="euiExpression__value emotion-euiExpression__value"
-                            >
-                              some.parentField
-                            </span>
-                          </span>
-                          <span
-                            class="euiExpression emotion-euiExpression-success"
-                          >
-                            <span
-                              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-                            />
-                             
-                            
-                          </span>
-                        </div>
-                        <div
-                          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow "
-                          data-test-subj="exceptionItemCardConditions-nestedCondition"
+                          data-test-subj="exceptionItemCardConditions-some.parentFieldnested0-condition"
                         >
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero c12"
+                            class="c12"
                           >
                             <span
-                              class="euiToken emotion-euiToken-circle-light-s-euiColorVis2"
+                              class="euiExpression emotion-euiExpression-primary"
                             >
                               <span
-                                data-euiicon-type="tokenNested"
+                                class="euiExpression__description emotion-euiExpression__description-primary-isUppercase"
                               />
+                               
+                              <span
+                                class="euiExpression__value emotion-euiExpression__value"
+                              >
+                                some.parentField
+                              </span>
+                            </span>
+                            <span
+                              class="euiExpression emotion-euiExpression-success"
+                            >
+                              <span
+                                class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+                              />
+                               
+                              
                             </span>
                           </div>
+                        </div>
+                        <div
+                          data-test-subj="exceptionItemCardConditions-nested.fieldmatchsome value0-condition"
+                        >
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero c12"
+                            class="c12"
+                          >
+                            <div
+                              class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive "
+                              data-test-subj="nested-nested.fieldmatchsome value0-condition"
+                            >
+                              <span
+                                class="euiToken emotion-euiToken-circle-light-s-euiColorVis2"
+                              >
+                                <span
+                                  data-euiicon-type="tokenNested"
+                                />
+                              </span>
+                              <div
+                                class="c13"
+                              >
+                                <span
+                                  class="euiExpression emotion-euiExpression-subdued"
+                                >
+                                  <span
+                                    class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
+                                  />
+                                   
+                                  <span
+                                    class="euiExpression__value emotion-euiExpression__value"
+                                  >
+                                    nested.field
+                                  </span>
+                                </span>
+                                <span
+                                  class="euiExpression emotion-euiExpression-success"
+                                >
+                                  <span
+                                    class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+                                  >
+                                    IS
+                                  </span>
+                                   
+                                  <span
+                                    class="euiExpression__value emotion-euiExpression__value"
+                                  >
+                                    some value
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div
+                          data-test-subj="exceptionItemCardConditions-some.not.nested.fieldmatchsome value1-condition"
+                        >
+                          <div
+                            class="c12"
                           >
                             <span
                               class="euiExpression emotion-euiExpression-subdued"
                             >
                               <span
                                 class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
-                              />
+                              >
+                                AND
+                              </span>
                                
                               <span
                                 class="euiExpression__value emotion-euiExpression__value"
                               >
-                                nested.field
+                                some.not.nested.field
                               </span>
                             </span>
-                          </div>
-                          <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero c12"
-                          >
                             <span
                               class="euiExpression emotion-euiExpression-success"
                             >
@@ -784,48 +839,7 @@ Object {
                             </span>
                           </div>
                         </div>
-                      </div>
-                      <div
-                        data-test-subj="exceptionItemCardConditions-condition"
-                      >
-                        <div
-                          class="eui-xScroll"
-                        >
-                          <span
-                            class="euiExpression emotion-euiExpression-subdued"
-                          >
-                            <span
-                              class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
-                            >
-                              <span
-                                class="c13"
-                              >
-                                AND
-                              </span>
-                            </span>
-                             
-                            <span
-                              class="euiExpression__value emotion-euiExpression__value"
-                            >
-                              some.not.nested.field
-                            </span>
-                          </span>
-                          <span
-                            class="euiExpression emotion-euiExpression-success"
-                          >
-                            <span
-                              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-                            >
-                              IS
-                            </span>
-                             
-                            <span
-                              class="euiExpression__value emotion-euiExpression__value"
-                            >
-                              some value
-                            </span>
-                          </span>
-                        </div>
+                        0
                       </div>
                     </div>
                   </div>
@@ -990,7 +1004,7 @@ Object {
           data-test-subj="exceptionsContainer"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero sc-pdOLj bmEoYE"
+            class="euiFlexItem euiFlexItem--flexGrowZero sc-pmiWo cQkTBR"
             data-test-subj="exceptionItemContainer"
           >
             <div
@@ -1055,7 +1069,7 @@ Object {
                     data-test-subj="exceptionItemCardMetaInfo"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero sc-qcpsZ jyXFme"
+                      class="euiFlexItem euiFlexItem--flexGrowZero sc-oVrtG fYZCZB"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -1135,7 +1149,7 @@ Object {
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero sc-qcpsZ jyXFme"
+                      class="euiFlexItem euiFlexItem--flexGrowZero sc-oVrtG fYZCZB"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -1254,73 +1268,115 @@ Object {
                   data-test-subj="exceptionItemCard-condition"
                 >
                   <div
-                    class="euiPanel euiPanel--subdued euiPanel--paddingMedium sc-fzqNJr jfJSfU emotion-euiPanel-grow-m-m-subdued"
+                    class="euiPanel euiPanel--subdued euiPanel--paddingMedium sc-fzqBZW crMSZp eui-xScroll emotion-euiPanel-grow-m-m-subdued"
                     data-test-subj="exceptionItemCardConditions"
                   >
-                    <div
-                      data-test-subj="exceptionItemCardConditions-condition"
-                    >
+                    <div>
                       <div
-                        class="eui-xScroll"
-                      >
-                        <span
-                          class="euiExpression emotion-euiExpression-primary"
-                        >
-                          <span
-                            class="euiExpression__description emotion-euiExpression__description-primary-isUppercase"
-                          />
-                           
-                          <span
-                            class="euiExpression__value emotion-euiExpression__value"
-                          >
-                            some.parentField
-                          </span>
-                        </span>
-                        <span
-                          class="euiExpression emotion-euiExpression-success"
-                        >
-                          <span
-                            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-                          />
-                           
-                          
-                        </span>
-                      </div>
-                      <div
-                        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow sc-fznZeY itbMso"
-                        data-test-subj="exceptionItemCardConditions-nestedCondition"
+                        data-test-subj="exceptionItemCardConditions-some.parentFieldnested0-condition"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero sc-fzokOt bVLdnX"
+                          class="sc-fzoyAV dEYEJJ"
                         >
                           <span
-                            class="euiToken emotion-euiToken-circle-light-s-euiColorVis2"
+                            class="euiExpression emotion-euiExpression-primary"
                           >
                             <span
-                              data-euiicon-type="tokenNested"
+                              class="euiExpression__description emotion-euiExpression__description-primary-isUppercase"
                             />
+                             
+                            <span
+                              class="euiExpression__value emotion-euiExpression__value"
+                            >
+                              some.parentField
+                            </span>
+                          </span>
+                          <span
+                            class="euiExpression emotion-euiExpression-success"
+                          >
+                            <span
+                              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+                            />
+                             
+                            
                           </span>
                         </div>
+                      </div>
+                      <div
+                        data-test-subj="exceptionItemCardConditions-nested.fieldmatchsome value0-condition"
+                      >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero sc-fzokOt bVLdnX"
+                          class="sc-fzoyAV dEYEJJ"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-fznZeY lKsEH"
+                            data-test-subj="nested-nested.fieldmatchsome value0-condition"
+                          >
+                            <span
+                              class="euiToken emotion-euiToken-circle-light-s-euiColorVis2"
+                            >
+                              <span
+                                data-euiicon-type="tokenNested"
+                              />
+                            </span>
+                            <div
+                              class="sc-fzqNJr lgXyNn"
+                            >
+                              <span
+                                class="euiExpression emotion-euiExpression-subdued"
+                              >
+                                <span
+                                  class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
+                                />
+                                 
+                                <span
+                                  class="euiExpression__value emotion-euiExpression__value"
+                                >
+                                  nested.field
+                                </span>
+                              </span>
+                              <span
+                                class="euiExpression emotion-euiExpression-success"
+                              >
+                                <span
+                                  class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+                                >
+                                  IS
+                                </span>
+                                 
+                                <span
+                                  class="euiExpression__value emotion-euiExpression__value"
+                                >
+                                  some value
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div
+                        data-test-subj="exceptionItemCardConditions-some.not.nested.fieldmatchsome value1-condition"
+                      >
+                        <div
+                          class="sc-fzoyAV dEYEJJ"
                         >
                           <span
                             class="euiExpression emotion-euiExpression-subdued"
                           >
                             <span
                               class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
-                            />
+                            >
+                              AND
+                            </span>
                              
                             <span
                               class="euiExpression__value emotion-euiExpression__value"
                             >
-                              nested.field
+                              some.not.nested.field
                             </span>
                           </span>
-                        </div>
-                        <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero sc-fzokOt bVLdnX"
-                        >
                           <span
                             class="euiExpression emotion-euiExpression-success"
                           >
@@ -1338,48 +1394,7 @@ Object {
                           </span>
                         </div>
                       </div>
-                    </div>
-                    <div
-                      data-test-subj="exceptionItemCardConditions-condition"
-                    >
-                      <div
-                        class="eui-xScroll"
-                      >
-                        <span
-                          class="euiExpression emotion-euiExpression-subdued"
-                        >
-                          <span
-                            class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
-                          >
-                            <span
-                              class="sc-fzqBZW BunCg"
-                            >
-                              AND
-                            </span>
-                          </span>
-                           
-                          <span
-                            class="euiExpression__value emotion-euiExpression__value"
-                          >
-                            some.not.nested.field
-                          </span>
-                        </span>
-                        <span
-                          class="euiExpression emotion-euiExpression-success"
-                        >
-                          <span
-                            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-                          >
-                            IS
-                          </span>
-                           
-                          <span
-                            class="euiExpression__value emotion-euiExpression__value"
-                          >
-                            some value
-                          </span>
-                        </span>
-                      </div>
+                      0
                     </div>
                   </div>
                 </div>
