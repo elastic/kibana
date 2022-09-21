@@ -6,11 +6,16 @@
  */
 
 class TelemetryConfiguration {
-  private _telemetry_max_buffer_size = 100;
-  private _max_security_list_telemetry_batch = 100;
-  private _max_endpoint_telemetry_batch = 300;
-  private _max_detection_rule_telemetry_batch = 1_000;
-  private _max_detection_alerts_batch = 50;
+  private readonly DEFAULT_TELEMETRY_MAX_BUFFER_SIZE = 100;
+  private readonly DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH = 100;
+  private readonly DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH = 300;
+  private readonly DEFAULT_MAX_DETECTION_RULE_TELEMETRY_BATCH = 1_000;
+  private readonly DEFAULT_MAX_DETECTION_ALERTS_BATCH = 50;
+  private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
+  private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
+  private _max_endpoint_telemetry_batch = this.DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH;
+  private _max_detection_rule_telemetry_batch = this.DEFAULT_MAX_DETECTION_RULE_TELEMETRY_BATCH;
+  private _max_detection_alerts_batch = this.DEFAULT_MAX_DETECTION_ALERTS_BATCH;
 
   get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -50,6 +55,14 @@ class TelemetryConfiguration {
 
   set max_detection_alerts_batch(num: number) {
     this._max_detection_alerts_batch = num;
+  }
+
+  resetAllToDefault() {
+  this._telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
+  this._max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
+  this._max_endpoint_telemetry_batch = this.DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH;
+  this._max_detection_rule_telemetry_batch = this.DEFAULT_MAX_DETECTION_RULE_TELEMETRY_BATCH;
+  this._max_detection_alerts_batch = this.DEFAULT_MAX_DETECTION_ALERTS_BATCH;
   }
 }
 

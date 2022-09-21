@@ -18,7 +18,7 @@ export function createTelemetryConfigurationTaskConfig() {
   return {
     type: 'security:telemetry-configuration',
     title: 'Security Solution Telemetry Configuration task',
-    interval: '30s',
+    interval: '30m',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
@@ -42,6 +42,7 @@ export function createTelemetryConfigurationTaskConfig() {
         return 0;
       } catch (err) {
         tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
+        telemetryConfiguration.resetAllToDefault();
         return 0;
       }
     },
