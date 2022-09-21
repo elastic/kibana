@@ -33,6 +33,7 @@ import {
   getVerificationResult,
   getPackageInfo,
   setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
 } from '../archive';
 import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
@@ -220,12 +221,13 @@ export async function fetchCategories(
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function getInfo(name: string, version: string) {
+export async function getInfo(name: string, version: string, options: { cache?: boolean } = {}) {
+  const cache = options.cache ?? true;
   return withPackageSpan('Fetch package info', async () => {
     let packageInfo = getPackageInfo({ name, version });
     if (!packageInfo) {
       packageInfo = await fetchInfo(name, version);
-      setPackageInfo({ name, version, packageInfo });
+      if (cache) setPackageInfo({ name, version, packageInfo });
     }
     return packageInfo as RegistryPackage;
   });
@@ -234,7 +236,7 @@ export async function getInfo(name: string, version: string) {
 export async function getRegistryPackage(
   name: string,
   version: string,
-  options?: { ignoreUnverified?: boolean }
+  options?: { ignoreUnverified?: boolean; getPkgInfoFromArchive?: boolean }
 ): Promise<{
   paths: string[];
   packageInfo: RegistryPackage;
@@ -268,6 +270,14 @@ export async function getRegistryPackage(
         contentType: ensureContentType(archivePath),
       })
     );
+    const cachedInfo = getPackageInfo({ name, version });
+    if (options?.getPkgInfoFromArchive && !cachedInfo) {
+      const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
+        archiveBuffer,
+        ensureContentType(archivePath)
+      );
+      setPackageInfo({ packageInfo, name, version });
+    }
   }
 
   const packageInfo = await getInfo(name, version);
@@ -298,7 +308,7 @@ export async function fetchArchiveBuffer({
   verificationResult?: PackageVerificationResult;
 }> {
   const logger = appContextService.getLogger();
-  const { download: archivePath } = await getInfo(pkgName, pkgVersion);
+  const { download: archivePath } = await getInfo(pkgName, pkgVersion, { cache: false });
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
   if (shouldVerify) {
@@ -326,7 +336,9 @@ export async function getPackageArchiveSignatureOrUndefined({
   pkgVersion: string;
   logger: Logger;
 }): Promise<string | undefined> {
-  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
+  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion, {
+    cache: false,
+  });
 
   if (!signaturePath) {
     logger.debug(
@@ -373,6 +385,18 @@ export function getNoticePath(paths: string[]): string | undefined {
   for (const path of paths) {
     const parts = getPathParts(path.replace(/^\/package\//, ''));
     if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
+}
+
+export function getLicensePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'license') {
       const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
       return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
     }

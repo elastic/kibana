@@ -8,7 +8,7 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { getXyVisualization } from './xy_visualization';
+import { getXyVisualization, XYState } from './xy_visualization';
 import { OperationDescriptor } from '../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { layerTypes } from '../../../common';
@@ -19,6 +19,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -30,6 +31,7 @@ describe('#toExpression', () => {
     core: coreMock.createStart(),
     storage: {} as IStorageWrapper,
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -537,5 +539,77 @@ describe('#toExpression', () => {
     }
     expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
     expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
+  });
+
+  it('should ignore annotation layers with no event configured', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            yConfig: [{ forAccessor: 'a' }],
+          },
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [],
+            indexPatternId: 'my-indexPattern',
+            ignoreGlobalFilters: true,
+          },
+        ],
+      },
+      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock },
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(expression.chain[0].arguments.layers).toHaveLength(1);
+  });
+
+  it('should correctly set the current time marker visibility settings', () => {
+    const state: XYState = {
+      legend: { position: Position.Bottom, isVisible: true },
+      valueLabels: 'show',
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'area',
+          splitAccessor: 'd',
+          xAccessor: 'a',
+          accessors: ['b', 'c'],
+        },
+      ],
+    };
+    let expression = xyVisualization.toExpression(
+      {
+        ...state,
+        showCurrentTimeMarker: true,
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(expression.chain[0].arguments.addTimeMarker[0] as Ast).toEqual(true);
+
+    expression = xyVisualization.toExpression(
+      {
+        ...state,
+        showCurrentTimeMarker: false,
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(expression.chain[0].arguments.addTimeMarker[0] as Ast).toEqual(false);
   });
 });

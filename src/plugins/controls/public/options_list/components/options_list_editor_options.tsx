@@ -11,8 +11,7 @@ import React, { useState } from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { OptionsListStrings } from './options_list_strings';
-import { OptionsListEmbeddableInput } from '../types';
-import { ControlEditorProps } from '../..';
+import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 
 interface OptionsListEditorState {
   singleSelect?: boolean;

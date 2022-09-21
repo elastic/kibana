@@ -38,7 +38,7 @@ import {
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { hasField } from '../pure_utils';
+import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { IndexPatternLayer } from '../types';
@@ -46,7 +46,7 @@ import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
-import { Window } from './window';
+import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
@@ -289,15 +289,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   }, []);
 
+  const currentField =
+    selectedColumn &&
+    hasField(selectedColumn) &&
+    currentIndexPattern.getFieldByName(selectedColumn.sourceField);
+
+  const referencedField =
+    currentField || getReferencedField(selectedColumn, currentIndexPattern, state.layers[layerId]);
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
-    const currentField =
-      selectedColumn &&
-      hasField(selectedColumn) &&
-      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
       compatibleWithCurrentField: canTransition({
@@ -335,12 +339,36 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
-      let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
+      const partialIcon = compatibleWithCurrentField &&
+        referencedField?.partiallyApplicableFunctions?.[operationType] && (
+          <span data-test-subj={`${operationType}-partial-warning`}>
+            {' '}
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.helpPartiallyApplicableFunctionLabel',
+                {
+                  defaultMessage:
+                    'This function may only return partial results, as it is unable to support the full time range of rolled-up historical data.',
+                }
+              )}
+              position="left"
+              size="s"
+              type="partial"
+              color="warning"
+            />
+          </span>
+        );
+      let label: EuiListGroupItemProps['label'] = (
+        <>
+          {operationDisplay[operationType].displayName}
+          {partialIcon}
+        </>
+      );
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
             <EuiText color="danger" size="s">
-              <strong>{operationDisplay[operationType].displayName}</strong>
+              <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
         );
@@ -572,7 +600,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-          defaultMessage: 'Function',
+          defaultMessage: 'Functions',
         })}
         fullWidth
       >
@@ -922,9 +950,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ) : null,
             },
             {
-              dataTestSubj: 'indexPattern-window-enable',
-              inlineElement: selectedOperationDefinition.windowable ? (
-                <Window
+              dataTestSubj: 'indexPattern-reducedTimeRange-enable',
+              inlineElement: selectedOperationDefinition.canReduceTimeRange ? (
+                <ReducedTimeRange
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   indexPattern={currentIndexPattern}

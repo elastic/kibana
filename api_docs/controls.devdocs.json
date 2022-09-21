@@ -47,6 +47,7 @@
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -59,7 +60,23 @@
               "\"control_group\""
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.anyControlOutputConsumerLoading$",
+            "type": "Object",
+            "tags": [],
+            "label": "anyControlOutputConsumerLoading$",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<boolean>"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -73,6 +90,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -86,6 +104,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -103,6 +122,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -116,6 +136,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -133,6 +154,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -148,6 +170,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -169,6 +192,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -184,6 +208,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -200,12 +225,45 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
               "If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.\nOtherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types."
             ]
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreateTimeSliderControlButton",
+            "description": [],
+            "signature": [
+              "(closePopover?: (() => void) | undefined) => JSX.Element"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "closePopover",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "controls",
@@ -223,6 +281,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "`SolutionToolbarPopover` button for input controls"
@@ -240,6 +299,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -259,6 +319,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -279,6 +340,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -316,6 +378,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -333,6 +396,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -384,9 +448,7 @@
                 "section": "def-public.ControlOutput",
                 "text": "ControlOutput"
               },
-              ">, ",
-              "SavedObjectAttributes",
-              ">, partial?: Partial<TEmbeddableInput>) => ",
+              ">, unknown>, partial?: Partial<TEmbeddableInput>) => ",
               {
                 "pluginId": "controls",
                 "scope": "common",
@@ -398,6 +460,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -442,12 +505,11 @@
                     "section": "def-public.ControlOutput",
                     "text": "ControlOutput"
                   },
-                  ">, ",
-                  "SavedObjectAttributes",
-                  ">"
+                  ">, unknown>"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -462,6 +524,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -486,6 +549,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -499,6 +563,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -517,6 +582,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -530,6 +596,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -547,6 +614,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -562,6 +630,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -575,6 +644,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -592,6 +662,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -661,12 +732,11 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">"
+          ">, unknown>"
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -679,7 +749,8 @@
               "true"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -692,7 +763,8 @@
               "\"control_group\""
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -723,6 +795,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -736,7 +809,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "controls",
@@ -750,7 +824,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -784,6 +859,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -797,7 +873,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -813,6 +890,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -832,6 +910,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -849,6 +928,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -864,6 +944,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -887,6 +968,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -942,6 +1024,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -961,6 +1044,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -998,6 +1082,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1049,6 +1134,7 @@
         ],
         "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -1061,7 +1147,8 @@
               "\"optionsListControl\""
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1071,7 +1158,8 @@
             "label": "deferEmbeddableLoad",
             "description": [],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1085,6 +1173,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1104,6 +1193,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1124,6 +1214,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1144,6 +1235,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1181,6 +1273,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1198,6 +1291,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1213,6 +1307,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1228,6 +1323,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1241,9 +1337,26 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddable.isChained",
+            "type": "Function",
+            "tags": [],
+            "label": "isChained",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -1312,9 +1425,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">,",
+          ">, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -1334,6 +1445,7 @@
         ],
         "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -1343,7 +1455,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1357,6 +1470,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1372,6 +1486,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1427,6 +1542,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1446,6 +1562,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1483,6 +1600,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1540,6 +1658,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1561,12 +1680,13 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
                 "id": "def-public.OptionsListEmbeddableFactory.presaveTransformFunction.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -1598,6 +1718,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1617,6 +1738,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1630,6 +1752,7 @@
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1663,6 +1786,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1691,7 +1815,8 @@
                   ">"
                 ],
                 "path": "src/plugins/controls/public/options_list/components/options_list_editor_options.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1707,6 +1832,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1722,6 +1848,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1737,6 +1864,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1752,6 +1880,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1784,6 +1913,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1797,7 +1927,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "controls",
@@ -1811,7 +1942,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1845,6 +1977,7 @@
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1858,7 +1991,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1908,6 +2042,7 @@
         ],
         "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -1920,7 +2055,8 @@
               "\"rangeSliderControl\""
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1930,7 +2066,8 @@
             "label": "deferEmbeddableLoad",
             "description": [],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1944,6 +2081,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1963,6 +2101,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1983,6 +2122,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2003,6 +2143,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2040,6 +2181,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2057,6 +2199,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2072,6 +2215,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2087,6 +2231,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2100,9 +2245,26 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddable.isChained",
+            "type": "Function",
+            "tags": [],
+            "label": "isChained",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -2171,9 +2333,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">,",
+          ">, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -2193,6 +2353,7 @@
         ],
         "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2202,7 +2363,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2216,6 +2378,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2231,6 +2394,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2246,6 +2410,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2261,6 +2426,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2276,6 +2442,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2331,6 +2498,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2350,6 +2518,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2387,6 +2556,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2444,6 +2614,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2465,12 +2636,13 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
                 "id": "def-public.RangeSliderEmbeddableFactory.presaveTransformFunction.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -2502,6 +2674,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2521,6 +2694,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2534,6 +2708,7 @@
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2568,6 +2743,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2581,7 +2757,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "controls",
@@ -2595,7 +2772,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2629,6 +2807,7 @@
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2642,7 +2821,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2679,6 +2859,7 @@
         ],
         "path": "src/plugins/controls/public/controls_callout/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -2692,7 +2873,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2708,6 +2890,7 @@
         "description": [],
         "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2721,6 +2904,7 @@
             ],
             "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2736,6 +2920,7 @@
         "description": [],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2749,7 +2934,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2762,7 +2948,22 @@
               "string | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.CommonControlOutput.timeslice",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice",
+            "description": [],
+            "signature": [
+              "[number, number] | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2786,6 +2987,7 @@
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2798,7 +3000,8 @@
               "Partial<T> | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2812,6 +3015,7 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2825,6 +3029,7 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2861,6 +3066,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2873,7 +3079,8 @@
               "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2893,7 +3100,8 @@
               " | undefined"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2906,7 +3114,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2919,7 +3128,8 @@
               "\"twoLine\" | \"oneLine\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2938,7 +3148,8 @@
               }
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2964,6 +3175,7 @@
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2985,6 +3197,7 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -3005,6 +3218,7 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3038,6 +3252,7 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -3051,12 +3266,13 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
                 "id": "def-public.IEditableControlFactory.presaveTransformFunction.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -3080,6 +3296,7 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3099,6 +3316,7 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -3112,6 +3330,7 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3140,6 +3359,7 @@
         ],
         "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3152,7 +3372,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3165,7 +3386,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3178,7 +3400,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3192,6 +3415,7 @@
         "description": [],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3204,7 +3428,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3217,7 +3442,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3230,7 +3456,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3243,7 +3470,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3268,6 +3496,7 @@
         ],
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3280,7 +3509,8 @@
               "[string, string]"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3300,6 +3530,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3317,10 +3548,11 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<TControlEmbeddableInput, TControlEmbeddableOutput>"
+          "<TControlEmbeddableInput, TControlEmbeddableOutput> & { isChained?: (() => boolean) | undefined; renderPrepend?: (() => React.ReactNode) | undefined; }"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3366,12 +3598,11 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">"
+          ">, unknown>"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3401,6 +3632,7 @@
         ],
         "path": "src/plugins/controls/public/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3424,7 +3656,7 @@
           "Filter",
           "[] | undefined; timeRange?: ",
           "TimeRange",
-          " | undefined; controlStyle?: ",
+          " | undefined; timeslice?: [number, number] | undefined; controlStyle?: ",
           "ControlStyle",
           " | undefined; ignoreParentSettings?: ",
           "ParentIgnoreSettings",
@@ -3432,6 +3664,7 @@
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3460,6 +3693,7 @@
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3474,6 +3708,7 @@
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3488,6 +3723,7 @@
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3502,6 +3738,7 @@
         ],
         "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3516,6 +3753,22 @@
         ],
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.TIME_SLIDER_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_SLIDER_CONTROL",
+        "description": [],
+        "signature": [
+          "\"timeSlider\""
+        ],
+        "path": "src/plugins/controls/common/time_slider/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3543,6 +3796,7 @@
         ],
         "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3556,6 +3810,7 @@
             ],
             "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3598,6 +3853,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3619,6 +3875,7 @@
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3645,6 +3902,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -3677,6 +3935,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3697,6 +3956,7 @@
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -3718,6 +3978,7 @@
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -3752,6 +4013,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3771,6 +4033,7 @@
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3798,6 +4061,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3819,6 +4083,7 @@
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3847,6 +4112,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3860,6 +4126,7 @@
             ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3896,6 +4163,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3908,7 +4176,8 @@
               "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3928,7 +4197,8 @@
               " | undefined"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3941,7 +4211,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3954,7 +4225,8 @@
               "\"twoLine\" | \"oneLine\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3973,7 +4245,8 @@
               }
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3987,6 +4260,7 @@
         "description": [],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3996,7 +4270,8 @@
             "label": "total",
             "description": [],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4009,7 +4284,8 @@
               "{ [key: string]: number; }"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4022,7 +4298,8 @@
               "{ [key: string]: number; }"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4035,7 +4312,8 @@
               "{ [key: string]: number; }"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4048,7 +4326,8 @@
               "{ [key: string]: { total: number; details: { [key: string]: number; }; }; }"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4080,6 +4359,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -4089,7 +4369,8 @@
             "label": "order",
             "description": [],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4102,7 +4383,8 @@
               "\"small\" | \"medium\" | \"large\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4112,7 +4394,8 @@
             "label": "grow",
             "description": [],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4126,6 +4409,7 @@
         "description": [],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -4148,7 +4432,8 @@
               ">"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4173,6 +4458,7 @@
         ],
         "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -4185,7 +4471,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4198,7 +4485,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -4211,7 +4499,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4236,6 +4525,7 @@
         ],
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -4248,7 +4538,8 @@
               "[string, string]"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4268,6 +4559,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4282,6 +4574,7 @@
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4296,6 +4589,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4310,6 +4604,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4324,6 +4619,7 @@
         ],
         "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4354,6 +4650,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4368,6 +4665,7 @@
         ],
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4390,6 +4688,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4428,6 +4727,22 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.TIME_SLIDER_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_SLIDER_CONTROL",
+        "description": [],
+        "signature": [
+          "\"timeSlider\""
+        ],
+        "path": "src/plugins/controls/common/time_slider/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

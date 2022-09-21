@@ -31,6 +31,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -44,6 +45,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -58,23 +60,25 @@
         "label": "AutocompleteFieldListsComponent",
         "description": [],
         "signature": [
-          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, allowLargeValueLists, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldListsComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n}",
+            "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  allowLargeValueLists = false,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldListsProps>"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -93,6 +97,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -106,6 +111,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -120,23 +126,25 @@
         "label": "AutocompleteFieldMatchComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, onChange, onError, autocompleteService, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldMatchComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  onChange,\n  onError,\n  autocompleteService,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldMatchProps>"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -155,6 +163,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_wildcard/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -168,7 +177,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -181,7 +191,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -202,6 +213,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -215,6 +227,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -230,6 +243,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -244,6 +258,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -258,6 +273,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -272,10 +288,13 @@
         "label": "FieldComponent",
         "description": [],
         "signature": [
-          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, }: React.PropsWithChildren<OperatorProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, }: React.PropsWithChildren<",
+          "FieldProps",
+          ">): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -285,10 +304,13 @@
             "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<OperatorProps>"
+              "React.PropsWithChildren<",
+              "FieldProps",
+              ">"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -305,27 +327,50 @@
           "\nGiven an array of lists and optionally a field this will return all\nthe lists that match against the field based on the types from the field\n\nNOTE: That we support one additional property from \"FieldSpec\" located here:\nsrc/plugins/data/common/index_patterns/fields/types.ts\nThis type property is esTypes. If it exists and is on there we will read off the esTypes."
         ],
         "signature": [
-          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
+          "(lists: ",
+          {
+            "pluginId": "@kbn/securitysolution-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionAutocompletePluginApi",
+            "section": "def-common.AutocompleteListsData",
+            "text": "AutocompleteListsData"
+          },
+          ", field?: (",
           "DataViewFieldBase",
-          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+          " & { esTypes?: string[] | undefined; }) | undefined) => ",
+          {
+            "pluginId": "@kbn/securitysolution-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionAutocompletePluginApi",
+            "section": "def-common.AutocompleteListsData",
+            "text": "AutocompleteListsData"
+          }
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.filterFieldToList.$1",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "lists",
             "description": [
               "The lists to match against the field"
             ],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              {
+                "pluginId": "@kbn/securitysolution-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionAutocompletePluginApi",
+                "section": "def-common.AutocompleteListsData",
+                "text": "AutocompleteListsData"
+              }
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -344,6 +389,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -360,7 +406,7 @@
           "\nDetermines the options, selected values and option labels for EUI combo box"
         ],
         "signature": [
-          "<T>({ getLabel, options, selectedOptions, }: { getLabel: (value: T) => string; options: T[]; selectedOptions: T[]; }) => ",
+          "<T>({ getLabel, options, selectedOptions, disabledOptions, }: { getLabel: (value: T) => string; options: T[]; selectedOptions: T[]; disabledOptions?: T[] | undefined; }) => ",
           {
             "pluginId": "@kbn/securitysolution-autocomplete",
             "scope": "common",
@@ -371,16 +417,18 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.getGenericComboBoxProps.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  getLabel,\n  options,\n  selectedOptions,\n}",
+            "label": "{\n  getLabel,\n  options,\n  selectedOptions,\n  disabledOptions,\n}",
             "description": [],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -394,6 +442,7 @@
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -407,6 +456,7 @@
                     ],
                     "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -423,7 +473,8 @@
                   "T[]"
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -436,7 +487,22 @@
                   "T[]"
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-autocomplete",
+                "id": "def-common.getGenericComboBoxProps.$1.disabledOptions",
+                "type": "Array",
+                "tags": [],
+                "label": "disabledOptions",
+                "description": [],
+                "signature": [
+                  "T[] | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -462,6 +528,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -478,6 +545,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -496,6 +564,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -509,6 +578,40 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-autocomplete",
+        "id": "def-common.paramContainsSpace",
+        "type": "Function",
+        "tags": [],
+        "label": "paramContainsSpace",
+        "description": [],
+        "signature": [
+          "(param: string) => boolean | \"\""
+        ],
+        "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.paramContainsSpace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "param",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -531,6 +634,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -546,6 +650,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -563,6 +668,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -579,6 +685,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -595,6 +702,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -632,6 +740,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -651,6 +760,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -661,6 +771,48 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-autocomplete",
+        "id": "def-common.AutocompleteListsData",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutocompleteListsData",
+        "description": [],
+        "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.AutocompleteListsData.smallLists",
+            "type": "Array",
+            "tags": [],
+            "label": "smallLists",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.AutocompleteListsData.largeLists",
+            "type": "Array",
+            "tags": [],
+            "label": "largeLists",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-autocomplete",
         "id": "def-common.GetGenericComboBoxPropsReturn",
         "type": "Interface",
         "tags": [],
@@ -668,6 +820,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -681,7 +834,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -694,7 +848,8 @@
               "string[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -708,7 +863,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -722,6 +878,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -734,7 +891,8 @@
               "any"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -747,7 +905,8 @@
               "string | string[] | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -761,7 +920,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -774,7 +934,8 @@
               "ListOperatorTypeEnum"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -784,7 +945,8 @@
             "label": "query",
             "description": [],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -798,7 +960,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -818,6 +981,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

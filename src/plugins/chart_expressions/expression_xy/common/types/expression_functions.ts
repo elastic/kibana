@@ -215,7 +215,6 @@ export interface XYArgs extends DataLayerArgs {
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   referenceLines: ReferenceLineConfigResult[];
-  annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -233,12 +232,21 @@ export interface XYArgs extends DataLayerArgs {
   showTooltip: boolean;
 }
 
+export interface ExpressionAnnotationsLayers {
+  layers: AnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+export type ExpressionAnnotationResult = ExpressionAnnotationsLayers & {
+  type: 'event_annotations_result';
+};
+
 export interface LayeredXYArgs {
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
+  annotations?: ExpressionAnnotationResult;
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -279,15 +287,17 @@ export interface XYProps {
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   singleTable?: boolean;
+  annotations?: ExpressionAnnotationResult;
 }
 
 export interface AnnotationLayerArgs {
+  layerId: string;
   annotations: EventAnnotationOutput[];
   simpleView?: boolean;
 }
 
 export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {
-  layerId?: string;
+  layerId: string;
 };
 
 export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
@@ -326,7 +336,6 @@ export type XYExtendedLayerConfig =
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ReferenceLineLayerConfigResult
-  | ExtendedAnnotationLayerConfigResult
   | ReferenceLineConfigResult;
 
 export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {

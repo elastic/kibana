@@ -11,6 +11,7 @@ steps:
     agents:
       queue: c2-16
     key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: ':muscle: Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
@@ -18,6 +19,7 @@ steps:
       queue: kb-static-ubuntu
     depends_on: build
     key: tests
+    timeout_in_minutes: 60
 
   - label: ':shipit: Performance Tests dataset extraction for scalability benchmarking'
     command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh

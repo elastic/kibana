@@ -13,7 +13,7 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { ScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
@@ -47,7 +47,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
 }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
-  const history = new ScopedHistory(browserHistory, basepath);
+  const history = new CoreScopedHistory(browserHistory, basepath);
 
   const isCloudEnabled = storyContext?.args.isCloudEnabled;
   // @ts-ignore {} no assignable to parameter
@@ -72,6 +72,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),
+        languageClientsUiComponents: new Map(),
       },
       docLinks: getDocLinks(),
       http: getHttp(),

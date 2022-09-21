@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -40,6 +40,7 @@ import type {
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -56,6 +57,7 @@ import type { Management } from './management';
 import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
+import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -90,6 +92,7 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -101,6 +104,15 @@ export type StartServices = CoreStart &
     storage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    onAppLeave: (handler: AppLeaveHandler) => void;
+
+    /**
+     * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.
+     * The goal is to allow page property customization (such as `template`).
+     */
+    securityLayout: {
+      getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
+    };
   };
 
 export interface PluginSetup {

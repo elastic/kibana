@@ -53,14 +53,18 @@ export class FieldEditorService extends FtrService {
   public async confirmSave() {
     await this.retry.try(async () => {
       await this.testSubjects.setValue('saveModalConfirmText', 'change');
-      await this.testSubjects.clickWhenNotDisabled('confirmModalConfirmButton', { timeout: 1000 });
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
+        timeout: 1000,
+      });
     });
   }
 
   public async confirmDelete() {
     await this.retry.try(async () => {
       await this.testSubjects.setValue('deleteModalConfirmText', 'remove');
-      await this.testSubjects.clickWhenNotDisabled('confirmModalConfirmButton', { timeout: 1000 });
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
+        timeout: 1000,
+      });
     });
   }
 }

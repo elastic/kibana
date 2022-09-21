@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AlertStatusEventEntityIdMap,
+  EventAction,
   ProcessEvent,
   ProcessEventResults,
 } from '../../../common/types/process_tree';
@@ -63,7 +64,12 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage, pages) => {
         const isRefetch = pages.length === 1 && jumpToCursor;
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
-          const cursor = lastPage.events?.[lastPage.events.length - 1]?.['@timestamp'];
+          const filtered = lastPage.events.filter((event) => {
+            const action = event.event?.action;
+            return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+          });
+
+          const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
 
           if (cursor) {
             return {
@@ -74,12 +80,17 @@ export const useFetchSessionViewProcessEvents = (
         }
       },
       getPreviousPageParam: (firstPage, pages) => {
-        const atBeginning = pages.length > 1 && firstPage.events.length < PROCESS_EVENTS_PER_PAGE;
+        const filtered = firstPage.events.filter((event) => {
+          const action = event.event?.action;
+          return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+        });
+
+        const atBeginning = pages.length > 1 && filtered.length < PROCESS_EVENTS_PER_PAGE;
 
         if (jumpToCursor && !atBeginning) {
           // it's possible the first page returned no events
           // fallback to using jumpToCursor if there are no "forward" events.
-          const cursor = firstPage.events?.[0]?.['@timestamp'] || jumpToCursor;
+          const cursor = filtered[0]?.['@timestamp'] || jumpToCursor;
 
           return {
             cursor,
@@ -189,14 +200,13 @@ export const useFetchAlertStatus = (
   return query;
 };
 
-// TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
 export const useFetchGetTotalIOBytes = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, sessionEntityId];
-  const query = useQuery<number, Error>(
+  const query = useQuery<{ total: number }, Error>(
     cachingKeys,
     async () => {
-      return http.get<number>(GET_TOTAL_IO_BYTES_ROUTE, {
+      return http.get<{ total: number }>(GET_TOTAL_IO_BYTES_ROUTE, {
         query: {
           sessionEntityId,
         },

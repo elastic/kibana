@@ -7,17 +7,10 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import {
-  Operation,
-  VisualizeEditorContext,
-  Suggestion,
-  OperationDescriptor,
-  DatasourcePublicAPI,
-} from '../../types';
+import { Operation, OperationDescriptor, DatasourcePublicAPI } from '../../types';
 import type {
   State,
   XYState,
-  XYSuggestion,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -26,7 +19,6 @@ import type {
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar } from '@kbn/chart-icons';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
@@ -35,9 +27,14 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsState } from '../../state_management';
+import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
+  type: 'manual',
   label: 'Event 1',
   key: {
     type: 'point_in_time',
@@ -47,6 +44,7 @@ const exampleAnnotation: EventAnnotationConfig = {
 };
 const exampleAnnotation2: EventAnnotationConfig = {
   icon: 'circle',
+  type: 'manual',
   id: 'an2',
   key: {
     timestamp: '2022-04-18T11:01:59.135Z',
@@ -84,6 +82,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -237,7 +236,12 @@ describe('xy_visualization', () => {
 
   describe('#appendLayer', () => {
     it('adds a layer', () => {
-      const layers = xyVisualization.appendLayer!(exampleState(), 'foo', layerTypes.DATA).layers;
+      const layers = xyVisualization.appendLayer!(
+        exampleState(),
+        'foo',
+        layerTypes.DATA,
+        'indexPattern1'
+      ).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
@@ -245,7 +249,7 @@ describe('xy_visualization', () => {
 
   describe('#clearLayer', () => {
     it('clears the specified layer', () => {
-      const layer = xyVisualization.clearLayer(exampleState(), 'first').layers[0];
+      const layer = xyVisualization.clearLayer(exampleState(), 'first', 'indexPattern1').layers[0];
       expect(layer).toMatchObject({
         accessors: [],
         layerId: 'first',
@@ -460,7 +464,9 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -471,10 +477,13 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
+          ignoreGlobalFilters: true,
           annotations: [
             exampleAnnotation,
             {
               icon: 'triangle',
+              type: 'manual',
               id: 'newCol',
               key: {
                 timestamp: '2022-04-15T00:00:00.000Z',
@@ -495,7 +504,9 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -517,7 +528,9 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
+          ignoreGlobalFilters: true,
         });
       });
       it('should reorder a dimension to a annotation layer', () => {
@@ -530,7 +543,9 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation, exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -553,7 +568,9 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, exampleAnnotation],
+          ignoreGlobalFilters: true,
         });
       });
 
@@ -566,13 +583,17 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -596,12 +617,16 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [{ ...exampleAnnotation, id: 'an2' }],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -614,13 +639,17 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -644,12 +673,16 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -662,13 +695,17 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -692,12 +729,16 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -710,13 +751,17 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -740,296 +785,18 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
         ]);
-      });
-    });
-  });
-
-  describe('#updateLayersConfigurationFromContext', () => {
-    let mockDatasource: ReturnType<typeof createMockDatasource>;
-    let frame: ReturnType<typeof createMockFramePublicAPI>;
-    let context: VisualizeEditorLayersContext;
-
-    beforeEach(() => {
-      frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
-
-      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd', fields: [] },
-        { columnId: 'a', fields: [] },
-        { columnId: 'b', fields: [] },
-        { columnId: 'c', fields: [] },
-      ]);
-
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
-        },
-      };
-
-      context = {
-        chartType: 'area',
-        axisPosition: 'right',
-        palette: {
-          name: 'temperature',
-          type: 'palette',
-        },
-        metrics: [
-          {
-            agg: 'count',
-            isFullReference: false,
-            fieldName: 'document',
-            params: {},
-            color: '#68BC00',
-          },
-        ],
-        timeInterval: 'auto',
-        format: 'bytes',
-      } as VisualizeEditorLayersContext;
-    });
-
-    it('sets the context configuration correctly', () => {
-      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
-        prevState: {
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'line',
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        layerId: 'first',
-        context,
-      });
-      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
-      expect((state?.layers[0] as XYDataLayerConfig).yConfig).toStrictEqual([
-        {
-          axisMode: 'right',
-          color: '#68BC00',
-          forAccessor: 'a',
-        },
-      ]);
-
-      expect((state?.layers[0] as XYDataLayerConfig).palette).toStrictEqual({
-        name: 'temperature',
-        type: 'palette',
-      });
-    });
-
-    it('sets the context configuration correctly for reference lines', () => {
-      const newContext = {
-        ...context,
-        metrics: [
-          {
-            agg: 'static_value',
-            fieldName: 'document',
-            isFullReference: true,
-            color: '#68BC00',
-            params: {
-              value: '10',
-            },
-          },
-        ],
-      };
-      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
-        prevState: {
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'line',
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        layerId: 'first',
-        context: newContext,
-      });
-      const firstLayer = state?.layers[0] as XYDataLayerConfig;
-      expect(firstLayer).toHaveProperty('seriesType', 'area');
-      expect(firstLayer).toHaveProperty('layerType', 'referenceLine');
-      expect(firstLayer.yConfig).toStrictEqual([
-        {
-          axisMode: 'right',
-          color: '#68BC00',
-          forAccessor: 'a',
-          fill: 'below',
-        },
-      ]);
-    });
-  });
-
-  describe('#getVisualizationSuggestionFromContext', () => {
-    let context: VisualizeEditorContext;
-    let suggestions: Suggestion[];
-
-    beforeEach(() => {
-      suggestions = [
-        {
-          title: 'Average of AvgTicketPrice over timestamp',
-          score: 0.3333333333333333,
-          hide: true,
-          visualizationId: 'lnsXY',
-          visualizationState: {
-            legend: {
-              isVisible: true,
-              position: 'right',
-            },
-            valueLabels: 'hide',
-            fittingFunction: 'None',
-            axisTitlesVisibilitySettings: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            tickLabelsVisibilitySettings: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            labelsOrientation: {
-              x: 0,
-              yLeft: 0,
-              yRight: 0,
-            },
-            gridlinesVisibilitySettings: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            preferredSeriesType: 'bar_stacked',
-            layers: [
-              {
-                layerId: 'e71c3459-ddcf-4a13-94a1-bf91f7b40175',
-                seriesType: 'bar_stacked',
-                xAccessor: '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
-                accessors: ['0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b'],
-                layerType: 'data',
-              },
-            ],
-          },
-          keptLayerIds: [],
-          datasourceState: {
-            layers: {
-              'e71c3459-ddcf-4a13-94a1-bf91f7b40175': {
-                indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-                columns: {
-                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1': {
-                    label: 'timestamp',
-                    dataType: 'date',
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                    isBucketed: true,
-                    scale: 'interval',
-                    params: {
-                      interval: 'auto',
-                    },
-                  },
-                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b': {
-                    label: 'Average of AvgTicketPrice',
-                    dataType: 'number',
-                    operationType: 'average',
-                    sourceField: 'AvgTicketPrice',
-                    isBucketed: false,
-                    scale: 'ratio',
-                  },
-                },
-                columnOrder: [
-                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
-                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b',
-                ],
-                incompleteColumns: {},
-              },
-            },
-          },
-          datasourceId: 'indexpattern',
-          columns: 2,
-          changeType: 'initial',
-        },
-      ] as unknown as Suggestion[];
-
-      context = {
-        layers: [
-          {
-            indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-            xFieldName: 'order_date',
-            xMode: 'date_histogram',
-            chartType: 'area',
-            axisPosition: 'left',
-            palette: {
-              type: 'palette',
-              name: 'default',
-            },
-            metrics: [
-              {
-                agg: 'count',
-                isFullReference: false,
-                fieldName: 'document',
-                params: {},
-                color: '#68BC00',
-              },
-            ],
-            timeInterval: 'auto',
-          },
-        ],
-        type: 'lnsXY',
-        configuration: {
-          fill: '0.5',
-          legend: {
-            isVisible: true,
-            position: 'right',
-            shouldTruncate: true,
-            maxLines: true,
-          },
-          gridLinesVisibility: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          extents: {
-            yLeftExtent: {
-              mode: 'full',
-            },
-            yRightExtent: {
-              mode: 'full',
-            },
-          },
-        },
-        isVisualizeAction: true,
-      } as VisualizeEditorContext;
-    });
-
-    it('updates the visualization state correctly based on the context', () => {
-      const suggestion = xyVisualization?.getVisualizationSuggestionFromContext?.({
-        suggestions,
-        context,
-      }) as XYSuggestion;
-      expect(suggestion?.visualizationState?.fillOpacity).toEqual(0.5);
-      expect(suggestion?.visualizationState?.yRightExtent).toEqual({ mode: 'full' });
-      expect(suggestion?.visualizationState?.legend).toEqual({
-        isVisible: true,
-        maxLines: true,
-        position: 'right',
-        shouldTruncate: true,
       });
     });
   });
@@ -1106,7 +873,9 @@ describe('xy_visualization', () => {
               {
                 layerId: 'ann',
                 layerType: layerTypes.ANNOTATIONS,
+                indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -1124,7 +893,9 @@ describe('xy_visualization', () => {
         {
           layerId: 'ann',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
+          ignoreGlobalFilters: true,
         },
       ]);
     });
@@ -1843,7 +1614,9 @@ describe('xy_visualization', () => {
             {
               layerId: 'annotations',
               layerType: layerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
             },
           ],
         };
@@ -2278,7 +2051,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          frame.datasourceLayers
+          { datasourceLayers: frame.datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2334,7 +2107,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2390,7 +2163,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2398,6 +2171,110 @@ describe('xy_visualization', () => {
           longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
         },
       ]);
+    });
+
+    describe('Annotation layers', () => {
+      function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
+        return {
+          layers: [
+            {
+              layerId: 'layerId',
+              layerType: 'annotations',
+              indexPatternId: 'first',
+              annotations: [
+                {
+                  label: 'Event',
+                  id: '1',
+                  type: 'query',
+                  timeField: 'start_date',
+                  ...annotation,
+                },
+              ],
+            },
+          ],
+        } as XYState;
+      }
+
+      function getFrameMock() {
+        return createMockFramePublicAPI({
+          datasourceLayers: { first: mockDatasource.publicAPIMock },
+          dataViews: createMockDataViewsState({
+            indexPatterns: { first: createMockedIndexPattern() },
+          }),
+        });
+      }
+      it('should return error if current annotation contains non-existent field as timeField', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: 'non-existent',
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Time field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should return error if current annotation contains non existent field as textField', () => {
+        const xyState = createStateWithAnnotationProps({
+          textField: 'non-existent',
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Text field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should contain error if current annotation contains at least one non-existent field as tooltip field', () => {
+        const xyState = createStateWithAnnotationProps({
+          extraFields: ['bytes', 'memory', 'non-existent'],
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Tooltip field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should contain error if current annotation contains invalid query', () => {
+        const xyState = createStateWithAnnotationProps({
+          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining(
+              'Expected "(", "{", value, whitespace but """ found.'
+            ),
+          })
+        );
+      });
+      it('should contain multiple errors if current annotation contains multiple non-existent fields', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: 'non-existent',
+          textField: 'non-existent',
+          extraFields: ['bytes', 'memory', 'non-existent'],
+          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(4);
+      });
+      it('should contain error if current annotation contains no time field set', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: undefined,
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining('Time field is missing'),
+          })
+        );
+      });
     });
   });
 
@@ -2552,6 +2429,86 @@ describe('xy_visualization', () => {
         '4': 'Event [2]',
         '5': 'Event [1] [1]',
         '6': 'Custom [1]',
+      });
+    });
+  });
+
+  describe('#fromPersistableState', () => {
+    it('should inject references on annotation layers', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.fromPersistableState!(
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          },
+          [
+            {
+              type: 'index-pattern',
+              name: `xy-visualization-layer-annotation`,
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+          },
+        ],
+      });
+    });
+
+    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.fromPersistableState!(
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          },
+          [
+            {
+              type: 'index-pattern',
+              name: 'something-else',
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+          },
+        ],
       });
     });
   });

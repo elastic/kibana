@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPageBody,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
@@ -26,9 +26,9 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
-import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
+import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/use_url_state';
 import { useData } from '../../hooks/use_data';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
@@ -37,6 +37,7 @@ import { SearchPanel } from '../search_panel';
 
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
+import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './explain_log_rate_spikes_page.scss';
@@ -55,8 +56,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   dataView,
   savedSearch,
 }) => {
-  const { services } = useAiOpsKibana();
-  const { data: dataService } = services;
+  const { data: dataService } = useAiopsAppContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -95,6 +95,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
 
   const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
   const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePoint | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<GroupTableItem | null>(null);
 
   // If a row is pinned, still overrule with a potentially hovered row.
   const currentSelectedChangePoint = useMemo(() => {
@@ -117,7 +118,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     { currentDataView: dataView, currentSavedSearch },
     aiopsListState,
     setGlobalState,
-    currentSelectedChangePoint
+    currentSelectedChangePoint,
+    undefined,
+    selectedGroup
   );
 
   const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
@@ -168,6 +171,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setWindowParameters(undefined);
     setPinnedChangePoint(null);
     setSelectedChangePoint(null);
+    setSelectedGroup(null);
   }
 
   return (
@@ -226,7 +230,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={
-                    currentSelectedChangePoint ? documentCountStatsCompare : undefined
+                    currentSelectedChangePoint || selectedGroup
+                      ? documentCountStatsCompare
+                      : undefined
                   }
                   totalCount={totalCount}
                   changePoint={currentSelectedChangePoint}
@@ -247,6 +253,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   onPinnedChangePoint={setPinnedChangePoint}
                   onSelectedChangePoint={setSelectedChangePoint}
                   selectedChangePoint={currentSelectedChangePoint}
+                  onSelectedGroup={setSelectedGroup}
                 />
               )}
               {windowParameters === undefined && (

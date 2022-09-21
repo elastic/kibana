@@ -18,6 +18,7 @@ import { ObservabilityExploratoryView } from '../components/shared/exploratory_v
 import { RulesPage } from '../pages/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
+import { AlertDetailsPage } from '../pages/alert_details';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -112,6 +113,13 @@ export const routes = {
   '/alerts/rules/:ruleId': {
     handler: () => {
       return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId/alerts/:alertId': {
+    handler: () => {
+      return <AlertDetailsPage />;
     },
     params: {},
     exact: true,

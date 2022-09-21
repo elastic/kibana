@@ -84,6 +84,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       );
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
@@ -164,7 +165,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     };
   }, [items]);
 
-  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
+  let tableSettings: object = useTableSettings<NodeItem>(items.length, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
@@ -184,6 +185,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     function updateOnTimerRefresh() {
       fetchNodesData();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
   );
 

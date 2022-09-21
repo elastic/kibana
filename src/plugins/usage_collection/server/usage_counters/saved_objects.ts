@@ -9,7 +9,6 @@
 import type {
   SavedObject,
   SavedObjectsRepository,
-  SavedObjectAttributes,
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
 import moment from 'moment';
@@ -18,7 +17,7 @@ import type { CounterMetric } from './usage_counter';
 /**
  * The attributes stored in the UsageCounters' SavedObjects
  */
-export interface UsageCountersSavedObjectAttributes extends SavedObjectAttributes {
+export interface UsageCountersSavedObjectAttributes {
   /** The domain ID registered in the Usage Counter **/
   domainId: string;
   /** The counter name **/

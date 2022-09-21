@@ -21,7 +21,7 @@ import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 const createFieldsFetcher = () =>
   ({
-    getFieldsForWildcard: jest.fn(async () => []),
+    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: [] })),
   } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
@@ -348,6 +348,26 @@ describe('IndexPatterns', () => {
 
     // successful subsequent request
     expect(async () => await indexPatterns.get(id)).toBeDefined();
+  });
+
+  test('can set and remove field format', async () => {
+    const id = 'id';
+    setDocsourcePayload(id, savedObject);
+    const dataView = await indexPatterns.get(id);
+    dataView.setFieldFormat('field', { id: 'formatId' });
+    await indexPatterns.updateSavedObject(dataView);
+    let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    let [, , attrs] = lastCall;
+    expect(attrs).toHaveProperty('fieldFormatMap');
+    expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{\\"field\\":{\\"id\\":\\"formatId\\"}}"`);
+    dataView.deleteFieldFormat('field');
+    await indexPatterns.updateSavedObject(dataView);
+    lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    [, , attrs] = lastCall;
+
+    // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
+    expect(attrs).toHaveProperty('fieldFormatMap');
+    expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
   describe('getDefaultDataView', () => {

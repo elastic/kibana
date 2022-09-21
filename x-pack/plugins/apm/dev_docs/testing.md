@@ -72,6 +72,8 @@ node scripts/test/api --runner --basic --updateSnapshots
 
 The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
 
+[Test tips and best practices](../ftr_e2e/README.md)
+
 ### Start test server
 
 ```
@@ -81,7 +83,7 @@ node x-pack/plugins/apm/scripts/test/e2e.js --server
 ### Run tests
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e.js --open
+node x-pack/plugins/apm/scripts/test/e2e.js --runner --open
 ```
 
 ### A11y checks

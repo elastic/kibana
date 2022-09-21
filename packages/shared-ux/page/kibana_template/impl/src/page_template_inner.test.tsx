@@ -10,9 +10,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-// imports from elastic packages
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
-
 // imports from immediate files
 import { KibanaPageTemplateInner } from './page_template_inner';
 
@@ -42,7 +39,7 @@ describe('KibanaPageTemplateInner', () => {
         <KibanaPageTemplateInner isEmptyState={true} pageHeader={pageHeader} />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(EuiEmptyPrompt).length).toBe(1);
+      expect(component.find('_EuiPageEmptyPrompt').length).toBe(1);
     });
 
     test('no pageHeader', () => {
@@ -53,15 +50,9 @@ describe('KibanaPageTemplateInner', () => {
     });
   });
 
-  test('custom template', () => {
-    const component = shallow(
-      <KibanaPageTemplateInner
-        isEmptyState={true}
-        pageHeader={pageHeader}
-        template={'centeredContent'}
-      />
-    );
+  test('page sidebar', () => {
+    const component = shallow(<KibanaPageTemplateInner pageSideBar={<>Test</>} />);
     expect(component).toMatchSnapshot();
-    expect(component.find(EuiPageTemplate).props().template).toEqual('centeredContent');
+    expect(component.find('EuiPageSidebar')).toHaveLength(1);
   });
 });

@@ -6,7 +6,7 @@
  */
 import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
 import React from 'react';
 import {
@@ -14,7 +14,6 @@ import {
   toMountPoint,
   wrapWithTheme,
 } from '@kbn/kibana-react-plugin/public';
-import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -95,13 +94,14 @@ export async function resolveJobSelection(
           ownFocus: true,
           closeButtonAriaLabel: 'jobSelectorFlyout',
         }
-      ); // Close the flyout when user navigates out of the dashboard plugin
+      );
 
-      currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
-        if (appId !== DashboardConstants.DASHBOARDS_ID) {
+      // Close the flyout when user navigates out of the current plugin
+      currentAppId$
+        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
+        .subscribe(() => {
           flyoutSession.close();
-        }
-      });
+        });
     } catch (error) {
       reject(error);
     }

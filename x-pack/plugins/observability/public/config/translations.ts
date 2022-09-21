@@ -71,6 +71,12 @@ export const translations = {
         defaultMessage: 'View alert details',
       }
     ),
+    viewAlertDetailsPageButtonText: i18n.translate(
+      'xpack.observability.alertsTable.viewAlertDetailsPageButtonText',
+      {
+        defaultMessage: 'View alert page',
+      }
+    ),
   },
   alertsFlyout: {
     statusLabel: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
@@ -109,6 +115,12 @@ export const translations = {
     viewInAppButtonText: i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
       defaultMessage: 'View in app',
     }),
+    alertDetailsButtonText: i18n.translate(
+      'xpack.observability.alertsFlyout.alertsDetailsButtonText',
+      {
+        defaultMessage: 'Alert details',
+      }
+    ),
   },
   alertsSearchBar: {
     placeholder: i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
