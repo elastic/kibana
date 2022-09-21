@@ -494,30 +494,20 @@ export const BodyComponent = React.memo<EventRenderedStatefulBodyProps>(
       [loadPage]
     );
 
-    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-    const [activeStatefulEventContext] = useState({
-      timelineID: id,
-      tabType,
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-    });
-
     return (
-      <StatefulEventContext.Provider value={activeStatefulEventContext}>
-        <EventRenderedView
-          appId={appId}
-          alertToolbar={alertToolbar}
-          events={data}
-          leadingControlColumns={leadingTGridControlColumns ?? []}
-          onChangePage={onChangePage}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          pageIndex={activePage}
-          pageSize={pageSize}
-          pageSizeOptions={itemsPerPageOptions}
-          rowRenderers={rowRenderers}
-          totalItemCount={totalItems}
-        />
-      </StatefulEventContext.Provider>
+      <EventRenderedView
+        appId={appId}
+        alertToolbar={alertToolbar}
+        events={data}
+        leadingControlColumns={leadingTGridControlColumns ?? []}
+        onChangePage={onChangePage}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        pageIndex={activePage}
+        pageSize={pageSize}
+        pageSizeOptions={itemsPerPageOptions}
+        rowRenderers={rowRenderers}
+        totalItemCount={totalItems}
+      />
     );
   }
 );

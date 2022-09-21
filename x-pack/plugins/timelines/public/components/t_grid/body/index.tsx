@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, useState } from 'react';
 import { Filter } from '@kbn/es-query';
 import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -23,6 +23,7 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { Ecs } from '../../../../common/ecs';
 import { ViewSelection } from '../event_rendered_view/selector';
+import { StatefulEventContext } from '../../stateful_event_context';
 
 const StatefulGridBody = lazy(async () => import('./grid'));
 const StatefuEventRenderedBody = lazy(async () => import('./event_rendered'));
@@ -84,15 +85,30 @@ export interface StatefulBodyProps {
  */
 
 export const BodyComponent = React.memo<StatefulBodyProps>(
-  ({ tableView = 'gridView', ...restProps }) => {
+  ({ tableView = 'gridView', ...props }) => {
+    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+    const [activeStatefulEventContext] = useState({
+      timelineID: props.id,
+      tabType: props.tabType,
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+    });
+
+    let component = null;
     switch (tableView) {
       case 'gridView':
-        return <StatefulGridBody {...restProps} />;
+        component = <StatefulGridBody {...props} />;
+        break;
       case 'eventRenderedView':
-        return <StatefuEventRenderedBody {...restProps} />;
-      default:
-        return null;
+        component = <StatefuEventRenderedBody {...props} />;
+        break;
     }
+
+    return (
+      <StatefulEventContext.Provider value={activeStatefulEventContext}>
+        {component}
+      </StatefulEventContext.Provider>
+    );
   }
 );
 

@@ -49,7 +49,6 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext } from '../../stateful_event_context';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -658,14 +657,6 @@ export const BodyComponent = React.memo<GridStatefulBodyProps>(
       hasAlertsCrudPermissions,
     ]);
 
-    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-    const [activeStatefulEventContext] = useState({
-      timelineID: id,
-      tabType,
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-    });
-
     // TODO: remove these prop definitions, they are not used for the alerts state table
     // const alertsTableProps = {
     //   alertsTableConfiguration: config,
@@ -724,10 +715,9 @@ export const BodyComponent = React.memo<GridStatefulBodyProps>(
           rowRenderers={rowRenderers}
           showAlertStatusActions={showAlertStatusActions}
         >
-          <StatefulEventContext.Provider value={activeStatefulEventContext}>
-            {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+          {triggersActionsUi.getAlertsStateTable(alertStateProps)}
 
-            {/* // TODO: REMOVE
+          {/* // TODO: REMOVE
               // <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
               //   <EuiDataGrid
               //     id={'body-data-grid'}
@@ -752,7 +742,6 @@ export const BodyComponent = React.memo<GridStatefulBodyProps>(
               //     ref={dataGridRef}
               //   />
               // </EuiDataGridContainer> */}
-          </StatefulEventContext.Provider>
         </TGridComponentStateProvider>
       </>
     );
