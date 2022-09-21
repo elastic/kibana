@@ -9,20 +9,20 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 
-import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
+import { ApiTotalStats } from './api_total_stats';
+import { ConnectorTotalStats } from './connector_total_stats';
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { OverviewLogic } from './overview.logic';
 import { SyncJobs } from './sync_jobs';
-import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
@@ -30,26 +30,30 @@ export const SearchIndexOverview: React.FC = () => {
   return (
     <>
       <EuiSpacer />
+      {isConnectorIndex(indexData) && indexData.connector.error && (
+        <>
+          <EuiCallOut
+            iconType="alert"
+            color="danger"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndex.connectorErrorCallOut.title',
+              {
+                defaultMessage: 'Your connector has reported an error',
+              }
+            )}
+          >
+            <EuiSpacer size="s" />
+            <EuiText size="s">{indexData.connector.error}</EuiText>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       {isCrawlerIndex(indexData) ? (
         <CrawlerTotalStats />
+      ) : isConnectorIndex(indexData) ? (
+        <ConnectorTotalStats />
       ) : (
-        <TotalStats
-          ingestionType={
-            isConnectorIndex(indexData)
-              ? i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
-                  {
-                    defaultMessage: 'Connector',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
-                  {
-                    defaultMessage: 'API',
-                  }
-                )
-          }
-        />
+        <ApiTotalStats />
       )}
       {isApiIndex(indexData) && (
         <>
@@ -66,8 +70,6 @@ export const SearchIndexOverview: React.FC = () => {
       )}
       {isConnectorIndex(indexData) && (
         <>
-          <EuiSpacer />
-          <ConnectorOverviewPanels />
           <EuiSpacer />
           <SyncJobs />
         </>

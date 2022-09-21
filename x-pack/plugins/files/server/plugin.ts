@@ -25,7 +25,7 @@ import {
 } from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes } from './routes';
-import { registerUsageCollector } from './usage';
+import { Counters, registerUsageCollector } from './usage';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
@@ -40,7 +40,8 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     core: CoreSetup,
     { security, usageCollection }: FilesPluginSetupDependencies
   ): FilesSetup {
-    FileServiceFactory.setup(core.savedObjects);
+    const usageCounter = usageCollection?.createUsageCounter(PLUGIN_ID);
+    FileServiceFactory.setup(core.savedObjects, usageCounter);
     this.securitySetup = security;
 
     core.http.registerRouteHandlerContext<FilesRequestHandlerContext, typeof PLUGIN_ID>(
@@ -51,6 +52,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
             asCurrentUser: () => this.fileServiceFactory!.asScoped(req),
             asInternalUser: () => this.fileServiceFactory!.asInternal(),
             logger: this.logger.get('files-routes'),
+            usageCounter: usageCounter
+              ? (counter: Counters) => usageCounter.incrementCounter({ counterName: counter })
+              : undefined,
           },
         };
       }
