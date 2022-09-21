@@ -14,7 +14,7 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { useKibana } from '../../../utils/kibana_react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { waitFor } from '@testing-library/react';
-import { alertWithTags, alertWithNoData, tags } from '../mock';
+import { alertWithTags, alertWithNoData, tags } from '../mock/alert';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

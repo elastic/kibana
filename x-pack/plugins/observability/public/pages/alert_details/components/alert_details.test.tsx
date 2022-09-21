@@ -14,7 +14,7 @@ import { Chance } from 'chance';
 import { useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../../../plugin';
-import { alert, alertWithNoData } from '../mock';
+import { alert, alertWithNoData } from '../mock/alert';
 import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../hooks/use_fetch_alert_detail');

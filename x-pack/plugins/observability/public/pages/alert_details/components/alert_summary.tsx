@@ -10,12 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { asDuration } from '../../../../common/utils/formatters';
-import { PageHeaderProps } from '../types';
+import { AlertSummaryProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { DEFAULT_DATE_FORMAT } from '../constants';
 
-export function AlertSummary({ alert }: PageHeaderProps) {
+export function AlertSummary({ alert }: AlertSummaryProps) {
   const { triggersActionsUi } = useKibana().services;
 
   return (

@@ -7,7 +7,7 @@
 
 import { TopAlert } from '../alerts/containers/alerts_page/types';
 
-export interface PageHeaderProps {
+export interface AlertSummaryProps {
   alert: TopAlert | null;
 }
 
