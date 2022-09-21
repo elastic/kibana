@@ -10,7 +10,7 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import { AggBasedColumn, Operations } from '../..';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../types';
-import { getLabel, getLabelForPercentile, getValidColumns } from './utils';
+import { getFieldNameFromField, getLabel, getLabelForPercentile, getValidColumns } from './utils';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -111,5 +111,21 @@ describe('getValidColumns', () => {
     } else {
       expect(getValidColumns(...input)).toEqual(expect.objectContaining(expected));
     }
+  });
+});
+
+describe('getFieldNameFromField', () => {
+  test('should return null if no field is passed', () => {
+    expect(getFieldNameFromField(undefined)).toBeNull();
+  });
+
+  test('should return field name if field is string', () => {
+    const fieldName = 'some-field-name';
+    expect(getFieldNameFromField(fieldName)).toEqual(fieldName);
+  });
+
+  test('should return field name if field is DataViewField', () => {
+    const field = stubLogstashDataView.fields[0];
+    expect(getFieldNameFromField(field)).toEqual(field.name);
   });
 });
