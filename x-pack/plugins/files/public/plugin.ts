@@ -6,8 +6,14 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  getFileKindsRegistry,
+  setFileKindsRegistry,
+  FileKindsRegistryImpl,
+} from '../common/file_kinds_registry';
 import type { FilesClientFactory } from './types';
 import { createFilesClient } from './files_client';
+import { FileKind } from '../common';
 
 /**
  * Public setup-phase contract
@@ -18,31 +24,48 @@ export interface FilesSetup {
    * registered {@link FileKind}.
    */
   filesClientFactory: FilesClientFactory;
+
+  /**
+   * Register a {@link FileKind} which allows for specifying details about the files
+   * that will be uploaded.
+   *
+   * @param {FileKind} fileKind - the file kind to register
+   */
+  registerFileKind(fileKind: FileKind): void;
 }
 
-export type FilesStart = FilesSetup;
+export type FilesStart = Pick<FilesSetup, 'filesClientFactory'>;
 
 /**
  * Bringing files to Kibana
  */
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
-  private api: undefined | FilesSetup;
+  private filesClientFactory: undefined | FilesClientFactory;
+
+  constructor() {
+    setFileKindsRegistry(new FileKindsRegistryImpl());
+  }
 
   setup(core: CoreSetup): FilesSetup {
-    this.api = {
-      filesClientFactory: {
-        asScoped(fileKind: string) {
-          return createFilesClient({ fileKind, http: core.http });
-        },
-        asUnscoped() {
-          return createFilesClient({ http: core.http });
-        },
+    this.filesClientFactory = {
+      asScoped(fileKind: string) {
+        return createFilesClient({ fileKind, http: core.http });
+      },
+      asUnscoped() {
+        return createFilesClient({ http: core.http });
       },
     };
-    return this.api;
+    return {
+      filesClientFactory: this.filesClientFactory,
+      registerFileKind: (fileKind: FileKind) => {
+        getFileKindsRegistry().register(fileKind);
+      },
+    };
   }
 
   start(core: CoreStart): FilesStart {
-    return this.api!;
+    return {
+      filesClientFactory: this.filesClientFactory!,
+    };
   }
 }

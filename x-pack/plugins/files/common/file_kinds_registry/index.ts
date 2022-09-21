@@ -6,10 +6,7 @@
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import assert from 'assert';
-import { FileKind } from '../../common';
-
-import { registerFileKindRoutes } from '../routes/file_kind';
-import { FilesRouter } from '../routes/types';
+import { FileKind } from '..';
 
 export interface FileKindsRegistry {
   /**
@@ -32,7 +29,7 @@ export interface FileKindsRegistry {
  * @internal
  */
 export class FileKindsRegistryImpl implements FileKindsRegistry {
-  constructor(private readonly router: FilesRouter) {}
+  constructor(private readonly onRegister?: (fileKind: FileKind) => void) {}
 
   private readonly fileKinds = new Map<string, FileKind>();
 
@@ -48,7 +45,7 @@ export class FileKindsRegistryImpl implements FileKindsRegistry {
     }
 
     this.fileKinds.set(fileKind.id, fileKind);
-    registerFileKindRoutes(this.router, fileKind);
+    this.onRegister?.(fileKind);
   }
 
   get(id: string): FileKind {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { Image, type ImageProps } from './image';
-export { UploadFile, type UploadFileProps } from './upload_file';
-export { FilesContext } from './context';
+import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+
+export function useBehaviorSubject<T>(o$: BehaviorSubject<T>) {
+  return useObservable(o$, o$.getValue());
+}
