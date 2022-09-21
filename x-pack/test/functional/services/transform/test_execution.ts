@@ -12,7 +12,7 @@ export function TransformTestExecutionProvider({ getService }: FtrProviderContex
 
   return {
     async logTestStep(stepTitle: string) {
-      await log.info(`=== TEST STEP === ${stepTitle}`);
+      await log.debug(`=== TEST STEP === ${stepTitle}`);
     },
   };
 }

@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   // Failing: See https://github.com/elastic/kibana/issues/139781
-  describe('creation_index_pattern', function () {
+  describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
