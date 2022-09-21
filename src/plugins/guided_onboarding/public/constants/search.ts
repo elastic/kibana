@@ -10,7 +10,7 @@ import type { GuideConfig } from '../types';
 
 export const searchConfig: GuideConfig = {
   title: 'Search my data',
-  description: `We'll help you build world-class search experiences with your data.`,
+  description: `We'll help you build world-class search experiences with your data, using Elastic's out-of-the-box web crawler, connectors, and our robust APIs. Gain deep insights from the built-in search analytics and use that data to inform changes to relevance.`,
   docs: {
     text: 'Enterprise Search 101 Documentation',
     url: 'example.com',
@@ -19,8 +19,11 @@ export const searchConfig: GuideConfig = {
     {
       id: 'add_data',
       title: 'Add data',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
       location: {
         appID: 'guidedOnboardingExample',
         path: 'stepOne',
@@ -29,8 +32,11 @@ export const searchConfig: GuideConfig = {
     {
       id: 'search_experience',
       title: 'Build a search experience',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
       location: {
         appID: 'guidedOnboardingExample',
         path: 'stepTwo?showTour=true',
@@ -39,14 +45,20 @@ export const searchConfig: GuideConfig = {
     {
       id: 'optimize',
       title: 'Optimize your search relevance',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
     {
       id: 'review',
       title: 'Review your search analytics',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
   ],
 };
