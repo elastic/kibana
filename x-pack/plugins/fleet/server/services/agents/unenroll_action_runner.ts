@@ -188,20 +188,30 @@ async function getAgentsWithoutActionResults(
   esClient: ElasticsearchClient,
   actionId: string,
   commonAgents: string[]
-) {
-  const res = await esClient.search({
-    index: AGENT_ACTIONS_RESULTS_INDEX,
-    query: {
-      bool: {
-        must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
+): Promise<string[]> {
+  try {
+    const res = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      query: {
+        bool: {
+          must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
+        },
       },
-    },
-    size: commonAgents.length,
-  });
-  const agentsToUpdate = commonAgents.filter(
-    (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
-  );
-  return agentsToUpdate;
+      size: commonAgents.length,
+    });
+    const agentsToUpdate = commonAgents.filter(
+      (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
+    );
+    return agentsToUpdate;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results does not yet exist
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
+  return commonAgents;
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {
