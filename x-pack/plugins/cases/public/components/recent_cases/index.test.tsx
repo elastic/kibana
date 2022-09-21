@@ -9,7 +9,12 @@ import React from 'react';
 import { configure } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noCasesCapabilities,
+  TestProviders,
+} from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -73,7 +78,7 @@ describe('RecentCases', () => {
       </TestProviders>
     );
     expect(useGetCasesMock).toHaveBeenCalledWith({
-      filterOptions: { reporters: [] },
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
       queryParams: { perPage: 2 },
     });
   });
@@ -86,7 +91,7 @@ describe('RecentCases', () => {
     );
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
-      filterOptions: { reporters: [] },
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
       queryParams: { perPage: 10 },
     });
 
@@ -97,6 +102,7 @@ describe('RecentCases', () => {
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
         reporters: [{ email: undefined, full_name: undefined, username: undefined }],
+        owner: ['securitySolution'],
       },
       queryParams: { perPage: 10 },
     });
@@ -108,8 +114,29 @@ describe('RecentCases', () => {
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
         reporters: [],
+        owner: ['securitySolution'],
       },
       queryParams: { perPage: 10 },
+    });
+  });
+
+  it('sets all available solutions correctly', () => {
+    appMockRender = createAppMockRenderer({ owner: [] });
+    /**
+     * We set securitySolutionCases capability to not have
+     * any access to cases. This tests that we get the owners
+     * that have at least read access.
+     */
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      securitySolutionCases: noCasesCapabilities(),
+    };
+
+    appMockRender.render(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />);
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['cases'] },
+      queryParams: { perPage: 2 },
     });
   });
 });
