@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiTitle, EuiHighlight, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiLink, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useServices } from '../services';
@@ -25,9 +25,9 @@ interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
 /**
  * Copied from https://stackoverflow.com/a/9310752
  */
-const escapeRegExp = (text: string) => {
-  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-};
+// const escapeRegExp = (text: string) => {
+//   return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+// };
 
 export function ItemDetails<T extends UserContentCommonSchema>({
   id,
