@@ -288,7 +288,7 @@ describe('ALL - Packs', () => {
         .click();
       cy.contains(/^Delete integration$/).click();
       closeModalIfVisible();
-      cy.contains(/^Deleted integration 'osquery_manager-3'$/);
+      cy.contains(/^Deleted integration 'osquery_manager-*/);
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');

@@ -13,7 +13,7 @@ import { UX_MESSAGES } from '../../../components/endpoint_response_actions_list/
 
 export const ResponseActionsListPage = () => {
   const [hideHeader, setHideHeader] = useState(true);
-  const setIsDataCallback = useCallback((isData: boolean) => {
+  const resetPageHeader = useCallback((isData: boolean) => {
     setHideHeader(!isData);
   }, []);
   return (
@@ -26,7 +26,7 @@ export const ResponseActionsListPage = () => {
       <ResponseActionsLog
         showHostNames={true}
         isFlyout={false}
-        setIsDataCallback={setIsDataCallback}
+        setIsDataInResponse={resetPageHeader}
       />
     </AdministrationListPage>
   );

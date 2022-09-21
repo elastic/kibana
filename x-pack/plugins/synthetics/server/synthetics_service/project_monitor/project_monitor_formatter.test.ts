@@ -10,20 +10,21 @@ import {
   INSUFFICIENT_FLEET_PERMISSIONS,
   ProjectMonitorFormatter,
 } from './project_monitor_formatter';
-import { LocationStatus } from '../../common/runtime_types';
+import { LocationStatus } from '../../../common/runtime_types';
 import { times } from 'lodash';
-import { SyntheticsService } from './synthetics_service';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
+import { SyntheticsService } from '../synthetics_service';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { Subject } from 'rxjs';
-import { formatSecrets } from './utils';
+import { formatSecrets } from '../utils';
 
-import * as telemetryHooks from '../routes/telemetry/monitor_upgrade_sender';
+import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 
 const testMonitors = [
   {
+    type: 'browser',
     throttling: { download: 5, upload: 3, latency: 20 },
     schedule: 3,
     locations: [],
@@ -46,6 +47,7 @@ const testMonitors = [
     filter: { match: 'check if title is present 10 0' },
   },
   {
+    type: 'browser',
     throttling: { download: 5, upload: 3, latency: 20 },
     schedule: 3,
     locations: [],
