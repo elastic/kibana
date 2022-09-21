@@ -43,8 +43,8 @@ export const alertWithTags: TopAlert = {
   ...alert,
   fields: {
     ...alert.fields,
-    'kibana.alert.rule.tags': tags
-  }
+    'kibana.alert.rule.tags': tags,
+  },
 };
 
 export const alertWithNoData: TopAlert | null = null;
