@@ -49,7 +49,7 @@ export interface CommandResponseActionApiState {
   };
 }
 
-interface UseConsoleActionSubmitterOptions
+interface UseConsoleActionSubmitterOptions<TCreator = {}>
   extends Pick<
     CommandExecutionComponentProps<any, CommandResponseActionApiState>,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
@@ -58,11 +58,17 @@ interface UseConsoleActionSubmitterOptions
     ResponseActionApiResponse,
     IHttpFetchError,
     BaseActionRequestBody
-  >;
+  > &
+    TCreator;
   /**
    * The API request body. If `undefined`, then API will not be called.
    */
-  actionRequestBody: unknown | undefined;
+  actionRequestBody:
+    | Parameters<
+        (UseMutationResult<ResponseActionApiResponse, IHttpFetchError, BaseActionRequestBody> &
+          TCreator)['mutate']
+      >[0]
+    | undefined;
 }
 
 export const useConsoleActionSubmitter = ({
