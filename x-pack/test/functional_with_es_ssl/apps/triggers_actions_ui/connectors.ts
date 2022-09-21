@@ -66,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionType: 'Slack',
         },
       ]);
-      const connector = await listConnectors(connectorName);
+      const connector = await getConnector(connectorName);
       objectRemover.add(connector.id, 'action', 'actions');
     });
 
@@ -304,7 +304,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAction;
   }
 
-  async function listConnectors(name: string) {
+  async function getConnector(name: string) {
     const { body } = await supertest
       .get(`/api/actions/connectors`)
       .set('kbn-xsrf', 'foo')
