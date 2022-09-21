@@ -360,12 +360,7 @@ describe('convertMetricToColumns valid cases', () => {
       mockConvertToSiblingPipelineColumns,
     ],
   ])('should return %s', (_, input, expected, mock) => {
-    if (expected === null) {
-      expect(convertMetricToColumns(...input)).toBeNull();
-    } else if (Array.isArray(expected)) {
-      expect(convertMetricToColumns(...input)).toEqual(expected.map(expect.objectContaining));
-    }
-
+    expect(convertMetricToColumns(...input)).toEqual(expected.map(expect.objectContaining));
     if (mock) {
       expect(mock).toBeCalledTimes(1);
     }
