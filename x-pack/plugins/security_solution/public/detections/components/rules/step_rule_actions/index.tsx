@@ -192,11 +192,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const displayResponseActionsOptions = useMemo(() => {
     if (isQueryRule(ruleType)) {
       return (
-        <>
-          <UseArray path="responseActions">
-            {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
-          </UseArray>
-        </>
+        <UseArray path="responseActions" initialNumberOfItems={0}>
+          {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+        </UseArray>
       );
     }
     return null;
