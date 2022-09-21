@@ -28,7 +28,12 @@ import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { useMlKibana } from '../contexts/kibana';
-import { AppStateSelectedCells, ExplorerJob, getSelectionTimeRange } from './explorer_utils';
+import {
+  AppStateSelectedCells,
+  ExplorerJob,
+  getSelectionInfluencers,
+  getSelectionTimeRange,
+} from './explorer_utils';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_anomaly_charts_to_dashboard_controls';
 
@@ -68,15 +73,10 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
   const casesPrivileges = cases?.helpers.canUseCases();
 
-  const { anomalyExplorerCommonStateService, anomalyTimelineStateService, chartsStateService } =
-    useAnomalyExplorerContext();
+  const { anomalyExplorerCommonStateService, chartsStateService } = useAnomalyExplorerContext();
   const { queryString } = useObservable(
     anomalyExplorerCommonStateService.getFilterSettings$(),
     anomalyExplorerCommonStateService.getFilterSettings()
-  );
-  const selectionInfluencers = useObservable(
-    anomalyTimelineStateService.getSelectedInfluencers$(),
-    anomalyTimelineStateService.getSelectedInfluencers()
   );
 
   const chartsData = useObservable(
@@ -121,6 +121,11 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     }
 
     if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
+      const selectionInfluencers = getSelectionInfluencers(
+        selectedCells,
+        selectedCells?.viewByFieldName!
+      );
+
       const queryFromSelectedCells = Array.isArray(selectionInfluencers)
         ? selectionInfluencers
             .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
@@ -159,7 +164,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     globalTimeRange,
     closePopoverOnAction,
     selectedJobs,
-    selectionInfluencers,
+    selectedCells,
     queryString,
     timeRangeToPlot,
   ]);
