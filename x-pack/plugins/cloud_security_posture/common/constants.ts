@@ -18,6 +18,7 @@ export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findin
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
@@ -29,6 +30,8 @@ export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
+export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
+  'cloud_security_posture_latest_index_add_ingest_timestamp_pipeline';
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
@@ -37,6 +40,7 @@ export const RULE_FAILED = `failed`;
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
+  showFindingFlyoutEvidence: false,
   showFindingsGroupBy: true,
 } as const;
 

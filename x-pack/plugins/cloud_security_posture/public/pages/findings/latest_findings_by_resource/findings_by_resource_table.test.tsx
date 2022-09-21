@@ -21,7 +21,10 @@ const getFakeFindingsByResource = (): FindingsByResourcePage => {
   const total = chance.integer() + count + 1;
   const normalized = count / total;
 
-  const [resourceName, resourceSubtype, ...cisSections] = chance.unique(chance.word, 4);
+  const [resourceName, resourceSubtype, ruleBenchmarkName, ...cisSections] = chance.unique(
+    chance.word,
+    5
+  );
 
   return {
     cluster_id: chance.guid(),
@@ -29,6 +32,7 @@ const getFakeFindingsByResource = (): FindingsByResourcePage => {
     'resource.name': resourceName,
     'resource.sub_type': resourceSubtype,
     'rule.section': cisSections,
+    'rule.benchmark.name': ruleBenchmarkName,
     failed_findings: {
       count,
       normalized,
