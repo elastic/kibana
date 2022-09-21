@@ -37,7 +37,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
   trainedModelName,
   isDeployed,
-  modelType,
+  types,
 }) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
@@ -135,13 +135,15 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
                     <EuiHealth color="success">{deployedText}</EuiHealth>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiBadge color="hollow">{modelType}</EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+                {types.map((type) => (
+                  <EuiFlexItem grow={false} key={type}>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <EuiBadge color="hollow">{type}</EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
