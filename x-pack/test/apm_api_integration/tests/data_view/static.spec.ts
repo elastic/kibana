@@ -78,6 +78,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await synthtrace.clean();
+    });
+
+    afterEach(async () => {
       await deleteDataView();
     });
 
@@ -177,17 +180,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when creating data view in "default" space', async () => {
-      before(async () => {
-        await createDataViewWithWriteUser();
-      });
-
       it('can be retrieved from the "default space"', async () => {
+        await createDataViewWithWriteUser();
         const res = await getDataView({ space: 'default' });
         expect(res.body.id).to.eql('apm_static_index_pattern_id');
         expect(res.body.namespaces).to.eql(['*', 'default']);
       });
 
       it('can be retrieved from the "foo" space', async () => {
+        await createDataViewWithWriteUser();
         const res = await getDataView({ space: 'foo' });
         expect(res.body.id).to.eql('apm_static_index_pattern_id');
         expect(res.body.namespaces).to.eql(['*', 'default']);

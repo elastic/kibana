@@ -119,7 +119,7 @@ async function addDataViewToAllSpaces(resources: APMRouteHandlerResources) {
   const scopedClient = startServices.savedObjects.getScopedClient(request);
 
   // make data view available across all spaces
-  await scopedClient.updateObjectsSpaces(
+  return scopedClient.updateObjectsSpaces(
     [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
     ['*'],
     []
