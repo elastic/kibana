@@ -25,53 +25,48 @@ import type {
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
 
-interface ConsoleActionSubmitter {
+interface ConsoleActionSubmitter<TActionOutputContent extends object = object> {
   /**
    * The ui to be returned to the console. This UI will display different states of the action,
    * including pending, error conditions and generic success messages.
    */
   result: JSX.Element;
-  action: ActionDetails | undefined;
+  action: ActionDetails<TActionOutputContent> | undefined;
 }
 
 /**
  * Command store state for response action api state.
  */
-export interface CommandResponseActionApiState {
+export interface CommandResponseActionApiState<TActionOutputContent extends object = object> {
   actionApiState?: {
     request: {
       sent: boolean;
       actionId: string | undefined;
       error: IHttpFetchError | undefined;
     };
-    actionDetails: ActionDetails | undefined;
+    actionDetails: ActionDetails<TActionOutputContent> | undefined;
     actionDetailsError: IHttpFetchError | undefined;
   };
 }
 
-interface UseConsoleActionSubmitterOptions<TCreator = {}>
-  extends Pick<
-    CommandExecutionComponentProps<any, CommandResponseActionApiState>,
+interface UseConsoleActionSubmitterOptions<
+  TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
+  TActionOutputContent extends object = object
+> extends Pick<
+    CommandExecutionComponentProps<any, CommandResponseActionApiState<TActionOutputContent>>,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
-  actionCreator: UseMutationResult<
-    ResponseActionApiResponse,
-    IHttpFetchError,
-    BaseActionRequestBody
-  > &
-    TCreator;
+  actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError, TReqBody>;
   /**
    * The API request body. If `undefined`, then API will not be called.
    */
-  actionRequestBody:
-    | Parameters<
-        (UseMutationResult<ResponseActionApiResponse, IHttpFetchError, BaseActionRequestBody> &
-          TCreator)['mutate']
-      >[0]
-    | undefined;
+  actionRequestBody: TReqBody | undefined;
 }
 
-export const useConsoleActionSubmitter = ({
+export const useConsoleActionSubmitter = <
+  TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
+  TActionOutputContent extends object = object
+>({
   actionCreator,
   actionRequestBody,
   setStatus,
@@ -79,7 +74,10 @@ export const useConsoleActionSubmitter = ({
   setStore,
   store,
   ResultComponent,
-}: UseConsoleActionSubmitterOptions): ConsoleActionSubmitter => {
+}: UseConsoleActionSubmitterOptions<
+  TReqBody,
+  TActionOutputContent
+>): ConsoleActionSubmitter<TActionOutputContent> => {
   const isMounted = useIsMounted();
   const isPending = status === 'pending';
 
@@ -106,13 +104,11 @@ export const useConsoleActionSubmitter = ({
     error: actionRequestError,
   } = currentActionState.request;
 
-  const { data: apiActionDetails, error: apiActionDetailsError } = useGetActionDetails(
-    actionId ?? '-',
-    {
+  const { data: apiActionDetails, error: apiActionDetailsError } =
+    useGetActionDetails<TActionOutputContent>(actionId ?? '-', {
       enabled: Boolean(actionId) && isPending,
       refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
-    }
-  );
+    });
 
   // Create the action request if not yet done
   useEffect(() => {
