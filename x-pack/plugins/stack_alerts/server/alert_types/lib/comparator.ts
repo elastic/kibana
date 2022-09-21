@@ -41,17 +41,17 @@ export const getComparatorScript = (
 ) => {
   switch (comparator) {
     case Comparator.LT:
-      return `${fieldName} < ${threshold[0]}`;
+      return `${fieldName} < ${threshold[0]}L`;
     case Comparator.LT_OR_EQ:
-      return `${fieldName} <= ${threshold[0]}`;
+      return `${fieldName} <= ${threshold[0]}L`;
     case Comparator.GT:
-      return `${fieldName} > ${threshold[0]}`;
+      return `${fieldName} > ${threshold[0]}L`;
     case Comparator.GT_OR_EQ:
-      return `${fieldName} >= ${threshold[0]}`;
+      return `${fieldName} >= ${threshold[0]}L`;
     case Comparator.BETWEEN:
-      return `${fieldName} >= ${threshold[0]} && ${fieldName} <= ${threshold[1]}`;
+      return `${fieldName} >= ${threshold[0]}L && ${fieldName} <= ${threshold[1]}L`;
     case Comparator.NOT_BETWEEN:
-      return `${fieldName} < ${threshold[0]} || ${fieldName} > ${threshold[1]}`;
+      return `${fieldName} < ${threshold[0]}L || ${fieldName} > ${threshold[1]}L`;
   }
 };
 

@@ -432,7 +432,7 @@ describe('ruleType', () => {
           timeWindowUnit: 'm',
         },
         selector: {
-          conditionScript: `${TIME_SERIES_BUCKET_SELECTOR_FIELD} < 1`,
+          conditionScript: `${TIME_SERIES_BUCKET_SELECTOR_FIELD} < 1L`,
           termLimit: 1000,
         },
       })
