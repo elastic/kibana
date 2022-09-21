@@ -8,10 +8,11 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -39,17 +40,24 @@ import type {
 
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import {
+  getCombinedFilterQuery,
+  getDefaultViewSelection,
+  resolverIsShowing,
+  ALERTS_TABLE_VIEW_SELECTION_KEY,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { Ecs } from '../../../../common/ecs';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
-import { StatefulBody } from '../body';
+import { BodyComponent } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
+import type { ViewSelection } from '../event_rendered_view/selector';
 import { SummaryViewSelector } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-import { useTGridComponentState } from '../../../methods/context';
+
+const storage = new Storage(localStorage);
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -189,7 +197,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-  const { viewSelection, setViewSelection } = useTGridComponentState();
+  const [viewSelection, setViewSelection] = useState<ViewSelection>(() =>
+    getDefaultViewSelection({
+      timelineId: id,
+      value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY),
+    })
+  );
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
@@ -350,7 +363,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     gutterSize="none"
                   >
                     <ScrollableFlexItem grow={1}>
-                      <StatefulBody
+                      <BodyComponent
                         activePage={pageInfo.activePage}
                         appId={appId}
                         browserFields={browserFields}

@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { ViewSelection } from '../components/t_grid/event_rendered_view/selector';
 import type { AlertStatus, CustomBulkActionProp } from '../../common/types/timeline/actions';
 import type { BrowserFields } from '../../common/search_strategy/index_fields';
-import {
-  ALERTS_TABLE_VIEW_SELECTION_KEY,
-  getDefaultViewSelection,
-} from '../components/t_grid/helpers';
 
 import type {
   CellValueElementProps,
@@ -64,10 +58,6 @@ export interface TGridComponentState {
 
   /** The current timeline id */
   timelineId?: string;
-
-  /** Whether the table is rendering regular cells or it uses event renderers */
-  viewSelection: ViewSelection;
-  setViewSelection: (newViewSelection: ViewSelection) => void;
 }
 
 const TGridComponentStateContext = createContext<TGridComponentState>({
@@ -79,15 +69,11 @@ const TGridComponentStateContext = createContext<TGridComponentState>({
   renderCellValue: () => null,
   rowRenderers: [],
   showAlertStatusActions: false,
-  viewSelection: 'gridView',
-  setViewSelection: () => {},
 });
 
 export const useTGridComponentState = () => {
   return useContext(TGridComponentStateContext);
 };
-
-const storage = new Storage(localStorage);
 
 export const TGridComponentStateProvider: React.FC<
   Pick<
@@ -118,13 +104,6 @@ export const TGridComponentStateProvider: React.FC<
   showAlertStatusActions,
   timelineId,
 }) => {
-  const [viewSelection, setViewSelection] = useState<ViewSelection>(() =>
-    getDefaultViewSelection({
-      timelineId: timelineId ?? '',
-      value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY),
-    })
-  );
-
   const providerValue: TGridComponentState = useMemo(() => {
     return {
       browserFields,
@@ -138,8 +117,6 @@ export const TGridComponentStateProvider: React.FC<
       rowRenderers,
       showAlertStatusActions,
       timelineId,
-      viewSelection,
-      setViewSelection,
     };
   }, [
     browserFields,
@@ -153,7 +130,6 @@ export const TGridComponentStateProvider: React.FC<
     rowRenderers,
     showAlertStatusActions,
     timelineId,
-    viewSelection,
   ]);
 
   return (
