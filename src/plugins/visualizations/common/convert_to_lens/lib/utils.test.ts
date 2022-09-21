@@ -16,8 +16,13 @@ import {
   getLabelForPercentile,
   getValidColumns,
   isColumnWithMeta,
+  isMetricAggWithoutParams,
+  isPercentileAgg,
+  isPercentileRankAgg,
+  isPipeline,
   isSchemaConfig,
   isSiblingPipeline,
+  isStdDevAgg,
 } from './utils';
 
 describe('getLabel', () => {
@@ -216,5 +221,117 @@ describe('isSiblingPipeline', () => {
     expect(isSiblingPipeline({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(
       expected
     );
+  });
+});
+
+describe('isPipeline', () => {
+  const metric: Omit<SchemaConfig, 'aggType'> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  test.each<[METRIC_TYPES, boolean]>([
+    [METRIC_TYPES.AVG_BUCKET, true],
+    [METRIC_TYPES.SUM_BUCKET, true],
+    [METRIC_TYPES.MAX_BUCKET, true],
+    [METRIC_TYPES.MIN_BUCKET, true],
+    [METRIC_TYPES.CUMULATIVE_SUM, true],
+    [METRIC_TYPES.DERIVATIVE, true],
+    [METRIC_TYPES.MOVING_FN, true],
+    [METRIC_TYPES.AVG, false],
+  ])('for %s should return %s', (aggType, expected) => {
+    expect(isPipeline({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(expected);
+  });
+});
+
+describe('isMetricAggWithoutParams', () => {
+  const metric: Omit<SchemaConfig, 'aggType'> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  test.each<[METRIC_TYPES, boolean]>([
+    [METRIC_TYPES.AVG, true],
+    [METRIC_TYPES.COUNT, true],
+    [METRIC_TYPES.MAX, true],
+    [METRIC_TYPES.MIN, true],
+    [METRIC_TYPES.SUM, true],
+    [METRIC_TYPES.MEDIAN, true],
+    [METRIC_TYPES.CARDINALITY, true],
+    [METRIC_TYPES.VALUE_COUNT, true],
+    [METRIC_TYPES.DERIVATIVE, false],
+  ])('for %s should return %s', (aggType, expected) => {
+    expect(isMetricAggWithoutParams({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(
+      expected
+    );
+  });
+});
+
+describe('isPercentileAgg', () => {
+  const metric: Omit<SchemaConfig, 'aggType'> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  test.each<[METRIC_TYPES, boolean]>([
+    [METRIC_TYPES.PERCENTILES, true],
+    [METRIC_TYPES.DERIVATIVE, false],
+  ])('for %s should return %s', (aggType, expected) => {
+    expect(isPercentileAgg({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(expected);
+  });
+});
+
+describe('isPercentileRankAgg', () => {
+  const metric: Omit<SchemaConfig, 'aggType'> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  test.each<[METRIC_TYPES, boolean]>([
+    [METRIC_TYPES.PERCENTILE_RANKS, true],
+    [METRIC_TYPES.PERCENTILES, false],
+  ])('for %s should return %s', (aggType, expected) => {
+    expect(isPercentileRankAgg({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(
+      expected
+    );
+  });
+});
+
+describe('isStdDevAgg', () => {
+  const metric: Omit<SchemaConfig, 'aggType'> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  test.each<[METRIC_TYPES, boolean]>([
+    [METRIC_TYPES.STD_DEV, true],
+    [METRIC_TYPES.PERCENTILES, false],
+  ])('for %s should return %s', (aggType, expected) => {
+    expect(isStdDevAgg({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(expected);
   });
 });

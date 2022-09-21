@@ -95,7 +95,7 @@ const PARENT_PIPELINE_AGGS: string[] = [
   METRIC_TYPES.MOVING_FN,
 ];
 
-const AGGS_WITHOUT_SPECIAL_RARAMS: string[] = [
+const AGGS_WITHOUT_SPECIAL_PARAMS: string[] = [
   METRIC_TYPES.AVG,
   METRIC_TYPES.COUNT,
   METRIC_TYPES.MAX,
@@ -131,7 +131,7 @@ export const isPipeline = (
 export const isMetricAggWithoutParams = (
   metric: SchemaConfig
 ): metric is SchemaConfig<MetricsWithoutSpecialParams> => {
-  return AGGS_WITHOUT_SPECIAL_RARAMS.includes(metric.aggType);
+  return AGGS_WITHOUT_SPECIAL_PARAMS.includes(metric.aggType);
 };
 
 export const isPercentileAgg = (
