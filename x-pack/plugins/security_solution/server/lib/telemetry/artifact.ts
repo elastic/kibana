@@ -38,7 +38,7 @@ class Artifact implements IArtifact {
       const zip = new AdmZip(response.data);
       const entries = zip.getEntries();
       const manifest = JSON.parse(entries[0].getData().toString());
-      const relativeUrl = manifest.artifacts[name].relative_url;
+      const relativeUrl = manifest.artifacts[name]?.relative_url;
       if (relativeUrl) {
         const url = `${this.CDN_URL}${relativeUrl}`;
         const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
