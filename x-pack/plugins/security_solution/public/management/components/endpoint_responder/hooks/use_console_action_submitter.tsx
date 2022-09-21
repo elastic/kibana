@@ -47,11 +47,14 @@ interface CommandResponseActionApiState {
 
 interface UseConsoleActionSubmitterOptions
   extends Pick<
-    CommandExecutionComponentProps<any, CommandResponseActionApiState, any>,
+    CommandExecutionComponentProps<any, CommandResponseActionApiState>,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
-  actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError, unknown>;
-  actionRequestBody: unknown;
+  actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError>;
+  /**
+   * The API request body. If `undefined`, then API will not be called.
+   */
+  actionRequestBody: unknown | undefined;
 }
 
 export const useConsoleActionSubmitter = ({
