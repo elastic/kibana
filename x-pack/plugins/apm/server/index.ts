@@ -31,9 +31,6 @@ const configSchema = schema.object({
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
     maxTraceItems: schema.number({ defaultValue: 1000 }),
   }),
-  searchAggregatedServiceMetrics: schema.boolean({
-    defaultValue: false,
-  }),
   searchAggregatedTransactions: schema.oneOf(
     [
       schema.literal(SearchAggregatedTransactionSetting.auto),

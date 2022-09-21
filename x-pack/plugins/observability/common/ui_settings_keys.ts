@@ -21,3 +21,4 @@ export const apmOperationsTab = 'observability:apmOperationsTab';
 export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
+export const enableServiceMetrics = 'observability:apmEnableServiceMetrics';

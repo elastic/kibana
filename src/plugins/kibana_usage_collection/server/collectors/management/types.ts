@@ -42,6 +42,7 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
+  'observability:apmEnableServiceMetrics': boolean;
   'observability:enableInfrastructureHostsView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
