@@ -132,8 +132,8 @@ function ExplorerChartContainer({
       // Prioritize timeRange from embeddable panel or case
       // Else use the time range from data plugins's timefilters service
       let mergedTimeRange = timeRange;
-      if (!timeRange) {
-        const bounds = timefilter.getActiveBounds();
+      const bounds = timefilter.getActiveBounds();
+      if (!timeRange && bounds) {
         mergedTimeRange = {
           from: bounds.min.toISOString(),
           to: bounds.max.toISOString(),
