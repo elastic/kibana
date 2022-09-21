@@ -88,6 +88,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
       refresh(currentTabId);
       setPageIndex(0);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentTabId]
   );
 
@@ -161,6 +162,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         )}
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, columns, isLoading, filters, currentTabId, refresh, onTableChange]);
 
   const tabs = useMemo(

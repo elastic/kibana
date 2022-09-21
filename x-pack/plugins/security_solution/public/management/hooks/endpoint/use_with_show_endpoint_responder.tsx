@@ -48,7 +48,10 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               endpoint: endpointMetadata,
             },
             consoleProps: {
-              commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
+              commands: getEndpointResponseActionsConsoleCommands({
+                endpointAgentId,
+                endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+              }),
               'data-test-subj': 'endpointResponseActionsConsole',
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },

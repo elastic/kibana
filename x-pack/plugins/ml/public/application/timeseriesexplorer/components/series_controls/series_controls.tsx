@@ -113,8 +113,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [storageFieldsConfig, setStorageFieldsConfig] =
-    useStorage<PartitionFieldsConfig>(ML_ENTITY_FIELDS_CONFIG);
+  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage(ML_ENTITY_FIELDS_CONFIG);
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {
@@ -193,6 +192,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   useEffect(() => {
     loadEntityValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJobId, selectedDetectorIndex, JSON.stringify(selectedEntities), resultFieldsConfig]);
 
   const entityFieldSearchChanged = debounce(async (entity, queryTerm) => {

@@ -19,6 +19,7 @@ import {
   getMapZoom,
   getMapCenter,
   getLayerListRaw,
+  getLayerList,
   getQuery,
   getFilters,
   getMapSettings,
@@ -37,6 +38,7 @@ import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_at
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
   getCoreChrome,
+  getIndexPatternService,
   getToasts,
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
@@ -52,7 +54,8 @@ import { createBasemapLayerDescriptor } from '../../../classes/layers/create_bas
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
-import { LayerStatsCollector } from '../../../../common/telemetry';
+import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -140,6 +143,21 @@ export class SavedMap {
     }
 
     this._reportUsage();
+
+    if (this._attributes?.mapStateJSON) {
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
+          const dataViewService = getIndexPatternService();
+          const promises = mapState.adHocDataViews.map((spec) => {
+            return dataViewService.create(spec);
+          });
+          await Promise.all(promises);
+        }
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
 
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
@@ -281,6 +299,8 @@ export class SavedMap {
       return;
     }
 
+    const mapSettingsStatsCollector = new MapSettingsCollector(this._attributes);
+
     const layerStatsCollector = new LayerStatsCollector(this._attributes);
 
     const uiCounterEvents = {
@@ -289,6 +309,9 @@ export class SavedMap {
       resolution: layerStatsCollector.getResolutionCounts(),
       join: layerStatsCollector.getJoinCounts(),
       ems_basemap: layerStatsCollector.getBasemapCounts(),
+      settings: {
+        custom_icons_count: mapSettingsStatsCollector.getCustomIconsCount(),
+      },
     };
 
     for (const [eventType, eventTypeMetrics] of Object.entries(uiCounterEvents)) {
@@ -428,7 +451,7 @@ export class SavedMap {
     if (newTags) {
       this._tags = newTags;
     }
-    this._syncAttributesWithStore();
+    await this._syncAttributesWithStore();
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
@@ -512,7 +535,7 @@ export class SavedMap {
     return;
   }
 
-  private _syncAttributesWithStore() {
+  private async _syncAttributesWithStore() {
     const state: MapStoreState = this._store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
@@ -521,6 +544,7 @@ export class SavedMap {
     const mapSettings = getMapSettings(state);
 
     this._attributes!.mapStateJSON = JSON.stringify({
+      adHocDataViews: await this._getAdHocDataViews(),
       zoom: getMapZoom(state),
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
@@ -543,5 +567,21 @@ export class SavedMap {
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
     } as SerializedUiState);
+  }
+
+  private async _getAdHocDataViews() {
+    const dataViewIds: string[] = [];
+    getLayerList(this._store.getState()).forEach((layer) => {
+      dataViewIds.push(...layer.getIndexPatternIds());
+    });
+
+    const dataViews = await getIndexPatternsFromIds(_.uniq(dataViewIds));
+    return dataViews
+      .filter((dataView) => {
+        return !dataView.isPersisted();
+      })
+      .map((dataView) => {
+        return dataView.toSpec(false);
+      });
   }
 }

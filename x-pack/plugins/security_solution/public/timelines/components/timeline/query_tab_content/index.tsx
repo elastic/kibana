@@ -24,6 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -62,6 +63,7 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -202,7 +204,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const ACTION_BUTTON_COUNT = 6;
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
@@ -330,7 +333,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (
@@ -340,7 +343,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
-        inputId="timeline"
+        inputId={InputsModelId.timeline}
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -365,7 +368,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               )}
               <DatePicker grow={10}>
                 <SuperDatePicker
-                  id="timeline"
+                  id={InputsModelId.timeline}
                   timelineId={timelineId}
                   disabled={isDatePickerDisabled}
                 />

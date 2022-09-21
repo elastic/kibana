@@ -19,6 +19,18 @@ import { awsSQSMessagesSent } from './tsvb/aws_sqs_messages_sent';
 import { awsSQSMessagesEmpty } from './tsvb/aws_sqs_messages_empty';
 import { awsSQSOldestMessage } from './tsvb/aws_sqs_oldest_message';
 
+const awsSQSSnapshotMetrics = {
+  sqsMessagesVisible,
+  sqsMessagesDelayed,
+  sqsMessagesEmpty,
+  sqsMessagesSent,
+  sqsOldestMessage,
+};
+
+export const awsSQSSnapshotMetricTypes = Object.keys(awsSQSSnapshotMetrics) as Array<
+  keyof typeof awsSQSSnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     awsSQSMessagesVisible,
@@ -27,13 +39,7 @@ export const metrics: InventoryMetrics = {
     awsSQSMessagesEmpty,
     awsSQSOldestMessage,
   },
-  snapshot: {
-    sqsMessagesVisible,
-    sqsMessagesDelayed,
-    sqsMessagesEmpty,
-    sqsMessagesSent,
-    sqsOldestMessage,
-  },
+  snapshot: awsSQSSnapshotMetrics,
   defaultSnapshot: 'sqsMessagesVisible',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

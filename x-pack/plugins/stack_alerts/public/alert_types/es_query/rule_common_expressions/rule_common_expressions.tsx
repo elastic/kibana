@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ForLastExpression,
@@ -26,6 +34,7 @@ export interface RuleCommonExpressionsProps {
   timeWindowSize: CommonAlertParams['timeWindowSize'];
   timeWindowUnit: CommonAlertParams['timeWindowUnit'];
   size: CommonAlertParams['size'];
+  excludeHitsFromPreviousRun: CommonAlertParams['excludeHitsFromPreviousRun'];
   errors: IErrorObject;
   hasValidationErrors: boolean;
   onChangeThreshold: Parameters<typeof ThresholdExpression>[0]['onChangeSelectedThreshold'];
@@ -37,6 +46,7 @@ export interface RuleCommonExpressionsProps {
   onChangeSizeValue: Parameters<typeof ValueExpression>[0]['onChangeSelectedValue'];
   onTestFetch: TestQueryRowProps['fetch'];
   onCopyQuery?: TestQueryRowProps['copyQuery'];
+  onChangeExcludeHitsFromPreviousRun: (exclude: boolean) => void;
 }
 
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
@@ -54,6 +64,8 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   onChangeSizeValue,
   onTestFetch,
   onCopyQuery,
+  excludeHitsFromPreviousRun,
+  onChangeExcludeHitsFromPreviousRun,
 }) => {
   return (
     <>
@@ -123,7 +135,21 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         popupPosition="upLeft"
         onChangeSelectedValue={onChangeSizeValue}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
+      <EuiFormRow>
+        <EuiCheckbox
+          data-test-subj="excludeHitsFromPreviousRunExpression"
+          checked={excludeHitsFromPreviousRun}
+          id="excludeHitsFromPreviousRunExpressionId"
+          onChange={(event) => {
+            onChangeExcludeHitsFromPreviousRun(event.target.checked);
+          }}
+          label={i18n.translate('xpack.stackAlerts.esQuery.ui.excludePreviousHitsExpression', {
+            defaultMessage: 'Exclude matches from previous runs',
+          })}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
       <TestQueryRow
         fetch={onTestFetch}
         copyQuery={onCopyQuery}

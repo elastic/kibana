@@ -8,14 +8,11 @@
 import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import {
-  MonitorServiceLocationsCodec,
-  MonitorServiceLocationCodec,
-  ServiceLocationErrors,
-} from './locations';
+import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
   DataStream,
   DataStreamCodec,
+  FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
@@ -24,6 +21,7 @@ import {
   VerificationModeCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
+import { PrivateLocationCodec } from './synthetics_private_locations';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -76,13 +74,15 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
-    [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
+    [ConfigKey.LOCATIONS]: t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec])),
   }),
   t.partial({
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_ID]: t.string,
+    [ConfigKey.JOURNEY_ID]: t.string,
   }),
 ]);
 
@@ -216,10 +216,10 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
     }),
     t.partial({
       [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
-      [ConfigKey.JOURNEY_ID]: t.string,
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
       [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+      [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
   ZipUrlTLSFieldsCodec,

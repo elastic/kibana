@@ -28,13 +28,6 @@ export const INVESTIGATION_ENRICHMENT_TITLE = i18n.translate(
   }
 );
 
-export const HOST_RISK_DATA_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
-  {
-    defaultMessage: 'Host Risk Data',
-  }
-);
-
 export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipContent',
   {
@@ -74,13 +67,6 @@ export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NO_HOST_RISK_DATA_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noRiskDataDescription',
-  {
-    defaultMessage: 'These is no host risk data found for this alert',
-  }
-);
-
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.investigationTimeQueryTitle',
   {
@@ -113,9 +99,44 @@ export const ENRICHED_DATA = i18n.translate(
   }
 );
 
-export const HOST_RISK_CLASSIFICATION = i18n.translate(
-  'xpack.securitySolution.alertDetails.hostRiskClassification',
+export const CURRENT_HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.hostRiskClassification',
   {
-    defaultMessage: 'Host risk classification',
+    defaultMessage: 'Current host risk classification',
+  }
+);
+
+export const ORIGINAL_HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.originalHostRiskClassification',
+  {
+    defaultMessage: 'Original host risk classification',
+  }
+);
+
+export const HOST_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
+  {
+    defaultMessage: 'Host Risk Data',
+  }
+);
+
+export const USER_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.userRiskDataTitle',
+  {
+    defaultMessage: 'User Risk Data',
+  }
+);
+
+export const ORIGINAL_USER_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.originalUserRiskClassification',
+  {
+    defaultMessage: 'Original risk classification',
+  }
+);
+
+export const CURRENT_USER_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.currentUserRiskClassification',
+  {
+    defaultMessage: 'Current user risk classification',
   }
 );

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import React from 'react';
 import { useMemo } from 'react';
-import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
+import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { useInspector } from '../../../../../hooks/use_inspector';
 import { IndicatorsFieldBrowser } from '../../indicators_field_browser';
-import { ComputedIndicatorFieldId } from '../cell_renderer';
 
-export interface Column {
-  id: RawIndicatorFieldId | ComputedIndicatorFieldId;
-  displayAsText: string;
-}
+const INSPECT_BUTTON_TEST_ID = 'tiIndicatorsGridInspect';
+
+const INSPECT_BUTTON_TITLE = i18n.translate('xpack.threatIntelligence.inspectTitle', {
+  defaultMessage: 'Inspect',
+});
 
 export const useToolbarOptions = ({
   browserFields,
@@ -31,11 +32,13 @@ export const useToolbarOptions = ({
   start: number;
   end: number;
   indicatorCount: number;
-  columns: Column[];
+  columns: EuiDataGridColumn[];
   onResetColumns: () => void;
   onToggleColumn: (columnId: string) => void;
-}) =>
-  useMemo(
+}) => {
+  const { onOpenInspector: handleOpenInspector } = useInspector();
+
+  return useMemo(
     () => ({
       showDisplaySelector: false,
       showFullScreenSelector: false,
@@ -62,7 +65,25 @@ export const useToolbarOptions = ({
             />
           ),
         },
+        right: (
+          <EuiButtonIcon
+            iconType="inspect"
+            title={INSPECT_BUTTON_TITLE}
+            data-test-subj={INSPECT_BUTTON_TEST_ID}
+            onClick={handleOpenInspector}
+          />
+        ),
       },
     }),
-    [start, end, indicatorCount, browserFields, columns, onResetColumns, onToggleColumn]
+    [
+      indicatorCount,
+      end,
+      start,
+      browserFields,
+      columns,
+      onResetColumns,
+      onToggleColumn,
+      handleOpenInspector,
+    ]
   );
+};

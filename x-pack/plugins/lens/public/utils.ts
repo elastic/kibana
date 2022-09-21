@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { uniq } from 'lodash';
+import { set, uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import type { Serializable } from '@kbn/utility-types';
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
@@ -22,7 +23,7 @@ import type {
   IndexPatternRef,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
-import { IndexPatternServiceAPI } from './indexpattern_service/service';
+import { IndexPatternServiceAPI } from './data_views_service/service';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -93,14 +94,11 @@ export async function refreshIndexPatternsList({
     .map((datasource) => datasource?.onRefreshIndexPattern)
     .filter(Boolean);
 
-  const [newlyMappedIndexPattern, indexPatternRefs] = await Promise.all([
-    indexPatternService.loadIndexPatterns({
-      cache: {},
-      patterns: [indexPatternId],
-      onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
-    }),
-    indexPatternService.loadIndexPatternRefs({ isFullEditor: true }),
-  ]);
+  const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
+    cache: {},
+    patterns: [indexPatternId],
+    onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
+  });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
   // But what about existingFields here?
   // When the indexPatterns cache object gets updated, the data panel will
@@ -110,16 +108,19 @@ export async function refreshIndexPatternsList({
       ...indexPatternsCache,
       [indexPatternId]: indexPattern,
     },
-    indexPatternRefs,
   });
 }
 
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
+  visualizationState,
+  activeVisualization,
 }: {
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
+  visualizationState: unknown;
+  activeVisualization?: Visualization;
 }): string[] {
   let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
@@ -129,6 +130,11 @@ export function getIndexPatternsIds({
     currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
+
+  if (activeVisualization?.getPersistableState) {
+    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
+    references.push(...savedObjectReferences);
+  }
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);
@@ -189,3 +195,50 @@ export function inferTimeField(
     })
     .find(Boolean);
 }
+
+export function renewIDs<T = unknown>(
+  obj: T,
+  forRenewIds: string[],
+  getNewId: (id: string) => string | undefined
+): T {
+  obj = cloneDeep(obj);
+  const recursiveFn = (
+    item: Serializable,
+    parent?: Record<string, Serializable> | Serializable[],
+    key?: string | number
+  ) => {
+    if (typeof item === 'object') {
+      if (Array.isArray(item)) {
+        item.forEach((a, k, ref) => recursiveFn(a, ref, k));
+      } else {
+        if (item) {
+          Object.keys(item).forEach((k) => {
+            let newId = k;
+            if (forRenewIds.includes(k)) {
+              newId = getNewId(k) ?? k;
+              item[newId] = item[k];
+              delete item[k];
+            }
+            recursiveFn(item[newId], item, newId);
+          });
+        }
+      }
+    } else if (
+      parent &&
+      key !== undefined &&
+      typeof item === 'string' &&
+      forRenewIds.includes(item)
+    ) {
+      set(parent, key, getNewId(item) ?? item);
+    }
+  };
+  recursiveFn(obj as unknown as Serializable);
+  return obj;
+}
+
+/**
+ * The dimension container is set up to close when it detects a click outside it.
+ * Use this CSS class to exclude particular elements from this behavior.
+ */
+export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
+  'lensDontCloseDimensionContainerOnClick';

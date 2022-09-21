@@ -26,6 +26,11 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import {
+  isInputOnlyPolicyTemplate,
+  isIntegrationPolicyTemplate,
+} from '../../../../../../../common/services';
+
 import { useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
@@ -52,7 +57,7 @@ import { IntegrationPreference } from '../../components/integration_preference';
 
 import { mergeCategoriesAndCount } from './util';
 import { ALL_CATEGORY, CategoryFacets } from './category_facets';
-import type { CategoryFacet } from './category_facets';
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
@@ -132,8 +137,12 @@ function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
     return pkg.categories;
   }
 
-  const allCategories = pkg.policy_templates?.reduce((accumulator, integration) => {
-    return [...accumulator, ...(integration.categories || [])];
+  const allCategories = pkg.policy_templates?.reduce((accumulator, policyTemplate) => {
+    if (isInputOnlyPolicyTemplate(policyTemplate)) {
+      // input only policy templates do not have categories
+      return accumulator;
+    }
+    return [...accumulator, ...(policyTemplate.categories || [])];
   }, pkg.categories || []);
 
   return _.uniq(allCategories);
@@ -160,8 +169,13 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       ...acc,
       topPackage,
       ...(doesPackageHaveIntegrations(pkg)
-        ? policyTemplates.map((integration) => {
-            const { name, title, description, icons, categories = [] } = integration;
+        ? policyTemplates.map((policyTemplate) => {
+            const { name, title, description, icons } = policyTemplate;
+
+            const categories =
+              isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
+                ? policyTemplate.categories
+                : [];
             const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
@@ -185,6 +199,7 @@ export const AvailablePackages: React.FC<{
   isLoading: boolean;
 }> = ({ allPackages, isLoading }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+
   useBreadcrumbs('integrations_all');
 
   const { http } = useStartServices();
@@ -194,11 +209,14 @@ export const AvailablePackages: React.FC<{
     useParams<CategoryParams>(),
     useLocation().search
   );
+  const [category, setCategory] = useState(selectedCategory);
 
   const history = useHistory();
   const { getHref, getAbsolutePath } = useLink();
 
-  function setSelectedCategory(categoryId: string) {
+  function setUrlCategory(categoryId: string) {
+    setCategory(categoryId as ExtendedIntegrationCategory);
+
     const url = pagePathGetters.integrations_all({
       category: categoryId,
       searchTerm: searchParam,
@@ -206,9 +224,9 @@ export const AvailablePackages: React.FC<{
     history.push(url);
   }
 
-  function setSearchTerm(search: string) {
+  function setUrlSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(pagePathGetters.integrations_all({ searchTerm: search })[1]);
+    history.replace(pagePathGetters.integrations_all({ searchTerm: search, category })[1]);
   }
 
   const {
@@ -250,7 +268,7 @@ export const AvailablePackages: React.FC<{
   ];
 
   const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard({ getAbsolutePath, getHref, item });
+    return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
   });
 
   cards.sort((a, b) => {
@@ -265,7 +283,7 @@ export const AvailablePackages: React.FC<{
     include_policy_templates: true,
   });
 
-  const categories = useMemo(() => {
+  const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
@@ -280,7 +298,7 @@ export const AvailablePackages: React.FC<{
         count: cards.length,
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
-    ] as CategoryFacet[];
+    ];
   }, [cards, eprCategories, isLoadingCategories]);
 
   if (!isLoadingCategories && !categoryExists(selectedCategory, categories)) {
@@ -303,9 +321,9 @@ export const AvailablePackages: React.FC<{
             isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
           }
           categories={categories}
-          selectedCategory={selectedCategory}
+          selectedCategory={category}
           onCategoryChange={({ id }) => {
-            setSelectedCategory(id);
+            setUrlCategory(id);
           }}
         />
       </EuiFlexItem>,
@@ -314,11 +332,11 @@ export const AvailablePackages: React.FC<{
   }
 
   const filteredCards = cards.filter((c) => {
-    if (selectedCategory === '') {
+    if (category === '') {
       return true;
     }
 
-    return c.categories.includes(selectedCategory);
+    return c.categories.includes(category);
   });
 
   // TODO: Remove this hard coded list of integrations with a suggestion service
@@ -366,7 +384,7 @@ export const AvailablePackages: React.FC<{
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint and Cloud Security',
+                defaultMessage: 'Elastic Defend',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:
@@ -393,8 +411,10 @@ export const AvailablePackages: React.FC<{
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}
-      setSelectedCategory={setSelectedCategory}
-      onSearchChange={setSearchTerm}
+      selectedCategory={category}
+      setSelectedCategory={setUrlCategory}
+      categories={categories}
+      onSearchChange={setUrlSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
       showCardLabels={false}

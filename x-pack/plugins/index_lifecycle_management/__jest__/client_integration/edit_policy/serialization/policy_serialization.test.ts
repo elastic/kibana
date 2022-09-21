@@ -254,6 +254,24 @@ describe('<EditPolicy /> serialization', () => {
       expect(parsedReqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe('abc');
     });
 
+    // Setting downsample disables setting readonly so we test this separately
+    test('setting downsample', async () => {
+      const { actions } = testBed;
+
+      await actions.rollover.toggleDefault();
+      await actions.hot.downsample.toggle();
+      await actions.hot.downsample.setDownsampleInterval('2', 'h');
+
+      await actions.savePolicy();
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.hot.actions.downsample).toEqual({ fixed_interval: '2h' });
+    });
+
     test('disabling rollover', async () => {
       const { actions } = testBed;
 
@@ -366,6 +384,25 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
+    });
+
+    // Setting downsample disables setting readonly so we test this separately
+    test('setting downsample', async () => {
+      const { actions } = testBed;
+
+      await actions.togglePhase('warm');
+      await actions.warm.setMinAgeValue('11');
+      await actions.warm.downsample.toggle();
+      await actions.warm.downsample.setDownsampleInterval('20', 'm');
+
+      await actions.savePolicy();
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.warm.actions.downsample).toEqual({ fixed_interval: '20m' });
     });
 
     describe('policy with include and exclude', () => {
@@ -500,6 +537,25 @@ describe('<EditPolicy /> serialization', () => {
           }),
         })
       );
+    });
+
+    // Setting downsample disables setting readonly so we test this separately
+    test('setting downsample', async () => {
+      const { actions } = testBed;
+
+      await actions.togglePhase('cold');
+      await actions.cold.setMinAgeValue('11');
+      await actions.cold.downsample.toggle();
+      await actions.cold.downsample.setDownsampleInterval('2');
+
+      await actions.savePolicy();
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.cold.actions.downsample).toEqual({ fixed_interval: '2d' });
     });
 
     // Setting searchable snapshot field disables setting replicas so we test this separately

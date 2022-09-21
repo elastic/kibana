@@ -45,7 +45,7 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
+import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
 import {
   preconfigurePackageInputs,
@@ -106,6 +106,7 @@ async function mockedGetInstallation(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   return Promise.resolve(pkg);
 }
 
@@ -113,7 +114,7 @@ async function mockedGetPackageInfo(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
-  if (params.pkgName === 'endpoint') pkg = {};
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   if (params.pkgName === 'test') {
     pkg = {
       version: '1.0.2',
@@ -1141,6 +1142,540 @@ describe('Package policy service', () => {
     });
   });
 
+  describe('bulkUpdate', () => {
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+    });
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should throw if the user try to update input vars that are frozen', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+
+        [{ ...mockPackagePolicy, inputs: inputsUpdate }]
+      );
+
+      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+    });
+
+    it('should allow to update input vars that are frozen with the force flag', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [{ ...mockPackagePolicy, inputs: inputsUpdate }],
+        { force: true }
+      );
+
+      const [modifiedInput] = result![0].inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('tabby');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['east', 'west']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should add new input vars when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [{ ...mockPackagePolicy, inputs: inputsUpdate }]
+      );
+
+      const [modifiedInput] = result![0].inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should update elasticsearch.privileges.cluster when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [{ ...mockPackagePolicy, inputs: [] }]
+      );
+
+      expect(result![0].elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+    });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        // this mimics the way that OSQuery plugin create immutable objects
+        [
+          produce<PackagePolicy>(
+            { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+            (draft) => draft
+          ),
+        ]
+      );
+
+      expect(result![0].name).toEqual('test');
+    });
+  });
+
   describe('delete', () => {
     it('should allow to delete a package policy', async () => {});
   });
@@ -1187,12 +1722,12 @@ describe('Package policy service', () => {
       });
       await expect(
         packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
-      ).rejects.toThrow(IngestManagerError);
+      ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
-      let error: IngestManagerError;
+      let error: FleetError;
       const callbackOneError = new Error('foo 1');
       const callbackTwoError = new Error('foo 2');
 
@@ -1228,7 +1763,6 @@ describe('Package policy service', () => {
       inputs: [],
       name: 'endpoint-1',
       namespace: 'default',
-      output_id: '',
       package: {
         name: 'endpoint',
         title: 'Elastic Endpoint',
@@ -1409,7 +1943,6 @@ describe('Package policy service', () => {
       },
       enabled: true,
       policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
-      output_id: '',
       inputs: [
         {
           type: 'cloudbeat',
@@ -1497,7 +2030,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1585,7 +2117,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1683,7 +2214,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1781,7 +2311,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1951,7 +2480,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2171,7 +2699,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2266,7 +2793,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2368,7 +2894,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2467,7 +2992,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2566,7 +3090,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2737,7 +3260,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2958,7 +3480,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -3052,7 +3573,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -3193,7 +3713,6 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
-        output_id: '',
         inputs: [
           {
             enabled: false,
@@ -3270,7 +3789,6 @@ describe('Package policy service', () => {
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
-        output_id: '',
         inputs: [
           {
             type: 'aws/metrics',
@@ -3297,7 +3815,6 @@ describe('Package policy service', () => {
         description: 'desc',
         enabled: false,
         policy_id: '2',
-        output_id: '3',
         inputs: [
           {
             type: 'logfile',
@@ -3332,7 +3849,6 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: false,
         policy_id: '2',
-        output_id: '3',
         inputs: [
           {
             enabled: true,
@@ -3413,7 +3929,7 @@ describe('Package policy service', () => {
 
       expect(
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
-      ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
+      ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
     });
   });
 });
@@ -3482,6 +3998,36 @@ describe('getUpgradeDryRunDiff', () => {
 
     expect(res.hasErrors).toBeTruthy();
   });
+
+  it('should return no errors if upgrading 2 package policies', async () => {
+    savedObjectsClient.get.mockImplementation((type, id) =>
+      Promise.resolve({
+        id,
+        type: 'abcd',
+        references: [],
+        version: '0.9.0',
+        attributes: { ...createPackagePolicyMock(), name: id },
+      })
+    );
+    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
+      'package-policy-id',
+      'package-policy-id-2',
+    ]);
+
+    expect(res).toEqual([
+      {
+        id: 'package-policy-id',
+        name: 'package-policy-id',
+        success: true,
+      },
+      {
+        id: 'package-policy-id-2',
+        name: 'package-policy-id-2',
+        success: true,
+      },
+    ]);
+  });
 });
 
 describe('_applyIndexPrivileges()', () => {
@@ -3490,6 +4036,7 @@ describe('_applyIndexPrivileges()', () => {
       type: '',
       dataset: '',
       title: '',
+      // @ts-ignore-error
       release: '',
       package: '',
       path: '',

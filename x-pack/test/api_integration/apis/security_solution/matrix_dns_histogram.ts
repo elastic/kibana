@@ -44,7 +44,6 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             defaultIndex: ['large_volume_dns_data'],
-            docValueFields: [],
             factoryQueryType: MatrixHistogramQuery,
             histogramType: MatrixHistogramType.dns,
             filterQuery:

@@ -85,9 +85,9 @@ export const patchRulesBulkRoute = (
             });
 
             const rule = await patchRules({
-              rule: migratedRule,
+              existingRule: migratedRule,
               rulesClient,
-              params: payloadRule,
+              nextParams: payloadRule,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);

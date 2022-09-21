@@ -12,6 +12,7 @@ import type {
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
@@ -38,6 +39,26 @@ export const sendGetPackagePolicy = (
 };
 
 /**
+ * Retrieves multiple package policies by ids
+ * @param http
+ * @param packagePolicyIds
+ * @param options
+ */
+export const sendBulkGetPackagePolicies = (
+  http: HttpStart,
+  packagePolicyIds: string[],
+  options?: HttpFetchOptions
+) => {
+  return http.post<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`, {
+    ...options,
+    body: JSON.stringify({
+      ids: packagePolicyIds,
+      ignoreMissing: true,
+    }),
+  });
+};
+
+/**
  * Retrieve a list of Agent Policies
  * @param http
  * @param options
@@ -47,6 +68,26 @@ export const sendGetAgentPolicyList = (
   options: HttpFetchOptions & GetAgentPoliciesRequest
 ) => {
   return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
+};
+
+/**
+ * Retrieve a list of Agent Policies
+ * @param http
+ * @param options
+ */
+export const sendBulkGetAgentPolicyList = (
+  http: HttpStart,
+  ids: string[],
+  options: HttpFetchOptions = {}
+) => {
+  return http.post<GetAgentPoliciesResponse>(`${INGEST_API_AGENT_POLICIES}/_bulk_get`, {
+    ...options,
+    body: JSON.stringify({
+      ids,
+      ignoreMissing: true,
+      full: true,
+    }),
+  });
 };
 
 /**

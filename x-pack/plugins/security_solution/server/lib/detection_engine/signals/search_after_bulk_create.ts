@@ -18,15 +18,16 @@ import {
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
+  addToSearchAfterReturn,
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { createEnrichEventsFunction } from './enrichments';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
   buildReasonMessage,
   bulkCreate,
-  completeRule,
   enrichment = identity,
   eventsTelemetry,
   exceptionsList,
@@ -51,10 +52,6 @@ export const searchAfterAndBulkCreate = async ({
     let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
 
-    // signalsCreatedCount keeps track of how many signals we have created,
-    // to ensure we don't exceed maxSignals
-    let signalsCreatedCount = 0;
-
     if (tuple == null || tuple.to == null || tuple.from == null) {
       ruleExecutionLogger.error(`[-] malformed date tuple`);
       return createSearchAfterReturnType({
@@ -63,8 +60,7 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
-    signalsCreatedCount = 0;
-    while (signalsCreatedCount < tuple.maxSignals) {
+    while (toReturn.createdSignalsCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         ruleExecutionLogger.debug(`sortIds: ${sortIds}`);
@@ -141,37 +137,31 @@ export const searchAfterAndBulkCreate = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
-          const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
+          const limitedEvents = includedEvents.slice(
+            0,
+            tuple.maxSignals - toReturn.createdSignalsCount
+          );
           const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          const {
-            bulkCreateDuration: bulkDuration,
-            createdItemsCount: createdCount,
-            createdItems,
-            success: bulkSuccess,
-            errors: bulkErrors,
-          } = await bulkCreate(wrappedDocs);
+          const bulkCreateResult = await bulkCreate(
+            wrappedDocs,
+            undefined,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
+          );
 
-          toReturn = mergeReturns([
-            toReturn,
-            createSearchAfterReturnType({
-              success: bulkSuccess,
-              createdSignalsCount: createdCount,
-              createdSignals: createdItems,
-              bulkCreateTimes: [bulkDuration],
-              errors: bulkErrors,
-            }),
-          ]);
-          signalsCreatedCount += createdCount;
+          addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 
-          ruleExecutionLogger.debug(`created ${createdCount} signals`);
-          ruleExecutionLogger.debug(`signalsCreatedCount: ${signalsCreatedCount}`);
+          ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+          ruleExecutionLogger.debug(`signalsCreatedCount: ${toReturn.createdSignalsCount}`);
           ruleExecutionLogger.debug(`enrichedEvents.hits.hits: ${enrichedEvents.length}`);
 
           sendAlertTelemetryEvents(
             enrichedEvents,
-            createdItems,
+            bulkCreateResult.createdItems,
             eventsTelemetry,
             ruleExecutionLogger
           );

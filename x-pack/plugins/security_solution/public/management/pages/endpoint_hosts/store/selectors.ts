@@ -174,7 +174,7 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
  * Returns the Host Status which is connected the fleet agent
  */
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state) => state.hostStatus,
+  (state: Immutable<EndpointState>) => state.hostStatus,
   (hostStatus) => {
     return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
@@ -184,7 +184,7 @@ export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = c
  * Returns the Policy Response overall status
  */
 export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
-  (state) => state.policyResponse,
+  (state: Immutable<EndpointState>) => state.policyResponse,
   (policyResponse) => {
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }

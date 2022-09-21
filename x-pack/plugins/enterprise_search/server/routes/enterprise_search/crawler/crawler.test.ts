@@ -42,7 +42,7 @@ describe('crawler routes', () => {
     });
 
     it('fails validation without language', () => {
-      const request = { body: { index_name: 'index-ame' } };
+      const request = { body: { index_name: 'index-name' } };
       mockRouter.shouldThrow(request);
     });
   });

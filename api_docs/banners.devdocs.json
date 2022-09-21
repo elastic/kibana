@@ -29,6 +29,7 @@
         "description": [],
         "path": "x-pack/plugins/banners/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "banners",
@@ -41,7 +42,8 @@
               "\"top\" | \"disabled\""
             ],
             "path": "x-pack/plugins/banners/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "banners",
@@ -51,7 +53,8 @@
             "label": "textContent",
             "description": [],
             "path": "x-pack/plugins/banners/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "banners",
@@ -61,7 +64,8 @@
             "label": "textColor",
             "description": [],
             "path": "x-pack/plugins/banners/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "banners",
@@ -71,7 +75,8 @@
             "label": "backgroundColor",
             "description": [],
             "path": "x-pack/plugins/banners/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -85,6 +90,7 @@
         "description": [],
         "path": "x-pack/plugins/banners/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "banners",
@@ -94,7 +100,8 @@
             "label": "allowed",
             "description": [],
             "path": "x-pack/plugins/banners/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "banners",
@@ -113,7 +120,8 @@
               }
             ],
             "path": "x-pack/plugins/banners/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -133,6 +141,7 @@
         ],
         "path": "x-pack/plugins/banners/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

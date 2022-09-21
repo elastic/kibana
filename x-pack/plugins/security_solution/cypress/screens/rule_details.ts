@@ -16,11 +16,19 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
-export const ALERTS_TAB = '[data-test-subj="alertsTab"]';
+export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
+
+export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
+
+export const SAVED_QUERY_DETAILS = /^Saved query$/;
+
+export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
+
+export const FILTERS_DETAILS = 'Filters';
 
 export const DATA_VIEW_DETAILS = 'Data View';
 
@@ -31,7 +39,7 @@ export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
-export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
+export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
@@ -112,3 +120,6 @@ export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
 export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
+
+export const DEFINE_RULE_PANEL_PROGRESS =
+  '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';

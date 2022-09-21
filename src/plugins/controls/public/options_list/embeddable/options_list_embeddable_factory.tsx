@@ -16,9 +16,12 @@ import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/options_list/options_list_persistable_state';
+import {
+  OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
+} from '../../../common/options_list/types';
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEditorOptions } from '../components/options_list_editor_options';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../types';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -32,7 +32,6 @@ import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
@@ -195,7 +194,7 @@ function DiscoverDocumentsComponent({
               dataView={dataView}
               isLoading={isLoading}
               rows={rows}
-              sort={(state.sort as SortPairArr[]) || []}
+              sort={(state.sort as SortOrder[]) || []}
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}

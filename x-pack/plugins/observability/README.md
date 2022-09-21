@@ -13,6 +13,17 @@ xpack.ruleRegistry.write.enabled: true
 
 When this is set to `true`, your alerts should show on the alerts page.
 
+## SLOs
+
+
+If you have:
+
+```yaml
+xpack.observability.unsafe.slo.enabled: true
+```
+
+In your Kibana configuration, the SLO feature will be available.
+
 ## Shared navigation
 
 The Observability plugin maintains a navigation registry for Observability solutions, and exposes a shared page template component. Please refer to the docs in [the component directory](public/components/shared/page_template) for more information on registering your solution's navigation structure, and rendering the navigation via the shared component.

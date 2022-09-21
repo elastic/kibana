@@ -14,11 +14,7 @@ import {
   getCspPackagePolicies,
   getCspAgentPolicies,
 } from '../../lib/fleet_util';
-import {
-  defineGetBenchmarksRoute,
-  createBenchmarkEntry,
-  addPackagePolicyCspRules,
-} from './benchmarks';
+import { defineGetBenchmarksRoute, addPackagePolicyCspRules } from './benchmarks';
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import {
@@ -26,27 +22,7 @@ import {
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { createCspRequestHandlerContextMock } from '../../mocks';
-
-function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
-  return {
-    id: 'some-uuid1',
-    namespace: 'default',
-    monitoring_enabled: [],
-    name: 'Test Policy',
-    description: '',
-    is_default: false,
-    is_preconfigured: false,
-    status: 'active',
-    is_managed: false,
-    revision: 1,
-    updated_at: '',
-    updated_by: 'elastic',
-    package_policies: [],
-    ...props,
-  };
-}
 
 describe('benchmarks API', () => {
   beforeEach(() => {
@@ -304,49 +280,6 @@ describe('benchmarks API', () => {
           all: 3,
           enabled: 2,
           disabled: 1,
-        });
-      });
-    });
-
-    describe('test createBenchmarkEntry', () => {
-      it('should build benchmark entry agent policy and package policy', async () => {
-        const packagePolicy = createPackagePolicyMock();
-        const agentPolicy = createMockAgentPolicy();
-        agentPolicy.agents = 3;
-
-        const cspRulesStatus = {
-          all: 100,
-          enabled: 52,
-          disabled: 48,
-        };
-        const enrichAgentPolicy = await createBenchmarkEntry(
-          agentPolicy,
-          packagePolicy,
-          cspRulesStatus
-        );
-
-        expect(enrichAgentPolicy).toEqual({
-          package_policy: {
-            id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-            name: 'endpoint-1',
-            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            namespace: 'default',
-            updated_at: '2020-06-25T16:03:38.159292',
-            updated_by: 'kibana',
-            created_at: '2020-06-25T16:03:38.159292',
-            created_by: 'kibana',
-            package: {
-              name: 'endpoint',
-              title: 'Elastic Endpoint',
-              version: '0.9.0',
-            },
-          },
-          agent_policy: { id: 'some-uuid1', name: 'Test Policy', agents: 3 },
-          rules: {
-            all: 100,
-            disabled: 48,
-            enabled: 52,
-          },
         });
       });
     });

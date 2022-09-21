@@ -11,7 +11,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
+import './mount_wrapper.scss';
+
 const defaultWrapperClass = 'kbnMountWrapper';
+
 interface MountWrapperComponentProps {
   mount: MountPoint;
   className?: string;
@@ -25,6 +28,7 @@ type MountWrapperComponent = React.FunctionComponent<MountWrapperComponentProps>
 
 /**
  * MountWrapper is a react component to mount a {@link MountPoint} inside a react tree.
+ * @internal
  */
 export const MountWrapper: MountWrapperComponent = ({ mount, className = defaultWrapperClass }) => {
   const element = useRef(null);
@@ -36,6 +40,7 @@ export const MountWrapper: MountWrapperComponent = ({ mount, className = default
  * Mount converter for react node.
  *
  * @param node to get a mount for
+ * @internal
  */
 export const mountReactNode =
   (node: React.ReactNode): MountPoint =>

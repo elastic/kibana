@@ -41,6 +41,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-internal",
@@ -54,6 +55,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -73,6 +75,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-internal",
@@ -83,6 +86,7 @@
                 "description": [],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-saved-objects-browser-internal",
@@ -95,7 +99,8 @@
                       "HttpSetup"
                     ],
                     "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -114,6 +119,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

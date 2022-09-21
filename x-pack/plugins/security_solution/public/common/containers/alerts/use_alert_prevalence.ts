@@ -11,6 +11,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { useGlobalTime } from '../use_global_time';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
@@ -52,6 +53,7 @@ export const useAlertPrevalence = ({
   const { loading, data, setQuery } = useQueryAlerts<{ _id: string }, AlertPrevalenceAggregation>({
     query: initialQuery,
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.PREVALENCE,
   });
 
   useEffect(() => {

@@ -94,7 +94,24 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-const mockSearchStrategy = jest.fn();
+jest.mock('../../../../risk_score/containers', () => {
+  return {
+    useHostRiskScore: jest.fn().mockReturnValue([
+      true,
+      {
+        data: undefined,
+        isModuleEnabled: false,
+      },
+    ]),
+    useUserRiskScore: jest.fn().mockReturnValue([
+      true,
+      {
+        data: undefined,
+        isModuleEnabled: false,
+      },
+    ]),
+  };
+});
 
 const defaultProps = {
   timelineId: TimelineId.test,
@@ -121,16 +138,6 @@ describe('event details footer component', () => {
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
-          search: {
-            searchStrategyClient: jest.fn(),
-            search: mockSearchStrategy.mockReturnValue({
-              unsubscribe: jest.fn(),
-              subscribe: jest.fn(),
-            }),
-          },
-          query: jest.fn(),
-        },
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
@@ -138,6 +145,14 @@ describe('event details footer component', () => {
           ui: {
             getCasesContext: () => mockCasesContext,
           },
+        },
+        timelines: {
+          getHoverActions: jest.fn().mockReturnValue({
+            getAddToTimelineButton: jest.fn(),
+          }),
+        },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
         },
       },
     });

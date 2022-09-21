@@ -13,7 +13,6 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -22,16 +21,17 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import type { PluginInitializerContext, AppMountParameters } from '.';
-// Import values from their individual modules instead.
-import { ScopedHistory } from './application';
-import { applicationServiceMock } from './application/application_service.mock';
-import { chromeServiceMock } from './chrome/chrome_service.mock';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
+import type { AppMountParameters } from '@kbn/core-application-browser';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import type { PluginInitializerContext } from '.';
+
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-export { chromeServiceMock } from './chrome/chrome_service.mock';
+export { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 export { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 export { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -43,8 +43,7 @@ export {
   savedObjectsServiceMock,
   simpleSavedObjectMock,
 } from '@kbn/core-saved-objects-browser-mocks';
-export { scopedHistoryMock } from './application/scoped_history.mock';
-export { applicationServiceMock } from './application/application_service.mock';
+export { applicationServiceMock, scopedHistoryMock } from '@kbn/core-application-browser-mocks';
 export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 
 function createCoreSetupMock({
@@ -143,7 +142,7 @@ function createAppMountParametersMock(appBasePath = '') {
   // Assemble an in-memory history mock using the provided basePath
   const rawHistory = createMemoryHistory();
   rawHistory.push(appBasePath);
-  const history = new ScopedHistory(rawHistory, appBasePath);
+  const history = new CoreScopedHistory(rawHistory, appBasePath);
 
   const params: jest.Mocked<AppMountParameters> = {
     appBasePath,

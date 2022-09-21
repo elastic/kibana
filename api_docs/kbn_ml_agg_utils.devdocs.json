@@ -27,6 +27,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -40,6 +41,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -54,6 +56,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -96,6 +99,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -109,6 +113,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -123,6 +128,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -137,6 +143,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -158,6 +165,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -172,6 +180,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -187,6 +196,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -221,6 +231,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -236,6 +247,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -252,6 +264,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -268,6 +281,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -290,6 +304,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -306,6 +321,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -323,6 +339,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -343,6 +360,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -356,6 +374,7 @@
             ],
             "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -384,6 +403,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -394,6 +414,7 @@
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-agg-utils",
@@ -406,7 +427,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/ml-agg-utils",
@@ -419,7 +441,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/ml-agg-utils",
@@ -432,7 +455,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -453,6 +477,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -465,7 +490,8 @@
               "FieldAggCardinality | ScriptAggCardinality"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -492,6 +518,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -501,7 +528,8 @@
             "label": "doc_count",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -511,7 +539,30 @@
             "label": "bg_count",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.total_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_doc_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.total_bg_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_bg_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -521,7 +572,8 @@
             "label": "score",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -534,7 +586,8 @@
               "number | null"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -544,7 +597,8 @@
             "label": "normalizedScore",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -564,7 +618,143 @@
               "[] | undefined"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointGroup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointGroup",
+        "description": [
+          "\nTree leaves"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "ChangePointGroupItem[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointGroupHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointGroupHistogram",
+        "description": [
+          "\nChange point histogram data for a group of field/value pairs."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroupHistogram.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroupHistogram.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -591,6 +781,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -610,7 +801,8 @@
               "[]"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -626,6 +818,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -635,7 +828,8 @@
             "label": "doc_count_overall",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -645,7 +839,8 @@
             "label": "doc_count_change_point",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -655,7 +850,8 @@
             "label": "key",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -665,7 +861,8 @@
             "label": "key_as_string",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -681,6 +878,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -690,7 +888,8 @@
             "label": "fieldName",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -703,7 +902,8 @@
               "KBN_FIELD_TYPES"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -717,6 +917,7 @@
         "description": [],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -726,7 +927,8 @@
             "label": "min",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -736,7 +938,8 @@
             "label": "max",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -746,7 +949,8 @@
             "label": "integerOnly",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -762,6 +966,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -771,7 +976,8 @@
             "label": "interval",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -781,7 +987,8 @@
             "label": "min",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
@@ -791,7 +998,8 @@
             "label": "max",
             "description": [],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -815,6 +1023,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -839,6 +1048,7 @@
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -40,10 +40,15 @@ export const CopySource: Task = {
 
       '!**/jest*',
       '!**/*.{story,stories}.{js,ts}',
-      '!**/test_mocks.ts',
+      '!**/{test_mocks,stubs}.ts',
       '!**/*.{scss,console,d.ts,sh,md,mdx,asciidoc,docnav.json}',
       '!**/*.{test,test.mocks,mock,mocks,spec}.*',
       '!**/{packages,dev_docs,docs,public,__stories__,storybook,.storybook,ftr_e2e,e2e,scripts,test,tests,test_resources,test_data,__tests__,manual_tests,__jest__,__snapshots__,__mocks__,mock_responses,mocks,fixtures,__fixtures__,cypress,integration_tests}/**',
+
+      '!x-pack/plugins/lens/to_playground.gif', // README.md
+      '!x-pack/plugins/lens/layout.png', // README.md
+      '!x-pack/plugins/cases/images', // README.md
+      '!x-pack/plugins/canvas/images', // unused
     ];
 
     const piscina = new Piscina({
