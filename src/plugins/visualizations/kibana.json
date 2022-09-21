@@ -17,7 +17,8 @@
     "screenshotMode",
     "presentationUtil",
     "dataViews",
-    "dataViewEditor"
+    "dataViewEditor",
+    "unifiedSearch"
   ],
   "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "charts"],

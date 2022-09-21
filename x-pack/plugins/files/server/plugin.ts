@@ -14,17 +14,18 @@ import type {
 } from '@kbn/core/server';
 
 import { PLUGIN_ID } from '../common/constants';
-
-import { BlobStorageService } from './blob_storage_service';
-import { FileServiceFactory } from './file_service';
-import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
 import {
   setFileKindsRegistry,
   getFileKindsRegistry,
   FileKindsRegistryImpl,
-} from './file_kinds_registry';
+} from '../common/file_kinds_registry';
+
+import { BlobStorageService } from './blob_storage_service';
+import { FileServiceFactory } from './file_service';
+import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
+
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
-import { registerRoutes } from './routes';
+import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
@@ -62,7 +63,11 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
 
     const router: FilesRouter = core.http.createRouter();
     registerRoutes(router);
-    setFileKindsRegistry(new FileKindsRegistryImpl(router));
+    setFileKindsRegistry(
+      new FileKindsRegistryImpl((fk) => {
+        registerFileKindRoutes(router, fk);
+      })
+    );
     registerUsageCollector({
       usageCollection,
       getFileService: () => this.fileServiceFactory?.asInternal(),

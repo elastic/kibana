@@ -28,7 +28,7 @@ import {
 } from './file_action_types';
 import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
-import { FileKindsRegistry } from '../file_kinds_registry';
+import { FileKindsRegistry } from '../../common/file_kinds_registry';
 import { SavedObjectsFileMetadataClient } from '../file_client';
 
 /**
