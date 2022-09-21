@@ -186,7 +186,7 @@ export function getCalleeFunction(frame: StackFrameMetadata): string {
 }
 
 export function getCalleeSource(frame: StackFrameMetadata): string {
-  if (frame.FunctionName === '' && frame.SourceLine === 0) {
+  if (frame.SourceFilename === '' && frame.SourceLine === 0) {
     if (frame.ExeFileName) {
       // If no source line or filename available, display the executable offset
       return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
