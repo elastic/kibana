@@ -39,19 +39,37 @@ export const getComparatorScript = (
   threshold: number[],
   fieldName: string
 ) => {
+  if (threshold.length === 0) {
+    throw new Error('Threshold value required');
+  }
+
+  function getThresholdString(thresh: number) {
+    return Number.isInteger(thresh) ? `${thresh}L` : `${thresh}`;
+  }
+
   switch (comparator) {
     case Comparator.LT:
-      return `${fieldName} < ${threshold[0]}L`;
+      return `${fieldName} < ${getThresholdString(threshold[0])}`;
     case Comparator.LT_OR_EQ:
-      return `${fieldName} <= ${threshold[0]}L`;
+      return `${fieldName} <= ${getThresholdString(threshold[0])}`;
     case Comparator.GT:
-      return `${fieldName} > ${threshold[0]}L`;
+      return `${fieldName} > ${getThresholdString(threshold[0])}`;
     case Comparator.GT_OR_EQ:
-      return `${fieldName} >= ${threshold[0]}L`;
+      return `${fieldName} >= ${getThresholdString(threshold[0])}`;
     case Comparator.BETWEEN:
-      return `${fieldName} >= ${threshold[0]}L && ${fieldName} <= ${threshold[1]}L`;
+      if (threshold.length < 2) {
+        throw new Error('Threshold values required');
+      }
+      return `${fieldName} >= ${getThresholdString(
+        threshold[0]
+      )} && ${fieldName} <= ${getThresholdString(threshold[1])}`;
     case Comparator.NOT_BETWEEN:
-      return `${fieldName} < ${threshold[0]}L || ${fieldName} > ${threshold[1]}L`;
+      if (threshold.length < 2) {
+        throw new Error('Threshold values required');
+      }
+      return `${fieldName} < ${getThresholdString(
+        threshold[0]
+      )} || ${fieldName} > ${getThresholdString(threshold[1])}`;
   }
 };
 
