@@ -503,7 +503,7 @@ export function getIndexPatternDatasource({
         filter: false,
       };
       const operations = flatten(
-        Object.values(state.layers ?? {}).map((l) =>
+        Object.values(state?.layers ?? {}).map((l) =>
           Object.values(l.columns).map((c) => {
             if (c.timeShift) {
               additionalEvents.time_shift = true;

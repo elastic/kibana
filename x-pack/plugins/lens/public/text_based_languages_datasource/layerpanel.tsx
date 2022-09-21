@@ -28,7 +28,7 @@ export function LayerPanel({ state, layerId, dataViews }: TextBasedLanguageLayer
       <ChangeIndexPattern
         data-test-subj="textBasedLanguages-switcher"
         trigger={{
-          label: dataView?.name || notFoundTitleLabel,
+          label: dataView?.name || dataView?.title || notFoundTitleLabel,
           title: dataView?.title || notFoundTitleLabel,
           size: 's',
           fontWeight: 'normal',

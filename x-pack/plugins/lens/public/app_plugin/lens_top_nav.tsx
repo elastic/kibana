@@ -576,7 +576,7 @@ export const LensTopNavMenu = ({
           );
 
           return discover.locator!.getRedirectUrl({
-            dataViewSpec: dataViews.indexPatterns[meta.id].spec,
+            dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
             query: newQuery,
