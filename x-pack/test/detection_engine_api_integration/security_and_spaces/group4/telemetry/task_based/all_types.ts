@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { unset } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -15,7 +16,6 @@ import {
   removeTimeFieldsFromTelemetryStats
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
-import { unset } from 'lodash';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
