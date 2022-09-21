@@ -12,8 +12,8 @@ describe('unique values function', () => {
   describe('getGroupByKey', () => {
     const getKey = operationDefinitionMap.unique_count.getGroupByKey!;
     const expressionToKey = (expression: string) =>
-      getKey(buildExpression(parseExpression(expression)));
-    it('generates unique keys based on configuration', () => {
+      getKey(buildExpression(parseExpression(expression))) as string;
+    describe('generates unique keys based on configuration', () => {
       const keys = [
         // group 1
         [
@@ -40,9 +40,18 @@ describe('unique values function', () => {
           'aggFilteredMetric id="8" enabled=true schema="metric" \n  customBucket={aggFilter id="8-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggCardinality id="8-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
           'aggFilteredMetric id="9" enabled=true schema="metric" \n  customBucket={aggFilter id="9-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggCardinality id="9-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
         ],
+        // check emptyAsNull cases
+        [
+          'aggCardinality id="10" enabled=true schema="metric" field="bytes" emptyAsNull=true',
+          'aggCardinality id="11" enabled=true schema="metric" field="bytes" emptyAsNull=true',
+        ],
+        [
+          'aggFilteredMetric id="12" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=true}',
+          'aggFilteredMetric id="13" enabled=true schema="metric" \n  customBucket={aggFilter id="3-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="3-metric" enabled=true schema="metric" field="bytes" emptyAsNull=true}',
+        ],
       ].map((group) => group.map(expressionToKey));
 
-      keys.forEach((thisGroup) => {
+      it.each(keys.map((group, i) => ({ group })))('%#', ({ group: thisGroup }) => {
         expect(thisGroup[0]).toEqual(thisGroup[1]);
         const otherGroups = keys.filter((group) => group !== thisGroup);
         for (const otherGroup of otherGroups) {
@@ -50,30 +59,40 @@ describe('unique values function', () => {
         }
       });
 
-      expect(keys).toMatchInlineSnapshot(`
-        Array [
+      it('snapshot', () => {
+        expect(keys).toMatchInlineSnapshot(`
           Array [
-            "bytes-undefined-false",
-            "bytes-undefined-false",
-          ],
-          Array [
-            "filtered-undefined-bytes-undefined-kql-geo.dest: \\"GA\\" ",
-            "filtered-undefined-bytes-undefined-kql-geo.dest: \\"GA\\" ",
-          ],
-          Array [
-            "filtered-undefined-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-            "filtered-undefined-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-          ],
-          Array [
-            "filtered-undefined-bytes-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-            "filtered-undefined-bytes-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-          ],
-          Array [
-            "filtered-1m-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-            "filtered-1m-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-          ],
-        ]
-      `);
+            Array [
+              "bytes-undefined-false",
+              "bytes-undefined-false",
+            ],
+            Array [
+              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
+              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
+            ],
+            Array [
+              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+            ],
+            Array [
+              "filtered-undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "filtered-undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+            ],
+            Array [
+              "filtered-1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+              "filtered-1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+            ],
+            Array [
+              "bytes-undefined-true",
+              "bytes-undefined-true",
+            ],
+            Array [
+              "filtered-undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
+              "filtered-undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
+            ],
+          ]
+        `);
+      });
     });
 
     it('returns undefined for aggs from different operation classes', () => {

@@ -220,7 +220,9 @@ export const cardinalityOperation: OperationDefinition<
 
         groupKey = `filtered-${aggFilterFnBuilder.getArgument('timeWindow')}-${
           metricFnBuilder.getArgument('field')?.[0]
-        }-${fnBuilder.getArgument('timeShift')?.[0]}`;
+        }-${fnBuilder.getArgument('timeShift')?.[0]}-${Boolean(
+          metricFnBuilder.getArgument('emptyAsNull')?.[0]
+        )}`;
 
         const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
           | ExpressionAstExpressionBuilder
