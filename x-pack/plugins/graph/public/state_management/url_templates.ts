@@ -84,7 +84,7 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
     })
     .case(loadTemplates, (_currentTemplates, newTemplates) => {
       return newTemplates.map((template) =>
-        template.isDefault && template.url.startsWith('/app/discover')
+        template.isDefault && template.url?.startsWith('/app/discover') // as in saved objects of sample data sets
           ? {
               ...template,
               url: addBasePath(template.url).replace(
