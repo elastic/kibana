@@ -165,7 +165,7 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[0][0];
+    const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -176,6 +176,15 @@ describe('unenrollAgents (plural)', () => {
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
+
+    const actionResults = esClient.bulk.mock.calls[0][0];
+    const resultIds = (actionResults as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(resultIds).toEqual(onlyRegular);
+
+    const action = esClient.create.mock.calls[0][0] as any;
+    expect(action.body.type).toEqual('FORCE_UNENROLL');
   });
 
   it('can unenroll from hosted agent policy with force=true', async () => {
@@ -226,7 +235,7 @@ describe('unenrollAgents (plural)', () => {
     ]);
 
     // calls ES update with correct values
-    const calledWith = esClient.bulk.mock.calls[0][0];
+    const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -237,6 +246,15 @@ describe('unenrollAgents (plural)', () => {
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
+
+    const actionResults = esClient.bulk.mock.calls[0][0];
+    const resultIds = (actionResults as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(resultIds).toEqual(idsToUnenroll);
+
+    const action = esClient.create.mock.calls[0][0] as any;
+    expect(action.body.type).toEqual('FORCE_UNENROLL');
   });
 });
 

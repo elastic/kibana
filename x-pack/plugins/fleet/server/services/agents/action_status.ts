@@ -36,7 +36,7 @@ export async function getActionStatuses(
       size: 0,
       aggs: {
         ack_counts: {
-          terms: { field: 'action_id', size: actions.length },
+          terms: { field: 'action_id', size: actions.length || 10 },
           aggs: {
             max_timestamp: { max: { field: '@timestamp' } },
           },

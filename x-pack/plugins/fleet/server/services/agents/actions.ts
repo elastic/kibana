@@ -268,5 +268,4 @@ export interface ActionsService {
   ) => Promise<AgentAction>;
 
   getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;
-  getUnenrollAgentActions: (esClient: ElasticsearchClient) => Promise<any[]>;
 }
