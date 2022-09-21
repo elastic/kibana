@@ -11,6 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
+import deepEqual from 'fast-deep-equal';
 
 interface VersionFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -85,4 +86,4 @@ const VersionFieldComponent = ({ euiFieldProps = {} }: VersionFieldProps) => {
   );
 };
 
-export const VersionField = React.memo(VersionFieldComponent);
+export const VersionField = React.memo(VersionFieldComponent, deepEqual);

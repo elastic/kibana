@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import deepEqual from 'fast-deep-equal';
 import { createFormIdFieldValidations } from '../packs/queries/validations';
 
 interface QueryIdFieldProps {
@@ -49,4 +50,4 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   );
 };
 
-export const QueryIdField = React.memo(QueryIdFieldComponent);
+export const QueryIdField = React.memo(QueryIdFieldComponent, deepEqual);

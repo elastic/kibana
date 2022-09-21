@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBottomBar, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
@@ -103,11 +103,17 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByNone.isFetching}
       />
-      <LatestFindingsPageTitle />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <LatestFindingsPageTitle />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
+          {!error && <FindingsGroupBySelector type="default" />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
-          <FindingsGroupBySelector type="default" />
           {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
             <FindingsDistributionBar
               {...{

@@ -160,7 +160,6 @@ export const UX_MESSAGES = Object.freeze({
     }),
 });
 
-// TODO: Add more filter names here (hosts, statuses) etc
 export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
@@ -170,5 +169,8 @@ export const FILTER_NAMES = Object.freeze({
   }),
   statuses: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.statuses', {
     defaultMessage: 'Statuses',
+  }),
+  users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
+    defaultMessage: 'Filter by user or comma separated list of users',
   }),
 });
