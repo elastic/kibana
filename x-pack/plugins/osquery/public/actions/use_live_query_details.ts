@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
-import type { EcsMappingFormField } from '../packs/queries/ecs_mapping_editor_field';
+import type { ECSMapping } from '../../common/schemas/common';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -27,7 +27,7 @@ export interface PackQueriesQuery {
   id: string;
   query: string;
   agents: string[];
-  ecs_mapping?: EcsMappingFormField[];
+  ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
   saved_query_id?: string;

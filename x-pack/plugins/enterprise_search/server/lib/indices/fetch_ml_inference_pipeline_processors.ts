@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
 import { InferencePipeline } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
@@ -53,9 +54,9 @@ export const fetchPipelineProcessorInferenceData = async (
       if (trainedModelName)
         pipelineProcessorData[trainedModelName] = {
           isDeployed: false,
-          modelType: 'unknown',
           pipelineName: pipelineProcessorName,
           trainedModelName,
+          types: [],
         };
 
       return pipelineProcessorData;
@@ -79,7 +80,13 @@ export const fetchAndAddTrainedModelData = async (
     const trainedModelName = trainedModelData.model_id;
 
     if (pipelineProcessorData.hasOwnProperty(trainedModelName)) {
-      pipelineProcessorData[trainedModelName].modelType = trainedModelData.model_type || 'unknown';
+      const isBuiltIn = trainedModelData.tags.includes(BUILT_IN_MODEL_TAG);
+
+      pipelineProcessorData[trainedModelName].types = [
+        trainedModelData.model_type,
+        ...Object.keys(trainedModelData.inference_config || {}),
+        ...(isBuiltIn ? [BUILT_IN_MODEL_TAG] : []),
+      ].filter((type): type is string => type !== undefined);
     }
   });
 
