@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-import { IExecutionLogResult, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
+import {
+  IExecutionLogResult,
+  IExecutionErrorsResult,
+  IExecutionKPIResult,
+} from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -78,7 +82,9 @@ export interface ComponentOpts {
   loadRuleState: (id: Rule['id']) => Promise<RuleTaskState>;
   loadRuleSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<RuleSummary>;
   loadRuleTypes: () => Promise<RuleType[]>;
-  loadExecutionKPIAggregations: (props: LoadExecutionKPIAggregationsProps) => Promise<any>;
+  loadExecutionKPIAggregations: (
+    props: LoadExecutionKPIAggregationsProps
+  ) => Promise<IExecutionKPIResult>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
@@ -87,7 +93,7 @@ export interface ComponentOpts {
   ) => Promise<IExecutionLogResult>;
   loadGlobalExecutionKPIAggregations: (
     props: LoadGlobalExecutionKPIAggregationsProps
-  ) => Promise<any>;
+  ) => Promise<IExecutionKPIResult>;
   loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;

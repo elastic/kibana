@@ -134,6 +134,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         defaultMessage: 'Field name',
       }),
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldValue',
@@ -143,6 +144,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       }),
       render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnLogRate',
@@ -176,6 +178,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         />
       ),
       sortable: false,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
@@ -185,6 +188,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         defaultMessage: 'Doc count',
       }),
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnPValue',
@@ -212,6 +216,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       ),
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnImpact',
@@ -237,10 +242,12 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
+        if (!pValue) return NOT_AVAILABLE;
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
@@ -266,6 +273,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         },
       ],
       width: ACTIONS_COLUMN_WIDTH,
+      valign: 'top',
     },
   ];
 

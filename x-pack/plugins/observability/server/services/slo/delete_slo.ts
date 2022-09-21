@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import { SLO } from '../../types/models';
+
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
@@ -19,23 +19,21 @@ export class DeleteSLO {
   ) {}
 
   public async execute(sloId: string): Promise<void> {
-    const slo = await this.repository.findById(sloId);
-
     const sloTransformId = getSLOTransformId(sloId);
     await this.transformManager.stop(sloTransformId);
     await this.transformManager.uninstall(sloTransformId);
 
-    await this.deleteRollupData(slo);
+    await this.deleteRollupData(sloId);
     await this.repository.deleteById(sloId);
   }
 
-  private async deleteRollupData(slo: SLO): Promise<void> {
+  private async deleteRollupData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: slo.settings.destination_index ?? `${SLO_INDEX_TEMPLATE_NAME}*`,
+      index: `${SLO_INDEX_TEMPLATE_NAME}*`,
       wait_for_completion: false,
       query: {
         match: {
-          'slo.id': slo.id,
+          'slo.id': sloId,
         },
       },
     });
