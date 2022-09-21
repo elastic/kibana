@@ -15,6 +15,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { FileServiceStart } from '../file_service';
+import { Counters } from '../usage';
 
 export interface FilesRequestHandlerContext extends RequestHandlerContext {
   files: Promise<{
@@ -22,6 +23,7 @@ export interface FilesRequestHandlerContext extends RequestHandlerContext {
       asCurrentUser: () => FileServiceStart;
       asInternalUser: () => FileServiceStart;
       logger: Logger;
+      usageCounter?: (counter: Counters) => void;
     };
   }>;
 }
