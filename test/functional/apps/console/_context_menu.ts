@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
   const browser = getService('browser');
   const toasts = getService('toasts');
-  const testSubjects = getService('testSubjects');
 
   describe('console context menu', function testContextMenu() {
     before(async () => {
