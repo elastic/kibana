@@ -98,7 +98,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
               id: watchedValues.id,
               savedQueryId: watchedValues.savedQueryId,
               query: watchedValues.query,
-              ecs_mapping: watchedValues.ecs_mapping,
+              ecsMapping: watchedValues.ecs_mapping,
             },
           },
         });
@@ -139,12 +139,16 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
 
   useEffectOnce(() => {
     if (defaultParams && defaultParams.id) {
-      const { packId, ...restParams } = defaultParams;
+      const { packId, ecsMapping, ...restParams } = defaultParams;
       map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
         if (!isEmpty(value)) {
           setValue(key, value);
         }
       });
+
+      if (!isEmpty(ecsMapping)) {
+        setValue('ecs_mapping', ecsMapping);
+      }
 
       if (!isEmpty(packId)) {
         setValue('packId', [packId]);

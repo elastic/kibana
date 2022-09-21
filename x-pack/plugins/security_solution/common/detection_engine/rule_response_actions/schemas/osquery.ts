@@ -33,6 +33,19 @@ export const OsqueryParams = t.intersection([
     query: t.string,
     ecs_mapping: ecsMapping,
     queries: arrayQueries,
+    pack_id: t.string,
+    saved_query_id: t.string,
+  }),
+]);
+
+export const OsqueryParamsCamelCase = t.intersection([
+  t.type({
+    id: t.string,
+  }),
+  t.partial({
+    query: t.string,
+    ecsMapping,
+    queries: arrayQueries,
     packId: t.string,
     savedQueryId: t.string,
   }),

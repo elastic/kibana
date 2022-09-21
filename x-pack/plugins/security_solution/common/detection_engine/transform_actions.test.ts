@@ -50,12 +50,20 @@ describe('transform_actions', () => {
       action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
       params: {
         id: 'test',
+        ecs_mapping: {},
+        saved_query_id: undefined,
+        pack_id: undefined,
       },
     };
     const alertAction = transformRuleToAlertResponseAction(ruleAction);
     expect(alertAction).toEqual({
       actionTypeId: ruleAction.action_type_id,
-      params: ruleAction.params,
+      params: {
+        id: 'test',
+        ecsMapping: {},
+        savedQueryId: undefined,
+        packId: undefined,
+      },
     });
   });
 
@@ -64,12 +72,15 @@ describe('transform_actions', () => {
       actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
       params: {
         id: 'test',
+        ecsMapping: {},
+        savedQueryId: undefined,
+        packId: undefined,
       },
     };
     const ruleAction = transformAlertToRuleResponseAction(alertAction);
     expect(ruleAction).toEqual({
       action_type_id: alertAction.actionTypeId,
-      params: alertAction.params,
+      params: { id: 'test', ecs_mapping: {}, saved_query_id: undefined, pack_id: undefined },
     });
   });
 });
