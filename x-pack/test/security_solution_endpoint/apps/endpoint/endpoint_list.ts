@@ -96,7 +96,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('when there is data,', () => {
+    // Version specific: https://github.com/elastic/kibana/issues/141298
+    describe.skip('when there is data,', () => {
       before(async () => {
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();
