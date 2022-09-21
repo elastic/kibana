@@ -42,7 +42,7 @@ export async function runKibanaServer(options: {
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
 }) {
-  const { onEarlyExit, config, procs } = options;
+  const { config, procs } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
@@ -62,7 +62,7 @@ export async function runKibanaServer(options: {
       ...extendNodeOptions(installDir),
     },
     wait: runOptions.wait,
-    onEarlyExit,
+    onEarlyExit: options.onEarlyExit,
   };
 
   const prefixArgs = devMode
