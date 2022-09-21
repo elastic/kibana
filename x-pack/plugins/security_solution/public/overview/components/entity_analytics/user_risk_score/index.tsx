@@ -13,8 +13,7 @@ import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -177,7 +176,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
               <RiskScoreDonutChart
-                severityCount={severityCount}
+                severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
                 onClick={goToUserRiskTab}
                 href={userRiskTabUrl}
               />
