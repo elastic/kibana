@@ -14,7 +14,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { OverviewStatus } from '../../../common/runtime_types';
+import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -156,10 +156,10 @@ export async function getStatus(
     );
     page++;
     monitors.saved_objects.forEach((monitor) => {
-      if (monitor.attributes.enabled === false) {
-        disabledCount += monitor.attributes.locations.length;
+      if (monitor.attributes[ConfigKey.ENABLED] === false) {
+        disabledCount += monitor.attributes[ConfigKey.ENABLED].length;
       } else {
-        enabledIds.push(monitor.id);
+        enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
         maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
         maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
       }
