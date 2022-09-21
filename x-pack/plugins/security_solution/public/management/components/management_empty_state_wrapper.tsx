@@ -13,12 +13,20 @@ export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   min-height: calc(100vh - 140px);
 `;
 
-export const ManagementEmptyStateWrapper = memo(({ children }) => {
-  return (
-    <StyledEuiFlexGroup direction="column" alignItems="center">
-      <EuiPageTemplate template="centeredContent">{children}</EuiPageTemplate>
-    </StyledEuiFlexGroup>
-  );
-});
+export const ManagementEmptyStateWrapper = memo(
+  ({
+    children,
+    'data-test-subj': dataTestSubj,
+  }: {
+    children: React.ReactNode;
+    'data-test-subj'?: string;
+  }) => {
+    return (
+      <StyledEuiFlexGroup direction="column" alignItems="center" data-test-subj={dataTestSubj}>
+        <EuiPageTemplate template="centeredContent">{children}</EuiPageTemplate>
+      </StyledEuiFlexGroup>
+    );
+  }
+);
 
 ManagementEmptyStateWrapper.displayName = 'ManagementEmptyStateWrapper';

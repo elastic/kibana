@@ -49,7 +49,7 @@ export const HotPhase: FunctionComponent = () => {
   const [formData] = useFormData({
     watch: [isUsingDefaultRolloverPath, ...rolloverFieldPaths],
   });
-  const { isUsingRollover } = useConfiguration();
+  const { isUsingRollover, isUsingDownsampleInHotPhase } = useConfiguration();
   const isUsingDefaultRollover: boolean = get(formData, isUsingDefaultRolloverPath);
 
   const showEmptyRolloverFieldsError = useRolloverValueRequiredValidation();
@@ -176,8 +176,8 @@ export const HotPhase: FunctionComponent = () => {
           {<ForcemergeField phase={'hot'} />}
           <ShrinkField phase={'hot'} />
           {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-          <ReadonlyField phase={'hot'} />
           <DownsampleField phase="hot" />
+          {!isUsingDownsampleInHotPhase && <ReadonlyField phase={'hot'} />}
         </>
       )}
       <IndexPriorityField phase={'hot'} />
