@@ -63,6 +63,10 @@ describe('convertToDateHistogramColumn', () => {
     },
   ];
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test.each<
     [
       string,
