@@ -13,7 +13,6 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import {
@@ -92,7 +91,14 @@ export async function getActiveInstances({
       defaultMessage: 'Active instances',
     }),
     key: 'active_instances',
-    yUnit: 'number',
+    yUnit: 'integer',
+    description: i18n.translate(
+      'xpack.apm.agentMetrics.serverless.activeInstances.description',
+      {
+        defaultMessage:
+          'This chart shows the number of active instances of your serverless function over time. Multiple active instances may be a result of provisioned concurrency for your function or an increase in concurrent load that scales your function on-demand. An increase in active instance can be an indicator for an increase in concurrent invocations.',
+      }
+    ),
     series: [
       {
         title: i18n.translate(
@@ -100,8 +106,8 @@ export async function getActiveInstances({
           { defaultMessage: 'Active instances' }
         ),
         key: 'active_instances',
-        type: 'linemark',
-        color: getVizColorForIndex(0, theme),
+        type: 'bar',
+        color: theme.euiColorVis1,
         overallValue: aggregations?.activeInstances.value ?? 0,
         data:
           aggregations?.timeseriesData.buckets.map((timeseriesBucket) => ({

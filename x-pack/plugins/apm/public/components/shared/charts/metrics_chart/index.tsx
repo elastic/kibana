@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
@@ -60,9 +60,22 @@ interface Props {
 export function MetricsChart({ chart, fetchStatus }: Props) {
   return (
     <>
-      <EuiTitle size="xs">
-        <span>{chart.title}</span>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <span>{chart.title}</span>
+          </EuiTitle>
+        </EuiFlexItem>
+        {chart.description && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={chart.description}
+              position="top"
+              type="questionInCircle"
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <TimeseriesChart
         fetchStatus={fetchStatus}
         id={chart.key}

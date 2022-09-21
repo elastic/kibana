@@ -141,6 +141,7 @@ export interface UsageStats {
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:apmOperationsTab': boolean;
   'observability:apmLabsButton': boolean;
+  'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;

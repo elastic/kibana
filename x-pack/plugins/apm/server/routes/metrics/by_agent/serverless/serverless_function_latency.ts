@@ -32,6 +32,13 @@ const chartBase: ChartBase = {
   type: 'linemark',
   yUnit: 'time',
   series: {},
+  description: i18n.translate(
+    'xpack.apm.agentMetrics.serverless.avgDuration.description',
+    {
+      defaultMessage:
+        'Transaction duration is the time spent processing and responding to a request. If the request is queued it will not be contribute to the transaction duration but will contribute the overall billed duration',
+    }
+  ),
 };
 
 async function getServerlessLantecySeries({

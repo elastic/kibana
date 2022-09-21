@@ -51,9 +51,9 @@ export function getServerlessAgentMetricCharts({
         ...options,
         searchAggregatedTransactions,
       }),
+      getMemoryChartData(options),
       getColdStartDuration(options),
       getColdStartCount(options),
-      getMemoryChartData(options),
       getComputeUsage(options),
       getActiveInstances({ ...options, searchAggregatedTransactions }),
     ]);
