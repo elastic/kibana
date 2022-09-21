@@ -40,13 +40,7 @@ export const AlertsSummaryWidgetUI = ({
               )}
             </EuiFlexItem>
 
-            <EuiPanel
-              hasShadow={false}
-              style={{
-                paddingBlock: 10,
-                paddingInline: 0,
-              }}
-            >
+            <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
@@ -90,7 +84,7 @@ export const AlertsSummaryWidgetUI = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexGroup>
-            </EuiPanel>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
