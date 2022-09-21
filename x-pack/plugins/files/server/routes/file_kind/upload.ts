@@ -55,6 +55,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     ) {
       return res.badRequest({ body: { message: e.message } });
     } else if (e instanceof fileErrors.AbortedUploadError) {
+      fileService.usageCounter?.('UPLOAD_ERROR_ABORT');
       fileService.logger.error(e);
       return res.customError({ body: { message: e.message }, statusCode: 499 });
     }
