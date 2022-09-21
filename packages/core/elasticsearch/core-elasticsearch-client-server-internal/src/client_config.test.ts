@@ -9,7 +9,7 @@
 import { duration } from 'moment';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
-import { DEFAULT_HEADERS, getDefaultHeaders } from './headers';
+import { getDefaultHeaders } from './headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -76,7 +76,7 @@ describe('parseClientOptions', () => {
 
     it('`customHeaders` take precedence to default kibana headers', () => {
       const customHeader: Record<string, string> = {};
-      for (let header in defaultHeaders) {
+      for (const header in defaultHeaders) {
         customHeader[header] = 'foo';
       }
 
