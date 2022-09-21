@@ -176,7 +176,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         enabled: true,
         schema: 'metric',
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
+        timeShift: column.filter || column.reducedTimeRange ? undefined : column.timeShift,
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     } else {
@@ -186,7 +186,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         schema: 'metric',
         field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
+        timeShift: column.filter || column.reducedTimeRange ? undefined : column.timeShift,
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     }

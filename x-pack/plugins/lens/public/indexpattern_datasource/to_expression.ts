@@ -126,7 +126,7 @@ function getExpressionForLayer(
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${aggId}-metric` : aggId,
+          wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
           uiSettings,
