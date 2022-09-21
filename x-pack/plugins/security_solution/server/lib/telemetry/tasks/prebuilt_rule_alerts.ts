@@ -56,6 +56,9 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         if (telemetryEvents.length === 0) {
           tlog(logger, 'no prebuilt rule alerts retrieved');
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return 0;
         }
 

@@ -43,6 +43,9 @@ export function createTelemetryDiagnosticsTaskConfig() {
         const hits = response.hits?.hits || [];
         if (!Array.isArray(hits) || !hits.length) {
           tlog(logger, 'no diagnostic alerts retrieved');
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return 0;
         }
         tlog(logger, `Received ${hits.length} diagnostic alerts`);

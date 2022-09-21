@@ -54,6 +54,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         if (!prebuiltRules) {
           tlog(logger, 'no prebuilt rules found');
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return 0;
         }
 

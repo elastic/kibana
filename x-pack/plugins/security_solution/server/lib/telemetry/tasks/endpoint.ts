@@ -94,6 +94,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          */
         if (endpointData.endpointMetrics === undefined) {
           tlog(logger, `no endpoint metrics to report`);
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return 0;
         }
 
@@ -103,6 +106,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
         if (endpointMetricsResponse.aggregations === undefined) {
           tlog(logger, `no endpoint metrics to report`);
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return 0;
         }
 
@@ -136,6 +142,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
         if (agentsResponse === undefined) {
           tlog(logger, 'no fleet agent information available');
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return 0;
         }
 

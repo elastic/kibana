@@ -88,6 +88,9 @@ export function createTelemetryTimelineTaskConfig() {
           endpointAlerts.hits.hits?.length === undefined
         ) {
           tlog(logger, 'no endpoint alerts received. exiting telemetry task.');
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return counter;
         }
 
