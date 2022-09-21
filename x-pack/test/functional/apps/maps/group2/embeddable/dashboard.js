@@ -102,7 +102,12 @@ export default function ({ getPageObjects, getService }) {
       await filterBar.addFilterAndSelectDataView('logstash-*', 'machine.os', 'is', 'win 8');
       await PageObjects.maps.waitForLayersToLoad();
 
-      await filterBar.addFilterAndSelectDataView('meta_for_geo_shapes*', 'shape_name', 'is', 'alpha');
+      await filterBar.addFilterAndSelectDataView(
+        'meta_for_geo_shapes*',
+        'shape_name',
+        'is',
+        'alpha'
+      );
       await PageObjects.maps.waitForLayersToLoad();
 
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(

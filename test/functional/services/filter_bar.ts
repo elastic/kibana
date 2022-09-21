@@ -113,7 +113,12 @@ export class FilterBarService extends FtrService {
     return Promise.all(filters.map((filter) => filter.getVisibleText()));
   }
 
-  public async addFilterAndSelectDataView(dataViewTitle: string | null, field: string, operator: string, ...values: any): Promise<void> {
+  public async addFilterAndSelectDataView(
+    dataViewTitle: string | null,
+    field: string,
+    operator: string,
+    ...values: any
+  ): Promise<void> {
     await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       await this.testSubjects.click('addFilter');
       await this.testSubjects.existOrFail('addFilterPopover');
