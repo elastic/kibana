@@ -55,6 +55,7 @@ import {
 } from './legacy_uptime/lib/alert_types';
 import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
 import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
+import { setStartServices } from './kibana_services';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -228,6 +229,7 @@ export class UptimePlugin
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
+      setStartServices(start);
 
       registerExtension({
         package: 'synthetics',
