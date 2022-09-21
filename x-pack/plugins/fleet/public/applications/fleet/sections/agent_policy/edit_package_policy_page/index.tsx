@@ -63,6 +63,7 @@ import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
+import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
@@ -577,7 +578,12 @@ export const EditPackagePolicyForm = memo<{
     ]
   );
 
-  const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
+    ExperimentalFeaturesService.get();
+
+  const showDevtoolsRequest =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
+    isShowDevtoolRequestExperimentEnabled;
 
   const devtoolRequest = useMemo(
     () =>
