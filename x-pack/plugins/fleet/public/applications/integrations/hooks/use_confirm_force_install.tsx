@@ -8,7 +8,7 @@
 import type { DocLinksStart, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useStartServices } from '../../fleet/hooks';
 import { ConfirmForceInstallModal } from '../components';
@@ -44,6 +44,8 @@ const confirmForceInstall = ({
 export const useConfirmForceInstall = () => {
   const { overlays, docLinks } = useStartServices();
 
-  return (pkg: { name: string; version: string }) =>
-    confirmForceInstall({ pkg, overlays, docLinks });
+  return useCallback(
+    (pkg: { name: string; version: string }) => confirmForceInstall({ pkg, overlays, docLinks }),
+    [docLinks, overlays]
+  );
 };

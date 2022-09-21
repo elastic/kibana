@@ -492,6 +492,9 @@ export function QueryBarMenuPanels({
           onSelectLanguage={onSelectLanguage}
           nonKqlMode={nonKqlMode}
           isOnTopBarMenu={true}
+          deps={{
+            docLinks: kibana.services.docLinks,
+          }}
         />
       ),
     },

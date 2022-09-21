@@ -14,7 +14,7 @@ import {
   ALERT_SEVERITY,
 } from '@kbn/rule-data-utils';
 import { compact } from 'lodash';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';

@@ -120,8 +120,8 @@ const getCloudPolicyWithIntegrationConfig = (
     },
     malware: {
       ...policy.linux.malware,
-      // Malware protection mode based on cloud settings
-      mode: config.cloudConfig.preventions.malware ? ProtectionModes.prevent : ProtectionModes.off,
+      // Disabling Malware protection, since it's not supported on Cloud integrations due to performance reasons
+      mode: ProtectionModes.off,
     },
     behavior_protection: {
       ...policy.linux.behavior_protection,
