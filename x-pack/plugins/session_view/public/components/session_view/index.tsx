@@ -282,7 +282,6 @@ export const SessionView = ({
                   <FormattedMessage
                     id="xpack.sessionView.ttyToggleTip"
                     defaultMessage=" of TTY output"
-                    values={bytesOfOutput}
                   />
                 </>
               }
