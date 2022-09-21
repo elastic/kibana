@@ -48,6 +48,16 @@ export type Interval = t.TypeOf<typeof interval>;
 export const intervalOrUndefined = t.union([interval, t.undefined]);
 export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
 
+export const snapshot = t.boolean;
+export type Snapshot = t.TypeOf<typeof snapshot>;
+export const snapshotOrUndefined = t.union([snapshot, t.undefined]);
+export type SnapshotOrUndefined = t.TypeOf<typeof snapshotOrUndefined>;
+
+export const removed = t.boolean;
+export type Removed = t.TypeOf<typeof removed>;
+export const removedOrUndefined = t.union([removed, t.undefined]);
+export type RemovedOrUndefined = t.TypeOf<typeof removedOrUndefined>;
+
 export const savedQueryId = t.string;
 export type SavedQueryId = t.TypeOf<typeof savedQueryId>;
 export const savedQueryIdOrUndefined = t.union([savedQueryId, t.undefined]);
@@ -85,7 +95,7 @@ export const arrayQueries = t.array(
   t.type({
     id,
     query,
-    ecsMapping,
+    ecs_mapping: ecsMapping,
     version,
     platform,
   })
@@ -95,7 +105,8 @@ export const objectQueries = t.record(
   t.string,
   t.type({
     query,
-    ecsMapping: ecsMappingOrUndefined,
+    id,
+    ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,
     saved_query_id: savedQueryIdOrUndefined,

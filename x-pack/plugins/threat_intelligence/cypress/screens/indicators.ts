@@ -41,6 +41,12 @@ export const INDICATOR_TYPE_CELL = '[data-gridcell-column-id="threat.indicator.t
 
 export const FIELD_SELECTOR = '[data-test-subj="tiIndicatorFieldSelectorDropdown"]';
 
+export const FIELD_SELECTOR_INPUT = '[data-test-subj="comboBoxInput"]';
+
+export const FIELD_SELECTOR_TOGGLE_BUTTON = '[data-test-subj="comboBoxToggleListButton"]';
+
+export const FIELD_SELECTOR_LIST = '[data-test-subj="comboBoxOptionsList"]';
+
 export const FIELD_BROWSER = `[data-test-subj="show-field-browser"]`;
 
 export const FIELD_BROWSER_MODAL = `[data-test-subj="fields-browser-container"]`;
@@ -101,3 +107,9 @@ export const UNTITLED_TIMELINE_BUTTON = '[data-test-subj="flyoutOverlay"]';
 export const TIMELINE_DRAGGABLE_ITEM = '[data-test-subj="providerContainer"]';
 
 export const KQL_FILTER = '[id="popoverFor_filter0"]';
+
+export const INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON =
+  '[data-test-subj="tiIndicatorTableInvestigateInTimelineButtonIcon"]';
+
+export const INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON =
+  '[data-test-subj="tiIndicatorFlyoutInvestigateInTimelineButton"]';

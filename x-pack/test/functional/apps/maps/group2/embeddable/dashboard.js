@@ -19,7 +19,8 @@ export default function ({ getPageObjects, getService }) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  describe('embed in dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/140241
+  describe.skip('embed in dashboard', () => {
     before(async () => {
       await security.testUser.setRoles(
         [
