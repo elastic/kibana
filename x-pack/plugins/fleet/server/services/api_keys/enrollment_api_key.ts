@@ -13,7 +13,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
-import type { ESSearchResponse as SearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { FleetError } from '../../errors';

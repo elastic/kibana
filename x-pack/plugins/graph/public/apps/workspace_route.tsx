@@ -37,6 +37,7 @@ export const WorkspaceRoute = ({
     capabilities,
     storage,
     data,
+    unifiedSearch,
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
