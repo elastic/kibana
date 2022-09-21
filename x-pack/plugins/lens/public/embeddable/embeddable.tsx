@@ -563,10 +563,18 @@ export class Embeddable
 
     const executionContext = this.getExecutionContext();
 
-    trackUiCounterEvents(
-      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
-      executionContext
-    );
+    const events = [
+      ...datasourceEvents,
+      ...visualizationEvents,
+      ...getExecutionContextEvents(executionContext),
+    ];
+
+    const adHocDataViews = Object.values(this.savedVis?.state.adHocDataViews || {});
+    adHocDataViews.forEach(() => {
+      events.push('ad_hoc_data_view');
+    });
+
+    trackUiCounterEvents(events, executionContext);
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
