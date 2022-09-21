@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButtonIcon,
@@ -15,7 +14,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  getBreakpoint,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { X509Expiry } from '../../../../../common/runtime_types';
@@ -61,15 +60,17 @@ export const MonitorListComponent: ({
   setPageSize,
 }) => {
   const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
-  const { width } = useWindowSize();
+  const currentBreakpoint = useCurrentEuiBreakpoint();
   const [hideExtraColumns, setHideExtraColumns] = useState(false);
 
   useDebounce(
     () => {
-      setHideExtraColumns(['m', 'l'].includes(getBreakpoint(width) ?? ''));
+      if (currentBreakpoint) {
+        setHideExtraColumns(['m', 'l'].includes(currentBreakpoint));
+      }
     },
     50,
-    [width]
+    [currentBreakpoint]
   );
 
   const items = list.summaries ?? [];
