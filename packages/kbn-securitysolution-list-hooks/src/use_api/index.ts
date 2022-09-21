@@ -15,6 +15,8 @@ import type {
   ApiCallFindListsItemsMemoProps,
   ApiCallMemoProps,
   ApiListExportProps,
+  ApiCallGetExceptionFilterFromIdsMemoProps,
+  ApiCallGetExceptionFilterFromExceptionsMemoProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as Api from '@kbn/securitysolution-list-api';
 
@@ -44,6 +46,10 @@ export interface ExceptionsApi {
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
+  getExceptionFilterFromIds: (arg: ApiCallGetExceptionFilterFromIdsMemoProps) => Promise<void>;
+  getExceptionFilterFromExceptions: (
+    arg: ApiCallGetExceptionFilterFromExceptionsMemoProps
+  ) => Promise<void>;
   exportExceptionList: (arg: ApiListExportProps) => Promise<void>;
 }
 
@@ -220,6 +226,52 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               },
             });
           }
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async getExceptionFilterFromIds({
+        exceptionListIds,
+        chunkSize,
+        alias,
+        excludeExceptions,
+        onSuccess,
+        onError,
+      }: ApiCallGetExceptionFilterFromIdsMemoProps): Promise<void> {
+        const abortCtrl = new AbortController();
+        try {
+          const { filter } = await Api.getExceptionFilterFromExceptionListIds({
+            http,
+            exceptionListIds,
+            signal: abortCtrl.signal,
+            chunkSize,
+            alias,
+            excludeExceptions,
+          });
+          onSuccess(filter);
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async getExceptionFilterFromExceptions({
+        exceptions,
+        chunkSize,
+        alias,
+        excludeExceptions,
+        onSuccess,
+        onError,
+      }: ApiCallGetExceptionFilterFromExceptionsMemoProps): Promise<void> {
+        const abortCtrl = new AbortController();
+        try {
+          const { filter } = await Api.getExceptionFilterFromExceptions({
+            http,
+            exceptions,
+            signal: abortCtrl.signal,
+            chunkSize,
+            alias,
+            excludeExceptions,
+          });
+          onSuccess(filter);
         } catch (error) {
           onError(error);
         }

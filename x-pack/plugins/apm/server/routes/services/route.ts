@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import { enableServiceMetrics } from '@kbn/observability-plugin/common';
 import * as t from 'io-ts';
 import { uniq, mergeWith } from 'lodash';
 import {
@@ -19,6 +20,7 @@ import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
@@ -121,6 +123,7 @@ const servicesRoute = createApmServerRoute({
       probability,
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
+    const coreContext = await resources.context.core;
 
     const [setup, serviceGroup, randomSampler] = await Promise.all([
       setupRequest(resources),
@@ -129,18 +132,28 @@ const servicesRoute = createApmServerRoute({
         : Promise.resolve(null),
       getRandomSampler({ security, request, probability }),
     ]);
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-      start,
-      end,
-    });
+
+    const { apmEventClient, config } = setup;
+
+    const serviceMetricsEnabled =
+      await coreContext.uiSettings.client.get<boolean>(enableServiceMetrics);
+
+    const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
+      await getServiceInventorySearchSource({
+        serviceMetricsEnabled,
+        config,
+        apmEventClient,
+        kuery,
+        start,
+        end,
+      });
 
     return getServices({
       environment,
       kuery,
       setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       logger,
       start,
       end,
@@ -202,6 +215,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       request,
       plugins: { security },
     } = resources;
+    const coreContext = await resources.context.core;
 
     const { environment, kuery, offset, start, end, probability } =
       params.query;
@@ -213,12 +227,20 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      start,
-      end,
-      kuery,
-    });
+    const { apmEventClient, config } = setup;
+
+    const serviceMetricsEnabled =
+      await coreContext.uiSettings.client.get<boolean>(enableServiceMetrics);
+
+    const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
+      await getServiceInventorySearchSource({
+        serviceMetricsEnabled,
+        config,
+        apmEventClient,
+        kuery,
+        start,
+        end,
+      });
 
     if (!serviceNames.length) {
       throw Boom.badRequest(`serviceNames cannot be empty`);
@@ -229,6 +251,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       kuery,
       setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       offset,
       serviceNames,
       start,
