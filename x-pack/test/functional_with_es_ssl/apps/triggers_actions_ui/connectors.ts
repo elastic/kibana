@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { findIndex } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { generateUniqueKey, getTestActionData } from '../../lib/get_test_data';
@@ -16,11 +17,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/88796
   describe('Connectors', function () {
-    const objectRemover = new ObjectRemover(supertest);
-
     before(async () => {
       const { body: createdAction } = await supertest
         .post(`/api/actions/connector`)
@@ -67,12 +66,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionType: 'Slack',
         },
       ]);
+      const connector = await listConnectors(connectorName);
+      objectRemover.add(connector.id, 'action', 'actions');
     });
 
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
-      await createConnector(connectorName);
+      const createdAction = await createConnector(connectorName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -162,7 +164,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should reset connector when canceling an edit', async () => {
       const connectorName = generateUniqueKey();
-      await createConnector(connectorName);
+      const createdAction = await createConnector(connectorName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -187,8 +190,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
-
-      await createConnector(generateUniqueKey());
+      const createdAction = await createConnector(generateUniqueKey());
+      objectRemover.add(createdAction.id, 'action', 'actions');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -212,8 +215,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should bulk delete connectors', async () => {
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
-
-      await createConnector(generateUniqueKey());
+      const createdAction = await createConnector(generateUniqueKey());
+      objectRemover.add(createdAction.id, 'action', 'actions');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -267,18 +270,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   });
 
   async function createConnector(connectorName: string) {
-    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-    await testSubjects.click('.slack-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-
-    await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
-
-    await find.clickByCssSelector(
-      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-    );
-    await pageObjects.common.closeToast();
+    const { body: createdAction } = await supertest
+      .post(`/api/actions/connector`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: connectorName,
+        config: {},
+        secrets: {
+          webhookUrl: 'https://test.com',
+        },
+        connector_type_id: '.slack',
+      })
+      .expect(200);
+    await testSubjects.click('connectorsTab');
+    return createdAction;
   }
 
   async function createIndexConnector(connectorName: string, indexName: string) {
@@ -297,5 +302,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .expect(200);
     await testSubjects.click('connectorsTab');
     return createdAction;
+  }
+
+  async function listConnectors(name: string) {
+    const { body } = await supertest
+      .get(`/api/actions/connectors`)
+      .set('kbn-xsrf', 'foo')
+      .expect(200);
+    const i = findIndex(body, (c) => c.name === name);
+    return body[i];
   }
 };
