@@ -86,6 +86,7 @@ export default function TextBasedLanguagesTransitionModal({
                   onClick={() => closeModal(dismissModalChecked)}
                   color="warning"
                   iconType="merge"
+                  data-test-subj="unifiedSearch_switch_noSave"
                 >
                   {i18n.translate(
                     'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
@@ -101,6 +102,7 @@ export default function TextBasedLanguagesTransitionModal({
                   fill
                   color="success"
                   iconType="save"
+                  data-test-subj="unifiedSearch_switch_andSave"
                 >
                   {i18n.translate(
                     'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalSaveButton',
