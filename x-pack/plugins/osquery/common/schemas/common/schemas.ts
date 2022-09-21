@@ -95,7 +95,7 @@ export const arrayQueries = t.array(
   t.type({
     id,
     query,
-    ecs_mapping: ecsMapping,
+    ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,
   })

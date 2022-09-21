@@ -19,7 +19,7 @@ export const arrayQueries = t.array(
   t.type({
     id: t.string,
     query: t.string,
-    ecs_mapping: ecsMapping,
+    ecs_mapping: t.union([ecsMapping, t.undefined]),
     version: t.union([t.string, t.undefined]),
     platform: t.union([t.string, t.undefined]),
   })
@@ -30,10 +30,10 @@ export const OsqueryParams = t.intersection([
     id: t.string,
   }),
   t.partial({
-    query: t.union([t.string, t.undefined]),
+    query: t.string,
     ecs_mapping: ecsMapping,
     queries: arrayQueries,
-    packId: t.union([t.string, t.undefined]),
-    savedQueryId: t.union([t.string, t.undefined]),
+    packId: t.string,
+    savedQueryId: t.string,
   }),
 ]);
