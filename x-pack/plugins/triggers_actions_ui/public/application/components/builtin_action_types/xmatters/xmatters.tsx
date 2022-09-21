@@ -9,7 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, GenericValidationResult } from '../../../../types';
 import { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../types';
-import { AlertProvidedActionVariables } from '../../../lib';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 export function getActionType(): ActionTypeModel<
   XmattersConfig,

@@ -16,7 +16,7 @@ import {
   EventActionOptions,
 } from '../types';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
-import { AlertProvidedActionVariables } from '../../../lib';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 export function getActionType(): ActionTypeModel<
   PagerDutyConfig,
