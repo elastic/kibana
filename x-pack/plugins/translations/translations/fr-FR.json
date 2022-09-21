@@ -15162,7 +15162,7 @@
     "xpack.infra.logSourceConfiguration.missingDataViewsLabel": "Vue de données {indexPatternId} manquante",
     "xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage": "La vue de données doit contenir un champ {messageField}.",
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "Impossible de localiser ce {savedObjectType} : {savedObjectId}",
-    "xpack.infra.metricDetailPage.documentTitleError": "{previousTitle} | Oups",
+    "xpack.infra.metricDetailPage.documentTitleError": "Oups",
     "xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError": "Il est possible que cette règle signale {matchedGroups} moins que prévu, car la requête de filtre comporte une correspondance pour {groupCount, plural, one {ce champ} other {ces champs}}. Pour en savoir plus, veuillez consulter {filteringAndGroupingLink}.",
     "xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail": "Vous ne trouvez pas d'indicateur ? {documentationLink}.",
     "xpack.infra.metrics.alerting.anomaly.summaryHigher": "{differential} x plus élevé",

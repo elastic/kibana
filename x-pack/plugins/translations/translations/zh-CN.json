@@ -15165,7 +15165,7 @@
     "xpack.infra.logSourceConfiguration.missingDataViewsLabel": "缺少数据视图 {indexPatternId}",
     "xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage": "数据视图必须包含 {messageField} 字段。",
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "无法找到该{savedObjectType}：{savedObjectId}",
-    "xpack.infra.metricDetailPage.documentTitleError": "{previousTitle} | 啊哦",
+    "xpack.infra.metricDetailPage.documentTitleError": "啊哦",
     "xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError": "此规则可能针对低于预期的 {matchedGroups} 告警，因为筛选查询包含{groupCount, plural, one {此字段} other {这些字段}}的匹配项。有关更多信息，请参阅 {filteringAndGroupingLink}。",
     "xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail": "找不到指标？{documentationLink}。",
     "xpack.infra.metrics.alerting.anomaly.summaryHigher": "高 {differential} 倍",
