@@ -70,7 +70,6 @@ export class GainSightShipper implements IShipper {
       this.gainSightApi.aptrinsic('identify', userId);
       this.lastUserId = userId;
     }
-
   }
 
   /**
