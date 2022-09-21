@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
-export const AppWrapper: React.FunctionComponent<{
+export const AppWrapper: React.FunctionComponent<PropsWithChildren<{
   chromeVisible$: Observable<boolean>;
-}> = ({ chromeVisible$, children }) => {
+}>> = ({ chromeVisible$, children }) => {
   const visible = useObservable(chromeVisible$);
   return (
     <div className={classNames(APP_WRAPPER_CLASS, { 'kbnAppWrapper--hiddenChrome': !visible })}>

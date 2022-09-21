@@ -15,7 +15,7 @@
 
 import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
-import React, { ReactElement, ValidationMap } from 'react';
+import React, { PropsWithChildren, ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
 // Use fake component to extract `intl` property to use in tests.
@@ -155,7 +155,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ComponentType<PropsWithChildren<unknown>>,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();

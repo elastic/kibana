@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import { CoreThemeProvider } from './core_theme_provider';
@@ -20,7 +20,7 @@ interface CoreContextProviderProps {
 /**
  * utility component exposing all the context providers required by core when integrating with react
  **/
-export const CoreContextProvider: FC<CoreContextProviderProps> = ({
+export const CoreContextProvider: FC<PropsWithChildren<CoreContextProviderProps>> = ({
   i18n,
   theme,
   children,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
@@ -38,7 +38,7 @@ emotionCache.compat = true;
  * Wrapper around `EuiProvider` converting (and exposing) core's theme to EUI theme.
  * @internal Only meant to be used within core for internal usages of EUI/React
  */
-export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({
+export const CoreThemeProvider: FC<PropsWithChildren<CoreThemeProviderProps>> = ({
   theme$,
   children,
   globalStyles,

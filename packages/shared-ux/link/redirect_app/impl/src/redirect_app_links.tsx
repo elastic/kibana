@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { PropsWithChildren, FC } from 'react';
 import type {
   RedirectAppLinksProps,
   RedirectAppLinksKibanaDependencies,
@@ -24,7 +24,7 @@ const isKibanaContract = (services: any): services is RedirectAppLinksKibanaDepe
  * `RedirectAppLinksKibanaProvider` based on the services provided, creating a single component
  * with which consumers can wrap their components or solutions.
  */
-export const RedirectAppLinks: FC<RedirectAppLinksProps> = ({ children, className, ...props }) => {
+export const RedirectAppLinks: FC<PropsWithChildren<RedirectAppLinksProps>> = ({ children, className, ...props }) => {
   const container = (
     <RedirectAppLinksContainer className={className}>{children}</RedirectAppLinksContainer>
   );

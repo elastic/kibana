@@ -21,6 +21,7 @@ import {
   EuiButtonIcon,
   EuiFieldNumberProps,
   useEuiTheme,
+  EuiColorPickerProps
 } from '@elastic/eui';
 
 import {
@@ -126,8 +127,9 @@ export function ColorRangeItem({
     [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes, isLast]
   );
 
-  const onValueChange = useCallback(
+  const onValueChange = useCallback<(event: { target: { value: string }}) => void>(
     ({ target: { value: targetValue } }) => {
+      // @ts-expect-error localValue expects number, but updateValue expects string
       setLocalValue(targetValue);
       dispatch({
         type: 'updateValue',
@@ -137,7 +139,7 @@ export function ColorRangeItem({
     [dispatch, index, accessor, dataBounds, palettes]
   );
 
-  const onUpdateColor = useCallback(
+  const onUpdateColor: EuiColorPickerProps['onChange'] = useCallback(
     (color) => {
       dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes } });
     },
