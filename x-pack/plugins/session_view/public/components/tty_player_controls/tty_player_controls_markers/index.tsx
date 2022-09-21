@@ -20,9 +20,9 @@ type Props = {
 };
 
 type TTYPlayerLineMarker = {
-  line: number;
+  line: number[];
   type: 'output' | 'data_limited';
-  name: string;
+  name: string[];
 };
 
 export const TTYPlayerControlsMarkers = ({
@@ -40,15 +40,27 @@ export const TTYPlayerControlsMarkers = ({
     if (processStartMarkers.length < 1) {
       return [];
     }
-    return processStartMarkers.map(
-      ({ event, line }) =>
-        ({
-          type:
-            event.process?.io?.max_bytes_per_process_exceeded === true ? 'data_limited' : 'output',
-          line,
-          name: event.process?.name,
-        } as TTYPlayerLineMarker)
-    );
+    return processStartMarkers
+      .map(
+        ({ event, line }) =>
+          ({
+            type:
+              event.process?.io?.max_bytes_per_process_exceeded === true
+                ? 'data_limited'
+                : 'output',
+            line: [line, line],
+            name: [event.process?.name],
+          } as TTYPlayerLineMarker)
+      )
+      .reduce((prev, current, index) => {
+        if (prev.length > 0 && prev[prev.length - 1].line[1] + 1 === current.line[0]) {
+          prev[prev.length - 1].name.push(current.name[0]);
+          prev[prev.length - 1].line[1] = prev[prev.length - 1].line[1] + 1;
+        } else {
+          prev.push(current);
+        }
+        return prev;
+      }, [] as TTYPlayerLineMarker[]);
   }, [processStartMarkers]);
 
   const markersLength = markers.length;
@@ -58,9 +70,9 @@ export const TTYPlayerControlsMarkers = ({
       return undefined;
     }
     const currentSelected =
-      currentLine >= markers[markersLength - 1].line
+      currentLine >= markers[markersLength - 1].line[0]
         ? markersLength - 1
-        : markers.findIndex((marker) => marker.line > currentLine) - 1;
+        : markers.findIndex((marker) => marker.line[0] > currentLine) - 1;
 
     return markers[Math.max(0, currentSelected)].type;
   }, [currentLine, markers, markersLength]);
@@ -84,31 +96,31 @@ export const TTYPlayerControlsMarkers = ({
       <div css={styles.markersOverlay}>
         {markers.map(({ line, type, name }, idx) => {
           const selected =
-            currentLine >= line &&
-            (idx === markersLength - 1 || currentLine < markers[idx + 1].line);
+            currentLine >= line[0] &&
+            (idx === markersLength - 1 || currentLine < markers[idx + 1].line[0]);
 
           // markers positions are absolute, setting higher z-index on the selected one in case there
           // are severals next to each other
           const markerWrapperPositioning = {
-            left: `${(line / linesLength) * 100}%`,
+            left: `${(line[0] / linesLength) * 100}%`,
             zIndex: selected ? 3 : 2,
           };
 
-          const onMarkerClick = () => onSeekLine(line);
+          const onMarkerClick = () => onSeekLine(line[0]);
 
           return (
             <div key={idx} style={markerWrapperPositioning} css={styles.markerWrapper}>
-              <EuiToolTip title={name}>
+              <EuiToolTip title={name.join(', ')}>
                 <button
                   type="button"
-                  value={line}
+                  value={line[0]}
                   tabIndex={-1}
                   title={type}
                   css={styles.marker(type, selected)}
                   onClick={onMarkerClick}
-                  aria-label={name}
+                  aria-label={name.join(', ')}
                 >
-                  {name}
+                  {name.join(', ')}
                 </button>
               </EuiToolTip>
             </div>
