@@ -9,6 +9,7 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
+import { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { LegendSize } from '../../constants';
 
 export const XYCurveTypes = {
@@ -90,7 +91,33 @@ export interface XYReferenceLineLayerConfig {
   layerType: 'referenceLine';
 }
 
-export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+export interface EventAnnotationConfig {
+  id: string;
+  filter: KibanaQueryOutput;
+  timeField?: string;
+  extraFields?: string[];
+  label: string;
+  color?: string;
+  isHidden?: boolean;
+  icon?: string;
+  type: 'query';
+  key: {
+    type: 'point_in_time';
+  };
+}
+
+export interface XYAnnotationsLayerConfig {
+  layerId: string;
+  annotations: EventAnnotationConfig[];
+  ignoreGlobalFilters: boolean;
+  layerType: 'annotations';
+  indexPatternId: string;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationsLayerConfig;
 
 export interface AxesSettingsConfig {
   x: boolean;

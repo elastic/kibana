@@ -41,6 +41,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
           aria-controls="canvas-filter-group-0"
           aria-expanded={true}
           className="euiAccordion__button emotion-euiAccordion__button"
+          disabled={false}
           id="generated-id"
           onClick={[Function]}
           type="button"
@@ -696,6 +697,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
           aria-controls="canvas-filter-group-0"
           aria-expanded={true}
           className="euiAccordion__button emotion-euiAccordion__button"
+          disabled={false}
           id="generated-id"
           onClick={[Function]}
           type="button"

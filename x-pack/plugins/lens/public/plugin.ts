@@ -49,6 +49,7 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
@@ -138,6 +139,7 @@ export interface LensPluginStartDependencies {
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
   discover?: DiscoverStart;
+  docLinks: DocLinksStart;
 }
 
 export interface LensPublicSetup {
