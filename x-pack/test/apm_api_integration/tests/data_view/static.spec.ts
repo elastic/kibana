@@ -174,7 +174,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(res.status).to.be(200);
         expect(res.body).to.eql({
           created: false,
-          reason: 'Dataview already exists in current space',
+          reason: 'Dataview already exists in the active space',
         });
       });
     });

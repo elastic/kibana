@@ -7,6 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -40,8 +41,10 @@ export async function createStaticDataView({
     if (!config.autoCreateApmDataView) {
       return {
         created: false,
-        reason:
-          'Auto-creation of data views has been disabled via "autoCreateApmDataView" config option',
+        reason: i18n.translate('xpack.apm.dataView.autoCreateDisabled', {
+          defaultMessage:
+            'Auto-creation of data views has been disabled via "autoCreateApmDataView" config option',
+        }),
       };
     }
 
@@ -50,7 +53,12 @@ export async function createStaticDataView({
     const hasData = await hasHistoricalAgentData(setup);
 
     if (!hasData) {
-      return { created: false, reason: 'No APM data' };
+      return {
+        created: false,
+        reason: i18n.translate('xpack.apm.dataView.noApmData', {
+          defaultMessage: 'No APM data',
+        }),
+      };
     }
 
     const apmDataViewTitle = getApmDataViewTitle(setup.indices);
@@ -60,10 +68,12 @@ export async function createStaticDataView({
     });
 
     if (!shouldCreateOrUpdate) {
-      await addDataViewToAllSpaces(resources);
       return {
         created: false,
-        reason: 'Dataview already exists in current space',
+        reason: i18n.translate(
+          'xpack.apm.dataView.alreadyExistsInActiveSpace',
+          { defaultMessage: 'Dataview already exists in the active space' }
+        ),
       };
     }
 
@@ -82,8 +92,13 @@ export async function createStaticDataView({
         if (SavedObjectsErrorHelpers.isConflictError(e)) {
           return {
             created: false,
-            reason:
-              'Dataview already exists in another space but is not made available in this space',
+            reason: i18n.translate(
+              'xpack.apm.dataView.alreadyExistsInAnotherSpace',
+              {
+                defaultMessage:
+                  'Dataview already exists in another space but is not made available in this space',
+              }
+            ),
           };
         }
         throw e;
