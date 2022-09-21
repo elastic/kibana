@@ -10,23 +10,25 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import React, { useCallback } from 'react';
 
-import { useStartServices } from '../../fleet/hooks';
-import { ConfirmForceInstallModal } from '../components';
+// Direct imports are important here, importing all hooks breaks unit tests
+// and increases bundle size because this is imported on first page load
+import { useStartServices } from '../../../hooks/use_core';
+import { ConfirmOpenUnverifiedModal } from '../components/confirm_open_unverified_modal';
 
-const confirmForceInstall = ({
-  pkg,
+const confirmOpenUnverified = ({
+  pkgName,
   overlays,
   docLinks,
 }: {
-  pkg: { name: string; version: string };
+  pkgName: string;
   overlays: OverlayStart;
   docLinks: DocLinksStart;
 }): Promise<boolean> =>
   new Promise((resolve) => {
     const session = overlays.openModal(
       toMountPoint(
-        <ConfirmForceInstallModal
-          pkg={pkg}
+        <ConfirmOpenUnverifiedModal
+          pkgName={pkgName}
           onConfirm={() => {
             session.close();
             resolve(true);
@@ -41,11 +43,11 @@ const confirmForceInstall = ({
     );
   });
 
-export const useConfirmForceInstall = () => {
+export const useConfirmOpenUnverified = () => {
   const { overlays, docLinks } = useStartServices();
 
   return useCallback(
-    (pkg: { name: string; version: string }) => confirmForceInstall({ pkg, overlays, docLinks }),
+    (pkgName: string) => confirmOpenUnverified({ pkgName, overlays, docLinks }),
     [docLinks, overlays]
   );
 };

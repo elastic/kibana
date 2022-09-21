@@ -203,6 +203,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
+        ignoreUnverified: force,
       });
       newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
     } else {

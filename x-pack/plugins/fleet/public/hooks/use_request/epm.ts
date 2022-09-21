@@ -7,7 +7,9 @@
 
 import useAsync from 'react-use/lib/useAsync';
 
-import { epmRouteService } from '../../services';
+import { useEffect, useState } from 'react';
+
+import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
   GetCategoriesResponse,
@@ -23,6 +25,8 @@ import type {
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
+
+import { useConfirmOpenUnverified } from '../../applications/integrations/hooks/use_confirm_open_unverified';
 
 import { useRequest, sendRequest } from './use_request';
 
@@ -67,11 +71,34 @@ export const useGetLimitedPackages = () => {
   });
 };
 
-export const useGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
-  return useRequest<GetInfoResponse>({
+export const useGetPackageInfoByKey = (
+  pkgName: string,
+  pkgVersion?: string,
+  ignoreUnverified: boolean = false
+) => {
+  const confirmOpenUnverified = useConfirmOpenUnverified();
+  const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(ignoreUnverified);
+  const res = useRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
+    query: ignoreUnverifiedQueryParam ? { ignoreUnverified: ignoreUnverifiedQueryParam } : {},
   });
+
+  useEffect(() => {
+    const confirm = async () => {
+      const forceInstall = await confirmOpenUnverified(pkgName);
+
+      if (forceInstall) {
+        setIgnoreUnverifiedQueryParam(true);
+      }
+    };
+
+    if (res.error && isVerificationError(res.error)) {
+      confirm();
+    }
+  }, [res.error, pkgName, pkgVersion, confirmOpenUnverified]);
+
+  return res;
 };
 
 export const useGetPackageStats = (pkgName: string) => {
@@ -81,10 +108,15 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
-export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
+export const sendGetPackageInfoByKey = (
+  pkgName: string,
+  pkgVersion?: string,
+  ignoreUnverified?: boolean
+) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
+    query: ignoreUnverified ? { ignoreUnverified } : {},
   });
 };
 

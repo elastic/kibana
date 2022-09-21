@@ -35,6 +35,9 @@ export const GetInfoRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    ignoreUnverified: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const GetInfoRequestSchemaDeprecated = {

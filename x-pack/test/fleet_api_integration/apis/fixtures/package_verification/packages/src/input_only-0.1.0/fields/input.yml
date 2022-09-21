@@ -1,0 +1,4 @@
+- name: input.name
+  type: constant_keyword
+  description: Sample field to be added.
+  value: logs
