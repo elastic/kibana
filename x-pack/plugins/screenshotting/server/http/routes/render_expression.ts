@@ -9,6 +9,10 @@ import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { firstValueFrom } from 'rxjs';
 import { ScreenshottingCoreSetup } from '../../plugin';
+import {PdfScreenshotResult, PngScreenshotResult} from '../../formats';
+
+const isPdfCaptureResult = (result: PngScreenshotResult | PdfScreenshotResult): result is PdfScreenshotResult =>
+  Buffer.isBuffer((result as PdfScreenshotResult));
 
 interface Params {
   core: ScreenshottingCoreSetup;
@@ -46,7 +50,17 @@ export const registerRenderExpression = ({ core, router }: Params) => {
           format,
           request,
         })
-      );
+      ) as PdfScreenshotResult | PngScreenshotResult;
+
+      if (isPdfCaptureResult(capture)) {
+        return response.ok({
+          body: capture.data,
+          headers: {
+            'content-type': 'application/pdf',
+            'content-disposition': 'attachment; filename="capture.pdf"',
+          },
+        });
+      }
 
       const result = capture.results[0];
       if (!result) throw new Error('No screenshot capture result.');
