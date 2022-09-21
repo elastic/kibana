@@ -37,8 +37,6 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { groupByKey } from '../group_by_key';
-import { extractAggId } from '../../to_expression';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -209,104 +207,54 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         ...aggConfigParams,
       }).toAst();
     },
-    optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
-      let aggs = [..._aggs];
-      const esAggsIdMap = { ..._esAggsIdMap };
+    getGroupByKey: (agg) => {
+      let groupKey;
+
+      const {
+        functions: [fnBuilder],
+      } = agg;
 
       const metricType = typeToFn[type];
 
-      const metricExpressionsByArgs = groupByKey<ExpressionAstExpressionBuilder>(
-        aggs,
-        (expressionBuilder) => {
-          let groupKey;
+      if (fnBuilder.name === metricType) {
+        groupKey = `${fnBuilder.getArgument('field')?.[0]}-${
+          fnBuilder.getArgument('timeShift')?.[0]
+        }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`; // boolean coersion since "undefined" is effectively the same as "false"
+      }
 
-          const {
-            functions: [fnBuilder],
-          } = expressionBuilder;
+      if (fnBuilder.name === 'aggFilteredMetric') {
+        const metricFnBuilder = (
+          fnBuilder.getArgument('customMetric')?.[0] as ExpressionAstExpressionBuilder
+        ).functions[0];
 
-          if (fnBuilder.name === metricType) {
-            groupKey = `${fnBuilder.getArgument('field')?.[0]}-${
-              fnBuilder.getArgument('timeShift')?.[0]
-            }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`; // boolean cooersion since "undefined" is effectively the same as "false"
+        if (metricFnBuilder?.name === metricType) {
+          const aggFilterFnBuilder = (
+            fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
+          ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
+
+          groupKey = `${aggFilterFnBuilder.getArgument('timeWindow')?.[0]}-${
+            metricFnBuilder.getArgument('field')?.[0]
+          }-${fnBuilder.getArgument('timeShift')?.[0]}-${Boolean(
+            metricFnBuilder.getArgument('emptyAsNull')?.[0]
+          )}`;
+
+          const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
+            | ExpressionAstExpressionBuilder
+            | undefined;
+
+          if (filterExpression) {
+            const filterFnBuilder = filterExpression.functions[0] as
+              | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
+              | undefined;
+
+            groupKey = `${groupKey}-${filterFnBuilder?.name}-${
+              filterFnBuilder?.getArgument('q')?.[0]
+            }`;
           }
-
-          if (fnBuilder.name === 'aggFilteredMetric') {
-            const metricFnBuilder = (
-              fnBuilder.getArgument('customMetric')?.[0] as ExpressionAstExpressionBuilder
-            ).functions[0];
-
-            if (metricFnBuilder?.name === metricType) {
-              const aggFilterFnBuilder = (
-                fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
-              ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
-
-              groupKey = `${aggFilterFnBuilder.getArgument('timeWindow')?.[0]}-${
-                metricFnBuilder.getArgument('field')?.[0]
-              }-${fnBuilder.getArgument('timeShift')?.[0]}-${Boolean(
-                metricFnBuilder.getArgument('emptyAsNull')?.[0]
-              )}`;
-
-              const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
-                | ExpressionAstExpressionBuilder
-                | undefined;
-
-              if (filterExpression) {
-                const filterFnBuilder = filterExpression.functions[0] as
-                  | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
-                  | undefined;
-
-                groupKey =
-                  `${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}-` + groupKey;
-              }
-            }
-          }
-
-          return groupKey;
         }
-      );
+      }
 
-      const termsFuncs = aggs
-        .map((agg) => agg.functions[0])
-        .filter((func) => func.name === 'aggTerms') as Array<
-        ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
-      >;
-
-      // collapse them into a single expression builder
-      Object.values(metricExpressionsByArgs).forEach((expressionBuilders) => {
-        if (expressionBuilders.length <= 1) {
-          // don't need to optimize if there aren't more than one
-          return;
-        }
-
-        const [firstExpressionBuilder, ...restExpressionBuilders] = expressionBuilders;
-
-        // throw away all but the first expression builder
-        aggs = aggs.filter((aggBuilder) => !restExpressionBuilders.includes(aggBuilder));
-
-        const firstEsAggsId = aggExpressionToEsAggsIdMap.get(firstExpressionBuilder);
-        if (firstEsAggsId === undefined) {
-          throw new Error('Could not find current column ID for expression builder');
-        }
-
-        restExpressionBuilders.forEach((expressionBuilder) => {
-          const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
-          if (currentEsAggsId === undefined) {
-            throw new Error('Could not find current column ID for expression builder');
-          }
-
-          esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
-
-          delete esAggsIdMap[currentEsAggsId];
-
-          termsFuncs.forEach((func) => {
-            if (func.getArgument('orderBy')?.[0] === extractAggId(currentEsAggsId)) {
-              func.replaceArgument('orderBy', [extractAggId(firstEsAggsId)]);
-            }
-          });
-        });
-      });
-
-      return { aggs, esAggsIdMap };
+      return groupKey;
     },
 
     getErrorMessage: (layer, columnId, indexPattern) =>
