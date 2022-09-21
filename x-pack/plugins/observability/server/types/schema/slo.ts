@@ -55,26 +55,30 @@ export const indicatorSchema = t.union([
   apmTransactionErrorRateIndicatorSchema,
 ]);
 
-const sloOptionalSettingsSchema = t.partial({
-  settings: t.partial({
-    destination_index: t.string,
+const createSLOBodySchema = t.type({
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: rollingTimeWindowSchema,
+  budgeting_method: t.literal('occurrences'),
+  objective: t.type({
+    target: t.number,
   }),
 });
 
-const createSLOBodySchema = t.intersection([
-  t.type({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    time_window: rollingTimeWindowSchema,
-    budgeting_method: t.literal('occurrences'),
-    objective: t.type({
-      target: t.number,
-    }),
-  }),
-  sloOptionalSettingsSchema,
-]);
+const createSLOResponseSchema = t.type({
+  id: t.string,
+});
+
+export type CreateSLOParams = t.TypeOf<typeof createSLOBodySchema>;
+export type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 
 export const createSLOParamsSchema = t.type({
   body: createSLOBodySchema,
+});
+
+export const deleteSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
 });

@@ -7,6 +7,7 @@ cd "$KIBANA_DIR"
 yarn storybook --site apm
 yarn storybook --site canvas
 yarn storybook --site ci_composite
+yarn storybook --site content_management
 yarn storybook --site custom_integrations
 yarn storybook --site dashboard
 yarn storybook --site dashboard_enhanced

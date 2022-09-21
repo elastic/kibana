@@ -88,7 +88,7 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
     <DiscoverFieldDetails
       field={field}
       dataView={dataView}
-      details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2, columns: [] }}
+      details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2 }}
       onAddFilter={() => {}}
     />
   ));

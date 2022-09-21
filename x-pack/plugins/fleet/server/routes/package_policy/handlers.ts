@@ -36,12 +36,12 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
-import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -62,7 +62,7 @@ export const getPackagePoliciesHandler: RequestHandler<
       },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -90,7 +90,7 @@ export const bulkGetPackagePoliciesHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -117,7 +117,7 @@ export const getOnePackagePolicyHandler: RequestHandler<
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return notFoundResponse();
     } else {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -162,7 +162,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
       },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -203,6 +203,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
+        ignoreUnverified: force,
       });
       newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
     } else {
@@ -220,11 +221,16 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
-      user,
-      force,
-      spaceId,
-    });
+    const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
+      soClient,
+      esClient,
+      newData,
+      {
+        user,
+        force,
+        spaceId,
+      }
+    );
 
     const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
@@ -245,7 +251,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -335,7 +341,7 @@ export const updatePackagePolicyHandler: RequestHandler<
       body: { item: updatedPackagePolicy },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -371,7 +377,7 @@ export const deletePackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -418,7 +424,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
       body: { id: request.params.packagePolicyId },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -451,7 +457,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -483,6 +489,6 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
