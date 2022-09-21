@@ -16,14 +16,13 @@ export const useStyles = () => {
 
     const ratio: CSSObject = {
       fontSize: size.m,
+      color: colors.ghost,
     };
 
     const separator: CSSObject = {
       background: colors.lightShade,
       height: size.xl,
       width: border.width.thin,
-      marginLeft: size.xs,
-      marginRight: size.xs,
     };
 
     return {
