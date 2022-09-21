@@ -75,7 +75,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       transform: `translateY(${show ? 0 : '100%'})`,
       transition: 'transform .2s',
       width: '100%',
-      height: 'calc(100% - 120px)',
+      height: 'calc(100% - 112px)',
       overflow: 'auto',
       backgroundColor: colors.ink,
     };
