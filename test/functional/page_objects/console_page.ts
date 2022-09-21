@@ -316,9 +316,11 @@ export class ConsolePageObject extends FtrService {
 
     await this.retry.try(async () => {
       const firstInnerHtml = await line.getAttribute('innerHTML');
+      // The line number is not updated immediately after the click, so we need to wait for it.
       this.common.sleep(500);
       line = await editor.findByCssSelector('.ace_active-line');
       const secondInnerHtml = await line.getAttribute('innerHTML');
+      // The line number will change as the user types, but we want to wait until it's stable.
       return firstInnerHtml === secondInnerHtml;
     });
 

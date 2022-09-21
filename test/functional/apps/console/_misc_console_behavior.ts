@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
+      // Ensure that the text area can be interacted with
       await PageObjects.console.collapseHelp();
     });
 
@@ -115,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           tabCount++;
         });
 
+        // Retry until the documentation is loaded
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
           expect(url).to.contain('search-search.html');
