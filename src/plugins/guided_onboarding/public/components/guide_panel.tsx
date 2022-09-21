@@ -29,7 +29,7 @@ import {
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { guidesConfig } from '../constants';
+import { guidesConfig } from '../constants/guides_config';
 import type { GuideConfig, StepStatus, GuidedOnboardingState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 

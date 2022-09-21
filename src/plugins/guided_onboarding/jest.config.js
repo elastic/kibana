@@ -10,9 +10,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/guided_onboarding'],
+  testRunner: 'jasmine2',
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/guided_onboarding',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/guided_onboarding/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/plugins/guided_onboarding/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

@@ -14,7 +14,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
 
 import { apiService } from '../services/api';
-import { guidesConfig } from '../constants';
+import { guidesConfig } from '../constants/guides_config';
 import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
