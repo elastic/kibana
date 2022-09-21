@@ -118,19 +118,7 @@ export const UploadFile = <Kind extends string = string>({
 
   return (
     <context.Provider value={uploadState}>
-      <Component
-        ref={ref}
-        meta={meta}
-        onCancel={uploadState.abort}
-        onChange={(fs) => {
-          uploadState.setFiles(fs);
-          if (immediate) uploadState.upload(meta);
-        }}
-        onUpload={uploadState.upload}
-        onClear={uploadState.clear}
-        immediate={immediate}
-        allowClear={allowClear}
-      />
+      <Component ref={ref} meta={meta} immediate={immediate} allowClear={allowClear} />
     </context.Provider>
   );
 };
