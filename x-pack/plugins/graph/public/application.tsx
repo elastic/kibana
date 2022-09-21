@@ -26,7 +26,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 
@@ -69,7 +68,6 @@ export interface GraphDependencies {
   savedObjects: SavedObjectsStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   uiSettings: IUiSettingsClient;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
 }

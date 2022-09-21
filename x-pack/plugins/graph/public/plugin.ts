@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -41,7 +40,6 @@ export interface GraphPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjects: SavedObjectsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
 }
@@ -112,7 +110,6 @@ export class GraphPlugin
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
-          unifiedSearch: pluginsStart.unifiedSearch,
         });
       },
     });

@@ -43,7 +43,6 @@ export const WorkspaceRoute = ({
     setHeaderActionMenu,
     spaces,
     indexPatterns: getIndexPatternProvider,
-    unifiedSearch,
   },
 }: WorkspaceRouteProps) => {
   /**
