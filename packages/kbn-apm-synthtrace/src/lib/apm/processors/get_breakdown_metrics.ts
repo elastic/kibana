@@ -105,15 +105,15 @@ export function getBreakdownMetrics(events: ApmFields[]) {
         lastMeasurement = timestamp;
       }
 
+      const instance = pickBy(event, instancePicker);
+
       const key = {
         '@timestamp': event['@timestamp']! - (event['@timestamp']! % (30 * 1000)),
         'transaction.type': transaction['transaction.type'],
         'transaction.name': transaction['transaction.name'],
         ...pickBy(event, metricsetPicker),
-        ...pickBy(event, instancePicker),
+        ...instance,
       };
-
-      const instance = pickBy(event, instancePicker);
 
       const metricsetId = objectHash(key);
 
@@ -122,7 +122,6 @@ export function getBreakdownMetrics(events: ApmFields[]) {
       if (!metricset) {
         metricset = {
           ...key,
-          ...instance,
           'processor.event': 'metric',
           'processor.name': 'metric',
           'metricset.name': `span_breakdown`,
