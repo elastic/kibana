@@ -90,7 +90,7 @@ export async function queryMonitorStatus(
                       },
                     ],
                     _source: {
-                      includes: ['@timestamp', 'monitor.status'],
+                      includes: ['@timestamp', 'summary'],
                     },
                   },
                 },
@@ -107,10 +107,11 @@ export async function queryMonitorStatus(
   for await (const response of promises) {
     response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
       location.buckets.forEach(({ status }: { key: string; status: any }) => {
-        const statusValue = status.hits.hits[0]._source.monitor.status;
-        if (statusValue === 'up') {
+        const downCount = status.hits.hits[0]._source.summary.down;
+        const upCount = status.hits.hits[0]._source.summary.up;
+        if (upCount > 0) {
           up += 1;
-        } else if (statusValue === 'down') {
+        } else if (downCount > 0) {
           down += 1;
         }
       });
@@ -133,7 +134,7 @@ export async function getStatus(
   let monitors;
   const enabledIds: Array<string | undefined> = [];
   let disabledCount = 0;
-  let page = 500;
+  let page = 1;
   let maxPeriod = 0;
   let maxLocations = 1;
   /**
@@ -145,8 +146,8 @@ export async function getStatus(
   do {
     monitors = await getMonitors(
       {
-        perPage: 1,
-        page,
+        perPage: 500,
+        page: 1,
         sortField: 'name.keyword',
         sortOrder: 'asc',
       },
