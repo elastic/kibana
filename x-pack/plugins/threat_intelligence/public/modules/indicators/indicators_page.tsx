@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { FiltersContextProvider } from './containers';
 import { IndicatorBarChartWrapper } from './components/barchart';
-import { IndicatorsTable } from './components/indicators_table/indicators_table';
+import { IndicatorsTable } from './components/table';
 import { useIndicators } from './hooks/use_indicators';
 import { DefaultPageLayout } from '../../components/layout';
 import { useFilters } from '../query_bar/hooks/use_filters';
@@ -16,7 +16,7 @@ import { FiltersGlobal } from '../../containers/filters_global';
 import QueryBar from '../query_bar/components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
 import { FieldTypesProvider } from '../../containers/field_types_provider';
-import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
+import { useColumnSettings } from './components/table/hooks/use_column_settings';
 
 export const IndicatorsPage: VFC = () => {
   const { browserFields, indexPattern } = useSourcererDataView();

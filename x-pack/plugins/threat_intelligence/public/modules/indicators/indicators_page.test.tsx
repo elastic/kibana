@@ -13,7 +13,7 @@ import { useAggregatedIndicators } from './components/barchart/hooks/use_aggrega
 import { useFilters } from '../query_bar/hooks/use_filters';
 import moment from 'moment';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { TABLE_TEST_ID } from './components/indicators_table';
+import { TABLE_TEST_ID } from './components/table';
 
 jest.mock('../query_bar/hooks/use_filters');
 jest.mock('./hooks/use_indicators');

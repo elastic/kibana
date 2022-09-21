@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './indicators_table';
+export * from './cell_actions';
+export * from './cell_renderer';
+export * from './actions_row_cell';

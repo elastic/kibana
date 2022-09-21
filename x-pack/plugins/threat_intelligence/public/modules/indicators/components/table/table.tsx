@@ -17,12 +17,12 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { CellActions } from './cell_actions';
+import { CellActions } from './components/cell_actions';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { cellRendererFactory } from './cell_renderer';
+import { cellRendererFactory } from './components/cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
-import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
+import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts/context';
 import { IndicatorFlyout } from '../flyout';
 import { Pagination } from '../../hooks/use_indicators';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
