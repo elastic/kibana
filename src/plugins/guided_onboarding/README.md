@@ -1,6 +1,6 @@
 # Guided Onboarding
 
-This plugin contains the code for the Guided Onboarding project. The guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages. 
+This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages. 
 
 The guided onboarding plugin includes a client-side code for the UI and the server side code for the internal API. The server-side code is not intended for external use. 
 
