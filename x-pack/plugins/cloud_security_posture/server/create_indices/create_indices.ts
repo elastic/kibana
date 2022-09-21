@@ -49,7 +49,6 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
         settings: {
           default_pipeline: scorePipelineIngestConfig.id,
           lifecycle: {
-            // This is the default lifecycle name, it is named on the data-stream type (e.g, logs/ metrics)
             name: '',
           },
         },
