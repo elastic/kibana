@@ -54,7 +54,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/stack_monitoring'),
       require.resolve('./apps/watcher'),
       require.resolve('./apps/rollup_jobs'),
-      require.resolve('./apps/observability')
+      require.resolve('./apps/observability'),
     ],
 
     pageObjects,
