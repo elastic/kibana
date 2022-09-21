@@ -177,8 +177,8 @@ export function getRuleType(
       logger,
       esClient,
       query: queryParams,
-      selector: {
-        termLimit: alertLimit,
+      condition: {
+        resultLimit: alertLimit,
         conditionScript: getComparatorScript(
           params.thresholdComparator,
           params.threshold,

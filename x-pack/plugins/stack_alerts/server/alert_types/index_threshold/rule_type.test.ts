@@ -431,9 +431,9 @@ describe('ruleType', () => {
           timeWindowSize: 5,
           timeWindowUnit: 'm',
         },
-        selector: {
+        condition: {
           conditionScript: `${TIME_SERIES_BUCKET_SELECTOR_FIELD} < 1L`,
-          termLimit: 1000,
+          resultLimit: 1000,
         },
       })
     );

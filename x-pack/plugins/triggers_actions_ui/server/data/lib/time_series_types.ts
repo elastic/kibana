@@ -45,10 +45,12 @@ export const TimeSeriesQuerySchema = schema.object(
   }
 );
 
-export interface TimeSeriesSelectorParams {
-  termLimit: number;
-  conditionScript: string;
-}
+export const TimeSeriesConditionSchema = schema.object({
+  resultLimit: schema.number(),
+  conditionScript: schema.string({ minLength: 1 }),
+});
+
+export type TimeSeriesCondition = TypeOf<typeof TimeSeriesConditionSchema>;
 
 // using direct type not allowed, circular reference, so body is typed to unknown
 function validateBody(anyParams: unknown): string | undefined {

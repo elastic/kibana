@@ -103,8 +103,8 @@ describe('timeSeriesQuery', () => {
   it('should create correct query when aggType=count and termField is undefined (count over all) and selector params are defined', async () => {
     await timeSeriesQuery({
       ...params,
-      selector: {
-        termLimit: 1000,
+      condition: {
+        resultLimit: 1000,
         conditionScript: `params.compareValue > 1`,
       },
     });
@@ -221,8 +221,8 @@ describe('timeSeriesQuery', () => {
         termField: 'the-term',
         termSize: 10,
       },
-      selector: {
-        termLimit: 1000,
+      condition: {
+        resultLimit: 1000,
         conditionScript: `params.compareValue > 1`,
       },
     });
@@ -364,8 +364,8 @@ describe('timeSeriesQuery', () => {
         aggType: 'avg',
         aggField: 'avg-field',
       },
-      selector: {
-        termLimit: 1000,
+      condition: {
+        resultLimit: 1000,
         conditionScript: `params.compareValue > 1`,
       },
     });
@@ -513,8 +513,8 @@ describe('timeSeriesQuery', () => {
         termField: 'the-field',
         termSize: 20,
       },
-      selector: {
-        termLimit: 1000,
+      condition: {
+        resultLimit: 1000,
         conditionScript: `params.compareValue > 1`,
       },
     });
@@ -598,7 +598,7 @@ describe('timeSeriesQuery', () => {
     );
   });
 
-  it('should correctly apply the termLimit if specified', async () => {
+  it('should correctly apply the resultLimit if specified', async () => {
     await timeSeriesQuery({
       ...params,
       query: {
@@ -606,8 +606,8 @@ describe('timeSeriesQuery', () => {
         termField: 'the-term',
         termSize: 100,
       },
-      selector: {
-        termLimit: 5,
+      condition: {
+        resultLimit: 5,
         conditionScript: `params.compareValue > 1`,
       },
     });
@@ -944,7 +944,7 @@ describe('getResultFromEs', () => {
         isCountAgg: true,
         isGroupAgg: true,
         isConditionInQuery: true,
-        termLimit: 5,
+        resultLimit: 5,
         esResult: {
           took: 1,
           timed_out: false,
@@ -1408,7 +1408,7 @@ describe('getResultFromEs', () => {
         isCountAgg: false,
         isGroupAgg: true,
         isConditionInQuery: true,
-        termLimit: 5,
+        resultLimit: 5,
         esResult: {
           took: 1,
           timed_out: false,

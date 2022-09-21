@@ -16,7 +16,7 @@ import {
   TimeSeriesQuery,
   TimeSeriesResult,
   TimeSeriesResultRow,
-  TimeSeriesSelectorParams,
+  TimeSeriesCondition,
 } from './time_series_types';
 export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
@@ -27,13 +27,13 @@ export interface TimeSeriesQueryParameters {
   logger: Logger;
   esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
-  selector?: TimeSeriesSelectorParams;
+  condition?: TimeSeriesCondition;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, esClient, query: queryParams, selector: selectorParams } = params;
+  const { logger, esClient, query: queryParams, condition: conditionParams } = params;
   const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
     queryParams;
 
@@ -71,20 +71,20 @@ export async function timeSeriesQuery(
 
   const isCountAgg = aggType === 'count';
   const isGroupAgg = !!termField;
-  const includeConditionInQuery = !!selectorParams;
+  const includeConditionInQuery = !!conditionParams;
 
-  // Cap the maximum number of terms returned to the termLimit if defined
-  // Use termLimit + 1 because we're using the bucket selector aggregation
+  // Cap the maximum number of terms returned to the resultLimit if defined
+  // Use resultLimit + 1 because we're using the bucket selector aggregation
   // to apply the threshold condition to the ES query. We don't seem to be
   // able to get the true cardinality from the bucket selector (i.e., get
   // the number of buckets that matched the selector condition without actually
-  // retrieving the bucket data). By using termLimit + 1, we can count the number
-  // of buckets returned and if the value is greater than termLimit, we know that
+  // retrieving the bucket data). By using resultLimit + 1, we can count the number
+  // of buckets returned and if the value is greater than resultLimit, we know that
   // there is additional alert data that we're not returning.
   let terms = termSize || DEFAULT_GROUPS;
   terms = includeConditionInQuery
-    ? terms > selectorParams.termLimit
-      ? selectorParams.termLimit + 1
+    ? terms > conditionParams.resultLimit
+      ? conditionParams.resultLimit + 1
       : terms
     : terms;
 
@@ -123,7 +123,7 @@ export async function timeSeriesQuery(
             buckets_path: {
               [TIME_SERIES_BUCKET_SELECTOR_PATH_NAME]: '_count',
             },
-            script: selectorParams.conditionScript,
+            script: conditionParams.conditionScript,
           },
         },
       };
@@ -158,7 +158,7 @@ export async function timeSeriesQuery(
           buckets_path: {
             [TIME_SERIES_BUCKET_SELECTOR_PATH_NAME]: 'sortValueAgg',
           },
-          script: selectorParams.conditionScript,
+          script: conditionParams.conditionScript,
         },
       };
     }
@@ -200,7 +200,7 @@ export async function timeSeriesQuery(
     isGroupAgg,
     isConditionInQuery: includeConditionInQuery,
     esResult,
-    termLimit: selectorParams?.termLimit,
+    resultLimit: conditionParams?.resultLimit,
   });
 }
 
@@ -209,7 +209,7 @@ interface GetResultFromEsParams {
   isGroupAgg: boolean;
   isConditionInQuery: boolean;
   esResult: estypes.SearchResponse<unknown>;
-  termLimit?: number;
+  resultLimit?: number;
 }
 
 export function getResultFromEs({
@@ -217,7 +217,7 @@ export function getResultFromEs({
   isGroupAgg,
   isConditionInQuery,
   esResult,
-  termLimit,
+  resultLimit,
 }: GetResultFromEsParams): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 
@@ -238,11 +238,11 @@ export function getResultFromEs({
   const numGroupsTotal = aggregations.groupAggCount?.count ?? 0;
   const result: TimeSeriesResult = {
     results: [],
-    truncated: isConditionInQuery && termLimit ? numGroupsTotal > termLimit : false,
+    truncated: isConditionInQuery && resultLimit ? numGroupsTotal > resultLimit : false,
   };
 
   for (const groupBucket of groupBuckets) {
-    if (termLimit && result.results.length === termLimit) break;
+    if (resultLimit && result.results.length === resultLimit) break;
 
     const groupName: string = `${groupBucket?.key}`;
     const dateBuckets = groupBucket?.dateAgg?.buckets || [];
