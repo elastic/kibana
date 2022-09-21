@@ -147,7 +147,7 @@ function getExpressionForLayer(
           indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${aggId}-metric` : aggId,
+          wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
           uiSettings,
