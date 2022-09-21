@@ -9,10 +9,11 @@ import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { firstValueFrom } from 'rxjs';
 import { ScreenshottingCoreSetup } from '../../plugin';
-import {PdfScreenshotResult, PngScreenshotResult} from '../../formats';
+import { PdfScreenshotResult, PngScreenshotResult } from '../../formats';
 
-const isPdfCaptureResult = (result: PngScreenshotResult | PdfScreenshotResult): result is PdfScreenshotResult =>
-  Buffer.isBuffer((result as PdfScreenshotResult));
+const isPdfCaptureResult = (
+  result: PngScreenshotResult | PdfScreenshotResult
+): result is PdfScreenshotResult => Buffer.isBuffer(result as PdfScreenshotResult);
 
 interface Params {
   core: ScreenshottingCoreSetup;
@@ -28,9 +29,12 @@ export const registerRenderExpression = ({ core, router }: Params) => {
           expression: schema.string(),
           input: schema.maybe(schema.any()),
           params: schema.maybe(
-            schema.object({}, {
-              unknowns: 'allow',
-            })
+            schema.object(
+              {},
+              {
+                unknowns: 'allow',
+              }
+            )
           ),
           format: schema.string({
             defaultValue: 'png',
@@ -48,7 +52,7 @@ export const registerRenderExpression = ({ core, router }: Params) => {
       const { expression, input, params } = request.body;
       const format = request.body.format as 'png' | 'pdf';
       const [, , screenshotting] = await core.getStartServices();
-      const capture = await firstValueFrom(
+      const capture = (await firstValueFrom(
         screenshotting.getScreenshots({
           expression,
           input,
@@ -56,7 +60,7 @@ export const registerRenderExpression = ({ core, router }: Params) => {
           request,
           params,
         })
-      ) as PdfScreenshotResult | PngScreenshotResult;
+      )) as PdfScreenshotResult | PngScreenshotResult;
 
       if (isPdfCaptureResult(capture)) {
         return response.ok({
