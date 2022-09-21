@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+export * from '../../risk_score/translations';
 
 export const FEED_NAME_PREPOSITION = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.feedNamePreposition',
@@ -113,14 +114,6 @@ export const ORIGINAL_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
     defaultMessage: 'Original {riskEntity} risk classification',
     values: {
       riskEntity: riskEntity === RiskScoreEntity.host ? 'host' : 'user',
-    },
-  });
-
-export const RISK_SCORE_TITLE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.riskScoreTitle', {
-    defaultMessage: '{riskEntity} Risk Score',
-    values: {
-      riskEntity: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
     },
   });
 

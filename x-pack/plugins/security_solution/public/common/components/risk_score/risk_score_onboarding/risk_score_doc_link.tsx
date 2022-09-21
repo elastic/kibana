@@ -14,7 +14,7 @@ import {
   RISKY_USERS_EXTERNAL_DOC_LINK,
 } from '../../../../../common/constants';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { LEARN_MORE } from '../../../../overview/components/entity_analytics/host_risk_score/translations';
+import { LEARN_MORE } from '../../../../overview/components/entity_analytics/risk_score/translations';
 
 const RiskScoreDocLinkComponent = ({
   external,

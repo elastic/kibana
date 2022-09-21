@@ -11,9 +11,10 @@ import { useRiskScoreFeatureStatus } from '../feature_status';
 import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
-  getHostRiskIndex,
   RiskQueries,
   getUserRiskIndex,
+  RiskScoreEntity,
+  getHostRiskIndex,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
@@ -51,8 +52,7 @@ export interface UseRiskScoreParams {
 }
 
 interface UseRiskScore<T> extends UseRiskScoreParams {
-  defaultIndex: string | undefined;
-  factoryQueryType: T;
+  riskEntity: T;
 }
 
 export const initialResult: Omit<
@@ -63,10 +63,10 @@ export const initialResult: Omit<
   data: undefined,
 };
 
-export const useHostRiskScore = (params?: UseRiskScoreParams) => {
+export const useHostRiskScore = (
+  params?: UseRiskScoreParams
+): [boolean, RiskScoreState<RiskQueries.hostsRiskScore>] => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
 
   return useRiskScore({
     timerange,
@@ -75,16 +75,14 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    defaultIndex,
-    factoryQueryType: RiskQueries.hostsRiskScore,
+    riskEntity: RiskScoreEntity.host,
   });
 };
 
-export const useUserRiskScore = (params?: UseRiskScoreParams) => {
+export const useUserRiskScore = (
+  params?: UseRiskScoreParams
+): [boolean, RiskScoreState<RiskQueries.usersRiskScore>] => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
-
   return useRiskScore({
     timerange,
     onlyLatest,
@@ -92,20 +90,31 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    defaultIndex,
-    factoryQueryType: RiskQueries.usersRiskScore,
+    riskEntity: RiskScoreEntity.user,
   });
 };
 
-const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
+const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
   filterQuery,
+  onlyLatest,
   sort,
   skip = false,
   pagination,
-  defaultIndex,
-  factoryQueryType,
-}: UseRiskScore<T>): [boolean, RiskScoreState<T>] => {
+  riskEntity,
+}: UseRiskScore<T>): [
+  boolean,
+  RiskScoreState<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>
+] => {
+  const spaceId = useSpaceId();
+  const defaultIndex = spaceId
+    ? riskEntity === RiskScoreEntity.host
+      ? getHostRiskIndex(spaceId, onlyLatest)
+      : getUserRiskIndex(spaceId, onlyLatest)
+    : undefined;
+  const factoryQueryType =
+    riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
+
   const { querySize, cursorStart } = pagination || {};
 
   const { addError } = useAppToasts();
@@ -116,7 +125,7 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     isLicenseValid,
     isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
-  } = useRiskScoreFeatureStatus(factoryQueryType, defaultIndex);
+  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
 
   const {
     loading,
