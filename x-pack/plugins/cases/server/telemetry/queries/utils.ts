@@ -167,7 +167,7 @@ export const getSolutionValues = (
     total: findValueInBuckets(aggregationsBuckets.totalsByOwner, owner),
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
     assignees: {
-      totalUnique: aggregations?.[owner].totalUniqueAssignees.value ?? 0,
+      total: aggregations?.[owner].totalAssignees.value ?? 0,
       totalWithZero: aggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
       totalWithAtLeastOne: aggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
     },
@@ -211,7 +211,11 @@ export const getOnlyConnectorsFilter = () =>
 export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
   cases: {
     all: {
-      totalUniqueAssignees: 0,
+      assignees: {
+        total: 0,
+        totalWithZero: 0,
+        totalWithAtLeastOne: 0,
+      },
       total: 0,
       monthly: 0,
       weekly: 0,
@@ -239,21 +243,21 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
       monthly: 0,
       weekly: 0,
       daily: 0,
-      assignees: { totalUnique: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
     },
     obs: {
       total: 0,
       monthly: 0,
       weekly: 0,
       daily: 0,
-      assignees: { totalUnique: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
     },
     main: {
       total: 0,
       monthly: 0,
       weekly: 0,
       daily: 0,
-      assignees: { totalUnique: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
     },
   },
   userActions: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },

@@ -32,8 +32,7 @@ describe('utils', () => {
       ],
     };
 
-    const solutionValues = {
-      counts,
+    const assignees = {
       assigneeFilters: {
         buckets: {
           atLeastOne: {
@@ -44,15 +43,18 @@ describe('utils', () => {
           },
         },
       },
-      totalUniqueAssignees: { value: 5 },
+      totalAssignees: { value: 5 },
+    };
+
+    const solutionValues = {
+      counts,
+      ...assignees,
     };
 
     const aggsResult: CaseAggregationResult = {
       users: { value: 1 },
       tags: { value: 2 },
-      totalUniqueAssignees: {
-        value: 5,
-      },
+      ...assignees,
       counts,
       securitySolution: { ...solutionValues },
       observability: { ...solutionValues },
@@ -99,7 +101,7 @@ describe('utils', () => {
       expect(getSolutionValues(aggsResult, 'securitySolution')).toMatchInlineSnapshot(`
         Object {
           "assignees": Object {
-            "totalUnique": 5,
+            "total": 5,
             "totalWithAtLeastOne": 0,
             "totalWithZero": 100,
           },
@@ -110,31 +112,31 @@ describe('utils', () => {
         }
       `);
       expect(getSolutionValues(aggsResult, 'cases')).toMatchInlineSnapshot(`
-      Object {
-        "assignees": Object {
-          "totalUnique": 5,
-          "totalWithAtLeastOne": 0,
-          "totalWithZero": 100,
-        },
-        "daily": 3,
-        "monthly": 1,
-        "total": 1,
-        "weekly": 2,
-      }
-    `);
+        Object {
+          "assignees": Object {
+            "total": 5,
+            "totalWithAtLeastOne": 0,
+            "totalWithZero": 100,
+          },
+          "daily": 3,
+          "monthly": 1,
+          "total": 1,
+          "weekly": 2,
+        }
+      `);
       expect(getSolutionValues(aggsResult, 'observability')).toMatchInlineSnapshot(`
-    Object {
-      "assignees": Object {
-        "totalUnique": 5,
-        "totalWithAtLeastOne": 0,
-        "totalWithZero": 100,
-      },
-      "daily": 3,
-      "monthly": 1,
-      "total": 1,
-      "weekly": 2,
-    }
-  `);
+        Object {
+          "assignees": Object {
+            "total": 5,
+            "totalWithAtLeastOne": 0,
+            "totalWithZero": 100,
+          },
+          "daily": 3,
+          "monthly": 1,
+          "total": 1,
+          "weekly": 2,
+        }
+      `);
     });
   });
 

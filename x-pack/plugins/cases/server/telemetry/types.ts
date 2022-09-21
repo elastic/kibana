@@ -20,6 +20,8 @@ export interface Cardinality {
   value: number;
 }
 
+export type ValueCount = Cardinality;
+
 export interface MaxBucketOnCaseAggregation {
   references: { cases: { max: { value: number } } };
 }
@@ -48,34 +50,39 @@ export interface Count {
   daily: number;
 }
 
+export interface AssigneesFilters {
+  buckets: {
+    zero: { doc_count: number };
+    atLeastOne: { doc_count: number };
+  };
+}
+
 export type CaseAggregationResult = Record<
   typeof OWNERS[number],
   {
     counts: Buckets;
-    totalUniqueAssignees: Cardinality;
-    assigneeFilters: {
-      buckets: {
-        zero: { doc_count: number };
-        atLeastOne: { doc_count: number };
-      };
-    };
+    totalAssignees: ValueCount;
+    assigneeFilters: AssigneesFilters;
   }
 > & {
+  assigneeFilters: AssigneesFilters;
   counts: Buckets;
   syncAlerts: Buckets;
   status: Buckets;
   users: Cardinality;
   tags: Cardinality;
-  totalUniqueAssignees: Cardinality;
+  totalAssignees: ValueCount;
   totalsByOwner: Buckets;
 };
 
+export interface Assignees {
+  total: number;
+  totalWithZero: number;
+  totalWithAtLeastOne: number;
+}
+
 export interface SolutionTelemetry extends Count {
-  assignees: {
-    totalUnique: number;
-    totalWithZero: number;
-    totalWithAtLeastOne: number;
-  };
+  assignees: Assignees;
 }
 
 export interface Status {
@@ -93,6 +100,7 @@ export interface LatestDates {
 export interface CasesTelemetry {
   cases: {
     all: Count & {
+      assignees: Assignees;
       status: Status;
       syncAlertsOn: number;
       syncAlertsOff: number;
@@ -101,7 +109,6 @@ export interface CasesTelemetry {
       totalTags: number;
       totalWithAlerts: number;
       totalWithConnectors: number;
-      totalUniqueAssignees: number;
       latestDates: LatestDates;
     };
     sec: SolutionTelemetry;
@@ -139,3 +146,5 @@ export type CountSchema = MakeSchemaFrom<Count>;
 export type StatusSchema = MakeSchemaFrom<Status>;
 export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;
+export type AssigneesSchema = MakeSchemaFrom<Assignees>;
+export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;

@@ -51,8 +51,7 @@ describe('getCasesTelemetryData', () => {
         ],
       };
 
-      const solutionValues = {
-        counts,
+      const assignees = {
         assigneeFilters: {
           buckets: {
             atLeastOne: {
@@ -63,15 +62,18 @@ describe('getCasesTelemetryData', () => {
             },
           },
         },
-        totalUniqueAssignees: { value: 5 },
+        totalAssignees: { value: 5 },
+      };
+
+      const solutionValues = {
+        counts,
+        ...assignees,
       };
 
       const caseAggsResult: CaseAggregationResult = {
         users: { value: 1 },
         tags: { value: 2 },
-        totalUniqueAssignees: {
-          value: 5,
-        },
+        ...assignees,
         counts,
         securitySolution: { ...solutionValues },
         observability: { ...solutionValues },
@@ -160,11 +162,15 @@ describe('getCasesTelemetryData', () => {
           totalUsers: 1,
           totalWithAlerts: 3,
           totalWithConnectors: 4,
-          totalUniqueAssignees: 5,
+          assignees: {
+            total: 5,
+            totalWithZero: 100,
+            totalWithAtLeastOne: 0,
+          },
         },
         main: {
           assignees: {
-            totalUnique: 5,
+            total: 5,
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
@@ -175,7 +181,7 @@ describe('getCasesTelemetryData', () => {
         },
         obs: {
           assignees: {
-            totalUnique: 5,
+            total: 5,
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
@@ -186,7 +192,7 @@ describe('getCasesTelemetryData', () => {
         },
         sec: {
           assignees: {
-            totalUnique: 5,
+            total: 5,
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
@@ -206,6 +212,30 @@ describe('getCasesTelemetryData', () => {
       expect(savedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "aggs": Object {
+            "assigneeFilters": Object {
+              "filters": Object {
+                "filters": Object {
+                  "atLeastOne": Object {
+                    "bool": Object {
+                      "filter": Object {
+                        "exists": Object {
+                          "field": "cases.attributes.assignees.uid",
+                        },
+                      },
+                    },
+                  },
+                  "zero": Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "cases.attributes.assignees.uid",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
             "cases": Object {
               "aggs": Object {
                 "assigneeFilters": Object {
@@ -252,8 +282,8 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
-                "totalUniqueAssignees": Object {
-                  "cardinality": Object {
+                "totalAssignees": Object {
+                  "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
                   },
                 },
@@ -330,8 +360,8 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
-                "totalUniqueAssignees": Object {
-                  "cardinality": Object {
+                "totalAssignees": Object {
+                  "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
                   },
                 },
@@ -388,8 +418,8 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
-                "totalUniqueAssignees": Object {
-                  "cardinality": Object {
+                "totalAssignees": Object {
+                  "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
                   },
                 },
@@ -415,8 +445,8 @@ describe('getCasesTelemetryData', () => {
                 "field": "cases.attributes.tags",
               },
             },
-            "totalUniqueAssignees": Object {
-              "cardinality": Object {
+            "totalAssignees": Object {
+              "value_count": Object {
                 "field": "cases.attributes.assignees.uid",
               },
             },

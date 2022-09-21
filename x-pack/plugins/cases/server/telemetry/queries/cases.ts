@@ -72,35 +72,7 @@ export const getCasesTelemetryData = async ({
         },
         aggs: {
           ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
-          totalUniqueAssignees: {
-            cardinality: {
-              field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
-            },
-          },
-          assigneeFilters: {
-            filters: {
-              filters: {
-                zero: {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
-                      },
-                    },
-                  },
-                },
-                atLeastOne: {
-                  bool: {
-                    filter: {
-                      exists: {
-                        field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
+          ...getAssigneesAggregations(),
         },
       },
     }),
@@ -114,11 +86,7 @@ export const getCasesTelemetryData = async ({
     aggs: {
       ...byOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
-      totalUniqueAssignees: {
-        cardinality: {
-          field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
-        },
-      },
+      ...getAssigneesAggregations(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
@@ -215,10 +183,47 @@ export const getCasesTelemetryData = async ({
       totalWithConnectors:
         totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
       latestDates,
-      totalUniqueAssignees: casesRes.aggregations?.totalUniqueAssignees?.value ?? 0,
+      assignees: {
+        total: casesRes.aggregations?.totalAssignees.value ?? 0,
+        totalWithZero: casesRes.aggregations?.assigneeFilters.buckets.zero.doc_count ?? 0,
+        totalWithAtLeastOne:
+          casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
+      },
     },
     sec: getSolutionValues(casesRes.aggregations, 'securitySolution'),
     obs: getSolutionValues(casesRes.aggregations, 'observability'),
     main: getSolutionValues(casesRes.aggregations, 'cases'),
   };
 };
+
+const getAssigneesAggregations = () => ({
+  totalAssignees: {
+    value_count: {
+      field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
+    },
+  },
+  assigneeFilters: {
+    filters: {
+      filters: {
+        zero: {
+          bool: {
+            must_not: {
+              exists: {
+                field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
+              },
+            },
+          },
+        },
+        atLeastOne: {
+          bool: {
+            filter: {
+              exists: {
+                field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import {
+  GENERAL_CASES_OWNER,
+  OBSERVABILITY_OWNER,
+  SECURITY_SOLUTION_OWNER,
+} from '@kbn/cases-plugin/common';
+
 /**
  * This should only be used within telemetry
  */
-export const OWNERS = ['observability', 'securitySolution', 'cases'] as const;
+export const OWNERS = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER, GENERAL_CASES_OWNER] as const;
