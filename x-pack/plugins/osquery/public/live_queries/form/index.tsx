@@ -9,17 +9,12 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { isEmpty, map, find, pickBy } from 'lodash';
+import { isEmpty, find, pickBy } from 'lodash';
 
 import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import type {
-  EcsMappingFormField,
-  EcsMappingSerialized,
-} from '../../packs/queries/ecs_mapping_editor_field';
-import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
+import type { ECSMapping } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
@@ -37,7 +32,7 @@ export interface LiveQueryFormFields {
   query?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping: EcsMappingFormField[];
+  ecs_mapping: ECSMapping;
   packId: string[];
 }
 
@@ -45,7 +40,7 @@ interface DefaultLiveQueryFormFields {
   query?: string;
   agentSelection?: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping?: EcsMappingSerialized;
+  ecs_mapping?: ECSMapping;
   packId?: string;
 }
 
@@ -78,11 +73,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions]
   );
 
-  const hooksForm = useHookForm<LiveQueryFormFields>({
-    defaultValues: {
-      ecs_mapping: [defaultEcsFormData],
-    },
-  });
+  const hooksForm = useHookForm<LiveQueryFormFields>();
   const {
     handleSubmit,
     watch,
@@ -91,7 +82,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     clearErrors,
     getFieldState,
     register,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = hooksForm;
 
   const canRunSingleQuery = useMemo(
@@ -131,7 +122,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   }, [register]);
 
   const queryStatus = useMemo(() => {
-    if (isError || queryState.invalid) return 'danger';
+    if (isError || queryState.error) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
 
@@ -144,28 +135,21 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const onSubmit = useCallback(
-    async (values: LiveQueryFormFields) => {
+    (values: LiveQueryFormFields) => {
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
           saved_query_id: values.savedQueryId,
           query: values.query,
           pack_id: values?.packId?.length ? values?.packId[0] : undefined,
-          ...(values.ecs_mapping
-            ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) }
-            : {}),
+          ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
-      );
-      if (isEmpty(errors)) {
-        try {
-          // @ts-expect-error update types
-          await mutateAsync(serializedData);
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
+      ) as unknown as LiveQueryFormFields;
+
+      mutateAsync(serializedData);
     },
-    [errors, mutateAsync]
+    [mutateAsync]
   );
 
   const serializedData: SavedQuerySOFormData = useMemo(
@@ -287,18 +271,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       if (defaultValue?.query && canRunSingleQuery) {
         setValue('query', defaultValue.query);
         setValue('savedQueryId', defaultValue.savedQueryId);
-        setValue(
-          'ecs_mapping',
-          !isEmpty(defaultValue.ecs_mapping)
-            ? map(defaultValue.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0],
-                },
-              }))
-            : [defaultEcsFormData]
-        );
+        setValue('ecs_mapping', defaultValue.ecs_mapping ?? {});
 
         return;
       }

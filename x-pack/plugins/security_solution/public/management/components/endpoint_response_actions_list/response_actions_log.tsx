@@ -116,9 +116,9 @@ export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
     showHostNames?: boolean;
     isFlyout?: boolean;
-    setIsDataCallback?: (isData: boolean) => void;
+    setIsDataInResponse?: (isData: boolean) => void;
   }
->(({ agentIds, showHostNames = false, isFlyout = true, setIsDataCallback }) => {
+>(({ agentIds, showHostNames = false, isFlyout = true, setIsDataInResponse }) => {
   const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
     useUrlPagination();
   const {
@@ -127,6 +127,7 @@ export const ResponseActionsLog = memo<
     statuses: statusesFromUrl,
     startDate: startDateFromUrl,
     endDate: endDateFromUrl,
+    users: usersFromUrl,
   } = useActionHistoryUrlParams();
 
   const getTestId = useTestIdGenerator('response-actions-list');
@@ -134,6 +135,7 @@ export const ResponseActionsLog = memo<
     [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
 
+  // Used to decide if display global loader or not (only the fist time tha page loads)
   const [isFirstAttempt, setIsFirstAttempt] = useState(true);
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
@@ -157,9 +159,10 @@ export const ResponseActionsLog = memo<
         statuses: statusesFromUrl?.length
           ? (statusesFromUrl as ResponseActionStatus[])
           : prevState.statuses,
+        userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
       }));
     }
-  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams]);
+  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams, usersFromUrl]);
 
   // date range picker state and handlers
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
@@ -179,6 +182,26 @@ export const ResponseActionsLog = memo<
     },
     { retry: false }
   );
+
+  // Hide page header when there is no actions index calling the setIsDataInResponse with false value.
+  // Otherwise, it shows the page header calling the setIsDataInResponse with true value and it also keeps track
+  // if the API request was done for the first time.
+  useEffect(() => {
+    if (
+      !isFetching &&
+      error?.body?.statusCode === 404 &&
+      error?.body?.message === 'index_not_found_exception'
+    ) {
+      if (setIsDataInResponse) {
+        setIsDataInResponse(false);
+      }
+    } else if (!isFetching && actionList) {
+      setIsFirstAttempt(false);
+      if (setIsDataInResponse) {
+        setIsDataInResponse(true);
+      }
+    }
+  }, [actionList, error, isFetching, setIsDataInResponse]);
 
   // handle auto refresh data
   const onRefresh = useCallback(() => {
@@ -216,6 +239,15 @@ export const ResponseActionsLog = memo<
     },
     [setQueryParams]
   );
+
+  // handle on change users filter
+  const onChangeUsersFilter = useCallback(
+    (selectedUserIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, userIds: selectedUserIds }));
+    },
+    [setQueryParams]
+  );
+
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
@@ -586,27 +618,10 @@ export const ResponseActionsLog = memo<
     [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
   );
 
-  useEffect(() => {
-    if (
-      !isFetching &&
-      error?.body?.statusCode === 404 &&
-      error?.body?.message === 'index_not_found_exception'
-    ) {
-      if (setIsDataCallback) {
-        setIsDataCallback(false);
-      }
-    } else if (!isFetching && actionList) {
-      setIsFirstAttempt(false);
-      if (setIsDataCallback) {
-        setIsDataCallback(true);
-      }
-    }
-  }, [actionList, error, isFetching, setIsDataCallback]);
-
   if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
-    return <ActionsLogEmptyState />;
+    return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
   } else if (isFetching && isFirstAttempt) {
-    return <ManagementPageLoader />;
+    return <ManagementPageLoader data-test-subj={getTestId('global-loader')} />;
   }
   return (
     <>
@@ -618,6 +633,7 @@ export const ResponseActionsLog = memo<
         onChangeHostsFilter={onChangeHostsFilter}
         onChangeCommandsFilter={onChangeCommandsFilter}
         onChangeStatusesFilter={onChangeStatusesFilter}
+        onChangeUsersFilter={onChangeUsersFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
