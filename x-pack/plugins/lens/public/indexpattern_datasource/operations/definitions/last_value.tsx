@@ -39,8 +39,6 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { groupByKey } from '../group_by_key';
-import { extractAggId } from '../../to_expression';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -266,89 +264,42 @@ export const lastValueOperation: OperationDefinition<
     ).toAst();
   },
 
-  optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
-    let aggs = [..._aggs];
-    const esAggsIdMap = { ..._esAggsIdMap };
+  getGroupByKey: (agg) => {
+    const {
+      functions: [fnBuilder],
+    } = agg;
 
-    const aggsByArgs = groupByKey<ExpressionAstExpressionBuilder>(aggs, (expressionBuilder) => {
-      const {
-        functions: [fnBuilder],
-      } = expressionBuilder;
-      if (fnBuilder.name === 'aggFilteredMetric') {
-        const metricFnBuilder = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
-          | ExpressionAstFunctionBuilder<AnyExpressionFunctionDefinition>
+    if (fnBuilder.name === 'aggFilteredMetric') {
+      const metricFnBuilder = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
+        | ExpressionAstFunctionBuilder<AnyExpressionFunctionDefinition>
+        | undefined;
+
+      if (metricFnBuilder && ['aggTopHit', 'aggTopMetrics'].includes(metricFnBuilder.name)) {
+        const aggFilterFnBuilder = (
+          fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
+        ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
+
+        let groupKey = `${metricFnBuilder.name}-${aggFilterFnBuilder.getArgument('timeWindow')}-${
+          metricFnBuilder.getArgument('field')?.[0]
+        }-${
+          fnBuilder.getArgument('timeShift')?.[0] // we get this from the parent agg
+        }`;
+
+        const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
+          | ExpressionAstExpressionBuilder
           | undefined;
 
-        if (metricFnBuilder && ['aggTopHit', 'aggTopMetrics'].includes(metricFnBuilder.name)) {
-          const aggFilterFnBuilder = (
-            fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
-          ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
-
-          let groupKey = `${metricFnBuilder.name}-${aggFilterFnBuilder.getArgument('timeWindow')}-${
-            metricFnBuilder.getArgument('field')?.[0]
-          }-${
-            fnBuilder.getArgument('timeShift')?.[0] // we get this from the parent agg
-          }`;
-
-          const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
-            | ExpressionAstExpressionBuilder
+        if (filterExpression) {
+          const filterFnBuilder = filterExpression.functions[0] as
+            | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
             | undefined;
 
-          if (filterExpression) {
-            const filterFnBuilder = filterExpression.functions[0] as
-              | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
-              | undefined;
-
-            groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
-          }
-
-          return groupKey;
-        }
-      }
-    });
-
-    const termsFuncs = aggs
-      .map((agg) => agg.functions[0])
-      .filter((func) => func.name === 'aggTerms') as Array<
-      ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
-    >;
-
-    // collapse them into a single expression builder
-    Object.values(aggsByArgs).forEach((expressionBuilders) => {
-      if (expressionBuilders.length <= 1) {
-        // don't need to optimize if there aren't more than one
-        return;
-      }
-
-      const [firstExpressionBuilder, ...restExpressionBuilders] = expressionBuilders;
-
-      // throw away all but the first expression builder
-      aggs = aggs.filter((aggBuilder) => !restExpressionBuilders.includes(aggBuilder));
-
-      const firstEsAggsId = aggExpressionToEsAggsIdMap.get(firstExpressionBuilder);
-      if (firstEsAggsId === undefined) {
-        throw new Error('Could not find current column ID for expression builder');
-      }
-
-      restExpressionBuilders.forEach((expressionBuilder) => {
-        const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
-        if (currentEsAggsId === undefined) {
-          throw new Error('Could not find current column ID for expression builder');
+          groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
         }
 
-        esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
-
-        delete esAggsIdMap[currentEsAggsId];
-
-        termsFuncs.forEach((func) => {
-          if (func.getArgument('orderBy')?.[0] === extractAggId(currentEsAggsId)) {
-            func.replaceArgument('orderBy', [extractAggId(firstEsAggsId)]);
-          }
-        });
-      });
-    });
-
-    return { aggs, esAggsIdMap };
+        return groupKey;
+      }
+    }
   },
 
   isTransferable: (column, newIndexPattern) => {

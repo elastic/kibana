@@ -21,12 +21,7 @@ import type { IndexPatternLayer } from '../../types';
 import type { IndexPattern } from '../../../types';
 import { TermsIndexPatternColumn } from './terms';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import {
-  buildExpression,
-  ExpressionAstExpressionBuilder,
-  parseExpression,
-} from '@kbn/expressions-plugin/common';
-import { OriginalColumn } from '../../to_expression';
+import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -925,143 +920,102 @@ describe('last_value', () => {
   });
 
   describe('optimizeEsAggs', () => {
-    const buildMapsFromAggBuilders = (aggs: ExpressionAstExpressionBuilder[]) => {
-      const esAggsIdMap: Record<string, OriginalColumn[]> = {};
-      const aggsToIdsMap = new Map();
-      aggs.forEach((builder, i) => {
-        const esAggsId = `col-${i}-${i}`;
-        esAggsIdMap[esAggsId] = [{ id: `original-${i}` } as OriginalColumn];
-        aggsToIdsMap.set(builder, esAggsId);
-      });
-      return {
-        esAggsIdMap,
-        aggsToIdsMap,
-      };
-    };
-
+    const getKey = lastValueOperation.getGroupByKey!;
+    const expressionToKey = (expression: string) =>
+      getKey(buildExpression(parseExpression(expression)));
     it('collapses duplicate aggs', () => {
-      const aggs = [
-        // group 1
-        'aggFilteredMetric id="0" enabled=true schema="metric" \n  customBucket={aggFilter id="0-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopMetrics id="0-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        'aggFilteredMetric id="1" enabled=true schema="metric" \n  customBucket={aggFilter id="1-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopMetrics id="1-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 2
-        'aggFilteredMetric id="2" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"}} \n  customMetric={aggTopMetrics id="2-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"}',
-        'aggFilteredMetric id="3" enabled=true schema="metric" \n  customBucket={aggFilter id="3-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"}} \n  customMetric={aggTopMetrics id="3-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 3
-        'aggFilteredMetric id="4" enabled=true schema="metric" \n  customBucket={aggFilter id="4-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"} timeShift="1h"} \n  customMetric={aggTopMetrics id="4-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"} timeShift="1h"',
-        'aggFilteredMetric id="5" enabled=true schema="metric" \n  customBucket={aggFilter id="5-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"} timeShift="1h"} \n  customMetric={aggTopMetrics id="5-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"} timeShift="1h"',
-        // group 4
-        'aggFilteredMetric id="6" enabled=true schema="metric" \n  customBucket={aggFilter id="6-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggTopMetrics id="6-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        'aggFilteredMetric id="7" enabled=true schema="metric" \n  customBucket={aggFilter id="7-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggTopMetrics id="7-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 5
-        'aggFilteredMetric id="8" enabled=true schema="metric" \n  customBucket={aggFilter id="8-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}} \n  customMetric={aggTopMetrics id="8-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        'aggFilteredMetric id="9" enabled=true schema="metric" \n  customBucket={aggFilter id="9-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}} \n  customMetric={aggTopMetrics id="9-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 6
-        'aggFilteredMetric id="10" enabled=true schema="metric" \n  customBucket={aggFilter id="10-filter" enabled=true schema="bucket" filter={lucene q="\\"geo.dest: \\\\\\"AL\\\\\\" \\""}} \n  customMetric={aggTopMetrics id="10-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        'aggFilteredMetric id="11" enabled=true schema="metric" \n  customBucket={aggFilter id="11-filter" enabled=true schema="bucket" filter={lucene q="\\"geo.dest: \\\\\\"AL\\\\\\" \\""}} \n  customMetric={aggTopMetrics id="11-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 7
-        'aggFilteredMetric id="12" enabled=true schema="metric" \n  customBucket={aggFilter id="12-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggTopMetrics id="12-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        'aggFilteredMetric id="13" enabled=true schema="metric" \n  customBucket={aggFilter id="13-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggTopMetrics id="13-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
-        // group 8 - uses "aggTopHit"
-        'aggFilteredMetric id="14" enabled=true schema="metric" \n  customBucket={aggFilter id="14-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopHit id="14-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp" aggregate="concat"}',
-        'aggFilteredMetric id="15" enabled=true schema="metric" \n  customBucket={aggFilter id="15-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopHit id="15-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp" aggregate="concat"}',
-        // group 9 - unrelated aggs (should remain untouched)
-        'aggCardinality id="16" enabled=true schema="metric" field="bytes" emptyAsNull=false',
-        'aggCardinality id="17" enabled=true schema="metric" field="bytes" emptyAsNull=false',
-        'aggFilteredMetric id="18" enabled=true schema="metric" \n  customBucket={aggFilter id="18-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="18-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
-        'aggFilteredMetric id="19" enabled=true schema="metric" \n  customBucket={aggFilter id="19-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="19-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}',
-      ].map((expression) => buildExpression(parseExpression(expression)));
+      const keys = [
+        [
+          'aggFilteredMetric id="0" enabled=true schema="metric" \n  customBucket={aggFilter id="0-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopMetrics id="0-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+          'aggFilteredMetric id="1" enabled=true schema="metric" \n  customBucket={aggFilter id="1-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopMetrics id="1-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+        ],
+        [
+          'aggFilteredMetric id="2" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"}} \n  customMetric={aggTopMetrics id="2-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"}',
+          'aggFilteredMetric id="3" enabled=true schema="metric" \n  customBucket={aggFilter id="3-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"}} \n  customMetric={aggTopMetrics id="3-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"}',
+        ],
+        [
+          'aggFilteredMetric id="4" enabled=true schema="metric" \n  customBucket={aggFilter id="4-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"} timeShift="1h"} \n  customMetric={aggTopMetrics id="4-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"} timeShift="1h"',
+          'aggFilteredMetric id="5" enabled=true schema="metric" \n  customBucket={aggFilter id="5-filter" enabled=true schema="bucket" filter={kql q="machine.ram: *"} timeShift="1h"} \n  customMetric={aggTopMetrics id="5-metric" enabled=true schema="metric" field="machine.ram" size=1 sortOrder="desc" sortField="timestamp"} timeShift="1h"',
+        ],
+        [
+          'aggFilteredMetric id="6" enabled=true schema="metric" \n  customBucket={aggFilter id="6-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggTopMetrics id="6-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+          'aggFilteredMetric id="7" enabled=true schema="metric" \n  customBucket={aggFilter id="7-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggTopMetrics id="7-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+        ],
+        [
+          'aggFilteredMetric id="8" enabled=true schema="metric" \n  customBucket={aggFilter id="8-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}} \n  customMetric={aggTopMetrics id="8-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+          'aggFilteredMetric id="9" enabled=true schema="metric" \n  customBucket={aggFilter id="9-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}} \n  customMetric={aggTopMetrics id="9-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+        ],
+        [
+          'aggFilteredMetric id="10" enabled=true schema="metric" \n  customBucket={aggFilter id="10-filter" enabled=true schema="bucket" filter={lucene q="\\"geo.dest: \\\\\\"AL\\\\\\" \\""}} \n  customMetric={aggTopMetrics id="10-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+          'aggFilteredMetric id="11" enabled=true schema="metric" \n  customBucket={aggFilter id="11-filter" enabled=true schema="bucket" filter={lucene q="\\"geo.dest: \\\\\\"AL\\\\\\" \\""}} \n  customMetric={aggTopMetrics id="11-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+        ],
+        [
+          'aggFilteredMetric id="12" enabled=true schema="metric" \n  customBucket={aggFilter id="12-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggTopMetrics id="12-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+          'aggFilteredMetric id="13" enabled=true schema="metric" \n  customBucket={aggFilter id="13-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "} timeWindow="1m"} \n  customMetric={aggTopMetrics id="13-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp"}',
+        ],
+        // uses aggTopHit
+        [
+          'aggFilteredMetric id="14" enabled=true schema="metric" \n  customBucket={aggFilter id="14-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopHit id="14-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp" aggregate="concat"}',
+          'aggFilteredMetric id="15" enabled=true schema="metric" \n  customBucket={aggFilter id="15-filter" enabled=true schema="bucket" filter={kql q="bytes: *"}} \n  customMetric={aggTopHit id="15-metric" enabled=true schema="metric" field="bytes" size=1 sortOrder="desc" sortField="timestamp" aggregate="concat"}',
+        ],
+      ].map((group) => group.map(expressionToKey));
 
-      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
-
-      const { esAggsIdMap: newIdMap, aggs: newAggs } = lastValueOperation.optimizeEsAggs!(
-        aggs,
-        esAggsIdMap,
-        aggsToIdsMap
-      );
-
-      expect(newAggs.length).toBe(12);
-
-      expect(newIdMap).toMatchInlineSnapshot(`
-        Object {
-          "col-0-0": Array [
-            Object {
-              "id": "original-0",
-            },
-            Object {
-              "id": "original-1",
-            },
-          ],
-          "col-10-10": Array [
-            Object {
-              "id": "original-10",
-            },
-            Object {
-              "id": "original-11",
-            },
-          ],
-          "col-12-12": Array [
-            Object {
-              "id": "original-12",
-            },
-            Object {
-              "id": "original-13",
-            },
-          ],
-          "col-14-14": Array [
-            Object {
-              "id": "original-14",
-            },
-            Object {
-              "id": "original-15",
-            },
-          ],
-          "col-16-16": Array [
-            Object {
-              "id": "original-16",
-            },
-          ],
-          "col-17-17": Array [
-            Object {
-              "id": "original-17",
-            },
-          ],
-          "col-2-2": Array [
-            Object {
-              "id": "original-2",
-            },
-            Object {
-              "id": "original-3",
-            },
-          ],
-          "col-4-4": Array [
-            Object {
-              "id": "original-4",
-            },
-            Object {
-              "id": "original-5",
-            },
-          ],
-          "col-6-6": Array [
-            Object {
-              "id": "original-6",
-            },
-            Object {
-              "id": "original-7",
-            },
-          ],
-          "col-8-8": Array [
-            Object {
-              "id": "original-8",
-            },
-            Object {
-              "id": "original-9",
-            },
-          ],
+      for (const thisGroup of keys) {
+        expect(thisGroup[0]).toEqual(thisGroup[1]);
+        for (const otherGroup of keys.filter((group) => group !== group)) {
+          expect(thisGroup[0]).not.toEqual(otherGroup[0]);
         }
-      `);
+      }
 
-      expect(newAggs.map((builder) => builder.toAst())).toMatchSnapshot();
+      expect(keys).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "aggTopMetrics-undefined-bytes-undefined-kql-bytes: *",
+            "aggTopMetrics-undefined-bytes-undefined-kql-bytes: *",
+          ],
+          Array [
+            "aggTopMetrics-undefined-machine.ram-undefined-kql-machine.ram: *",
+            "aggTopMetrics-undefined-machine.ram-undefined-kql-machine.ram: *",
+          ],
+          Array [
+            "aggTopMetrics-undefined-machine.ram-1h-kql-machine.ram: *",
+            "aggTopMetrics-undefined-machine.ram-1h-kql-machine.ram: *",
+          ],
+          Array [
+            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"GA\\" ",
+            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"GA\\" ",
+          ],
+          Array [
+            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"AL\\" ",
+            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"AL\\" ",
+          ],
+          Array [
+            "aggTopMetrics-undefined-bytes-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+            "aggTopMetrics-undefined-bytes-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+          ],
+          Array [
+            "aggTopMetrics-1m-bytes-undefined-kql-geo.dest: \\"AL\\" ",
+            "aggTopMetrics-1m-bytes-undefined-kql-geo.dest: \\"AL\\" ",
+          ],
+          Array [
+            "aggTopHit-undefined-bytes-undefined-kql-bytes: *",
+            "aggTopHit-undefined-bytes-undefined-kql-bytes: *",
+          ],
+        ]
+      `);
+    });
+
+    it('returns undefined for aggs from different operation classes', () => {
+      expect(
+        expressionToKey(
+          'aggSum id="0" enabled=true schema="metric" field="bytes" emptyAsNull=false'
+        )
+      ).toBeUndefined();
+      expect(
+        expressionToKey(
+          'aggFilteredMetric id="2" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}'
+        )
+      ).toBeUndefined();
     });
   });
 });

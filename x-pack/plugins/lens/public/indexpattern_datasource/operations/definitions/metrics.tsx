@@ -247,9 +247,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
               | undefined;
 
-            groupKey = `${groupKey}-${filterFnBuilder?.name}-${
-              filterFnBuilder?.getArgument('q')?.[0]
-            }`;
+            groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
           }
         }
       }
