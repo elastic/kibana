@@ -168,9 +168,7 @@ describe('Frame group operations', () => {
     });
 
     test('non-symbolized ELF frame', () => {
-      expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual(
-        'elf;libc;strlen()'
-      );
+      expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual('elf;libc;strlen()');
     });
 
     test('symbolized frame', () => {
