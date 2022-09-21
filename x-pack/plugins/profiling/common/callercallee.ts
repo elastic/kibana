@@ -18,66 +18,6 @@ import {
   StackTraceID,
 } from './profiling';
 
-interface RelevantTrace {
-  lazyFrames: LazyStackFrameMetadata[];
-  index: number;
-}
-
-// selectRelevantTraces searches through a map that maps trace hashes to their
-// frames and only returns those traces that have a frame that are equivalent
-// to the rootFrame provided. It also sets the "index" in the sequence of
-// traces at which the rootFrame is found.
-//
-// If the rootFrame is "empty" (e.g. fileID is empty and line number is 0), all
-// traces in the given time frame are deemed relevant, and the "index" is set
-// to the length of the trace -- since there is no root frame, the frame should
-// be considered "calls-to" only going.
-function selectRelevantTraces(
-  rootFrame: StackFrameMetadata,
-  rootFrameGroupID: FrameGroupID,
-  frames: Map<StackTraceID, LazyStackFrameMetadata[]>
-): Map<StackTraceID, RelevantTrace> {
-  const result = new Map<StackTraceID, RelevantTrace>();
-  if (rootFrame.FileID === '' && rootFrame.AddressOrLine === 0) {
-    for (const [stackTraceID, lazyFrameMetadata] of frames) {
-      // If the root frame is empty, every trace is relevant, and all elements
-      // of the trace are relevant. This means that the index is set to the
-      // length of the lazyFrameMetadata, implying that in the absence of a root
-      // frame the "topmost" frame is the root frame.
-      result.set(stackTraceID, {
-        lazyFrames: lazyFrameMetadata,
-        index: lazyFrameMetadata.length,
-      } as RelevantTrace);
-    }
-  } else {
-    for (const [stackTraceID, lazyFrameMetadata] of frames) {
-      // Search for the right index of the root frame in the frameMetadata, and
-      // set it in the result.
-      for (let i = 0; i < lazyFrameMetadata.length; i++) {
-        if (rootFrameGroupID === lazyFrameMetadata[i].FrameGroupID) {
-          result.set(stackTraceID, {
-            lazyFrames: lazyFrameMetadata,
-            index: i,
-          } as RelevantTrace);
-        }
-      }
-    }
-  }
-  return result;
-}
-
-function sortRelevantTraces(relevantTraces: Map<StackTraceID, RelevantTrace>): StackTraceID[] {
-  const sortedRelevantTraces = new Array<StackTraceID>();
-  for (const trace of relevantTraces.keys()) {
-    sortedRelevantTraces.push(trace);
-  }
-  return sortedRelevantTraces.sort((t1, t2) => {
-    if (t1 < t2) return -1;
-    if (t1 > t2) return 1;
-    return 0;
-  });
-}
-
 export interface CallerCalleeNode {
   Callers: Map<FrameGroupID, CallerCalleeNode>;
   Callees: Map<FrameGroupID, CallerCalleeNode>;
@@ -124,8 +64,7 @@ export function createCallerCalleeGraph(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>,
-  lazyFrameMap: Map<StackTraceID, LazyStackFrameMetadata[]>
+  executables: Map<FileID, Executable>
 ): CallerCalleeGraph {
   // Create a node for the centered frame
   const rootFrameGroup = createFrameGroup(
@@ -139,52 +78,56 @@ export function createCallerCalleeGraph(
   const root = createCallerCalleeNode(rootFrame, rootFrameGroup, rootFrameGroupID, 0);
   const graph: CallerCalleeGraph = { root, size: 1 };
 
-  // Obtain only the relevant frames (e.g. frames that contain the root frame
-  // somewhere). If the root frame is "empty" (e.g. fileID is zero and line
-  // number is zero), all frames are deemed relevant.
-  const relevantTraces = selectRelevantTraces(rootFrame, rootFrameGroupID, lazyFrameMap);
-
-  // For a deterministic result we have to walk the traces in a deterministic
-  // order. A deterministic result allows for deterministic UI views, something
-  // that users expect.
-  const relevantTracesSorted = sortRelevantTraces(relevantTraces);
+  const sortedStackTraceIDs = new Array<StackTraceID>();
+  for (const trace of stackTraces.keys()) {
+    sortedStackTraceIDs.push(trace);
+  }
+  sortedStackTraceIDs.sort((t1, t2) => {
+    return t1.localeCompare(t2);
+  });
 
   // Walk through all traces that contain the root. Increment the count of the
   // root by the count of that trace. Walk "up" the trace (through the callers)
   // and add the count of the trace to each caller. Then walk "down" the trace
   // (through the callees) and add the count of the trace to each callee.
 
-  for (const stackTraceID of relevantTracesSorted) {
+  for (const stackTraceID of sortedStackTraceIDs) {
     // The slice of frames is ordered so that the leaf function is at the
     // highest index. This means that the "first part" of the slice are the
     // callers, and the "second part" are the callees.
     //
     // We currently assume there are no callers.
-    const relevantTrace = relevantTraces.get(stackTraceID)!;
-    const lazyFrames = relevantTrace.lazyFrames;
-    const numLazyFrames = lazyFrames.length;
+    const stackTrace = stackTraces.get(stackTraceID)!;
+    const lenStackTrace = stackTrace.FrameIDs.length;
     const samples = events.get(stackTraceID)!;
 
     let currentNode = root;
     root.Samples += samples;
 
-    for (let i = 0; i < numLazyFrames; i++) {
-      const lazyFrame = lazyFrames[i];
-      let node = currentNode.Callees.get(lazyFrame.FrameGroupID);
-      if (node === undefined) {
-        const j = lazyFrame.StackTraceIndex;
-        const stackTrace = stackTraces.get(stackTraceID)!;
-        const frameID = stackTrace.FrameIDs[j];
-        const fileID = stackTrace.FileIDs[j];
-        const addressOrLine = stackTrace.AddressOrLines[j];
-        const frame = stackFrames.get(frameID)!;
-        const executable = executables.get(fileID)!;
+    for (let i = 0; i < lenStackTrace; i++) {
+      const frameID = stackTrace.FrameIDs[i];
+      const fileID = stackTrace.FileIDs[i];
+      const addressOrLine = stackTrace.AddressOrLines[i];
+      const frame = stackFrames.get(frameID)!;
+      const executable = executables.get(fileID)!;
 
+      const frameGroup = createFrameGroup(
+        fileID,
+        addressOrLine,
+        executable.FileName,
+        frame.FileName,
+        frame.FunctionName
+      );
+      const frameGroupID = createFrameGroupID(frameGroup);
+
+      let node = currentNode.Callees.get(frameGroupID);
+
+      if (node === undefined) {
         const callee = createStackFrameMetadata({
           FrameID: frameID,
           FileID: fileID,
           AddressOrLine: addressOrLine,
-          FrameType: stackTrace.Types[j],
+          FrameType: stackTrace.Types[i],
           FunctionName: frame.FunctionName,
           FunctionOffset: frame.FunctionOffset,
           SourceLine: frame.LineNumber,
@@ -192,13 +135,8 @@ export function createCallerCalleeGraph(
           ExeFileName: executable.FileName,
         });
 
-        node = createCallerCalleeNode(
-          callee,
-          lazyFrame.FrameGroup,
-          lazyFrame.FrameGroupID,
-          samples
-        );
-        currentNode.Callees.set(lazyFrame.FrameGroupID, node);
+        node = createCallerCalleeNode(callee, frameGroup, frameGroupID, samples);
+        currentNode.Callees.set(frameGroupID, node);
         graph.size++;
       } else {
         node.Samples += samples;
@@ -206,7 +144,7 @@ export function createCallerCalleeGraph(
 
       node.CountInclusive += samples;
 
-      if (i === numLazyFrames - 1) {
+      if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         node.CountExclusive += samples;
       }
