@@ -51,7 +51,7 @@ describe('AgentManager', () => {
         expect(HttpAgent).toBeCalledTimes(1);
         expect(HttpAgent).toBeCalledWith({
           keepAlive: true,
-          keepAliveMsecs: 50000,
+          keepAliveMsecs: 1000,
           maxFreeSockets: 256,
           maxSockets: 256,
           scheduling: 'lifo',
@@ -68,7 +68,7 @@ describe('AgentManager', () => {
         expect(HttpAgent).toBeCalledTimes(1);
         expect(HttpAgent).toBeCalledWith({
           keepAlive: true,
-          keepAliveMsecs: 50000,
+          keepAliveMsecs: 1000,
           maxFreeSockets: 32,
           maxSockets: 1024,
           scheduling: 'fifo',
