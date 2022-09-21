@@ -22,6 +22,7 @@ import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Sha256 } from '@kbn/crypto-browser';
+import type { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
@@ -58,6 +59,7 @@ export interface CloudConfigType {
 interface CloudSetupDependencies {
   home?: HomePublicPluginSetup;
   security?: Pick<SecurityPluginSetup, 'authc'>;
+  cloudExperiments?: CloudExperimentsPluginSetup;
 }
 
 interface CloudStartDependencies {
@@ -93,15 +95,15 @@ interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
-  private isCloudEnabled: boolean;
+  private readonly isCloudEnabled: boolean;
   private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
-    this.isCloudEnabled = false;
+    this.isCloudEnabled = getIsCloudEnabled(this.config.id);
   }
 
-  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
+  public setup(core: CoreSetup, { cloudExperiments, home, security }: CloudSetupDependencies) {
     this.setupTelemetryContext(core.analytics, security, this.config.id);
 
     this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
@@ -118,7 +120,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
     } = this.config;
 
-    this.isCloudEnabled = getIsCloudEnabled(id);
+    if (this.isCloudEnabled && id) {
+      // We use the Hashed Cloud Deployment ID as the userId in the Cloud Experiments
+      cloudExperiments?.identifyUser(sha256(id), {
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+      });
+    }
 
     this.setupChat({ http: core.http, security }).catch((e) =>
       // eslint-disable-next-line no-console

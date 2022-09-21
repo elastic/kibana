@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-
+import deepEqual from 'fast-deep-equal';
 import { useController } from 'react-hook-form';
 import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
@@ -79,4 +79,4 @@ const IntervalFieldComponent = ({ euiFieldProps }: IntervalFieldProps) => {
   );
 };
 
-export const IntervalField = React.memo(IntervalFieldComponent);
+export const IntervalField = React.memo(IntervalFieldComponent, deepEqual);

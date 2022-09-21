@@ -54,15 +54,14 @@ interface GetExecutionsPerDayCountResults {
   generatedActionsPercentilesByType: Record<string, Record<string, number>>;
   alertsPercentiles: Record<string, number>;
   alertsPercentilesByType: Record<string, Record<string, number>>;
+  countRulesByExecutionStatus: Record<string, number>;
 }
-
 interface GetExecutionTimeoutsPerDayCountResults {
   hasErrors: boolean;
   errorMessage?: string;
   countExecutionTimeouts: number;
   countExecutionTimeoutsByType: Record<string, number>;
 }
-
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
@@ -145,6 +144,11 @@ export async function getExecutionsPerDayCount({
             },
             aggs: eventLogAggs,
           },
+          by_execution_status: {
+            terms: {
+              field: 'event.outcome',
+            },
+          },
         },
       },
     };
@@ -165,6 +169,7 @@ export async function getExecutionsPerDayCount({
       avg_execution_time: AggregationsSingleMetricAggregateBase;
       avg_es_search_duration: AggregationsSingleMetricAggregateBase;
       avg_total_search_duration: AggregationsSingleMetricAggregateBase;
+      by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
     };
 
     const aggregationsByRuleTypeId: AggregationsBuckets<GetExecutionCountsAggregationBucket> =
@@ -176,6 +181,9 @@ export async function getExecutionsPerDayCount({
       ...parseExecutionFailureByRuleType(aggregationsByRuleTypeId),
       ...parseExecutionCountAggregationResults(aggregations),
       countTotalRuleExecutions: totalRuleExecutions ?? 0,
+      countRulesByExecutionStatus: parseSimpleRuleTypeBucket(
+        aggregations.by_execution_status.buckets
+      ),
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
@@ -204,6 +212,7 @@ export async function getExecutionsPerDayCount({
       generatedActionsPercentilesByType: {},
       alertsPercentiles: {},
       alertsPercentilesByType: {},
+      countRulesByExecutionStatus: {},
     };
   }
 }
@@ -313,6 +322,14 @@ export async function getExecutionTimeoutsPerDayCount({
  *   avg_total_search_duration: {         // average total search duration across executions
  *     value: 43.74647887323944,
  *   },
+ *   by_execution_status: {
+ *      "doc_count_error_upper_bound":0,
+ *      "sum_other_doc_count":0,
+ *      "buckets":[
+ *        {"key":"success","doc_count":48},
+ *        {"key":"failure","doc_count":1}
+ *      ]
+ *   }
  * }
  */
 

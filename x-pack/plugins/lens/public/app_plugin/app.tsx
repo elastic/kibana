@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -374,6 +375,7 @@ export function App({
         uiActions,
         core: { http, notifications, uiSettings },
         data,
+        contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
           if (options?.applyImmediately) {
@@ -387,7 +389,7 @@ export function App({
           }
         },
       }),
-    [dataViews, uiActions, http, notifications, uiSettings, data, dispatch]
+    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
   );
 
   return (
