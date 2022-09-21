@@ -207,6 +207,24 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "Profiling",
+      "matchPackageNames": ["fnv-plus", "peggy", "@types/dagre", "@types/fnv-plus"],
+      "reviewers": ["team:profiling-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "TTY Output",
+      "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
+      "reviewers": ["team:awp-viz"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }

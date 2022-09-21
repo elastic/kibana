@@ -277,14 +277,21 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
-  `/internal/prebuilt_content/dev_tool/{console_id}` as const;
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}/internal/prebuilt_content/dev_tool/${consoleId}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
-  '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
+  `/s/${spaceId}${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
 export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
-  `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
+export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
+export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
+export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
+export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
+export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 
 /**
  * Internal detection engine routes
@@ -317,6 +324,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -459,5 +467,11 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
 }
 
-export const RISKY_HOSTS_DOC_LINK =
+export const RISKY_HOSTS_EXTERNAL_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
+export const RISKY_USERS_EXTERNAL_DOC_LINK =
+  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/user-risk-score.md';
+export const RISKY_HOSTS_DOC_LINK =
+  'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
+export const RISKY_USERS_DOC_LINK =
+  'https://www.elastic.co/guide/en/security/current/user-risk-score.html';

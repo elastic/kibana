@@ -31,7 +31,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 85,
+  "risk_score": 47,
   "rule_id": "2339f03c-f53f-40fa-834b-40c5983fc41f",
   "severity": "medium",
   "tags": [
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 100
 }

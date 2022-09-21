@@ -25,6 +25,8 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -135,6 +137,7 @@ export interface VisualizationsStartDeps {
   urlForwarding: UrlForwardingStart;
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -287,6 +290,7 @@ export class VisualizationsPlugin
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          unifiedSearch: pluginsStart.unifiedSearch,
         };
 
         params.element.classList.add('visAppWrapper');

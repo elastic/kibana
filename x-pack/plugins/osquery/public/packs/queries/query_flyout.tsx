@@ -22,9 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
-import { isEmpty, map } from 'lodash';
-import { QueryIdField, IntervalField } from '../../form';
-import { defaultEcsFormData } from './ecs_mapping_editor_field';
+import { DEFAULT_PLATFORM } from '../../../common/constants';
+import { QueryIdField, IntervalField, VersionField, ResultsTypeField } from '../../form';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
@@ -37,7 +36,6 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
-import { VersionField } from '../../form';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -62,8 +60,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const {
     handleSubmit,
     formState: { isSubmitting },
-    setValue,
-    clearErrors,
+    resetField,
   } = hooksForm;
   const onSubmit = (payload: PackQueryFormData) => {
     const serializedData: PackSOQueryFormData = serializer(payload);
@@ -74,28 +71,19 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        clearErrors('id');
-        setValue('id', savedQuery.id);
-        setValue('query', savedQuery.query);
-        // setValue('description', savedQuery.description); // TODO do we need it?
-        setValue('platform', savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin');
-        setValue('version', savedQuery.version ? [savedQuery.version] : []);
-        setValue('interval', savedQuery.interval);
-        setValue(
-          'ecs_mapping',
-          !isEmpty(savedQuery.ecs_mapping)
-            ? map(savedQuery.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0] as string,
-                },
-              }))
-            : [defaultEcsFormData]
-        );
+        resetField('id', { defaultValue: savedQuery.id });
+        resetField('query', { defaultValue: savedQuery.query });
+        resetField('platform', {
+          defaultValue: savedQuery.platform ? savedQuery.platform : DEFAULT_PLATFORM,
+        });
+        resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
+        resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
+        resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
+        resetField('removed');
+        resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
-    [clearErrors, setValue]
+    [resetField]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
@@ -156,6 +144,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   onCreateOption: undefined,
                 }}
               />
+              <EuiSpacer />
+              <ResultsTypeField />
             </EuiFlexItem>
             <EuiFlexItem>
               <PlatformCheckBoxGroupField />

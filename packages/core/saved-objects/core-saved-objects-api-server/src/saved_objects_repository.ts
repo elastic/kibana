@@ -44,6 +44,9 @@ import type {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteResponse,
 } from './apis';
 
 /**
@@ -104,6 +107,17 @@ export interface ISavedObjectsRepository {
    * @returns {promise}
    */
   delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+
+  /**
+   * Deletes multiple documents at once
+   * @param {array} objects - an array of objects containing id and type
+   * @param {object} [options={}]
+   * @returns {promise} - { statuses: [{ id, type, success, error: { message } }] }
+   */
+  bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse>;
 
   /**
    * Deletes all objects from the provided namespace.

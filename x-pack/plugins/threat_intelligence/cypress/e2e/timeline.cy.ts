@@ -19,6 +19,8 @@ import {
   UNTITLED_TIMELINE_BUTTON,
   FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON,
   FLYOUT_OVERVIEW_TAB_BLOCKS_ITEM,
+  INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON,
+  INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON,
 } from '../screens/indicators';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { login } from '../tasks/login';
@@ -84,6 +86,20 @@ describe('Indicators', () => {
       cy.get(FLYOUT_TABS).should('exist');
       cy.get(`${FLYOUT_TABS} button:nth-child(2)`).click();
       cy.get(FLYOUT_TABLE_TAB_ROW_TIMELINE_BUTTON).should('exist').first().click();
+      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
+      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+    });
+
+    it('should investigate in timeline when clicking in an indicator table action row', () => {
+      cy.get(INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON).should('exist').first().click();
+      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+    });
+
+    it('should investigate in timeline when clicking in an indicator flyout', () => {
+      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
+      cy.get(INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON).should('exist').first().click();
       cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
       cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
