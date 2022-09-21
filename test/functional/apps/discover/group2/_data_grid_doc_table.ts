@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();
+      log.info('trying to reproduce the failure', await rows[0][0].getVisibleText());
       expect(rows.length).to.be.above(0);
     });
 
