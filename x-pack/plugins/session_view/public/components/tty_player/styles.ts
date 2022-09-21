@@ -38,6 +38,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
     };
 
     const header: CSSObject = {
+      display: show ? 'block' : 'none',
       backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
       padding: `${size.m} ${size.base}`,
     };
@@ -73,7 +74,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
     const scrollPane: CSSObject = {
       position: 'relative',
       transform: `translateY(${show ? 0 : '100%'})`,
-      transition: 'transform .2s',
+      transition: 'transform .2s ease-in-out',
       width: '100%',
       height: 'calc(100% - 112px)',
       overflow: 'auto',
