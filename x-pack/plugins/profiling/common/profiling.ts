@@ -263,9 +263,9 @@ export function createLazyStackTraceMap(
       const frameGroup = createFrameGroup(
         fileID,
         addressOrLine,
+        executable.FileName,
         frame.FileName,
-        frame.FunctionName,
-        executable.FileName
+        frame.FunctionName
       );
       const frameGroupID = createFrameGroupID(frameGroup);
 
