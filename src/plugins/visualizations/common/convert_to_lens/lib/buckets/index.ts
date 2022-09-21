@@ -30,7 +30,7 @@ const isSupportedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs
   return SUPPORTED_BUCKETS.includes(agg.aggType);
 };
 
-export const getBucketColumns = (
+const getBucketColumns = (
   aggType: BUCKET_TYPES,
   { aggParams, dataView, metricColumns, aggs }: CommonBucketConverterArgs<BucketAggs>,
   {
