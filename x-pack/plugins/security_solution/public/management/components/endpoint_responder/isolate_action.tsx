@@ -14,17 +14,17 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
     const isolateHostApi = useSendIsolateEndpointRequest();
 
-    const endpointId = command.commandDefinition?.meta?.endpointId;
-    const comment = command.args.args?.comment?.[0];
-
     const actionRequestBody = useMemo(() => {
+      const endpointId = command.commandDefinition?.meta?.endpointId;
+      const comment = command.args.args?.comment?.[0];
+
       return endpointId
         ? {
             endpoint_ids: [endpointId],
             comment,
           }
         : undefined;
-    }, [comment, endpointId]);
+    }, [command.args.args?.comment, command.commandDefinition?.meta?.endpointId]);
 
     return useConsoleActionSubmitter({
       ResultComponent,

@@ -11,6 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { BaseActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { ActionSuccess } from '../action_success';
 import { ActionError } from '../action_error';
 import { FormattedError } from '../../formatted_error';
@@ -33,7 +34,10 @@ interface ConsoleActionSubmitter {
   action: ActionDetails | undefined;
 }
 
-interface CommandResponseActionApiState {
+/**
+ * Command store state for response action api state.
+ */
+export interface CommandResponseActionApiState {
   actionApiState?: {
     request: {
       sent: boolean;
@@ -50,7 +54,11 @@ interface UseConsoleActionSubmitterOptions
     CommandExecutionComponentProps<any, CommandResponseActionApiState>,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
-  actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError>;
+  actionCreator: UseMutationResult<
+    ResponseActionApiResponse,
+    IHttpFetchError,
+    BaseActionRequestBody
+  >;
   /**
    * The API request body. If `undefined`, then API will not be called.
    */
