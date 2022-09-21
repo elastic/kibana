@@ -59,8 +59,8 @@ type PipelinesActions = Pick<
   Actions<PostPipelineArgs, PostPipelineResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  closeModal: () => void;
   closeAddMlInferencePipelineModal: () => void;
+  closeModal: () => void;
   createCustomPipeline: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
@@ -94,12 +94,12 @@ type PipelinesActions = Pick<
   fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
+  openAddMlInferencePipelineModal: () => void;
   openModal: () => void;
   savePipeline: () => void;
   setPipelineState(pipeline: IngestPipelineParams): {
     pipeline: IngestPipelineParams;
   };
-  openAddMlInferencePipelineModal: () => void;
 };
 
 interface PipelinesValues {
@@ -110,16 +110,16 @@ interface PipelinesValues {
   index: FetchIndexApiResponse;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineState: IngestPipelineParams;
-  showModal: boolean;
   showAddMlInferencePipelineModal: boolean;
+  showModal: boolean;
 }
 
 export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions>>({
   actions: {
-    closeModal: true,
     closeAddMlInferencePipelineModal: true,
-    openModal: true,
+    closeModal: true,
     openAddMlInferencePipelineModal: true,
+    openModal: true,
     savePipeline: true,
     setPipelineState: (pipeline: IngestPipelineParams) => ({ pipeline }),
   },
@@ -267,20 +267,20 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         setPipelineState: (_, { pipeline }) => pipeline,
       },
     ],
+    showAddMlInferencePipelineModal: [
+      false,
+      {
+        closeAddMlInferencePipelineModal: () => false,
+        createMlInferencePipelineSuccess: () => false,
+        openAddMlInferencePipelineModal: () => true,
+      },
+    ],
     showModal: [
       false,
       {
         apiSuccess: () => false,
         closeModal: () => false,
         openModal: () => true,
-      },
-    ],
-    showAddMlInferencePipelineModal: [
-      false,
-      {
-        createMlInferencePipelineSuccess: () => false,
-        closeAddMlInferencePipelineModal: () => false,
-        openAddMlInferencePipelineModal: () => true,
       },
     ],
   }),
