@@ -92,12 +92,9 @@ export const convertToTermsColumn = (
   aggId: string,
   { aggParams, dataView, aggs, metricColumns }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
   label: string,
-  isSplit: boolean
+  isSplit: boolean = false
 ): TermsColumn | null => {
-  if (!aggParams?.field) {
-    return null;
-  }
-  const sourceField = getFieldNameFromField(aggParams?.field) ?? 'document';
+  const sourceField = getFieldNameFromField(aggParams.field) ?? 'document';
   const field = dataView.getFieldByName(sourceField);
 
   if (!field) {
