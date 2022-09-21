@@ -184,7 +184,7 @@ describe('query_utils', () => {
       ]);
     });
 
-    it('includes a must_note with nested term filters when excluding a selectedGroupMock', () => {
+    it('includes a must_not with nested term filters when excluding a selectedGroup', () => {
       const baseFilterCriteria = buildBaseFilterCriteria(
         '@timestamp',
         1640082000012,
