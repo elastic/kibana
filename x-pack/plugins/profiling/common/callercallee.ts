@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createFrameGroup, createFrameGroupID, FrameGroup, FrameGroupID } from './frame_group';
+import { createFrameGroup, createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
   Executable,
@@ -22,7 +22,6 @@ export interface CallerCalleeNode {
   Callers: Map<FrameGroupID, CallerCalleeNode>;
   Callees: Map<FrameGroupID, CallerCalleeNode>;
   FrameMetadata: StackFrameMetadata;
-  FrameGroup: FrameGroup;
   FrameGroupID: FrameGroupID;
   Samples: number;
   CountInclusive: number;
@@ -31,7 +30,6 @@ export interface CallerCalleeNode {
 
 export function createCallerCalleeNode(
   frameMetadata: StackFrameMetadata,
-  frameGroup: FrameGroup,
   frameGroupID: FrameGroupID,
   samples: number
 ): CallerCalleeNode {
@@ -39,7 +37,6 @@ export function createCallerCalleeNode(
     Callers: new Map<FrameGroupID, CallerCalleeNode>(),
     Callees: new Map<FrameGroupID, CallerCalleeNode>(),
     FrameMetadata: frameMetadata,
-    FrameGroup: frameGroup,
     FrameGroupID: frameGroupID,
     Samples: samples,
     CountInclusive: 0,
@@ -75,7 +72,7 @@ export function createCallerCalleeGraph(
     rootFrame.FunctionName
   );
   const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
-  const root = createCallerCalleeNode(rootFrame, rootFrameGroup, rootFrameGroupID, 0);
+  const root = createCallerCalleeNode(rootFrame, rootFrameGroupID, 0);
   const graph: CallerCalleeGraph = { root, size: 1 };
 
   const sortedStackTraceIDs = new Array<StackTraceID>();
@@ -135,7 +132,7 @@ export function createCallerCalleeGraph(
           ExeFileName: executable.FileName,
         });
 
-        node = createCallerCalleeNode(callee, frameGroup, frameGroupID, samples);
+        node = createCallerCalleeNode(callee, frameGroupID, samples);
         currentNode.Callees.set(frameGroupID, node);
         graph.size++;
       } else {
