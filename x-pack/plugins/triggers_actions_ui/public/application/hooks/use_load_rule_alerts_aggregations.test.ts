@@ -8,7 +8,7 @@
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../common/lib/kibana';
-import { mockAggsResponse, mockChartData } from '../mock/rule_details/alert_summary';
+import { mockAggsResponse } from '../mock/rule_details/alert_summary';
 import { useLoadRuleAlertsAggs } from './use_load_rule_alerts_aggregations';
 
 jest.mock('../../common/lib/kibana');
@@ -21,7 +21,7 @@ describe('useLoadRuleAlertsAggs', () => {
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue({ index_name: ['mock_index'] });
   });
 
-  it('should return the expected chart data from the Elasticsearch Aggs. query', async () => {
+  it('should return the expected data from the Elasticsearch Aggs. query', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadRuleAlertsAggs({
         features: ALERTS_FEATURE_ID,
@@ -31,18 +31,15 @@ describe('useLoadRuleAlertsAggs', () => {
     expect(result.current).toEqual({
       isLoadingRuleAlertsAggs: true,
       ruleAlertsAggs: { active: 0, recovered: 0 },
-      alertsChartData: [],
     });
 
     await waitForNextUpdate();
-    const { ruleAlertsAggs, errorRuleAlertsAggs, alertsChartData } = result.current;
+    const { ruleAlertsAggs, errorRuleAlertsAggs } = result.current;
     expect(ruleAlertsAggs).toEqual({
       active: 1,
       recovered: 7,
     });
-    expect(alertsChartData).toEqual(mockChartData());
     expect(errorRuleAlertsAggs).toBeFalsy();
-    expect(alertsChartData.length).toEqual(33);
   });
 
   it('should have the correct query body sent to Elasticsearch', async () => {
