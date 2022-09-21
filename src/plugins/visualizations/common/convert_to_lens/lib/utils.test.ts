@@ -11,6 +11,7 @@ import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { AggBasedColumn, ColumnWithMeta, Operations } from '../..';
 import { SchemaConfig } from '../../types';
 import {
+  getCustomBucketsFromSiblingAggs,
   getFieldNameFromField,
   getLabel,
   getLabelForPercentile,
@@ -333,5 +334,80 @@ describe('isStdDevAgg', () => {
     [METRIC_TYPES.PERCENTILES, false],
   ])('for %s should return %s', (aggType, expected) => {
     expect(isStdDevAgg({ ...metric, aggType } as SchemaConfig<typeof aggType>)).toBe(expected);
+  });
+});
+
+describe('getCustomBucketsFromSiblingAggs', () => {
+  const bucket1 = {
+    id: 'some-id',
+    params: { type: 'some-type' },
+    type: 'type1',
+    enabled: true,
+  } as unknown as IAggConfig;
+  const serialize1 = () => bucket1;
+
+  const bucket2 = {
+    id: 'some-id-1',
+    params: { type: 'some-type-1' },
+    type: 'type2',
+    enabled: false,
+  } as unknown as IAggConfig;
+  const serialize2 = () => bucket2;
+
+  const bucketWithSerialize1 = { ...bucket1, serialize: serialize1 } as unknown as IAggConfig;
+  const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.AVG_BUCKET,
+    aggId: 'some-agg-id',
+    aggParams: {
+      customBucket: bucketWithSerialize1,
+    },
+  };
+
+  const bucketWithSerialize2 = { ...bucket2, serialize: serialize2 } as unknown as IAggConfig;
+  const metric2: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.AVG_BUCKET,
+    aggId: 'some-agg-id',
+    aggParams: {
+      customBucket: bucketWithSerialize2,
+    },
+  };
+  const bucket3 = { ...bucket1, id: 'other id' } as unknown as IAggConfig;
+  const serialize3 = () => bucket3;
+
+  const bucketWithSerialize3 = { ...bucket3, serialize: serialize3 } as unknown as IAggConfig;
+  const metric3: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.AVG_BUCKET,
+    aggId: 'some-agg-id',
+    aggParams: {
+      customBucket: bucketWithSerialize3,
+    },
+  };
+
+  test("should filter out duplicated custom buckets, ignoring id's", () => {
+    expect(getCustomBucketsFromSiblingAggs([metric1, metric2, metric3])).toEqual([
+      bucketWithSerialize1,
+      bucketWithSerialize2,
+    ]);
   });
 });
