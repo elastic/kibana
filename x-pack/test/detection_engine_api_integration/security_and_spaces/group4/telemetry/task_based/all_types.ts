@@ -14,6 +14,7 @@ import {
   getSecurityTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
+import { unset } from 'lodash';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -45,10 +46,10 @@ export default ({ getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
         // Remove time based fields
-        for (const [key, value] of Object.entries(stats)) {
-          delete value[0][0].time_executed_in_ms;
-          delete value[0][0].start_time;
-          delete value[0][0].end_time;
+        for (const [, value] of Object.entries(stats)) {
+          unset(value, '[0][0].time_executed_in_ms');
+          unset(value, '[0][0].start_time');
+          unset(value, '[0][0].end_time');
         }
         expect(stats).to.eql({
           detection_rules: [
