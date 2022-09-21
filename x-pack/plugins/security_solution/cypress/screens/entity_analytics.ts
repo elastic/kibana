@@ -7,6 +7,16 @@
 
 export const ENABLE_HOST_RISK_SCORE_BUTTON = '[data-test-subj="enable_host_risk_score"]';
 
+export const UPGRADE_HOST_RISK_SCORE_BUTTON = '[data-test-subj="host-risk-score-upgrade"]';
+
+export const UPGRADE_USER_RISK_SCORE_BUTTON = '[data-test-subj="user-risk-score-upgrade"]';
+
+export const HOST_RISK_SCORE_NO_DATA_DETECTED =
+  '[data-test-subj="host-risk-score-no-data-detected"]';
+
+export const USER_RISK_SCORE_NO_DATA_DETECTED =
+  '[data-test-subj="user-risk-score-no-data-detected"]';
+
 export const HOSTS_DONUT_CHART =
   '[data-test-subj="entity_analytics_hosts"] [data-test-subj="donut-chart"]';
 

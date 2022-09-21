@@ -32,7 +32,7 @@ export function useServiceMetricChartsFetcher({
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentName, serviceName, runtimeName } = useApmServiceContext();
 
   const {
     data = INITIAL_DATA,
@@ -53,13 +53,23 @@ export function useServiceMetricChartsFetcher({
                 start,
                 end,
                 agentName,
+                serviceRuntimeName: runtimeName,
               },
             },
           }
         );
       }
     },
-    [environment, kuery, serviceName, start, end, agentName, serviceNodeName]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      agentName,
+      serviceNodeName,
+      runtimeName,
+    ]
   );
 
   return {

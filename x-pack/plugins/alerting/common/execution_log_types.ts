@@ -48,6 +48,8 @@ export interface IExecutionLog {
   es_search_duration_ms: number;
   schedule_delay_ms: number;
   timed_out: boolean;
+  rule_id: string;
+  rule_name: string;
 }
 
 export interface IExecutionErrors {
