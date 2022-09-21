@@ -41,7 +41,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataCardProvider: FC<PropsWithChildren<Services>> = ({ children, ...services }) => {
+export const SampleDataCardProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   const {
     addBasePath,
     getAppNavigationHandler,

@@ -37,10 +37,9 @@ export const NoDataViewsPromptProvider: FC<PropsWithChildren<NoDataViewsPromptSe
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const NoDataViewsPromptKibanaProvider: FC<PropsWithChildren<NoDataViewsPromptKibanaDependencies>> = ({
-  children,
-  ...services
-}) => {
+export const NoDataViewsPromptKibanaProvider: FC<
+  PropsWithChildren<NoDataViewsPromptKibanaDependencies>
+> = ({ children, ...services }) => {
   return (
     <NoDataViewsPromptContext.Provider
       value={{

@@ -27,9 +27,8 @@ export const NoDataConfigPageProvider: FC<PropsWithChildren<NoDataConfigPageServ
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NoDataConfigPageKibanaProvider: FC<PropsWithChildren<NoDataConfigPageKibanaDependencies>> = ({
-  children,
-  ...dependencies
-}) => {
+export const NoDataConfigPageKibanaProvider: FC<
+  PropsWithChildren<NoDataConfigPageKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   return <NoDataPageKibanaProvider {...dependencies}>{children}</NoDataPageKibanaProvider>;
 };

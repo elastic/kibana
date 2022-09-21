@@ -31,10 +31,9 @@ export const KibanaPageTemplateProvider: FC<PropsWithChildren<KibanaPageTemplate
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaPageTemplateKibanaProvider: FC<PropsWithChildren<KibanaPageTemplateKibanaDependencies>> = ({
-  children,
-  ...dependencies
-}) => {
+export const KibanaPageTemplateKibanaProvider: FC<
+  PropsWithChildren<KibanaPageTemplateKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   return (
     <NoDataConfigPageKibanaProvider {...dependencies}>{children}</NoDataConfigPageKibanaProvider>
   );
