@@ -9,7 +9,7 @@ import { EuiComment, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { AddToCaseButton } from '../../cases/add_to_cases_button';
+import { AddToCasesWrapper } from '../../cases/add_to_cases_wrapper';
 import type { OsqueryActionResultsProps } from './types';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { ATTACHED_QUERY } from '../../agents/translations';
@@ -34,7 +34,7 @@ export const OsqueryResult = ({
 
   const addToCaseButton = useCallback(
     (payload) => (
-      <AddToCaseButton
+      <AddToCasesWrapper
         queryId={payload.queryId}
         actionId={actionId}
         agentIds={data?.agents}
