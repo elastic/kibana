@@ -12,6 +12,7 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   getSecurityTelemetryStats,
+  removeTimeFieldsFromTelemetryStats
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 import { unset } from 'lodash';
@@ -45,12 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should only have task metric values when no rules are running', async () => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
-        // Remove time based fields
-        for (const [, value] of Object.entries(stats)) {
-          unset(value, '[0][0].time_executed_in_ms');
-          unset(value, '[0][0].start_time');
-          unset(value, '[0][0].end_time');
-        }
+        removeTimeFieldsFromTelemetryStats(stats);
         expect(stats).to.eql({
           detection_rules: [
             [
