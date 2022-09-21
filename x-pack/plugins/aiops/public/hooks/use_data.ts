@@ -28,6 +28,9 @@ import {
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
 import type { Dictionary } from './use_url_state';
+import type { GroupTableItem } from '../components/spike_analysis_table/spike_analysis_table_groups';
+
+const DEFAULT_BAR_TARGET = 75;
 
 export const useData = (
   {
@@ -36,7 +39,9 @@ export const useData = (
   }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
-  selectedChangePoint?: ChangePoint
+  selectedChangePoint?: ChangePoint,
+  barTarget: number = DEFAULT_BAR_TARGET,
+  selectedGroup?: GroupTableItem | null
 ) => {
   const {
     uiSettings,
@@ -106,15 +111,25 @@ export const useData = (
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest
-      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      ? {
+          ...fieldStatsRequest,
+          selectedChangePoint,
+          selectedGroup,
+          includeSelectedChangePoint: false,
+        }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint]);
+  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest && selectedChangePoint
-      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+    return fieldStatsRequest && (selectedChangePoint || selectedGroup)
+      ? {
+          ...fieldStatsRequest,
+          selectedChangePoint,
+          selectedGroup,
+          includeSelectedChangePoint: true,
+        }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint]);
+  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
 
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
@@ -125,10 +140,9 @@ export const useData = (
   function updateFieldStatsRequest() {
     const timefilterActiveBounds = timefilter.getActiveBounds();
     if (timefilterActiveBounds !== undefined) {
-      const BAR_TARGET = 75;
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
-      _timeBuckets.setBarTarget(BAR_TARGET);
+      _timeBuckets.setBarTarget(barTarget);
       setFieldStatsRequest({
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
@@ -186,6 +200,7 @@ export const useData = (
     earliest: fieldStatsRequest?.earliest,
     /** End timestamp filter */
     latest: fieldStatsRequest?.latest,
+    intervalMs: fieldStatsRequest?.intervalMs,
     searchQueryLanguage,
     searchString,
     searchQuery,

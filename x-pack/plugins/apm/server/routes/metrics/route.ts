@@ -7,9 +7,10 @@
 
 import * as t from 'io-ts';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
+import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -23,6 +24,7 @@ const metricsChartsRoute = createApmServerRoute({
       }),
       t.partial({
         serviceNodeName: t.string,
+        serviceRuntimeName: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -33,25 +35,20 @@ const metricsChartsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    charts: Array<{
-      title: string;
-      key: string;
-      yUnit: import('./../../../typings/timeseries').YUnit;
-      series: Array<{
-        title: string;
-        key: string;
-        type: import('./../../../typings/timeseries').ChartType;
-        color: string;
-        overallValue: number;
-        data: Array<{ x: number; y: number | null }>;
-      }>;
-    }>;
+    charts: FetchAndTransformMetrics[];
   }> => {
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { agentName, environment, kuery, serviceNodeName, start, end } =
-      params.query;
+    const {
+      agentName,
+      environment,
+      kuery,
+      serviceNodeName,
+      start,
+      end,
+      serviceRuntimeName,
+    } = params.query;
 
     const charts = await getMetricsChartDataByAgent({
       environment,
@@ -62,6 +59,7 @@ const metricsChartsRoute = createApmServerRoute({
       serviceNodeName,
       start,
       end,
+      serviceRuntimeName,
     });
 
     return { charts };

@@ -12,6 +12,13 @@ import { Indicator } from '../../../../../common/types/indicator';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 
+const BUTTON_LABEL: string = i18n.translate(
+  'xpack.threatIntelligence.indicator.table.viewDetailsButton',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
 export interface OpenIndicatorFlyoutButtonProps {
   /**
    * {@link Indicator} passed to the flyout component.
@@ -35,22 +42,15 @@ export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
   onOpen,
   isOpen,
 }) => {
-  const buttonLabel: string = i18n.translate(
-    'xpack.threatIntelligence.indicator.table.viewDetailsButton',
-    {
-      defaultMessage: 'View details',
-    }
-  );
-
   return (
-    <EuiToolTip content={buttonLabel} delay="long">
+    <EuiToolTip content={BUTTON_LABEL}>
       <EuiButtonIcon
         data-test-subj={BUTTON_TEST_ID}
         color={isOpen ? 'text' : 'primary'}
         iconType={isOpen ? 'minimize' : 'expand'}
         isSelected={isOpen}
         iconSize="s"
-        aria-label={buttonLabel}
+        aria-label={BUTTON_LABEL}
         onClick={() => onOpen(indicator)}
       />
     </EuiToolTip>

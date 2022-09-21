@@ -14,11 +14,15 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
+import { useFetchStatus } from './fleet_integration/use_fetch_status';
+import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
   StartPlugins,
   AppPluginStartDependencies,
+  SetupPlugins,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
 import {
@@ -30,7 +34,9 @@ import {
   getLazyOsqueryAction,
   getLazyLiveQueryField,
   useIsOsqueryAvailableSimple,
+  getExternalReferenceAttachmentRegular,
 } from './shared_components';
+import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -40,9 +46,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): OsqueryPluginSetup {
+  public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
+
     // Register an application into the side navigation menu
     core.application.register({
       id: 'osquery',
@@ -65,6 +72,17 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           kibanaVersion
         );
       },
+    });
+
+    core.getStartServices().then(([coreStart, depsStart]) => {
+      plugins.cases?.attachmentFramework.registerExternalReference(
+        getExternalReferenceAttachmentRegular({
+          ...coreStart,
+          ...depsStart,
+          storage,
+          kibanaVersion,
+        } as unknown as ServicesWrapperProps['services'])
+      );
     });
 
     // Return methods that should be available to other plugins
@@ -103,6 +121,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         ...core,
         ...plugins,
       }),
+      OsqueryResults: getLazyOsqueryResults({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+      OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
+      fetchInstallationStatus: useFetchStatus,
       isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }

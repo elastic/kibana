@@ -34,9 +34,13 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
+  cloud: CloudSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   eventLog: IEventLogService;
@@ -50,11 +54,13 @@ export interface SecuritySolutionPluginSetupDependencies {
   telemetry?: TelemetryPluginSetup;
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
+  osquery: OsqueryPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
   cases?: CasesPluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
