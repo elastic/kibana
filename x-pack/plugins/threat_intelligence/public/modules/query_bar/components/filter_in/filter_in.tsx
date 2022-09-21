@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, VFC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { ComponentType } from '../../../../types/component_type';
@@ -15,11 +14,9 @@ import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicato
 import { FilterIn as FilterInConst, updateFiltersArray } from '../../lib/filter';
 import { Indicator } from '../../../../types/indicator';
 import { useStyles } from './styles';
+import { ICON_TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
-const ICON_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterInButton', {
-  defaultMessage: 'Filter In',
-});
 
 export interface FilterInProps {
   /**

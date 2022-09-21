@@ -7,8 +7,8 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSelect, EuiSelectOption } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { SELECT } from './translations';
 import { SecuritySolutionDataViewBase } from '../../../../../../types';
 import { RawIndicatorFieldId } from '../../../../../../types/indicator';
 
@@ -50,9 +50,7 @@ export const IndicatorFieldSelector = memo<IndicatorFieldSelectorProps>(
         data-test-subj={DROPDOWN_TEST_ID}
         onChange={(event) => selectedFieldChange(event.target.value)}
         options={fields}
-        prepend={i18n.translate('xpack.threatIntelligence.indicator.fieldSelector.label', {
-          defaultMessage: 'Stack by',
-        })}
+        prepend={SELECT}
         value={selectedField}
       />
     );

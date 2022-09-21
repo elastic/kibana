@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, VFC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { ComponentType } from '../../../../types/component_type';
@@ -15,11 +14,9 @@ import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicato
 import { FilterOut as FilterOutConst, updateFiltersArray } from '../../lib/filter';
 import { Indicator } from '../../../../types/indicator';
 import { useStyles } from './styles';
+import { ICON_TITLE } from './translations';
 
 const ICON_TYPE = 'minusInCircle';
-const ICON_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOutButton', {
-  defaultMessage: 'Filter Out',
-});
 
 export interface FilterOutProps {
   /**

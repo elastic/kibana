@@ -7,17 +7,10 @@
 
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { Indicator } from '../../../../types/indicator';
+import { BUTTON_LABEL } from './translations';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
-
-const BUTTON_LABEL: string = i18n.translate(
-  'xpack.threatIntelligence.indicator.table.viewDetailsButton',
-  {
-    defaultMessage: 'View details',
-  }
-);
 
 export interface OpenIndicatorFlyoutButtonProps {
   /**

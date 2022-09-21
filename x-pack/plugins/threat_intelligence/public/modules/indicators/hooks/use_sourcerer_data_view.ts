@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { NAME } from './translations';
 import { RawIndicatorFieldId } from '../../../types/indicator';
 import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
@@ -20,9 +20,7 @@ const indicatorNameField = {
   searchable: true,
   type: 'string',
   category: 'threat',
-  description: i18n.translate('xpack.threatIntelligence.indicatorNameFieldDescription', {
-    defaultMessage: 'Indicator display name generated in the runtime ',
-  }),
+  description: NAME,
   esTypes: ['keyword'],
 } as const;
 
