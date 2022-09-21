@@ -114,6 +114,7 @@ async function mountComponent(isTimeBased: boolean = false) {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
     isTimeBased,
+    onResetChartHeight: jest.fn(),
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;

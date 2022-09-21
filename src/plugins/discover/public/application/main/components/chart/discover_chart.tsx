@@ -44,6 +44,7 @@ export function DiscoverChart({
   interval,
   isTimeBased,
   appendHistogram,
+  onResetChartHeight,
 }: {
   className?: string;
   resetSavedSearch: () => void;
@@ -56,6 +57,7 @@ export function DiscoverChart({
   hideChart?: boolean;
   interval?: string;
   appendHistogram?: ReactElement;
+  onResetChartHeight?: () => void;
 }) {
   const { data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
@@ -113,13 +115,14 @@ export function DiscoverChart({
     },
     [data]
   );
-  const panels = useChartPanels(
+  const panels = useChartPanels({
     toggleHideChart,
-    (newInterval) => stateContainer.setAppState({ interval: newInterval }),
-    () => setShowChartOptionsPopover(false),
+    onChangeInterval: (newInterval) => stateContainer.setAppState({ interval: newInterval }),
+    closePopover: () => setShowChartOptionsPopover(false),
+    onResetChartHeight,
     hideChart,
-    interval
-  );
+    interval,
+  });
 
   return (
     <EuiFlexGroup

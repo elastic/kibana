@@ -12,13 +12,21 @@ import type {
 } from '@elastic/eui';
 import { search } from '@kbn/data-plugin/public';
 
-export function useChartPanels(
-  toggleHideChart: () => void,
-  onChangeInterval: (value: string) => void,
-  closePopover: () => void,
-  hideChart?: boolean,
-  interval?: string
-) {
+export function useChartPanels({
+  toggleHideChart,
+  onChangeInterval,
+  closePopover,
+  onResetChartHeight,
+  hideChart,
+  interval,
+}: {
+  toggleHideChart: () => void;
+  onChangeInterval: (value: string) => void;
+  closePopover: () => void;
+  onResetChartHeight?: () => void;
+  hideChart?: boolean;
+  interval?: string;
+}) {
   const selectedOptionIdx = search.aggs.intervalOptions.findIndex((opt) => opt.val === interval);
   const intervalDisplay =
     selectedOptionIdx > -1
@@ -43,6 +51,20 @@ export function useChartPanels(
     },
   ];
   if (!hideChart) {
+    if (onResetChartHeight) {
+      mainPanelItems.push({
+        name: i18n.translate('discover.resetChartHeight', {
+          defaultMessage: 'Reset to default height',
+        }),
+        icon: 'refresh',
+        onClick: () => {
+          onResetChartHeight();
+          closePopover();
+        },
+        'data-test-subj': 'discoverChartResetHeight',
+      });
+    }
+
     mainPanelItems.push({
       name: i18n.translate('discover.timeIntervalWithValue', {
         defaultMessage: 'Time interval: {timeInterval}',

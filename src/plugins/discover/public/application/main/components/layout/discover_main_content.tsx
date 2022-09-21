@@ -15,7 +15,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { RefObject, useCallback, useMemo } from 'react';
+import React, { RefObject, useCallback, useMemo, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
@@ -34,6 +34,8 @@ import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
+
+export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export interface DiscoverMainContentProps {
   isPlainRecord: boolean;
@@ -74,7 +76,7 @@ export const DiscoverMainContent = ({
   columns,
   resizeRef,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const { trackUiMetric, storage } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -104,14 +106,36 @@ export const DiscoverMainContent = ({
   const hideChart = state.hideChart || !isTimeBased;
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
   const { euiTheme } = useEuiTheme();
-  const topPanelHeight = euiTheme.base * 12;
+  const defaultTopPanelHeight = euiTheme.base * 12;
   const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
+
+  const [topPanelHeight, setTopPanelHeight] = useState(
+    Number(storage.get(HISTOGRAM_HEIGHT_KEY)) || defaultTopPanelHeight
+  );
+
+  const storeTopPanelHeight = useCallback(
+    (newTopPanelHeight: number) => {
+      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
+      setTopPanelHeight(newTopPanelHeight);
+    },
+    [storage]
+  );
+
+  const resetTopPanelHeight = useCallback(
+    () => storeTopPanelHeight(defaultTopPanelHeight),
+    [storeTopPanelHeight, defaultTopPanelHeight]
+  );
+
+  const onTopPanelHeightChange = useCallback(
+    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
+    [storeTopPanelHeight]
+  );
 
   const chartClassName =
     showFixedPanels && !hideChart
       ? css`
-          height: ${topPanelHeight}px;
+          height: ${defaultTopPanelHeight}px;
         `
       : 'eui-fullHeight';
 
@@ -136,6 +160,9 @@ export const DiscoverMainContent = ({
           interval={state.interval}
           isTimeBased={isTimeBased}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
+          onResetChartHeight={
+            panelsMode === DISCOVER_PANELS_MODE.RESIZABLE ? resetTopPanelHeight : undefined
+          }
         />
       </InPortal>
       <InPortal node={mainPanelNode}>
@@ -189,11 +216,12 @@ export const DiscoverMainContent = ({
         className="dscPageContent__inner"
         mode={panelsMode}
         resizeRef={resizeRef}
-        initialTopPanelHeight={topPanelHeight}
+        topPanelHeight={topPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
         mainPanel={<OutPortal node={mainPanelNode} />}
+        onTopPanelHeightChange={onTopPanelHeightChange}
       />
     </>
   );

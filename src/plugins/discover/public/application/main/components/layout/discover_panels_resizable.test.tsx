@@ -33,6 +33,7 @@ describe('Discover panels resizable', () => {
     topPanel = <></>,
     mainPanel = <></>,
     attachTo,
+    onTopPanelHeightChange = jest.fn(),
   }: {
     className?: string;
     resizeRef?: RefObject<HTMLDivElement>;
@@ -42,16 +43,18 @@ describe('Discover panels resizable', () => {
     topPanel?: ReactElement;
     mainPanel?: ReactElement;
     attachTo?: HTMLElement;
+    onTopPanelHeightChange?: (height: number) => void;
   }) => {
     return mount(
       <DiscoverPanelsResizable
         className={className}
         resizeRef={resizeRef}
-        initialTopPanelHeight={initialTopPanelHeight}
+        topPanelHeight={initialTopPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={topPanel}
         mainPanel={mainPanel}
+        onTopPanelHeightChange={onTopPanelHeightChange}
       />,
       attachTo ? { attachTo } : undefined
     );
@@ -95,7 +98,10 @@ describe('Discover panels resizable', () => {
 
   it('should set the correct heights of both panels when the panels are resized', () => {
     const initialTopPanelHeight = 200;
-    const component = mountComponent({ initialTopPanelHeight });
+    const onTopPanelHeightChange = jest.fn((topPanelHeight) => {
+      component.setProps({ topPanelHeight }).update();
+    });
+    const component = mountComponent({ initialTopPanelHeight, onTopPanelHeightChange });
     expectCorrectPanelSizes(component, containerHeight, initialTopPanelHeight);
     const newTopPanelSize = 30;
     const onPanelSizeChange = component
@@ -106,7 +112,9 @@ describe('Discover panels resizable', () => {
       onPanelSizeChange({ [topPanelId]: newTopPanelSize });
     });
     forceRender(component);
-    expectCorrectPanelSizes(component, containerHeight, containerHeight * (newTopPanelSize / 100));
+    const newTopPanelHeight = (newTopPanelSize / 100) * containerHeight;
+    expect(onTopPanelHeightChange).toHaveBeenCalledWith(newTopPanelHeight);
+    expectCorrectPanelSizes(component, containerHeight, newTopPanelHeight);
   });
 
   it('should maintain the height of the top panel and resize the main panel when the container height changes', () => {
