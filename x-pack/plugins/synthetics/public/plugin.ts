@@ -41,6 +41,8 @@ import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
@@ -80,6 +82,13 @@ export interface ClientPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   spaces: SpacesPluginStart;
   cloud?: CloudStart;
+  appName: string;
+  storage: IStorageWrapper;
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+  docLinks: DocLinksStart;
+  uiSettings: CoreStart['uiSettings'];
+  usageCollection: UsageCollectionStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
