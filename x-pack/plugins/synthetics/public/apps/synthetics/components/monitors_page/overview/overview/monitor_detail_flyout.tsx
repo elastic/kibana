@@ -309,7 +309,7 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
+                <EuiButtonEmpty onClick={props.onClose}>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
