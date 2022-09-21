@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('4.13K');
+      expect(metricData[0].title).to.eql('bytes');
     });
 
     it('should allow switching to another query', async () => {
