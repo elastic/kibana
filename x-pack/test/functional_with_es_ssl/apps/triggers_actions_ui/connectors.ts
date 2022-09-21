@@ -309,7 +309,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .get(`/api/actions/connectors`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
-    const i = findIndex(body, (c) => c.name === name);
+    const i = findIndex(body, (c: any) => c.name === name);
     return body[i];
   }
 };
