@@ -163,9 +163,6 @@ export const getFormulaForPipelineAgg = (
 ) => {
   const { aggType } = agg;
   const supportedAgg = SUPPORTED_METRICS[aggType];
-  if (!supportedAgg) {
-    return null;
-  }
 
   const metricAgg = getMetricFromParentPipelineAgg(agg, aggs);
   if (!metricAgg) {
