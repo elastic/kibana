@@ -88,7 +88,7 @@ export const EntityAnalyticsHeader = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
-  const totalAnomalies = useMemo(() => sum(data.map(({ count }) => count)), [data]);
+  const totalAnomalies = useMemo(() => sum(data.map(({ count }) => count)) || '-', [data]);
 
   const jobsUrl = useMlHref(ml, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -102,7 +102,9 @@ export const EntityAnalyticsHeader = () => {
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem className="eui-textCenter">
                 <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
-                  <span>{hostsSeverityCount[RiskSeverity.critical]}</span>
+                  <span>
+                    {hostsSeverityCount ? hostsSeverityCount[RiskSeverity.critical] : '-'}
+                  </span>
                 </StyledEuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -122,7 +124,9 @@ export const EntityAnalyticsHeader = () => {
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem className="eui-textCenter">
                 <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
-                  <span>{usersSeverityCount[RiskSeverity.critical]}</span>
+                  <span>
+                    {usersSeverityCount ? usersSeverityCount[RiskSeverity.critical] : '-'}
+                  </span>
                 </StyledEuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>

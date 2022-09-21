@@ -74,7 +74,7 @@ const useRiskScoreKpiComplete = () => useObservable(getRiskScoreKpiWithOptionalS
 interface RiskScoreKpi {
   error: unknown;
   isModuleDisabled: boolean;
-  severityCount: SeverityCount;
+  severityCount?: SeverityCount;
   loading: boolean;
 }
 
@@ -151,17 +151,19 @@ const useRiskScoreKpi = ({
     }
   }, [data, defaultIndex, start, filterQuery, skip, entity, featureEnabled]);
 
-  const severityCount = useMemo(
-    () => ({
-      [RiskSeverity.unknown]: 0,
-      [RiskSeverity.low]: 0,
-      [RiskSeverity.moderate]: 0,
-      [RiskSeverity.high]: 0,
-      [RiskSeverity.critical]: 0,
-      ...(result?.kpiRiskScore ?? {}),
-    }),
-    [result]
-  );
+  const severityCount = useMemo(() => {
+    if (result?.kpiRiskScore) {
+      return {
+        [RiskSeverity.unknown]: result?.kpiRiskScore[RiskSeverity.unknown] ?? 0,
+        [RiskSeverity.low]: result?.kpiRiskScore[RiskSeverity.low] ?? 0,
+        [RiskSeverity.moderate]: result?.kpiRiskScore[RiskSeverity.moderate] ?? 0,
+        [RiskSeverity.high]: result?.kpiRiskScore[RiskSeverity.high] ?? 0,
+        [RiskSeverity.critical]: result?.kpiRiskScore[RiskSeverity.critical] ?? 0,
+      };
+    } else {
+      return undefined;
+    }
+  }, [result]);
 
   return { error, severityCount, loading, isModuleDisabled };
 };

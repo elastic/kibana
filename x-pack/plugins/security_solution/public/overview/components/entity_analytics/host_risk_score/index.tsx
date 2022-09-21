@@ -19,6 +19,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useHostRiskScore, useHostRiskScoreKpi } from '../../../../risk_score/containers';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
@@ -156,7 +157,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
               <EuiFlexItem grow={false}>
                 <SeverityFilterGroup
                   selectedSeverities={selectedSeverity}
-                  severityCount={severityCount}
+                  severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
                   title={i18n.HOST_RISK}
                   onSelect={setSelectedSeverity}
                 />

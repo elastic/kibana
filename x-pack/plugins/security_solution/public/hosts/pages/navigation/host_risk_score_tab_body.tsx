@@ -21,7 +21,7 @@ import {
   useHostRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
@@ -109,7 +109,7 @@ export const HostRiskScoreQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      severityCount={severityCount}
+      severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
       totalCount={totalCount}
       type={type}
     />
