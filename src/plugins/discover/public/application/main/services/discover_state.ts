@@ -65,6 +65,8 @@ import {
   DataTotalHitsMsg,
   SavedSearchData,
 } from '../hooks/use_saved_search';
+import { persistSavedSearch } from '@kbn/discover-plugin/public/application/main/utils/persist_saved_search';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 export interface AppState {
   /**
@@ -155,7 +157,7 @@ export interface DiscoverStateContainer {
     reset: (id: string | undefined) => Promise<SavedSearch>;
   };
 
-  dataState: {
+  dataStateContainer: {
     fetch: () => void;
     data$: SavedSearchData;
     refetch$: DataRefetch$;
@@ -210,6 +212,11 @@ export interface DiscoverStateContainer {
      */
     pauseAutoRefreshInterval: () => Promise<void>;
     fetch: (reset?: boolean) => void;
+    persistSavedSearch: (params: {
+      onError: (error: Error, savedSearch: SavedSearch) => void;
+      onSuccess: (id: string) => void;
+      saveOptions: SavedObjectSaveOpts;
+    }) => Promise<any>;
   };
 }
 
@@ -255,11 +262,37 @@ function getSavedSearchContainer({
     savedSearch$.next(newSavedSearch);
     return newSavedSearch;
   };
+  const persist = ({
+    onError,
+    onSuccess,
+    saveOptions,
+    state,
+  }: {
+    onError: (error: Error, savedSearch: SavedSearch) => void;
+    onSuccess: (id: string) => void;
+    saveOptions: SavedObjectSaveOpts;
+    state: AppState;
+  }) => {
+    return persistSavedSearch(savedSearch, {
+      dataView: savedSearch.searchSource.getField('index')!,
+      onError,
+      onSuccess,
+      state: state,
+      services,
+      saveOptions,
+    });
+  };
+
+  const hasChanged = () => {
+    return !isEqual(savedSearch, savedSearch$.getValue());
+  };
 
   return {
     savedSearch$,
     set,
     reset,
+    hasChanged,
+    persist,
   };
 }
 
@@ -397,7 +430,7 @@ export function getDiscoverStateContainer({
       stop();
     };
   };
-  const dataStateContainer = getDataState({
+  const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
     appStateContainer,
@@ -406,7 +439,7 @@ export function getDiscoverStateContainer({
 
   return {
     appStateContainer: appStateContainerModified,
-    dataState: dataStateContainer,
+    dataStateContainer,
     savedSearchContainer,
     startSync: () => {
       const { start, stop } = syncAppState();
@@ -466,6 +499,14 @@ export function getDiscoverStateContainer({
       fetch: (reset?: boolean) => {
         const msg = reset ? 'reset' : undefined;
         dataStateContainer.refetch$.next(msg);
+      },
+      persistSavedSearch: ({ onError, onSuccess, saveOptions }) => {
+        return savedSearchContainer.persist({
+          onError,
+          onSuccess,
+          saveOptions,
+          state: appStateContainer.getState(),
+        });
       },
     },
   };
@@ -590,7 +631,7 @@ function createUrlGeneratorState({
   };
 }
 
-function getDataState({
+function getDataStateContainer({
   services,
   searchSessionManager,
   appStateContainer,
@@ -613,8 +654,7 @@ function getDataState({
   const refetch$ = new Subject<DataRefetchMsg>();
   const shouldSearchOnPageLoad =
     services.uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-    savedSearch$.getValue().id !== undefined ||
-    services.timefilter.getRefreshInterval().pause === false ||
+    savedSearch$.getValue().id !== undefined || !services.timefilter.getRefreshInterval().pause ||
     searchSessionManager.hasSearchSessionIdInURL();
   const initialFetchStatus = shouldSearchOnPageLoad
     ? FetchStatus.LOADING

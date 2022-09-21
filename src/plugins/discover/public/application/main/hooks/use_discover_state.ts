@@ -59,7 +59,7 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, inspectorAdapters, subscribe } = stateContainer.dataState;
+  const { data$, refetch$, inspectorAdapters, subscribe } = stateContainer.dataStateContainer;
 
   useEffect(() => {
     const unsubscribe = subscribe();
@@ -81,7 +81,7 @@ export function useDiscoverState({
   /**
    * Reset to display loading spinner when savedSearch is changing
    */
-  useEffect(() => stateContainer.dataState.reset(), [savedSearch.id, stateContainer]);
+  useEffect(() => stateContainer.dataStateContainer.reset(), [savedSearch.id, stateContainer]);
 
   /**
    * Sync URL state with local app state on saved search load
@@ -116,7 +116,7 @@ export function useDiscoverState({
         nextDataView = (
           await loadDataView(nextState.index, services.dataViews, services.uiSettings)
         ).loaded;
-        stateContainer.dataState.reset();
+        stateContainer.dataStateContainer.reset();
         savedSearch.searchSource.setField('index', nextDataView);
       }
 
@@ -127,19 +127,13 @@ export function useDiscoverState({
 
       if (
         dataViewChanged &&
-        stateContainer.dataState.initialFetchStatus === FetchStatus.UNINITIALIZED
+        stateContainer.dataStateContainer.initialFetchStatus === FetchStatus.UNINITIALIZED
       ) {
         return;
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged || dataViewChanged) {
-        addLog('📦 AppStateContainer update triggers data fetching', {
-          chartDisplayChanged,
-          chartIntervalChanged,
-          docTableSortChanged,
-          dataViewChanged,
-        });
-
+        addLog('📦 AppStateContainer update triggers data fetching');
         refetch$.next(undefined);
       }
     });
@@ -177,10 +171,10 @@ export function useDiscoverState({
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (dataView && stateContainer.dataState.initialFetchStatus === FetchStatus.LOADING) {
-      stateContainer.dataState.refetch$.next(undefined);
+    if (dataView && stateContainer.dataStateContainer.initialFetchStatus === FetchStatus.LOADING) {
+      stateContainer.dataStateContainer.refetch$.next(undefined);
     }
-  }, [dataView, savedSearch.id, stateContainer.dataState.initialFetchStatus]);
+  }, [dataView, savedSearch.id, stateContainer.dataStateContainer.initialFetchStatus, stateContainer.dataStateContainer.refetch$]);
 
   /**
    * We need to make sure the auto refresh interval is disabled for

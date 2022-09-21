@@ -16,11 +16,9 @@ import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/pu
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
-import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
-  dataView,
   navigateTo,
   savedSearch,
   saveOptions,
@@ -79,14 +77,11 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return persistSavedSearch(savedSearch, {
-    dataView,
+  return stateContainer.actions.persistSavedSearch({
     onError,
     onSuccess,
     saveOptions,
-    services,
-    state: stateContainer.appStateContainer.getState(),
-  });
+  })
 }
 
 export async function onSaveSearch({

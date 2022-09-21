@@ -316,7 +316,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />
+                <DiscoverUninitialized onRefresh={() => stateContainer.dataStateContainer.fetch()} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
@@ -370,7 +370,7 @@ export function DiscoverLayout({
                       stateContainer={stateContainer}
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       trackUiMetric={trackUiMetric}
-                      fetchQuery={stateContainer.dataState.fetch}
+                      fetchQuery={stateContainer.dataStateContainer.fetch}
                     />
                   )}
                 </EuiFlexGroup>
