@@ -37,7 +37,7 @@ export const fetchMlInferencePipelineProcessorNames = async (
 export const fetchPipelineProcessorInferenceData = async (
   client: ElasticsearchClient,
   mlInferencePipelineProcessorNames: string[]
-): Promise<Record<string, InferencePipeline>> => {
+): Promise<InferencePipeline[]> => {
   const mlInferencePipelineProcessorConfigs = await client.ingest.getPipeline({
     id: mlInferencePipelineProcessorNames.join(),
   });
@@ -53,16 +53,16 @@ export const fetchPipelineProcessorInferenceData = async (
 
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
-        pipelineProcessorData[trainedModelName] = {
+        pipelineProcessorData.push({
           isDeployed: false,
           pipelineName: pipelineProcessorName,
           trainedModelName,
           types: [],
-        };
+        });
 
       return pipelineProcessorData;
     },
-    {} as Record<string, InferencePipeline>
+    [] as InferencePipeline[]
   );
 };
 
@@ -115,19 +115,25 @@ export const getMlModelConfigsForModelIds = async (
 
 export const fetchAndAddTrainedModelData = async (
   client: ElasticsearchClient,
-  pipelineProcessorData: Record<string, InferencePipeline>
-): Promise<Record<string, InferencePipeline>> => {
-  const trainedModelNames = Object.keys(pipelineProcessorData);
+  pipelineProcessorData: InferencePipeline[]
+): Promise<InferencePipeline[]> => {
+  const trainedModelNames = Array.from(
+    new Set(pipelineProcessorData.map((pipeline) => pipeline.trainedModelName))
+  );
   const modelConfigs = await getMlModelConfigsForModelIds(client, trainedModelNames);
 
-  for (const [modelName, modelData] of Object.entries(modelConfigs)) {
-    if (pipelineProcessorData.hasOwnProperty(modelName)) {
-      pipelineProcessorData[modelName].types = modelData.types;
-      pipelineProcessorData[modelName].isDeployed = modelData.isDeployed;
+  return pipelineProcessorData.map((data) => {
+    const model = modelConfigs[data.trainedModelName];
+    if (!model) {
+      return data;
     }
-  }
-
-  return pipelineProcessorData;
+    const { types, isDeployed } = model;
+    return {
+      ...data,
+      types,
+      isDeployed,
+    };
+  });
 };
 
 export const fetchMlInferencePipelineProcessors = async (
@@ -144,7 +150,7 @@ export const fetchMlInferencePipelineProcessors = async (
   // the possible pipeline data.
   if (mlInferencePipelineProcessorNames.length === 0) return [] as InferencePipeline[];
 
-  let pipelineProcessorInferenceDataByTrainedModelName = await fetchPipelineProcessorInferenceData(
+  let pipelineProcessorInferenceData = await fetchPipelineProcessorInferenceData(
     client,
     mlInferencePipelineProcessorNames
   );
@@ -152,13 +158,7 @@ export const fetchMlInferencePipelineProcessors = async (
   // Elasticsearch's GET trained models and GET trained model stats API calls will return the
   // data/stats for all of the trained models if no ids are provided. If we didn't find any
   // inference processors, return early to avoid fetching all of the possible trained model data.
-  if (Object.keys(pipelineProcessorInferenceDataByTrainedModelName).length === 0)
-    return [] as InferencePipeline[];
+  if (pipelineProcessorInferenceData.length === 0) return [] as InferencePipeline[];
 
-  pipelineProcessorInferenceDataByTrainedModelName = await fetchAndAddTrainedModelData(
-    client,
-    pipelineProcessorInferenceDataByTrainedModelName
-  );
-
-  return Object.values(pipelineProcessorInferenceDataByTrainedModelName);
+  return await fetchAndAddTrainedModelData(client, pipelineProcessorInferenceData);
 };
