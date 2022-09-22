@@ -77,9 +77,7 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
     dataProvider,
     field: key,
     ownFocus: false,
-    onClick: () => {
-
-    }
+    onClick: () => {},
   };
   if (component) addToTimelineProps.Component = component;
 
