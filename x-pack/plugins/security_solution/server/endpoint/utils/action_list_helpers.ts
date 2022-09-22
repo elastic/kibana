@@ -76,9 +76,9 @@ export const getActions = async ({
   ];
 
   if (userIds?.length) {
-    const kql = userIds.map((userId) => `user_id:*${userId}*`).join(' or ');
-    const query = toElasticsearchQuery(fromKueryExpression(kql));
-    must.push(query);
+    const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
+    const mustClause = toElasticsearchQuery(fromKueryExpression(userIdsKql));
+    must.push(mustClause);
   }
 
   const actionsSearchQuery: SearchRequest = {

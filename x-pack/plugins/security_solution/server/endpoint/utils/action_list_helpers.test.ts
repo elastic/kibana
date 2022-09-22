@@ -71,6 +71,7 @@ describe('action helpers', () => {
         }
       );
     });
+
     it('should query with additional filter options provided', async () => {
       const esClient = mockScopedEsClient.asInternalUser;
 
@@ -83,7 +84,7 @@ describe('action helpers', () => {
         elasticAgentIds: ['agent-123', 'agent-456'],
         endDate: 'now',
         commands: ['isolate', 'unisolate', 'get-file'],
-        userIds: ['elastic', 'kibana'],
+        userIds: ['*elastic*', '*kibana*'],
       });
 
       expect(esClient.search).toHaveBeenCalledWith(
@@ -186,6 +187,109 @@ describe('action helpers', () => {
         }
       );
     });
+
+    it('should search with exact usernames when given', async () => {
+      const esClient = mockScopedEsClient.asInternalUser;
+
+      applyActionListEsSearchMock(esClient);
+      await getActions({
+        esClient,
+        size: 10,
+        from: 1,
+        startDate: 'now-1d',
+        endDate: 'now',
+        userIds: ['elastic', 'kibana'],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          term: {
+                            input_type: 'endpoint',
+                          },
+                        },
+                        {
+                          term: {
+                            type: 'INPUT_ACTION',
+                          },
+                        },
+                        {
+                          range: {
+                            '@timestamp': {
+                              gte: 'now-1d',
+                            },
+                          },
+                        },
+                        {
+                          range: {
+                            '@timestamp': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [
+                              {
+                                match: {
+                                  user_id: 'elastic',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              {
+                                match: {
+                                  user_id: 'kibana',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
+          },
+          from: 1,
+          index: '.logs-endpoint.actions-default',
+          size: 10,
+        },
+        {
+          ignore: [404],
+          meta: true,
+        }
+      );
+    });
+
     it('should return expected output', async () => {
       const esClient = mockScopedEsClient.asInternalUser;
       const actionRequests = createActionRequestsEsSearchResultsMock();

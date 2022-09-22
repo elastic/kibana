@@ -225,7 +225,7 @@ describe('When using `getActionList()', () => {
       startDate: 'now-10d',
       endDate: 'now',
       commands: ['isolate', 'unisolate', 'get-file'],
-      userIds: ['elastic'],
+      userIds: ['*elastic*'],
     });
 
     expect(esClient.search).toHaveBeenNthCalledWith(
@@ -302,6 +302,110 @@ describe('When using `getActionList()', () => {
         from: 0,
         index: '.logs-endpoint.actions-default',
         size: 20,
+      },
+      { ignore: [404], meta: true }
+    );
+  });
+
+  it('should call search with exact usernames when no wildcards are present', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
+    await getActionList({
+      esClient,
+      logger,
+      metadataService: endpointAppContextService.getEndpointMetadataService(),
+      pageSize: 10,
+      startDate: 'now-1d',
+      endDate: 'now',
+      userIds: ['elastic', 'kibana'],
+    });
+
+    expect(esClient.search).toHaveBeenNthCalledWith(
+      1,
+      {
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          input_type: 'endpoint',
+                        },
+                      },
+                      {
+                        term: {
+                          type: 'INPUT_ACTION',
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            gte: 'now-1d',
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            lte: 'now',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                user_id: 'elastic',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                user_id: 'kibana',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+        },
+        from: 0,
+        index: '.logs-endpoint.actions-default',
+        size: 10,
       },
       { ignore: [404], meta: true }
     );
