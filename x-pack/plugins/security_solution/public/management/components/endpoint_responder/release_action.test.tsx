@@ -116,7 +116,7 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('releaseSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('release-success')).toBeTruthy();
     });
   });
 
@@ -131,7 +131,7 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('releaseErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('release-actionFailure').textContent).toMatch(
         /error one \| error two/
       );
     });

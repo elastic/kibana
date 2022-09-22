@@ -115,7 +115,7 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('isolateSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('isolate-success')).toBeTruthy();
     });
   });
 
@@ -130,7 +130,7 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('isolate-actionFailure').textContent).toMatch(
         /error one \| error two/
       );
     });

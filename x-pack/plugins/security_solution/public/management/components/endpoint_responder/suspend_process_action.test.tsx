@@ -186,7 +186,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('suspendProcessSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
     });
   });
 
@@ -195,7 +195,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --entityId 123wer');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('suspendProcessSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
     });
   });
 
@@ -210,7 +210,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('suspendProcessErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('suspendProcess-actionFailure').textContent).toMatch(
         /error one \| error two/
       );
     });
@@ -225,7 +225,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('suspendProcessAPIErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('suspendProcess-apiFailure').textContent).toMatch(
         /this is an error/
       );
     });
