@@ -33,7 +33,7 @@ export const InformationText: FC<Props> = ({
           title={
             <h2>
               <FormattedMessage
-                id="xpack.aiops.logCategorization.noCategories.title"
+                id="xpack.aiops.logCategorization.noDocs.title"
                 defaultMessage="No documents found"
               />
             </h2>
@@ -42,7 +42,7 @@ export const InformationText: FC<Props> = ({
           body={
             <p>
               <FormattedMessage
-                id="xpack.aiops.logCategorization.noCategories.title"
+                id="xpack.aiops.logCategorization.noDocs.body"
                 defaultMessage="Ensure the selected time range contains documents."
               />
             </p>
@@ -88,7 +88,7 @@ export const InformationText: FC<Props> = ({
           body={
             <p>
               <FormattedMessage
-                id="xpack.aiops.logCategorization.noCategories.title"
+                id="xpack.aiops.logCategorization.noCategories.body"
                 defaultMessage="Ensure the selected field is populated in the selected time range."
               />
             </p>
