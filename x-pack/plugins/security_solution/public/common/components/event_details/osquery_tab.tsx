@@ -63,10 +63,7 @@ interface ExpandedEventFieldsObject {
 
 export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventData }) => {
   const {
-    services: {
-      osquery,
-      application: { capabilities },
-    },
+    services: { osquery, application },
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
@@ -140,7 +137,7 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
     content: (
       <>
         <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          {!capabilities.osquery.read ? (
+          {!application?.capabilities?.osquery?.read ? (
             emptyPrompt
           ) : (
             <OsqueryResults
