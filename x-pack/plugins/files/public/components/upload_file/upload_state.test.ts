@@ -162,7 +162,6 @@ describe('UploadState', () => {
         name: 'test 2',
       });
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
-      expect(filesClient.delete).toHaveBeenCalledTimes(2);
     });
   });
 
