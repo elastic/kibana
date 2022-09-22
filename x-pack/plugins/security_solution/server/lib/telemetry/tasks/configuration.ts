@@ -17,8 +17,8 @@ import { tlog } from '../helpers';
 export function createTelemetryConfigurationTaskConfig() {
   return {
     type: 'security:telemetry-configuration',
-    title: 'Security Solution Telemetry Configuration task',
-    interval: '30m',
+    title: 'Security Solution Telemetry Configuration Task',
+    interval: '45m',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
