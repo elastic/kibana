@@ -30,6 +30,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
 import { duration } from 'moment';
@@ -199,6 +200,11 @@ describe('#setup', () => {
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
+  });
+
+  it('returns an AgentManager as part of the contract', async () => {
+    const setupContract = await elasticsearchService.setup(setupDeps);
+    expect(setupContract.agentManager).toBeInstanceOf(AgentManager);
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {

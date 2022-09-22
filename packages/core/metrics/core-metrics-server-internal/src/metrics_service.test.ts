@@ -12,6 +12,7 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { take } from 'rxjs/operators';
@@ -24,6 +25,7 @@ const logger = loggingSystemMock.create();
 
 describe('MetricsService', () => {
   const httpMock = httpServiceMock.createInternalSetupContract();
+  const esServiceMock = elasticsearchServiceMock.createInternalSetup();
   let metricsService: MetricsService;
 
   beforeEach(() => {
@@ -43,7 +45,7 @@ describe('MetricsService', () => {
 
   describe('#start', () => {
     it('invokes setInterval with the configured interval', async () => {
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
 
       expect(setInterval).toHaveBeenCalledTimes(1);
@@ -53,7 +55,7 @@ describe('MetricsService', () => {
     it('collects the metrics at every interval', async () => {
       mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
 
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
@@ -68,7 +70,7 @@ describe('MetricsService', () => {
     it('resets the collector after each collection', async () => {
       mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
 
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
       // `advanceTimersByTime` only ensure the interval handler is executed
@@ -108,7 +110,7 @@ describe('MetricsService', () => {
         .mockResolvedValueOnce(firstMetrics)
         .mockResolvedValueOnce(secondMetrics);
 
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
       const nextEmission = async () => {
@@ -157,7 +159,7 @@ describe('MetricsService', () => {
       mockOpsCollector.collect
         .mockResolvedValueOnce(firstMetrics)
         .mockResolvedValueOnce(secondMetrics);
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
       const nextEmission = async () => {
@@ -176,7 +178,7 @@ describe('MetricsService', () => {
     it('omits metrics from log message if they are missing or malformed', async () => {
       const opsLogger = logger.get('metrics', 'ops');
       mockOpsCollector.collect.mockResolvedValueOnce({ secondMetrics: 'metrics' });
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
       expect(loggingSystemMock.collect(opsLogger).debug[0]).toMatchInlineSnapshot(`
         Array [
@@ -219,7 +221,7 @@ describe('MetricsService', () => {
 
   describe('#stop', () => {
     it('stops the metrics interval', async () => {
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
@@ -235,7 +237,7 @@ describe('MetricsService', () => {
     });
 
     it('completes the metrics observable', async () => {
-      await metricsService.setup({ http: httpMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
       let completed = false;

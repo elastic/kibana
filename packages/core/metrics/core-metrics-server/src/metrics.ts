@@ -41,6 +41,46 @@ export interface IntervalHistogram {
 }
 
 /**
+ * Metrics related to the elasticsearch clients
+ * @public
+ */
+export interface ElasticsearchClientsMetrics {
+  /** Number of HTTP Agents that have are currently being used by the ES-js client */
+  agents: number;
+  /** Number of ES instances (or proxies) that ES-js client is connecting to */
+  connectedNodes: number;
+  /** Number of nodes with active connections */
+  nodesWithActiveSockets: number;
+  /** Number of nodes with available connections (alive but idle).
+   * Note that a node can have both active and idle connections at the same time
+   */
+  nodesWithIdleSockets: number;
+  /** Total number of active sockets (all nodes, all connections) */
+  totalActiveSockets: number;
+  /** Total number of available sockets (alive but idle, all nodes, all connections) */
+  totalIdleSockets: number;
+  /** Total number of queued requests (all nodes, all connections) */
+  totalQueuedRequests: number;
+  /** Number of active connections of the node with most active connections */
+  mostActiveNodeSockets: number;
+  /** Average of active sockets per node (all connections) */
+  averageActiveSocketsPerNode: number;
+  /** Number of idle connections of the node with most idle connections */
+  mostIdleNodeSockets: number;
+  /** Average of available (idle) sockets per node (all connections) */
+  averageIdleSocketsPerNode: number;
+}
+
+/**
+ * Metrics related to the elasticsearch clients, by protocol
+ * @public
+ */
+export interface ElasticsearchClientsMetricsByProtocol {
+  http: ElasticsearchClientsMetrics;
+  https: ElasticsearchClientsMetrics;
+}
+
+/**
  * Process related metrics
  * @public
  */
@@ -165,6 +205,10 @@ export interface OpsServerMetrics {
 export interface OpsMetrics {
   /** Time metrics were recorded at. */
   collected_at: Date;
+  /**
+   * Metrics related to the elasticsearch client
+   */
+  elasticsearch_client: ElasticsearchClientsMetricsByProtocol;
   /**
    * Process related metrics.
    * @deprecated use the processes field instead.

@@ -122,4 +122,30 @@ describe('AgentManager', () => {
       });
     });
   });
+
+  describe('#getHttpAgents() and #getHttpsAgents()', () => {
+    it('return the created HTTP and HTTPs Agent instances', () => {
+      const agentManager = new AgentManager();
+      const agentFactory1 = agentManager.getAgentFactory();
+      const agentFactory2 = agentManager.getAgentFactory();
+      const agent1 = agentFactory1({ url: new URL('http://elastic-node-1:9200') });
+      const agent2 = agentFactory2({ url: new URL('http://elastic-node-1:9200') });
+      const agent3 = agentFactory1({ url: new URL('https://elastic-node-1:9200') });
+      const agent4 = agentFactory2({ url: new URL('https://elastic-node-1:9200') });
+
+      const httpAgents = agentManager.getHttpAgents();
+      const httpsAgents = agentManager.getHttpsAgents();
+
+      expect(httpAgents.size).toEqual(2);
+      expect(httpsAgents.size).toEqual(2);
+      expect(httpAgents.has(agent1)).toEqual(true);
+      expect(httpAgents.has(agent2)).toEqual(true);
+      expect(httpAgents.has(agent3)).toEqual(false);
+      expect(httpAgents.has(agent4)).toEqual(false);
+      expect(httpsAgents.has(agent1)).toEqual(false);
+      expect(httpsAgents.has(agent2)).toEqual(false);
+      expect(httpsAgents.has(agent3)).toEqual(true);
+      expect(httpsAgents.has(agent4)).toEqual(true);
+    });
+  });
 });

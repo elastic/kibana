@@ -8,7 +8,7 @@
 
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
+import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 
 const HTTPS = 'https:';
 const DEFAULT_CONFIG: HttpAgentOptions = {
@@ -77,6 +77,14 @@ export class AgentManager {
 
       return httpAgent;
     };
+  }
+
+  public getHttpAgents(): Set<NetworkAgent> {
+    return this.httpStore;
+  }
+
+  public getHttpsAgents(): Set<NetworkAgent> {
+    return this.httpsStore;
   }
 }
 

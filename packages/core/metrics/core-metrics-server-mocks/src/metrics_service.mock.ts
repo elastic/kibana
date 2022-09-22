@@ -26,6 +26,19 @@ const createInternalSetupContractMock = () => {
   };
 
   const processMock = collectorMock.createOpsProcessMetrics();
+  const esClientStats = {
+    agents: 1,
+    connectedNodes: 3,
+    nodesWithActiveSockets: 3,
+    nodesWithIdleSockets: 3,
+    totalActiveSockets: 10,
+    totalIdleSockets: 5,
+    totalQueuedRequests: 1,
+    mostActiveNodeSockets: 5,
+    averageActiveSocketsPerNode: 3,
+    mostIdleNodeSockets: 3,
+    averageIdleSocketsPerNode: 2,
+  };
 
   setupContract.getOpsMetrics$.mockReturnValue(
     new BehaviorSubject({
@@ -38,6 +51,10 @@ const createInternalSetupContractMock = () => {
         load: { '1m': 1, '5m': 1, '15m': 1 },
         memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
         uptime_in_millis: 1,
+      },
+      elasticsearch_client: {
+        http: esClientStats,
+        https: esClientStats,
       },
       response_times: { avg_in_millis: 1, max_in_millis: 1 },
       requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },

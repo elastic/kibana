@@ -28,6 +28,7 @@ import type {
   ClusterInfo,
 } from '@kbn/core-elasticsearch-server-internal';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 
@@ -94,6 +95,7 @@ const createInternalSetupContractMock = () => {
       level: ServiceStatusLevels.available,
       summary: 'Elasticsearch is available',
     }),
+    agentManager: new AgentManager(),
   };
   return internalSetupContract;
 };

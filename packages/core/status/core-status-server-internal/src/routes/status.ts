@@ -135,6 +135,7 @@ export const registerStatusRoute = ({
             ...lastMetrics.requests,
             status_codes: lastMetrics.requests.statusCodes,
           },
+          elasticsearch_client: lastMetrics.elasticsearch_client,
         },
       };
 
