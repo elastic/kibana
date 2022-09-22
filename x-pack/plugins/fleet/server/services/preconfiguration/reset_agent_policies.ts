@@ -163,7 +163,7 @@ async function _deleteExistingData(
   // Delete
   if (agents.length > 0) {
     logger.info(`Force unenrolling ${agents.length} agents`);
-    await pMap(agents, (agent) => forceUnenrollAgent(soClient, esClient, agent.id), {
+    await pMap(agents, (agent) => forceUnenrollAgent(esClient, agent.id), {
       concurrency: 20,
     });
   }

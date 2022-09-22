@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import uuid from 'uuid';
+
 import type { Agent, BulkActionResult } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -20,6 +22,7 @@ import {
   invalidateAPIKeysForAgents,
   UnenrollActionRunner,
   unenrollBatch,
+  updateActionsForForceUnenroll,
 } from './unenroll_action_runner';
 
 async function unenrollAgentIsAllowed(
@@ -50,7 +53,7 @@ export async function unenrollAgent(
     await unenrollAgentIsAllowed(soClient, esClient, agentId);
   }
   if (options?.revoke) {
-    return forceUnenrollAgent(soClient, esClient, agentId);
+    return forceUnenrollAgent(esClient, agentId);
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
@@ -102,7 +105,6 @@ export async function unenrollAgents(
 }
 
 export async function forceUnenrollAgent(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentIdOrAgent: string | Agent
 ) {
@@ -116,4 +118,5 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
+  await updateActionsForForceUnenroll(esClient, [agent.id], uuid(), 1);
 }
