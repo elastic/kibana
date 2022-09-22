@@ -12,6 +12,7 @@ import createContainer from 'constate';
 import moment from 'moment';
 import { useMemo } from 'react';
 import { merge, of } from 'rxjs';
+import { useDiscoverStateContext } from '../../../main/hooks/use_discover_state';
 import { dataAccessStateMachine } from '../../state_machines/data_access_state_machine/state_machine';
 import {
   EntriesActorRef,
@@ -22,7 +23,6 @@ import {
 import { loadTail } from '../../state_machines/entries_state_machine/services/load_tail_service';
 import { loadHistogram } from '../../state_machines/histogram_state_machine/services/load_histogram_service';
 import { useSubscription } from '../use_observable';
-import { useDiscoverStateContext } from '../discover_state/use_discover_state';
 import {
   entriesStateMachine,
   HistogramActorRef,
@@ -37,7 +37,9 @@ export const useStateMachineService = ({
   virtualRowCount: number;
   query: QueryStart;
 }) => {
-  const { searchSource, dataView } = useDiscoverStateContext();
+  const { dataView, stateContainer } = useDiscoverStateContext();
+  const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
+  const searchSource = savedSearch.searchSource;
 
   const {
     timefilter: { timefilter },

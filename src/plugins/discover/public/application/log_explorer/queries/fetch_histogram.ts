@@ -98,7 +98,7 @@ const buildHistogramAggregations = (
     breakdown_histogram: {
       auto_date_histogram: {
         buckets: 50,
-        field: dataView.timeFieldName,
+        field: dataView?.timeFieldName,
       },
       ...(breakdownField
         ? {

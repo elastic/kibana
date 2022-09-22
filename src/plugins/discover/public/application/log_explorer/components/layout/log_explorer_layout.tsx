@@ -12,12 +12,12 @@ import { isOfQueryType } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
+import { useDiscoverStateContext } from '../../../main/hooks/use_discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import '../../../main/components/layout/discover_layout.scss';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
 import { DiscoverNoResults } from '../../../main/components/no_results';
 import { useEntries } from '../../hooks/query_data/use_state_machine';
-import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
 import { LogExplorer } from './log_explorer';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 
@@ -26,12 +26,13 @@ export interface LogExplorerLayoutProps {
   savedSearch: SavedSearch;
 }
 
-export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayoutProps) {
+export function LogExplorerLayout({ savedSearch }: LogExplorerLayoutProps) {
   // Access to Discover services
   const { data } = useDiscoverServices();
 
   // Access to "outer" Discover state
-  const { state, onDisableFilters } = useDiscoverStateContext();
+  const { stateContainer } = useDiscoverStateContext();
+  const state = stateContainer.appStateContainer.getState();
 
   // Data querying state machine access and derivatives
   const { actor: entriesActor, state: entriesState } = useEntries();
@@ -63,7 +64,7 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
             // error={dataState.error}
             hasQuery={isOfQueryType(state.query) && !!state.query?.query}
             hasFilters={hasActiveFilter(state.filters)}
-            onDisableFilters={onDisableFilters}
+            onDisableFilters={() => {}}
           />
         ) : entriesState.matches('loadingAround') ? (
           <LoadingSpinner />

@@ -8,16 +8,18 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import createContainer from 'constate';
+import { useDiscoverStateContext } from '../../../main/hooks/use_discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useColumns as useDiscoverColumns } from '../../../../hooks/use_data_grid_columns';
-import { useDiscoverStateContext } from './use_discover_state';
 import { useStateMachineContext } from '../query_data/use_state_machine';
 
 const MESSAGE_FIELD = 'message';
 
 export const useColumns = () => {
   const { capabilities, dataViews, uiSettings } = useDiscoverServices();
-  const { dataView, state, stateContainer } = useDiscoverStateContext();
+  const { dataView, stateContainer } = useDiscoverStateContext();
+  const state = stateContainer.appStateContainer.getState();
+
   const dataAccessService = useStateMachineContext();
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDiscoverColumns({

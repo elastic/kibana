@@ -10,13 +10,13 @@ import { EuiDataGridRefProps } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useSelector } from '@xstate/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useDiscoverStateContext } from '../../../main/hooks/use_discover_state';
 import { DataTableRecord } from '../../../../types';
 import {
   DiscoverGrid,
   EuiDataGridPropOverrides,
 } from '../../../../components/discover_grid/discover_grid';
 import { useDiscoverColumnsContext } from '../../hooks/discover_state/use_columns';
-import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
 import { useEntries, useStateMachineContext } from '../../hooks/query_data/use_state_machine';
 import { selectDiscoverRows } from '../../state_machines';
 import { useScrollInteractions } from './use_scroll_interactions';
@@ -45,7 +45,9 @@ export function LogExplorerDiscoverGrid({ savedSearch }: { savedSearch: SavedSea
   const { columns, onSetColumns, onAddColumn, onRemoveColumn } = useDiscoverColumnsContext();
 
   // Access to "outer" Discover state
-  const { dataView, state, onAddFilter } = useDiscoverStateContext();
+  const { dataView, stateContainer } = useDiscoverStateContext();
+  const state = stateContainer.appStateContainer.getState();
+  const onAddFilter = () => {};
 
   // In place editing of fields
   const onFieldEdited = useCallback(() => {
