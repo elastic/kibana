@@ -6,17 +6,20 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * @param pipelineId - the pipeline id to create. If a pipeline with the same pipelineId already exists, nothing is created or updated.
- *
+ * @param logger - logger
+ * @param pipelineConf - ingest pipeline configuration
+ * @param esClient - the elasticsearch client
  * @return true if the pipeline exits or created, false otherwise.
  */
 export const createPipelineIfNotExists = async (
   esClient: ElasticsearchClient,
-  pipelineId: string,
+  pipelineConf: IngestPutPipelineRequest,
   logger: Logger
 ) => {
+  const pipelineId = pipelineConf.id;
   try {
     await esClient.ingest.getPipeline({ id: pipelineId });
     logger.trace(`pipeline: ${pipelineId} already exists`);
@@ -25,26 +28,7 @@ export const createPipelineIfNotExists = async (
     const exitError = transformError(exitErr);
     if (exitError.statusCode === 404) {
       try {
-        await esClient.ingest.putPipeline({
-          id: pipelineId,
-          description: 'Pipeline for adding event timestamp',
-          processors: [
-            {
-              set: {
-                field: '@timestamp',
-                value: '{{_ingest.timestamp}}',
-              },
-            },
-          ],
-          on_failure: [
-            {
-              set: {
-                field: 'error.message',
-                value: '{{ _ingest.on_failure_message }}',
-              },
-            },
-          ],
-        });
+        await esClient.ingest.putPipeline(pipelineConf);
         logger.trace(`pipeline: ${pipelineId} was created`);
         return true;
       } catch (existError) {
