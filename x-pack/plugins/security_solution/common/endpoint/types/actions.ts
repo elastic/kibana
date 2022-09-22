@@ -253,6 +253,7 @@ export interface PendingActionsResponse {
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
+
 export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
   id: string;

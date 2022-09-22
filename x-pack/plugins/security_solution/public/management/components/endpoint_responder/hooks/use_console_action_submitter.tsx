@@ -104,7 +104,7 @@ export const useConsoleActionSubmitter = <
     error: actionRequestError,
   } = currentActionState.request;
 
-  const { data: apiActionDetails, error: apiActionDetailsError } =
+  const { data: apiActionDetailsResponse, error: apiActionDetailsError } =
     useGetActionDetails<TActionOutputContent>(actionId ?? '-', {
       enabled: Boolean(actionId) && isPending,
       refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
@@ -120,6 +120,13 @@ export const useConsoleActionSubmitter = <
           sent: true,
         };
 
+      // The object defined above (`updatedRequestState`) is saved to the command state right away.
+      // the creation of the Action request (below) will mutate this object to store the Action ID
+      // once the API response is received. We do this to ensure that the action is not created more
+      // than once if the user happens to close the console prior to the response being returned.
+      // Once a response is received, we check if the component is mounted, and if so, then we send
+      // another update to the command store which will cause it to re-render and start checking for
+      // action completion.
       actionCreator
         .mutateAsync(actionRequestBody)
         .then((response) => {
@@ -189,19 +196,19 @@ export const useConsoleActionSubmitter = <
 
   // If the action details indicates complete, then update the action's console state and set the status to success
   useEffect(() => {
-    if (apiActionDetails?.data.isCompleted && isPending) {
+    if (apiActionDetailsResponse?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
           ...prevState,
           actionApiState: {
             ...(prevState.actionApiState ?? currentActionState),
-            actionDetails: apiActionDetails.data,
+            actionDetails: apiActionDetailsResponse.data,
           },
         };
       });
     }
-  }, [apiActionDetails, currentActionState, isPending, setStatus, setStore]);
+  }, [apiActionDetailsResponse, currentActionState, isPending, setStatus, setStore]);
 
   // Calculate the action's UI result based on the different API responses
   const result = useMemo(() => {
@@ -249,6 +256,6 @@ export const useConsoleActionSubmitter = <
 
   return {
     result,
-    action: apiActionDetails?.data,
+    action: apiActionDetailsResponse?.data,
   };
 };
