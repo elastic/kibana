@@ -166,6 +166,14 @@ Example: Smooth a line of measurements:
       },
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.movingAverage.documentation.quick',
+    {
+      defaultMessage: `
+      Smoothing values over time by averaging a moving window of averages.
+      `,
+    }
+  ),
   shiftable: true,
 };
 

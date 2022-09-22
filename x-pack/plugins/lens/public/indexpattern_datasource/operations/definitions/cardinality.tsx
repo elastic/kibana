@@ -210,4 +210,12 @@ Example: Calculate the number of different products from the "clothes" group:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.cardinality.documentation.quick',
+    {
+      defaultMessage: `
+The number of unique values of a specified field. Works for number, string, date and boolean values.
+      `,
+    }
+  ),
 };

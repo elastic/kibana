@@ -402,4 +402,12 @@ Example: Get the number of bytes larger than 95 % of values:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.percentile.documentation.quick',
+    {
+      defaultMessage: `
+The specified percentile of the values of a field. This is the value n percent of the values occuring in documents are smaller.
+      `,
+    }
+  ),
 };

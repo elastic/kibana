@@ -147,5 +147,13 @@ Example: Visualize the received bytes accumulated over time:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.cumulativeSum.documentation.quick',
+    {
+      defaultMessage: `
+      The sum of all values as they grow over time.
+      `,
+    }
+  ),
   shiftable: true,
 };

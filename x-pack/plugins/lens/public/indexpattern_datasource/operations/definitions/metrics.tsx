@@ -231,6 +231,17 @@ Example: Get the {metric} of price for orders from the UK:
           },
         }),
     },
+    quickFunctionDocumentation: i18n.translate(
+      'xpack.lens.indexPattern.metric.documentation.quick',
+      {
+        defaultMessage: `
+The {metric} of a field. This function only works for number fields.
+      `,
+        values: {
+          metric: displayName,
+        },
+      }
+    ),
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
 }
