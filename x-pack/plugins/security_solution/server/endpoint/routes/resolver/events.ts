@@ -49,6 +49,7 @@ export function handleEvents(
       pagination: PaginationBuilder.createBuilder(limit, afterEvent),
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
+      schema: undefined,
     });
     const results = await eventsQuery.search(eventsClient, body, alertsClient);
     return res.ok({

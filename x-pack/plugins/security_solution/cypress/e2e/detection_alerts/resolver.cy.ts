@@ -28,12 +28,12 @@ describe('Analyze events view for alerts', () => {
     waitForAlertsToPopulate();
   });
 
-  it('should render analyzer when button is clicked', () => {
+  it('should render when button is clicked', () => {
     openAnalyzerForFirstAlertInTimeline();
     cy.get(ANALYZER_NODE).first().should('be.visible');
   });
 
-  it(`should render an analyzer view and display
+  it(`should display
    a toast indicating the date range of found events when a time range has 0 events in it`, () => {
     const dateContainingZeroEvents = 'Jul 27, 2022 @ 00:00:00.000';
     setStartDate(dateContainingZeroEvents);
@@ -42,4 +42,6 @@ describe('Analyze events view for alerts', () => {
     cy.get(TOASTER).should('be.visible');
     cy.get(ANALYZER_NODE).first().should('be.visible');
   });
+
+  it(`should contain the same number of nodes in the unbounded view and the range suggestion`)
 });

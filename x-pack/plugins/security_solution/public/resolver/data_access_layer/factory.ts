@@ -34,7 +34,7 @@ export function dataAccessLayerFactory(
       indexPatterns,
     }: {
       entityID: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverRelatedEvents> {
       const response: ResolverPaginatedEvents = await context.services.http.post(
@@ -76,7 +76,7 @@ export function dataAccessLayerFactory(
       entityID: string;
       category: string;
       after?: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverPaginatedEvents> {
       const commonFields = {
@@ -127,30 +127,30 @@ export function dataAccessLayerFactory(
       limit,
     }: {
       ids: string[];
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
       limit: number;
     }): Promise<SafeResolverEvent[]> {
+      const query = {
+        query: { limit },
+        body: JSON.stringify({
+          indexPatterns,
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': ids } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+        }),
+      };
+      if (timeRange !== undefined) {
+        query.timeRange = timeRange;
+      }
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
-        {
-          query: { limit },
-          body: JSON.stringify({
-            timeRange: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
-            indexPatterns,
-            filter: JSON.stringify({
-              bool: {
-                filter: [
-                  { terms: { 'process.entity_id': ids } },
-                  { term: { 'event.category': 'process' } },
-                ],
-              },
-            }),
-          }),
-        }
+        query
       );
       return response.events;
     },
@@ -172,7 +172,7 @@ export function dataAccessLayerFactory(
       eventTimestamp: string;
       eventID?: string | number;
       winlogRecordID: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
       /** @description - eventID isn't provided by winlog. This can be removed once runtime fields are available */
@@ -250,7 +250,7 @@ export function dataAccessLayerFactory(
     }: {
       dataId: string;
       schema: ResolverSchema;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indices: string[];
       ancestors: number;
       descendants: number;
