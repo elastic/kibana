@@ -62,37 +62,24 @@ export const initialResult: Omit<
   totalCount: 0,
   data: undefined,
 };
-
+// why? because this makes typescript very happy
 export const useHostRiskScore = (
   params?: UseRiskScoreParams
 ): [boolean, RiskScoreState<RiskQueries.hostsRiskScore>] => {
-  const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
-
   return useRiskScore({
-    timerange,
-    onlyLatest,
-    filterQuery,
-    sort,
-    skip,
-    pagination,
+    ...params,
     riskEntity: RiskScoreEntity.host,
   });
 };
 
+// why? because this makes typescript very happy
 export const useUserRiskScore = (
   params?: UseRiskScoreParams
-): [boolean, RiskScoreState<RiskQueries.usersRiskScore>] => {
-  const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
-  return useRiskScore({
-    timerange,
-    onlyLatest,
-    filterQuery,
-    sort,
-    skip,
-    pagination,
+): [boolean, RiskScoreState<RiskQueries.usersRiskScore>] =>
+  useRiskScore({
+    ...params,
     riskEntity: RiskScoreEntity.user,
   });
-};
 
 const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
