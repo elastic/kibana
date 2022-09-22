@@ -63,11 +63,6 @@ export async function getServiceAggregatedTransactionDetailedStats({
         field: TRANSACTION_DURATION_SUMMARY,
       },
     },
-    total_doc: {
-      value_count: {
-        field: TRANSACTION_DURATION_SUMMARY,
-      },
-    },
     failure_count: {
       sum: {
         field: TRANSACTION_FAILURE_COUNT,
