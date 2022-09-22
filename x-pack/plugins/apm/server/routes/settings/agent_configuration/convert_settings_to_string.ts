@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability
