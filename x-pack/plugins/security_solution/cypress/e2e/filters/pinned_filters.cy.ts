@@ -17,10 +17,12 @@ import {
   openKibanaNavigation,
 } from '../../tasks/kibana_navigation';
 import { ALERTS_PAGE } from '../../screens/kibana_navigation';
+import { postDataView } from '../../tasks/common';
 
 describe('pinned filters', () => {
   before(() => {
     login();
+    postDataView('audit*');
   });
 
   it('show pinned filters on security', () => {

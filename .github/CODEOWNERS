@@ -418,6 +418,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/network @elastic/security-threat-hunting-explore
