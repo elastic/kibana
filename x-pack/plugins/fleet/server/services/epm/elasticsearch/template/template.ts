@@ -371,23 +371,6 @@ function generateMultiFields(fields: Fields): MultiFields {
   return multiFields;
 }
 
-function generateKeywordMapping(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {
-    ignore_above: DEFAULT_IGNORE_ABOVE,
-  };
-  if (field.index !== false && field.doc_values !== false && field.ignore_above) {
-    mapping.ignore_above = field.ignore_above;
-  }
-  if (field.normalizer) {
-    mapping.normalizer = field.normalizer;
-  }
-  if (field.dimension) {
-    mapping.time_series_dimension = field.dimension;
-    delete mapping.ignore_above;
-  }
-  return mapping;
-}
-
 function generateTextMapping(field: Field): IndexTemplateMapping {
   const mapping: IndexTemplateMapping = {};
   if (field.analyzer) {
