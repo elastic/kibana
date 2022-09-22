@@ -60,7 +60,7 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
-  const migratedDashboardFilters = mapAndFlattenFilters(_.cloneDeep(dashboardFilters));
+  const migratedDashboardFilters = mapAndFlattenFilters(cloneDeep(dashboardFilters));
   return {
     refreshConfig: timefilter.getRefreshInterval(),
     filters: filterManager
