@@ -1140,7 +1140,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe.only('when upgrading from an integration package to an input package where a required variable has been added', function () {
+    describe('when upgrading from an integration package to an input package where a required variable has been added', function () {
       withTestPackage('integration_to_input', '0.9.1');
 
       beforeEach(async function () {
