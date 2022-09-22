@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly set cookie and authenticate user', async () => {
-      const response = await supertest
+      let response = await supertest
         .get('/security/account')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       checkCookieIsSet(sessionCookie);
 
       // Cookie should be accepted.
-      const response = await supertest
+      response = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .ca(CA_CERT)
