@@ -14,14 +14,16 @@ const getColumns = (
   metrics: string[],
   buckets: string[],
   columns: Column[],
-  bucketCollapseFn?: string
+  bucketCollapseFn?: Record<string, string | undefined>
 ) => {
   const { showTotal, totalFunc } = params;
   return columns.map(({ columnId }) => ({
     columnId,
     alignment: 'left' as const,
     ...(showTotal && metrics.includes(columnId) ? { summaryRow: totalFunc } : {}),
-    ...(bucketCollapseFn && buckets.includes(columnId) ? { collapseFn: bucketCollapseFn } : {}),
+    ...(bucketCollapseFn && bucketCollapseFn[columnId]
+      ? { collapseFn: bucketCollapseFn[columnId] }
+      : {}),
   }));
 };
 
@@ -54,7 +56,7 @@ export const getConfiguration = (
     metrics: string[];
     buckets: string[];
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: string;
+    bucketCollapseFn?: Record<string, string | undefined>;
   }
 ): TableVisConfiguration => {
   return {

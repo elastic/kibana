@@ -59,7 +59,6 @@ export const getBucketColumns = (
         dropEmptyRowsInDateHistogram
       );
     case BUCKET_TYPES.FILTERS:
-      convertToFiltersColumn;
       return convertToFiltersColumn(agg.aggId ?? '', agg.aggParams, isSplit);
     case BUCKET_TYPES.RANGE:
     case BUCKET_TYPES.HISTOGRAM:
