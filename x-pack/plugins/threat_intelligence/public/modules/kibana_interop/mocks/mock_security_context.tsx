@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SecuritySolutionPluginContext } from '../../../index';
+import { SecuritySolutionPluginContext } from '../../..';
 
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
   getFiltersGlobalComponent:

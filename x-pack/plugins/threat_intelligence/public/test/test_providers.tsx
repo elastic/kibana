@@ -8,7 +8,6 @@
 import moment from 'moment/moment';
 import React, { FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { I18nProvider } from '../../../../private/var/tmp/_bazel_maxcold/fce807b6c2551c4f3f2c619f16f76292/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-i18n-react/npm_module_types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
@@ -16,6 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { I18nProvider } from '../../../../private/var/tmp/_bazel_maxcold/fce807b6c2551c4f3f2c619f16f76292/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-i18n-react/npm_module_types';
 import { KibanaContext } from '../modules/kibana_interop/hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../types';
 import { getSecuritySolutionContextMock } from '../modules/kibana_interop/mocks/mock_security_context';

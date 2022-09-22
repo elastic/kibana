@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DateFormatter } from './index';
+import { DateFormatter } from '.';
 import { useDateFormat, useTimeZone } from '../../../kibana_interop/hooks/use_kibana_ui_settings';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';

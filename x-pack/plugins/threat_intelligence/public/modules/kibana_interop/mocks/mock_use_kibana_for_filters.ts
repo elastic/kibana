@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../private/var/tmp/_bazel_maxcold/fce807b6c2551c4f3f2c619f16f76292/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-es-query/npm_module_types';
 import { BehaviorSubject } from 'rxjs';
+import { Filter } from '../../../../private/var/tmp/_bazel_maxcold/fce807b6c2551c4f3f2c619f16f76292/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-es-query/npm_module_types';
 import * as hook from '../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana');

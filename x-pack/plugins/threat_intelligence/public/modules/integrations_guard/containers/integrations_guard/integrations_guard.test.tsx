@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { IntegrationsGuard } from './index';
+import { IntegrationsGuard } from '.';
 import { TestProvidersComponent } from '../../../../test/test_providers';
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
