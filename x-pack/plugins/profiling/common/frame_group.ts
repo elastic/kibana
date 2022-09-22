@@ -28,6 +28,7 @@ interface EmptyFrameGroup extends BaseFrameGroup {
 interface ElfFrameGroup extends BaseFrameGroup {
   readonly name: FrameGroupName.ELF;
   readonly fileID: StackFrameMetadata['FileID'];
+  readonly exeFilename: StackFrameMetadata['ExeFileName'];
   readonly functionName: StackFrameMetadata['FunctionName'];
 }
 
@@ -43,7 +44,7 @@ export type FrameGroup = EmptyFrameGroup | ElfFrameGroup | FullFrameGroup;
 // createFrameGroup is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
 //
-// For ELF-symbolized frames, group by FunctionName and FileID.
+// For ELF-symbolized frames, group by FunctionName, ExeFileName and FileID.
 // For non-symbolized frames, group by FileID and AddressOrLine.
 // otherwise group by ExeFileName, SourceFilename and FunctionName.
 export function createFrameGroup(frame: StackFrameMetadata): FrameGroup {
@@ -59,6 +60,7 @@ export function createFrameGroup(frame: StackFrameMetadata): FrameGroup {
     return {
       name: FrameGroupName.ELF,
       fileID: frame.FileID,
+      exeFilename: frame.ExeFileName,
       functionName: frame.FunctionName,
     } as ElfFrameGroup;
   }
@@ -123,12 +125,14 @@ export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
     if (b.name === FrameGroupName.ELF) {
       if (a.functionName < b.functionName) return -1;
       if (a.functionName > b.functionName) return 1;
-      if (a.fileID < b.fileID) return -1;
-      if (a.fileID > b.fileID) return 1;
+      if (a.exeFilename < b.exeFilename) return -1;
+      if (a.exeFilename > b.exeFilename) return 1;
       return 0;
     }
     if (a.functionName < b.functionName) return -1;
     if (a.functionName > b.functionName) return 1;
+    if (a.exeFilename < b.exeFilename) return -1;
+    if (a.exeFilename > b.exeFilename) return 1;
     return -1;
   }
 
@@ -144,6 +148,8 @@ export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
   if (b.name === FrameGroupName.ELF) {
     if (a.functionName < b.functionName) return -1;
     if (a.functionName > b.functionName) return 1;
+    if (a.exeFilename < b.exeFilename) return -1;
+    if (a.exeFilename > b.exeFilename) return 1;
   }
   return 1;
 }
@@ -154,7 +160,7 @@ export function createFrameGroupID(frameGroup: FrameGroup): FrameGroupID {
       return `${frameGroup.name};${frameGroup.fileID};${frameGroup.addressOrLine}`;
       break;
     case FrameGroupName.ELF:
-      return `${frameGroup.name};${frameGroup.fileID};${frameGroup.functionName}`;
+      return `${frameGroup.name};${frameGroup.exeFilename};${frameGroup.functionName}`;
       break;
     case FrameGroupName.FULL:
       return `${frameGroup.name};${frameGroup.exeFilename};${frameGroup.functionName};${frameGroup.sourceFilename}`;
