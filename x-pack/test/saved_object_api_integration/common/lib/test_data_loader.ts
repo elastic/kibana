@@ -83,7 +83,7 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
       log.debug('Loading test data for the following spaces: default, space_1 and space_2');
       await Promise.all([
         kbnServer.importExport.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+          'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json'
         ),
         kbnServer.importExport.load(
           'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
