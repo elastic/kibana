@@ -101,11 +101,7 @@ export class ListingTableService extends FtrService {
    * Types name into search field on Landing page and waits till search completed
    * @param name item name
    */
-  public async searchForItemWithName(_name: string, { escape = true }: { escape?: boolean } = {}) {
-    // There is an issue with Selenium and the EuiHighlight, when the text is completely highlighted
-    // it is invisible to Selenium which then throws an error. We'll leave 1 char **not** highlighted
-    // to avoid this issue.
-    let name = _name.substring(0, _name.length - 2);
+  public async searchForItemWithName(name: string, { escape = true }: { escape?: boolean } = {}) {
     this.log.debug(`searchForItemWithName: ${name}`);
 
     await this.retry.try(async () => {
@@ -123,8 +119,6 @@ export class ListingTableService extends FtrService {
 
       await searchFilter.type(name);
       await this.common.pressEnterKey();
-
-      await this.common.sleep(1000);
     });
 
     await this.header.waitUntilLoadingHasFinished();
