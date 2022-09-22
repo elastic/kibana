@@ -92,14 +92,15 @@ export const UploadFile = <Kind extends string = string>({
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { registry } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
+  const fileKind = registry.get(kindId);
   const uploadState = useMemo(
     () =>
       createUploadState({
         client,
-        fileKind: registry.get(kindId),
+        fileKind,
         allowRepeatedUploads,
       }),
-    [client, kindId, allowRepeatedUploads, registry]
+    [client, allowRepeatedUploads, fileKind]
   );
 
   /**
@@ -118,7 +119,13 @@ export const UploadFile = <Kind extends string = string>({
 
   return (
     <context.Provider value={uploadState}>
-      <Component ref={ref} meta={meta} immediate={immediate} allowClear={allowClear} />
+      <Component
+        ref={ref}
+        accept={fileKind.allowedMimeTypes?.join(',')}
+        meta={meta}
+        immediate={immediate}
+        allowClear={allowClear}
+      />
     </context.Provider>
   );
 };

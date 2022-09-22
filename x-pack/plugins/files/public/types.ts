@@ -96,7 +96,10 @@ export interface FilesClient extends GlobalEndpoints {
    *
    * @param args - upload file args
    */
-  upload: ClientMethodFrom<UploadFileKindHttpEndpoint, { abortSignal?: AbortSignal }>;
+  upload: ClientMethodFrom<
+    UploadFileKindHttpEndpoint,
+    { abortSignal?: AbortSignal; contentType?: string }
+  >;
   /**
    * Stream a download of the file object's content.
    *

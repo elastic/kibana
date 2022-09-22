@@ -16,6 +16,7 @@ const httpTags = {
 
 export const exampleFileKind: FileKind = {
   id: 'filesExample',
+  allowedMimeTypes: ['image/png'],
   http: {
     create: httpTags,
     delete: httpTags,
