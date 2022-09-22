@@ -16,7 +16,7 @@ function getGlobPattern() {
     return '**/*.spec.ts';
   }
 
-  return envGrepFiles.includes('.spec.ts') ? envGrepFiles : `**/*${envGrepFiles}*.spec.ts`;
+  return envGrepFiles.includes('**') ? envGrepFiles : `**/*${envGrepFiles}*`;
 }
 
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {

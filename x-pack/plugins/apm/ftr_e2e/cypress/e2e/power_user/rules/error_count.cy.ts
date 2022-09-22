@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { synthtrace } from '../../../../synthtrace';
+import { generateData } from './generate_data';
+
 function deleteAllRules() {
   cy.log('Delete all rules');
   cy.request({
@@ -36,6 +39,21 @@ describe('Rules', () => {
 
   after(() => {
     deleteAllRules();
+  });
+
+  before(() => {
+    const start = '2021-10-10T00:00:00.000Z';
+    const end = '2021-10-10T00:01:00.000Z';
+    synthtrace.index(
+      generateData({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
+  });
+
+  after(() => {
+    synthtrace.clean();
   });
 
   describe('Error count', () => {
