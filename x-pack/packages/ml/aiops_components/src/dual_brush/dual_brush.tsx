@@ -245,7 +245,7 @@ export function DualBrush({
               [0, BRUSH_MARGIN],
               [widthRef.current, BRUSH_HEIGHT - BRUSH_MARGIN],
             ]);
-            
+
             brushObject.brush(d3.select(n[i]));
             const xStart = x(brushObject.start) ?? 0;
             const xEnd = x(brushObject.end) ?? 0;
