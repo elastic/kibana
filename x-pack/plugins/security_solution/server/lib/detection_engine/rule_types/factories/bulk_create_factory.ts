@@ -21,6 +21,7 @@ import type {
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
+  enrichmentDuration: string;
   createdItemsCount: number;
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
@@ -45,6 +46,7 @@ export const bulkCreateFactory =
       return {
         errors: [],
         success: true,
+        enrichmentDuration: '0',
         bulkCreateDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
@@ -54,6 +56,22 @@ export const bulkCreateFactory =
 
     const start = performance.now();
 
+    let enrichmentsTimeStart: number = 0;
+    let enrichmentsTimeFinish: number = 0;
+    let enrichAlertsWrapper: typeof enrichAlerts;
+    if (enrichAlerts) {
+      enrichAlertsWrapper = async (alerts, params) => {
+        try {
+          enrichmentsTimeStart = performance.now();
+          const enrichedEvents = await enrichAlerts(alerts, params);
+          enrichmentsTimeFinish = performance.now();
+          return enrichedEvents;
+        } catch {
+          return alerts;
+        }
+      };
+    }
+
     const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
@@ -62,7 +80,7 @@ export const bulkCreateFactory =
       })),
       refreshForBulkCreate,
       maxAlerts,
-      enrichAlerts
+      enrichAlertsWrapper
     );
 
     const end = performance.now();
@@ -78,6 +96,7 @@ export const bulkCreateFactory =
       return {
         errors: Object.keys(errors),
         success: false,
+        enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
         bulkCreateDuration: makeFloatString(end - start),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
@@ -88,6 +107,7 @@ export const bulkCreateFactory =
         errors: [],
         success: true,
         bulkCreateDuration: makeFloatString(end - start),
+        enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
         alertsWereTruncated,

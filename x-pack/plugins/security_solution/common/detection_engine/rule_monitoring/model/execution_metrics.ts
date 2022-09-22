@@ -15,5 +15,6 @@ export type RuleExecutionMetrics = t.TypeOf<typeof RuleExecutionMetrics>;
 export const RuleExecutionMetrics = t.partial({
   total_search_duration_ms: DurationMetric,
   total_indexing_duration_ms: DurationMetric,
+  total_enrichment_duration_ms: DurationMetric,
   execution_gap_duration_s: DurationMetric,
 });

@@ -1452,6 +1452,7 @@ describe('utils', () => {
       const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
         success: false,
         bulkCreateDuration: '100',
+        enrichmentDuration: '0',
         createdItemsCount: 1,
         createdItems: [],
         errors: ['new error'],
@@ -1469,6 +1470,7 @@ describe('utils', () => {
       const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
         success: true,
         bulkCreateDuration: '0',
+        enrichmentDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
         errors: ['error 1'],
@@ -1484,6 +1486,7 @@ describe('utils', () => {
       const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
         success: true,
         bulkCreateDuration: '0',
+        enrichmentDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
         errors: ['error 2'],

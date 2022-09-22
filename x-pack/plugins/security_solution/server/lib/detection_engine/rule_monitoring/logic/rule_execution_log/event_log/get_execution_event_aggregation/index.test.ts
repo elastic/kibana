@@ -249,6 +249,11 @@ describe('getExecutionEventAggregation', () => {
                   field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
                 },
               },
+              enrichmentDuration: {
+                min: {
+                  field: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+                },
+              },
             },
           },
           securityStatus: {
