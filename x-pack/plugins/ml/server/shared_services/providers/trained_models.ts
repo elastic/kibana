@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { GetGuards } from '../shared_services';
 
-export interface AnomalyDetectorsProvider {
+export interface TrainedModelsProvider {
   trainedModelsProvider(
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
@@ -19,7 +19,7 @@ export interface AnomalyDetectorsProvider {
   };
 }
 
-export function getTrainedModelsProvider(getGuards: GetGuards): AnomalyDetectorsProvider {
+export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsProvider {
   return {
     trainedModelsProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       return {
