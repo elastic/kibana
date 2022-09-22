@@ -668,7 +668,7 @@ describe('percentile', () => {
 
       const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
 
-      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+      const { aggs: newAggs } = percentileOperation.optimizeEsAggs!(
         aggs,
         esAggsIdMap,
         aggsToIdsMap
