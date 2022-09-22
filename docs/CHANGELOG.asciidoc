@@ -889,7 +889,7 @@ Before you upgrade to 8.0.0., remove these settings from kibana.yml.
 To start {kib}, you must enable inline scripting in {es}. For more information, refer to {kibana-pull}113068[#113068].
 
 *Impact* +
-Enable link:https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html[inline scripting].
+Enable {ref}/modules-scripting-security.html[inline scripting].
 ====
 
 [discrete]
