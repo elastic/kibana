@@ -7,15 +7,9 @@
 import expect from '@kbn/expect';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
 import { apm, timerange } from '@kbn/apm-synthtrace';
-import {
-  APIReturnType,
-  APIClientRequestParamsOf,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { first } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-
-type StorageExplorer = APIReturnType<'GET /internal/apm/storage_explorer'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -118,21 +112,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const goServiceStats = body.serviceStatistics.find(
           ({ serviceName }) => serviceName === 'opbeans-go'
         );
-        expect(goServiceStats.environments).to.have.length(1);
-        expect(goServiceStats.environments).to.contain('production');
-        expect(goServiceStats.agentName).to.be('go');
-        expect(goServiceStats.size).to.be.greaterThan(0);
-        expect(goServiceStats.sampling).to.be(1);
+        expect(goServiceStats?.environments).to.have.length(1);
+        expect(goServiceStats?.environments).to.contain('production');
+        expect(goServiceStats?.agentName).to.be('go');
+        expect(goServiceStats?.size).to.be.greaterThan(0);
+        expect(goServiceStats?.sampling).to.be(1);
 
         const nodeServiceStats = body.serviceStatistics.find(
           ({ serviceName }) => serviceName === 'opbeans-node'
         );
-        expect(nodeServiceStats.environments).to.have.length(2);
-        expect(nodeServiceStats.environments).to.contain('staging');
-        expect(nodeServiceStats.environments).to.contain('dev');
-        expect(nodeServiceStats.agentName).to.be('node');
-        expect(nodeServiceStats.size).to.be.greaterThan(0);
-        expect(nodeServiceStats.sampling).to.be(1);
+        expect(nodeServiceStats?.environments).to.have.length(2);
+        expect(nodeServiceStats?.environments).to.contain('staging');
+        expect(nodeServiceStats?.environments).to.contain('dev');
+        expect(nodeServiceStats?.agentName).to.be('node');
+        expect(nodeServiceStats?.size).to.be.greaterThan(0);
+        expect(nodeServiceStats?.sampling).to.be(1);
       });
 
       it('returns only node service stats when there is a matching environment', async () => {
@@ -143,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
         expect(body.serviceStatistics).to.have.length(1);
-        expect(first(body.serviceStatistics).serviceName).to.be(nodeServiceName);
+        expect(body.serviceStatistics[0]?.serviceName).to.be(nodeServiceName);
       });
 
       it('returns empty stats when there is no matching lifecycle phase', async () => {
@@ -164,7 +158,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
         expect(body.serviceStatistics).to.have.length(1);
-        expect(first(body.serviceStatistics).serviceName).to.be(goServiceName);
+        expect(body.serviceStatistics[0]?.serviceName).to.be(goServiceName);
       });
     });
   });
