@@ -35,7 +35,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
 }) => {
   let header;
 
-  const [offset, setOffset] = useState<number | undefined>(undefined);
+  const [offset, setOffset] = useState<number | undefined>();
 
   useEffect(() => {
     const kibanaChrome = document.querySelector('[data-test-subj="kibanaChrome"]') as HTMLElement;
