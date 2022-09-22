@@ -158,9 +158,7 @@ describe('fetch package', () => {
 });
 
 describe('getLicensePath', () => {
-  beforeEach(() => {
-    MockArchive.getPathParts = jest.requireActual('../archive').getPathParts;
-  });
+  MockArchive.getPathParts = jest.requireActual('../archive').getPathParts;
 
   it('returns first license path if found', () => {
     const path = getLicensePath([
