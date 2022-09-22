@@ -19,6 +19,7 @@ export async function __kbnBootstrap__() {
     detail: LOAD_BOOTSTRAP_START,
   });
 
+  // Some comment
   const injectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
