@@ -1039,6 +1039,42 @@ describe('IndexPattern Data Source', () => {
       `);
     });
 
+    it('should not add time shift to nested count metric', async () => {
+      const queryBaseState: IndexPatternPrivateState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+                timeShift: '1h',
+                reducedTimeRange: '1m',
+              },
+            },
+          },
+        },
+      };
+
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
+      const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
+      const metricAgg = (filteredMetricAgg.customMetric[0] as Ast).chain[0].arguments;
+      const bucketAgg = (filteredMetricAgg.customBucket[0] as Ast).chain[0].arguments;
+      expect(filteredMetricAgg.timeShift[0]).toEqual('1h');
+      expect(bucketAgg.timeWindow[0]).toEqual('1m');
+      expect(metricAgg.timeWindow).toEqual(undefined);
+      expect(metricAgg.timeShift).toEqual(undefined);
+    });
+
     it('should put column formatters after calculated columns', async () => {
       const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
