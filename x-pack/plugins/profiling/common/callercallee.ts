@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createFrameGroup, createFrameGroupID, FrameGroupID } from './frame_group';
+import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
   emptyExecutable,
@@ -66,14 +66,13 @@ export function createCallerCalleeGraph(
 ): CallerCalleeGraph {
   // Create a root node for the graph
   const rootFrame = createStackFrameMetadata();
-  const rootFrameGroup = createFrameGroup(
+  const rootFrameGroupID = createFrameGroupID(
     rootFrame.FileID,
     rootFrame.AddressOrLine,
     rootFrame.ExeFileName,
     rootFrame.SourceFilename,
     rootFrame.FunctionName
   );
-  const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
   const root = createCallerCalleeNode(rootFrame, rootFrameGroupID, 0);
   const graph: CallerCalleeGraph = { root, size: 1 };
 
@@ -113,14 +112,13 @@ export function createCallerCalleeGraph(
       const frame = stackFrames.get(frameID) ?? emptyStackFrame;
       const executable = executables.get(fileID) ?? emptyExecutable;
 
-      const frameGroup = createFrameGroup(
+      const frameGroupID = createFrameGroupID(
         fileID,
         addressOrLine,
         executable.FileName,
         frame.FileName,
         frame.FunctionName
       );
-      const frameGroupID = createFrameGroupID(frameGroup);
 
       let node = currentNode.Callees.get(frameGroupID);
 

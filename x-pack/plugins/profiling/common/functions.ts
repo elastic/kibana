@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { createFrameGroup, createFrameGroupID, FrameGroupID } from './frame_group';
+import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
   emptyExecutable,
@@ -71,14 +71,13 @@ export function createTopNFunctions(
       const frame = stackFrames.get(frameID) ?? emptyStackFrame;
       const executable = executables.get(fileID) ?? emptyExecutable;
 
-      const frameGroup = createFrameGroup(
+      const frameGroupID = createFrameGroupID(
         fileID,
         addressOrLine,
         executable.FileName,
         frame.FileName,
         frame.FunctionName
       );
-      const frameGroupID = createFrameGroupID(frameGroup);
 
       let topNFunction = topNFunctions.get(frameGroupID);
 
