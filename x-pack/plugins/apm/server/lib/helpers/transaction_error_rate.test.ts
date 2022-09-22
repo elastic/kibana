@@ -17,7 +17,7 @@ describe('calculateFailedTransactionRateFromServiceMetrics', () => {
     ).toBe(0);
   });
 
-  it('should return 9 when failedTransactions:null', () => {
+  it('should return 0 when failedTransactions:null', () => {
     expect(
       calculateFailedTransactionRateFromServiceMetrics({
         failedTransactions: null,
