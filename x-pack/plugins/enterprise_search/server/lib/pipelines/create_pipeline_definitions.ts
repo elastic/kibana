@@ -284,7 +284,7 @@ export const formatMlPipelineBody = async (
               model_id: modelId,
               model_version: modelVersion,
               processed_timestamp: '{{{ _ingest.timestamp }}}',
-              type: modelTypes,
+              types: modelTypes,
             },
           ],
         },
