@@ -64,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Graph inspect panel', async function () {
+      await testSubjects.click('graph-explore-button');
       await testSubjects.click('graphInspectButton');
       await a11y.testAppSnapshot();
       await testSubjects.click('graphInspectButton');
