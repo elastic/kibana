@@ -236,10 +236,12 @@ export const createLifecycleExecutor =
           ...commonRuleFields,
           ...currentAlertData,
           [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
-          [ALERT_TIME_RANGE]: {
-            gte: started,
-            lte: options.startedAt.toISOString(),
-          },
+          [ALERT_TIME_RANGE]: isRecovered
+            ? {
+                gte: started,
+                lte: commonRuleFields[TIMESTAMP],
+              }
+            : { gte: started },
           [ALERT_INSTANCE_ID]: alertId,
           [ALERT_START]: started,
           [ALERT_UUID]: alertUuid,
