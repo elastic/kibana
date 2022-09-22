@@ -19,7 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('certificates', function () {
-    // FLAKY: https://github.com/elastic/kibana/issues/114261
     describe('empty certificates', function () {
       before(async () => {
         await esArchiver.load(BLANK_INDEX_PATH);
