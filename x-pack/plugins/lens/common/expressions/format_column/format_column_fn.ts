@@ -32,7 +32,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
-              id: format,
+              id: supportedFormats[format].formatId,
               params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);

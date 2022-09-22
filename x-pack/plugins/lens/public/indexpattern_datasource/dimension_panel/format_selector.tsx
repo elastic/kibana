@@ -28,6 +28,11 @@ const supportedFormats: Record<string, { title: string }> = {
       defaultMessage: 'Bytes (1024)',
     }),
   },
+  bits: {
+    title: i18n.translate('xpack.lens.indexPattern.bitsFormatLabel', {
+      defaultMessage: 'Bits (1000)',
+    }),
+  },
 };
 
 const defaultOption = {
