@@ -10,16 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
 import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
+import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
+import { useInspector } from '../../helpers/use_inspector';
 
 interface WorkspaceTopNavMenuProps {
   workspace: Workspace | undefined;
-  setShowInspect: React.Dispatch<React.SetStateAction<boolean>>;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -30,9 +31,11 @@ interface WorkspaceTopNavMenuProps {
   graphSavePolicy: GraphSavePolicy;
   navigation: NavigationStart;
   capabilities: Capabilities;
+  inspect: InspectorPublicPluginStart;
   coreStart: CoreStart;
   canEditDrillDownUrls: boolean;
   isInitialized: boolean;
+  requestAdapter: RequestAdapter;
 }
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
@@ -41,6 +44,11 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const history = useHistory();
   const allSavingDisabled = props.graphSavePolicy === 'none';
   const isInspectDisabled = !props.workspace?.lastRequest || !props.workspace.lastRequest;
+
+  const { onOpenInspector } = useInspector({
+    inspect: props.inspect,
+    requestAdapter: props.requestAdapter,
+  });
 
   // ===== Menubar configuration =========
   const { TopNavMenu } = props.navigation.ui;
@@ -117,7 +125,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
       defaultMessage: 'Inspect',
     }),
     run: () => {
-      props.setShowInspect((prevShowInspect) => !prevShowInspect);
+      onOpenInspector();
     },
     tooltip: () => {
       if (isInspectDisabled) {

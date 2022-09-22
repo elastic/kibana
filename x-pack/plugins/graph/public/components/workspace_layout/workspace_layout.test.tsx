@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 import { WorkspaceLayoutComponent } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, IndexPatternProvider } from '../../types';
 import { OverlayStart, Capabilities } from '@kbn/core/public';
@@ -45,6 +46,14 @@ describe('workspace_layout', () => {
       aliasTargetId: '',
     } as SharingSavedObjectProps,
     spaces: spacesPluginMock.createStartContract(),
+    inspect: { open: jest.fn() } as unknown as InspectorStart,
+    requestAdapter: {
+      start: () => ({
+        stats: jest.fn(),
+        json: jest.fn(),
+      }),
+      reset: jest.fn(),
+    } as unknown as RequestAdapter,
   };
   it('should display conflict notification if outcome is conflict', () => {
     shallow(
