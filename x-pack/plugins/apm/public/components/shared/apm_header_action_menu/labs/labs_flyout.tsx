@@ -54,7 +54,7 @@ export function LabsFlyout({ onClose }: Props) {
         return settingsEditableConfig[key].requiresPageReload;
       });
 
-      await saveAll();
+      await saveAll({ trackMetricName: 'labs_save' });
 
       if (reloadPage) {
         window.location.reload();
