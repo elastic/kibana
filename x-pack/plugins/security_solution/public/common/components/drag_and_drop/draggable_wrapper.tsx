@@ -159,8 +159,9 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     render,
     fieldType,
     isAggregatable,
-    timelineId,
+    scopeId: timelineId ?? '',
     truncate,
+    isInTimeline: true,
   });
 
   const registerProvider = useCallback(() => {
@@ -338,8 +339,9 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     fieldType,
     onFilterAdded,
     render,
-    timelineId,
+    scopeId: timelineId ?? '',
     truncate,
+    isInTimeline: true,
   });
   const renderContent = useCallback(
     () => (

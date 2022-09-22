@@ -206,10 +206,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const ACTION_BUTTON_COUNT = 6;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+  const currentTimeline = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')
   );
 
+  const activeFilterManager = currentTimeline.filterManager;
+
+  console.log(activeFilterManager);
   const filterManager = useMemo(
     () => activeFilterManager ?? new FilterManager(uiSettings),
     [activeFilterManager, uiSettings]
@@ -274,15 +277,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
-  /* useEffect(() => {
+  useEffect(() => {
     dispatch(
-      timelineActions.updateTimeline({
-        timeline: { filterManager },
+      timelineActions.initializeTimelineSettings({
+        filterManager,
         id: timelineId,
       })
     );
-  }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
-  */
+  }, [activeFilterManager, currentTimeline, dispatch, filterManager, timelineId, uiSettings]);
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({

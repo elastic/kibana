@@ -36,9 +36,9 @@ import type {
 } from '../../../../common/types/timeline';
 import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import { timelineDefaults } from './defaults';
+import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
-import type { TimelineById } from './types';
+import type { TimelineById, TimelineModelSettings } from './types';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -1539,4 +1539,37 @@ export const setDeletedTableEvents = ({
       isSelectAllChecked,
     },
   };
+};
+
+interface InitializeTimelineParams {
+  id: string;
+  timelineById: TimelineById;
+  timelineSettingsProps: Partial<TimelineModelSettings>;
+}
+
+export const setInitializeTimelineSettings = ({
+  id,
+  timelineById,
+  timelineSettingsProps,
+}: InitializeTimelineParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return !timeline?.initialized
+    ? {
+        ...timelineById,
+        [id]: {
+          ...timelineDefaults,
+          ...getTimelineManageDefaults(id),
+          ...timeline,
+          ...timelineSettingsProps,
+          ...(!timeline ||
+          (isEmpty(timeline.columns) && !isEmpty(timelineSettingsProps.defaultColumns))
+            ? { columns: timelineSettingsProps.defaultColumns }
+            : {}),
+          sort: timelineSettingsProps.sort ?? timelineDefaults.sort,
+          loadingEventIds: timelineDefaults.loadingEventIds,
+          initialized: true,
+        },
+      }
+    : timelineById;
 };

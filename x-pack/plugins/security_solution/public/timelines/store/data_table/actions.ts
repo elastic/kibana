@@ -38,4 +38,5 @@ export {
   updateTableGraphEventId,
   updateTableSessionViewConfig,
   createTGrid,
+  addProviderToTimeline,
 } from '@kbn/timelines-plugin/public';

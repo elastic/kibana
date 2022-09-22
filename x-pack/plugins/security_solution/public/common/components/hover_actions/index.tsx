@@ -157,7 +157,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     toggleTopN,
     values,
     isInTimeline,
-    activeFilterManager,
   }) => {
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
     const [isActive, setIsActive] = useState(false);
@@ -246,7 +245,6 @@ export const HoverActions: React.FC<Props> = React.memo(
       toggleTopN,
       values,
       scopeId,
-      activeFilterManager,
       isInTimeline,
     });
 

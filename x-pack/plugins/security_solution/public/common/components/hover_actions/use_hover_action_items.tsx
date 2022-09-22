@@ -13,13 +13,16 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
+import { dataTableSelectors } from '../../../timelines/store/data_table';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/timeline/actions';
-
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { isInTableScope, isTimelineScope } from '../event_details/helpers';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
@@ -45,7 +48,6 @@ export interface UseHoverActionItemsProps {
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
-  activeFilterManager?: FilterManager;
   isInTimeline: boolean;
 }
 
@@ -75,11 +77,10 @@ export const useHoverActionItems = ({
   ownFocus,
   showTopN,
   stKeyboardEvent,
-  scopeId,
+  scopeId = TimelineId.active,
   toggleColumn,
   toggleTopN,
   values,
-  activeFilterManager,
   isInTimeline,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
@@ -98,10 +99,24 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
+  console.log(scopeId)
+  const getScope = useMemo(() => {
+    if (isTimelineScope(scopeId ?? '')) {
+      return timelineSelectors.getTimelineByIdSelector();
+    } else if (isInTableScope(scopeId ?? '')) {
+      return dataTableSelectors.getTableByIdSelector();
+    }
+  }, [scopeId]);
+
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+    getScope ? getScope(state, scopeId ?? '') : { filterManager: undefined }
+  );
+  console.log(activeFilterManager)
+
   const filterManager = useMemo(
     () =>
       isInTimeline ? activeFilterManager ?? new FilterManager(uiSettings) : filterManagerBackup,
-    [uiSettings, isInTimeline, activeFilterManager, filterManagerBackup]
+    [isInTimeline, activeFilterManager, uiSettings, filterManagerBackup]
   );
 
   /*

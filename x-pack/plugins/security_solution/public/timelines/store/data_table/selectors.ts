@@ -7,7 +7,6 @@
 import type { TableById, TGridModel } from '@kbn/timelines-plugin/public/types';
 import { createSelector } from 'reselect';
 import type { State } from '../../../common/store/types';
-import { tableDefaults } from '../timeline/defaults';
 
 export { getManageDataTableById, getTGridByIdSelector } from '@kbn/timelines-plugin/public';
 
@@ -15,10 +14,7 @@ const selectTableById = (state: State): TableById => state.dataTable.tableById;
 
 export const tableByIdSelector = createSelector(selectTableById, (tableById) => tableById);
 
-export const selectTable = (state: State, tableId: string): TGridModel => {
-  const v = state.dataTable.tableById[tableId];
-  console.log(v)
-  return v ?? tableDefaults;
-}
+export const selectTable = (state: State, tableId: string): TGridModel =>
+  state.dataTable.tableById[tableId];
 
 export const getTableByIdSelector = () => createSelector(selectTable, (table) => table);

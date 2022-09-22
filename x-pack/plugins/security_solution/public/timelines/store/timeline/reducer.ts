@@ -58,6 +58,7 @@ import {
   clearSelected,
   setSelected,
   setEventsDeleted,
+  initializeTimelineSettings,
 } from './actions';
 import {
   addNewTimeline,
@@ -97,6 +98,7 @@ import {
   updateTableSort,
   setSelectedTableEvents,
   setDeletedTableEvents,
+  setInitializeTimelineSettings,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -507,6 +509,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       eventIds,
       timelineById: state.timelineById,
       isDeleted,
+    }),
+  }))
+  .case(initializeTimelineSettings, (state, { id, ...timelineSettingsProps }) => ({
+    ...state,
+    timelineById: setInitializeTimelineSettings({
+      id,
+      timelineById: state.timelineById,
+      timelineSettingsProps,
     }),
   }))
   .build();

@@ -11,10 +11,7 @@ import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 
 import type { OnDataProviderEdited } from '../events';
@@ -71,17 +68,14 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     wrapperRef,
   }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const timelineType = useShallowEqualSelector((state) => {
+    const { isLoading, timelineType = TimelineType.default } = useShallowEqualSelector((state) => {
       if (!timelineId) {
-        return TimelineType.default;
+        return { timelineType: TimelineType.default, isLoading: false };
       }
+      const timeline = getTimeline(state, timelineId);
 
-      return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
+      return timeline;
     });
-    const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const { isLoading } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, timelineId ?? '')
-    );
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);

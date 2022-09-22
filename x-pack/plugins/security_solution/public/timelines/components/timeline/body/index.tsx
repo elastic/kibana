@@ -80,7 +80,7 @@ export const StatefulBody = React.memo<Props>(
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const {
-      tGrid: { queryFields },
+      // tGrid: { queryFields },
       timeline: {
         columns,
         eventIdToNoteIds,
@@ -90,6 +90,7 @@ export const StatefulBody = React.memo<Props>(
         pinnedEventIds,
         selectedEventIds,
         show,
+        queryFields,
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, id));
 

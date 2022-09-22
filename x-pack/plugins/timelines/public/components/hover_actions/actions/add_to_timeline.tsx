@@ -8,18 +8,14 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { DraggableId } from 'react-beautiful-dnd';
-import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { DataProvider } from '../../../../common/types';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { tGridSelectors } from '../../../types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 import { HoverActionComponentProps } from './types';
-import { addProviderToTimeline } from '../../../store/t_grid/actions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 
@@ -51,6 +47,7 @@ export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   draggableId?: DraggableId;
   dataProvider?: DataProvider[] | DataProvider;
+  timelineType?: string;
 }
 
 const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
@@ -65,15 +62,10 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     onClick,
     showTooltip = false,
     value,
+    timelineType = 'default',
   }) => {
-    const dispatch = useDispatch();
     const { addSuccess } = useAppToasts();
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
-    const getTGrid = tGridSelectors.getTGridByIdSelector();
-
-    const { timelineType } = useDeepEqualSelector((state) => {
-      return getTGrid(state, 'active');
-    });
 
     const handleStartDragToTimeline = useCallback(() => {
       if (draggableId != null) {
@@ -82,12 +74,6 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
         const addDataProvider = Array.isArray(dataProvider) ? dataProvider : [dataProvider];
         addDataProvider.forEach((provider) => {
           if (provider) {
-            dispatch(
-              addProviderToTimeline({
-                id: 'active',
-                dataProvider: provider,
-              })
-            );
             addSuccess(
               i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(provider.name, timelineType === 'default')
             );
@@ -98,15 +84,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       if (onClick != null) {
         onClick();
       }
-    }, [
-      addSuccess,
-      dataProvider,
-      dispatch,
-      draggableId,
-      onClick,
-      startDragToTimeline,
-      timelineType,
-    ]);
+    }, [addSuccess, dataProvider, draggableId, onClick, startDragToTimeline, timelineType]);
 
     useEffect(() => {
       if (!ownFocus) {

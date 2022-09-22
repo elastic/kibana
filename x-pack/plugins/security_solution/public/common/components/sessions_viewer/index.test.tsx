@@ -33,7 +33,7 @@ const filterQuery =
   '{"bool":{"must":[],"filter":[{"match_phrase":{"host.name":{"query":"ubuntu-impish"}}}],"should":[],"must_not":[]}}';
 
 const testProps: SessionsComponentsProps = {
-  scopeId: TableId.hostsPageSessions,
+  tableId: TableId.hostsPageSessions,
   entityType: 'sessions',
   pageFilters: [],
   startDate,

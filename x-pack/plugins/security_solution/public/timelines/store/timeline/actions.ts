@@ -15,7 +15,7 @@ import type {
 } from '../../components/timeline/data_providers/data_provider';
 
 import type { KqlMode, TimelineModel } from './model';
-import type { InsertTimeline } from './types';
+import type { InitialyzeTimelineSettings, InsertTimeline } from './types';
 import type {
   FieldsEqlOptions,
   TimelineNonEcsData,
@@ -260,3 +260,6 @@ export const setSelected = actionCreator<{
 export const clearSelected = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_SELECTED');
+
+export const initializeTimelineSettings =
+  actionCreator<InitialyzeTimelineSettings>('INITIALIZE_TIMELINE');

@@ -113,3 +113,14 @@ export const tableDefaults: SubsetTGridModel = {
   savedObjectId: null,
   columns: defaultHeaders,
 };
+
+export const getTimelineManageDefaults = (id: string) => ({
+  defaultColumns: defaultHeaders,
+  documentType: '',
+  selectAll: false,
+  id,
+  isLoading: false,
+  queryFields: [],
+  title: '',
+  graphEventId: '',
+});
