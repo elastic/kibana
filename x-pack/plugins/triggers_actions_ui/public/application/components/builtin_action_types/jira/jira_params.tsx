@@ -196,48 +196,77 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   return (
     <>
-      <>
-        <EuiFormRow
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.jira.urgencySelectFieldLabel',
+          {
+            defaultMessage: 'Issue type',
+          }
+        )}
+      >
+        <EuiSelect
           fullWidth
-          label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.jira.urgencySelectFieldLabel',
-            {
-              defaultMessage: 'Issue type',
-            }
-          )}
-        >
-          <EuiSelect
-            fullWidth
-            isLoading={isLoadingIssueTypes}
-            disabled={isLoadingIssueTypes || isLoadingFields}
-            data-test-subj="issueTypeSelect"
-            options={issueTypesSelectOptions}
-            value={incident.issueType ?? undefined}
-            onChange={(e) => editSubActionProperty('issueType', e.target.value)}
-          />
-        </EuiFormRow>
-        <EuiHorizontalRule />
-        {hasParent && (
+          isLoading={isLoadingIssueTypes}
+          disabled={isLoadingIssueTypes || isLoadingFields}
+          data-test-subj="issueTypeSelect"
+          options={issueTypesSelectOptions}
+          value={incident.issueType ?? undefined}
+          onChange={(e) => editSubActionProperty('issueType', e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiHorizontalRule />
+      {hasParent && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                  {
+                    defaultMessage: 'Parent issue',
+                  }
+                )}
+              >
+                <SearchIssues
+                  selectedValue={incident.parent}
+                  http={http}
+                  toastNotifications={toasts}
+                  actionConnector={actionConnector}
+                  onChange={(parentIssueKey) => {
+                    editSubActionProperty('parent', parentIssueKey);
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <>
+        {hasPriority && (
           <>
-            <EuiFlexGroup>
+            <EuiFlexGroup data-test-subj="priority-wrapper">
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
                     {
-                      defaultMessage: 'Parent issue',
+                      defaultMessage: 'Priority',
                     }
                   )}
                 >
-                  <SearchIssues
-                    data-test-subj="parent-search"
-                    selectedValue={incident.parent}
-                    http={http}
-                    toastNotifications={toasts}
-                    actionConnector={actionConnector}
-                    onChange={(parentIssueKey) => {
-                      editSubActionProperty('parent', parentIssueKey);
+                  <EuiSelect
+                    fullWidth
+                    isLoading={isLoadingFields}
+                    disabled={isLoadingIssueTypes || isLoadingFields}
+                    data-test-subj="prioritySelect"
+                    options={prioritiesSelectOptions}
+                    value={incident.priority ?? undefined}
+                    onChange={(e) => {
+                      editSubActionProperty('priority', e.target.value);
                     }}
                   />
                 </EuiFormRow>
@@ -246,141 +275,109 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             <EuiSpacer size="m" />
           </>
         )}
-        <>
-          {hasPriority && (
-            <>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    fullWidth
-                    label={i18n.translate(
-                      'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
-                      {
-                        defaultMessage: 'Priority',
-                      }
-                    )}
-                  >
-                    <EuiSelect
-                      fullWidth
-                      isLoading={isLoadingFields}
-                      disabled={isLoadingIssueTypes || isLoadingFields}
-                      data-test-subj="prioritySelect"
-                      options={prioritiesSelectOptions}
-                      value={incident.priority ?? undefined}
-                      onChange={(e) => {
-                        editSubActionProperty('priority', e.target.value);
-                      }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          <EuiFormRow
-            data-test-subj="summary-row"
-            fullWidth
-            error={errors['subActionParams.incident.summary']}
-            isInvalid={
-              errors['subActionParams.incident.summary'] !== undefined &&
-              errors['subActionParams.incident.summary'].length > 0 &&
-              incident.summary !== undefined
+        <EuiFormRow
+          data-test-subj="summary-row"
+          fullWidth
+          error={errors['subActionParams.incident.summary']}
+          isInvalid={
+            errors['subActionParams.incident.summary'] !== undefined &&
+            errors['subActionParams.incident.summary'].length > 0 &&
+            incident.summary !== undefined
+          }
+          label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
+            {
+              defaultMessage: 'Summary (required)',
             }
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
-              {
-                defaultMessage: 'Summary (required)',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editSubActionProperty}
-              messageVariables={messageVariables}
-              paramsProperty={'summary'}
-              inputTargetValue={incident.summary ?? undefined}
-              errors={errors['subActionParams.incident.summary'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          {hasLabels && (
-            <>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFormRow
+          )}
+        >
+          <TextFieldWithMessageVariables
+            index={index}
+            editAction={editSubActionProperty}
+            messageVariables={messageVariables}
+            paramsProperty={'summary'}
+            inputTargetValue={incident.summary ?? undefined}
+            errors={errors['subActionParams.incident.summary'] as string[]}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        {hasLabels && (
+          <>
+            <EuiFlexGroup data-test-subj="labels-wrapper">
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
+                    {
+                      defaultMessage: 'Labels',
+                    }
+                  )}
+                  error={errors['subActionParams.incident.labels'] as string[]}
+                  isInvalid={areLabelsInvalid}
+                >
+                  <EuiComboBox
+                    noSuggestions
                     fullWidth
-                    label={i18n.translate(
-                      'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
-                      {
-                        defaultMessage: 'Labels',
+                    isLoading={isLoadingFields}
+                    isDisabled={isLoadingIssueTypes || isLoadingFields}
+                    selectedOptions={labelOptions}
+                    onCreateOption={(searchValue: string) => {
+                      const newOptions = [...labelOptions, { label: searchValue }];
+                      editSubActionProperty(
+                        'labels',
+                        newOptions.map((newOption) => newOption.label)
+                      );
+                    }}
+                    onChange={(selectedOptions: Array<{ label: string }>) => {
+                      editSubActionProperty(
+                        'labels',
+                        selectedOptions.map((selectedOption) => selectedOption.label)
+                      );
+                    }}
+                    onBlur={() => {
+                      if (!incident.labels) {
+                        editSubActionProperty('labels', []);
                       }
-                    )}
-                    error={errors['subActionParams.incident.labels'] as string[]}
+                    }}
+                    isClearable={true}
+                    data-test-subj="labelsComboBox"
                     isInvalid={areLabelsInvalid}
-                  >
-                    <EuiComboBox
-                      noSuggestions
-                      fullWidth
-                      isLoading={isLoadingFields}
-                      isDisabled={isLoadingIssueTypes || isLoadingFields}
-                      selectedOptions={labelOptions}
-                      onCreateOption={(searchValue: string) => {
-                        const newOptions = [...labelOptions, { label: searchValue }];
-                        editSubActionProperty(
-                          'labels',
-                          newOptions.map((newOption) => newOption.label)
-                        );
-                      }}
-                      onChange={(selectedOptions: Array<{ label: string }>) => {
-                        editSubActionProperty(
-                          'labels',
-                          selectedOptions.map((selectedOption) => selectedOption.label)
-                        );
-                      }}
-                      onBlur={() => {
-                        if (!incident.labels) {
-                          editSubActionProperty('labels', []);
-                        }
-                      }}
-                      isClearable={true}
-                      data-test-subj="labelsComboBox"
-                      isInvalid={areLabelsInvalid}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          {hasDescription && (
-            <TextAreaWithMessageVariables
-              index={index}
-              editAction={editSubActionProperty}
-              messageVariables={messageVariables}
-              paramsProperty={'description'}
-              inputTargetValue={incident.description ?? undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
-                {
-                  defaultMessage: 'Description',
-                }
-              )}
-            />
-          )}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {hasDescription && (
           <TextAreaWithMessageVariables
             index={index}
-            editAction={editComment}
+            editAction={editSubActionProperty}
             messageVariables={messageVariables}
-            paramsProperty={'comments'}
-            inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+            paramsProperty={'description'}
+            inputTargetValue={incident.description ?? undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.commentsTextAreaFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
               {
-                defaultMessage: 'Additional comments',
+                defaultMessage: 'Description',
               }
             )}
           />
-        </>
+        )}
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editComment}
+          messageVariables={messageVariables}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.jira.commentsTextAreaFieldLabel',
+            {
+              defaultMessage: 'Additional comments',
+            }
+          )}
+        />
       </>
     </>
   );
