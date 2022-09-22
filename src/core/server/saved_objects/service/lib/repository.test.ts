@@ -952,8 +952,6 @@ describe('SavedObjectsRepository', () => {
         expect(result.saved_objects[1].id).toEqual(obj2.id);
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#bulkGet', () => {
@@ -1240,8 +1238,6 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#bulkResolve', () => {
@@ -1726,8 +1722,6 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#checkConflicts', () => {
@@ -1847,8 +1841,6 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#create', () => {
@@ -2461,8 +2453,6 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#delete', () => {
@@ -2759,8 +2749,6 @@ describe('SavedObjectsRepository', () => {
         expect(result).toEqual({});
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#deleteByNamespace', () => {
@@ -2989,8 +2977,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#find', () => {
@@ -3393,8 +3379,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#get', () => {
@@ -3565,8 +3549,6 @@ describe('SavedObjectsRepository', () => {
         expect(result).toMatchObject({ originId });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#resolve', () => {
@@ -4516,8 +4498,6 @@ describe('SavedObjectsRepository', () => {
         expect(result).toMatchObject({ originId });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#openPointInTimeForType', () => {
@@ -4609,8 +4589,6 @@ describe('SavedObjectsRepository', () => {
         expect(response).toEqual({ id });
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#closePointInTime', () => {
@@ -4649,8 +4627,6 @@ describe('SavedObjectsRepository', () => {
         expect(response).toEqual(results);
       });
     });
-
-    test.todo('with security extension');
   });
 
   describe('#createPointInTimeFinder', () => {

@@ -1381,14 +1381,9 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       setupCheckAuthorized();
 
-      await bulkGetSuccess(
-        client,
-        repository,
-        registry,
-        [objA, objB],
-        { namespace: optionsNamespace } // foo-namespace is alredy in multiNamespaceObjNamespaces
-        // (though we could leave it in as a duplicate - those are NOT removed, ToDo: remove duplicate namespace checks?)
-      );
+      await bulkGetSuccess(client, repository, registry, [objA, objB], {
+        namespace: optionsNamespace,
+      });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
