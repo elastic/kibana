@@ -61,6 +61,7 @@ class DocLinks {
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
   public connectorsWorkplaceSearch: string;
+  public contentExtraction: string;
   public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
@@ -73,6 +74,7 @@ class DocLinks {
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
+  public ingestPipelines: string;
   public kibanaSecurity: string;
   public languageAnalyzers: string;
   public languageClients: string;
@@ -172,6 +174,7 @@ class DocLinks {
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
     this.connectorsWorkplaceSearch = '';
+    this.contentExtraction = '';
     this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
@@ -184,6 +187,7 @@ class DocLinks {
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
+    this.ingestPipelines = '';
     this.kibanaSecurity = '';
     this.languageAnalyzers = '';
     this.languageClients = '';
@@ -285,6 +289,7 @@ class DocLinks {
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
+    this.contentExtraction = docLinks.links.enterpriseSearch.contentExtraction;
     this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
@@ -297,6 +302,7 @@ class DocLinks {
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
+    this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.languageClients = docLinks.links.enterpriseSearch.languageClients;

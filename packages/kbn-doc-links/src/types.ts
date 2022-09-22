@@ -111,10 +111,12 @@ export interface DocLinks {
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
+    readonly contentExtraction: string;
     readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly documentLevelSecurity: string;
+    readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
