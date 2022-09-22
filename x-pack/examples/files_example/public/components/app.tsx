@@ -25,8 +25,6 @@ import { DetailsFlyout } from './details_flyout';
 import type { FileClients } from '../types';
 import { ConfirmButtonIcon } from './confirm_button';
 import { Modal } from './modal';
-// @ts-ignore
-// import imageBase64 from '!!raw-loader!../assets/image.png.base64';
 
 interface FilesExampleAppDeps {
   files: FileClients;
