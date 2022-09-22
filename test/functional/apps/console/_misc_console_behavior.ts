@@ -10,14 +10,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
   describe('misc console behavior', function testMiscConsoleBehavior() {
     this.tags('includeFirefox');
     before(async () => {
-      log.debug('navigateTo console');
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
@@ -68,7 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressCtrlI();
         await retry.waitFor('request to be auto indented', async () => {
           const request = await PageObjects.console.getRequest();
-          log.debug(request);
           return request === 'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}';
         });
       });
@@ -79,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressCtrlUp();
         await retry.waitFor('request to be selected', async () => {
           const request = await PageObjects.console.getRequestAtLine(1);
-          log.debug(request);
           return request === 'GET _search/foo';
         });
       });
