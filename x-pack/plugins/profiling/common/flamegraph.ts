@@ -6,10 +6,10 @@
  */
 
 import fnv from 'fnv-plus';
-import { CallerCalleeGraph, sortCallerCalleeNodes } from './callercallee';
+import { CalleeTree, sortCalleeNodes } from './callee';
 import { getCalleeLabel } from './profiling';
 
-interface ColumnarCallerCallee {
+interface ColumnarCallee {
   Label: string[];
   Value: number[];
   X: number[];
@@ -94,12 +94,13 @@ function normalize(n: number, lower: number, upper: number): number {
   return (n - lower) / (upper - lower);
 }
 
-// createColumnarCallerCallee flattens the intermediate representation of the diagram
-// into a columnar format that is more compact than JSON. This representation will later
-// need to be normalized into the response ultimately consumed by the flamegraph.
-export function createColumnarCallerCallee(graph: CallerCalleeGraph): ColumnarCallerCallee {
-  const numCallees = graph.size;
-  const columnar: ColumnarCallerCallee = {
+// createColumnarCallee flattens the intermediate representation of the tree
+// into a columnar format that is more compact than JSON. This representation
+// will later need to be normalized into the response ultimately consumed by
+// the flamegraph.
+export function createColumnarCallee(tree: CalleeTree): ColumnarCallee {
+  const numCallees = tree.size;
+  const columnar: ColumnarCallee = {
     Label: new Array<string>(numCallees),
     Value: new Array<number>(numCallees),
     X: new Array<number>(numCallees),
@@ -112,7 +113,7 @@ export function createColumnarCallerCallee(graph: CallerCalleeGraph): ColumnarCa
     ExecutableID: new Array<string>(numCallees),
   };
 
-  const queue = [{ x: 0, depth: 1, node: graph.root, parentID: 'root' }];
+  const queue = [{ x: 0, depth: 1, node: tree.root, parentID: 'root' }];
 
   let idx = 0;
   while (queue.length > 0) {
@@ -143,9 +144,10 @@ export function createColumnarCallerCallee(graph: CallerCalleeGraph): ColumnarCa
     columnar.FrameID[idx] = node.FrameMetadata.FrameID;
     columnar.ExecutableID[idx] = node.FrameMetadata.FileID;
 
-    // For a deterministic result we have to walk the callers / callees in a deterministic
-    // order. A deterministic result allows deterministic UI views, something that users expect.
-    const callees = sortCallerCalleeNodes(node.Callees);
+    // For a deterministic result we have to walk the callees in a deterministic
+    // order. A deterministic result allows deterministic UI views, something
+    // that users expect.
+    const callees = sortCalleeNodes(node.Callees);
 
     let delta = 0;
     for (const callee of callees) {
@@ -165,7 +167,7 @@ export function createColumnarCallerCallee(graph: CallerCalleeGraph): ColumnarCa
 
 // createFlameGraph normalizes the intermediate columnar representation into the
 // response ultimately consumed by the flamegraph in the UI.
-export function createFlameGraph(columnar: ColumnarCallerCallee): FlameGraph {
+export function createFlameGraph(columnar: ColumnarCallee): FlameGraph {
   const graph: FlameGraph = {
     Label: [],
     Value: [],

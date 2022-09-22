@@ -8,12 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import { createCallerCalleeGraph } from '../../common/callercallee';
-import {
-  createColumnarCallerCallee,
-  createFlameGraph,
-  ElasticFlameGraph,
-} from '../../common/flamegraph';
+import { createCalleeTree } from '../../common/callee';
+import { createColumnarCallee, createFlameGraph, ElasticFlameGraph } from '../../common/flamegraph';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -56,17 +52,12 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
           const t0 = Date.now();
-          const graph = createCallerCalleeGraph(
-            stackTraceEvents,
-            stackTraces,
-            stackFrames,
-            executables
-          );
-          logger.info(`creating caller-callee graph took ${Date.now() - t0} ms`);
+          const tree = createCalleeTree(stackTraceEvents, stackTraces, stackFrames, executables);
+          logger.info(`creating callee tree took ${Date.now() - t0} ms`);
 
           const t1 = Date.now();
-          const columnar = createColumnarCallerCallee(graph);
-          logger.info(`creating columnar caller-callee graph took ${Date.now() - t1} ms`);
+          const columnar = createColumnarCallee(tree);
+          logger.info(`creating columnar callee table took ${Date.now() - t1} ms`);
 
           const t2 = Date.now();
           const fg = createFlameGraph(columnar);

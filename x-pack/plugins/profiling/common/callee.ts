@@ -20,9 +20,8 @@ import {
   StackTraceID,
 } from './profiling';
 
-export interface CallerCalleeNode {
-  Callers: Map<FrameGroupID, CallerCalleeNode>;
-  Callees: Map<FrameGroupID, CallerCalleeNode>;
+export interface CalleeNode {
+  Callees: Map<FrameGroupID, CalleeNode>;
   FrameMetadata: StackFrameMetadata;
   FrameGroupID: FrameGroupID;
   Samples: number;
@@ -30,14 +29,13 @@ export interface CallerCalleeNode {
   CountExclusive: number;
 }
 
-export function createCallerCalleeNode(
+export function createCalleeNode(
   frameMetadata: StackFrameMetadata,
   frameGroupID: FrameGroupID,
   samples: number
-): CallerCalleeNode {
+): CalleeNode {
   return {
-    Callers: new Map<FrameGroupID, CallerCalleeNode>(),
-    Callees: new Map<FrameGroupID, CallerCalleeNode>(),
+    Callees: new Map<FrameGroupID, CalleeNode>(),
     FrameMetadata: frameMetadata,
     FrameGroupID: frameGroupID,
     Samples: samples,
@@ -46,25 +44,25 @@ export function createCallerCalleeNode(
   };
 }
 
-export interface CallerCalleeGraph {
-  root: CallerCalleeNode;
+export interface CalleeTree {
+  root: CalleeNode;
   size: number;
 }
 
-// createCallerCalleeGraph creates a graph in the internal representation
-// from a StackFrameMetadata that identifies the "centered" function and
-// the trace results that provide traces and the number of times that the
-// trace has been seen.
+// createCalleeTree creates a tree in the internal representation from a
+// StackFrameMetadata that identifies the "centered" function and the trace
+// results that provide traces and the number of times that the trace has
+// been seen.
 //
 // The resulting data structure contains all of the data, but is not yet in the
 // form most easily digestible by others.
-export function createCallerCalleeGraph(
+export function createCalleeTree(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>
-): CallerCalleeGraph {
-  // Create a root node for the graph
+): CalleeTree {
+  // Create a root node for the tree
   const rootFrame = createStackFrameMetadata();
   const rootFrameGroupID = createFrameGroupID(
     rootFrame.FileID,
@@ -73,8 +71,8 @@ export function createCallerCalleeGraph(
     rootFrame.SourceFilename,
     rootFrame.FunctionName
   );
-  const root = createCallerCalleeNode(rootFrame, rootFrameGroupID, 0);
-  const graph: CallerCalleeGraph = { root, size: 1 };
+  const root = createCalleeNode(rootFrame, rootFrameGroupID, 0);
+  const tree: CalleeTree = { root, size: 1 };
 
   const sortedStackTraceIDs = new Array<StackTraceID>();
   for (const trace of stackTraces.keys()) {
@@ -85,16 +83,12 @@ export function createCallerCalleeGraph(
   });
 
   // Walk through all traces that contain the root. Increment the count of the
-  // root by the count of that trace. Walk "up" the trace (through the callers)
-  // and add the count of the trace to each caller. Then walk "down" the trace
-  // (through the callees) and add the count of the trace to each callee.
+  // root by the count of that trace. Walk "down" the trace (through the callees)
+  // and add the count of the trace to each callee.
 
   for (const stackTraceID of sortedStackTraceIDs) {
     // The slice of frames is ordered so that the leaf function is at the
-    // highest index. This means that the "first part" of the slice are the
-    // callers, and the "second part" are the callees.
-    //
-    // We currently assume there are no callers.
+    // highest index.
 
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
@@ -135,9 +129,9 @@ export function createCallerCalleeGraph(
           ExeFileName: executable.FileName,
         });
 
-        node = createCallerCalleeNode(callee, frameGroupID, samples);
+        node = createCalleeNode(callee, frameGroupID, samples);
         currentNode.Callees.set(frameGroupID, node);
-        graph.size++;
+        tree.size++;
       } else {
         node.Samples += samples;
       }
@@ -155,13 +149,11 @@ export function createCallerCalleeGraph(
   root.CountExclusive = 0;
   root.CountInclusive = root.Samples;
 
-  return graph;
+  return tree;
 }
 
-export function sortCallerCalleeNodes(
-  nodes: Map<FrameGroupID, CallerCalleeNode>
-): CallerCalleeNode[] {
-  const sortedNodes = new Array<CallerCalleeNode>();
+export function sortCalleeNodes(nodes: Map<FrameGroupID, CalleeNode>): CalleeNode[] {
+  const sortedNodes = new Array<CalleeNode>();
   for (const [_, node] of nodes) {
     sortedNodes.push(node);
   }
