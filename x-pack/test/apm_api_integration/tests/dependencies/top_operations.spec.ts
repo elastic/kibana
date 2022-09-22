@@ -52,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             environment,
             kuery,
             dependencyName,
+            searchServiceDestinationMetrics: false,
           },
         },
       })

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useSearchServiceDestinationMetrics } from '../../../../context/time_range_metadata/use_search_service_destination_metrics';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -66,6 +67,9 @@ export function DependencyDetailOperationsList() {
     urlComparisonEnabled,
   });
 
+  const { searchServiceDestinationMetrics } =
+    useSearchServiceDestinationMetrics({ rangeFrom, rangeTo, kuery });
+
   const primaryStatsFetch = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/dependencies/operations', {
@@ -76,11 +80,19 @@ export function DependencyDetailOperationsList() {
             end,
             environment,
             kuery,
+            searchServiceDestinationMetrics,
           },
         },
       });
     },
-    [dependencyName, start, end, environment, kuery]
+    [
+      dependencyName,
+      start,
+      end,
+      environment,
+      kuery,
+      searchServiceDestinationMetrics,
+    ]
   );
 
   const comparisonStatsFetch = useFetcher(
@@ -99,11 +111,21 @@ export function DependencyDetailOperationsList() {
             offset,
             environment,
             kuery,
+            searchServiceDestinationMetrics,
           },
         },
       });
     },
-    [dependencyName, start, end, offset, environment, kuery, comparisonEnabled]
+    [
+      dependencyName,
+      start,
+      end,
+      offset,
+      environment,
+      kuery,
+      comparisonEnabled,
+      searchServiceDestinationMetrics,
+    ]
   );
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [

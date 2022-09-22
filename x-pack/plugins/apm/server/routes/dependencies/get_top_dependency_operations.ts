@@ -10,7 +10,6 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -28,6 +27,11 @@ import {
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { Setup } from '../../lib/helpers/setup_request';
 import { calculateImpactBuilder } from '../traces/calculate_impact_builder';
+import {
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getLatencyFieldForServiceDestinationStatistics,
+  getProcessorEventForServiceDestinationStatistics,
+} from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 const MAX_NUM_OPERATIONS = 500;
 
@@ -51,6 +55,7 @@ export async function getTopDependencyOperations({
   offset,
   environment,
   kuery,
+  searchServiceDestinationMetrics,
 }: {
   setup: Setup;
   dependencyName: string;
@@ -59,6 +64,7 @@ export async function getTopDependencyOperations({
   offset?: string;
   environment: Environment;
   kuery: string;
+  searchServiceDestinationMetrics: boolean;
 }) {
   const { apmEventClient } = setup;
 
@@ -71,7 +77,9 @@ export async function getTopDependencyOperations({
   const aggs = {
     duration: {
       avg: {
-        field: SPAN_DURATION,
+        field: getLatencyFieldForServiceDestinationStatistics(
+          searchServiceDestinationMetrics
+        ),
       },
     },
     successful: {
@@ -94,7 +102,11 @@ export async function getTopDependencyOperations({
     'get_top_dependency_operations',
     {
       apm: {
-        events: [ProcessorEvent.span],
+        events: [
+          getProcessorEventForServiceDestinationStatistics(
+            searchServiceDestinationMetrics
+          ),
+        ],
       },
       body: {
         track_total_hits: false,
@@ -106,6 +118,9 @@ export async function getTopDependencyOperations({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+              ...getDocumentTypeFilterForServiceDestinationStatistics(
+                searchServiceDestinationMetrics
+              ),
             ],
           },
         },
