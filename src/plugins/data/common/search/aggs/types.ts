@@ -169,7 +169,7 @@ export type AggExpressionFunctionArgs<Name extends keyof SerializedAggParamsMapp
  *
  * @internal
  */
-export interface SerializedAggParamsMapping {
+interface SerializedAggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
@@ -213,6 +213,7 @@ export interface SerializedAggParamsMapping {
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHitSerialized;
   [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetricsSerialized;
 }
+
 export interface AggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
