@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiCode,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+} from '@elastic/eui';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -54,10 +63,36 @@ interface ExpandedEventFieldsObject {
 
 export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventData }) => {
   const {
-    services: { osquery },
+    services: {
+      osquery,
+      application: { capabilities },
+    },
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
+
+  const emptyPrompt = useMemo(
+    () => (
+      <EuiEmptyPrompt
+        iconType="logoOsquery"
+        title={<h2>{PERMISSION_DENIED}</h2>}
+        titleSize="xs"
+        body={
+          <FormattedMessage
+            id="xpack.securitySolution.osquery.results.missingPrivilleges"
+            defaultMessage=" To access these results, ask your administrator for {osquery} Kibana
+              privileges."
+            values={{
+              // eslint-disable-next-line react/jsx-no-literals
+              osquery: <EuiCode>osquery</EuiCode>,
+            }}
+          />
+        }
+      />
+    ),
+    []
+  );
+
   if (!osquery || !rawEventData || !responseActionsEnabled) {
     return;
   }
@@ -105,12 +140,16 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
     content: (
       <>
         <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          <OsqueryResults
-            agentIds={agentIds}
-            ruleName={ruleName}
-            alertId={alertId}
-            addToTimeline={handleAddToTimeline}
-          />
+          {!capabilities.osquery.read ? (
+            emptyPrompt
+          ) : (
+            <OsqueryResults
+              agentIds={agentIds}
+              ruleName={ruleName}
+              alertId={alertId}
+              addToTimeline={handleAddToTimeline}
+            />
+          )}
         </TabContentWrapper>
       </>
     ),
