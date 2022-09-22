@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService } from './plugins_service';
-export type { Plugin, PluginInitializer } from './plugin';
-export type { PluginInitializerContext } from './plugin_context';
-export type { PluginOpaqueId } from '../../server/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/lifecycle/core-lifecycle-browser'],
+};

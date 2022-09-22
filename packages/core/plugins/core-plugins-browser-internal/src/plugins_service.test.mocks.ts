@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginName } from '../../server';
-import { Plugin } from './plugin';
+import type { PluginName } from '@kbn/core-base-common';
+import type { Plugin } from '@kbn/core-plugins-browser';
 
 export type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;
 
