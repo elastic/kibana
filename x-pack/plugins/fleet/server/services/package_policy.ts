@@ -566,59 +566,56 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
 
     await soClient.bulkUpdate<PackagePolicySOAttributes>(
-      await pMap(
-        packagePolicyUpdates,
-        async (packagePolicyUpdate) => {
-          const id = packagePolicyUpdate.id;
-          const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
-          const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
-          if (!oldPackagePolicy) {
-            throw new Error('Package policy not found');
-          }
+      await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
+        const id = packagePolicyUpdate.id;
+        const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
+        const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
+        if (!oldPackagePolicy) {
+          throw new Error('Package policy not found');
+        }
 
-          const { version, ...restOfPackagePolicy } = packagePolicy;
+        // id and version are not part of the saved object attributes
+        const { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
-          if (packagePolicyUpdate.is_managed && !options?.force) {
-            throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
-          }
+        if (packagePolicyUpdate.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
+        }
 
-          let inputs = restOfPackagePolicy.inputs.map((input) =>
-            assignStreamIdToInput(oldPackagePolicy.id, input)
+        let inputs = restOfPackagePolicy.inputs.map((input) =>
+          assignStreamIdToInput(oldPackagePolicy.id, input)
+        );
+
+        inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
+        let elasticsearch: PackagePolicy['elasticsearch'];
+        if (packagePolicy.package?.name) {
+          const pkgInfo = packageInfos.get(
+            `${packagePolicy.package.name}-${packagePolicy.package.version}`
           );
+          if (pkgInfo) {
+            validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-          inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
-          let elasticsearch: PackagePolicy['elasticsearch'];
-          if (packagePolicy.package?.name) {
-            const pkgInfo = packageInfos.get(
-              `${packagePolicy.package.name}-${packagePolicy.package.version}`
-            );
-            if (pkgInfo) {
-              validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-
-              inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
-              elasticsearch = pkgInfo.elasticsearch;
-            }
+            inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+            elasticsearch = pkgInfo.elasticsearch;
           }
+        }
 
-          // Handle component template/mappings updates for experimental features, e.g. synthetic source
-          await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+        // Handle component template/mappings updates for experimental features, e.g. synthetic source
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
 
-          return {
-            type: SAVED_OBJECT_TYPE,
-            id,
-            attributes: {
-              ...restOfPackagePolicy,
-              inputs,
-              elasticsearch,
-              revision: oldPackagePolicy.revision + 1,
-              updated_at: new Date().toISOString(),
-              updated_by: options?.user?.username ?? 'system',
-            },
-            version,
-          };
-        },
-        { concurrency: 50 }
-      )
+        return {
+          type: SAVED_OBJECT_TYPE,
+          id,
+          attributes: {
+            ...restOfPackagePolicy,
+            inputs,
+            elasticsearch,
+            revision: oldPackagePolicy.revision + 1,
+            updated_at: new Date().toISOString(),
+            updated_by: options?.user?.username ?? 'system',
+          },
+          version,
+        };
+      })
     );
 
     const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
