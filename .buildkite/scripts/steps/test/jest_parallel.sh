@@ -28,11 +28,17 @@ configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | 
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
+
+  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  echo "actual full command is:"
+  echo "$cmd"
+  echo ""
+
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
   set +e;
-  NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
+  eval "$cmd"
   lastCode=$?
   set -e;
 
