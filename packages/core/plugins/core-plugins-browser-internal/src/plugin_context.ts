@@ -8,30 +8,11 @@
 
 import { omit } from 'lodash';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-import type { DiscoveredPlugin } from '../../server';
-import type { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
+import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '..';
-
-/**
- * The available core services passed to a `PluginInitializer`
- *
- * @public
- */
-export interface PluginInitializerContext<ConfigSchema extends object = object> {
-  /**
-   * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
-   */
-  readonly opaqueId: PluginOpaqueId;
-  readonly env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
-  readonly config: {
-    get: <T extends object = ConfigSchema>() => T;
-  };
-}
 
 /**
  * Provides a plugin-specific context passed to the plugin's constructor. This is currently
