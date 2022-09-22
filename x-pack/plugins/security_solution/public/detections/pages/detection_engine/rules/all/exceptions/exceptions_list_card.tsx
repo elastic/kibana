@@ -33,11 +33,29 @@ interface ExceptionsListCardProps {
     id: string;
     listId: string;
     namespaceType: NamespaceType;
-  }) => Promise<void>;
+  }) => () => Promise<void>;
+  handleExport: ({
+    id,
+    listId,
+    namespaceType,
+  }: {
+    id: string;
+    listId: string;
+    namespaceType: NamespaceType;
+  }) => () => Promise<void>;
+  handleDuplicate: ({
+    id,
+    listId,
+    namespaceType,
+  }: {
+    id: string;
+    listId: string;
+    namespaceType: NamespaceType;
+  }) => () => Promise<void>;
 }
 
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, http, handleDelete }) => {
+  ({ exceptionsList, http, handleDelete, handleDuplicate, handleExport }) => {
     const [toggleStatus, setToggleStatus] = useState(false);
     const toggle = useCallback(() => {
       setToggleStatus(!toggleStatus);
@@ -186,6 +204,34 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                       }}
                     >
                       {'Delete exception list'}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key={'copy'}
+                      icon={'copy'}
+                      onClick={() => {
+                        onClosePopover();
+                        handleDuplicate({
+                          id: exceptionsList.id,
+                          listId: exceptionsList.list_id,
+                          namespaceType: exceptionsList.namespace_type,
+                        })();
+                      }}
+                    >
+                      {'Duplicate exception list'}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key={'export'}
+                      icon={'exportAction'}
+                      onClick={() => {
+                        onClosePopover();
+                        handleExport({
+                          id: exceptionsList.id,
+                          listId: exceptionsList.list_id,
+                          namespaceType: exceptionsList.namespace_type,
+                        })();
+                      }}
+                    >
+                      {'Export exception list'}
                     </EuiContextMenuItem>,
                   ]}
                 />

@@ -6,7 +6,12 @@
  */
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import type { EuiSearchBarProps } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiSearchBarProps,
+} from '@elastic/eui';
 
 import {
   EuiFlyout,
@@ -54,6 +59,7 @@ import { MissingPrivilegesCallOut } from '../../../../../components/callouts/mis
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 import { ExceptionsListCard } from './exceptions_list_card';
 import { useImportExceptionList } from './use_import_exception_list';
+import { AddExceptionFlyout } from '@kbn/security-solution-plugin/public/detection_engine/rule_exceptions/components/add_exception_flyout';
 
 export type Func = () => Promise<void>;
 
@@ -199,6 +205,21 @@ export const ExceptionListsTable = React.memo(() => {
       async () => {
         setExportingListIds((ids) => [...ids, id]);
         await exportExceptionList({
+          id,
+          listId,
+          namespaceType,
+          onError: handleExportError,
+          onSuccess: handleExportSuccess(listId),
+        });
+      },
+    [exportExceptionList, handleExportError, handleExportSuccess]
+  );
+
+  const handleDuplicate = useCallback(
+    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+      async () => {
+        setExportingListIds((ids) => [...ids, id]);
+        await duplicateExceptionList({
           id,
           listId,
           namespaceType,
@@ -387,6 +408,8 @@ export const ExceptionListsTable = React.memo(() => {
     setFile(files?.item(0) ?? null);
   }, []);
 
+  const [openAddExceptionFlyout, setOpenAddExceptionFlyout] = useState(false);
+
   return (
     <>
       <MissingPrivilegesCallOut />
@@ -400,15 +423,39 @@ export const ExceptionListsTable = React.memo(() => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setDisplayImportListFlyout(true)}>
+          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
             {'Import exception list'}
           </EuiButton>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton>{'Create'}</EuiButton>
+          <EuiPopover button={<EuiButton iconType={'arrowDown'}>{'Create'}</EuiButton>}>
+            <EuiContextMenuPanel
+              size="s"
+              items={[
+                <EuiContextMenuItem
+                  key={'ruleException'}
+                  onClick={() => setOpenAddExceptionFlyout(true)}
+                />,
+              ]}
+            />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {openAddExceptionFlyout && (
+        <AddExceptionFlyout
+          ruleName={rule.name}
+          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
+          dataViewId={rule.data_view_id}
+          ruleId={rule.id}
+          exceptionListType={listType}
+          onCancel={handleCancelExceptionItemFlyout}
+          onConfirm={handleConfirmExceptionFlyout}
+          onRuleChange={onRuleChange}
+          data-test-subj="addExceptionItemFlyout"
+        />
+      )}
 
       {displayImportListFlyout && (
         <EuiFlyout onClose={() => setDisplayImportListFlyout(false)}>
@@ -486,6 +533,8 @@ export const ExceptionListsTable = React.memo(() => {
                 http={http}
                 exceptionsList={excList}
                 handleDelete={handleDelete}
+                handleExport={handleExport}
+                handleDuplicate={handleDuplicate}
               />
             ))}
           </>
