@@ -74,7 +74,6 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { StepDefineRuleNewFeaturesTour } from './new_features_tour';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 
@@ -679,7 +678,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <StepDefineRuleNewFeaturesTour />
         <Form form={form} data-test-subj="stepDefineRule">
           <StyledVisibleContainer isVisible={false}>
             <UseField
