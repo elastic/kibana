@@ -91,7 +91,11 @@ export const WorkspaceLayoutComponent = ({
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
 
-  const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
+  // savedWorkspace.id gets set to null while saving a copy of an existing
+  // workspace, so we need to check for savedWorkspace.isSaving as well
+  const isInitialized = Boolean(
+    workspaceInitialized || savedWorkspace.id || savedWorkspace.isSaving
+  );
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
     selectedNode.current = node;
