@@ -17,7 +17,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  TIMESTAMP
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
