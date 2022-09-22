@@ -7,7 +7,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginsService, PluginsServiceSetup } from './plugins_service';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<PluginsServiceSetup> = {
@@ -23,6 +24,31 @@ const createStartContractMock = () => {
   };
   // we have to suppress type errors until decide how to mock es6 class
   return startContract as PluginsServiceSetup;
+};
+
+const createPluginInitializerContextMock = (config: unknown = {}) => {
+  const mock: PluginInitializerContext = {
+    opaqueId: Symbol(),
+    env: {
+      mode: {
+        dev: true,
+        name: 'development',
+        prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
+      },
+    },
+    config: {
+      get: <T>() => config as T,
+    },
+  };
+
+  return mock;
 };
 
 type PluginsServiceContract = PublicMethodsOf<PluginsService>;
@@ -43,4 +69,5 @@ export const pluginsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
+  createPluginInitializerContext: createPluginInitializerContextMock,
 };

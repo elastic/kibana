@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer } from './plugin';
+import type { PluginInitializer } from '@kbn/core-plugins-browser';
 
 /**
  * Unknown variant for internal use only for when plugins are not known.

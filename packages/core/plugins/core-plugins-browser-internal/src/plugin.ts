@@ -7,39 +7,14 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import type { DiscoveredPlugin, PluginOpaqueId } from '../../server';
-import { PluginInitializerContext } from './plugin_context';
+import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
+import type {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+} from '@kbn/core-plugins-browser';
 import { read } from './plugin_reader';
-import { CoreStart, CoreSetup } from '..';
-
-/**
- * The interface that should be returned by a `PluginInitializer`.
- *
- * @public
- */
-export interface Plugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> {
-  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
-  start(core: CoreStart, plugins: TPluginsStart): TStart;
-  stop?(): void;
-}
-
-/**
- * The `plugin` export at the root of a plugin's `public` directory should conform
- * to this interface.
- *
- * @public
- */
-export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating

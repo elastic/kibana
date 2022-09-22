@@ -17,7 +17,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { pluginsServiceMock } from './plugins/plugins_service.mock';
+import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
@@ -94,7 +94,7 @@ jest.doMock('@kbn/core-overlays-browser-internal', () => ({
 
 export const MockPluginsService = pluginsServiceMock.create();
 export const PluginsServiceConstructor = jest.fn().mockImplementation(() => MockPluginsService);
-jest.doMock('./plugins', () => ({
+jest.doMock('@kbn/core-plugins-browser-internal', () => ({
   PluginsService: PluginsServiceConstructor,
 }));
 
