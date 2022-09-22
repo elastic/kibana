@@ -141,7 +141,7 @@ describe('threshold_executor', () => {
           [`${getThresholdTermsHash(terms2)}`]: signalHistoryRecord2,
         },
       };
-      await thresholdExecutor({
+      const result = await thresholdExecutor({
         completeRule: thresholdCompleteRule,
         tuple,
         services: alertServices,
@@ -165,10 +165,11 @@ describe('threshold_executor', () => {
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
-      expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-      expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
-        "The following exceptions won't be applied to rule execution"
-      );
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });
