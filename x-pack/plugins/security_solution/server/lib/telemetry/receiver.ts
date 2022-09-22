@@ -33,7 +33,6 @@ import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
-import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
@@ -58,6 +57,7 @@ import type {
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
+import { telemetryConfiguration } from './configuration';
 
 export interface ITelemetryReceiver {
   start(
@@ -378,7 +378,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
-      size: TELEMETRY_MAX_BUFFER_SIZE,
+      size: telemetryConfiguration.telemetry_max_buffer_size,
       body: {
         query: {
           range: {
