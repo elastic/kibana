@@ -127,10 +127,10 @@ export function createFilesClient({
         body: JSON.stringify(body),
       });
     },
-    upload: ({ kind, abortSignal, ...args }) => {
+    upload: ({ kind, abortSignal, contentType, ...args }) => {
       return http.put(apiRoutes.getUploadRoute(scopedFileKind ?? kind, args.id), {
         headers: {
-          'Content-Type': 'application/octet-stream',
+          'Content-Type': contentType ?? 'application/octet-stream',
         },
         signal: abortSignal,
         body: args.body as BodyInit,

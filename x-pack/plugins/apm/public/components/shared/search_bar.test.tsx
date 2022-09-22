@@ -15,6 +15,7 @@ import { ApmServiceContextProvider } from '../../context/apm_service/apm_service
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import type { ApmUrlParams } from '../../context/url_params_context/types';
 import * as useFetcherHook from '../../hooks/use_fetcher';
+import * as useApmDataViewHook from '../../hooks/use_apm_data_view';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../utils/test_helpers';
 import { fromQuery } from './links/url_helpers';
@@ -44,6 +45,11 @@ function setup({
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
     .mockReturnValue(serviceTransactionTypes);
+
+  // mock transaction types
+  jest
+    .spyOn(useApmDataViewHook, 'useApmDataView')
+    .mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
