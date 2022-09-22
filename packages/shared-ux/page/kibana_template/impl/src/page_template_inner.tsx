@@ -21,6 +21,9 @@ const getClasses = (template?: string, className?: string) => {
   );
 };
 
+const KIBANA_CHROME_SELECTOR = '[data-test-subj="kibanaChrome"]';
+const HEADER_GLOBAL_NAV_SELECTOR = '[data-test-subj="headerGlobalNav"]';
+
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
@@ -38,10 +41,10 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   const [offset, setOffset] = useState<number | undefined>();
 
   useEffect(() => {
-    const kibanaChrome = document.querySelector('[data-test-subj="kibanaChrome"]') as HTMLElement;
+    const kibanaChrome = document.querySelector(KIBANA_CHROME_SELECTOR) as HTMLElement;
     if (kibanaChrome) {
       const kibanaChromeHeader = kibanaChrome.querySelector(
-        '[data-test-subj="headerGlobalNav"]'
+        HEADER_GLOBAL_NAV_SELECTOR
       ) as HTMLElement;
       setOffset(kibanaChromeHeader?.offsetTop + kibanaChromeHeader?.offsetHeight);
     }
