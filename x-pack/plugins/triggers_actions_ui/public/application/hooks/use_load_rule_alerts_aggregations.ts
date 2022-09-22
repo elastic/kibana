@@ -87,7 +87,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
   return ruleAlertsAggs;
 }
 
-export async function fetchIndexNameAPI({
+async function fetchIndexNameAPI({
   http,
   features,
 }: {
@@ -102,13 +102,7 @@ export async function fetchIndexNameAPI({
   };
 }
 
-interface RuleAlertsAggs {
-  active: number;
-  recovered: number;
-  error?: string;
-}
-
-export async function fetchRuleAlertsAggByTimeRange({
+async function fetchRuleAlertsAggByTimeRange({
   http,
   index,
   ruleId,
@@ -177,46 +171,12 @@ export async function fetchRuleAlertsAggByTimeRange({
               },
             },
           },
-          statusPerDay: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: '1d',
-              extended_bounds: {
-                min: 'now-30d',
-                max: 'now',
-              },
-            },
-            aggs: {
-              alertStatus: {
-                terms: {
-                  field: 'kibana.alert.status',
-                },
-              },
-            },
-          },
         },
       }),
     });
 
     const active = res?.aggregations?.total.buckets.totalActiveAlerts?.doc_count ?? 0;
     const recovered = res?.aggregations?.total.buckets.totalRecoveredAlerts?.doc_count ?? 0;
-    let maxTotalAlertPerDay = 0;
-    res?.aggregations?.statusPerDay.buckets.forEach(
-      (dayAlerts: {
-        key: number;
-        doc_count: number;
-        alertStatus: {
-          buckets: Array<{
-            key: 'active' | 'recovered';
-            doc_count: number;
-          }>;
-        };
-      }) => {
-        if (dayAlerts.doc_count > maxTotalAlertPerDay) {
-          maxTotalAlertPerDay = dayAlerts.doc_count;
-        }
-      }
-    );
 
     return {
       active,

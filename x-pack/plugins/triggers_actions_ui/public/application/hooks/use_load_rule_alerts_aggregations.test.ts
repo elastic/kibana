@@ -52,7 +52,7 @@ describe('useLoadRuleAlertsAggs', () => {
     );
 
     await waitForNextUpdate();
-    const body = `{"index":"mock_index","size":0,"query":{"bool":{"must":[{"term":{"kibana.alert.rule.uuid":"${ruleId}"}},{"range":{"@timestamp":{"gte":"now-30d","lt":"now"}}},{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}}]}},"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}},"statusPerDay":{"date_histogram":{"field":"@timestamp","fixed_interval":"1d","extended_bounds":{"min":"now-30d","max":"now"}},"aggs":{"alertStatus":{"terms":{"field":"kibana.alert.status"}}}}}}`;
+    const body = `{"index":"mock_index","size":0,"query":{"bool":{"must":[{"term":{"kibana.alert.rule.uuid":"${ruleId}"}},{"range":{"@timestamp":{"gte":"now-30d","lt":"now"}}},{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}}]}},"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}}}}`;
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/internal/rac/alerts/find',

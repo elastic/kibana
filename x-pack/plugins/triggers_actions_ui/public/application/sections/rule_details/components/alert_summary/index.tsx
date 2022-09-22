@@ -7,4 +7,3 @@
 
 export { RuleAlertsSummary } from './rule_alerts_summary';
 export type { RuleAlertsSummaryProps } from './types';
-export { getColorSeries } from './helpers';

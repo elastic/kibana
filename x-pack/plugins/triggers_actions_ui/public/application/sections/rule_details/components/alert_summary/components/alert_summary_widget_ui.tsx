@@ -50,7 +50,7 @@ export const AlertsSummaryWidgetUI = ({
                     <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
-                        defaultMessage="All alerts"
+                        defaultMessage="All"
                       />
                     </EuiText>
                   </EuiFlexItem>
@@ -78,7 +78,7 @@ export const AlertsSummaryWidgetUI = ({
                     <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
-                        defaultMessage="Active"
+                        defaultMessage="Currently active"
                       />
                     </EuiText>
                   </EuiFlexItem>
