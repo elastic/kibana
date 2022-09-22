@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable } from 'rxjs';
@@ -55,7 +55,7 @@ export interface ProvidersProps {
   defaultCode?: string;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FunctionComponent<PropsWithChildren<ProvidersProps>> = ({
   defaultCode,
   services,
   theme$,

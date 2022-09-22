@@ -53,7 +53,7 @@ export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
 
         {error !== undefined ? (
           <EuiCallOut color="danger" iconType="alert">
-            {error}
+            <>{error}</>
           </EuiCallOut>
         ) : null}
         {randomNumber > -1 ? (

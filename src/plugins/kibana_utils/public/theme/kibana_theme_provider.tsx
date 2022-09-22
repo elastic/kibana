@@ -8,7 +8,7 @@
 
 import { EuiProvider, EuiProviderProps } from '@elastic/eui';
 import createCache from '@emotion/cache';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -38,7 +38,7 @@ emotionCache.compat = true;
 /**
  * Copied from the `kibana_react` plugin, to avoid cyclical dependency
  */
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => {
+export const KibanaThemeProvider: FC<PropsWithChildren<KibanaThemeProviderProps>> = ({ theme$, modify, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
   return (
