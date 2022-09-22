@@ -12,8 +12,9 @@ import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 export class FilesExamplePlugin
   implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
 {
-  public setup(core: CoreSetup<FilesExamplePluginsStart>) {
-    // Register an application into the side navigation menu
+  public setup(core: CoreSetup<FilesExamplePluginsStart>, { files }: FilesExamplePluginsSetup) {
+    files.registerFileKind(exampleFileKind);
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -21,13 +22,14 @@ export class FilesExamplePlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
-        const [coreStart, { files }] = await core.getStartServices();
+        const [coreStart, deps] = await core.getStartServices();
         // Render the application
         return renderApp(
           coreStart,
           {
             files: {
-              example: files.filesClientFactory.asScoped(exampleFileKind.id),
+              unscoped: deps.files.filesClientFactory.asUnscoped(),
+              example: deps.files.filesClientFactory.asScoped(exampleFileKind.id),
             },
           },
           params
