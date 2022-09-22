@@ -8,7 +8,17 @@ import React from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_RULE_TAGS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  TIMESTAMP
+} from '@kbn/rule-data-utils';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
@@ -32,7 +42,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields['kibana.alert.evaluation.value'] ?? '-'}
+            {alert?.fields[ALERT_EVALUATION_VALUE] ?? '-'}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -46,7 +56,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields['kibana.alert.evaluation.threshold'] ?? '-'}
+            {alert?.fields[ALERT_EVALUATION_THRESHOLD] ?? '-'}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -60,7 +70,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {asDuration(Number(alert?.fields['kibana.alert.duration.us']))}
+            {asDuration(Number(alert?.fields[ALERT_DURATION]))}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -73,10 +83,10 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
             </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {alert?.fields['kibana.alert.status'] ? (
+          {alert?.fields[ALERT_STATUS] ? (
             <AlertStatusIndicator
               alertStatus={
-                alert?.fields['kibana.alert.status'] === ALERT_STATUS_ACTIVE
+                alert?.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
                   ? ALERT_STATUS_ACTIVE
                   : ALERT_STATUS_RECOVERED
               }
@@ -111,7 +121,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {moment(alert?.fields['kibana.alert.start']?.toString()).format(DEFAULT_DATE_FORMAT)}
+            {moment(alert?.fields[ALERT_START]?.toString()).format(DEFAULT_DATE_FORMAT)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -125,8 +135,8 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {moment(alert?.fields['@timestamp']?.toString()).fromNow()},&nbsp;
-            {moment(alert?.fields['@timestamp']?.toString()).format(DEFAULT_DATE_FORMAT)}
+            {moment(alert?.fields[TIMESTAMP]?.toString()).fromNow()},&nbsp;
+            {moment(alert?.fields[TIMESTAMP]?.toString()).format(DEFAULT_DATE_FORMAT)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -141,11 +151,11 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           <div>
             <EuiSpacer size="s" />
-            {alert?.fields['kibana.alert.rule.tags'] &&
-              alert?.fields['kibana.alert.rule.tags'].length > 0 &&
+            {alert?.fields[ALERT_RULE_TAGS] &&
+              alert?.fields[ALERT_RULE_TAGS].length > 0 &&
               triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
                 tagsOutPopover: true,
-                tags: alert?.fields['kibana.alert.rule.tags'],
+                tags: alert?.fields[ALERT_RULE_TAGS],
               })}
           </div>
         </EuiFlexItem>
