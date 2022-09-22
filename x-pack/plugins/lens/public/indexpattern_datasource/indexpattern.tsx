@@ -281,6 +281,7 @@ export function getIndexPatternDatasource({
                 dataViews,
                 fieldFormats,
                 charts,
+                unifiedSearch,
               }}
             >
               <IndexPatternDataPanel
@@ -356,6 +357,7 @@ export function getIndexPatternDatasource({
                 fieldFormats,
                 savedObjects: core.savedObjects,
                 docLinks: core.docLinks,
+                unifiedSearch,
               }}
             >
               <IndexPatternDimensionTrigger
@@ -388,6 +390,7 @@ export function getIndexPatternDatasource({
                 savedObjects: core.savedObjects,
                 docLinks: core.docLinks,
                 http: core.http,
+                unifiedSearch,
               }}
             >
               <IndexPatternDimensionEditor
