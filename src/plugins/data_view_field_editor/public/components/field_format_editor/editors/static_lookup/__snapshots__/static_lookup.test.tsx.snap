@@ -73,6 +73,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     size="m"
   />
   <EuiButton
+    color="primary"
     data-test-subj="staticLookupEditorAddEntry"
     iconType="plusInCircle"
     onClick={[Function]}
@@ -182,6 +183,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     size="m"
   />
   <EuiButton
+    color="primary"
     data-test-subj="staticLookupEditorAddEntry"
     iconType="plusInCircle"
     onClick={[Function]}
