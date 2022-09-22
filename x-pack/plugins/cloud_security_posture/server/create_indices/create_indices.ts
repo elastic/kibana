@@ -48,9 +48,9 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
         mappings: benchmarkScoreMapping,
         settings: {
           default_pipeline: scorePipelineIngestConfig.id,
+          // TODO: once we will convert the score index to datastream we will no longer override the ilm to be empty
           lifecycle: {
-            // This is the default lifecycle name, it is named on the data-stream type (e.g, logs/ metrics)
-            name: 'logs',
+            name: '',
           },
         },
       },
