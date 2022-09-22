@@ -199,8 +199,8 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.time_range": Object {
+        "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range",
-        "format": "epoch_millis||strict_date_optional_time"
       },
       "kibana.alert.uuid": Object {
         "required": true,
