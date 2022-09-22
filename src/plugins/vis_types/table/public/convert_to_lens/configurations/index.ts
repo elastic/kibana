@@ -27,7 +27,7 @@ const getColumns = (
 
 const getPagination = ({ perPage }: TableVisParams): PagingState => {
   return {
-    enabled: perPage !== '' ? true : false,
+    enabled: perPage !== '',
     size: perPage !== '' ? perPage : 0,
   };
 };
