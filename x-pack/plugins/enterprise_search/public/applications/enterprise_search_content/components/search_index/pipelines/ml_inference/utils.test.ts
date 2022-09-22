@@ -33,11 +33,6 @@ describe('ml inference utils', () => {
         }),
         makeFakeModel({
           inference_config: {
-            classification: {},
-          },
-        }),
-        makeFakeModel({
-          inference_config: {
             text_classification: {},
           },
         }),
@@ -53,6 +48,16 @@ describe('ml inference utils', () => {
             },
           },
         }),
+        makeFakeModel({
+          inference_config: {
+            question_answering: {},
+          },
+        }),
+        makeFakeModel({
+          inference_config: {
+            fill_mask: {},
+          },
+        }),
       ];
 
       for (const model of models) {
@@ -61,7 +66,14 @@ describe('ml inference utils', () => {
     });
 
     it('returns false for expected models', () => {
-      const models: TrainedModelConfigResponse[] = [makeFakeModel({})];
+      const models: TrainedModelConfigResponse[] = [
+        makeFakeModel({}),
+        makeFakeModel({
+          inference_config: {
+            classification: {},
+          },
+        }),
+      ];
 
       for (const model of models) {
         expect(isSupportedMLModel(model)).toBe(false);
@@ -85,6 +97,9 @@ describe('ml inference utils', () => {
       expect(isValidPipelineName('apipelinename123')).toEqual(true);
       expect(isValidPipelineName('a_pipeline_name123')).toEqual(true);
       expect(isValidPipelineName('a-pipeline-name-123')).toEqual(true);
+    });
+    it('does not allow spaces', () => {
+      expect(isValidPipelineName('a pipeline name')).toEqual(false);
     });
     it('does not allow special characters', () => {
       expect(isValidPipelineName('a_pipeline_name_1$')).toEqual(false);

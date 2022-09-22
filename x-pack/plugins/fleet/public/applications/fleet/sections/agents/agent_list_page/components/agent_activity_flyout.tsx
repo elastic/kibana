@@ -32,6 +32,8 @@ import { useActionStatus } from '../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
+import { Loading } from '../../components';
+
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
@@ -47,12 +49,16 @@ const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
 export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
   onAbortSuccess: () => void;
-}> = ({ onClose, onAbortSuccess }) => {
+  refreshAgentActivity: boolean;
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity }) => {
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const { currentActions, abortUpgrade } = useActionStatus(onAbortSuccess);
+  const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
+    onAbortSuccess,
+    refreshAgentActivity
+  );
 
   const getAgentPolicyName = (policyId: string) => {
     const policy = agentPoliciesData?.items.find((item) => item.id === policyId);
@@ -102,7 +108,18 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         </EuiFlyoutHeader>
 
         <FullHeightFlyoutBody>
-          {currentActionsEnriched.length === 0 ? (
+          {isFirstLoading ? (
+            <EuiFlexGroup
+              direction="row"
+              justifyContent={'center'}
+              alignItems={'center'}
+              className="eui-fullHeight"
+            >
+              <EuiFlexItem>
+                <Loading />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : currentActionsEnriched.length === 0 ? (
             <EuiFlexGroup
               direction="column"
               justifyContent={'center'}
@@ -126,7 +143,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                   body={
                     <FormattedMessage
                       id="xpack.fleet.agentActivityFlyout.noActivityDescription"
-                      defaultMessage="Activity feed will appear here as agents get enrolled, upgraded, or configured."
+                      defaultMessage="Activity feed will appear here as agents are reassigned, upgraded, or unenrolled."
                     />
                   }
                 />
@@ -220,6 +237,11 @@ const actionNames: {
     inProgressText: 'Unenrolling',
     completedText: 'unenrolled',
     cancelledText: 'unenrollment',
+  },
+  FORCE_UNENROLL: {
+    inProgressText: 'Force unenrolling',
+    completedText: 'force unenrolled',
+    cancelledText: 'force unenrollment',
   },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },

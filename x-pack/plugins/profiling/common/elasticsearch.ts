@@ -13,6 +13,8 @@ export enum ProfilingESField {
   ProcessThreadName = 'process.thread.name',
   StacktraceCount = 'Stacktrace.count',
   HostID = 'host.id',
+  HostName = 'host.name',
+  HostIP = 'host.ip',
   OrchestratorResourceName = 'orchestrator.resource.name',
   ServiceName = 'service.name',
   StacktraceID = 'Stacktrace.id',

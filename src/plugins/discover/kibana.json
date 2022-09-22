@@ -18,7 +18,8 @@
     "dataViewFieldEditor",
     "dataViewEditor",
     "expressions",
-    "unifiedFieldList"
+    "unifiedFieldList",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "home",

@@ -4504,7 +4504,17 @@
             "signature": [
               "((state: P, references?: ",
               "SavedObjectReference",
-              "[] | undefined) => T) | undefined"
+              "[] | undefined, initialContext?: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.VisualizeFieldContext",
+                "text": "VisualizeFieldContext"
+              },
+              " | ",
+              "VisualizeEditorContext",
+              " | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -4535,6 +4545,30 @@
                 "signature": [
                   "SavedObjectReference",
                   "[] | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.fromPersistableState.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.VisualizeFieldContext",
+                    "text": "VisualizeFieldContext"
+                  },
+                  " | ",
+                  "VisualizeEditorContext",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -4633,6 +4667,85 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.cloneLayer",
+            "type": "Function",
+            "tags": [],
+            "label": "cloneLayer",
+            "description": [
+              "Reset button on each layer triggers this"
+            ],
+            "signature": [
+              "((state: T, layerId: string, newLayerId: string, clonedIDsMap: Map<string, string>) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.cloneLayer.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.cloneLayer.$2",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.cloneLayer.$3",
+                "type": "string",
+                "tags": [],
+                "label": "newLayerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.cloneLayer.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "clonedIDsMap",
+                "description": [],
+                "signature": [
+                  "Map<string, string>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -6506,6 +6619,17 @@
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYAnnotationLayerConfig.ignoreGlobalFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7762,14 +7886,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.LineStyle",
-                "text": "LineStyle"
-              },
-              " | undefined"
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -9658,7 +9775,7 @@
             "label": "layers",
             "description": [],
             "signature": [
-              "({ layerId: string; layerType: \"data\" | \"referenceLine\"; } | { layerId: string; layerType: \"annotations\"; annotations: { id: string; type: \"query\" | \"manual\"; }[]; })[]"
+              "({ layerId: string; layerType: \"data\" | \"referenceLine\"; } | { layerId: string; layerType: \"annotations\"; annotations: { id: string; type: \"query\" | \"manual\"; }[]; ignoreGlobalFilters: boolean; })[]"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false,
