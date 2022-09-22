@@ -11,6 +11,7 @@ import type {
   PackagePolicyConfigRecord,
   NewPackagePolicy,
   PackageInfo,
+  ExperimentalDataStreamFeature,
 } from '../types';
 import { PackagePolicyValidationError } from '../errors';
 
@@ -66,7 +67,10 @@ type InputMap = Map<string, { input: NewPackagePolicyInput; streams: StreamsMap 
 
 export function simplifiedPackagePolicytoNewPackagePolicy(
   data: SimplifiedPackagePolicy,
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  options?: {
+    experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+  }
 ): NewPackagePolicy {
   const {
     policy_id: policyId,
@@ -77,6 +81,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     vars: packageLevelVars,
   } = data;
   const packagePolicy = packageToPackagePolicy(packageInfo, policyId, namespace, name, description);
+  if (packagePolicy.package && options?.experimental_data_stream_features) {
+    packagePolicy.package.experimental_data_stream_features =
+      options.experimental_data_stream_features;
+  }
 
   // Build a input and streams Map to easily find package policy stream
   const inputMap: InputMap = new Map();
