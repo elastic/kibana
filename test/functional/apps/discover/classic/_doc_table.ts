@@ -67,10 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('classic table in window 900x700', async function () {
+    describe('classic table in window 900x900', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-        await browser.setWindowSize(900, 700);
+        await browser.setWindowSize(900, 900);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
@@ -87,10 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('classic table in window 600x700', async function () {
+    describe('classic table in window 600x900', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-        await browser.setWindowSize(600, 700);
+        await browser.setWindowSize(600, 900);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
@@ -237,7 +237,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           for (const column of extraColumns) {
             await PageObjects.discover.clearFieldSearchInput();
             await PageObjects.discover.findFieldByName(column);
-            await retry.try(async function () {
+            await retry.waitFor('field to appear', async function () {
               return await testSubjects.exists(`field-${column}`);
             });
             await PageObjects.discover.clickFieldListItemAdd(column);
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           for (const column of extraColumns) {
             await PageObjects.discover.clearFieldSearchInput();
             await PageObjects.discover.findFieldByName(column);
-            await retry.try(async function () {
+            await retry.waitFor('field to appear', async function () {
               return await testSubjects.exists(`field-${column}`);
             });
             await PageObjects.discover.clickFieldListItemAdd(column);
