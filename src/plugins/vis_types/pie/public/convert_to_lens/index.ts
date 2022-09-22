@@ -70,7 +70,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     type: 'lnsPie',
     layers: [
       {
-        indexPatternId: dataView.id!,
+        indexPatternId,
         layerId,
         columns: result.columns.map(excludeMetaFromColumn),
         columnOrder: [],
