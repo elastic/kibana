@@ -49,7 +49,8 @@ import {
   startSelector,
   endSelector,
 } from '../../../../common/components/super_date_picker/selectors';
-import { combineQueries, focusActiveTimelineButton } from '../../timeline/helpers';
+import { focusActiveTimelineButton } from '../../timeline/helpers';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';

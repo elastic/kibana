@@ -1530,10 +1530,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@64.0.4":
-  version "64.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-64.0.4.tgz#4a6a997a3f43f459c82e3b992ac2e6ab318d5a12"
-  integrity sha512-4wpZcVJyNvxfZA58kVSwnJxIbWCrFriU6vARr/DoDB6Vvt/5zHeFrHzXFjdo+hqTWZApPoEQlK7aJ7FDZTEbkw==
+"@elastic/eui@64.0.5":
+  version "64.0.5"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-64.0.5.tgz#d68dcebc2acd9ec360a84cb8688919de0d802417"
+  integrity sha512-6sJpnHYIUErA+IFJBLrXB8a86E+VR6dOBKpWVfQZVL+ZXrt4fy6uWXNompsz0geT8ylvW85oSpfpxRh+cgb0lw==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3040,6 +3040,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -3113,6 +3125,18 @@
   uid ""
 
 "@kbn/core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
   version "0.0.0"
   uid ""
 
@@ -3372,6 +3396,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-types@link:bazel-bin/packages/kbn-field-types":
   version "0.0.0"
   uid ""
@@ -3381,6 +3409,14 @@
   uid ""
 
 "@kbn/flot-charts@link:bazel-bin/packages/kbn-flot-charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
@@ -3433,6 +3469,10 @@
   uid ""
 
 "@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/journeys@link:bazel-bin/packages/kbn-journeys":
   version "0.0.0"
   uid ""
 
@@ -6044,6 +6084,11 @@
   resolved "https://registry.yarnpkg.com/@types/braces/-/braces-3.0.0.tgz#7da1c0d44ff1c7eb660a36ec078ea61ba7eb42cb"
   integrity sha512-TbH79tcyi9FHwbyboOKeRachRq63mSuWYXOflsNO9ZyE5ClQ/JaozNKl+aWUq87qPNsXasXxi2AbgfwIJ+8GQw==
 
+"@types/byte-size@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@types/byte-size/-/byte-size-8.1.0.tgz#013a3995d1ff2d85ad27da0801029f13328bd91b"
+  integrity sha512-LCIlZh8vyx+I2fgRycE1D34c33QDppYY6quBYYoaOpQ1nGhJ/avSP2VlrAefVotjJxgSk6WkKo0rTcCJwGG7vA==
+
 "@types/cacheable-request@^6.0.1":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@types/cacheable-request/-/cacheable-request-6.0.1.tgz#5d22f3dded1fd3a84c0bbeb5039a7419c2c91976"
@@ -7072,6 +7117,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7145,6 +7202,18 @@
   uid ""
 
 "@types/kbn__core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7396,11 +7465,23 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__field-types@link:bazel-bin/packages/kbn-field-types/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7453,6 +7534,10 @@
   uid ""
 
 "@types/kbn__jest-serializers@link:bazel-bin/packages/kbn-jest-serializers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__journeys@link:bazel-bin/packages/kbn-journeys/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -10712,6 +10797,11 @@ builtin-status-codes@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
+
+byte-size@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-8.1.0.tgz#6353d0bc14ab7a69abcefbf11f8db0145a862cb5"
+  integrity sha512-FkgMTAg44I0JtEaUAvuZTtU2a2YDmBRbQxdsQNSMtLCjhG0hMcF5b1IMN9UjSCJaU4nvlj/GER7B9sI4nKdCgA==
 
 bytes@3.0.0:
   version "3.0.0"
@@ -28521,11 +28611,6 @@ xpath@0.0.32:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.2.tgz#bb72779f5fa465186b1f438f674fa347fdb5db54"
   integrity sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==
-
-xterm-addon-fit@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/xterm-addon-fit/-/xterm-addon-fit-0.5.0.tgz#2d51b983b786a97dcd6cde805e700c7f913bc596"
-  integrity sha512-DsS9fqhXHacEmsPxBJZvfj2la30Iz9xk+UKjhQgnYNkrUIN5CYLbw7WEfz117c7+S86S/tpHPfvNxJsF5/G8wQ==
 
 xterm@^4.18.0:
   version "4.18.0"

@@ -28,26 +28,40 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
-import { Toast } from '@kbn/core/public';
+import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
-import { getQueryLog } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
-import { KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
-import type { IUnifiedSearchPluginServices } from '../types';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme } from '../services';
 import './query_string_input.scss';
+
+export interface QueryStringInputDependencies {
+  unifiedSearch: {
+    autocomplete: ReturnType<AutocompleteService['start']>;
+  };
+  usageCollection?: UsageCollectionStart;
+  data: DataPublicPluginStart;
+  storage: IStorageWrapper;
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+  docLinks: DocLinksStart;
+  uiSettings: CoreStart['uiSettings'];
+}
 
 export interface QueryStringInputProps {
   indexPatterns: Array<DataView | string>;
@@ -72,6 +86,8 @@ export interface QueryStringInputProps {
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
   isDisabled?: boolean;
+  appName: string;
+  deps: QueryStringInputDependencies;
 
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
@@ -91,10 +107,6 @@ export interface QueryStringInputProps {
    * Override whether autocomplete suggestions are restricted by time range.
    */
   timeRangeForSuggestionsOverride?: boolean;
-}
-
-interface Props extends QueryStringInputProps {
-  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
 }
 
 interface State {
@@ -126,7 +138,7 @@ const KEY_CODES = {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default class QueryStringInputUI extends PureComponent<Props, State> {
+export default class QueryStringInputUI extends PureComponent<QueryStringInputProps, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
     iconType: 'search',
@@ -149,10 +161,10 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private fetchIndexPatternsAbortController?: AbortController;
-  private services = this.props.kibana.services;
-  private reportUiCounter = this.services.usageCollection?.reportUiCounter.bind(
-    this.services.usageCollection,
-    this.services.appName
+
+  private reportUiCounter = this.props.deps.usageCollection?.reportUiCounter.bind(
+    this.props.deps.usageCollection,
+    this.props.appName
   );
   private componentIsUnmounting = false;
 
@@ -181,7 +193,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const currentAbortController = this.fetchIndexPatternsAbortController;
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
-      this.services.data.indexPatterns,
+      this.props.deps.data.indexPatterns,
       stringPatterns
     )) as DataView[];
 
@@ -203,9 +215,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = await this.services.unifiedSearch.autocomplete.hasQuerySuggestions(
-      language
-    );
+
+    const hasQuerySuggestions =
+      this.props.deps.unifiedSearch.autocomplete.hasQuerySuggestions(language);
 
     if (
       !hasQuerySuggestions ||
@@ -226,7 +238,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const suggestions =
-        (await this.services.unifiedSearch.autocomplete.getQuerySuggestions({
+        (await this.props.deps.unifiedSearch.autocomplete.getQuerySuggestions({
           language,
           indexPatterns,
           query: queryString,
@@ -456,13 +468,13 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     if (
       subTypeNested &&
       subTypeNested.nested &&
-      !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
+      !this.props.deps.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
     ) {
-      const { notifications, docLinks } = this.services;
+      const { notifications, docLinks } = this.props.deps;
 
       const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
-        if (!this.services.storage) return;
-        this.services.storage.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
+        if (!this.props.deps.storage) return;
+        this.props.deps.storage.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
@@ -536,12 +548,12 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.services.http.post('/api/kibana/kql_opt_in_stats', {
+    this.props.deps.http.post('/api/kibana/kql_opt_in_stats', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
     const storageKey = this.props.storageKey;
-    this.services.storage.set(storageKey!, language);
+    this.props.deps.storage.set(storageKey!, language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -597,10 +609,11 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
   };
 
   private initPersistedLog = () => {
-    const { uiSettings, storage, appName } = this.services;
+    const { uiSettings } = this.props.deps;
+    const { appName } = this.props;
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(uiSettings, storage, appName, this.props.query.language);
+      : getQueryLog(uiSettings, this.props.deps.storage, appName, this.props.query.language);
   };
 
   public onMouseEnterSuggestion = (suggestion: QuerySuggestion, index: number) => {
@@ -622,7 +635,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     window.addEventListener('resize', this.handleAutoHeight);
   }
 
-  public componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: QueryStringInputProps) {
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -721,6 +734,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         nonKqlMode={this.props.nonKqlMode}
+        deps={{
+          docLinks: this.props.deps.docLinks,
+        }}
       />
     );
 
@@ -748,7 +764,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             style={{ position: 'relative', width: '100%' }}
             aria-label={i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
               defaultMessage: 'Search and filter the {pageType} page',
-              values: { pageType: this.services.appName },
+              values: { pageType: this.props.appName },
             })}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
@@ -777,7 +793,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 spellCheck={false}
                 aria-label={i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
                   defaultMessage: 'Start typing to search and filter the {pageType} page',
-                  values: { pageType: this.services.appName },
+                  values: { pageType: this.props.appName },
                 })}
                 aria-autocomplete="list"
                 aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}

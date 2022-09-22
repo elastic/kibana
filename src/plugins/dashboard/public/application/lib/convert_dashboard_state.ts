@@ -8,15 +8,10 @@
 
 import { cloneDeep, omit } from 'lodash';
 
-import {
-  compareFilters,
-  isFilterPinned,
-  migrateFilter,
-  COMPARE_ALL_OPTIONS,
-  type Filter,
-} from '@kbn/es-query';
 import type { KibanaExecutionContext } from '@kbn/core/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { type EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { Filter, isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 
 import { pluginServices } from '../../services/plugin_services';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common';
@@ -44,9 +39,10 @@ export const stateToDashboardContainerInput = ({
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
   const {
-    data: { query: queryService },
+    data: {
+      query: { filterManager, timefilter: timefilterService },
+    },
   } = pluginServices.getServices();
-  const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
   const {
@@ -64,6 +60,7 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
+  const migratedDashboardFilters = mapAndFlattenFilters(_.cloneDeep(dashboardFilters));
   return {
     refreshConfig: timefilter.getRefreshInterval(),
     filters: filterManager
@@ -71,8 +68,8 @@ export const stateToDashboardContainerInput = ({
       .filter(
         (filter) =>
           isFilterPinned(filter) ||
-          dashboardFilters.some((dashboardFilter) =>
-            filtersAreEqual(migrateFilter(cloneDeep(dashboardFilter)), filter)
+          migratedDashboardFilters.some((dashboardFilter) =>
+            filtersAreEqual(dashboardFilter, filter)
           )
       ),
     isFullScreenMode: fullScreenMode,
