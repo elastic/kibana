@@ -69,7 +69,7 @@ export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
   model: Panel,
   dataViews: DataViewsPublicPluginStart
-): Promise<XYLayerConfig[]> => {
+): Promise<XYLayerConfig[] | null> => {
   const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
     const series = model.series[parseInt(key, 10)];
     const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
@@ -136,30 +136,34 @@ export const getLayers = async (
     (a) => typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id
   );
 
-  const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
-    Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
-      const convertedAnnotations: EventAnnotationConfig[] = [];
-      const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
+  try {
+    const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
+      Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
+        const convertedAnnotations: EventAnnotationConfig[] = [];
+        const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
 
-      if (indexPattern) {
-        annotations.forEach((a: Annotation) => {
-          const lensAnnotation = convertAnnotation(a, indexPattern);
-          if (lensAnnotation) {
-            convertedAnnotations.push(lensAnnotation);
-          }
-        });
-        return {
-          layerId: v4(),
-          layerType: 'annotations',
-          ignoreGlobalFilters: true,
-          annotations: convertedAnnotations,
-          indexPatternId,
-        };
-      }
-    })
-  );
+        if (indexPattern) {
+          annotations.forEach((a: Annotation) => {
+            const lensAnnotation = convertAnnotation(a, indexPattern);
+            if (lensAnnotation) {
+              convertedAnnotations.push(lensAnnotation);
+            }
+          });
+          return {
+            layerId: v4(),
+            layerType: 'annotations',
+            ignoreGlobalFilters: true,
+            annotations: convertedAnnotations,
+            indexPatternId,
+          };
+        }
+      })
+    );
 
-  return nonAnnotationsLayers.concat(...annotationsLayers.filter(nonNullable));
+    return nonAnnotationsLayers.concat(...annotationsLayers.filter(nonNullable));
+  } catch (e) {
+    return null;
+  }
 };
 
 const convertAnnotation = (
