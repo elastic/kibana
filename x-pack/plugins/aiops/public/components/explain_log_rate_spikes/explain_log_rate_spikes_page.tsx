@@ -181,7 +181,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
           <EuiPageContentHeader className="aiopsPageHeader">
             <EuiPageContentHeaderSection>
               <div className="dataViewTitleHeader">
-                <EuiTitle size={'s'}>
+                <EuiTitle size={'xs'}>
                   <h2>{dataView.getName()}</h2>
                 </EuiTitle>
               </div>
