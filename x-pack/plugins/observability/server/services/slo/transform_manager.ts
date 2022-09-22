@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { SLO, SLITypes } from '../../types/models';
+import { retryTransientEsErrors } from '../../utils/retry';
 import { TransformGenerator } from './transform_generators';
 
 type TransformId = string;
@@ -36,7 +37,9 @@ export class DefaultTransformManager implements TransformManager {
 
     const transformParams = generator.getTransformParams(slo, this.spaceId);
     try {
-      await this.esClient.transform.putTransform(transformParams);
+      await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
+        logger: this.logger,
+      });
     } catch (err) {
       this.logger.error(`Cannot create transform for ${slo.indicator.type} SLO type: ${err}`);
       throw err;
@@ -47,9 +50,10 @@ export class DefaultTransformManager implements TransformManager {
 
   async start(transformId: TransformId): Promise<void> {
     try {
-      await this.esClient.transform.startTransform(
-        { transform_id: transformId },
-        { ignore: [409] }
+      await retryTransientEsErrors(
+        () =>
+          this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
+        { logger: this.logger }
       );
     } catch (err) {
       this.logger.error(`Cannot start transform id ${transformId}: ${err}`);
@@ -59,9 +63,13 @@ export class DefaultTransformManager implements TransformManager {
 
   async stop(transformId: TransformId): Promise<void> {
     try {
-      await this.esClient.transform.stopTransform(
-        { transform_id: transformId, wait_for_completion: true },
-        { ignore: [404] }
+      await retryTransientEsErrors(
+        () =>
+          this.esClient.transform.stopTransform(
+            { transform_id: transformId, wait_for_completion: true },
+            { ignore: [404] }
+          ),
+        { logger: this.logger }
       );
     } catch (err) {
       this.logger.error(`Cannot stop transform id ${transformId}: ${err}`);
@@ -71,9 +79,13 @@ export class DefaultTransformManager implements TransformManager {
 
   async uninstall(transformId: TransformId): Promise<void> {
     try {
-      await this.esClient.transform.deleteTransform(
-        { transform_id: transformId, force: true },
-        { ignore: [404] }
+      await retryTransientEsErrors(
+        () =>
+          this.esClient.transform.deleteTransform(
+            { transform_id: transformId, force: true },
+            { ignore: [404] }
+          ),
+        { logger: this.logger }
       );
     } catch (err) {
       this.logger.error(`Cannot delete transform id ${transformId}: ${err}`);
