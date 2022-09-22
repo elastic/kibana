@@ -28,9 +28,11 @@ export const getBucketCollapseFn = (
   customBucketColumns: AggBasedColumn[]
 ) => {
   const collapseFn = metrics.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
-  return {
-    [customBucketColumns[0].columnId]: collapseFn,
-  };
+  return customBucketColumns.length
+    ? {
+        [customBucketColumns[0].columnId]: collapseFn,
+      }
+    : {};
 };
 
 export const getBucketColumns = (
