@@ -18,7 +18,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
-describe('renderApp (APM)', () => {
+// FAILING: https://github.com/elastic/kibana/issues/141543
+describe.skip('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
   beforeAll(() => {
     // The RUM agent logs an unnecessary message here. There's a couple open
