@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TopAlert } from '../../alerts';
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
@@ -27,8 +26,9 @@ import {
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
-  VERSION
+  VERSION,
 } from '@kbn/rule-data-utils';
+import { TopAlert } from '../../alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
 
