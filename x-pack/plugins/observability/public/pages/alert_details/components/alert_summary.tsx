@@ -152,12 +152,12 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           <div>
             <EuiSpacer size="s" />
-            {
-              tags && tags.length > 0 && triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+            {tags &&
+              tags.length > 0 &&
+              triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
                 tagsOutPopover: true,
-                tags
-              })
-            }
+                tags,
+              })}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
