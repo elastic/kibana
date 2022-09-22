@@ -43,6 +43,7 @@ import { useInvalidateRules } from '../../../../containers/detection_engine/rule
 import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
 import { RuleDetailTabs } from '../details';
+import moment from 'moment';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -387,7 +388,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         ),
         render: (value: DurationMetric | undefined) => (
           <EuiText data-test-subj="gap" size="s">
-            {value != null ? value.toFixed() : getEmptyTagValue()}
+            {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>
         ),
         sortable: !!isInMemorySorting,
