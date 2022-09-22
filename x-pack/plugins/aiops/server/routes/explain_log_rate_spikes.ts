@@ -18,10 +18,12 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 import type { ChangePoint, NumericChartData, NumericHistogramField } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import {
   addChangePointsAction,
   addChangePointsGroupAction,
+  addChangePointsGroupHistogramAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
@@ -216,6 +218,21 @@ export const defineExplainLogRateSpikesRoute = (
           return;
         }
 
+        const histogramFields: [NumericHistogramField] = [
+          { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
+        ];
+
+        const [overallTimeSeries] = (await fetchHistogramsForFields(
+          client,
+          request.body.index,
+          { match_all: {} },
+          // fields
+          histogramFields,
+          // samplerShardSize
+          -1,
+          undefined
+        )) as [NumericChartData];
+
         if (groupingEnabled) {
           // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
           // Note this is a compromise and not 100% accurate because there could be change points that
@@ -325,27 +342,40 @@ export const defineExplainLogRateSpikesRoute = (
           });
 
           changePointGroups.push(
-            ...missingChangePoints.map((cp) => {
+            ...missingChangePoints.map(({ fieldName, fieldValue, doc_count: docCount, pValue }) => {
               const duplicates = groupedChangePoints.find((d) =>
-                d.group.some(
-                  (dg) => dg.fieldName === cp.fieldName && dg.fieldValue === cp.fieldValue
-                )
+                d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
               );
               if (duplicates !== undefined) {
                 return {
+                  id: `${stringHash(
+                    JSON.stringify(
+                      duplicates.group.map((d) => ({
+                        fieldName: d.fieldName,
+                        fieldValue: d.fieldValue,
+                      }))
+                    )
+                  )}`,
                   group: duplicates.group.map((d) => ({
                     fieldName: d.fieldName,
                     fieldValue: d.fieldValue,
                     duplicate: false,
                   })),
-                  docCount: cp.doc_count,
-                  pValue: cp.pValue,
+                  docCount,
+                  pValue,
                 };
               } else {
                 return {
-                  group: [{ fieldName: cp.fieldName, fieldValue: cp.fieldValue, duplicate: false }],
-                  docCount: cp.doc_count,
-                  pValue: cp.pValue,
+                  id: `${stringHash(JSON.stringify({ fieldName, fieldValue }))}`,
+                  group: [
+                    {
+                      fieldName,
+                      fieldValue,
+                      duplicate: false,
+                    },
+                  ],
+                  docCount,
+                  pValue,
                 };
               }
             })
@@ -358,22 +388,62 @@ export const defineExplainLogRateSpikesRoute = (
           if (maxItems > 1) {
             push(addChangePointsGroupAction(changePointGroups));
           }
+
+          if (changePointGroups) {
+            await asyncForEach(changePointGroups, async (cpg, index) => {
+              const histogramQuery = {
+                bool: {
+                  filter: cpg.group.map((d) => ({
+                    term: { [d.fieldName]: d.fieldValue },
+                  })),
+                },
+              };
+
+              const [cpgTimeSeries] = (await fetchHistogramsForFields(
+                client,
+                request.body.index,
+                histogramQuery,
+                // fields
+                [
+                  {
+                    fieldName: request.body.timeFieldName,
+                    type: KBN_FIELD_TYPES.DATE,
+                    interval: overallTimeSeries.interval,
+                    min: overallTimeSeries.stats[0],
+                    max: overallTimeSeries.stats[1],
+                  },
+                ],
+                // samplerShardSize
+                -1,
+                undefined
+              )) as [NumericChartData];
+
+              const histogram =
+                overallTimeSeries.data.map((o, i) => {
+                  const current = cpgTimeSeries.data.find(
+                    (d1) => d1.key_as_string === o.key_as_string
+                  ) ?? {
+                    doc_count: 0,
+                  };
+                  return {
+                    key: o.key,
+                    key_as_string: o.key_as_string ?? '',
+                    doc_count_change_point: current.doc_count,
+                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                  };
+                }) ?? [];
+
+              push(
+                addChangePointsGroupHistogramAction([
+                  {
+                    id: cpg.id,
+                    histogram,
+                  },
+                ])
+              );
+            });
+          }
         }
-
-        const histogramFields: [NumericHistogramField] = [
-          { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
-        ];
-
-        const [overallTimeSeries] = (await fetchHistogramsForFields(
-          client,
-          request.body.index,
-          { match_all: {} },
-          // fields
-          histogramFields,
-          // samplerShardSize
-          -1,
-          undefined
-        )) as [NumericChartData];
 
         // time series filtered by fields
         if (changePoints) {

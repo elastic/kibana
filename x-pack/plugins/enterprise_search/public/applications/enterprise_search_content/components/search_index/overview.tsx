@@ -15,14 +15,14 @@ import { i18n } from '@kbn/i18n';
 
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 
-import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
+import { ApiTotalStats } from './api_total_stats';
+import { ConnectorTotalStats } from './connector_total_stats';
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { OverviewLogic } from './overview.logic';
 import { SyncJobs } from './sync_jobs';
-import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
@@ -50,24 +50,10 @@ export const SearchIndexOverview: React.FC = () => {
       )}
       {isCrawlerIndex(indexData) ? (
         <CrawlerTotalStats />
+      ) : isConnectorIndex(indexData) ? (
+        <ConnectorTotalStats />
       ) : (
-        <TotalStats
-          ingestionType={
-            isConnectorIndex(indexData)
-              ? i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
-                  {
-                    defaultMessage: 'Connector',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
-                  {
-                    defaultMessage: 'API',
-                  }
-                )
-          }
-        />
+        <ApiTotalStats />
       )}
       {isApiIndex(indexData) && (
         <>
@@ -84,8 +70,6 @@ export const SearchIndexOverview: React.FC = () => {
       )}
       {isConnectorIndex(indexData) && (
         <>
-          <EuiSpacer />
-          <ConnectorOverviewPanels />
           <EuiSpacer />
           <SyncJobs />
         </>
