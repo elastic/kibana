@@ -9,6 +9,7 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -43,7 +44,6 @@ import { useInvalidateRules } from '../../../../containers/detection_engine/rule
 import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
 import { RuleDetailTabs } from '../details';
-import moment from 'moment';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
