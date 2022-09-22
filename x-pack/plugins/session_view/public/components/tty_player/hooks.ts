@@ -281,13 +281,13 @@ export const useXtermPlayer = ({
   useEffect(() => {
     if (isPlaying) {
       const timer = setTimeout(() => {
-        const nextLine = Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME);
+        render(currentLine, false);
 
-        setCurrentLine(nextLine);
-        render(nextLine, false);
-
-        if (nextLine === lines.length - 1) {
+        if (currentLine === lines.length - 1) {
           setIsPlaying(false);
+        } else {
+          const nextLine = Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME);
+          setCurrentLine(nextLine);
         }
       }, playSpeed);
 
