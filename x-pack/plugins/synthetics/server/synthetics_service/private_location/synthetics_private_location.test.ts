@@ -123,7 +123,7 @@ describe('SyntheticsPrivateLocation', () => {
     [true, 'Unable to create Synthetics package policy for private location'],
     [
       false,
-      'Unable to update Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
+      'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
   ])('throws errors for edit monitor', async (writeIntegrationPolicies, error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -137,10 +137,11 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.editMonitor(
-        testConfig,
+      await syntheticsPrivateLocation.editMonitors(
+        [testConfig],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
+        [mockPrivateLocation],
         'test-space'
       );
     } catch (e) {
