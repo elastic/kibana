@@ -16,6 +16,7 @@ import {
   EventActionOptions,
 } from '../types';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 export function getActionType(): ActionTypeModel<
   PagerDutyConfig,
@@ -83,6 +84,14 @@ export function getActionType(): ActionTypeModel<
     },
     actionConnectorFields: lazy(() => import('./pagerduty_connectors')),
     actionParamsFields: lazy(() => import('./pagerduty_params')),
+    defaultActionParams: {
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      eventAction: EventActionOptions.TRIGGER,
+    },
+    defaultRecoveredActionParams: {
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      eventAction: EventActionOptions.RESOLVE,
+    },
   };
 }
 
