@@ -243,6 +243,11 @@ const actionNames: {
     completedText: 'force unenrolled',
     cancelledText: 'force unenrollment',
   },
+  UPDATE_TAGS: {
+    inProgressText: 'Updating tags of',
+    completedText: 'updated tags',
+    cancelledText: 'update tags',
+  },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };

@@ -20,7 +20,7 @@ export const useUpdateTags = () => {
   const wrapRequest = useCallback(
     async (
       requestFn: () => Promise<any>,
-      onSuccess: () => void,
+      onSuccess: (hasCompleted?: boolean) => void,
       successMessage?: string,
       errorMessage?: string
     ) => {
@@ -30,14 +30,21 @@ export const useUpdateTags = () => {
         if (res.error) {
           throw res.error;
         }
+        const hasCompleted = !res.data.actionId;
         const message =
           successMessage ??
           i18n.translate('xpack.fleet.updateAgentTags.successNotificationTitle', {
             defaultMessage: 'Tags updated',
           });
-        notifications.toasts.addSuccess(message);
+        const submittedMessage = i18n.translate(
+          'xpack.fleet.agentReassignPolicy.submittedNotificationTitle',
+          {
+            defaultMessage: 'Tags update submitted',
+          }
+        );
+        notifications.toasts.addSuccess(hasCompleted ? message : submittedMessage);
 
-        onSuccess();
+        onSuccess(hasCompleted);
       } catch (error) {
         const errorTitle =
           errorMessage ??
@@ -73,7 +80,7 @@ export const useUpdateTags = () => {
       agents: string[] | string,
       tagsToAdd: string[],
       tagsToRemove: string[],
-      onSuccess: () => void,
+      onSuccess: (hasCompleted?: boolean) => void,
       successMessage?: string,
       errorMessage?: string
     ) => {
