@@ -8,8 +8,8 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
-import { DiscoveredPlugin, PluginType } from '../../server';
-import { coreMock } from '../mocks';
+import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
+import { createPluginInitializerContextMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
 
 function createManifest(
@@ -32,7 +32,7 @@ function createManifest(
 
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const opaqueId = Symbol();
-const initializerContext = coreMock.createPluginInitializerContext();
+const initializerContext = createPluginInitializerContextMock();
 
 beforeEach(() => {
   mockPluginReader.mockClear();
