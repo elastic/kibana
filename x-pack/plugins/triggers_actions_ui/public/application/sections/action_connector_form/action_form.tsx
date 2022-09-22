@@ -295,15 +295,6 @@ export const ActionForm = ({
     </SectionLoading>
   ) : (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       {actionTypesIndex &&
         actions.map((actionItem: RuleAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);

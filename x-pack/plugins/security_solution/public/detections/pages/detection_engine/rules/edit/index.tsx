@@ -281,7 +281,7 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.ACTIONS}>
+            <StepPanel loading={loading}>
               {actionsStep.data != null && (
                 <StepRuleActions
                   isReadOnlyView={false}
