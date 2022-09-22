@@ -6,7 +6,7 @@
  */
 
 import { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserField, BrowserFields } from '../../types';
+import { BrowserFields, BrowserField } from '../../../common';
 
 const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');
@@ -21,7 +21,7 @@ const getFieldCategory = (fieldCapability: FieldDescriptor) => {
 const browserFieldFactory = (
   fieldCapability: FieldDescriptor,
   category: string
-): { [fieldName in string]: BrowserField } => {
+): Readonly<Record<string, Partial<BrowserField>>> => {
   return {
     [fieldCapability.name]: {
       ...fieldCapability,

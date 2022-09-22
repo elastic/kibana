@@ -874,7 +874,7 @@
             "section": "def-server.AsyncSetupFunc",
             "text": "AsyncSetupFunc"
           },
-          "<T>"
+          "<T, Partial<P>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
@@ -951,7 +951,7 @@
             "section": "def-server.SyncSetupFunc",
             "text": "SyncSetupFunc"
           },
-          "<T>"
+          "<T, Partial<P>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
@@ -1033,7 +1033,7 @@
             "section": "def-server.SetupFunc",
             "text": "SetupFunc"
           },
-          "<T>"
+          "<T, Partial<P>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
@@ -2060,7 +2060,7 @@
         "label": "AsyncSetupFunc",
         "description": [],
         "signature": [
-          "(props?: any) => Promise<",
+          "(props?: P | undefined) => Promise<",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -2078,12 +2078,12 @@
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-server.AsyncSetupFunc.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
@@ -2100,7 +2100,7 @@
         "label": "SetupFunc",
         "description": [],
         "signature": [
-          "(props?: any) => ",
+          "(props?: P | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -2126,12 +2126,12 @@
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-server.SetupFunc.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
@@ -2148,7 +2148,7 @@
         "label": "SyncSetupFunc",
         "description": [],
         "signature": [
-          "(props?: any) => ",
+          "(props?: P | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -2166,12 +2166,12 @@
           {
             "parentPluginId": "@kbn/test-jest-helpers",
             "id": "def-server.SyncSetupFunc.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
