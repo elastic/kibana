@@ -25,7 +25,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { combineQueries } from '../../../common/lib/kuery';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';

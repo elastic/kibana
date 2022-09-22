@@ -57,7 +57,7 @@ import {
   omitTypenameInTimeline,
   formatTimelineResultToModel,
 } from '../../../timelines/components/open_timeline/helpers';
-import { convertKueryToElasticSearchQuery } from '../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { getField, getFieldKey } from '../../../helpers';
 import {
   replaceTemplateFieldFromQuery,

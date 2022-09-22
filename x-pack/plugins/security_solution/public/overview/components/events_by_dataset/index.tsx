@@ -22,7 +22,7 @@ import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,

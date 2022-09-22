@@ -11,4 +11,5 @@ export {
   convertToBuildEsQuery,
   escapeKuery,
   escapeQueryValue,
+  combineQueries,
 } from '@kbn/timelines-plugin/public';

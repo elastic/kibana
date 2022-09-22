@@ -40,7 +40,7 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';

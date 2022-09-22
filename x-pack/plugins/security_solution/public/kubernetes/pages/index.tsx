@@ -20,7 +20,7 @@ import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { TimelineId } from '../../../common/types/timeline';

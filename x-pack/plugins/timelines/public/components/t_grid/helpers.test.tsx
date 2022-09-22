@@ -526,6 +526,101 @@ describe('Combined Queries', () => {
     );
   });
 
+  test('Disabled Data Provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: '_id',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
+  test('Both disabled & enabled data provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          [dataProviders[1].queryMatch.field]: dataProviders[1].queryMatch.value,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: '_id',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
   describe('resolverIsShowing', () => {
     test('it returns true when graphEventId is NOT an empty string', () => {
       expect(resolverIsShowing('a valid id')).toBe(true);
