@@ -19,7 +19,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, skipWhile, switchMap, tap } from 'rxjs/operators';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -253,6 +253,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             })
           );
         }),
+        skipWhile(({ rawResponse: body }) => Boolean(body.is_partial || body.is_running)),
         map(({ rawResponse: body }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
