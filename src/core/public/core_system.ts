@@ -11,8 +11,6 @@ import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
   type InjectedMetadataParams,
-  type InternalInjectedMetadataSetup,
-  type InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
@@ -32,16 +30,12 @@ import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
-import {
-  ApplicationService,
-  type InternalApplicationSetup,
-  type InternalApplicationStart,
-} from '@kbn/core-application-browser-internal';
+import { ApplicationService } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
-import { CoreSetup, CoreStart } from '.';
-import { PluginsService } from './plugins';
 
 import {
   LOAD_SETUP_DONE,
@@ -57,18 +51,6 @@ interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-}
-
-/** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
-  application: InternalApplicationSetup;
-  injectedMetadata: InternalInjectedMetadataSetup;
-}
-
-/** @internal */
-export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
-  application: InternalApplicationStart;
-  injectedMetadata: InternalInjectedMetadataStart;
 }
 
 // Expands the definition of navigator to include experimental features
