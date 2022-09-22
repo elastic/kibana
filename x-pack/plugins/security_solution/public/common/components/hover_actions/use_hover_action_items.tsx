@@ -48,7 +48,6 @@ export interface UseHoverActionItemsProps {
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
-  isInTimeline: boolean;
 }
 
 export interface UseHoverActionItems {
@@ -77,11 +76,10 @@ export const useHoverActionItems = ({
   ownFocus,
   showTopN,
   stKeyboardEvent,
-  scopeId = TimelineId.active,
+  scopeId,
   toggleColumn,
   toggleTopN,
   values,
-  isInTimeline,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
   const dispatch = useDispatch();
@@ -99,7 +97,6 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  console.log(scopeId)
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId ?? '')) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -108,11 +105,11 @@ export const useHoverActionItems = ({
     }
   }, [scopeId]);
 
+  const isInTimeline = isTimelineScope(scopeId ?? '');
+
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getScope ? getScope(state, scopeId ?? '') : { filterManager: undefined }
   );
-  console.log(activeFilterManager)
-
   const filterManager = useMemo(
     () =>
       isInTimeline ? activeFilterManager ?? new FilterManager(uiSettings) : filterManagerBackup,
@@ -170,13 +167,13 @@ export const useHoverActionItems = ({
     ),
     [
       enableOverflowButton,
-      field,
       isCaseView,
+      field,
+      toggleTopN,
       onFilterAdded,
       ownFocus,
       showTopN,
       scopeId,
-      toggleTopN,
       values,
       isInTimeline,
     ]

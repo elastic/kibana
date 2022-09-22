@@ -20,7 +20,7 @@ import { isTimelineScope } from '../../components/event_details/helpers';
 interface Props {
   field: ColumnHeaderOptions;
   globalFilters?: Filter[];
-  timelineId: string;
+  scopeId: string;
   value: string[] | undefined;
   onFilterAdded?: () => void;
 }
@@ -39,7 +39,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   field,
   globalFilters,
   onFilterAdded,
-  timelineId,
+  scopeId,
   value,
 }) => {
   const {
@@ -83,10 +83,10 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             showLegend
             showTopN={showTopN}
             showTooltip={false}
-            scopeId={timelineId}
+            scopeId={scopeId}
             title={showTopN ? HIDE_TOP_VALUES : SHOW_TOP_VALUES}
             value={value}
-            isInTimeline={isTimelineScope(timelineId)}
+            isInTimeline={isTimelineScope(scopeId)}
           />
         ) : null}
       </StyledContent>

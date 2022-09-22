@@ -71,7 +71,7 @@ const HostNameComponent: React.FC<Props> = ({
           timelineActions.toggleDetailPanel({
             ...updatedExpandedDetail,
             timelineId: timelineID,
-            tabType,
+            tabType: tabType as TimelineTabs,
           })
         );
 

@@ -72,7 +72,7 @@ const DraggableLegendItemComponent: React.FC<{
                 hideTopN={true}
                 id={dataProviderId}
                 isDraggable={false}
-                timelineId={timelineId}
+                scopeId={timelineId}
                 value={value}
               >
                 {legendItem.render == null ? (

@@ -12,7 +12,6 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
-import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
@@ -112,8 +111,6 @@ interface Props {
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
-  isInTimeline: boolean;
-  activeFilterManager?: FilterManager;
 }
 
 /** Returns a value for the `disabled` prop of `EuiFocusTrap` */
@@ -156,7 +153,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     toggleColumn,
     toggleTopN,
     values,
-    isInTimeline,
   }) => {
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
     const [isActive, setIsActive] = useState(false);
@@ -245,7 +241,6 @@ export const HoverActions: React.FC<Props> = React.memo(
       toggleTopN,
       values,
       scopeId,
-      isInTimeline,
     });
 
     const Container = applyWidthAndPadding

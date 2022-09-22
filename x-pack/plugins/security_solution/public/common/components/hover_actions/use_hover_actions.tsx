@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { TableContext } from '@kbn/timelines-plugin/public';
+import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 
 import type { DataProvider } from '../../../../common/types';
@@ -33,10 +35,9 @@ interface Props {
   isDraggable?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
-  scopeId: string;
+  scopeId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
-  isInTimeline: boolean;
 }
 
 export const useHoverActions = ({
@@ -48,8 +49,9 @@ export const useHoverActions = ({
   onFilterAdded,
   render,
   scopeId,
-  isInTimeline,
 }: Props) => {
+  const { timelineId: timelineIdFind } = useContext(TimelineContext);
+  const { tableId: tableIdFind } = useContext(TableContext);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
@@ -114,14 +116,13 @@ export const useHoverActions = ({
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
         showTopN={showTopN}
-        scopeId={scopeId}
+        scopeId={!scopeId ? timelineIdFind ?? tableIdFind : scopeId}
         toggleTopN={toggleTopN}
         values={
           typeof dataProvider.queryMatch.value !== 'number'
             ? dataProvider.queryMatch.value
             : `${dataProvider.queryMatch.value}`
         }
-        isInTimeline={isInTimeline}
       />
     );
   }, [
@@ -137,8 +138,9 @@ export const useHoverActions = ({
     render,
     showTopN,
     scopeId,
-    isInTimeline,
     toggleTopN,
+    timelineIdFind,
+    tableIdFind,
   ]);
 
   const setContainerRef = useCallback((e: HTMLDivElement) => {

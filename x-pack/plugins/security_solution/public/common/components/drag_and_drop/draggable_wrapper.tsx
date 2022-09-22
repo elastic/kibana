@@ -103,7 +103,7 @@ interface Props {
   render: RenderFunctionProp;
   isAggregatable?: boolean;
   fieldType?: string;
-  timelineId?: string;
+  scopeId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
@@ -134,7 +134,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   render,
   fieldType = '',
   isAggregatable = false,
-  timelineId,
+  scopeId,
   truncate,
 }) => {
   const [providerRegistered, setProviderRegistered] = useState(false);
@@ -159,9 +159,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     render,
     fieldType,
     isAggregatable,
-    scopeId: timelineId ?? '',
+    scopeId,
     truncate,
-    isInTimeline: true,
   });
 
   const registerProvider = useCallback(() => {
@@ -321,7 +320,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   render,
   isAggregatable = false,
   fieldType = '',
-  timelineId,
+  scopeId,
   truncate,
 }) => {
   const {
@@ -339,9 +338,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     fieldType,
     onFilterAdded,
     render,
-    scopeId: timelineId ?? '',
+    scopeId,
     truncate,
-    isInTimeline: true,
   });
   const renderContent = useCallback(
     () => (
@@ -386,7 +384,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       fieldType={fieldType}
       isAggregatable={isAggregatable}
       render={render}
-      timelineId={timelineId}
+      scopeId={scopeId}
       truncate={truncate}
     />
   );

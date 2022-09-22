@@ -205,7 +205,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         dispatch(
           timelineActions.toggleDetailPanel({
             ...updatedExpandedDetail,
-            tabType,
+            tabType: tabType as TimelineTabs,
             timelineId: timelineID,
           })
         );

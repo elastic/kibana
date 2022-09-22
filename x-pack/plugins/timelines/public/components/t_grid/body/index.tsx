@@ -733,7 +733,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               ecsData: data.map((row) => row.ecs),
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
-              timelineId: id,
+              scopeId: id,
               closeCellPopover: dataGridRef.current?.closeCellPopover,
             });
           return {
@@ -822,7 +822,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           colIndex,
           rowRenderers,
           setCellProps,
-          timelineId: id,
+          scopeId: id,
           truncate: isDetails ? false : true,
         }) as React.ReactElement;
       };

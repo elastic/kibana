@@ -207,12 +207,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const currentTimeline = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? '')
+    getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
   const activeFilterManager = currentTimeline.filterManager;
-
-  console.log(activeFilterManager);
   const filterManager = useMemo(
     () => activeFilterManager ?? new FilterManager(uiSettings),
     [activeFilterManager, uiSettings]
