@@ -20,7 +20,7 @@ const convertToLastValueParams = (
 ): LastValueParams => {
   return {
     sortField: agg.aggParams!.sortField!.name,
-    showArrayValues: agg.aggType === METRIC_TYPES.TOP_HITS ? true : false,
+    showArrayValues: agg.aggType === METRIC_TYPES.TOP_HITS,
   };
 };
 
