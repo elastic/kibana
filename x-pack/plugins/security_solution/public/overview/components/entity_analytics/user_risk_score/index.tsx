@@ -34,8 +34,10 @@ import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
+const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
 
 const EntityAnalyticsUserRiskScoresComponent = () => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -52,11 +54,6 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
 
-  const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-  });
-
   const timerange = useMemo(
     () => ({
       from,
@@ -64,6 +61,17 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     }),
     [from, to]
   );
+
+  const {
+    severityCount,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    inspect: inspectKpi,
+  } = useUserRiskScoreKpi({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    timerange,
+  });
 
   const [
     isTableLoading,
@@ -87,6 +95,15 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     inspect,
   });
 
+  useQueryInspector({
+    queryId: USER_RISK_KPI_QUERY_ID,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    setQuery,
+    deleteQuery,
+    inspect: inspectKpi,
+  });
+
   useEffect(() => {
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
@@ -106,19 +123,21 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const refreshPage = useRefetchQueries();
+
   if (!isLicenseValid) {
     return null;
   }
 
   if (!isModuleEnabled) {
-    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refreshPage} timerange={timerange} />;
   }
 
   if (isDeprecated) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.user}
-        refetch={refetch}
+        refetch={refreshPage}
         timerange={timerange}
       />
     );

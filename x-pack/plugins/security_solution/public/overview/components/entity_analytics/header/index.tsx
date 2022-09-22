@@ -25,15 +25,41 @@ import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anom
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorVis9};
 `;
 
+const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
+const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
+
 export const EntityAnalyticsHeader = () => {
-  const { severityCount: hostsSeverityCount } = useHostRiskScoreKpi({});
-  const { severityCount: usersSeverityCount } = useUserRiskScoreKpi({});
   const { from, to } = useGlobalTime(false);
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
+
+  const {
+    severityCount: hostsSeverityCount,
+    loading: hostRiskLoading,
+    inspect: inspectHostRiskScore,
+    refetch: refetchHostRiskScore,
+  } = useHostRiskScoreKpi({ timerange });
+
+  const {
+    severityCount: usersSeverityCount,
+    loading: userRiskLoading,
+    refetch: refetchUserRiskScore,
+    inspect: inspectUserRiskScore,
+  } = useUserRiskScoreKpi({
+    timerange,
+  });
+
   const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
@@ -87,6 +113,26 @@ export const EntityAnalyticsHeader = () => {
     });
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
+
+  const { deleteQuery, setQuery } = useGlobalTime();
+
+  useQueryInspector({
+    queryId: USER_RISK_QUERY_ID,
+    loading: userRiskLoading,
+    refetch: refetchUserRiskScore,
+    setQuery,
+    deleteQuery,
+    inspect: inspectUserRiskScore,
+  });
+
+  useQueryInspector({
+    queryId: HOST_RISK_QUERY_ID,
+    loading: hostRiskLoading,
+    refetch: refetchHostRiskScore,
+    setQuery,
+    deleteQuery,
+    inspect: inspectHostRiskScore,
+  });
 
   const totalAnomalies = useMemo(() => sum(data.map(({ count }) => count)) || '-', [data]);
 

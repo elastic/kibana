@@ -34,8 +34,10 @@ import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
+const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
 
 const EntityAnalyticsHostRiskScoresComponent = () => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -52,11 +54,6 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
 
-  const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-  });
-
   const timerange = useMemo(
     () => ({
       from,
@@ -64,6 +61,26 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     }),
     [from, to]
   );
+
+  const {
+    severityCount,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    inspect: inspectKpi,
+  } = useHostRiskScoreKpi({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    timerange,
+  });
+
+  useQueryInspector({
+    queryId: HOST_RISK_KPI_QUERY_ID,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    setQuery,
+    deleteQuery,
+    inspect: inspectKpi,
+  });
 
   const [
     isTableLoading,
@@ -107,19 +124,21 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const refreshPage = useRefetchQueries();
+
   if (!isLicenseValid) {
     return null;
   }
 
   if (!isModuleEnabled) {
-    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refreshPage} timerange={timerange} />;
   }
 
   if (isDeprecated) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.host}
-        refetch={refetch}
+        refetch={refreshPage}
         timerange={timerange}
       />
     );
