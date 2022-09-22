@@ -33,7 +33,7 @@ describe('convertToDateHistogramColumn', () => {
     },
     size: 5,
   };
-  const aggs: SchemaConfig<METRIC_TYPES>[] = [
+  const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
     {
       accessor: 0,
       label: '',
@@ -68,12 +68,7 @@ describe('convertToDateHistogramColumn', () => {
   });
 
   test.each<
-    [
-      string,
-      Parameters<typeof convertToTermsColumn>,
-      Partial<TermsColumn> | null,
-      () => void
-    ]
+    [string, Parameters<typeof convertToTermsColumn>, Partial<TermsColumn> | null, () => void]
   >([
     [
       'null if dataview does not include field from terms params',
