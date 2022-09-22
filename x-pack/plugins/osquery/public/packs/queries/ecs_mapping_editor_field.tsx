@@ -42,7 +42,9 @@ import deepEqual from 'fast-deep-equal';
 
 import type { InternalFieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
-import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+
+import type { ECSMappingArray } from '../../../common/schemas/common/utils';
 import {
   convertECSMappingToArray,
   convertECSMappingToObject,

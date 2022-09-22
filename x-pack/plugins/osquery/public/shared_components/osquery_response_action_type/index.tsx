@@ -12,7 +12,7 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import type { ECSMapping } from '../../../common/schemas/common/utils';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useFormContext } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';

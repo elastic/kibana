@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy } from 'lodash';
@@ -14,7 +15,6 @@ import { isEmpty, find, pickBy } from 'lodash';
 import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import type { ECSMapping } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
