@@ -20,12 +20,12 @@ export const THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS = [
   { value: '7d', text: 'Weekly' },
 ];
 
-export const THROTTLE_OPTIONS = [
+export const THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING = [
   { value: NOTIFICATION_THROTTLE_NO_ACTIONS, text: 'Perform no actions' },
   ...THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
 ];
 
-export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS[0];
+export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING[0];
 
 type ThrottleSelectField = typeof SelectField;
 
