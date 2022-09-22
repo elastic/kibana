@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 
-const DATA_API_ROOT = '/api/triggers_actions_ui/data';
+const DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 
 const formatPattern = (pattern: string) => {
   let formattedPattern = pattern;
