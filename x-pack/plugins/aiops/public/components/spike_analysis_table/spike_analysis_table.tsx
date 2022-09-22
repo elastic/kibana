@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
 import {
+  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -50,6 +51,7 @@ interface SpikeAnalysisTableProps {
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
+  pinnedChangePoint?: ChangePoint | null;
   selectedChangePoint?: ChangePoint;
 }
 
@@ -59,9 +61,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   loading,
   onPinnedChangePoint,
   onSelectedChangePoint,
+  pinnedChangePoint,
   selectedChangePoint,
 }) => {
   const euiTheme = useEuiTheme();
+  const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -318,6 +322,32 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     };
   }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
 
+  const getRowStyle = (changePoint: ChangePoint) => {
+    if (
+      pinnedChangePoint &&
+      pinnedChangePoint.fieldName === changePoint.fieldName &&
+      pinnedChangePoint.fieldValue === changePoint.fieldValue
+    ) {
+      return {
+        backgroundColor: primaryBackgroundColor,
+      };
+    }
+
+    if (
+      selectedChangePoint &&
+      selectedChangePoint.fieldName === changePoint.fieldName &&
+      selectedChangePoint.fieldValue === changePoint.fieldValue
+    ) {
+      return {
+        backgroundColor: euiTheme.euiColorLightestShade,
+      };
+    }
+
+    return {
+      backgroundColor: euiTheme.euiColorEmptyShade,
+    };
+  };
+
   // Don't pass on the `loading` state to the table itself because
   // it disables hovering events. Because the mini histograms take a while
   // to load, hovering would not update the main chart. Instead,
@@ -340,7 +370,14 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
           onClick: () => {
             if (onPinnedChangePoint) {
-              onPinnedChangePoint(changePoint);
+              if (
+                changePoint.fieldName === pinnedChangePoint?.fieldName &&
+                changePoint.fieldValue === pinnedChangePoint?.fieldValue
+              ) {
+                onPinnedChangePoint(null);
+              } else {
+                onPinnedChangePoint(changePoint);
+              }
             }
           },
           onMouseEnter: () => {
@@ -353,14 +390,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
               onSelectedChangePoint(null);
             }
           },
-          style:
-            selectedChangePoint &&
-            selectedChangePoint.fieldValue === changePoint.fieldValue &&
-            selectedChangePoint.fieldName === changePoint.fieldName
-              ? {
-                  backgroundColor: euiTheme.euiColorLightestShade,
-                }
-              : null,
+          style: getRowStyle(changePoint),
         };
       }}
     />

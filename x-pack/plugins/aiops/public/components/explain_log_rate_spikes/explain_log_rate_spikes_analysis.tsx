@@ -56,8 +56,9 @@ interface ExplainLogRateSpikesAnalysisProps {
   searchQuery: Query['query'];
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  selectedChangePoint?: ChangePoint;
   onSelectedGroup?: (group: GroupTableItem | null) => void;
+  pinnedChangePoint?: ChangePoint | null;
+  selectedChangePoint?: ChangePoint;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -68,8 +69,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   searchQuery,
   onPinnedChangePoint,
   onSelectedChangePoint,
-  selectedChangePoint,
   onSelectedGroup,
+  pinnedChangePoint,
+  selectedChangePoint,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -262,6 +264,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           loading={isRunning}
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
+          pinnedChangePoint={pinnedChangePoint}
           selectedChangePoint={selectedChangePoint}
           dataViewId={dataView.id}
         />

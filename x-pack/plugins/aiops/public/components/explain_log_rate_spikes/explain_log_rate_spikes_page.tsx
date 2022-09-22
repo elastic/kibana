@@ -252,8 +252,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   searchQuery={searchQuery}
                   onPinnedChangePoint={setPinnedChangePoint}
                   onSelectedChangePoint={setSelectedChangePoint}
-                  selectedChangePoint={currentSelectedChangePoint}
                   onSelectedGroup={setSelectedGroup}
+                  pinnedChangePoint={pinnedChangePoint}
+                  selectedChangePoint={currentSelectedChangePoint}
                 />
               )}
               {windowParameters === undefined && (
