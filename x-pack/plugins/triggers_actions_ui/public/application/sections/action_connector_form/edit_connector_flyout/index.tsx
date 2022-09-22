@@ -13,6 +13,8 @@ import {
   EuiLink,
   EuiButton,
   EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -127,6 +129,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [isFormModified, setIsFormModified] = useState<boolean>(false);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(true);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
@@ -155,6 +158,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const onFormModifiedChange = useCallback(
     (formModified: boolean) => {
+      if (formModified) {
+        setIsSaved(false);
+      }
       setIsFormModified(formModified);
       setTestExecutionResult(none);
     },
@@ -213,6 +219,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         if (onConnectorUpdated) {
           onConnectorUpdated(updatedConnector);
         }
+        setIsSaved(true);
         setIsEdit(false);
         setIsEdit(true);
       }
@@ -268,18 +275,30 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                     />
                     {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
                     {showButtons && (
-                      <EuiButton
-                        color="success"
-                        data-test-subj="edit-connector-flyout-save-btn"
-                        isLoading={isSaving}
-                        onClick={onClickSave}
-                        disabled={!isFormModified || hasErrors || isSaving}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                          defaultMessage="Save"
-                        />
-                      </EuiButton>
+                      <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            iconType={isSaved ? 'check' : undefined}
+                            color="success"
+                            data-test-subj="edit-connector-flyout-save-btn"
+                            isLoading={isSaving}
+                            onClick={onClickSave}
+                            disabled={!isFormModified || hasErrors || isSaving}
+                          >
+                            {isSaved ? (
+                              <FormattedMessage
+                                id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
+                                defaultMessage="Changes Saved"
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                                defaultMessage="Save"
+                              />
+                            )}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     )}
                   </>
                 )}

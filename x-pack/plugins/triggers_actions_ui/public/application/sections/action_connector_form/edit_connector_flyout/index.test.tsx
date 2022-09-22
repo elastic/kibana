@@ -109,6 +109,31 @@ describe('EditConnectorFlyout', () => {
     expect(getByTestId('edit-connector-flyout-save-btn')).not.toBeDisabled();
   });
 
+  it('shows a confirmation modal on close if the form is modified', async () => {
+    const { getByTestId, getByText } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+
+    await act(async () => {
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name', {
+        delay: 10,
+      });
+    });
+
+    act(() => {
+      userEvent.click(getByTestId('edit-connector-flyout-save-close-btn'));
+    });
+
+    expect(getByText('Discard unsaved changes to connector?')).toBeInTheDocument();
+  });
+
   it('renders the connector form correctly', async () => {
     const { getByTestId, queryByText } = appMockRenderer.render(
       <EditConnectorFlyout
@@ -348,7 +373,7 @@ describe('EditConnectorFlyout', () => {
     });
 
     it('updates the connector and close the flyout correctly', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      const { getByTestId, getByText } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -383,6 +408,8 @@ describe('EditConnectorFlyout', () => {
           }
         );
       });
+
+      expect(getByText('Changes Saved')).toBeInTheDocument();
 
       act(() => {
         userEvent.click(getByTestId('edit-connector-flyout-save-close-btn'));
