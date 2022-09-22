@@ -61,6 +61,8 @@ export const HostRiskScoreQueryTabBody = ({
   }, [toggleStatus]);
   const { from, to } = useGlobalTime();
 
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+
   const [
     loading,
     { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
@@ -69,15 +71,13 @@ export const HostRiskScoreQueryTabBody = ({
     skip: querySkip,
     pagination,
     sort,
-    timerange: { from, to },
+    timerange,
   });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
     filterQuery,
     skip: querySkip,
   });
-
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   if (!isModuleEnabled && !loading) {
     return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
