@@ -285,223 +285,6 @@
         }
       }
     },
-    "canvas": {
-      "properties": {
-        "workpads": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of Canvas Workpads in the cluster"
-              }
-            }
-          }
-        },
-        "pages": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of pages across all Canvas Workpads"
-              }
-            },
-            "per_workpad": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of pages across all Canvas Workpads"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of pages found in a Canvas Workpad"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of pages found in a Canvas Workpad"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "elements": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of elements across all Canvas Workpads"
-              }
-            },
-            "per_page": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of elements per page across all Canvas Workpads"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of elements on a page across all Canvas Workpads"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of elements on a page across all Canvas Workpads"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "functions": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of functions in use across all Canvas Workpads"
-              }
-            },
-            "in_use": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "A function in use in any Canvas Workpad"
-                }
-              }
-            },
-            "in_use_30d": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "A function in use in a Canvas Workpad that has been modified in the last 30 days"
-                }
-              }
-            },
-            "in_use_90d": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "A function in use in a Canvas Workpad that has been modified in the last 90 days"
-                }
-              }
-            },
-            "per_element": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "Average number of functions used per element across all Canvas Workpads"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of functions used in an element across all Canvas Workpads"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of functions used in an element across all Canvas Workpads"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "variables": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of variables defined across all Canvas Workpads"
-              }
-            },
-            "per_workpad": {
-              "properties": {
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of variables set per Canvas Workpad"
-                  }
-                },
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number variables set across all Canvas Workpads"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of variables set across all Canvas Workpads"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "custom_elements": {
-          "properties": {
-            "count": {
-              "type": "long",
-              "_meta": {
-                "description": "The total number of custom Canvas elements"
-              }
-            },
-            "elements": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The minimum number of elements used across all Canvas Custom Elements"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The maximum number of elements used across all Canvas Custom Elements"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "The average number of elements used in Canvas Custom Element"
-                  }
-                }
-              }
-            },
-            "functions_in_use": {
-              "type": "array",
-              "items": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The functions in use by Canvas Custom Elements"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "cloud": {
-      "properties": {
-        "isCloudEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "alerts": {
       "properties": {
         "has_errors": {
@@ -2912,12 +2695,1967 @@
         }
       }
     },
+    "apm": {
+      "properties": {
+        "services_per_agent": {
+          "properties": {
+            "android/java": {
+              "type": "long"
+            },
+            "dotnet": {
+              "type": "long"
+            },
+            "iOS/swift": {
+              "type": "long"
+            },
+            "go": {
+              "type": "long"
+            },
+            "java": {
+              "type": "long"
+            },
+            "js-base": {
+              "type": "long"
+            },
+            "nodejs": {
+              "type": "long"
+            },
+            "php": {
+              "type": "long"
+            },
+            "python": {
+              "type": "long"
+            },
+            "ruby": {
+              "type": "long"
+            },
+            "rum-js": {
+              "type": "long"
+            },
+            "otlp": {
+              "type": "long"
+            },
+            "opentelemetry/cpp": {
+              "type": "long"
+            },
+            "opentelemetry/dotnet": {
+              "type": "long"
+            },
+            "opentelemetry/erlang": {
+              "type": "long"
+            },
+            "opentelemetry/go": {
+              "type": "long"
+            },
+            "opentelemetry/java": {
+              "type": "long"
+            },
+            "opentelemetry/nodejs": {
+              "type": "long"
+            },
+            "opentelemetry/php": {
+              "type": "long"
+            },
+            "opentelemetry/python": {
+              "type": "long"
+            },
+            "opentelemetry/ruby": {
+              "type": "long"
+            },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
+            "opentelemetry/webjs": {
+              "type": "long"
+            }
+          }
+        },
+        "agents": {
+          "properties": {
+            "android/java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "go": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "js-base": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "nodejs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "php": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "python": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ruby": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "rum-js": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "has_any_services": {
+          "type": "boolean"
+        },
+        "version": {
+          "properties": {
+            "apm_server": {
+              "properties": {
+                "major": {
+                  "type": "long"
+                },
+                "minor": {
+                  "type": "long"
+                },
+                "patch": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "environments": {
+          "properties": {
+            "services_without_environment": {
+              "type": "long"
+            },
+            "services_with_multiple_environments": {
+              "type": "long"
+            },
+            "top_environments": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "aggregated_transactions": {
+          "properties": {
+            "current_implementation": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "no_observer_name": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "no_rum": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "no_rum_no_observer_name": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "only_rum": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "only_rum_no_observer_name": {
+              "properties": {
+                "expected_metric_document_count": {
+                  "type": "long"
+                },
+                "transaction_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "cloud": {
+          "properties": {
+            "availability_zone": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            },
+            "provider": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            },
+            "region": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "counts": {
+          "properties": {
+            "transaction": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "span": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "metric": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "sourcemap": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "onboarding": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "agent_configuration": {
+              "properties": {
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "max_transaction_groups_per_service": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "max_error_groups_per_service": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "traces": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            },
+            "services": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                },
+                "all": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "cardinality": {
+          "properties": {
+            "client": {
+              "properties": {
+                "geo": {
+                  "properties": {
+                    "country_iso_code": {
+                      "properties": {
+                        "rum": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "user_agent": {
+              "properties": {
+                "original": {
+                  "properties": {
+                    "all_agents": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rum": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "transaction": {
+              "properties": {
+                "name": {
+                  "properties": {
+                    "all_agents": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rum": {
+                      "properties": {
+                        "1d": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "retainment": {
+          "properties": {
+            "span": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "transaction": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "metric": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "sourcemap": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            },
+            "onboarding": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "integrations": {
+          "properties": {
+            "ml": {
+              "properties": {
+                "all_jobs_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "indices": {
+          "properties": {
+            "shards": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "all": {
+              "properties": {
+                "total": {
+                  "properties": {
+                    "docs": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "store": {
+                      "properties": {
+                        "size_in_bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "service_groups": {
+          "properties": {
+            "kuery_fields": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "per_service": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "service_id": {
+                "type": "keyword"
+              },
+              "timed_out": {
+                "type": "boolean"
+              },
+              "cloud": {
+                "properties": {
+                  "availability_zones": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "providers": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              },
+              "faas": {
+                "properties": {
+                  "trigger": {
+                    "properties": {
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "agent": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "service": {
+                "properties": {
+                  "language": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "framework": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "runtime": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "kubernetes": {
+                "properties": {
+                  "pod": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "container": {
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tasks": {
+          "properties": {
+            "aggregated_transactions": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "processor_events": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "agent_configuration": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "services": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "versions": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "groupings": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "agents": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "indices_stats": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "cardinality": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "environments": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "service_groups": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "per_service": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "app_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "engines_overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "create_first_engine_button": {
+              "type": "long"
+            },
+            "engine_table_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "canvas": {
+      "properties": {
+        "workpads": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Canvas Workpads in the cluster"
+              }
+            }
+          }
+        },
+        "pages": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of pages across all Canvas Workpads"
+              }
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of pages across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of pages found in a Canvas Workpad"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of pages found in a Canvas Workpad"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "elements": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of elements across all Canvas Workpads"
+              }
+            },
+            "per_page": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements per page across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements on a page across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements on a page across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "functions": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of functions in use across all Canvas Workpads"
+              }
+            },
+            "in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in any Canvas Workpad"
+                }
+              }
+            },
+            "in_use_30d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 30 days"
+                }
+              }
+            },
+            "in_use_90d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 90 days"
+                }
+              }
+            },
+            "per_element": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average number of functions used per element across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of functions used in an element across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of functions used in an element across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "variables": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of variables defined across all Canvas Workpads"
+              }
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of variables set per Canvas Workpad"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number variables set across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of variables set across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "custom_elements": {
+          "properties": {
+            "count": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of custom Canvas elements"
+              }
+            },
+            "elements": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements used across all Canvas Custom Elements"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements used across all Canvas Custom Elements"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements used in Canvas Custom Element"
+                  }
+                }
+              }
+            },
+            "functions_in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The functions in use by Canvas Custom Elements"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "cases": {
       "properties": {
         "cases": {
           "properties": {
             "all": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -2930,18 +4668,6 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 },
                 "status": {
                   "properties": {
@@ -2994,6 +4720,18 @@
             },
             "sec": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -3006,23 +4744,23 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 }
               }
             },
             "obs": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -3035,23 +4773,23 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 }
               }
             },
             "main": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -3064,18 +4802,6 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 }
               }
             }
