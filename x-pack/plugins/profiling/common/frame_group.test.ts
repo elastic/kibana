@@ -33,18 +33,21 @@ const elfSymbolizedFrameGroups = [
   createFrameGroup(
     createStackFrameMetadata({
       FileID: '0x0123456789ABCDEF',
+      ExeFileName: 'libc',
       FunctionName: 'strlen()',
     })
   ),
   createFrameGroup(
     createStackFrameMetadata({
       FileID: '0xFEDCBA9876543210',
+      ExeFileName: 'libc',
       FunctionName: 'strtok()',
     })
   ),
   createFrameGroup(
     createStackFrameMetadata({
       FileID: '0xFEDCBA9876543210',
+      ExeFileName: 'myapp',
       FunctionName: 'main()',
     })
   ),
@@ -165,9 +168,7 @@ describe('Frame group operations', () => {
     });
 
     test('non-symbolized ELF frame', () => {
-      expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual(
-        'elf;0x0123456789ABCDEF;strlen()'
-      );
+      expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual('elf;libc;strlen()');
     });
 
     test('symbolized frame', () => {
