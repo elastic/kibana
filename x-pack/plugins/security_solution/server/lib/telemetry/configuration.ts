@@ -17,47 +17,47 @@ class TelemetryConfiguration {
   private _max_detection_rule_telemetry_batch = this.DEFAULT_MAX_DETECTION_RULE_TELEMETRY_BATCH;
   private _max_detection_alerts_batch = this.DEFAULT_MAX_DETECTION_ALERTS_BATCH;
 
-  get telemetry_max_buffer_size(): number {
+  public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
   }
 
-  get max_security_list_telemetry_batch(): number {
-    return this._max_security_list_telemetry_batch;
-  }
-
-  get max_endpoint_telemetry_batch(): number {
-    return this._max_endpoint_telemetry_batch;
-  }
-
-  get max_detection_rule_telemetry_batch(): number {
-    return this._max_detection_rule_telemetry_batch;
-  }
-
-  get max_detection_alerts_batch(): number {
-    return this._max_detection_alerts_batch;
-  }
-
-  set telemetry_max_buffer_size(num: number) {
+  public set telemetry_max_buffer_size(num: number) {
     this._telemetry_max_buffer_size = num;
   }
 
-  set max_security_list_telemetry_batch(num: number) {
+  public get max_security_list_telemetry_batch(): number {
+    return this._max_security_list_telemetry_batch;
+  }
+
+  public set max_security_list_telemetry_batch(num: number) {
     this._max_security_list_telemetry_batch = num;
   }
 
-  set max_endpoint_telemetry_batch(num: number) {
+  public get max_endpoint_telemetry_batch(): number {
+    return this._max_endpoint_telemetry_batch;
+  }
+
+  public set max_endpoint_telemetry_batch(num: number) {
     this._max_endpoint_telemetry_batch = num;
   }
 
-  set max_detection_rule_telemetry_batch(num: number) {
+  public get max_detection_rule_telemetry_batch(): number {
+    return this._max_detection_rule_telemetry_batch;
+  }
+
+  public set max_detection_rule_telemetry_batch(num: number) {
     this._max_detection_rule_telemetry_batch = num;
   }
 
-  set max_detection_alerts_batch(num: number) {
+  public get max_detection_alerts_batch(): number {
+    return this._max_detection_alerts_batch;
+  }
+
+  public set max_detection_alerts_batch(num: number) {
     this._max_detection_alerts_batch = num;
   }
 
-  resetAllToDefault() {
+  public resetAllToDefault() {
     this._telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
     this._max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
     this._max_endpoint_telemetry_batch = this.DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH;
