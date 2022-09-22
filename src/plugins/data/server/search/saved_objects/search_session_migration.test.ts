@@ -11,7 +11,7 @@ import {
   SearchSessionSavedObjectAttributesPre$7$13$0,
   SearchSessionSavedObjectAttributesPre$7$14$0,
   SearchSessionSavedObjectAttributesPre$8$0$0,
-  SearchSessionSavedObjectAttributesPre$8$5$0,
+  SearchSessionSavedObjectAttributesPre$8$6$0,
 } from './search_session_migration';
 import { SavedObject } from '@kbn/core/types';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
@@ -358,10 +358,10 @@ describe('7.14.0 -> 8.0.0', () => {
   });
 });
 
-describe('8.0.0 -> 8.5.0', () => {
-  const migration = searchSessionSavedObjectMigrations['8.5.0'];
+describe('8.0.0 -> 8.6.0', () => {
+  const migration = searchSessionSavedObjectMigrations['8.6.0'];
 
-  const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$5$0> = {
+  const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$6$0> = {
     id: 'id',
     type: SEARCH_SESSION_TYPE,
     attributes: {
