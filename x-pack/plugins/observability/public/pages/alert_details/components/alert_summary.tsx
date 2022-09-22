@@ -153,7 +153,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <div>
             <EuiSpacer size="s" />
             {
-              tags && triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+              tags && tags.length > 0 && triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
                 tagsOutPopover: true,
                 tags
               })
