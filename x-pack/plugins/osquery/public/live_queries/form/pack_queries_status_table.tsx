@@ -24,7 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { ECSMapping } from '../../../common/schemas/common';
-import { SECURITY_APP_NAME } from '../../timelines/get_add_to_timeline';
 import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -150,14 +149,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   addToCase,
   showResultsHeader,
 }) => {
-  const { discover, application, lens } = useKibana().services;
-  const discoverPermissions = application.capabilities.discover;
-  const locator = discover?.locator;
-  const isDiscoverAvailable = !!(locator && discoverPermissions.show);
-  const isLensAvailable = lens?.canUseEditor();
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
-  const { cases, timelines, appName } = useKibana().services;
+  const { cases } = useKibana().services;
   const casePermissions = cases.helpers.canUseCases();
   const CasesContext = cases.ui.getCasesContext();
 
@@ -276,35 +269,37 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const getItemId = useCallback((item: PackItem) => get(item, 'id'), []);
 
-  const columns = useMemo(() => {
-    const resultActions = [
-      {
-        available: () => isDiscoverAvailable,
-        render: renderDiscoverResultsAction,
-      },
-      {
-        available: () => isLensAvailable,
-        render: renderLensResultsAction,
-      },
-      {
-        available: () => !!addToCase,
-        render: (item: { action_id: string }) =>
-          addToCase &&
-          addToCase({
-            actionId,
-            queryId: item.action_id,
-            isIcon: true,
-            isDisabled: !item.action_id,
-          }),
-      },
-      {
-        available: () => addToTimeline && timelines && appName === SECURITY_APP_NAME,
-        render: (item: { action_id: string }) =>
-          addToTimeline && addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
-      },
-    ];
+  const renderResultActions = useCallback(
+    (row: { action_id: string }) => {
+      const resultActions = [
+        {
+          render: renderDiscoverResultsAction,
+        },
+        {
+          render: renderLensResultsAction,
+        },
+        {
+          render: (item: { action_id: string }) =>
+            addToTimeline && addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
+        },
+        {
+          render: (item: { action_id: string }) =>
+            addToCase &&
+            addToCase({
+              actionId,
+              queryId: item.action_id,
+              isIcon: true,
+              isDisabled: !item.action_id,
+            }),
+        },
+      ];
 
-    return [
+      return resultActions.map((action) => action.render(row));
+    },
+    [actionId, addToCase, addToTimeline, renderDiscoverResultsAction, renderLensResultsAction]
+  );
+  const columns = useMemo(
+    () => [
       {
         field: 'id',
         name: i18n.translate('xpack.osquery.pack.queriesTable.idColumnTitle', {
@@ -340,7 +335,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'View results',
         }),
         width: '90px',
-        actions: resultActions,
+        render: renderResultActions,
       },
       {
         id: 'actions',
@@ -353,24 +348,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           },
         ],
       },
-    ];
-  }, [
-    renderDiscoverResultsAction,
-    renderLensResultsAction,
-    renderIDColumn,
-    renderQueryColumn,
-    renderDocsColumn,
-    renderAgentsColumn,
-    renderToggleResultsAction,
-    isDiscoverAvailable,
-    isLensAvailable,
-    addToCase,
-    actionId,
-    addToTimeline,
-    timelines,
-    appName,
-  ]);
-
+    ],
+    [
+      renderIDColumn,
+      renderQueryColumn,
+      renderDocsColumn,
+      renderAgentsColumn,
+      renderResultActions,
+      renderToggleResultsAction,
+    ]
+  );
   const sorting = useMemo(
     () => ({
       sort: {
