@@ -10,7 +10,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['settings']);
+  const PageObjects = getPageObjects(['settings', 'common']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -33,14 +33,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test on inputs on rules panel - name', async () => {
+    it('a11y test on inputs on rules panel', async () => {
       await testSubjects.setValue('ruleNameInput', 'testRule');
+      await a11y.testAppSnapshot();
       await testSubjects.setValue('comboBoxInput', 'ruleTag');
+      await a11y.testAppSnapshot();
       await testSubjects.click('intervalFormRow');
+      await a11y.testAppSnapshot();
       await testSubjects.click('notifyWhenSelect');
+      await a11y.testAppSnapshot();
       await testSubjects.click('onActionGroupChange');
+      await a11y.testAppSnapshot();
       await testSubjects.click('solutionsFilterButton');
+      await a11y.testAppSnapshot();
       await testSubjects.click('apm.anomaly-SelectOption');
+      await PageObjects.common.sleep(3000);
       await a11y.testAppSnapshot();
     });
 
