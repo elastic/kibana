@@ -53,6 +53,8 @@ describe('transform_actions', () => {
         ecs_mapping: {},
         saved_query_id: undefined,
         pack_id: undefined,
+        query: undefined,
+        queries: undefined,
       },
     };
     const alertAction = transformRuleToAlertResponseAction(ruleAction);
@@ -63,6 +65,8 @@ describe('transform_actions', () => {
         ecsMapping: {},
         savedQueryId: undefined,
         packId: undefined,
+        query: undefined,
+        queries: undefined,
       },
     });
   });
@@ -75,12 +79,21 @@ describe('transform_actions', () => {
         ecsMapping: {},
         savedQueryId: undefined,
         packId: undefined,
+        query: undefined,
+        queries: undefined,
       },
     };
     const ruleAction = transformAlertToRuleResponseAction(alertAction);
     expect(ruleAction).toEqual({
       action_type_id: alertAction.actionTypeId,
-      params: { id: 'test', ecs_mapping: {}, saved_query_id: undefined, pack_id: undefined },
+      params: {
+        id: 'test',
+        ecs_mapping: {},
+        saved_query_id: undefined,
+        pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+      },
     });
   });
 });
