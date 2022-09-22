@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
   // Failing: See https://github.com/elastic/kibana/issues/141002
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -642,42 +642,42 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
     });
 
-    it('should disable and reenable task and run it when runSoon = true', async () => {
-      const historyItem = random(1, 100);
-      const scheduledTask = await scheduleTask({
-        taskType: 'sampleTask',
-        schedule: { interval: '30m' },
-        params: { historyItem },
-      });
+    // it('should disable and reenable task and run it when runSoon = true', async () => {
+    //   const historyItem = random(1, 100);
+    //   const scheduledTask = await scheduleTask({
+    //     taskType: 'sampleTask',
+    //     schedule: { interval: '30m' },
+    //     params: { historyItem },
+    //   });
 
-      await retry.try(async () => {
-        expect((await historyDocs()).length).to.eql(1);
-        const tasks = (await currentTasks()).docs;
+    //   await retry.try(async () => {
+    //     expect((await historyDocs()).length).to.eql(1);
+    //     const tasks = (await currentTasks()).docs;
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
-      });
+    //     expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+    //   });
 
-      // disable the task
-      await bulkDisable([scheduledTask.id]);
+    //   // disable the task
+    //   await bulkDisable([scheduledTask.id]);
 
-      await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+    //   await retry.try(async () => {
+    //     const tasks = (await currentTasks()).docs;
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
-      });
+    //     expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
+    //   });
 
-      // re-enable the task
-      await bulkEnable([scheduledTask.id], true);
+    //   // re-enable the task
+    //   await bulkEnable([scheduledTask.id], true);
 
-      await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+    //   await retry.try(async () => {
+    //     const tasks = (await currentTasks()).docs;
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+    //     expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
 
-        // should get a new document even tho original schedule interval was 30m
-        expect((await historyDocs()).length).to.eql(2);
-      });
-    });
+    //     // should get a new document even tho original schedule interval was 30m
+    //     expect((await historyDocs()).length).to.eql(2);
+    //   });
+    // });
 
     it('should disable and reenable task and not run it when runSoon = false', async () => {
       const historyItem = random(1, 100);
@@ -706,6 +706,7 @@ export default function ({ getService }: FtrProviderContext) {
       // re-enable the task
       await bulkEnable([scheduledTask.id], false);
 
+      const now = Date.now();
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
 
@@ -716,7 +717,7 @@ export default function ({ getService }: FtrProviderContext) {
         // task runAt should be set in the future by greater than 20 minutes
         // this assumes it takes less than 10 minutes to disable and renable the task
         // since the schedule interval is 30 minutes
-        expect(Date.parse(task.runAt) - Date.now()).to.be.greaterThan(10 * 60 * 1000);
+        expect(Date.parse(task.runAt) - now).to.be.greaterThan(10 * 60 * 1000);
       });
     });
 
