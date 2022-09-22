@@ -11,7 +11,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
-import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, from, map, switchMap, throwError, skipWhile } from 'rxjs';
 import {
   SqlRequestParams,
   SqlSearchStrategyRequest,
@@ -155,6 +155,7 @@ export function esdocs(): ExpressionFunctionDefinition<
 
           return throwError(() => error);
         }),
+        skipWhile(({ rawResponse: body }) => Boolean(body.is_partial || body.is_running)),
         map(({ rawResponse: body }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
