@@ -39,21 +39,21 @@ export type SearchSessionSavedObjectAttributesPre$7$14$0 = Omit<
  * from using `urlGeneratorId` to `locatorId`.
  */
 export type SearchSessionSavedObjectAttributesPre$8$0$0 = Omit<
-  SearchSessionSavedObjectAttributesPre$8$5$0,
+  SearchSessionSavedObjectAttributesPre$8$6$0,
   'locatorId'
 > & {
   urlGeneratorId?: string;
 };
 
 /**
- * In 8.5.0 with search session refactoring and moving away from using task manager we are no longer track of:
+ * In 8.6.0 with search session refactoring and moving away from using task manager we are no longer track of:
  *  - `completed` - when session was completed
  *  - `persisted` - if session was saved
  *  - `touched` - when session was last updated (touched by the user)
  *  - `status` - status is no longer persisted. Except 'canceled' which was moved to `isCanceled`
  *  - `status` and `error` in idMapping (search info)
  */
-export type SearchSessionSavedObjectAttributesPre$8$5$0 = Omit<
+export type SearchSessionSavedObjectAttributesPre$8$6$0 = Omit<
   SearchSessionSavedObjectAttributesLatest,
   'idMapping' | 'isCanceled'
 > & {
@@ -116,8 +116,8 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     const attributes = { ...otherAttrs, locatorId };
     return { ...doc, attributes };
   },
-  '8.5.0': (
-    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$5$0>
+  '8.6.0': (
+    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$6$0>
   ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
     const {
       attributes: { touched, completed, persisted, idMapping, status, ...otherAttrs },
