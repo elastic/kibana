@@ -34,6 +34,7 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
       setStatus,
       actionCreator: isolateHostApi,
       actionRequestBody,
+      dataTestSubj: 'isolate',
     }).result;
   }
 );

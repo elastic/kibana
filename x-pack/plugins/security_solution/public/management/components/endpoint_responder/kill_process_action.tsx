@@ -38,6 +38,7 @@ export const KillProcessActionResult = memo<
     setStatus,
     actionCreator,
     actionRequestBody,
+    dataTestSubj: 'killProcess',
   }).result;
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

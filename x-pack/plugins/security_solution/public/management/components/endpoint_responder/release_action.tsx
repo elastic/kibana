@@ -34,6 +34,7 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
       setStatus,
       actionCreator: releaseHostApi,
       actionRequestBody,
+      dataTestSubj: 'release',
     }).result;
   }
 );

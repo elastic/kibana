@@ -64,6 +64,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       setStatus,
       actionCreator,
       actionRequestBody,
+      dataTestSubj: 'getProcesses',
     });
 
     const columns = useMemo(

@@ -44,6 +44,7 @@ export const SuspendProcessActionResult = memo<
     setStatus,
     actionCreator,
     actionRequestBody,
+    dataTestSubj: 'suspendProcess',
   }).result;
 });
 SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';

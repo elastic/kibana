@@ -11,6 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { BaseActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { ActionSuccess } from '../action_success';
 import { ActionError } from '../action_error';
@@ -61,6 +62,8 @@ interface UseConsoleActionSubmitterOptions<
    * The API request body. If `undefined`, then API will not be called.
    */
   actionRequestBody: TReqBody | undefined;
+
+  dataTestSubj?: string;
 }
 
 export const useConsoleActionSubmitter = <
@@ -74,11 +77,13 @@ export const useConsoleActionSubmitter = <
   setStore,
   store,
   ResultComponent,
+  dataTestSubj,
 }: UseConsoleActionSubmitterOptions<
   TReqBody,
   TActionOutputContent
 >): ConsoleActionSubmitter<TActionOutputContent> => {
   const isMounted = useIsMounted();
+  const getTestId = useTestIdGenerator(dataTestSubj);
   const isPending = status === 'pending';
 
   const currentActionState = useMemo<
@@ -213,19 +218,19 @@ export const useConsoleActionSubmitter = <
   // Calculate the action's UI result based on the different API responses
   const result = useMemo(() => {
     if (isPending) {
-      return <ResultComponent showAs="pending" />;
+      return <ResultComponent showAs="pending" data-test-subj={getTestId('pending')} />;
     }
 
     const apiError = actionRequestError || actionDetailsError;
 
     if (apiError) {
       return (
-        <ResultComponent showAs="failure" data-test-subj="responseActionFailure">
+        <ResultComponent showAs="failure" data-test-subj={getTestId('apiFailure')}>
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessage"
             defaultMessage="The following error was encountered:"
           />
-          <FormattedError error={apiError} data-test-subj="responseActionApiErrorDetail" />
+          <FormattedError error={apiError} data-test-subj={getTestId('apiErrorDetails')} />
         </ResultComponent>
       );
     }
@@ -237,7 +242,7 @@ export const useConsoleActionSubmitter = <
           <ActionError
             ResultComponent={ResultComponent}
             action={actionDetails}
-            dataTestSubj={'responseActionExecError'}
+            dataTestSubj={getTestId('actionFailure')}
           />
         );
       }
@@ -246,13 +251,20 @@ export const useConsoleActionSubmitter = <
         <ActionSuccess
           ResultComponent={ResultComponent}
           action={actionDetails}
-          data-test-subj="responseActionSuccess"
+          data-test-subj={getTestId('success')}
         />
       );
     }
 
     return <></>;
-  }, [isPending, actionRequestError, actionDetailsError, actionDetails, ResultComponent]);
+  }, [
+    isPending,
+    actionRequestError,
+    actionDetailsError,
+    actionDetails,
+    ResultComponent,
+    getTestId,
+  ]);
 
   return {
     result,
