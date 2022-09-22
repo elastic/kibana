@@ -184,7 +184,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           <h4>
             <FormattedMessage
               defaultMessage="Actions"
-              id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
+              id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
             />
           </h4>
         </EuiTitle>
