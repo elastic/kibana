@@ -41,48 +41,42 @@ export const AlertsSummaryWidgetUI = ({
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexGroup direction="row">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem>
+                  <EuiText>
+                    <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
+                  </EuiText>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
+                      defaultMessage="All"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText>
-                      <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
-                        defaultMessage="All"
-                      />
+                    <EuiText color={euiLightVars.euiColorSuccessText}>
+                      <h3 data-test-subj="recoveredAlertsCount">{recovered}</h3>
                     </EuiText>
                   </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexGroup direction="row">
-                  <EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText color={euiLightVars.euiColorSuccessText}>
-                        <h3 data-test-subj="recoveredAlertsCount">{recovered}</h3>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
-                        defaultMessage="Recovered"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexGroup direction="row">
-                  <EuiFlexItem>
-                    <EuiText color={euiLightVars.euiColorDangerText}>
-                      <h3 data-test-subj="activeAlertsCount">{active}</h3>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
-                        defaultMessage="Currently active"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
+                      defaultMessage="Recovered"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color={euiLightVars.euiColorDangerText}>
+                    <h3 data-test-subj="activeAlertsCount">{active}</h3>
+                  </EuiText>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
+                      defaultMessage="Currently active"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
