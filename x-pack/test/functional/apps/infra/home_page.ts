@@ -35,12 +35,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
-
-      it('renders the correct page title', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-        const documentTitle = await browser.getTitle();
-        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
-      });
     });
 
     describe('with metrics present', () => {
@@ -53,6 +47,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         async () =>
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
       );
+
+      it('renders the correct page title', async () => {
+        await pageObjects.common.navigateToApp('infraOps');
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
 
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
