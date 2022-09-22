@@ -24,7 +24,7 @@ import {
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
-import { getDefaultProperties, histogram, scaledFloat } from './mappings';
+import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 
 interface Properties {
   [key: string]: any;
@@ -261,8 +261,7 @@ function _generateMappings(
             fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
             break;
           case 'keyword':
-            const keywordMapping = generateKeywordMapping(field);
-            fieldProps = { ...fieldProps, ...keywordMapping, type: 'keyword' };
+            fieldProps = keyword(field);
             if (field.multi_fields) {
               fieldProps.fields = generateMultiFields(field.multi_fields);
             }
@@ -359,7 +358,7 @@ function generateMultiFields(fields: Fields): MultiFields {
           multiFields[f.name] = { ...generateTextMapping(f), type: f.type };
           break;
         case 'keyword':
-          multiFields[f.name] = { ...generateKeywordMapping(f), type: f.type };
+          multiFields[f.name] = keyword(f);
           break;
         case 'long':
         case 'double':
@@ -370,23 +369,6 @@ function generateMultiFields(fields: Fields): MultiFields {
     });
   }
   return multiFields;
-}
-
-function generateKeywordMapping(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {
-    ignore_above: DEFAULT_IGNORE_ABOVE,
-  };
-  if (field.ignore_above) {
-    mapping.ignore_above = field.ignore_above;
-  }
-  if (field.normalizer) {
-    mapping.normalizer = field.normalizer;
-  }
-  if (field.dimension) {
-    mapping.time_series_dimension = field.dimension;
-    delete mapping.ignore_above;
-  }
-  return mapping;
 }
 
 function generateTextMapping(field: Field): IndexTemplateMapping {
