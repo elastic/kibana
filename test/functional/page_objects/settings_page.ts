@@ -360,7 +360,7 @@ export class SettingsPageObject extends FtrService {
 
   async filterField(name: string) {
     const input = await this.testSubjects.find('indexPatternFieldFilter');
-    await input.clearValue();
+    await input.clearValueWithKeyboard();
     await input.type(name);
   }
 
