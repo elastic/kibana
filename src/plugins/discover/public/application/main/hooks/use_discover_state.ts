@@ -12,18 +12,17 @@ import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import createContainer from 'constate';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { addLog } from '../../../utils/addLog';
 import { updateSavedSearch } from '../utils/persist_saved_search';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { getDiscoverStateContainer } from '../services/discover_state';
-import { DiscoverServices } from '../../../build_services';
 import { loadDataView } from '../utils/resolve_data_view';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { useSearchSession } from './use_search_session';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { FetchStatus } from '../../types';
-import {useDiscoverServices} from "@kbn/discover-plugin/public/hooks/use_discover_services";
 
 export function useDiscoverState({
   history,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { merge } from 'rxjs';
-import { debounceTime, filter, skip, tap } from 'rxjs/operators';
+import { debounceTime, filter, tap } from 'rxjs/operators';
 
 import type { AutoRefreshDoneFn, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { addLog } from '../../../utils/addLog';
@@ -34,7 +34,7 @@ export function getFetch$({
 }) {
   const { timefilter } = data.query.timefilter;
   const { filterManager } = data.query;
-  let fetch$ = merge(
+  const fetch$ = merge(
     refetch$,
     filterManager.getFetches$(),
     timefilter.getFetch$(),

@@ -7,7 +7,6 @@
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
-import createContainer from 'constate';
 import { useHistory } from 'react-router-dom';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
