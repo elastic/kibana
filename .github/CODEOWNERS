@@ -265,6 +265,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/licensing/  @elastic/kibana-core
 /x-pack/plugins/global_search/  @elastic/kibana-core
 /x-pack/plugins/cloud/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/ @elastic/kibana-core
 /x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
@@ -936,6 +937,7 @@ packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/shared-ux/avatar/solution @elastic/shared-ux
+packages/shared-ux/avatar/user_profile/impl @elastic/shared-ux
 packages/shared-ux/button_toolbar @elastic/shared-ux
 packages/shared-ux/button/exit_full_screen/impl @elastic/shared-ux
 packages/shared-ux/button/exit_full_screen/mocks @elastic/shared-ux
@@ -965,6 +967,9 @@ packages/shared-ux/page/solution_nav @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/impl @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/mocks @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/types @elastic/shared-ux
+packages/shared-ux/router/impl @elastic/shared-ux
+packages/shared-ux/router/mocks @elastic/shared-ux
+packages/shared-ux/router/types @elastic/shared-ux
 packages/shared-ux/storybook/config @elastic/shared-ux
 packages/shared-ux/storybook/mock @elastic/shared-ux
 x-pack/packages/ml/agg_utils @elastic/ml-ui
