@@ -26,13 +26,13 @@ import type {
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
 
-interface ConsoleActionSubmitter<TActionOutputContent extends object = object> {
+export interface ConsoleActionSubmitter<TActionOutputContent extends object = object> {
   /**
    * The ui to be returned to the console. This UI will display different states of the action,
    * including pending, error conditions and generic success messages.
    */
   result: JSX.Element;
-  action: ActionDetails<TActionOutputContent> | undefined;
+  actionDetails: Immutable<ActionDetails<TActionOutputContent>> | undefined;
 }
 
 /**
@@ -50,7 +50,7 @@ export interface CommandResponseActionApiState<TActionOutputContent extends obje
   };
 }
 
-interface UseConsoleActionSubmitterOptions<
+export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TActionOutputContent extends object = object
 > extends Pick<
@@ -68,7 +68,7 @@ interface UseConsoleActionSubmitterOptions<
 
 /**
  * generic hook for use with Response Action commands. It will create the action, store its ID and
- * continiously pull the Action's Details until it completes. It handles all aspects of UI display
+ * continuously pull the Action's Details until it completes. It handles all aspects of UI display
  * for the different states of the command (pending -> success/failure)
  *
  * @param actionCreator
@@ -288,6 +288,6 @@ export const useConsoleActionSubmitter = <
 
   return {
     result,
-    action: apiActionDetailsResponse?.data,
+    actionDetails: currentActionState.actionDetails,
   };
 };

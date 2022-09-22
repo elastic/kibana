@@ -53,7 +53,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
         : undefined;
     }, [command.args.args?.comment, endpointId]);
 
-    const { result, action: completedActionDetails } = useConsoleActionSubmitter<
+    const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,
       GetProcessesActionOutputContent
     >({
