@@ -420,10 +420,8 @@ jest.mock('../../vis_schemas', () => ({
 }));
 
 describe('getMetricFromParentPipelineAgg', () => {
-  const dataView = stubLogstashDataView;
   const metricAggId = 'agg-id-0';
   const aggId = 'agg-id-1';
-  const aggIdParentPipeline = 'agg-id-2';
   const plainAgg: SchemaConfig<METRIC_TYPES.AVG> = {
     accessor: 0,
     label: 'some-label',
