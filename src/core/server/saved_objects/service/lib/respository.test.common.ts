@@ -9,6 +9,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
+import { isEqual } from 'lodash';
 import { mockGetSearchDsl } from './repository.test.mock';
 
 import {
@@ -53,15 +54,18 @@ export interface ExpectedErrorResult {
 
 export type ErrorPayload = Error & Payload;
 
-export const createBadRequestError = (reason?: string) =>
+export const createBadRequestErrorPayload = (reason?: string) =>
   SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload as unknown as ErrorPayload;
-export const createConflictError = (type: string, id: string, reason?: string) =>
+export const createConflictErrorPayload = (type: string, id: string, reason?: string) =>
   SavedObjectsErrorHelpers.createConflictError(type, id, reason).output
     .payload as unknown as ErrorPayload;
-export const createGenericNotFoundError = (type: string | null = null, id: string | null = null) =>
+export const createGenericNotFoundErrorPayload = (
+  type: string | null = null,
+  id: string | null = null
+) =>
   SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output
     .payload as unknown as ErrorPayload;
-export const createUnsupportedTypeError = (type: string) =>
+export const createUnsupportedTypeErrorPayload = (type: string) =>
   SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output
     .payload as unknown as ErrorPayload;
 
@@ -81,11 +85,11 @@ export const expectErrorResult = (
   error: { ...error, ...overrides },
 });
 export const expectErrorNotFound = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-  expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
+  expectErrorResult(obj, createGenericNotFoundErrorPayload(obj.type, obj.id), overrides);
 export const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-  expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
+  expectErrorResult(obj, createConflictErrorPayload(obj.type, obj.id), overrides);
 export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-  expectErrorResult(obj, createUnsupportedTypeError(obj.type), overrides);
+  expectErrorResult(obj, createUnsupportedTypeErrorPayload(obj.type), overrides);
 
 export const KIBANA_VERSION = '2.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
@@ -119,6 +123,7 @@ export const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
 export const mockVersion = encodeHitVersion(mockVersionProps);
 export const mockTimestamp = '2017-08-14T15:49:14.886Z';
 export const mockTimestampFields = { updated_at: mockTimestamp };
+export const REMOVE_REFS_COUNT = 42;
 
 export interface TypeIdTuple {
   id: string;
@@ -374,6 +379,7 @@ export const mockUpdateResponse = (
   type: string,
   id: string,
   options?: SavedObjectsUpdateOptions,
+  namespaces?: string[],
   originId?: string
 ) => {
   client.update.mockResponseOnce(
@@ -384,7 +390,7 @@ export const mockUpdateResponse = (
       // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
       get: {
         _source: {
-          namespaces: [options?.namespace ?? 'default'],
+          namespaces: namespaces ?? [options?.namespace ?? 'default'],
           namespace: options?.namespace,
 
           // If the existing saved object contains an originId attribute, the operation will return it in the result.
@@ -408,15 +414,17 @@ export const updateSuccess = async <T>(
   internalOptions: {
     originId?: string;
     mockGetResponseValue?: estypes.GetResponse;
-  } = {}
+  } = {},
+  objNamespaces?: string[]
 ) => {
   const { mockGetResponseValue, originId } = internalOptions;
   if (registry.isMultiNamespace(type)) {
     const mockGetResponse =
-      mockGetResponseValue ?? getMockGetResponse(registry, { type, id }, options?.namespace);
+      mockGetResponseValue ??
+      getMockGetResponse(registry, { type, id }, objNamespaces ?? options?.namespace);
     client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
   }
-  mockUpdateResponse(client, type, id, options, originId);
+  mockUpdateResponse(client, type, id, options, objNamespaces, originId);
   const result = await repository.update(type, id, attributes, options);
   expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
   return result;
@@ -439,12 +447,27 @@ export const bulkGetSuccess = async (
   objects: SavedObject[],
   options?: SavedObjectsBaseOptions
 ) => {
-  const response = getMockMgetResponse(registry, objects, options?.namespace);
-  client.mget.mockResponseOnce(response);
+  const mockResponse = getMockMgetResponse(registry, objects, options?.namespace);
+  client.mget.mockResponseOnce(mockResponse);
   const result = await bulkGet(repository, objects, options);
   expect(client.mget).toHaveBeenCalledTimes(1);
-  return result;
+  return { result, mockResponse };
 };
+
+export const expectBulkGetResult = (
+  { type, id }: TypeIdTuple,
+  doc: estypes.GetGetResult<SavedObjectsRawDocSource>
+) => ({
+  type,
+  id,
+  namespaces: doc._source!.namespaces ?? [doc._source!.namespace] ?? ['default'],
+  ...(doc._source!.originId && { originId: doc._source!.originId }),
+  ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),
+  version: encodeHitVersion(doc),
+  attributes: doc._source![type],
+  references: doc._source!.references || [],
+  migrationVersion: doc._source!.migrationVersion,
+});
 
 export const getMockBulkCreateResponse = (
   objects: SavedObjectsBulkCreateObject[],
@@ -479,11 +502,24 @@ export const bulkCreateSuccess = async (
   objects: SavedObjectsBulkCreateObject[],
   options?: SavedObjectsCreateOptions
 ) => {
-  const response = getMockBulkCreateResponse(objects, options?.namespace);
-  client.bulk.mockResponse(response);
+  const mockResponse = getMockBulkCreateResponse(objects, options?.namespace);
+  client.bulk.mockResponse(mockResponse);
   const result = await repository.bulkCreate(objects, options);
   return result;
 };
+
+export const expectCreateResult = (obj: {
+  type: string;
+  namespace?: string;
+  namespaces?: string[];
+}) => ({
+  ...obj,
+  migrationVersion: { [obj.type]: '1.1.1' },
+  coreMigrationVersion: KIBANA_VERSION,
+  version: mockVersion,
+  namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
+  ...mockTimestampFields,
+});
 
 export const getMockBulkUpdateResponse = (
   registry: SavedObjectTypeRegistry,
@@ -534,6 +570,21 @@ export const bulkUpdateSuccess = async (
   expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
   return result;
 };
+
+export const expectUpdateResult = ({
+  type,
+  id,
+  attributes,
+  references,
+}: SavedObjectsBulkUpdateObject) => ({
+  type,
+  id,
+  attributes,
+  references,
+  version: mockVersion,
+  namespaces: ['default'],
+  ...mockTimestampFields,
+});
 
 export type IGenerateSearchResultsFunction = (
   namespace?: string
@@ -620,11 +671,12 @@ export const findSuccess = async (
   namespace?: string,
   generateSearchResultsFunc: IGenerateSearchResultsFunction = generateIndexPatternSearchResults
 ) => {
-  client.search.mockResponseOnce(generateSearchResultsFunc(namespace));
+  const generatedResults = generateSearchResultsFunc(namespace);
+  client.search.mockResponseOnce(generatedResults);
   const result = await repository.find(options);
   expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
   expect(client.search).toHaveBeenCalledTimes(1);
-  return result;
+  return { result, generatedResults };
 };
 
 export const deleteSuccess = async (
@@ -656,7 +708,7 @@ export const removeReferencesToSuccess = async (
   type: string,
   id: string,
   options = {},
-  updatedCount = 42
+  updatedCount = REMOVE_REFS_COUNT
 ) => {
   client.updateByQuery.mockResponseOnce({
     updated: updatedCount,
@@ -689,3 +741,41 @@ export const checkConflictsSuccess = async (
   expect(client.mget).toHaveBeenCalledTimes(1);
   return result;
 };
+
+export const getSuccess = async (
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  registry: SavedObjectTypeRegistry,
+  type: string,
+  id: string,
+  options?: SavedObjectsBaseOptions,
+  originId?: string,
+  objNamespaces?: string[]
+) => {
+  const response = getMockGetResponse(
+    registry,
+    {
+      type,
+      id,
+      // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+      // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+      originId,
+    },
+    objNamespaces ?? options?.namespace
+  );
+  client.get.mockResponseOnce(response);
+  const result = await repository.get(type, id, options);
+  expect(client.get).toHaveBeenCalledTimes(1);
+  return result;
+};
+
+export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
+  return isEqual(Array(setA).sort(), Array(setB).sort());
+}
+
+export function mapsAreEqual(mapA: Map<string, Set<string>>, mapB: Map<string, Set<string>>) {
+  return (
+    mapA.size === mapB.size &&
+    Array.from(mapA.keys()).every((key) => setsAreEqual(mapA.get(key)!, mapB.get(key)!))
+  );
+}

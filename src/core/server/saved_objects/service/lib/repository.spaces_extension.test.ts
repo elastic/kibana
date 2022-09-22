@@ -38,7 +38,6 @@ import {
   updateSuccess,
   bulkCreateSuccess,
   bulkUpdateSuccess,
-  createBadRequestError,
   CUSTOM_INDEX_TYPE,
   findSuccess,
   deleteSuccess,
@@ -122,7 +121,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
         mockSpacesExt.getCurrentNamespace.mockImplementation((namespace: string | undefined) => {
           if (namespace) {
-            throw new Error(createBadRequestError(ERROR_NAMESPACE_SPECIFIED).message);
+            throw SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED);
           }
           return currentSpace.expectedNamespace;
         });
@@ -152,7 +151,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           // Just makes sure the error propogstes from the extension through the repo call
           await expect(repository.get('foo', '', { namespace: 'bar' })).rejects.toThrowError(
-            createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
@@ -188,7 +187,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           // Just makes sure the error propogstes from the extension through the repo call
           await expect(
             repository.update('foo', 'some-id', { attr: 'value' }, { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -234,7 +235,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.create('foo', { attr: 'value' }, { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
           // expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
@@ -275,7 +278,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.delete('foo', 'some-id', { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -306,7 +311,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.removeReferencesTo('foo', 'some-id', { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -340,7 +347,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.checkConflicts(undefined, { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -381,7 +390,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.updateObjectsSpaces([], [], [], { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -417,7 +428,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.collectMultiNamespaceReferences([], { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -463,7 +476,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             repository.resolve('foo', 'some-id', { namespace: 'bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
         });
@@ -522,7 +537,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace: 'foo-bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
         });
@@ -588,7 +605,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             bulkCreateSuccess(client, repository, [obj1, obj2], { namespace: 'foo-bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
         });
@@ -636,7 +655,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`throws error if options.namespace is specified`, async () => {
           await expect(
             bulkUpdateSuccess(client, repository, registry, [obj1, obj2], { namespace: 'foo-bar' })
-          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
         });
@@ -694,7 +715,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
         test(`throws error if options.namespace is specified`, async () => {
           await expect(repository.bulkResolve([], { namespace: 'foo-bar' })).rejects.toThrowError(
-            createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
