@@ -10,6 +10,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -98,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.numberOfServices).to.be(2);
-        expect(Math.round(body.tracesPerMinute)).to.be(2);
+        expect(roundNumber(body.tracesPerMinute)).to.be(2);
         expect(body.estimatedSize).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be.greaterThan(0);
       });
@@ -112,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.numberOfServices).to.be(1);
-        expect(Math.round(body.tracesPerMinute)).to.be(1);
+        expect(roundNumber(body.tracesPerMinute)).to.be(1);
         expect(body.estimatedSize).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be.greaterThan(0);
       });
@@ -140,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.numberOfServices).to.be(1);
-        expect(Math.round(body.tracesPerMinute)).to.be(1);
+        expect(roundNumber(body.tracesPerMinute)).to.be(1);
         expect(body.estimatedSize).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be.greaterThan(0);
       });

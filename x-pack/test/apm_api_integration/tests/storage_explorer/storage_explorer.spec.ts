@@ -9,6 +9,7 @@ import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_
 import { apm, timerange } from '@kbn/apm-synthtrace';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -109,18 +110,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(body.serviceStatistics).to.have.length(2);
 
-        const goServiceStats = body.serviceStatistics.find(
-          ({ serviceName }) => serviceName === 'opbeans-go'
-        );
+        const stats = keyBy(body.serviceStatistics, 'serviceName');
+
+        const goServiceStats = stats[goServiceName];
         expect(goServiceStats?.environments).to.have.length(1);
         expect(goServiceStats?.environments).to.contain('production');
         expect(goServiceStats?.agentName).to.be('go');
         expect(goServiceStats?.size).to.be.greaterThan(0);
         expect(goServiceStats?.sampling).to.be(1);
 
-        const nodeServiceStats = body.serviceStatistics.find(
-          ({ serviceName }) => serviceName === 'opbeans-node'
-        );
+        const nodeServiceStats = stats[nodeServiceName];
         expect(nodeServiceStats?.environments).to.have.length(2);
         expect(nodeServiceStats?.environments).to.contain('staging');
         expect(nodeServiceStats?.environments).to.contain('dev');

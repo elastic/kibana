@@ -13,6 +13,7 @@ import {
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type StorageDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/storage_details'>;
@@ -113,32 +114,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct stats for processor events', async () => {
         const { status, body } = await callApi();
         expect(status).to.be(200);
-
         expect(body.processorEventStats).to.have.length(4);
 
-        const transactionStats = body.processorEventStats.find(
-          ({ processorEvent }) => processorEvent === ProcessorEvent.transaction
-        );
-        expect(transactionStats?.docs).to.be(3);
-        expect(transactionStats?.size).to.be.greaterThan(0);
+        const stats = keyBy(body.processorEventStats, 'processorEvent');
 
-        const spanStats = body.processorEventStats.find(
-          ({ processorEvent }) => processorEvent === ProcessorEvent.span
-        );
-        expect(spanStats?.docs).to.be(6);
-        expect(spanStats?.size).to.be.greaterThan(0);
-
-        const errorStats = body.processorEventStats.find(
-          ({ processorEvent }) => processorEvent === ProcessorEvent.error
-        );
-        expect(errorStats?.docs).to.be(9);
-        expect(errorStats?.size).to.be.greaterThan(0);
-
-        const metricStats = body.processorEventStats.find(
-          ({ processorEvent }) => processorEvent === ProcessorEvent.metric
-        );
-        expect(metricStats?.docs).to.be.greaterThan(0);
-        expect(metricStats?.size).to.be.greaterThan(0);
+        expect(stats[ProcessorEvent.transaction]?.docs).to.be(3);
+        expect(stats[ProcessorEvent.transaction]?.size).to.be.greaterThan(0);
+        expect(stats[ProcessorEvent.span]?.docs).to.be(6);
+        expect(stats[ProcessorEvent.span]?.size).to.be.greaterThan(0);
+        expect(stats[ProcessorEvent.error]?.docs).to.be(9);
+        expect(stats[ProcessorEvent.error]?.size).to.be.greaterThan(0);
+        expect(stats[ProcessorEvent.metric]?.docs).to.be.greaterThan(0);
+        expect(stats[ProcessorEvent.metric]?.size).to.be.greaterThan(0);
       });
 
       it('returns empty stats when there is no matching environment', async () => {
