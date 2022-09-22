@@ -13,13 +13,26 @@ import { useHttp } from '../../../common/lib/kibana';
 import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 
+interface ErrorType {
+  statusCode: number;
+  message: string;
+}
+
 export const useGetEndpointActionList = (
   query: EndpointActionListRequestQuery,
-  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError> = {}
-): UseQueryResult<ActionListApiResponse, IHttpFetchError> => {
+  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError<ErrorType>> = {}
+): UseQueryResult<ActionListApiResponse, IHttpFetchError<ErrorType>> => {
   const http = useHttp();
 
-  return useQuery<ActionListApiResponse, IHttpFetchError>({
+  // prepend and append * to userIds for fuzzy search
+  let userIds = query.userIds;
+  if (typeof query.userIds === 'string') {
+    userIds = `*${query.userIds}*`;
+  } else if (Array.isArray(query.userIds)) {
+    userIds = query.userIds.map((userId) => `*${userId}*`);
+  }
+
+  return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
     queryFn: async () => {
@@ -32,7 +45,7 @@ export const useGetEndpointActionList = (
           pageSize: query.pageSize,
           startDate: query.startDate,
           statuses: query.statuses,
-          userIds: query.userIds,
+          userIds,
         },
       });
     },

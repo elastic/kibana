@@ -16,8 +16,11 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { DataViewBase } from '@kbn/es-query';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { Store } from 'redux';
+import { DataProvider } from '@kbn/timelines-plugin/common';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -43,6 +46,7 @@ export type Services = {
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
   securityLayout: any;
+  inspector: InspectorPluginStart;
 } & CoreStart;
 
 export interface LicenseAware {
@@ -56,6 +60,12 @@ export interface SourcererDataView {
   browserFields: BrowserFields;
   selectedPatterns: string[];
   loading: boolean;
+}
+
+export interface UseInvestigateInTimelineProps {
+  dataProviders: DataProvider[];
+  from: string;
+  to: string;
 }
 
 /**
@@ -77,7 +87,19 @@ export interface SecuritySolutionPluginContext {
    */
   licenseService: LicenseAware;
   /**
-   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView
+   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
   sourcererDataView: SourcererDataView;
+  /**
+   * Security Solution store
+   */
+  getSecuritySolutionStore: Store;
+  /**
+   * Pass UseInvestigateInTimeline functionality to TI plugin
+   */
+  getUseInvestigateInTimeline: ({
+    dataProviders,
+    from,
+    to,
+  }: UseInvestigateInTimelineProps) => () => Promise<void>;
 }

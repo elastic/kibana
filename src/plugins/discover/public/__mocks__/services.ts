@@ -63,7 +63,7 @@ export const discoverServiceMock = {
       if (key === 'fields:popularLimit') {
         return 5;
       } else if (key === DEFAULT_COLUMNS_SETTING) {
-        return [];
+        return ['default_column'];
       } else if (key === UI_SETTINGS.META_FIELDS) {
         return [];
       } else if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
@@ -117,8 +117,11 @@ export const discoverServiceMock = {
   toastNotifications: {
     addInfo: jest.fn(),
     addWarning: jest.fn(),
+    addDanger: jest.fn(),
+    addSuccess: jest.fn(),
   },
   expressions: expressionsPlugin,
   savedObjectsTagging: {},
   dataViews: dataViewsMock,
+  timefilter: { createFilter: jest.fn() },
 } as unknown as DiscoverServices;

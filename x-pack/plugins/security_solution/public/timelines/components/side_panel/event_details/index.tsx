@@ -11,13 +11,11 @@ import React, { useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { AlertRawEventData } from '../../../../common/components/event_details/event_details';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
-import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import type { HostRisk } from '../../../../risk_score/containers';
-import { useHostRiskScore } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
@@ -79,34 +77,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const filterQuery = useMemo(
-    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-    [hostName]
-  );
-
-  const pagination = useMemo(
-    () => ({
-      cursorStart: 0,
-      querySize: 1,
-    }),
-    []
-  );
-
-  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    filterQuery,
-    pagination,
-  });
-
-  const hostRisk: HostRisk | null = useMemo(() => {
-    return data
-      ? {
-          loading: hostRiskLoading,
-          isModuleEnabled,
-          result: data,
-        }
-      : null;
-  }, [data, hostRiskLoading, isModuleEnabled]);
-
   const header = useMemo(
     () =>
       isFlyoutView || isHostIsolationPanelOpen ? (
@@ -147,9 +117,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           alertId={alertId}
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={ecsData}
           event={expandedEvent}
           hostName={hostName}
-          hostRisk={hostRisk}
           handleIsolationActionSuccess={handleIsolationActionSuccess}
           handleOnEventClosed={handleOnEventClosed}
           isAlert={isAlert}
@@ -158,7 +128,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           loading={loading}
-          rawEventData={rawEventData}
+          rawEventData={rawEventData as AlertRawEventData}
           showAlertDetails={showAlertDetails}
           timelineId={timelineId}
           isReadOnly={isReadOnly}
@@ -191,14 +161,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <ExpandableEvent
             browserFields={browserFields}
             detailsData={detailsData}
+            detailsEcsData={ecsData}
             event={expandedEvent}
             isAlert={isAlert}
             isDraggable={isDraggable}
             loading={loading}
-            rawEventData={rawEventData}
+            rawEventData={rawEventData as AlertRawEventData}
             timelineId={timelineId}
             timelineTabType={tabType}
-            hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
           />
         </>
@@ -208,11 +178,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     alertId,
     browserFields,
     detailsData,
+    ecsData,
     expandedEvent,
     handleIsolationActionSuccess,
     handleOnEventClosed,
     hostName,
-    hostRisk,
     isAlert,
     isDraggable,
     isFlyoutView,

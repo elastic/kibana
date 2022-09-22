@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -32,6 +34,7 @@ export interface CspClientPluginSetupDeps {
   // required
   data: DataPublicPluginSetup;
   fleet: FleetSetup;
+  cloud: CloudSetup;
   // optional
 }
 
@@ -42,6 +45,7 @@ export interface CspClientPluginStartDeps {
   charts: ChartsPluginStart;
   discover: DiscoverStart;
   fleet: FleetStart;
+  licensing: LicensingPluginStart;
   // optional
 }
 

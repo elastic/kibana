@@ -7,10 +7,18 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
-import { DataProviderType } from '../../../common/types/timeline';
-import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
-import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
+import { DataProviderType, TimelineId } from '../../../common/types/timeline';
+import {
+  buildGlobalQuery,
+  combineQueries,
+  getDefaultViewSelection,
+  isSelectableView,
+  isViewSelection,
+  resolverIsShowing,
+  showGlobalFilters,
+} from './helpers';
+import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -518,6 +526,101 @@ describe('Combined Queries', () => {
     );
   });
 
+  test('Disabled Data Provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: '_id',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
+  test('Both disabled & enabled data provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          [dataProviders[1].queryMatch.field]: dataProviders[1].queryMatch.value,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: '_id',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
   describe('resolverIsShowing', () => {
     test('it returns true when graphEventId is NOT an empty string', () => {
       expect(resolverIsShowing('a valid id')).toBe(true);
@@ -555,6 +658,103 @@ describe('Combined Queries', () => {
 
     test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
       expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
+    });
+  });
+
+  describe('view selection', () => {
+    const validViewSelections = ['gridView', 'eventRenderedView'];
+    const invalidViewSelections = [
+      'gRiDvIeW',
+      'EvEnTrEnDeReDvIeW',
+      'anything else',
+      '',
+      1234,
+      {},
+      undefined,
+      null,
+    ];
+
+    const selectableViews: TimelineId[] = [
+      TimelineId.detectionsPage,
+      TimelineId.detectionsRulesDetailsPage,
+    ];
+
+    const exampleNonSelectableViews: string[] = [
+      TimelineId.casePage,
+      TimelineId.hostsPageEvents,
+      TimelineId.usersPageEvents,
+      'foozle',
+      '',
+    ];
+
+    describe('isSelectableView', () => {
+      selectableViews.forEach((timelineId) => {
+        test(`it returns true (for selectable view) timelineId ${timelineId}`, () => {
+          expect(isSelectableView(timelineId)).toBe(true);
+        });
+      });
+
+      exampleNonSelectableViews.forEach((timelineId) => {
+        test(`it returns false (for NON-selectable view) timelineId ${timelineId}`, () => {
+          expect(isSelectableView(timelineId)).toBe(false);
+        });
+      });
+    });
+
+    describe('isViewSelection', () => {
+      validViewSelections.forEach((value) => {
+        test(`it returns true when value is valid: ${value}`, () => {
+          expect(isViewSelection(value)).toBe(true);
+        });
+      });
+
+      invalidViewSelections.forEach((value) => {
+        test(`it returns false when value is INvalid: ${value}`, () => {
+          expect(isViewSelection(value)).toBe(false);
+        });
+      });
+    });
+
+    describe('getDefaultViewSelection', () => {
+      describe('NON-selectable views', () => {
+        exampleNonSelectableViews.forEach((timelineId) => {
+          describe('given valid values', () => {
+            validViewSelections.forEach((value) => {
+              test(`it ALWAYS returns 'gridView' for NON-selectable timelineId ${timelineId}, with valid value: ${value}`, () => {
+                expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
+              });
+            });
+          });
+
+          describe('given INvalid values', () => {
+            invalidViewSelections.forEach((value) => {
+              test(`it ALWAYS returns 'gridView' for NON-selectable timelineId ${timelineId}, with INvalid value: ${value}`, () => {
+                expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
+              });
+            });
+          });
+        });
+      });
+    });
+
+    describe('selectable views', () => {
+      selectableViews.forEach((timelineId) => {
+        describe('given valid values', () => {
+          validViewSelections.forEach((value) => {
+            test(`it returns ${value} for selectable timelineId ${timelineId}, with valid value: ${value}`, () => {
+              expect(getDefaultViewSelection({ timelineId, value })).toEqual(value);
+            });
+          });
+        });
+
+        describe('given INvalid values', () => {
+          invalidViewSelections.forEach((value) => {
+            test(`it ALWAYS returns 'gridView' for selectable timelineId ${timelineId}, with INvalid value: ${value}`, () => {
+              expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
+            });
+          });
+        });
+      });
     });
   });
 });

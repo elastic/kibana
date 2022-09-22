@@ -11,9 +11,7 @@ import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { ConvertTsvbToLensVisualization } from './types';
 
-const getConvertFnByType = (
-  type: PANEL_TYPES
-): Promise<ConvertTsvbToLensVisualization> | undefined => {
+const getConvertFnByType = (type: PANEL_TYPES) => {
   const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {
     [PANEL_TYPES.TIMESERIES]: async () => {
       const { convertToLens } = await import('./timeseries');
@@ -35,7 +33,7 @@ const getConvertFnByType = (
  */
 export const convertTSVBtoLensConfiguration = async (model: Panel, timeRange?: TimeRange) => {
   // Disables the option for not supported charts, for the string mode and for series with annotations
-  if (!model.use_kibana_indexes || (model.annotations && model.annotations.length > 0)) {
+  if (!model.use_kibana_indexes) {
     return null;
   }
   // Disables if model is invalid
