@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
     });
 
+    // This should fail
     it('Discover main page', async () => {
       await a11y.testAppSnapshot();
     });
