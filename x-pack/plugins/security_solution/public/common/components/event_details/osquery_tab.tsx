@@ -77,7 +77,7 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
         body={
           <FormattedMessage
             id="xpack.securitySolution.osquery.results.missingPrivilleges"
-            defaultMessage=" To access these results, ask your administrator for {osquery} Kibana
+            defaultMessage="To access these results, ask your administrator for {osquery} Kibana
               privileges."
             values={{
               // eslint-disable-next-line react/jsx-no-literals
