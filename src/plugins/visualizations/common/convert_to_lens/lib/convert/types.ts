@@ -31,6 +31,7 @@ import {
   DateHistogramColumn as BaseDateHistogramColumn,
   TermsColumn as BaseTermsColumn,
   FiltersColumn as BaseFiltersColumn,
+  RangeColumn as BaseRangeColumn
 } from '../../types';
 
 export type MetricsWithField = Exclude<
@@ -74,7 +75,7 @@ export interface ExtendedColumnConverterArgs<
 export interface CommonBucketConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
 > {
-  aggParams: Exclude<SchemaConfig<Agg>['aggParams'], undefined>;
+  agg: SchemaConfig<Agg>;
   dataView: DataView;
   metricColumns: AggBasedColumn[];
   aggs: Array<SchemaConfig<METRIC_TYPES>>;
@@ -114,3 +115,4 @@ export type DerivativeColumn = GenericColumnWithMeta<BaseDerivativeColumn, Meta>
 export type DateHistogramColumn = GenericColumnWithMeta<BaseDateHistogramColumn, Meta>;
 export type TermsColumn = GenericColumnWithMeta<BaseTermsColumn, Meta>;
 export type FiltersColumn = GenericColumnWithMeta<BaseFiltersColumn, Meta>;
+export type RangeColumn = GenericColumnWithMeta<BaseRangeColumn, Meta>;
