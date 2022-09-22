@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    hideAnnouncements: true,
   };
   const testSubjects = getService('testSubjects');
 
@@ -112,9 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
-      after(async () => {
-        await kibanaServer.uiSettings.replace({});
-      });
+
       it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
         const initialRows = await testSubjects.findAll('docTableRow');
         // click the Skip to the end of the table
@@ -198,7 +197,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show allow toggling columns from the expanded document', async function () {
           await PageObjects.discover.clickNewSearchButton();
-          await testSubjects.click('dscExplorerCalloutClose');
           await retry.try(async function () {
             log.debug('row index: ' + String(rowToInspect - 1));
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
@@ -237,6 +235,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           for (const column of extraColumns) {
             await PageObjects.discover.clearFieldSearchInput();
             await PageObjects.discover.findFieldByName(column);
+            await retry.try(async function () {
+              return await testSubjects.exists(`field-${column}`);
+            });
             await PageObjects.discover.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
             // test the header now
@@ -250,7 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           for (const column of extraColumns) {
             await PageObjects.discover.clearFieldSearchInput();
             await PageObjects.discover.findFieldByName(column);
-            log.debug(`add a ${column} column`);
+            await retry.try(async function () {
+              return await testSubjects.exists(`field-${column}`);
+            });
             await PageObjects.discover.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
