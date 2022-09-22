@@ -15,6 +15,7 @@ import {
   getFieldNameFromField,
   getLabel,
   getLabelForPercentile,
+  getMetricFromParentPipelineAgg,
   getValidColumns,
   isColumnWithMeta,
   isMetricAggWithoutParams,
@@ -409,5 +410,114 @@ describe('getCustomBucketsFromSiblingAggs', () => {
       bucketWithSerialize1,
       bucketWithSerialize2,
     ]);
+  });
+});
+
+const mockConvertToSchemaConfig = jest.fn();
+
+jest.mock('../../vis_schemas', () => ({
+  convertToSchemaConfig: jest.fn(() => mockConvertToSchemaConfig()),
+}));
+
+describe('getMetricFromParentPipelineAgg', () => {
+  const dataView = stubLogstashDataView;
+  const metricAggId = 'agg-id-0';
+  const aggId = 'agg-id-1';
+  const aggIdParentPipeline = 'agg-id-2';
+  const plainAgg: SchemaConfig<METRIC_TYPES.AVG> = {
+    accessor: 0,
+    label: 'some-label',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.AVG,
+    aggId: metricAggId,
+  };
+  const agg: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.AVG_BUCKET,
+    aggParams: { customMetric: {} as IAggConfig },
+    aggId,
+  };
+
+  const parentPipelineAgg: SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM> = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+    aggType: METRIC_TYPES.CUMULATIVE_SUM,
+    aggParams: { metricAgg: 'custom' },
+    aggId,
+  };
+
+  const metric = { aggType: METRIC_TYPES.CUMULATIVE_SUM };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    mockConvertToSchemaConfig.mockReturnValue(metric);
+  });
+
+  test('should return null if aggParams are undefined', () => {
+    expect(getMetricFromParentPipelineAgg({ ...agg, aggParams: undefined }, [])).toBeNull();
+    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+  });
+
+  test('should return null if is sibling pipeline agg and custom metric is not defined', () => {
+    expect(
+      getMetricFromParentPipelineAgg({ ...agg, aggParams: { customMetric: undefined } }, [])
+    ).toBeNull();
+    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+  });
+
+  test('should return null if is parent pipeline agg, metricAgg is custom and custom metric is not defined', () => {
+    expect(getMetricFromParentPipelineAgg(parentPipelineAgg, [])).toBeNull();
+    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+  });
+
+  test('should return metric if is parent pipeline agg, metricAgg is equal to aggId and custom metric is not defined', () => {
+    const parentPipelineAggWithLink = {
+      ...parentPipelineAgg,
+      aggParams: {
+        metricAgg: metricAggId,
+      },
+    };
+    expect(
+      getMetricFromParentPipelineAgg(parentPipelineAggWithLink, [
+        parentPipelineAggWithLink,
+        plainAgg,
+      ])
+    ).toEqual(plainAgg);
+    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+  });
+
+  test('should return metric if sibling pipeline agg with custom metric', () => {
+    expect(getMetricFromParentPipelineAgg(agg, [agg])).toEqual(metric);
+    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
+  });
+
+  test('should return metric if parent pipeline agg with custom metric', () => {
+    expect(
+      getMetricFromParentPipelineAgg(
+        {
+          ...parentPipelineAgg,
+          aggParams: { ...parentPipelineAgg.aggParams, customMetric: {} as IAggConfig },
+        },
+        [agg]
+      )
+    ).toEqual(metric);
+    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
   });
 });
