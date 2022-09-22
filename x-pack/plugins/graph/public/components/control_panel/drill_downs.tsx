@@ -40,7 +40,9 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
             return (
               <li className="list-group-item">
                 {urlTemplate.icon && (
-                  <span className="kuiIcon gphNoUserSelect">{urlTemplate.icon?.code}</span>
+                  <>
+                    <span className="kuiIcon gphNoUserSelect">{urlTemplate.icon?.code}</span>{' '}
+                  </>
                 )}
                 <a aria-hidden="true" onClick={onOpenUrlTemplate}>
                   {urlTemplate.description}
