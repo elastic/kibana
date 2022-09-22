@@ -353,7 +353,7 @@ describe('ruleParamsModifier', () => {
   });
 
   describe('schedule', () => {
-    test('should set timeline', () => {
+    test('should set schedule', () => {
       const INTERVAL_IN_MINUTES = 5;
       const LOOKBACK_IN_MINUTES = 1;
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
