@@ -15,7 +15,7 @@
   ],
   "references": [
     { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../x-pack/plugins/cloud" },
-    { "path": "../../../../x-pack/plugins/security" },
+    { "path": "../../cloud/tsconfig.json" },
+    { "path": "../../security/tsconfig.json" },
   ]
 }
