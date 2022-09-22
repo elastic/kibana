@@ -22,6 +22,8 @@ export interface FilesSetup {
   /**
    * A factory for creating an {@link FilesClient} instance. This requires a
    * registered {@link FileKind}.
+   *
+   * @track-adoption
    */
   filesClientFactory: FilesClientFactory;
 

@@ -18,6 +18,8 @@ export interface FilesSetup {
    * that will be uploaded.
    *
    * @param {FileKind} fileKind - the file kind to register
+   *
+   * @track-adoption
    */
   registerFileKind(fileKind: FileKind): void;
 }
@@ -33,6 +35,8 @@ export interface FilesPluginSetupDependencies {
 export interface FilesStart {
   /**
    * Create an instance of {@link FileServiceStart}.
+   *
+   * @track-adoption
    */
   fileServiceFactory: FileServiceFactory;
 }
