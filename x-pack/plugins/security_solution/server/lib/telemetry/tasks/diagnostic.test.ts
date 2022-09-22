@@ -46,5 +46,6 @@ describe('diagnostics telemetry task test', () => {
     expect(mockTelemetryEventsSender.queueTelemetryEvents).toHaveBeenCalledWith(
       testDiagnosticsAlerts.hits.hits.flatMap((doc) => [doc._source])
     );
+    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(1);
   });
 });

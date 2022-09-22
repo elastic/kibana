@@ -19,6 +19,7 @@ import {
   getSecurityTelemetryStats,
   createExceptionListItem,
   createExceptionList,
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 
@@ -72,10 +73,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-
+          removeTimeFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
-            .map((obj: { trusted_application: any }) => obj.trusted_application);
+            .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application));
           expect(trustedApplication).to.eql([
             {
               created_at: trustedApplication[0].created_at,
@@ -94,6 +95,10 @@ export default ({ getService }: FtrProviderContext) => {
                 type: 'policy',
                 policies: [],
               },
+            },
+            {
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -138,12 +143,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-
+          removeTimeFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
-            .map((obj: { trusted_application: any }) => obj.trusted_application)
+            .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
-              return obj1.entries.name - obj2.entries.name;
+              return obj1?.entries?.name - obj2?.entries?.name;
             });
 
           expect(trustedApplication).to.eql([
@@ -183,6 +188,10 @@ export default ({ getService }: FtrProviderContext) => {
                 policies: [],
               },
             },
+            {
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -210,9 +219,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
-            .map((obj: { endpoint_exception: any }) => obj.endpoint_exception);
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception));
           expect(securityLists).to.eql([
             {
               created_at: securityLists[0].created_at,
@@ -227,6 +237,10 @@ export default ({ getService }: FtrProviderContext) => {
               id: securityLists[0].id,
               name: ENDPOINT_LIST_ID,
               os_types: [],
+            },
+            {
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -271,11 +285,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
-            .map((obj: { endpoint_exception: any }) => obj.endpoint_exception)
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
-              return obj1.entries.name - obj2.entries.name;
+              return obj1?.entries?.name - obj2?.entries?.name;
             });
 
           expect(securityLists).to.eql([
@@ -306,6 +321,10 @@ export default ({ getService }: FtrProviderContext) => {
               id: securityLists[1].id,
               name: ENDPOINT_LIST_ID,
               os_types: [],
+            },
+            {
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -346,9 +365,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
-            .map((obj: { endpoint_event_filter: any }) => obj.endpoint_event_filter);
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter));
+
           expect(endPointEventFilter).to.eql([
             {
               created_at: endPointEventFilter[0].created_at,
@@ -363,6 +384,10 @@ export default ({ getService }: FtrProviderContext) => {
               id: endPointEventFilter[0].id,
               name: ENDPOINT_EVENT_FILTERS_LIST_ID,
               os_types: ['linux'],
+            },
+            {
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -407,11 +432,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
-            .map((obj: { endpoint_event_filter: any }) => obj.endpoint_event_filter)
+            .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
-              return obj1.entries.name - obj2.entries.name;
+              return obj1?.entries?.name - obj2?.entries?.name;
             });
 
           expect(endPointEventFilter).to.eql([
@@ -442,6 +468,10 @@ export default ({ getService }: FtrProviderContext) => {
               id: endPointEventFilter[1].id,
               name: ENDPOINT_EVENT_FILTERS_LIST_ID,
               os_types: ['macos'],
+            },
+            {
+              name: 'Security Solution Lists Telemetry',
+              passed: true,
             },
           ]);
         });
