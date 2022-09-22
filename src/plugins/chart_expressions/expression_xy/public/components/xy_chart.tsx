@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { css } from '@emotion/react';
 import {
   Chart,
+  Tooltip as TooltipSpec,
   Settings,
   Axis,
   Position,
@@ -744,6 +745,64 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
+          <TooltipSpec
+            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            headerFormatter={
+              !args.detailedTooltip
+                ? ({ value }) => (
+                    <TooltipHeader
+                      value={value}
+                      formatter={safeXAccessorLabelRenderer}
+                      xDomain={rawXDomain}
+                    />
+                  )
+                : undefined
+            }
+            actions={[
+              {
+                label: () => 'Alert selected series specs',
+                onSelect: (values) => {
+                  alert(values.map(({ seriesIdentifier }) => seriesIdentifier.specId).join('\n'));
+                },
+              },
+              {
+                label: ({ length }) => (
+                  <span>
+                    Alert series label of all <b>{length}</b> selected series
+                  </span>
+                ),
+                disabled: ({ length }) => (length < 1 ? 'Select at least one series' : false),
+                onSelect: (series) => {
+                  alert(
+                    `Selected the following: \n - ${series
+                      .map((s) => s.label)
+                      .join('\n - ')}`
+                  );
+                },
+              },
+            ]}
+            customTooltip={
+              args.detailedTooltip
+                ? ({ header, values }) => (
+                    <Tooltip
+                      header={header}
+                      values={values}
+                      titles={titles}
+                      fieldFormats={fieldFormats}
+                      formatFactory={formatFactory}
+                      formattedDatatables={formattedDatatables}
+                      splitAccessors={{
+                        splitColumnAccessor: splitColumnId,
+                        splitRowAccessor: splitRowId,
+                      }}
+                      layers={dataLayers}
+                      xDomain={isTimeViz ? rawXDomain : undefined}
+                    />
+                  )
+                : undefined
+            }
+            type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
+          />
           <Settings
             noResults={
               <EmptyPlaceholder
@@ -788,37 +847,6 @@ export function XYChart({
               markSizeRatio: args.markSizeRatio,
             }}
             baseTheme={chartBaseTheme}
-            tooltip={{
-              boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-              headerFormatter: !args.detailedTooltip
-                ? ({ value }) => (
-                    <TooltipHeader
-                      value={value}
-                      formatter={safeXAccessorLabelRenderer}
-                      xDomain={rawXDomain}
-                    />
-                  )
-                : undefined,
-              customTooltip: args.detailedTooltip
-                ? ({ header, values }) => (
-                    <Tooltip
-                      header={header}
-                      values={values}
-                      titles={titles}
-                      fieldFormats={fieldFormats}
-                      formatFactory={formatFactory}
-                      formattedDatatables={formattedDatatables}
-                      splitAccessors={{
-                        splitColumnAccessor: splitColumnId,
-                        splitRowAccessor: splitRowId,
-                      }}
-                      layers={dataLayers}
-                      xDomain={isTimeViz ? rawXDomain : undefined}
-                    />
-                  )
-                : undefined,
-              type: args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None,
-            }}
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
             xDomain={xDomain}
