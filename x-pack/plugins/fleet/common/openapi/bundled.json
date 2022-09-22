@@ -606,8 +606,17 @@
           "name": "pkgVersion",
           "in": "path",
           "required": true
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ],
+      "required": true,
       "post": {
         "summary": "Packages - Install",
         "tags": [],
