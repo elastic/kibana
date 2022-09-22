@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-router-mocks",
+  "owner": "@elastic/shared-ux",
+  "runtimeDeps": [],
+  "typeDeps": []
+}
