@@ -11,7 +11,6 @@ import {
   BENCHMARK_SCORE_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  CSP_INGEST_TIMESTAMP_PIPELINE,
   FINDINGS_INDEX_NAME,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
@@ -19,11 +18,15 @@ import {
 } from '../../common/constants';
 import { createPipelineIfNotExists } from './create_processor';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
+import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from './ingest_pipelines';
 
 // TODO: Add integration tests
 
 export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
-  await createPipelineIfNotExists(esClient, CSP_INGEST_TIMESTAMP_PIPELINE, logger);
+  await Promise.all([
+    createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
+    createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
+  ]);
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
@@ -44,10 +47,10 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
       template: {
         mappings: benchmarkScoreMapping,
         settings: {
-          default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE,
+          default_pipeline: scorePipelineIngestConfig.id,
+          // TODO: once we will convert the score index to datastream we will no longer override the ilm to be empty
           lifecycle: {
-            // This is the default lifecycle name, it is named on the data-stream type (e.g, logs/ metrics)
-            name: 'logs',
+            name: '',
           },
         },
       },
@@ -84,20 +87,24 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
     const { template, composed_of, _meta } =
       findingsIndexTemplateResponse.index_templates[0].index_template;
 
-    if (template?.settings) {
-      template.settings.lifecycle = {
-        name: '',
-      };
-    }
-
     // We always want to keep the index template updated
     await esClient.indices.putIndexTemplate({
       name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
       index_patterns: LATEST_FINDINGS_INDEX_PATTERN,
       priority: 500,
+      template: {
+        mappings: template?.mappings,
+        settings: {
+          ...template?.settings,
+          default_pipeline: latestFindingsPipelineIngestConfig.id,
+          lifecycle: {
+            name: '',
+          },
+        },
+        aliases: template?.aliases,
+      },
       _meta,
       composed_of,
-      template,
     });
 
     await createIndexSafe(esClient, logger, LATEST_FINDINGS_INDEX_DEFAULT_NS);

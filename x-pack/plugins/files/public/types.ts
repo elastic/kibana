@@ -31,8 +31,8 @@ type UnscopedClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
 /**
  * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
  */
-type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
-  args: Parameters<UnscopedClientMethodFrom<E>>[0] & { kind: string }
+type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition, ExtraArgs extends {} = {}> = (
+  args: Parameters<UnscopedClientMethodFrom<E>>[0] & { kind: string } & ExtraArgs
 ) => Promise<E['output']>;
 
 interface GlobalEndpoints {
@@ -96,7 +96,7 @@ export interface FilesClient extends GlobalEndpoints {
    *
    * @param args - upload file args
    */
-  upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
+  upload: ClientMethodFrom<UploadFileKindHttpEndpoint, { abortSignal?: AbortSignal }>;
   /**
    * Stream a download of the file object's content.
    *
