@@ -773,11 +773,7 @@ export function XYChart({
                 ),
                 disabled: ({ length }) => (length < 1 ? 'Select at least one series' : false),
                 onSelect: (series) => {
-                  alert(
-                    `Selected the following: \n - ${series
-                      .map((s) => s.label)
-                      .join('\n - ')}`
-                  );
+                  alert(`Selected the following: \n - ${series.map((s) => s.label).join('\n - ')}`);
                 },
               },
             ]}
