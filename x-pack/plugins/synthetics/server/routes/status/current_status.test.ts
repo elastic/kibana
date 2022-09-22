@@ -45,7 +45,6 @@ jest.mock('../../legacy_uptime/lib/requests/get_snapshot_counts', () => ({
 describe('current status route', () => {
   describe('periodToMs', () => {
     it('returns 0 for unsupported unit type', () => {
-      // @ts-expect-error passing invalid unit type for testing purpose
       expect(periodToMs({ number: '10', unit: 'rad' })).toEqual(0);
     });
     it('converts seconds', () => {
@@ -79,6 +78,10 @@ describe('current status route', () => {
                             monitor: {
                               status: 'up',
                             },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
                           },
                         },
                       ],
@@ -103,6 +106,10 @@ describe('current status route', () => {
                             monitor: {
                               status: 'up',
                             },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
                           },
                         },
                       ],
@@ -119,6 +126,10 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:19:16.724Z',
                             monitor: {
                               status: 'down',
+                            },
+                            summary: {
+                              down: 1,
+                              up: 0,
                             },
                           },
                         },
@@ -156,6 +167,10 @@ describe('current status route', () => {
                             monitor: {
                               status: 'up',
                             },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
                           },
                         },
                       ],
@@ -180,6 +195,10 @@ describe('current status route', () => {
                             monitor: {
                               status: 'up',
                             },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
                           },
                         },
                       ],
@@ -196,6 +215,10 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:19:16.724Z',
                             monitor: {
                               status: 'down',
+                            },
+                            summary: {
+                              up: 0,
+                              down: 1,
                             },
                           },
                         },
@@ -221,11 +244,9 @@ describe('current status route', () => {
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering
-      // @ts-expect-error esclient types not designed to include query
       expect(esClient.search.mock.calls[0][0].query.bool.filter[1].terms['monitor.id']).toEqual([
         'id1',
       ]);
-      // @ts-expect-error esclient types not designed to include query
       expect(esClient.search.mock.calls[1][0].query.bool.filter[1].terms['monitor.id']).toEqual([
         'id2',
       ]);
