@@ -20,7 +20,13 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async deleteCase() {
-      await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
+      const caseActions = await testSubjects.findDescendant(
+        'property-actions-ellipses',
+        await testSubjects.find('case-view-actions')
+      );
+
+      await caseActions.click();
+      await testSubjects.existOrFail('property-actions-trash');
       await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
