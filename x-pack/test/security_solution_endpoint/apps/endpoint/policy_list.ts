@@ -24,7 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Endpoint Policy List Page', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/141532
+  describe.skip('When on the Endpoint Policy List Page', () => {
     before(async () => {
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
