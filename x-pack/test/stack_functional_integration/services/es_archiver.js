@@ -10,7 +10,7 @@ import Path from 'path';
 import { EsArchiver } from '@kbn/es-archiver';
 import { REPO_ROOT } from '@kbn/utils';
 
-import * as KibanaServer from '../../../../test/common/services/kibana_server';
+import { KibanaServer } from '@kbn/ftr-common-functional-services';
 
 const INTEGRATION_TEST_ROOT =
   process.env.WORKSPACE || Path.resolve(REPO_ROOT, '../integration-test');

@@ -24,6 +24,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
+    metadata,
   } = options;
 
   const stats = {};
@@ -104,6 +105,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       tests: allTests.length + failedHooks.length,
       failures: failures.length,
       skipped: skippedResults.length,
+      'metadata-json': JSON.stringify(metadata ?? {}),
     });
 
     function addTestcaseEl(node) {
