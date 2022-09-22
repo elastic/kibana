@@ -57,6 +57,15 @@ export const NATIVE_CONNECTORS: NativeConnector[] = [
           }
         ),
       },
+      direct_connection: {
+        value: '',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.directConnectionLabel',
+          {
+            defaultMessage: 'Use direct connection (true/false)',
+          }
+        ),
+      },
     },
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mongodb.name', {
       defaultMessage: 'MongoDB',
