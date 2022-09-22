@@ -6,6 +6,7 @@
  */
 import { type TypeOf, schema } from '@kbn/config-schema';
 
+// Some comment
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
 export const benchmarksQueryParamsSchema = schema.object({
