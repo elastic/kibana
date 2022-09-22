@@ -95,8 +95,15 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(async () => await testDataLoader.beforeEach());
-        after(async () => await testDataLoader.afterEach());
+        before(async () => {
+          await testDataLoader.before();
+          await testDataLoader.beforeEach();
+        });
+
+        after(async () => {
+          await testDataLoader.after();
+          await testDataLoader.afterEach();
+        });
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
