@@ -152,7 +152,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <div>
             <EuiSpacer size="s" />
             {alert?.fields[ALERT_RULE_TAGS] &&
-              alert?.fields[ALERT_RULE_TAGS].length > 0 &&
+              alert?.fields[ALERT_RULE_TAGS]?.length > 0 &&
               triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
                 tagsOutPopover: true,
                 tags: alert?.fields[ALERT_RULE_TAGS],
