@@ -54,7 +54,8 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
             sampleSize: targetSampleSize,
           });
 
-        const topNFunctions = await withProfilingSpan('collect_topn_functions', async () => {
+        const t0 = Date.now();
+        const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
             stackTraces,
@@ -64,6 +65,7 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
             endIndex
           );
         });
+        logger.info(`creating topN functions took ${Date.now() - t0} ms`);
 
         logger.info('returning payload response to client');
 

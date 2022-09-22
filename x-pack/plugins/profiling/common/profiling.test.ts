@@ -50,7 +50,7 @@ describe('Stack frame metadata operations', () => {
       SourceFilename: 'dockerd',
       FunctionOffset: 0x183a5b0,
     });
-    expect(getCalleeSource(metadata)).toEqual('dockerd+0x0');
+    expect(getCalleeSource(metadata)).toEqual('dockerd');
   });
 
   test('metadata has source name and function offset', () => {
