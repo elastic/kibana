@@ -56,6 +56,7 @@ export interface CLIParams {
     testData: TestData;
     buildId: string;
     withoutStaticResources: boolean;
+    splitBySteps: boolean;
   };
   client: {
     baseURL: string;

@@ -104,8 +104,17 @@ export async function runExtractor() {
 
       const withoutStaticResources = !!flags['without-static-resources'] || false;
 
+      const splitBySteps = !!flags['split-by-steps'] || false;
+
       return extractor({
-        param: { journeyName, scalabilitySetup, testData, buildId, withoutStaticResources },
+        param: {
+          journeyName,
+          scalabilitySetup,
+          testData,
+          buildId,
+          withoutStaticResources,
+          splitBySteps,
+        },
         client: { baseURL, username, password },
         log,
       });
@@ -114,7 +123,7 @@ export async function runExtractor() {
       description: `CLI to fetch and normalize APM traces for journey scalability testing`,
       flags: {
         string: ['config', 'buildId', 'es-url', 'es-username', 'es-password'],
-        boolean: ['without-static-resources'],
+        boolean: ['without-static-resources', 'split-by-steps'],
         help: `
           --config <config_path>     path to an FTR config file that sets scalabilitySetup and journeyName (stored as 'labels.journeyName' in APM-based document)
           --buildId <buildId>        BUILDKITE_JOB_ID or uuid generated locally, stored in APM-based document as label: 'labels.testBuildId'
@@ -122,6 +131,7 @@ export async function runExtractor() {
           --es-username <username>   username for Elasticsearch (APM cluster)
           --es-password <password>   password for Elasticsearch (APM cluster)
           --without-static-resources filters out traces with url path matching static resources pattern
+          --split-by-steps           split requests by journey steps
         `,
       },
     }
