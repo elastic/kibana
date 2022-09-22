@@ -6,7 +6,14 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlyout, EuiText, EuiFlyoutBody, EuiLink } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiText,
+  EuiFlyoutBody,
+  EuiLink,
+  EuiButton,
+  EuiConfirmModal,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
@@ -73,6 +80,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     docLinks,
     application: { capabilities },
   } = useKibana().services;
+
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
@@ -117,7 +125,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   );
 
   const [isFormModified, setIsFormModified] = useState<boolean>(false);
-
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(true);
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
@@ -153,76 +162,71 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   );
 
   const closeFlyout = useCallback(() => {
+    if (isFormModified) {
+      setShowConfirmModal(true);
+      return;
+    }
     onClose();
-  }, [onClose]);
+  }, [onClose, isFormModified, setShowConfirmModal]);
 
-  const onClickSave = useCallback(
-    async (closeAfterSave: boolean = true) => {
-      setPreSubmitValidationErrorMessage(null);
+  const onClickSave = useCallback(async () => {
+    setPreSubmitValidationErrorMessage(null);
 
-      const { isValid, data } = await submit();
-      if (!isMounted.current) {
-        // User has closed the flyout meanwhile submitting the form
-        return;
+    const { isValid, data } = await submit();
+    if (!isMounted.current) {
+      // User has closed the flyout meanwhile submitting the form
+      return;
+    }
+
+    if (isValid) {
+      if (preSubmitValidator) {
+        const validatorRes = await preSubmitValidator();
+
+        if (validatorRes) {
+          setPreSubmitValidationErrorMessage(validatorRes.message);
+          return;
+        }
       }
 
-      if (isValid) {
-        if (preSubmitValidator) {
-          const validatorRes = await preSubmitValidator();
+      /**
+       * At this point the form is valid
+       * and there are no pre submit error messages.
+       */
 
-          if (validatorRes) {
-            setPreSubmitValidationErrorMessage(validatorRes.message);
-            return;
-          }
-        }
+      const { name, config, secrets } = data;
+      const validConnector = {
+        id: connector.id,
+        name: name ?? '',
+        config: config ?? {},
+        secrets: secrets ?? {},
+      };
 
+      const updatedConnector = await updateConnector(validConnector);
+
+      if (updatedConnector) {
         /**
-         * At this point the form is valid
-         * and there are no pre submit error messages.
+         * ConnectorFormSchema has been saved.
+         * Set the from to clean state.
          */
+        onFormModifiedChange(false);
 
-        const { name, config, secrets } = data;
-        const validConnector = {
-          id: connector.id,
-          name: name ?? '',
-          config: config ?? {},
-          secrets: secrets ?? {},
-        };
-
-        const updatedConnector = await updateConnector(validConnector);
-
-        if (updatedConnector) {
-          /**
-           * ConnectorFormSchema has been saved.
-           * Set the from to clean state.
-           */
-          onFormModifiedChange(false);
-
-          if (onConnectorUpdated && updatedConnector) {
-            onConnectorUpdated(updatedConnector);
-          }
-
-          if (closeAfterSave) {
-            closeFlyout();
-          }
+        if (onConnectorUpdated) {
+          onConnectorUpdated(updatedConnector);
         }
-
-        return updatedConnector;
+        setIsEdit(false);
+        setIsEdit(true);
       }
-    },
-    [
-      submit,
-      preSubmitValidator,
-      connector.id,
-      updateConnector,
-      onFormModifiedChange,
-      onConnectorUpdated,
-      closeFlyout,
-    ]
-  );
 
-  const onSubmit = useCallback(() => onClickSave(false), [onClickSave]);
-  const onSubmitAndClose = useCallback(() => onClickSave(true), [onClickSave]);
+      return updatedConnector;
+    }
+  }, [
+    onConnectorUpdated,
+    submit,
+    preSubmitValidator,
+    connector.id,
+    updateConnector,
+    onFormModifiedChange,
+  ]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -233,59 +237,110 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   }, []);
 
   return (
-    <EuiFlyout
-      onClose={closeFlyout}
-      aria-labelledby="flyoutActionEditTitle"
-      size="m"
-      data-test-subj="edit-connector-flyout"
-    >
-      <FlyoutHeader
-        isPreconfigured={connector.isPreconfigured}
-        connectorName={connector.name}
-        connectorTypeDesc={actionTypeModel?.selectMessage}
-        setTab={handleSetTab}
-        selectedTab={selectedTab}
-        icon={actionTypeModel?.iconClass}
-        isExperimental={actionTypeModel?.isExperimental}
-      />
-      <EuiFlyoutBody>
-        {selectedTab === EditConnectorTabs.Configuration ? (
-          !connector.isPreconfigured ? (
-            <>
-              <ConnectorForm
-                actionTypeModel={actionTypeModel}
-                connector={getConnectorWithoutSecrets(connector)}
-                isEdit={true}
-                onChange={setFormState}
-                onFormModifiedChange={onFormModifiedChange}
-              />
-              {preSubmitValidationErrorMessage}
-            </>
+    <>
+      <EuiFlyout
+        onClose={closeFlyout}
+        aria-labelledby="flyoutActionEditTitle"
+        size="m"
+        data-test-subj="edit-connector-flyout"
+      >
+        <FlyoutHeader
+          isPreconfigured={connector.isPreconfigured}
+          connectorName={connector.name}
+          connectorTypeDesc={actionTypeModel?.selectMessage}
+          setTab={handleSetTab}
+          selectedTab={selectedTab}
+          icon={actionTypeModel?.iconClass}
+          isExperimental={actionTypeModel?.isExperimental}
+        />
+        <EuiFlyoutBody>
+          {selectedTab === EditConnectorTabs.Configuration ? (
+            !connector.isPreconfigured ? (
+              <>
+                {isEdit && (
+                  <>
+                    <ConnectorForm
+                      actionTypeModel={actionTypeModel}
+                      connector={getConnectorWithoutSecrets(connector)}
+                      isEdit={isEdit}
+                      onChange={setFormState}
+                      onFormModifiedChange={onFormModifiedChange}
+                    />
+                    {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                    {showButtons && (
+                      <EuiButton
+                        color="success"
+                        data-test-subj="edit-connector-flyout-save-btn"
+                        isLoading={isSaving}
+                        onClick={onClickSave}
+                        disabled={!isFormModified || hasErrors || isSaving}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                          defaultMessage="Save"
+                        />
+                      </EuiButton>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <ReadOnlyConnectorMessage href={docLinks.links.alerting.preconfiguredConnectors} />
+            )
           ) : (
-            <ReadOnlyConnectorMessage href={docLinks.links.alerting.preconfiguredConnectors} />
-          )
-        ) : (
-          <TestConnectorForm
-            connector={connector}
-            executeEnabled={!isFormModified}
-            actionParams={testExecutionActionParams}
-            setActionParams={setTestExecutionActionParams}
-            onExecutionAction={onExecutionAction}
-            isExecutingAction={isExecutingConnector}
-            executionResult={testExecutionResult}
-            actionTypeRegistry={actionTypeRegistry}
+            <TestConnectorForm
+              connector={connector}
+              executeEnabled={!isFormModified}
+              actionParams={testExecutionActionParams}
+              setActionParams={setTestExecutionActionParams}
+              onExecutionAction={onExecutionAction}
+              isExecutingAction={isExecutingConnector}
+              executionResult={testExecutionResult}
+              actionTypeRegistry={actionTypeRegistry}
+            />
+          )}
+        </EuiFlyoutBody>
+        <FlyoutFooter
+          isSaving={isSaving}
+          disabled={isSaving}
+          onCancel={closeFlyout}
+          onClose={closeFlyout}
+        />
+      </EuiFlyout>
+      {showConfirmModal && (
+        <EuiConfirmModal
+          buttonColor="danger"
+          data-test-subj="closeConnectorEditConfirm"
+          title={i18n.translate(
+            'xpack.triggersActionsUI.sections.confirmConnectorEditClose.title',
+            {
+              defaultMessage: 'Discard unsaved changes to connector?',
+            }
+          )}
+          onCancel={() => {
+            setShowConfirmModal(false);
+          }}
+          onConfirm={onClose}
+          cancelButtonText={i18n.translate(
+            'xpack.triggersActionsUI.sections.confirmConnectorEditClose.cancelButtonLabel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.triggersActionsUI.sections.confirmConnectorEditClose.discardButtonLabel',
+            {
+              defaultMessage: 'Discard Changes',
+            }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.confirmConnectorEditClose.confirmConnectorCloseMessage"
+            defaultMessage="You can't recover unsaved changes."
           />
-        )}
-      </EuiFlyoutBody>
-      <FlyoutFooter
-        isSaving={isSaving}
-        disabled={hasErrors || isSaving}
-        showButtons={showButtons}
-        onCancel={closeFlyout}
-        onSubmit={onSubmit}
-        onSubmitAndClose={onSubmitAndClose}
-      />
-    </EuiFlyout>
+        </EuiConfirmModal>
+      )}
+    </>
   );
 };
 
