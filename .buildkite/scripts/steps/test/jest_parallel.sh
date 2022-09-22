@@ -10,8 +10,10 @@ exitCode=0
 results=()
 
 if [[ "$1" == 'jest.config.js' ]]; then
-  # run unit tests in parallel
-  parallelism="-w2"
+  # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
+  # https://github.com/elastic/kibana/issues/141477
+  # parallelism="-w2"
+  parallelism="--runInBand"
   TEST_TYPE="unit"
 else
   # run integration tests in-band
