@@ -205,6 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const fields = ['_id', '_index', 'agent'];
             for (const field of fields) {
               await testSubjects.click(`toggleColumnButton-${field}`);
+              await testSubjects.click(`tableDocViewRow-${field}`); // to suppress the appeared tooltip
             }
 
             const headerWithFields = await docTable.getHeaderFields();
