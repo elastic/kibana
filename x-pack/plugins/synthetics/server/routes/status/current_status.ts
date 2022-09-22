@@ -147,7 +147,7 @@ export async function getStatus(
     monitors = await getMonitors(
       {
         perPage: 500,
-        page: 1,
+        page,
         sortField: 'name.keyword',
         sortOrder: 'asc',
       },
