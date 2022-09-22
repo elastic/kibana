@@ -22,16 +22,26 @@ describe('AnalyticsService', () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(1);
     await expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
-    ).toMatchInlineSnapshot(`
+    ).toMatchInlineSnapshot(
+      {
+        branch: expect.any(String),
+        buildNum: 9007199254740991,
+        buildSha: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+        isDev: true,
+        isDistributable: false,
+        version: expect.any(String),
+      },
+      `
             Object {
-              "branch": "main",
+              "branch": Any<String>,
               "buildNum": 9007199254740991,
               "buildSha": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
               "isDev": true,
               "isDistributable": false,
-              "version": "8.5.0",
+              "version": Any<String>,
             }
-          `);
+          `
+    );
   });
 
   test('should register the `performance_metric` event type on creation', () => {
