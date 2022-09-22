@@ -26,11 +26,35 @@ export const severityLabels: Record<Severity, string> = {
   low: STATUS_LOW_LABEL,
 };
 
-export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string }) => ({
+export interface EntityFilter {
+  field: string;
+  value: string;
+}
+
+export const getAlertsByStatusQuery = ({
+  from,
+  to,
+  entityFilter,
+}: {
+  from: string;
+  to: string;
+  entityFilter?: EntityFilter;
+}) => ({
   size: 0,
   query: {
     bool: {
-      filter: [{ range: { '@timestamp': { gte: from, lte: to } } }],
+      filter: [
+        { range: { '@timestamp': { gte: from, lte: to } } },
+        ...(entityFilter
+          ? [
+              {
+                term: {
+                  [entityFilter.field]: entityFilter.value,
+                },
+              },
+            ]
+          : []),
+      ],
     },
   },
   aggs: {
@@ -79,6 +103,7 @@ export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
+  entityFilter?: EntityFilter;
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
@@ -88,6 +113,7 @@ export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
 };
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
+  entityFilter,
   queryId,
   signalIndexName,
   skip = false,
@@ -107,6 +133,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     query: getAlertsByStatusQuery({
       from,
       to,
+      entityFilter,
     }),
     indexName: signalIndexName,
     skip,
@@ -118,9 +145,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       getAlertsByStatusQuery({
         from,
         to,
+        entityFilter,
       })
     );
-  }, [setAlertsQuery, from, to]);
+  }, [setAlertsQuery, from, to, entityFilter]);
 
   useEffect(() => {
     if (data == null) {

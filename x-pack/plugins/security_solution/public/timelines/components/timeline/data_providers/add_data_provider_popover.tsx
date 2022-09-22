@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import styled from 'styled-components';
 import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
@@ -32,6 +33,10 @@ interface AddDataProviderPopoverProps {
   browserFields: BrowserFields;
   timelineId: string;
 }
+
+const AddFieldPopoverContainer = styled.div`
+  min-width: 350px;
+`;
 
 const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({
   browserFields,
@@ -205,7 +210,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       panelPaddingSize="none"
       repositionOnScroll
     >
-      {content}
+      <AddFieldPopoverContainer>{content}</AddFieldPopoverContainer>
     </EuiPopover>
   );
 };

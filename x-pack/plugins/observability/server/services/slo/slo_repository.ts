@@ -69,6 +69,5 @@ function toSLOModel(slo: StoredSLO): SLO {
     time_window: slo.time_window,
     budgeting_method: slo.budgeting_method,
     objective: slo.objective,
-    settings: slo.settings,
   };
 }
