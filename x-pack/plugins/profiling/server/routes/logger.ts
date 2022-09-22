@@ -12,9 +12,9 @@ export async function logExecutionLatency<T>(
   activity: string,
   func: () => Promise<T>
 ): Promise<T> {
-  const start = new Date().getTime();
+  const start = Date.now();
   return await func().then((res) => {
-    logger.info(activity + ' took ' + (new Date().getTime() - start) + 'ms');
+    logger.info(activity + ' took ' + (Date.now() - start) + 'ms');
     return res;
   });
 }
