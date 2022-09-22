@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiHeaderLinks,
+} from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -53,21 +58,15 @@ export function ApmHeaderActionMenu() {
       <EuiHeaderLink
         color="text"
         href={apmHref('/storage-explorer')}
-        iconType="beaker"
         data-test-subj="apmStorageExplorerHeaderLink"
       >
-        {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-          defaultMessage: 'Storage Explorer',
-        })}
-      </EuiHeaderLink>
-      <EuiHeaderLink
-        color="text"
-        href={apmHref('/settings')}
-        data-test-subj="apmSettingsHeaderLink"
-      >
-        {i18n.translate('xpack.apm.settingsLinkLabel', {
-          defaultMessage: 'Settings',
-        })}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+              defaultMessage: 'Storage Explorer',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHeaderLink>
       {canAccessML && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
@@ -87,6 +86,16 @@ export function ApmHeaderActionMenu() {
       >
         {i18n.translate('xpack.apm.addDataButtonLabel', {
           defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
+
+      <EuiHeaderLink
+        color="text"
+        href={apmHref('/settings')}
+        data-test-subj="apmSettingsHeaderLink"
+      >
+        {i18n.translate('xpack.apm.settingsLinkLabel', {
+          defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
