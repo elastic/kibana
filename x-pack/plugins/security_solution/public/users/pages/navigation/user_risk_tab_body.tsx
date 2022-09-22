@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
 import * as i18n from '../translations';
 
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -17,10 +18,12 @@ import { TopRiskScoreContributors } from '../../../common/components/top_risk_sc
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
 import type { UserRiskScore } from '../../../../common/search_strategy';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import { RiskScoreEntity, buildUserNamesFilter } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
@@ -57,7 +60,7 @@ const UserRiskTabBodyComponent: React.FC<
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const [loading, { data, refetch, inspect }] = useUserRiskScore({
+  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useUserRiskScore({
     filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
@@ -86,6 +89,24 @@ const UserRiskTabBodyComponent: React.FC<
     },
     [setOverTimeToggleStatus]
   );
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
+
+  if (isDeprecated) {
+    return (
+      <RiskScoresDeprecated
+        entityType={RiskScoreEntity.user}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
+  }
+
+  if (isModuleEnabled && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+  }
 
   const lastUsertRiskItem: UserRiskScore | null =
     data && data.length > 0 ? data[data.length - 1] : null;

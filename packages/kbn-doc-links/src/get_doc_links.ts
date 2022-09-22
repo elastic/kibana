@@ -360,6 +360,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
+      packageActionTroubleshooting: {
+        // TODO: Pending to be updated when docs are ready
+        es_connection: '',
+      },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
     },
     query: {
@@ -443,6 +447,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       monitorUptimeSynthetics: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime-synthetics.html`,
       userExperience: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/user-experience.html`,
       createAlerts: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/create-alerts.html`,
+      syntheticsCommandReference: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-configuration.html#synthetics-configuration-playwright-options`,
     },
     alerting: {
       guide: `${KIBANA_DOCS}create-and-manage-rules.html`,

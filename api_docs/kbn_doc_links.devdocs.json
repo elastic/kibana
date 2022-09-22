@@ -546,7 +546,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly threatIntelInt: string; readonly responseActions: string; }"
+              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -658,7 +658,7 @@
             "label": "observability",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; }"
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsCommandReference: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

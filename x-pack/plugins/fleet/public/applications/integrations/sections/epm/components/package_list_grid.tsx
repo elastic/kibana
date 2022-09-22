@@ -15,9 +15,11 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiText,
-  EuiBadge,
+  useEuiTheme,
+  EuiIcon,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -69,6 +71,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
   const [windowScrollY] = useState(window.scrollY);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
@@ -81,17 +84,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return () => window.removeEventListener('scroll', onScroll);
   }, [windowScrollY, isSticky]);
 
-  const onQueryChange = ({
-    queryText,
-    error,
-  }: {
-    queryText: string;
-    error: { message: string } | null;
-  }) => {
-    if (!error) {
-      onSearchChange(queryText);
-      setSearchTerm(queryText);
-    }
+  const onQueryChange = (e: any) => {
+    const queryText = e.target.value;
+    setSearchTerm(queryText);
+    onSearchChange(queryText);
   };
 
   const resetQuery = () => {
@@ -128,37 +124,64 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     <>
       {featuredList}
       <div ref={menuRef}>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
+        <EuiFlexGroup
+          alignItems="flexStart"
+          gutterSize="xl"
+          data-test-subj="epmList.integrationCards"
+        >
           <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
             {controlsContent}
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiSearchBar
-              query={searchTerm || undefined}
-              box={{
-                'data-test-subj': 'epmList.searchBar',
-                placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-                  defaultMessage: 'Search for integrations',
-                }),
-                incremental: true,
-              }}
-              onChange={onQueryChange}
-              toolsRight={
+            <EuiFieldSearch
+              data-test-subj="epmList.searchBar"
+              placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+                defaultMessage: 'Search for integrations',
+              })}
+              value={searchTerm}
+              onChange={(e) => onQueryChange(e)}
+              isClearable={true}
+              incremental={true}
+              fullWidth={true}
+              prepend={
                 selectedCategoryTitle ? (
-                  <div>
-                    <EuiBadge
-                      color="accent"
-                      iconType="cross"
-                      iconSide="right"
-                      iconOnClick={() => {
+                  <EuiText
+                    data-test-subj="epmList.categoryBadge"
+                    size="xs"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontWeight: euiTheme.font.weight.bold,
+                      backgroundColor: euiTheme.colors.lightestShade,
+                    }}
+                  >
+                    <EuiScreenReaderOnly>
+                      <span>Searching category: </span>
+                    </EuiScreenReaderOnly>
+                    {selectedCategoryTitle}
+                    <button
+                      data-test-subj="epmList.categoryBadge.closeBtn"
+                      onClick={() => {
                         setSelectedCategory('');
                       }}
-                      iconOnClickAriaLabel="Remove category"
-                      data-test-sub="epmList.categoryBadge"
+                      aria-label="Remove filter"
+                      style={{
+                        padding: euiTheme.size.xs,
+                        paddingTop: '2px',
+                      }}
                     >
-                      {selectedCategoryTitle}
-                    </EuiBadge>
-                  </div>
+                      <EuiIcon
+                        type="cross"
+                        color="text"
+                        size="s"
+                        style={{
+                          width: 'auto',
+                          padding: 0,
+                          backgroundColor: euiTheme.colors.lightestShade,
+                        }}
+                      />
+                    </button>
+                  </EuiText>
                 ) : undefined
               }
             />

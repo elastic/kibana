@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { Unit } from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -27,8 +26,7 @@ import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
-import { formatDate } from '../../../../common/components/super_date_picker';
-import { alertsPreviewDefaultModel } from '../../alerts_table/default_config';
+import { getAlertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { TimelineId } from '../../../../../common/types';
@@ -42,7 +40,8 @@ import { useGlobalFullScreen } from '../../../../common/containers/use_full_scre
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import type { State } from '../../../../common/store';
-import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
+import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -59,39 +58,32 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 export const ID = 'previewHistogram';
 
 interface PreviewHistogramProps {
-  timeFrame: Unit;
   previewId: string;
   addNoiseWarning: () => void;
   spaceId: string;
   ruleType: Type;
-  indexPattern: DataViewBase;
-  advancedOptions?: AdvancedPreviewOptions;
+  indexPattern: DataViewBase | undefined;
+  timeframeOptions: TimeframePreviewOptions;
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
 
 export const PreviewHistogram = ({
-  timeFrame,
   previewId,
   addNoiseWarning,
   spaceId,
   ruleType,
   indexPattern,
-  advancedOptions,
+  timeframeOptions,
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
   const { setQuery, isInitializing } = useGlobalTime();
   const { timelines: timelinesUi } = useKibana().services;
-  const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
-  const to = useMemo(() => 'now', []);
   const startDate = useMemo(
-    () => (advancedOptions ? advancedOptions.timeframeStart.toISOString() : formatDate(from)),
-    [from, advancedOptions]
+    () => timeframeOptions.timeframeStart.toISOString(),
+    [timeframeOptions]
   );
-  const endDate = useMemo(
-    () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : formatDate(to)),
-    [to, advancedOptions]
-  );
+  const endDate = useMemo(() => timeframeOptions.timeframeEnd.toISOString(), [timeframeOptions]);
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -103,7 +95,7 @@ export const PreviewHistogram = ({
     indexPattern,
     ruleType,
   });
-
+  const license = useLicense();
   const {
     timeline: {
       columns,
@@ -114,7 +106,7 @@ export const PreviewHistogram = ({
       itemsPerPageOptions,
       kqlMode,
       sort,
-    } = alertsPreviewDefaultModel,
+    } = getAlertsPreviewDefaultModel(license),
   } = useSelector((state: State) => eventsViewerSelector(state, TimelineId.rulePreview));
 
   const {
@@ -133,11 +125,11 @@ export const PreviewHistogram = ({
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
-      if (isNoisy(totalCount, timeFrame)) {
+      if (isNoisy(totalCount, timeframeOptions)) {
         addNoiseWarning();
       }
     }
-  }, [totalCount, addNoiseWarning, timeFrame, previousPreviewId, previewId]);
+  }, [totalCount, addNoiseWarning, previousPreviewId, previewId, timeframeOptions]);
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {

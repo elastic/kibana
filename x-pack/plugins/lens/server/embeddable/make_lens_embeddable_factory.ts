@@ -27,7 +27,7 @@ import {
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
-  commonExplicitAnnotationType,
+  commonEnrichAnnotationLayer,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
@@ -142,7 +142,7 @@ export const makeLensEmbeddableFactory =
                 };
 
                 let migratedLensState = commonMigrateMetricIds(lensState.attributes);
-                migratedLensState = commonExplicitAnnotationType(
+                migratedLensState = commonEnrichAnnotationLayer(
                   migratedLensState as LensDocShape850<XYVisState850>
                 );
                 migratedLensState = commonMigratePartitionChartGroups(
@@ -152,6 +152,18 @@ export const makeLensEmbeddableFactory =
                   }>
                 );
                 migratedLensState = commonMigratePartitionMetrics(migratedLensState);
+                return {
+                  ...lensState,
+                  attributes: migratedLensState,
+                } as unknown as SerializableRecord;
+              },
+              '8.6.0': (state) => {
+                const lensState = state as unknown as {
+                  attributes: LensDocShape850<VisState850>;
+                };
+
+                const migratedLensState = commonMigrateMetricIds(lensState.attributes);
+
                 return {
                   ...lensState,
                   attributes: migratedLensState,

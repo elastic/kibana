@@ -2294,7 +2294,7 @@ describe('Lens migrations', () => {
     });
   });
 
-  describe('8.5.0 Add Annotation event type and dataView references', () => {
+  describe('8.5.0 Add Annotation event type and ignore filters flag', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
@@ -2328,6 +2328,7 @@ describe('Lens migrations', () => {
       expect(annotationLayer).toEqual({
         layerType: 'annotations',
         annotations: [{ id: 'annotation-id', type: 'manual' }],
+        ignoreGlobalFilters: true,
       });
     });
   });
@@ -2362,7 +2363,7 @@ describe('Lens migrations', () => {
     });
   });
 
-  describe('8.5.0 migrates partition metrics', () => {
+  describe('8.6.0 migrates partition metrics', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
@@ -2385,7 +2386,7 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('make metric an array', () => {
-      const result = migrations['8.5.0'](example, context) as ReturnType<
+      const result = migrations['8.6.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
       expect(

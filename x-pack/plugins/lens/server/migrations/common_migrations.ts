@@ -423,7 +423,7 @@ export const commonFixValueLabelsInXY = (
   };
 };
 
-export const commonExplicitAnnotationType = (
+export const commonEnrichAnnotationLayer = (
   attributes: LensDocShape850<XYVisStatePre850>
 ): LensDocShape850<VisState850> => {
   // Skip the migration heavy part if not XY or it does not contain annotations
@@ -449,6 +449,7 @@ export const commonExplicitAnnotationType = (
           return {
             ...l,
             annotations: l.annotations.map((a) => ({ ...a, type: 'manual' })),
+            ignoreGlobalFilters: true,
           };
         }),
       },
