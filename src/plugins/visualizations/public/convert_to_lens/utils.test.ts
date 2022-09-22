@@ -133,14 +133,39 @@ describe('getBucketCollapseFn', () => {
     aggType: METRIC_TYPES.SUM_BUCKET,
   };
 
-  test.each<[string, Array<SchemaConfig<SupportedAggregation>>, string | undefined]>([
-    ['avg', [metric1, metric2], 'avg'],
-    ['max', [metric1, metric3], 'max'],
-    ['min', [metric1, metric4], 'min'],
-    ['sum', [metric1, metric5], 'sum'],
-    ['undefined if no sibling pipeline agg is provided', [metric1], undefined],
+  const customBucketColum: AggBasedColumn = {
+    columnId: 'bucket-1',
+    operationType: 'date_histogram',
+    sourceField: 'test',
+    isBucketed: true,
+    isSplit: false,
+    params: {
+      interval: '1h',
+    },
+    dataType: 'date',
+    meta: {
+      aggId: '1',
+    },
+  };
+
+  test.each<
+    [
+      string,
+      [Array<SchemaConfig<SupportedAggregation>>, AggBasedColumn[]],
+      Record<string, string | undefined>
+    ]
+  >([
+    ['avg', [[metric1, metric2], [customBucketColum]], { [customBucketColum.columnId]: 'avg' }],
+    ['max', [[metric1, metric3], [customBucketColum]], { [customBucketColum.columnId]: 'max' }],
+    ['min', [[metric1, metric4], [customBucketColum]], { [customBucketColum.columnId]: 'min' }],
+    ['sum', [[metric1, metric5], [customBucketColum]], { [customBucketColum.columnId]: 'sum' }],
+    [
+      'undefined if no sibling pipeline agg is provided',
+      [[metric1], [customBucketColum]],
+      { [customBucketColum.columnId]: undefined },
+    ],
   ])('should return%s', (_, input, expected) => {
-    expect(getBucketCollapseFn(input)).toEqual(expected);
+    expect(getBucketCollapseFn(...input)).toEqual(expected);
   });
 });
 
@@ -281,10 +306,10 @@ describe('isValidVis', () => {
       [bucketKey]: [],
     };
 
-    expect(isValidVis(visSchemas, [])).toBeTruthy();
+    expect(isValidVis(visSchemas)).toBeTruthy();
   });
 
-  test('should return true, if metrics contain only one sibling agg and no splits is specified', () => {
+  test('should return true, if metrics contain only one sibling agg', () => {
     const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
       accessor: 0,
       label: '',
@@ -301,7 +326,7 @@ describe('isValidVis', () => {
       [bucketKey]: [],
     };
 
-    expect(isValidVis(visSchemas, [])).toBeTruthy();
+    expect(isValidVis(visSchemas)).toBeTruthy();
   });
 
   test('should return true, if metrics contain multiple sibling aggs of the same type', () => {
@@ -321,36 +346,7 @@ describe('isValidVis', () => {
       [bucketKey]: [],
     };
 
-    expect(isValidVis(visSchemas, [])).toBeTruthy();
-  });
-
-  test('should return false, if metrics contain sibling agg and splits', () => {
-    const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
-      accessor: 0,
-      label: '',
-      format: {
-        id: undefined,
-        params: undefined,
-      },
-      params: {},
-      aggType: METRIC_TYPES.AVG_BUCKET,
-    };
-    const splitBucket: SchemaConfig<BUCKET_TYPES.TERMS> = {
-      accessor: 0,
-      label: '',
-      format: {
-        id: undefined,
-        params: undefined,
-      },
-      params: {},
-      aggType: BUCKET_TYPES.TERMS,
-    };
-    const visSchemas: Schemas = {
-      [metricKey]: [metric1, metric1],
-      [bucketKey]: [splitBucket],
-    };
-
-    expect(isValidVis(visSchemas, [bucketKey])).toBeFalsy();
+    expect(isValidVis(visSchemas)).toBeTruthy();
   });
 
   test('should return false, if metrics contain multiple sibling aggs with different types', () => {
@@ -380,7 +376,7 @@ describe('isValidVis', () => {
       [bucketKey]: [],
     };
 
-    expect(isValidVis(visSchemas, [])).toBeFalsy();
+    expect(isValidVis(visSchemas)).toBeFalsy();
   });
 });
 
