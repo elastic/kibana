@@ -24,8 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  // Failing: See https://github.com/elastic/kibana/issues/141532
-  describe.skip('When on the Endpoint Policy List Page', () => {
+  describe('When on the Endpoint Policy List Page', () => {
     before(async () => {
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
@@ -42,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await fleetButton.click();
         await testSubjects.existOrFail('createPackagePolicy_pageTitle');
         expect(await testSubjects.getVisibleText('createPackagePolicy_pageTitle')).to.equal(
-          'Add Endpoint and Cloud Security integration'
+          'Add Elastic Defend integration'
         );
       });
       it('navigates back to the policy list page', async () => {
