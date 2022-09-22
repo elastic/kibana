@@ -69,7 +69,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
 
   const topValuesOtherCount =
     (progressBarMax ?? 0) -
-    (topValues ? topValues.map((value) => value.doc_count).reduce((v, acc) => acc + v) : 0);
+    (topValues ? topValues.map((value) => value.doc_count).reduce((v, acc) => acc + v, 0) : 0);
 
   const countsElement =
     totalDocuments !== undefined ? (
