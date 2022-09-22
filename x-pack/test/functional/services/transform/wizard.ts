@@ -34,7 +34,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   return {
     async clickNextButton() {
       await testSubjects.existOrFail('transformWizardNavButtonNext');
-      await testSubjects.clickWhenNotDisabledWithoutRetry('transformWizardNavButtonNext');
+      await testSubjects.clickWhenNotDisabled('transformWizardNavButtonNext');
     },
 
     async assertDefineStepActive() {
@@ -317,7 +317,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       const subj = 'transformAdvancedRuntimeMappingsEditorSwitch';
       if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
+          await testSubjects.clickWhenNotDisabled(subj);
           await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
         });
       }
@@ -355,7 +355,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async applyRuntimeMappings() {
       const subj = 'transformRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
-      await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
+      await testSubjects.clickWhenNotDisabled(subj);
       const isEnabled = await testSubjects.isEnabled(subj);
       expect(isEnabled).to.eql(
         false,
@@ -560,7 +560,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
             break;
         }
       }
-      await testSubjects.clickWhenNotDisabledWithoutRetry('transformApplyAggChanges');
+      await testSubjects.clickWhenNotDisabled('transformApplyAggChanges');
       await testSubjects.missingOrFail(`transformAggPopoverForm_${expectedLabel}`);
     },
 
