@@ -16,7 +16,7 @@ import {
   TIMESTAMP,
   TYPE,
 } from './translations';
-import { RawIndicatorFieldId } from '../../../../types/indicator';
+import { RawIndicatorFieldId } from '../../types/indicator';
 
 interface IndicatorFieldLabelProps {
   field: string;

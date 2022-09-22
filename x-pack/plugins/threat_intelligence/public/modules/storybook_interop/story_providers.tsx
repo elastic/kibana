@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FC, ReactNode, VFC } from 'react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { mockIndicatorsFiltersContext } from '../indicators/mocks/mock_indicators_filters_context';
+import { SecuritySolutionContext } from '../kibana_interop/contexts/security_solution_context';
+import { getSecuritySolutionContextMock } from '../kibana_interop/mocks/mock_security_context';
+import { FieldTypesContext, FiltersContext } from '../indicators/contexts';
+import { generateFieldTypeMap } from '../indicators/mocks/mock_field_type_map';
+import { mockUiSettingsService } from '../kibana_interop/mocks/mock_kibana_ui_settings_service';
+import { mockKibanaTimelinesService } from '../kibana_interop/mocks/mock_kibana_timelines_service';
+import { mockTriggersActionsUiService } from '../kibana_interop/mocks/mock_kibana_triggers_actions_ui_service';
+
+export interface KibanaContextMock {
+  /**
+   * For the data plugin (see {@link DataPublicPluginStart})
+   */
+  data?: DataPublicPluginStart;
+  /**
+   * For the core ui-settings package (see {@link IUiSettingsClient})
+   */
+  uiSettings?: IUiSettingsClient;
+  /**
+   * For the timelines plugin
+   */
+  timelines: TimelinesUIStart;
+}
+
+export interface StoryProvidersComponentProps {
+  /**
+   * Extend / override mock services specified in {@link defaultServices} to create KibanaReactContext (using {@link createKibanaReactContext}). This is optional.
+   */
+  kibana?: KibanaContextMock;
+  /**
+   * Component(s) to be displayed inside
+   */
+  children: ReactNode;
+}
+
+const securityLayout = {
+  getPluginWrapper:
+    (): FC =>
+    ({ children }) =>
+      <div>{children}</div>,
+};
+
+const defaultServices = {
+  uiSettings: mockUiSettingsService(),
+  timelines: mockKibanaTimelinesService,
+  triggersActionsUi: mockTriggersActionsUiService,
+  storage: {
+    set: () => {},
+    get: () => {},
+  },
+} as unknown as CoreStart;
+
+/**
+ * Helper functional component used in Storybook stories.
+ * Wraps the story with our {@link SecuritySolutionContext} and KibanaReactContext.
+ */
+export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
+  children,
+  kibana = {},
+}) => {
+  const KibanaReactContext = createKibanaReactContext({
+    ...defaultServices,
+    ...kibana,
+    securityLayout,
+  });
+  const securitySolutionContextMock = getSecuritySolutionContextMock();
+
+  return (
+    <EuiThemeProvider>
+      <FieldTypesContext.Provider value={generateFieldTypeMap()}>
+        <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
+          <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
+            <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>
+          </FiltersContext.Provider>
+        </SecuritySolutionContext.Provider>
+      </FieldTypesContext.Provider>
+    </EuiThemeProvider>
+  );
+};

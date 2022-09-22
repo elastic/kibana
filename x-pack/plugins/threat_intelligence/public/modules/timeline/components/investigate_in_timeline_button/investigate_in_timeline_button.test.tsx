@@ -11,8 +11,8 @@ import {
   generateMockIndicator,
   generateMockUrlIndicator,
   Indicator,
-} from '../../../../types/indicator';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+} from '../../../indicators/types/indicator';
+import { TestProvidersComponent } from '../../../../test/test_providers';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 
 describe('<InvestigateInTimelineButton />', () => {

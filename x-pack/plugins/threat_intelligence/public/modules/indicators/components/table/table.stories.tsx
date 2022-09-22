@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
-import { generateMockIndicator, Indicator } from '../../../../types/indicator';
+import { mockIndicatorsFiltersContext } from '../../mocks/mock_indicators_filters_context';
+import { StoryProvidersComponent } from '../../../storybook_interop/story_providers';
+import { generateMockIndicator, Indicator } from '../../types/indicator';
 import { IndicatorsTable } from '.';
 import { FiltersContext } from '../../contexts';
 import { DEFAULT_COLUMNS } from './hooks/use_column_settings';

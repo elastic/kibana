@@ -11,9 +11,9 @@ import {
   generateMockIndicator,
   generateMockUrlIndicator,
   Indicator,
-} from '../../../../types/indicator';
-import { EMPTY_VALUE } from '../../../../common/constants';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+} from '../../../indicators/types/indicator';
+import { EMPTY_VALUE } from '../../../../constants';
+import { TestProvidersComponent } from '../../../../test/test_providers';
 import { InvestigateInTimelineButtonIcon } from './investigate_in_timeline_button_icon';
 
 describe('<InvestigateInTimelineButtonIcon />', () => {

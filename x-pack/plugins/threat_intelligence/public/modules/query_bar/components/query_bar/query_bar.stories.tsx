@@ -9,7 +9,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ComponentStory } from '@storybook/react';
-import { KibanaContextProvider } from '../../../../hooks/use_kibana';
+import { KibanaContextProvider } from '../../../kibana_interop/hooks/use_kibana';
 import { QueryBar } from './query_bar';
 
 export default {

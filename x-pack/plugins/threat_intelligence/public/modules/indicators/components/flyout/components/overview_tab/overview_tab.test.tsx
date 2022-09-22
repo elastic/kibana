@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../../../test/test_providers';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { generateMockIndicator, Indicator } from '../../../../../../types/indicator';
+import { generateMockIndicator, Indicator } from '../../../../types/indicator';
 import {
   IndicatorFlyoutOverviewTab,
   TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,

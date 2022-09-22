@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EmptyPage } from '.';
-import { StoryProvidersComponent } from '../../common/mocks/story_providers';
+import { StoryProvidersComponent } from '../storybook_interop/story_providers';
 
 export default {
   component: BasicEmptyPage,

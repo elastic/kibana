@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, Indicator } from '../../../../types/indicator';
-import { EMPTY_VALUE } from '../../../../common/constants';
+import { generateMockIndicator, Indicator } from '../../../indicators/types/indicator';
+import { EMPTY_VALUE } from '../../../../constants';
 import { AddToTimeline } from './add_to_timeline';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../test/test_providers';
 
 describe('<AddToTimeline />', () => {
   it('should render timeline button when Indicator data', () => {

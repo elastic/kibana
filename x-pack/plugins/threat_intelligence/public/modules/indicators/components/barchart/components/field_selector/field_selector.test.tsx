@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../../../test/test_providers';
 import { DROPDOWN_TEST_ID, IndicatorFieldSelector } from '.';
 
 const mockIndexPattern: DataView = {

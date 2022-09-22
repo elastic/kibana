@@ -10,8 +10,8 @@ import {
   useInvestigateInTimeline,
   UseInvestigateInTimelineValue,
 } from './use_investigate_in_timeline';
-import { generateMockIndicator, generateMockUrlIndicator } from '../../../types/indicator';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { generateMockIndicator, generateMockUrlIndicator } from '../../indicators/types/indicator';
+import { TestProvidersComponent } from '../../../test/test_providers';
 
 describe('useInvestigateInTimeline()', () => {
   let hookResult: RenderHookResult<{}, UseInvestigateInTimelineValue, Renderer<unknown>>;

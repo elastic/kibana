@@ -10,7 +10,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from './hooks/use_kibana';
+import { KibanaContextProvider } from './modules/kibana_interop/hooks/use_kibana';
 import {
   SecuritySolutionPluginContext,
   Services,
@@ -18,10 +18,10 @@ import {
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
 } from './types';
-import { SecuritySolutionContext } from './contexts/security_solution_context';
-import { EnterpriseGuard } from './containers/enterprise_guard';
-import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
-import { IntegrationsGuard } from './containers/integrations_guard';
+import { SecuritySolutionContext } from './modules/kibana_interop/contexts/security_solution_context';
+import { EnterpriseGuard } from './modules/enterprise_guard/containers';
+import { SecuritySolutionPluginTemplateWrapper } from './modules/kibana_interop/containers/security_solution_plugin_template_wrapper';
+import { IntegrationsGuard } from './modules/integrations_guard/containers/integrations_guard';
 
 interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;

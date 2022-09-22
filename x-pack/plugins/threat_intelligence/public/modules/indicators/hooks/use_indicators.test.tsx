@@ -13,7 +13,7 @@ import {
   UseIndicatorsValue,
 } from './use_indicators';
 import { BehaviorSubject, throwError } from 'rxjs';
-import { mockedSearchService, TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { mockedSearchService, TestProvidersComponent } from '../../../test/test_providers';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };

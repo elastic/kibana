@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import { NAME } from './translations';
-import { RawIndicatorFieldId } from '../../../types/indicator';
+import { RawIndicatorFieldId } from '../types/indicator';
 import { SecuritySolutionDataViewBase } from '../../../types';
-import { useSecurityContext } from '../../../hooks/use_security_context';
+import { useSecurityContext } from '../../kibana_interop/hooks/use_security_context';
 
 /**
  * Inline definition for a runtime field "threat.indicator.name" we are adding for indicators grid

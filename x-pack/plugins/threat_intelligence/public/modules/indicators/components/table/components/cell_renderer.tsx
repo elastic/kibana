@@ -8,8 +8,8 @@
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { Indicator } from '../../../../../types/indicator';
+import { useKibana } from '../../../../kibana_interop/hooks/use_kibana';
+import { Indicator } from '../../../types/indicator';
 import { IndicatorFieldValue } from '../../field_value';
 import { IndicatorsTableContext } from '../contexts/context';
 import { ActionsRowCell } from '.';

@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useKibana } from '../../../kibana_interop/hooks/use_kibana';
 import {
   DEFAULT_QUERY,
   DEFAULT_TIME_RANGE,

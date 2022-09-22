@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { useSecurityContext } from '../../../hooks/use_security_context';
+import { useSecurityContext } from '../../kibana_interop/hooks/use_security_context';
 
 export const FiltersGlobal: FC = ({ children }) => {
   const contextValue = useSecurityContext();

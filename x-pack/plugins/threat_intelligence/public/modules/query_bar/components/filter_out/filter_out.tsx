@@ -8,14 +8,14 @@
 import React, { useCallback, VFC } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { ComponentType } from '../../../../types/component_type';
+import { ComponentType } from '../../../eui_interop/types/component_type';
 import { useIndicatorFiltersContext } from '../../../indicators/hooks/use_filters_context';
 import {
   fieldAndValueValid,
   getIndicatorFieldAndValue,
 } from '../../../indicators/utils/field_value';
 import { FilterOut as FilterOutConst, updateFiltersArray } from '../../utils/filter';
-import { Indicator } from '../../../../types/indicator';
+import { Indicator } from '../../../indicators/types/indicator';
 import { useStyles } from './styles';
 import { ICON_TITLE } from './translations';
 

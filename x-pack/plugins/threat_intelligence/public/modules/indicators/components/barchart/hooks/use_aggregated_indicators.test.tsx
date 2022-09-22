@@ -20,7 +20,7 @@ import {
   mockedSearchService,
   mockedTimefilterService,
   TestProvidersComponent,
-} from '../../../../../common/mocks/test_providers';
+} from '../../../../../test/test_providers';
 import { useFilters } from '../../../../query_bar/hooks/use_filters';
 
 jest.mock('../../../../query_bar/hooks/use_filters/use_filters');

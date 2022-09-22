@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
-import { Indicator } from '../../../../types/indicator';
+import { Indicator } from '../../../indicators/types/indicator';
 import { BUTTON_LABEL } from './translations';
 
 export interface InvestigateInTimelineButtonIconProps {

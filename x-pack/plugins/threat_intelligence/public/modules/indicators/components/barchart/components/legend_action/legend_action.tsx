@@ -7,7 +7,7 @@
 
 import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { ComponentType } from '../../../../../../types/component_type';
+import { ComponentType } from '../../../../../eui_interop/types/component_type';
 import { FilterIn } from '../../../../../query_bar/components/filter_in';
 import { FilterOut } from '../../../../../query_bar/components/filter_out';
 import { AddToTimeline } from '../../../../../timeline/components/add_to_timeline';

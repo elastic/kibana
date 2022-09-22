@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { FiltersContext } from '../../../../../../contexts';
-import { StoryProvidersComponent } from '../../../../../../../../common/mocks/story_providers';
-import { generateMockIndicator } from '../../../../../../../../types/indicator';
+import { StoryProvidersComponent } from '../../../../../../../storybook_interop/story_providers';
+import { generateMockIndicator } from '../../../../../../types/indicator';
 import { IndicatorBlock } from '.';
 
 export default {

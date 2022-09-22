@@ -10,7 +10,7 @@ import { FiltersContextProvider } from './containers';
 import { IndicatorBarChartWrapper } from './components/barchart';
 import { IndicatorsTable } from './components/table';
 import { useIndicators } from './hooks/use_indicators';
-import { DefaultPageLayout } from '../../components/layout';
+import { DefaultPageLayout } from '../layout/components/layout';
 import { useFilters } from '../query_bar/hooks/use_filters';
 import { FiltersGlobal } from './containers/filters_global';
 import QueryBar from '../query_bar/components/query_bar';

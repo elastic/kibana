@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../../../test/test_providers';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
 import { IndicatorBarChart } from '.';
 

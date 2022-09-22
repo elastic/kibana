@@ -9,10 +9,10 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { mockIndicatorsFiltersContext } from '../../../../../../common/mocks/mock_indicators_filters_context';
-import { mockUiSettingsService } from '../../../../../../common/mocks/mock_kibana_ui_settings_service';
-import { mockKibanaTimelinesService } from '../../../../../../common/mocks/mock_kibana_timelines_service';
-import { generateMockIndicator, Indicator } from '../../../../../../types/indicator';
+import { mockIndicatorsFiltersContext } from '../../../../mocks/mock_indicators_filters_context';
+import { mockUiSettingsService } from '../../../../../kibana_interop/mocks/mock_kibana_ui_settings_service';
+import { mockKibanaTimelinesService } from '../../../../../kibana_interop/mocks/mock_kibana_timelines_service';
+import { generateMockIndicator, Indicator } from '../../../../types/indicator';
 import { IndicatorFlyoutTableTab } from '.';
 import { FiltersContext } from '../../../../contexts';
 

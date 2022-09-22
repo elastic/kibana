@@ -9,9 +9,9 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { EMPTY_VALUE } from '../../../../common/constants';
-import { generateMockIndicator, Indicator } from '../../../../types/indicator';
+import { mockKibanaTimelinesService } from '../../../kibana_interop/mocks/mock_kibana_timelines_service';
+import { EMPTY_VALUE } from '../../../../constants';
+import { generateMockIndicator, Indicator } from '../../../indicators/types/indicator';
 import { AddToTimeline } from './add_to_timeline';
 
 export default {

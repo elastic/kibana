@@ -7,7 +7,7 @@
 
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { Indicator } from '../../../../types/indicator';
+import { Indicator } from '../../types/indicator';
 import { BUTTON_LABEL } from './translations';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';

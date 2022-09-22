@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TestProvidersComponent } from '../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../test/test_providers';
 import { DOCS_LINK_TEST_ID, EmptyPage, INTEGRATION_LINK_ID } from './empty_page';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
+import { useIntegrationsPageLink } from '../integrations_guard/hooks/use_integrations_page_link';
+import { useTIDocumentationLink } from '../integrations_guard/hooks/use_documentation_link';
 
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');

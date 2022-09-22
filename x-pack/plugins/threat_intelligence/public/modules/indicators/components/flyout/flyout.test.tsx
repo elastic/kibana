@@ -8,8 +8,8 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { IndicatorFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from '.';
-import { generateMockIndicator, Indicator } from '../../../../types/indicator';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { generateMockIndicator, Indicator } from '../../types/indicator';
+import { TestProvidersComponent } from '../../../../test/test_providers';
 
 const mockIndicator = generateMockIndicator();
 

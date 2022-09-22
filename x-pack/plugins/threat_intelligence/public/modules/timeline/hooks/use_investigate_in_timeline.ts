@@ -9,14 +9,14 @@ import { useContext } from 'react';
 import moment from 'moment';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { generateDataProvider } from '../utils/data_provider';
-import { SecuritySolutionContext } from '../../../contexts/security_solution_context';
+import { SecuritySolutionContext } from '../../kibana_interop/contexts/security_solution_context';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { unwrapValue } from '../../indicators/utils/unwrap_value';
 import {
   Indicator,
   IndicatorFieldEventEnrichmentMap,
   RawIndicatorFieldId,
-} from '../../../types/indicator';
+} from '../../indicators/types/indicator';
 
 export interface UseInvestigateInTimelineParam {
   /**

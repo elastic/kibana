@@ -16,11 +16,11 @@ import {
   TimeRangeBounds,
 } from '@kbn/data-plugin/common';
 import { useFilters } from '../../../../query_bar/hooks/use_filters';
-import { convertAggregationToChartSeries } from '../../../../../common/utils/barchart';
-import { RawIndicatorFieldId } from '../../../../../types/indicator';
-import { THREAT_QUERY_BASE } from '../../../../../common/constants';
-import { calculateBarchartColumnTimeInterval } from '../../../../../common/utils/dates';
-import { useKibana } from '../../../../../hooks/use_kibana';
+import { convertAggregationToChartSeries } from '../utils/barchart';
+import { RawIndicatorFieldId } from '../../../types/indicator';
+import { THREAT_QUERY_BASE } from '../../../../../constants';
+import { calculateBarchartColumnTimeInterval } from '../../../../dates/utils/dates';
+import { useKibana } from '../../../../kibana_interop/hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from '../../../hooks/use_sourcerer_data_view';
 import {

@@ -8,7 +8,7 @@
 import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
-import { Indicator } from '../../../../../../types/indicator';
+import { Indicator } from '../../../../types/indicator';
 import { IndicatorFieldValue } from '../../../field_value';
 import { IndicatorValueActions } from '../../../value_actions';
 

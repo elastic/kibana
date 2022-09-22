@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
 import { SecuritySolutionDataViewBase } from '../../../../types';
-import { RawIndicatorFieldId } from '../../../../types/indicator';
+import { RawIndicatorFieldId } from '../../types/indicator';
 import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
 import { IndicatorFieldSelector } from './components/field_selector';
 import { IndicatorBarChart } from './components/barchart';

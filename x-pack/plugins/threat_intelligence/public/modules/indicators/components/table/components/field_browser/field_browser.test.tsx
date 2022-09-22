@@ -8,7 +8,7 @@
 import {
   mockedTriggersActionsUiService,
   TestProvidersComponent,
-} from '../../../../../../common/mocks/test_providers';
+} from '../../../../../../test/test_providers';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsFieldBrowser } from '.';

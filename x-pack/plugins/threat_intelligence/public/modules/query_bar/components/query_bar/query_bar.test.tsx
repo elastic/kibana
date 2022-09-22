@@ -13,8 +13,8 @@ import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { getByTestSubj } from '../../../../common/test/utils';
+import { TestProvidersComponent } from '../../../../test/test_providers';
+import { getByTestSubj } from '../../../../test/utils';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 

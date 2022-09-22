@@ -8,9 +8,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IndicatorFieldValue } from '.';
-import { generateMockIndicator } from '../../../../types/indicator';
-import { EMPTY_VALUE } from '../../../../common/constants';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { generateMockIndicator } from '../../types/indicator';
+import { EMPTY_VALUE } from '../../../../constants';
+import { TestProvidersComponent } from '../../../../test/test_providers';
 
 const mockIndicator = generateMockIndicator();
 

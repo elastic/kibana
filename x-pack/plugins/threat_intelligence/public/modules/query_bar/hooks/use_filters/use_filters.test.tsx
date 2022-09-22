@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mockUseKibanaForFilters } from '../../../../common/mocks/mock_use_kibana_for_filters';
+import { mockUseKibanaForFilters } from '../../../kibana_interop/mocks/mock_use_kibana_for_filters';
 import { act, Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { useFilters, UseFiltersValue } from './use_filters';
 
 import { useHistory, useLocation } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../test/test_providers';
 
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({

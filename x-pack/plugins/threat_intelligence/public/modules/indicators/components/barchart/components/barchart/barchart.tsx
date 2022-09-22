@@ -10,7 +10,7 @@ import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/
 import { EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { IndicatorBarchartLegendAction } from '../legend_action';
-import { barChartTimeAxisLabelFormatter } from '../../../../../../common/utils/dates';
+import { barChartTimeAxisLabelFormatter } from '../../../../../dates/utils/dates';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
 
 const ID = 'tiIndicator';
