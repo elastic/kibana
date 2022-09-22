@@ -9,17 +9,19 @@
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { convertBucketToColumns } from '.';
-import { DateHistogramColumn, FiltersColumn, TermsColumn } from '../../types';
+import { DateHistogramColumn, FiltersColumn, RangeColumn, TermsColumn } from '../../types';
 import { AggBasedColumn, SchemaConfig } from '../../..';
 
 const mockConvertToDateHistogramColumn = jest.fn();
 const mockConvertToFiltersColumn = jest.fn();
 const mockConvertToTermsColumn = jest.fn();
+const mockConvertToRangeColumn = jest.fn();
 
 jest.mock('../convert', () => ({
   convertToDateHistogramColumn: jest.fn(() => mockConvertToDateHistogramColumn()),
   convertToFiltersColumn: jest.fn(() => mockConvertToFiltersColumn()),
   convertToTermsColumn: jest.fn(() => mockConvertToTermsColumn()),
+  convertToRangeColumn: jest.fn(() => mockConvertToRangeColumn()),
 }));
 
 describe('convertBucketToColumns', () => {
@@ -94,6 +96,32 @@ describe('convertBucketToColumns', () => {
         interval: '1h',
       },
     },
+    {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: BUCKET_TYPES.RANGE,
+      aggParams: {
+        field,
+      },
+    },
+    {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: BUCKET_TYPES.DATE_RANGE,
+      aggParams: {
+        field,
+      },
+    },
   ];
   const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
     {
@@ -134,12 +162,12 @@ describe('convertBucketToColumns', () => {
       string,
       Parameters<typeof convertBucketToColumns>,
       () => void,
-      Partial<TermsColumn | DateHistogramColumn | FiltersColumn> | null
+      Partial<TermsColumn | DateHistogramColumn | FiltersColumn | RangeColumn> | null
     ]
   >([
     [
       'null if bucket agg type is not supported',
-      [{ dataView: stubLogstashDataView, agg: bucketAggs[4], aggs, metricColumns }],
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[6], aggs, metricColumns }],
       () => {},
       null,
     ],
@@ -202,6 +230,30 @@ describe('convertBucketToColumns', () => {
       },
       {
         operationType: 'terms',
+      },
+    ],
+    [
+      'range column if bucket agg is valid histogram agg',
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[4], aggs, metricColumns }],
+      () => {
+        mockConvertToRangeColumn.mockReturnValue({
+          operationType: 'range',
+        });
+      },
+      {
+        operationType: 'range',
+      },
+    ],
+    [
+      'range column if bucket agg is valid range agg',
+      [{ dataView: stubLogstashDataView, agg: bucketAggs[5], aggs, metricColumns }],
+      () => {
+        mockConvertToRangeColumn.mockReturnValue({
+          operationType: 'range',
+        });
+      },
+      {
+        operationType: 'range',
       },
     ],
   ])('should return %s', (_, input, actions, expected) => {

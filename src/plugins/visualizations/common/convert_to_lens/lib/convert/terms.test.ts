@@ -7,7 +7,7 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { AggParamsTerms, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { AggParamsTerms, IAggConfig, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { convertToTermsColumn } from './terms';
 import { AggBasedColumn, TermsColumn } from './types';
 import { SchemaConfig } from '../../..';
@@ -75,7 +75,7 @@ describe('convertToDateHistogramColumn', () => {
       [
         aggId,
         {
-          aggParams: { ...aggParams, field: '' },
+          agg: { aggParams: { ...aggParams, field: '' } } as SchemaConfig<BUCKET_TYPES.TERMS>,
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
@@ -87,7 +87,16 @@ describe('convertToDateHistogramColumn', () => {
     ],
     [
       'terms column with alphabetical orderBy',
-      [aggId, { aggParams, dataView: stubLogstashDataView, aggs, metricColumns }, ''],
+      [
+        aggId,
+        {
+          agg: { aggParams } as SchemaConfig<BUCKET_TYPES.TERMS>,
+          dataView: stubLogstashDataView,
+          aggs,
+          metricColumns,
+        },
+        '',
+      ],
       {
         operationType: 'terms',
         sourceField: stubLogstashDataView.fields[0].name,
@@ -108,7 +117,7 @@ describe('convertToDateHistogramColumn', () => {
       [
         aggId,
         {
-          aggParams: { ...aggParams, orderBy: '1' },
+          agg: { aggParams: { ...aggParams, orderBy: '1' } } as SchemaConfig<BUCKET_TYPES.TERMS>,
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
@@ -136,7 +145,7 @@ describe('convertToDateHistogramColumn', () => {
       [
         aggId,
         {
-          aggParams: { ...aggParams, orderBy: '2' },
+          agg: { aggParams: { ...aggParams, orderBy: '2' } } as SchemaConfig<BUCKET_TYPES.TERMS>,
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
@@ -151,7 +160,9 @@ describe('convertToDateHistogramColumn', () => {
       [
         aggId,
         {
-          aggParams: { ...aggParams, orderBy: 'custom', orderAgg: undefined },
+          agg: {
+            aggParams: { ...aggParams, orderBy: 'custom', orderAgg: undefined },
+          } as SchemaConfig<BUCKET_TYPES.TERMS>,
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
@@ -166,7 +177,9 @@ describe('convertToDateHistogramColumn', () => {
       [
         aggId,
         {
-          aggParams: { ...aggParams, orderBy: 'custom', orderAgg: {} as IAggConfig },
+          agg: {
+            aggParams: { ...aggParams, orderBy: 'custom', orderAgg: {} as IAggConfig },
+          } as SchemaConfig<BUCKET_TYPES.TERMS>,
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
@@ -183,7 +196,9 @@ describe('convertToDateHistogramColumn', () => {
       [
         aggId,
         {
-          aggParams: { ...aggParams, orderBy: 'custom', orderAgg: {} as IAggConfig },
+          agg: {
+            aggParams: { ...aggParams, orderBy: 'custom', orderAgg: {} as IAggConfig },
+          } as SchemaConfig<BUCKET_TYPES.TERMS>,
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
