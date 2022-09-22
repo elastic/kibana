@@ -12,6 +12,7 @@ export const throttle = t.union([
   t.null,
   t.literal('onActiveAlert'),
   t.literal('onThrottleInterval'),
+  t.literal('onActionGroupChange'),
 ]);
 export type Throttle = t.TypeOf<typeof throttle>;
 
