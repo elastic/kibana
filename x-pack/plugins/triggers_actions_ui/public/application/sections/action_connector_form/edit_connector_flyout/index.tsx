@@ -278,6 +278,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
                         <EuiFlexItem grow={false}>
                           <EuiButton
+                            fill
                             iconType={isSaved ? 'check' : undefined}
                             color="success"
                             data-test-subj="edit-connector-flyout-save-btn"
@@ -319,12 +320,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
             />
           )}
         </EuiFlyoutBody>
-        <FlyoutFooter
-          isSaving={isSaving}
-          disabled={isSaving}
-          onCancel={closeFlyout}
-          onClose={closeFlyout}
-        />
+        <FlyoutFooter onClose={closeFlyout} />
       </EuiFlyout>
       {showConfirmModal && (
         <EuiConfirmModal
