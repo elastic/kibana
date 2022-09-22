@@ -1,6 +1,7 @@
 # Kibana task manager
 
 The task manager is a generic system for running background tasks.
+
 Documentation: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
 
 It supports:
