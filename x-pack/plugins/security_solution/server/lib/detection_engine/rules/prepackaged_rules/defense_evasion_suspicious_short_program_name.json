@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious Execution - Short Program Name",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and length(process.name) > 0 and\n length(process.name) == 5 and host.os.name == \"Windows\" and length(process.pe.original_file_name) > 5\n",
+  "query": "process where event.type == \"start\" and length(process.name) > 0 and\n length(process.name) == 5 and host.os.name == \"Windows\" and length(process.pe.original_file_name) > 5\n",
   "required_fields": [
     {
       "ecs": true,
@@ -73,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 101
 }

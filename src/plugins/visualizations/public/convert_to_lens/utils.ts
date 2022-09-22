@@ -23,8 +23,16 @@ export const getColumnsWithoutReferenced = (columns: AggBasedColumn[]) => {
   return columns.filter(({ columnId }) => !isReferenced(columnId, references));
 };
 
-export const getBucketCollapseFn = (metrics: Array<SchemaConfig<SupportedAggregation>>) => {
-  return metrics.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
+export const getBucketCollapseFn = (
+  metrics: Array<SchemaConfig<SupportedAggregation>>,
+  customBucketColumns: AggBasedColumn[]
+) => {
+  const collapseFn = metrics.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
+  return customBucketColumns.length
+    ? {
+        [customBucketColumns[0].columnId]: collapseFn,
+      }
+    : {};
 };
 
 export const getBucketColumns = (
@@ -59,7 +67,7 @@ export const getBucketColumns = (
   return columns;
 };
 
-export const isValidVis = (visSchemas: Schemas, splits: Array<keyof Schemas>) => {
+export const isValidVis = (visSchemas: Schemas) => {
   const { metric } = visSchemas;
   const siblingPipelineAggs = metric.filter((m) => isSiblingPipeline(m));
 
@@ -72,11 +80,7 @@ export const isValidVis = (visSchemas: Schemas, splits: Array<keyof Schemas>) =>
     return false;
   }
 
-  const splitAggs = splits.flatMap((split) => visSchemas[split]).filter(Boolean);
-  if (!splitAggs.length) {
-    return true;
-  }
-  return false;
+  return true;
 };
 
 export const getMetricsWithoutDuplicates = (metrics: Array<SchemaConfig<SupportedAggregation>>) =>

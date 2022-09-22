@@ -99,3 +99,8 @@ export const FillTypes = {
   ABOVE: 'above',
   BELOW: 'below',
 } as const;
+
+export const RANGE_MODES = {
+  Range: 'range',
+  Histogram: 'histogram',
+} as const;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggParamsTerms, BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { SchemaConfig } from '../../..';
@@ -16,14 +16,22 @@ import {
   convertToDateHistogramColumn,
   convertToFiltersColumn,
   convertToTermsColumn,
+  convertToRangeColumn,
 } from '../convert';
 import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
 
-export type BucketAggs = BUCKET_TYPES.TERMS | BUCKET_TYPES.DATE_HISTOGRAM | BUCKET_TYPES.FILTERS;
+export type BucketAggs =
+  | BUCKET_TYPES.TERMS
+  | BUCKET_TYPES.DATE_HISTOGRAM
+  | BUCKET_TYPES.FILTERS
+  | BUCKET_TYPES.RANGE
+  | BUCKET_TYPES.HISTOGRAM;
 const SUPPORTED_BUCKETS: string[] = [
   BUCKET_TYPES.TERMS,
   BUCKET_TYPES.DATE_HISTOGRAM,
   BUCKET_TYPES.FILTERS,
+  BUCKET_TYPES.RANGE,
+  BUCKET_TYPES.HISTOGRAM,
 ];
 
 const isSupportedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs> => {
@@ -31,28 +39,32 @@ const isSupportedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs
 };
 
 export const getBucketColumns = (
-  aggType: BUCKET_TYPES,
-  { aggParams, dataView, metricColumns, aggs }: CommonBucketConverterArgs<BucketAggs>,
+  { agg, dataView, metricColumns, aggs }: CommonBucketConverterArgs<BucketAggs>,
   {
     label,
     isSplit = false,
     dropEmptyRowsInDateHistogram = false,
-  }: { label: string; isSplit: boolean; dropEmptyRowsInDateHistogram: boolean },
-  aggId: string = ''
+  }: { label: string; isSplit: boolean; dropEmptyRowsInDateHistogram: boolean }
 ) => {
-  switch (aggType) {
+  if (!agg.aggParams) {
+    return null;
+  }
+  switch (agg.aggType) {
     case BUCKET_TYPES.DATE_HISTOGRAM:
       return convertToDateHistogramColumn(
-        aggId,
-        aggParams,
+        agg.aggId ?? '',
+        agg.aggParams,
         dataView,
         isSplit,
         dropEmptyRowsInDateHistogram
       );
     case BUCKET_TYPES.FILTERS:
-      return convertToFiltersColumn(aggId, aggParams, isSplit);
+      return convertToFiltersColumn(agg.aggId ?? '', agg.aggParams, isSplit);
+    case BUCKET_TYPES.RANGE:
+    case BUCKET_TYPES.HISTOGRAM:
+      return convertToRangeColumn(agg.aggId ?? '', agg.aggParams, label, dataView, isSplit);
     case BUCKET_TYPES.TERMS:
-      const fieldName = getFieldNameFromField((aggParams as AggParamsTerms).field);
+      const fieldName = getFieldNameFromField(agg.aggParams.field);
       if (!fieldName) {
         return null;
       }
@@ -63,14 +75,14 @@ export const getBucketColumns = (
       }
       if (field.type !== 'date') {
         return convertToTermsColumn(
-          aggId,
-          { aggParams: aggParams as AggParamsTerms, dataView, metricColumns, aggs },
+          agg.aggId ?? '',
+          { agg, dataView, metricColumns, aggs },
           label,
           isSplit
         );
       } else {
         return convertToDateHistogramColumn(
-          aggId,
+          agg.aggId ?? '',
           {
             field: fieldName,
           },
@@ -103,15 +115,12 @@ export const convertBucketToColumns = (
   if (!currentAgg.aggParams || !isSupportedBucketAgg(currentAgg)) {
     return null;
   }
-  const { aggParams } = currentAgg;
   return getBucketColumns(
-    currentAgg.aggType,
-    { aggParams, dataView, metricColumns, aggs },
+    { agg: currentAgg, dataView, metricColumns, aggs },
     {
       label: getLabel(currentAgg),
       isSplit,
       dropEmptyRowsInDateHistogram,
-    },
-    currentAgg.aggId
+    }
   );
 };

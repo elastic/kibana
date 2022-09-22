@@ -7,8 +7,13 @@
  */
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import {
+  getIndexPatternIds,
+  isAnnotationsLayer,
+  Layer,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Panel } from '../../../common/types';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
@@ -37,7 +42,7 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
 };
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel) => {
-  const dataViews = getDataViewsStart();
+  const dataViews: DataViewsPublicPluginStart = getDataViewsStart();
   const extendedLayers: Record<number, ExtendedLayer> = {};
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 
@@ -96,9 +101,20 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
     };
   }
 
+  const configLayers = await getLayers(extendedLayers, model, dataViews);
+  const configuration = getConfiguration(model, configLayers);
+  const layers = Object.values(excludeMetaFromLayers(extendedLayers));
+  const annotationIndexPatterns = configuration.layers.reduce<string[]>((acc, layer) => {
+    if (isAnnotationsLayer(layer)) {
+      return [...acc, layer.indexPatternId];
+    }
+    return acc;
+  }, []);
+
   return {
     type: 'lnsXY',
-    layers: Object.values(excludeMetaFromLayers(extendedLayers)),
-    configuration: getConfiguration(model, getLayers(extendedLayers, model)),
+    layers,
+    configuration,
+    indexPatternIds: [...getIndexPatternIds(layers), ...annotationIndexPatterns],
   };
 };

@@ -41,7 +41,7 @@ export const getColumnsFromVis = <T>(
     timeRange: timefilter.getAbsoluteTime(),
   });
 
-  if (!isValidVis(visSchemas, [...buckets, ...splits])) {
+  if (!isValidVis(visSchemas)) {
     return null;
   }
 
@@ -113,7 +113,7 @@ export const getColumnsFromVis = <T>(
   return {
     metrics: getColumnIds(columnsWithoutReferenced.filter((с) => !с.isBucketed)),
     buckets: getColumnIds(columnsWithoutReferenced.filter((c) => c.isBucketed)),
-    bucketCollapseFn: getBucketCollapseFn(visSchemas.metric),
+    bucketCollapseFn: getBucketCollapseFn(visSchemas.metric, customBucketColumns),
     columnsWithoutReferenced,
     columns,
   };

@@ -88,17 +88,18 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   }
 
   const layerId = uuid();
-
+  const indexPatternId = dataView.id!;
   return {
     type: 'lnsDatatable',
     layers: [
       {
-        indexPatternId: dataView.id!,
+        indexPatternId,
         layerId,
         columns: result.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
     configuration: getConfiguration(layerId, vis.params, result),
+    indexPatternIds: [indexPatternId],
   };
 };

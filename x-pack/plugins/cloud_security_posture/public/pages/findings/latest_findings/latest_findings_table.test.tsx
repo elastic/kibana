@@ -18,8 +18,8 @@ import { CspFinding } from '../../../../common/schemas/csp_finding';
 const chance = new Chance();
 
 const getFakeFindings = (name: string): CspFinding & { id: string } => ({
-  id: chance.word(),
   cluster_id: chance.guid(),
+  id: chance.word(),
   result: {
     expected: {
       source: {},
