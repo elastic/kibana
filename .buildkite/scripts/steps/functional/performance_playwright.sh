@@ -57,7 +57,7 @@ for journey in "${journeys[@]}"; do
 
     export TEST_PERFORMANCE_PHASE="$phase"
     node scripts/functional_tests \
-      --config "$journey" \
+      --config "x-pack/performance/journeys/$journey.ts" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
