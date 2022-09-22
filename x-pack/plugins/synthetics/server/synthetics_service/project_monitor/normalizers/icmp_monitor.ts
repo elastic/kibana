@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getNormalizeCommonFields } from './common_fields';
-import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
@@ -14,7 +12,17 @@ import {
   FormMonitorType,
   ICMPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { normalizeYamlConfig, getValueInSeconds, getOptionalArrayField } from './common_fields';
+import {
+  NormalizerResult,
+  NormalizedProjectProps,
+  normalizeYamlConfig,
+  getNormalizeCommonFields,
+  getValueInSeconds,
+  getOptionalArrayField,
+  getOptionalListField,
+  getMultipleUrlsOrHostsError,
+  getUnsupportedKeysError,
+} from './common_fields';
 
 export const getNormalizeICMPFields = ({
   locations = [],
@@ -22,8 +30,10 @@ export const getNormalizeICMPFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): { normalizedFields: ICMPFields; unsupportedKeys: string[] } => {
+  version,
+}: NormalizedProjectProps): NormalizerResult<ICMPFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.ICMP];
+  const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
   const commonFields = getNormalizeCommonFields({
@@ -32,7 +42,18 @@ export const getNormalizeICMPFields = ({
     monitor,
     projectId,
     namespace,
+    version,
   });
+
+  /* Check if monitor has multiple hosts */
+  const hosts = getOptionalListField(monitor.hosts);
+  if (hosts.length > 1) {
+    errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  }
+
+  if (unsupportedKeys.length) {
+    errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
+  }
 
   const normalizedFields = {
     ...yamlConfig,
@@ -54,5 +75,6 @@ export const getNormalizeICMPFields = ({
       ...normalizedFields,
     },
     unsupportedKeys,
+    errors,
   };
 };

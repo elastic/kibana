@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { normalizeYamlConfig, getValueInSeconds } from './common_fields';
-
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   TCPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { getNormalizeCommonFields, getOptionalArrayField } from './common_fields';
+import {
+  NormalizedProjectProps,
+  NormalizerResult,
+  normalizeYamlConfig,
+  getValueInSeconds,
+  getNormalizeCommonFields,
+  getOptionalArrayField,
+  getOptionalListField,
+  getMultipleUrlsOrHostsError,
+  getUnsupportedKeysError,
+} from './common_fields';
 
 export const getNormalizeTCPFields = ({
   locations = [],
@@ -23,8 +30,10 @@ export const getNormalizeTCPFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): { normalizedFields: TCPFields; unsupportedKeys: string[] } => {
+  version,
+}: NormalizedProjectProps): NormalizerResult<TCPFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.TCP];
+  const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
   const commonFields = getNormalizeCommonFields({
@@ -33,7 +42,18 @@ export const getNormalizeTCPFields = ({
     monitor,
     projectId,
     namespace,
+    version,
   });
+
+  /* Check if monitor has multiple hosts */
+  const hosts = getOptionalListField(monitor.hosts);
+  if (hosts.length > 1) {
+    errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  }
+
+  if (unsupportedKeys.length) {
+    errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
+  }
 
   const normalizedFields = {
     ...yamlConfig,
@@ -52,5 +72,6 @@ export const getNormalizeTCPFields = ({
       ...normalizedFields,
     },
     unsupportedKeys,
+    errors,
   };
 };

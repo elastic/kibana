@@ -118,6 +118,7 @@ describe('browser normalizers', () => {
         monitors,
         projectId,
         namespace: 'test-space',
+        version: '8.5.0',
       });
       expect(actual).toEqual([
         {
@@ -162,6 +163,7 @@ describe('browser normalizers', () => {
             timeout: null,
           },
           unsupportedKeys: [],
+          errors: [],
         },
         {
           normalizedFields: {
@@ -217,6 +219,7 @@ describe('browser normalizers', () => {
             timeout: null,
           },
           unsupportedKeys: [],
+          errors: [],
         },
         {
           normalizedFields: {
@@ -279,6 +282,7 @@ describe('browser normalizers', () => {
             timeout: null,
           },
           unsupportedKeys: [],
+          errors: [],
         },
       ]);
     });
