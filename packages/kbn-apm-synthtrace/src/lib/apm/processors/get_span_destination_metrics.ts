@@ -18,6 +18,7 @@ export function getSpanDestinationMetrics(events: ApmFields[]) {
     'service.environment',
     'service.name',
     'span.destination.service.resource',
+    'span.name',
   ]);
 
   return metricsets.map((metricset) => {

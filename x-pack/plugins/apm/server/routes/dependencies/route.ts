@@ -492,7 +492,10 @@ const dependencyOperationsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       offsetRt,
-      t.type({ dependencyName: t.string }),
+      t.type({
+        dependencyName: t.string,
+        searchServiceDestinationMetrics: toBooleanRt,
+      }),
     ]),
   }),
   handler: async (
@@ -501,7 +504,15 @@ const dependencyOperationsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const {
-      query: { dependencyName, start, end, environment, kuery, offset },
+      query: {
+        dependencyName,
+        start,
+        end,
+        environment,
+        kuery,
+        offset,
+        searchServiceDestinationMetrics,
+      },
     } = resources.params;
 
     const operations = await getTopDependencyOperations({
@@ -512,6 +523,7 @@ const dependencyOperationsRoute = createApmServerRoute({
       offset,
       environment,
       kuery,
+      searchServiceDestinationMetrics,
     });
 
     return { operations };
