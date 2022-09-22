@@ -84,10 +84,12 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         />
       </EuiButtonEmpty>
       <EuiButton
+        color="primary"
         data-test-subj="confirmSaveSavedObjectButton"
         fill={true}
         isDisabled={false}
         isLoading={false}
+        size="m"
         type="submit"
       >
         Save
@@ -181,10 +183,12 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         />
       </EuiButtonEmpty>
       <EuiButton
+        color="primary"
         data-test-subj="confirmSaveSavedObjectButton"
         fill={true}
         isDisabled={true}
         isLoading={false}
+        size="m"
         type="submit"
       >
         Save
@@ -278,10 +282,12 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         />
       </EuiButtonEmpty>
       <EuiButton
+        color="primary"
         data-test-subj="confirmSaveSavedObjectButton"
         fill={true}
         isDisabled={false}
         isLoading={false}
+        size="m"
         type="submit"
       >
         Save
@@ -389,10 +395,12 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
         />
       </EuiButtonEmpty>
       <EuiButton
+        color="primary"
         data-test-subj="confirmSaveSavedObjectButton"
         fill={true}
         isDisabled={false}
         isLoading={false}
+        size="m"
         type="submit"
       >
         Save
