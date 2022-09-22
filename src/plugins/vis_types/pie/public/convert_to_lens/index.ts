@@ -65,16 +65,18 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
 
   const layerId = uuid();
 
+  const indexPatternId = dataView.id!;
   return {
     type: 'lnsPie',
     layers: [
       {
-        indexPatternId: dataView.id!,
+        indexPatternId,
         layerId,
         columns: result.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
     configuration: getConfiguration(layerId, vis, result),
+    indexPatternIds: [indexPatternId],
   };
 };

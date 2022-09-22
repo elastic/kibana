@@ -534,5 +534,8 @@ function getTopSuggestion(
     );
   });
 
-  return suggestions[0];
+  return (
+    suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
+    suggestions[0]
+  );
 }

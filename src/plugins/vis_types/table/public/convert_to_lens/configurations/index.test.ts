@@ -48,7 +48,7 @@ describe('getConfiguration', () => {
             },
           },
         ],
-        bucketCollapseFn: 'sum',
+        bucketCollapseFn: { 'bucket-1': 'sum' },
       })
     ).toEqual({
       columns: [

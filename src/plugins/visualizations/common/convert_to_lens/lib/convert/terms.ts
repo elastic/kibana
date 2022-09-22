@@ -20,21 +20,25 @@ interface OrderByWithAgg {
 }
 
 const getOrderByWithAgg = ({
-  aggParams,
+  agg,
   dataView,
   aggs,
   metricColumns,
 }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>): OrderByWithAgg | null => {
-  if (aggParams.orderBy === '_key') {
+  if (!agg.aggParams) {
+    return null;
+  }
+
+  if (agg.aggParams.orderBy === '_key') {
     return { orderBy: { type: 'alphabetical' } };
   }
 
-  if (aggParams.orderBy === 'custom') {
-    if (!aggParams.orderAgg) {
+  if (agg.aggParams.orderBy === 'custom') {
+    if (!agg.aggParams.orderAgg) {
       return null;
     }
     const orderMetricColumn = convertMetricToColumns(
-      convertToSchemaConfig(aggParams.orderAgg),
+      convertToSchemaConfig(agg.aggParams.orderAgg),
       dataView,
       aggs
     );
@@ -49,7 +53,7 @@ const getOrderByWithAgg = ({
 
   const orderAgg = metricColumns.find((column) => {
     if (isColumnWithMeta(column)) {
-      return column.meta.aggId === aggParams.orderBy;
+      return column.meta.aggId === agg.aggParams?.orderBy;
     }
     return false;
   });
@@ -65,52 +69,59 @@ const getOrderByWithAgg = ({
 };
 
 export const convertToTermsParams = ({
-  aggParams,
+  agg,
   dataView,
   aggs,
   metricColumns,
 }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>): TermsParams | null => {
-  const orderByWithAgg = getOrderByWithAgg({ aggParams, dataView, aggs, metricColumns });
+  if (!agg.aggParams) {
+    return null;
+  }
+
+  const orderByWithAgg = getOrderByWithAgg({ agg, dataView, aggs, metricColumns });
   if (orderByWithAgg === null) {
     return null;
   }
 
   return {
-    size: aggParams.size ?? 10,
-    include: aggParams.include
-      ? Array.isArray(aggParams.include)
-        ? aggParams.include
-        : [aggParams.include]
+    size: agg.aggParams.size ?? 10,
+    include: agg.aggParams.include
+      ? Array.isArray(agg.aggParams.include)
+        ? agg.aggParams.include
+        : [agg.aggParams.include]
       : [],
-    includeIsRegex: aggParams.includeIsRegex,
-    exclude: aggParams.exclude
-      ? Array.isArray(aggParams.exclude)
-        ? aggParams.exclude
-        : [aggParams.exclude]
+    includeIsRegex: agg.aggParams.includeIsRegex,
+    exclude: agg.aggParams.exclude
+      ? Array.isArray(agg.aggParams.exclude)
+        ? agg.aggParams.exclude
+        : [agg.aggParams.exclude]
       : [],
-    excludeIsRegex: aggParams.excludeIsRegex,
-    otherBucket: aggParams.otherBucket,
-    orderDirection: aggParams.order?.value ?? 'desc',
+    excludeIsRegex: agg.aggParams.excludeIsRegex,
+    otherBucket: agg.aggParams.otherBucket,
+    orderDirection: agg.aggParams.order?.value ?? 'desc',
     parentFormat: { id: 'terms' },
-    missingBucket: aggParams.missingBucket,
+    missingBucket: agg.aggParams.missingBucket,
     ...orderByWithAgg,
   };
 };
 
 export const convertToTermsColumn = (
   aggId: string,
-  { aggParams, dataView, aggs, metricColumns }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
+  { agg, dataView, aggs, metricColumns }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
   label: string,
   isSplit: boolean = false
 ): TermsColumn | null => {
-  const sourceField = getFieldNameFromField(aggParams.field) ?? 'document';
+  if (!agg.aggParams?.field) {
+    return null;
+  }
+  const sourceField = getFieldNameFromField(agg.aggParams?.field) ?? 'document';
   const field = dataView.getFieldByName(sourceField);
 
   if (!field) {
     return null;
   }
 
-  const params = convertToTermsParams({ aggParams, dataView, aggs, metricColumns });
+  const params = convertToTermsParams({ agg, dataView, aggs, metricColumns });
   if (!params) {
     return null;
   }
@@ -124,7 +135,7 @@ export const convertToTermsColumn = (
     isBucketed: true,
     isSplit,
     params: { ...params },
-    timeShift: aggParams?.timeShift,
+    timeShift: agg.aggParams?.timeShift,
     meta: { aggId },
   };
 };
