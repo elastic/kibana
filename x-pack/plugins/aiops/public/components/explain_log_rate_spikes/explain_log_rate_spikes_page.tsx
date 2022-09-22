@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
@@ -41,6 +42,16 @@ import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_tabl
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './explain_log_rate_spikes_page.scss';
+
+function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
+  if (changePoint) {
+    return `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
+  } else if (group) {
+    return i18n.translate('xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel', {
+      defaultMessage: 'Selected group',
+    });
+  }
+}
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -94,6 +105,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   );
 
   const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
+  const [pinnedGroup, setPinnedGroup] = useState<GroupTableItem | null>(null);
   const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePoint | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<GroupTableItem | null>(null);
 
@@ -105,6 +117,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
       return pinnedChangePoint;
     }
   }, [pinnedChangePoint, selectedChangePoint]);
+
+  // If a group is pinned, still overrule with a potentially hovered group.
+  const currentSelectedGroup = useMemo(() => {
+    if (selectedGroup) {
+      return selectedGroup;
+    } else if (pinnedGroup) {
+      return pinnedGroup;
+    }
+  }, [selectedGroup, pinnedGroup]);
 
   const {
     documentStats,
@@ -120,7 +141,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setGlobalState,
     currentSelectedChangePoint,
     undefined,
-    selectedGroup
+    currentSelectedGroup
   );
 
   const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
@@ -230,12 +251,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={
-                    currentSelectedChangePoint || selectedGroup
+                    currentSelectedChangePoint || currentSelectedGroup
                       ? documentCountStatsCompare
                       : undefined
                   }
+                  documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
+                    currentSelectedChangePoint,
+                    currentSelectedGroup
+                  )}
                   totalCount={totalCount}
-                  changePoint={currentSelectedChangePoint}
                   windowParameters={windowParameters}
                 />
               </EuiPanel>
@@ -251,10 +275,13 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   windowParameters={windowParameters}
                   searchQuery={searchQuery}
                   onPinnedChangePoint={setPinnedChangePoint}
+                  onPinnedGroup={setPinnedGroup}
                   onSelectedChangePoint={setSelectedChangePoint}
                   onSelectedGroup={setSelectedGroup}
                   pinnedChangePoint={pinnedChangePoint}
+                  pinnedGroup={pinnedGroup}
                   selectedChangePoint={currentSelectedChangePoint}
+                  selectedGroup={currentSelectedGroup}
                 />
               )}
               {windowParameters === undefined && (

@@ -55,10 +55,13 @@ interface ExplainLogRateSpikesAnalysisProps {
   windowParameters: WindowParameters;
   searchQuery: Query['query'];
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onPinnedGroup?: (group: GroupTableItem | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedGroup?: (group: GroupTableItem | null) => void;
   pinnedChangePoint?: ChangePoint | null;
+  pinnedGroup?: GroupTableItem | null;
   selectedChangePoint?: ChangePoint;
+  selectedGroup?: GroupTableItem;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -68,10 +71,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   windowParameters,
   searchQuery,
   onPinnedChangePoint,
+  onPinnedGroup,
   onSelectedChangePoint,
   onSelectedGroup,
   pinnedChangePoint,
+  pinnedGroup,
   selectedChangePoint,
+  selectedGroup,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -83,6 +89,20 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
+
+    // When toggling the group switch, clear all row selections
+    if (onPinnedChangePoint) {
+      onPinnedChangePoint(null);
+    }
+    if (onPinnedGroup) {
+      onPinnedGroup(null);
+    }
+    if (onSelectedChangePoint) {
+      onSelectedChangePoint(null);
+    }
+    if (onSelectedGroup) {
+      onSelectedGroup(null);
+    }
   };
 
   const {
@@ -252,9 +272,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           groupTableItems={groupTableItems}
           loading={isRunning}
           onPinnedChangePoint={onPinnedChangePoint}
+          onPinnedGroup={onPinnedGroup}
           onSelectedChangePoint={onSelectedChangePoint}
-          selectedChangePoint={selectedChangePoint}
           onSelectedGroup={onSelectedGroup}
+          pinnedChangePoint={pinnedChangePoint}
+          pinnedGroup={pinnedGroup}
+          selectedChangePoint={selectedChangePoint}
+          selectedGroup={selectedGroup}
           dataViewId={dataView.id}
         />
       ) : null}

@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
 import {
+  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -65,9 +66,13 @@ interface SpikeAnalysisTableProps {
   dataViewId?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onPinnedGroup?: (group: GroupTableItem | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  selectedChangePoint?: ChangePoint;
   onSelectedGroup?: (group: GroupTableItem | null) => void;
+  pinnedChangePoint?: ChangePoint | null;
+  pinnedGroup?: GroupTableItem | null;
+  selectedChangePoint?: ChangePoint;
+  selectedGroup?: GroupTableItem;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -76,9 +81,13 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   dataViewId,
   loading,
   onPinnedChangePoint,
+  onPinnedGroup,
   onSelectedChangePoint,
-  selectedChangePoint,
   onSelectedGroup,
+  pinnedChangePoint,
+  pinnedGroup,
+  selectedChangePoint,
+  selectedGroup,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -89,6 +98,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   );
 
   const euiTheme = useEuiTheme();
+  const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -123,6 +133,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           loading={loading}
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
+          pinnedChangePoint={pinnedChangePoint}
           selectedChangePoint={selectedChangePoint}
           dataViewId={dataViewId}
         />
@@ -458,6 +469,24 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     };
   }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
 
+  const getRowStyle = (group: GroupTableItem) => {
+    if (pinnedGroup && pinnedGroup.id === group.id) {
+      return {
+        backgroundColor: primaryBackgroundColor,
+      };
+    }
+
+    if (selectedGroup && selectedGroup.id === group.id) {
+      return {
+        backgroundColor: euiTheme.euiColorLightestShade,
+      };
+    }
+
+    return {
+      backgroundColor: euiTheme.euiColorEmptyShade,
+    };
+  };
+
   return (
     <EuiBasicTable
       data-test-subj="aiopsSpikeAnalysisGroupsTable"
@@ -473,6 +502,15 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       rowProps={(group) => {
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
+          onClick: () => {
+            if (onPinnedGroup) {
+              if (group.id === pinnedGroup?.id) {
+                onPinnedGroup(null);
+              } else {
+                onPinnedGroup(group);
+              }
+            }
+          },
           onMouseEnter: () => {
             if (onSelectedGroup) {
               onSelectedGroup(group);
@@ -483,6 +521,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               onSelectedGroup(null);
             }
           },
+          style: getRowStyle(group),
         };
       }}
     />
