@@ -1626,7 +1626,7 @@ export function updatePackageInputs(
 
       // Ignore any inputs removed from this policy template in the new package version
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
-        ? policyTemplate.type === input.type
+        ? policyTemplate.input === input.type
         : policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
           ) ?? false;
