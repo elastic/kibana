@@ -66,6 +66,20 @@ interface UseConsoleActionSubmitterOptions<
   dataTestSubj?: string;
 }
 
+/**
+ * generic hook for use with Response Action commands. It will create the action, store its ID and
+ * continiously pull the Action's Details until it completes. It handles all aspects of UI display
+ * for the different states of the command (pending -> success/failure)
+ *
+ * @param actionCreator
+ * @param actionRequestBody
+ * @param setStatus
+ * @param status
+ * @param setStore
+ * @param store
+ * @param ResultComponent
+ * @param dataTestSubj
+ */
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TActionOutputContent extends object = object
@@ -87,7 +101,7 @@ export const useConsoleActionSubmitter = <
   const isPending = status === 'pending';
 
   const currentActionState = useMemo<
-    Immutable<Required<CommandResponseActionApiState>['actionApiState']>
+    Immutable<Required<CommandResponseActionApiState<TActionOutputContent>>['actionApiState']>
   >(
     () =>
       store.actionApiState ?? {
@@ -118,12 +132,16 @@ export const useConsoleActionSubmitter = <
   // Create the action request if not yet done
   useEffect(() => {
     if (!actionRequestSent && actionRequestBody && isMounted) {
-      const updatedRequestState: Required<CommandResponseActionApiState>['actionApiState']['request'] =
-        {
-          ...(currentActionState as Required<CommandResponseActionApiState>['actionApiState'])
-            .request,
-          sent: true,
-        };
+      const updatedRequestState: Required<
+        CommandResponseActionApiState<TActionOutputContent>
+      >['actionApiState']['request'] = {
+        ...(
+          currentActionState as Required<
+            CommandResponseActionApiState<TActionOutputContent>
+          >['actionApiState']
+        ).request,
+        sent: true,
+      };
 
       // The object defined above (`updatedRequestState`) is saved to the command state right away.
       // the creation of the Action request (below) will mutate this object to store the Action ID
@@ -202,7 +220,7 @@ export const useConsoleActionSubmitter = <
   // If the action details indicates complete, then update the action's console state and set the status to success
   useEffect(() => {
     if (apiActionDetailsResponse?.data.isCompleted && isPending) {
-      setStatus('success');
+      setStatus(apiActionDetailsResponse?.data.wasSuccessful ? 'success' : 'error');
       setStore((prevState) => {
         return {
           ...prevState,
@@ -210,7 +228,9 @@ export const useConsoleActionSubmitter = <
             ...(prevState.actionApiState ?? currentActionState),
             actionDetails: apiActionDetailsResponse.data,
           },
-        };
+          // Unclear why I needed to cast this here. For some reason the `ActionDetails['outputs']` is
+          // reporting a type error for the `content` property, although the types seem to line up.
+        } as typeof prevState;
       });
     }
   }, [apiActionDetailsResponse, currentActionState, isPending, setStatus, setStore]);
