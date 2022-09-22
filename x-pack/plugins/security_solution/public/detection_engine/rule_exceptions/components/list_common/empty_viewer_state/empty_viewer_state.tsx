@@ -26,9 +26,7 @@ import * as i18n from '../translations';
 interface EmptyViewerStateProps {
   title?: string;
   body?: string;
-
   buttonText?: string;
-
   listType?: string;
   isReadOnly: boolean;
   viewerStatus: ViewerStatus;
@@ -39,7 +37,6 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
   title,
   body,
   buttonText,
-
   listType,
   isReadOnly,
   viewerStatus,
