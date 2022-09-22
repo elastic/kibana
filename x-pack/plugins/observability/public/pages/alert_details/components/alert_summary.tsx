@@ -27,6 +27,7 @@ import { DEFAULT_DATE_FORMAT } from '../constants';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
   const { triggersActionsUi } = useKibana().services;
+  const tags = alert?.fields[ALERT_RULE_TAGS];
 
   return (
     <>
@@ -151,12 +152,12 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           <div>
             <EuiSpacer size="s" />
-            {alert?.fields[ALERT_RULE_TAGS] &&
-              alert?.fields[ALERT_RULE_TAGS]?.length > 0 &&
-              triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+            {
+              tags && triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
                 tagsOutPopover: true,
-                tags: alert?.fields[ALERT_RULE_TAGS],
-              })}
+                tags
+              })
+            }
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
