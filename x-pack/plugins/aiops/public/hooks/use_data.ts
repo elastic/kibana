@@ -10,6 +10,7 @@ import { merge } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 
@@ -27,7 +28,7 @@ import {
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
 import type { Dictionary } from './use_url_state';
-import { useSpikeAnalysisTableRowContext } from '../components/spike_analysis_table/spike_analysis_table_row_provider';
+import type { GroupTableItem } from '../components/spike_analysis_table/spike_analysis_table_groups';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -38,6 +39,8 @@ export const useData = (
   }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
+  selectedChangePoint?: ChangePoint,
+  selectedGroup?: GroupTableItem | null,
   barTarget: number = DEFAULT_BAR_TARGET
 ) => {
   const {
@@ -46,9 +49,6 @@ export const useData = (
       query: { filterManager },
     },
   } = useAiopsAppContext();
-
-  const { currentSelectedChangePoint: selectedChangePoint, currentSelectedGroup: selectedGroup } =
-    useSpikeAnalysisTableRowContext();
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<

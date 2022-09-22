@@ -65,26 +65,38 @@ export const SpikeAnalysisTableRowStateProvider: FC = ({ children }) => {
     }
   }, [selectedGroup, pinnedGroup]);
 
-  function clearAllRowState() {
-    setPinnedChangePoint(null);
-    setPinnedGroup(null);
-    setSelectedChangePoint(null);
-    setSelectedGroup(null);
-  }
-
-  const contextValue: SpikeAnalysisTableRow = {
-    pinnedChangePoint,
-    setPinnedChangePoint,
-    pinnedGroup,
-    setPinnedGroup,
-    selectedChangePoint,
-    setSelectedChangePoint,
-    selectedGroup,
-    setSelectedGroup,
-    currentSelectedChangePoint,
-    currentSelectedGroup,
-    clearAllRowState,
-  };
+  const contextValue: SpikeAnalysisTableRow = useMemo(
+    () => ({
+      pinnedChangePoint,
+      setPinnedChangePoint,
+      pinnedGroup,
+      setPinnedGroup,
+      selectedChangePoint,
+      setSelectedChangePoint,
+      selectedGroup,
+      setSelectedGroup,
+      currentSelectedChangePoint,
+      currentSelectedGroup,
+      clearAllRowState: () => {
+        setPinnedChangePoint(null);
+        setPinnedGroup(null);
+        setSelectedChangePoint(null);
+        setSelectedGroup(null);
+      },
+    }),
+    [
+      pinnedChangePoint,
+      setPinnedChangePoint,
+      pinnedGroup,
+      setPinnedGroup,
+      selectedChangePoint,
+      setSelectedChangePoint,
+      selectedGroup,
+      setSelectedGroup,
+      currentSelectedChangePoint,
+      currentSelectedGroup,
+    ]
+  );
 
   return (
     // Provider managing the state
@@ -97,7 +109,7 @@ export const SpikeAnalysisTableRowStateProvider: FC = ({ children }) => {
 export const useSpikeAnalysisTableRowContext = () => {
   const spikeAnalysisTableRow = useContext(spikeAnalysisTableRowContext);
 
-  // if `undefined`, throw an error
+  // If `undefined`, throw an error.
   if (spikeAnalysisTableRow === undefined) {
     throw new Error('useSpikeAnalysisTableRowContext was used outside of its Provider');
   }

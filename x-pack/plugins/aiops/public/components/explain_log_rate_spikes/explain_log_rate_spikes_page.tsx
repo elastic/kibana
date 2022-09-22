@@ -126,7 +126,8 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     { currentDataView: dataView, currentSavedSearch },
     aiopsListState,
     setGlobalState,
-    undefined
+    currentSelectedChangePoint,
+    currentSelectedGroup
   );
 
   const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
