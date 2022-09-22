@@ -79,9 +79,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           onClick={onClickTitleHandler}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >
-          <EuiText>
-            <h4>{title}</h4>
-          </EuiText>
+          {title}
         </EuiLink>
       </RedirectAppLinks>
     );
