@@ -80,6 +80,10 @@ const populateColumns = (
   });
 };
 
+const getColumnIds = (columns: EuiDataGridColumn[]): string[] => {
+  return columns.map((column: EuiDataGridColumn) => column.id);
+};
+
 const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => {
   return columns.find(({ id }: { id: string }) => id === columnId);
 };
@@ -154,7 +158,7 @@ export const useColumns = ({
     (columnId: string): void => {
       const newColumnIds = toggleColumn({
         columnId,
-        columnIds: columns.map((column: EuiDataGridColumn) => column.id),
+        columnIds: getColumnIds(columns),
         defaultColumns,
       });
 
@@ -175,7 +179,7 @@ export const useColumns = ({
 
   return {
     columns,
-    visibleColumns: columns.map((column: EuiDataGridColumn) => column.id),
+    visibleColumns: getColumnIds(columns),
     isBrowserFieldDataLoading,
     browserFields,
     onColumnsChange: setColumnsAndSave,
