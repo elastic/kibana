@@ -326,7 +326,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.updateRuleAPIKeysTitle"
-            defaultMessage="Update API Keys"
+            defaultMessage="Update API keys"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
