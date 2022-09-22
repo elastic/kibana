@@ -1530,10 +1530,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@64.0.4":
-  version "64.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-64.0.4.tgz#4a6a997a3f43f459c82e3b992ac2e6ab318d5a12"
-  integrity sha512-4wpZcVJyNvxfZA58kVSwnJxIbWCrFriU6vARr/DoDB6Vvt/5zHeFrHzXFjdo+hqTWZApPoEQlK7aJ7FDZTEbkw==
+"@elastic/eui@64.0.5":
+  version "64.0.5"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-64.0.5.tgz#d68dcebc2acd9ec360a84cb8688919de0d802417"
+  integrity sha512-6sJpnHYIUErA+IFJBLrXB8a86E+VR6dOBKpWVfQZVL+ZXrt4fy6uWXNompsz0geT8ylvW85oSpfpxRh+cgb0lw==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3040,6 +3040,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -3113,6 +3125,18 @@
   uid ""
 
 "@kbn/core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
   version "0.0.0"
   uid ""
 
@@ -3372,6 +3396,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-types@link:bazel-bin/packages/kbn-field-types":
   version "0.0.0"
   uid ""
@@ -3381,6 +3409,14 @@
   uid ""
 
 "@kbn/flot-charts@link:bazel-bin/packages/kbn-flot-charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
@@ -3433,6 +3469,10 @@
   uid ""
 
 "@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/journeys@link:bazel-bin/packages/kbn-journeys":
   version "0.0.0"
   uid ""
 
@@ -7077,6 +7117,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7150,6 +7202,18 @@
   uid ""
 
 "@types/kbn__core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7401,11 +7465,23 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__field-types@link:bazel-bin/packages/kbn-field-types/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7458,6 +7534,10 @@
   uid ""
 
 "@types/kbn__jest-serializers@link:bazel-bin/packages/kbn-jest-serializers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__journeys@link:bazel-bin/packages/kbn-journeys/npm_module_types":
   version "0.0.0"
   uid ""
 
