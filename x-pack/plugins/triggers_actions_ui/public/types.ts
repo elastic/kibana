@@ -204,6 +204,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  defaultActionParams?: Partial<ActionParams>;
+  defaultRecoveredActionParams?: Partial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
 }
@@ -410,7 +412,6 @@ export interface FetchAlertData {
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
@@ -434,6 +435,11 @@ export interface AlertsTableProps {
   visibleColumns: string[];
   'data-test-subj': string;
   updatedAt: number;
+  browserFields: any;
+  onToggleColumn: (columnId: string) => void;
+  onResetColumns: () => void;
+  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
+  onChangeVisibleColumns: (newColumns: string[]) => void;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
