@@ -64,7 +64,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               id: parentFormatId,
               params: {
                 ...col.meta.params?.params,
-                id: format,
+                id: supportedFormats[format].formatId,
                 ...parentFormatParams,
                 // some wrapper formatters require params to be flatten out (i.e. terms) while others
                 // require them to be in the params property (i.e. ranges)
@@ -83,7 +83,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             id: parentFormatId,
             params: {
               ...col.meta.params?.params,
-              id: format,
+              id: supportedFormats[format].formatId,
               // some wrapper formatters require params to be flatten out (i.e. terms) while others
               // require them to be in the params property (i.e. ranges)
               // so for now duplicate

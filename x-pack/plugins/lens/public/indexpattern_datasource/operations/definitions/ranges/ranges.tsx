@@ -195,13 +195,14 @@ export const rangeOperation: OperationDefinition<
       numberFormat &&
       supportedFormats[numberFormat.id] &&
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
+    const numberFormatId = numberFormat && supportedFormats[numberFormat.id].formatId;
 
     const rangeFormatter = fieldFormats.deserialize({
       ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
         ...(numberFormat
-          ? { id: numberFormat.id, params: { pattern: numberFormatterPattern } }
+          ? { id: numberFormatId, params: { pattern: numberFormatterPattern } }
           : getFieldDefaultFormat(indexPattern, currentField)),
       },
     });
