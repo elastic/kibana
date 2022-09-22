@@ -163,6 +163,7 @@ const AlertsTableState = ({
     sort,
     skip: false,
   });
+  console.log('==============>isLoading', isLoading);
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
@@ -278,6 +279,7 @@ const AlertsTableState = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshNow]);
 
+  console.log('==============>alertsCount:', alertsCount);
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && <EmptyState />}
