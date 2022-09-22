@@ -31,7 +31,7 @@ import {
   DateHistogramColumn as BaseDateHistogramColumn,
   TermsColumn as BaseTermsColumn,
   FiltersColumn as BaseFiltersColumn,
-  RangeColumn as BaseRangeColumn
+  RangeColumn as BaseRangeColumn,
 } from '../../types';
 
 export type MetricsWithField = Exclude<
