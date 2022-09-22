@@ -2548,6 +2548,26 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.EditorRenderProps.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/visualizations/public/visualize_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.EditorRenderProps.linked",
             "type": "boolean",
             "tags": [],
