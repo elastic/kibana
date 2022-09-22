@@ -200,7 +200,7 @@ it('matches snapshot', () => {
       },
       "kibana.alert.time_range": Object {
         "type": "date_range",
-        "format": "epoch_millis|strict_date_optional_time"
+        "format": "epoch_millis||strict_date_optional_time"
       },
       "kibana.alert.uuid": Object {
         "required": true,
