@@ -674,7 +674,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const deletePackagePolicy = async (id: string) => {
+    const idsToDelete: string[] = [];
+
+    ids.forEach((id) => {
       try {
         const packagePolicy = packagePolicies.find((p) => p.id === id);
 
@@ -694,10 +696,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        // TODO: replace this with savedObject BulkDelete when following PR is merged
-        // https://github.com/elastic/kibana/pull/139680
-        await soClient.delete(SAVED_OBJECT_TYPE, id);
+        idsToDelete.push(id);
+      } catch (error) {
+        result.push({
+          id,
+          success: false,
+          ...fleetErrorToResponseOptions(error),
+        });
+      }
+    });
 
+    const { statuses } = await soClient.bulkDelete(
+      idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
+    );
+
+    statuses.forEach(({ id, success, error }) => {
+      const packagePolicy = packagePolicies.find((p) => p.id === id);
+      if (success && packagePolicy) {
         result.push({
           id,
           name: packagePolicy.name,
@@ -709,16 +724,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           },
           policy_id: packagePolicy.policy_id,
         });
-      } catch (error) {
+      } else if (!success && error) {
         result.push({
           id,
           success: false,
-          ...fleetErrorToResponseOptions(error),
+          statusCode: error.statusCode,
+          body: {
+            message: error.message,
+          },
         });
       }
-    };
-
-    await pMap(ids, deletePackagePolicy, { concurrency: 1000 });
+    });
 
     if (!options?.skipUnassignFromAgentPolicies) {
       const uniquePolicyIdsR = [

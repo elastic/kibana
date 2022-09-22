@@ -17,6 +17,8 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLoadingContent,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
@@ -54,7 +56,7 @@ export function LabsFlyout({ onClose }: Props) {
         return settingsEditableConfig[key].requiresPageReload;
       });
 
-      await saveAll();
+      await saveAll({ trackMetricName: 'labs_save' });
 
       if (reloadPage) {
         window.location.reload();
@@ -83,9 +85,9 @@ export function LabsFlyout({ onClose }: Props) {
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="beaker" size="xl" />
+            <EuiIcon type="beaker" size="l" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle>
@@ -97,6 +99,13 @@ export function LabsFlyout({ onClose }: Props) {
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText>
+          {i18n.translate('xpack.apm.labs.description', {
+            defaultMessage:
+              'Try out the APM features that are under technical preview and in progress.',
+          })}
+        </EuiText>
       </EuiFlyoutHeader>
 
       {isLoading ? (
