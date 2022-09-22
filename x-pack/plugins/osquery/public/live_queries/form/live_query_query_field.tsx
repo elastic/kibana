@@ -97,6 +97,15 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     [permissions.writeLiveQueries]
   );
 
+  const isAdvancedToggleHidden = useMemo(
+    () =>
+      !(
+        permissions.writeLiveQueries ||
+        permissions.runSavedQueries ||
+        permissions.readSavedQueries
+      ),
+    [permissions.readSavedQueries, permissions.runSavedQueries, permissions.writeLiveQueries]
+  );
   const isSavedQueryDisabled = useMemo(
     () => !permissions.runSavedQueries || !permissions.readSavedQueries,
     [permissions.readSavedQueries, permissions.runSavedQueries]
@@ -143,15 +152,17 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
       <EuiSpacer size="m" />
 
-      <StyledEuiAccordion
-        id="advanced"
-        forceState={advancedContentState}
-        onToggle={handleToggle}
-        buttonContent="Advanced"
-      >
-        <EuiSpacer size="xs" />
-        <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
-      </StyledEuiAccordion>
+      {!isAdvancedToggleHidden && (
+        <StyledEuiAccordion
+          id="advanced"
+          forceState={advancedContentState}
+          onToggle={handleToggle}
+          buttonContent="Advanced"
+        >
+          <EuiSpacer size="xs" />
+          <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
+        </StyledEuiAccordion>
+      )}
     </>
   );
 };

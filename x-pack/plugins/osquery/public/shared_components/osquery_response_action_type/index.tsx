@@ -140,6 +140,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   useEffectOnce(() => {
     if (defaultParams && defaultParams.id) {
       const { packId, ecsMapping, ...restParams } = defaultParams;
+      // TODO change map into forEach, and type defaultParams
       map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
         if (!isEmpty(value)) {
           setValue(key, value);
