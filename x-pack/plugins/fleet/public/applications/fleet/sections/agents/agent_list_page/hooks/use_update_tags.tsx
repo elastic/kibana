@@ -36,13 +36,7 @@ export const useUpdateTags = () => {
           i18n.translate('xpack.fleet.updateAgentTags.successNotificationTitle', {
             defaultMessage: 'Tags updated',
           });
-        const submittedMessage = i18n.translate(
-          'xpack.fleet.agentReassignPolicy.submittedNotificationTitle',
-          {
-            defaultMessage: 'Tags update submitted',
-          }
-        );
-        notifications.toasts.addSuccess(hasCompleted ? message : submittedMessage);
+        notifications.toasts.addSuccess(message);
 
         onSuccess(hasCompleted);
       } catch (error) {

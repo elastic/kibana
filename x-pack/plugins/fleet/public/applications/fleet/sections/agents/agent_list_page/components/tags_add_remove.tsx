@@ -86,6 +86,23 @@ export const TagsAddRemove: React.FC<Props> = ({
     [labels, searchValue]
   );
 
+  const handleTagsUpdated = (
+    tagsToAdd: string[],
+    tagsToRemove: string[],
+    hasCompleted: boolean = true,
+    isRenameOrDelete = false
+  ) => {
+    if (hasCompleted) {
+      return onTagsUpdated();
+    }
+    const newSelectedTags = difference(selectedTags, tagsToRemove).concat(tagsToAdd);
+    const allTagsWithNew = allTags.includes(tagsToAdd[0]) ? allTags : allTags.concat(tagsToAdd);
+    const allTagsWithRemove = isRenameOrDelete
+      ? difference(allTagsWithNew, tagsToRemove)
+      : allTagsWithNew;
+    setLabels(labelsFromTags(allTagsWithRemove, newSelectedTags));
+  };
+
   const updateTags = async (
     tagsToAdd: string[],
     tagsToRemove: string[],
@@ -106,18 +123,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         agents!,
         tagsToAdd,
         tagsToRemove,
-        (hasCompleted?: boolean) => {
-          if (hasCompleted === false) {
-            setLabels(
-              labelsFromTags(
-                allTags.includes(tagsToAdd[0]) ? allTags : allTags.concat(tagsToAdd),
-                newSelectedTags
-              )
-            );
-          } else {
-            onTagsUpdated();
-          }
-        },
+        (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
         successMessage,
         errorMessage
       );
@@ -147,7 +153,9 @@ export const TagsAddRemove: React.FC<Props> = ({
           <TagOptions
             tagName={option.label}
             isTagHovered={isTagHovered[option.label]}
-            onTagsUpdated={onTagsUpdated}
+            onTagsUpdated={(tagsToAdd, tagsToRemove, hasCompleted) =>
+              handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted, true)
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>

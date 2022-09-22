@@ -367,7 +367,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           <p>
             <FormattedMessage
               id="xpack.fleet.agentActivityFlyout.failureDescription"
-              defaultMessage=" A problem occured during this operation."
+              defaultMessage=" A problem occurred during this operation."
             />
             &nbsp;
             {inProgressDescription(action.creationTime)}
