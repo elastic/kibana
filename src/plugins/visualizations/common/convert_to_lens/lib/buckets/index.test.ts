@@ -95,7 +95,7 @@ describe('convertBucketToColumns', () => {
       },
     },
   ];
-  const aggs: SchemaConfig<METRIC_TYPES>[] = [
+  const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
     {
       accessor: 0,
       label: '',
