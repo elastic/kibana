@@ -933,7 +933,8 @@ describe('test tlog', () => {
   });
 });
 
-describe('test create task metrics', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141356
+describe.skip('test create task metrics', () => {
   test('can succeed when all parameters are given', async () => {
     const stubTaskName = 'test';
     const stubPassed = true;
