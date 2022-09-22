@@ -25,12 +25,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../../common/types/api';
+import { docLinks } from '../../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { FetchIndexApiLogic } from '../../../../api/index/fetch_index_api_logic';
-import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
+import { NEW_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../../../layout';
 import { baseBreadcrumbs } from '../../../search_indices';
@@ -127,7 +129,7 @@ export const SelectConnector: React.FC = () => {
                 <ConnectorCheckable
                   {...nativeConnector}
                   onChange={() => setSelectedConnector(nativeConnector)}
-                  documentationUrl={'' /* TODO docLinks */}
+                  documentationUrl={nativeConnector.docsUrl}
                   checked={nativeConnector === selectedNativeConnector}
                 />
               </EuiFlexItem>
@@ -149,17 +151,17 @@ export const SelectConnector: React.FC = () => {
               defaultMessage="Looking for more connectors? {workplaceSearchLink} or {buildYourOwnConnectorLink}."
               values={{
                 buildYourOwnConnectorLink: (
-                  <EuiLink target="_blank" href={'' /* TODO docLinks */}>
+                  <EuiLinkTo to={`${generateEncodedPath(NEW_INDEX_PATH, {})}?method=connector`}>
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.buildYourOwnConnectorLinkLabel',
                       {
                         defaultMessage: 'build your own',
                       }
                     )}
-                  </EuiLink>
+                  </EuiLinkTo>
                 ),
                 workplaceSearchLink: (
-                  <EuiLink target="_blank" href={'' /* TODO docLinks */}>
+                  <EuiLink target="_blank" href={docLinks.connectorsWorkplaceSearch}>
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.workplaceSearchLinkLabel',
                       {

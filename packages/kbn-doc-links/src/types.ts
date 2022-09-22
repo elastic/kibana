@@ -104,20 +104,24 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
-    readonly apiKeys: string;
-    readonly bulkApi: string;
-    readonly configuration: string;
-    readonly connectors: string;
-    readonly crawlerGettingStarted: string;
-    readonly crawlerManaging: string;
-    readonly crawlerOverview: string;
-    readonly languageAnalyzers: string;
-    readonly languageClients: string;
-    readonly licenseManagement: string;
-    readonly mailService: string;
-    readonly start: string;
-    readonly troubleshootSetup: string;
-    readonly usersAccess: string;
+    // readonly apiKeys: string;
+    // readonly bulkApi: string;
+    // readonly configuration: string;
+    // readonly connectors: string;
+    // readonly connectorsMongoDB: string;
+    // readonly connectorsMySQL: string;
+    // readonly connectorsWorkplaceSearch: string;
+    // readonly crawlerGettingStarted: string;
+    // readonly crawlerManaging: string;
+    // readonly crawlerOverview: string;
+    // readonly documentLevelSecurity: string;
+    // readonly languageAnalyzers: string;
+    // readonly languageClients: string;
+    // readonly licenseManagement: string;
+    // readonly mailService: string;
+    // readonly start: string;
+    // readonly troubleshootSetup: string;
+    // readonly usersAccess: string;
   };
   readonly workplaceSearch: {
     readonly apiKeys: string;

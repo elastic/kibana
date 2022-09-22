@@ -19,7 +19,7 @@ interface ResearchConfigurationProps {
 export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
   nativeConnector,
 }) => {
-  const { name } = nativeConnector;
+  const { docsUrl, externalDocsUrl, name } = nativeConnector;
 
   return (
     <>
@@ -38,7 +38,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
       <EuiSpacer />
       <EuiFlexGroup direction="row" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={'' /* TODO docLinks */}>
+          <EuiLink target="_blank" href={docsUrl}>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
               {
@@ -48,7 +48,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={'' /* TODO external link */}>
+          <EuiLink target="_blank" href={externalDocsUrl}>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
               {

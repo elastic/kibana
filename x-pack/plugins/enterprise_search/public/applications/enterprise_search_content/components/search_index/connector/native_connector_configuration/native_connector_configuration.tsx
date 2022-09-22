@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
@@ -190,7 +191,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     }
                   )}
                   <EuiSpacer size="s" />
-                  <EuiLink href={'' /* TODO docsLink url */} target="_blank">
+                  <EuiLink href={docLinks.documentLevelSecurity} target="_blank">
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.securityLinkLabel',
                       {
