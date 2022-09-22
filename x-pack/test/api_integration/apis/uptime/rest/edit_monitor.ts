@@ -16,8 +16,7 @@ import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/140520
-  describe.skip('[PUT] /internal/uptime/service/monitors', function () {
+  describe('[PUT] /internal/uptime/service/monitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
