@@ -368,7 +368,11 @@ export function registerIndexRoutes({
         if ((error as Error).message === ErrorCode.PIPELINE_ALREADY_EXISTS) {
           return createError({
             errorCode: (error as Error).message as ErrorCode,
-            message: 'Pipeline already exists',
+            message: `
+              A pipeline with the name ${getPrefixedInferencePipelineProcessorName(pipelineName)}
+              already exists. Pipelines must have unique names across the entire deployment. If this
+              pipeline is meant to be specific to this index, consider adding the index name.
+            `,
             response,
             statusCode: 409,
           });
