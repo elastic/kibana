@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       .set('Cookie', sessionCookie.cookieString())
       .expect(200);
 
-    expect(apiResponse.body).to.only.have.keys([
+    expect(apiResponse.body).to.have.keys([
       'username',
       'full_name',
       'email',
@@ -67,7 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
       'authentication_provider',
       'authentication_type',
       'elastic_cloud_user',
-      'profile_uid',
     ]);
 
     expect(apiResponse.body.username).to.be(username);
