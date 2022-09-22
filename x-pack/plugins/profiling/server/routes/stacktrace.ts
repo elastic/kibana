@@ -68,7 +68,7 @@ export function runLengthEncode(input: number[]): Buffer {
     return Buffer.from(output);
   }
 
-  let count = 0;
+  let count = 1;
   let current = input[0];
 
   for (let i = 1; i < input.length; i++) {
@@ -79,13 +79,13 @@ export function runLengthEncode(input: number[]): Buffer {
       continue;
     }
 
-    output.push(count + 1, current);
+    output.push(count, current);
 
-    count = 0;
+    count = 1;
     current = next;
   }
 
-  output.push(count + 1, current);
+  output.push(count, current);
 
   return Buffer.from(output);
 }
