@@ -190,6 +190,7 @@ export class UploadState {
             kind: this.fileKind.id,
             abortSignal,
             selfDestructOnAbort: true,
+            contentType: mime,
           })
         );
       }),

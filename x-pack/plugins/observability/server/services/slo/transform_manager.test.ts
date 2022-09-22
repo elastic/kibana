@@ -6,10 +6,14 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ElasticsearchClientMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { DefaultTransformManager } from './transform_manager';
 import {
@@ -22,7 +26,7 @@ import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/sl
 const SPACE_ID = 'space-id';
 
 describe('TransformManager', () => {
-  let esClientMock: jest.Mocked<ElasticsearchClient>;
+  let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
 
   beforeEach(() => {
@@ -157,6 +161,26 @@ describe('TransformManager', () => {
       await transformManager.uninstall('slo-transform-id');
 
       expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries on transient error', async () => {
+      esClientMock.transform.deleteTransform.mockRejectedValueOnce(
+        new EsErrors.ConnectionError('irrelevant')
+      );
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<SLITypes, TransformGenerator> = {
+        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        esClientMock,
+        loggerMock,
+        SPACE_ID
+      );
+
+      await transformManager.uninstall('slo-transform-id');
+
+      expect(esClientMock.transform.deleteTransform).toHaveBeenCalledTimes(2);
     });
   });
 });
