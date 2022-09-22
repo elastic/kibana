@@ -7,10 +7,16 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import {
+  Query,
+  TimeRange,
+  AggregateQuery,
+  getAggregateQueryMode,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_SQL } from '../../../../../common';
+import { ENABLE_TEXT_BASED } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -62,8 +68,13 @@ export const DiscoverTopNav = ({
   const history = useHistory();
 
   const showDatePicker = useMemo(
-    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
-    [dataView]
+    () =>
+      dataView.isTimeBased() &&
+      dataView.type !== DataViewType.ROLLUP &&
+      (!query ||
+        !isOfAggregateQueryType(query) ||
+        (isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql')),
+    [dataView, query]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
@@ -187,10 +198,11 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
+  const isSQLModeEnabled = uiSettings.get(ENABLE_TEXT_BASED);
   const supportedTextBasedLanguages = [];
   if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
+    supportedTextBasedLanguages.push('ESQL');
   }
   const dataViewPickerProps = {
     trigger: {
