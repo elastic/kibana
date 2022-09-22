@@ -25,6 +25,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import { splitPkgKey } from '../../../../../../../common/services';
+import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
+
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
@@ -59,6 +61,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
+import { DocumentationPage } from './documentation';
 
 import './index.scss';
 
@@ -489,6 +492,24 @@ export function Detail() {
       });
     }
 
+    if (!HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo.name)) {
+      tabs.push({
+        id: 'api-reference',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
+            defaultMessage="API reference"
+          />
+        ),
+        isSelected: panel === 'api-reference',
+        'data-test-subj': `tab-api-reference`,
+        href: getHref('integration_details_api_reference', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
     return tabs;
   }, [
     packageInfo,
@@ -574,6 +595,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
+            <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Switch>

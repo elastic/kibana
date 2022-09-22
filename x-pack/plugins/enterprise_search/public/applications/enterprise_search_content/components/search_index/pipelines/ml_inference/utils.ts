@@ -11,10 +11,11 @@ import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const NLP_CONFIG_KEYS = [
+  'fill_mask',
   'ner',
-  'classification',
   'text_classification',
   'text_embedding',
+  'question_answering',
   'zero_shot_classification',
 ];
 export const isSupportedMLModel = (model: TrainedModelConfigResponse): boolean => {
@@ -35,7 +36,7 @@ export const sortSourceFields = (a: string, b: string): number => {
   return a.localeCompare(b);
 };
 
-const VALID_PIPELINE_NAME_REGEX = /^[\w\s\-]+$/;
+const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 export const isValidPipelineName = (input: string): boolean => {
   return input.length > 0 && VALID_PIPELINE_NAME_REGEX.test(input);
 };
