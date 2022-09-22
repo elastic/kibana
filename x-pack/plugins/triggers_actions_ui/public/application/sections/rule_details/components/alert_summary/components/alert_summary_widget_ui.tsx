@@ -41,7 +41,7 @@ export const AlertsSummaryWidgetUI = ({
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
                 <EuiFlexItem>
                   <EuiText>
                     <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
