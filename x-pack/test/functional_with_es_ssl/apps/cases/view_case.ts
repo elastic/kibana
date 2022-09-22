@@ -167,6 +167,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('deletes the case successfully', async () => {
         await cases.singleCase.deleteCase();
+        await cases.casesTable.waitForTableToFinishLoading();
         await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });
