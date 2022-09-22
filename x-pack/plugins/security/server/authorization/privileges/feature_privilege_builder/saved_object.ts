@@ -24,6 +24,7 @@ const writeOperations: string[] = [
   'update',
   'bulk_update',
   'delete',
+  'bulk_delete',
   'share_to_space',
 ];
 const allOperations: string[] = [...readOperations, ...writeOperations];

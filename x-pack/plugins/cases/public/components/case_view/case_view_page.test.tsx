@@ -32,6 +32,8 @@ import {
   defaultUseGetCaseUserActions,
 } from './mocks';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -100,13 +102,31 @@ describe('CaseViewPage', () => {
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
-
-    appMockRenderer = createAppMockRenderer();
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    appMockRenderer = createAppMockRenderer({ license });
   });
 
   it('should render CaseViewPage', async () => {
-    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    const damagedRaccoonUser = userProfiles[0].user;
+    const caseDataWithDamagedRaccoon = {
+      ...caseData,
+      createdBy: {
+        profileUid: userProfiles[0].uid,
+        username: damagedRaccoonUser.username,
+        fullName: damagedRaccoonUser.full_name,
+        email: damagedRaccoonUser.email,
+      },
+    };
+
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
+    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] }, license });
+    const result = appMockRenderer.render(<CaseViewPage {...props} />);
 
     expect(result.getByTestId('header-page-title')).toHaveTextContent(data.title);
     expect(result.getByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
@@ -119,9 +139,7 @@ describe('CaseViewPage', () => {
       within(result.getByTestId('case-view-tag-list')).getByTestId('tag-pepsi')
     ).toHaveTextContent(data.tags[1]);
 
-    expect(result.getAllByTestId('case-view-username')[0]).toHaveTextContent(
-      data.createdBy.username ?? ''
-    );
+    expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
       within(result.getByTestId('description-action')).getByTestId('user-action-markdown')
@@ -407,6 +425,11 @@ describe('CaseViewPage', () => {
                 delete: true,
                 push: true,
               }),
+            },
+          },
+          notifications: {
+            toasts: {
+              addDanger: () => {},
             },
           },
         },

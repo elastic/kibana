@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from './types/connectors';
+
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
@@ -109,6 +111,7 @@ export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';
 
 export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
 export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
+export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
@@ -117,3 +120,11 @@ export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
 export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';
+
+export const DEFAULT_PIPELINE_NAME = 'ent-search-generic-ingestion';
+export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
+  extract_binary_content: true,
+  name: DEFAULT_PIPELINE_NAME,
+  reduce_whitespace: true,
+  run_ml_inference: false,
+};

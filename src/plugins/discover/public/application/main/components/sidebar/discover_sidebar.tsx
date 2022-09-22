@@ -116,6 +116,7 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
+  state,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -144,8 +145,8 @@ export function DiscoverSidebarComponent({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: DataViewField) => getDetails(ipField, documents, columns, selectedDataView),
-    [documents, columns, selectedDataView]
+    (ipField: DataViewField) => getDetails(ipField, documents, selectedDataView),
+    [documents, selectedDataView]
   );
 
   const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
@@ -412,6 +413,8 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                state={state}
+                                contextualFields={columns}
                               />
                             </li>
                           );
@@ -472,6 +475,8 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                state={state}
+                                contextualFields={columns}
                               />
                             </li>
                           );
@@ -501,6 +506,8 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
+                            state={state}
+                            contextualFields={columns}
                           />
                         </li>
                       );

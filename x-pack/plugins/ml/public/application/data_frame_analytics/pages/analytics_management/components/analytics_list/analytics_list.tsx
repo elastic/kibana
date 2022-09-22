@@ -187,7 +187,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
 
   const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(
-    filteredAnalytics,
+    filteredAnalytics.length,
     pageState,
     updatePageState
   );
