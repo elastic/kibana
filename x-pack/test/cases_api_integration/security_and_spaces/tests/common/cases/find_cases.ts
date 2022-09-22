@@ -368,6 +368,11 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          // There is potential for the alert index to not be refreshed by the time the second comment is created
+          // which could attempt to update the alert status again and will encounter a conflict so this will
+          // ensure that the index is up to date before we try to update the next alert status
+          await es.indices.refresh({ index: defaultSignalsIndex });
         }
 
         const patchedCase = await createComment({

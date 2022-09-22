@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,6 +19,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
+import { BottomBarActions } from '../bottom_bar_actions';
 
 const apmSettingsKeys = [
   enableComparisonByDefault,
@@ -38,6 +38,7 @@ export function GeneralSettings() {
     unsavedChanges,
     saveAll,
     isSaving,
+    cleanUnsavedChanges,
   } = useApmEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
@@ -45,7 +46,7 @@ export function GeneralSettings() {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
         return settingsEditableConfig[key].requiresPageReload;
       });
-      await saveAll();
+      await saveAll({ trackMetricName: 'general_settings_save' });
       if (reloadPage) {
         window.location.reload();
       }
@@ -76,16 +77,17 @@ export function GeneralSettings() {
           />
         );
       })}
-      <EuiButton
-        fill
-        isLoading={isSaving}
-        disabled={isEmpty(unsavedChanges)}
-        onClick={handleSave}
-      >
-        {i18n.translate('xpack.apm.labs.reload', {
-          defaultMessage: 'Reload to apply changes',
-        })}
-      </EuiButton>
+      {!isEmpty(unsavedChanges) && (
+        <BottomBarActions
+          isLoading={isSaving}
+          onDiscardChanges={cleanUnsavedChanges}
+          onSave={handleSave}
+          saveLabel={i18n.translate('xpack.apm.apmSettings.saveButton', {
+            defaultMessage: 'Save changes',
+          })}
+          unsavedChangesCount={Object.keys(unsavedChanges).length}
+        />
+      )}
     </>
   );
 }

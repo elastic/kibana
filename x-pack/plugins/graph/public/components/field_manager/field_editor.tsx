@@ -125,7 +125,7 @@ export function FieldEditor({
   return (
     <EuiPopover
       id={`graphFieldEditor-${initialField.name}`}
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
       ownFocus
       panelPaddingSize="none"
       button={

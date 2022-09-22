@@ -12,10 +12,10 @@ import { setToggleFullscreen } from './lens_slice';
 /** cancels updates to the store that don't change the state */
 export const fullscreenMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: Action) => {
-    next(action);
     if (setToggleFullscreen.match(action)) {
       const isFullscreen = (store.getState as LensGetState)().lens.isFullscreenDatasource;
-      storeDeps.lensServices.chrome.setIsVisible(!isFullscreen);
+      storeDeps.lensServices.chrome.setIsVisible(Boolean(isFullscreen));
     }
+    next(action);
   };
 };
