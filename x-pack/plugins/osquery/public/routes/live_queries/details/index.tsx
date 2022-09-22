@@ -11,7 +11,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import styled from 'styled-components';
-import { AddToCaseButton } from '../../../cases/add_to_cases_button';
+import { AddToCaseWrapper } from '../../../cases/add_to_cases';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
@@ -60,7 +60,7 @@ const LiveQueryDetailsPageComponent = () => {
   }, [data?.status]);
   const addToCaseButton = useCallback(
     (payload) => (
-      <AddToCaseButton
+      <AddToCaseWrapper
         queryId={payload.queryId}
         actionId={actionId}
         agentIds={data?.agents}

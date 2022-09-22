@@ -28,13 +28,10 @@ import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
-import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
-
-const CASES_OWNER: string[] = [];
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -150,10 +147,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   showResultsHeader,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
-  const { cases } = useKibana().services;
-  const casePermissions = cases.helpers.canUseCases();
-  const CasesContext = cases.ui.getCasesContext();
-
   const renderIDColumn = useCallback(
     (id: string) => (
       <TruncateTooltipText>
@@ -394,7 +387,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   return (
-    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
+    <>
       {showResultsHeader && (
         <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
       )}
@@ -407,7 +400,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable
       />
-    </CasesContext>
+    </>
   );
 };
 
