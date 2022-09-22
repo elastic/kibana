@@ -99,7 +99,7 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  console.log(scopeId)
+  console.log(scopeId);
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId ?? '')) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -111,7 +111,7 @@ export const useHoverActionItems = ({
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getScope ? getScope(state, scopeId ?? '') : { filterManager: undefined }
   );
-  console.log(activeFilterManager)
+  console.log(activeFilterManager);
 
   const filterManager = useMemo(
     () =>

@@ -65,9 +65,7 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
         dataProvider: providerA,
         field: value,
         ownFocus: false,
-        onClick: () => {
-          
-        },
+        onClick: () => {},
         ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
       });
     },
