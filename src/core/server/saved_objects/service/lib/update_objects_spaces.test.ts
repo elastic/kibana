@@ -26,6 +26,19 @@ import { updateObjectsSpaces } from './update_objects_spaces';
 import { ALL_NAMESPACES_STRING } from './utils';
 import { SavedObjectsErrorHelpers } from './errors';
 import { extensionsMock } from './extensions/extensions.mock';
+import { AuditAction, ISavedObjectsSecurityExtension } from './extensions';
+import {
+  authMap,
+  checkAuthError,
+  enforceError,
+  mapsAreEqual,
+  setsAreEqual,
+  setupCheckAuthorized,
+  setupCheckUnauthorized,
+  setupEnforceFailure,
+  setupEnforceSuccess,
+  setupRedactPassthrough,
+} from './respository.test.common';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>
@@ -68,14 +81,17 @@ describe('#updateObjectsSpaces', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `updateObjectsSpaces` */
-  function setup({ objects = [], spacesToAdd = [], spacesToRemove = [], options }: SetupParams) {
+  function setup(
+    { objects = [], spacesToAdd = [], spacesToRemove = [], options }: SetupParams,
+    securityExtension?: ISavedObjectsSecurityExtension
+  ) {
     const registry = typeRegistryMock.create();
     registry.isShareable.mockImplementation(
       (type) => [SHAREABLE_OBJ_TYPE, SHAREABLE_HIDDEN_OBJ_TYPE].includes(type) // NON_SHAREABLE_OBJ_TYPE is excluded
     );
     client = elasticsearchClientMock.createElasticsearchClient();
     const serializer = new SavedObjectsSerializer(registry);
-    const { securityExtension } = extensionsMock.create();
+    // const securityExtension = extensionsMock.createSecurityExtension();
     return {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to deleteLegacyUrlAliases which is mocked
       registry,
@@ -635,5 +651,234 @@ describe('#updateObjectsSpaces', () => {
     });
   });
 
-  test.todo('with security extension');
+  describe(`with security extension`, () => {
+    let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let params: UpdateObjectsSpacesParams;
+
+    describe(`errors`, () => {
+      beforeEach(() => {
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+        const objects = [obj1];
+        const spacesToAdd = ['foo-space'];
+        mockSecurityExt = extensionsMock.createSecurityExtension();
+        params = setup({ objects, spacesToAdd }, mockSecurityExt);
+        mockMgetResults({ found: true, namespaces: [EXISTING_SPACE] }); // result for obj1
+        mockBulkResults({ error: false }); // result for obj1
+      });
+
+      test(`propogates decorated errror when checkAuthorization rejects promise`, async () => {
+        mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(checkAuthError);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      });
+
+      test(`propogates decorated error when unauthorized`, async () => {
+        setupCheckUnauthorized(mockSecurityExt);
+        setupEnforceFailure(mockSecurityExt);
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      });
+
+      test(`adds audit event when not unauthorized`, async () => {
+        setupCheckUnauthorized(mockSecurityExt);
+        setupEnforceFailure(mockSecurityExt);
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+          action: AuditAction.UPDATE_OBJECTS_SPACES,
+          addToSpaces: params.spacesToAdd,
+          deleteFromSpaces: undefined,
+          savedObject: { type: params.objects[0].type, id: params.objects[0].id },
+          error: enforceError,
+        });
+      });
+
+      test(`returns error from es client bulk operation`, async () => {
+        setupCheckAuthorized(mockSecurityExt);
+        setupEnforceSuccess(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+
+        mockGetBulkOperationError.mockReset();
+        client.bulk.mockReset();
+        mockBulkResults({ error: true });
+
+        const result = await updateObjectsSpaces(params);
+        expect(result).toEqual({
+          objects: [
+            {
+              error: BULK_ERROR,
+              id: params.objects[0].id,
+              spaces: [],
+              type: params.objects[0].type,
+            },
+          ],
+        });
+      });
+    });
+
+    describe('success', () => {
+      const defaultSpace = 'default';
+      const otherSpace = 'space-to-add';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
+
+      const objects = [obj1, obj2, obj3, obj4];
+      const spacesToAdd = [otherSpace];
+      const spacesToRemove = [EXISTING_SPACE];
+
+      beforeEach(() => {
+        mockSecurityExt = extensionsMock.createSecurityExtension();
+        params = setup({ objects, spacesToAdd, spacesToRemove }, mockSecurityExt);
+        mockMgetResults(
+          { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj2 -- will be updated to add otherSpace
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj3 -- will be updated to remove EXISTING_SPACE
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+        );
+        mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+        setupCheckAuthorized(mockSecurityExt);
+        setupEnforceSuccess(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+      });
+
+      test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        const expectedActions = ['share_to_space'];
+        const expectedSpaces = new Set([defaultSpace, otherSpace, EXISTING_SPACE]);
+        const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
+
+        const {
+          actions: actualActions,
+          spaces: actualSpaces,
+          types: actualTypes,
+        } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+
+        expect(actualActions).toEqual(expectedActions);
+        expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+        expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      });
+
+      test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'share_to_space',
+          })
+        );
+        const expectedTypesAndSpaces = new Map([
+          [SHAREABLE_OBJ_TYPE, new Set([defaultSpace, EXISTING_SPACE, otherSpace])],
+        ]);
+
+        const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
+          mockSecurityExt.enforceAuthorization.mock.calls[0][0];
+
+        expect(mapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(actualTypeMap).toBe(authMap);
+      });
+
+      test(`adds audit event per object when successful`, async () => {
+        await updateObjectsSpaces(params);
+
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
+        objects.forEach((obj) => {
+          expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+            action: AuditAction.UPDATE_OBJECTS_SPACES,
+            savedObject: { type: obj.type, id: obj.id },
+            outcome: 'unknown',
+            addToSpaces: spacesToAdd,
+            deleteFromSpaces: spacesToRemove,
+            error: undefined,
+          });
+        });
+      });
+    });
+
+    describe('all spaces', () => {
+      const defaultSpace = 'default';
+      const otherSpace = 'space-to-add';
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
+      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' };
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' };
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' };
+      const objects = [obj1, obj2, obj3, obj4];
+
+      const setupForAllSpaces = (spacesToAdd: string[], spacesToRemove: string[]) => {
+        mockSecurityExt = extensionsMock.createSecurityExtension();
+        params = setup({ objects, spacesToAdd, spacesToRemove }, mockSecurityExt);
+        mockMgetResults(
+          { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
+          { found: true, namespaces: [ALL_NAMESPACES_STRING] }, // result for obj2 -- will be updated to add otherSpace
+          { found: true, namespaces: [EXISTING_SPACE, otherSpace] }, // result for obj3 -- will be updated to remove EXISTING_SPACE
+          { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
+        );
+        mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+        setupCheckAuthorized(mockSecurityExt);
+        setupEnforceSuccess(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+      };
+
+      test(`calls checkAuthorization with '*' when spacesToAdd includes '*'`, async () => {
+        const spacesToAdd = ['*'];
+        const spacesToRemove = [otherSpace];
+        setupForAllSpaces(spacesToAdd, spacesToRemove);
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        const expectedActions = ['share_to_space'];
+        const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
+        const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
+
+        const {
+          actions: actualActions,
+          spaces: actualSpaces,
+          types: actualTypes,
+        } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+
+        expect(actualActions).toEqual(expectedActions);
+        expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+        expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      });
+
+      test(`calls checkAuthorization with '*' when spacesToRemove includes '*'`, async () => {
+        const spacesToAdd = [otherSpace];
+        const spacesToRemove = ['*'];
+        setupForAllSpaces(spacesToAdd, spacesToRemove);
+        await updateObjectsSpaces(params);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        const expectedActions = ['share_to_space'];
+        const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
+        const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
+
+        const {
+          actions: actualActions,
+          spaces: actualSpaces,
+          types: actualTypes,
+        } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+
+        expect(actualActions).toEqual(expectedActions);
+        expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+        expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      });
+    });
+  });
 });

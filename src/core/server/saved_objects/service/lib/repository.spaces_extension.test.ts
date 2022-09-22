@@ -25,7 +25,8 @@ import { SavedObjectsSerializer } from '../../serialization';
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 
-import { savedObjectsSpacesExtensionMock } from './repository.extensions.mock';
+import { ISavedObjectsEncryptionExtension, ISavedObjectsSpacesExtension } from './extensions';
+import { extensionsMock } from './extensions/extensions.mock';
 import {
   DEFAULT_SPACE,
   mockTimestamp,
@@ -60,7 +61,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let mockSpacesExt: ReturnType<typeof savedObjectsSpacesExtensionMock.create>;
+  let mockSpacesExt: jest.Mocked<ISavedObjectsSpacesExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -111,8 +112,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
         serializer = createSpySerializer(registry);
 
-        // create a mock saved objects encryption extension
-        mockSpacesExt = savedObjectsSpacesExtensionMock.create();
+        // create a mock saved objects spaces extension
+        mockSpacesExt = extensionsMock.createSpacesExtension();
 
         mockGetCurrentTime.mockReturnValue(mockTimestamp);
         mockGetSearchDsl.mockClear();

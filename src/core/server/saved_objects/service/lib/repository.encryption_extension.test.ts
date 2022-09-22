@@ -23,7 +23,7 @@ import { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serializ
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 
-import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
+import { extensionsMock } from './extensions/extensions.mock';
 import {
   ENCRYPTED_TYPE,
   MULTI_NAMESPACE_ENCRYPTED_TYPE,
@@ -43,6 +43,7 @@ import {
   bulkUpdateSuccess,
   findSuccess,
 } from './respository.test.common';
+import { ISavedObjectsEncryptionExtension } from './extensions';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -53,7 +54,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let mockEncryptionExt: ReturnType<typeof savedObjectsEncryptionExtensionMock.create>;
+  let mockEncryptionExt: jest.Mocked<ISavedObjectsEncryptionExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -114,7 +115,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     serializer = createSpySerializer(registry);
 
     // create a mock saved objects encryption extension
-    mockEncryptionExt = savedObjectsEncryptionExtensionMock.create();
+    mockEncryptionExt = extensionsMock.createEncryptionExtension();
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();

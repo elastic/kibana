@@ -20,7 +20,7 @@ import { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serializ
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 
-import { savedObjectsSecurityExtensionMock } from './repository.extensions.mock';
+import { ISavedObjectsSecurityExtension } from './extensions';
 import {
   mockTimestamp,
   mappings,
@@ -47,12 +47,21 @@ import {
   expectUpdateResult,
   setsAreEqual,
   mapsAreEqual,
+  checkAuthError,
+  enforceError,
+  setupEnforceFailure,
+  setupCheckUnauthorized,
+  setupCheckAuthorized,
+  setupRedactPassthrough,
+  authMap,
+  setupEnforceSuccess,
+  setupCheckPartiallyAuthorized,
 } from './respository.test.common';
-import { SavedObjectsErrorHelpers } from './errors';
-import { AuthorizationTypeEntry, AuditAction, EnforceAuthorizationParams } from './extensions';
+import { AuditAction } from './extensions';
 import { SavedObject } from '../../types';
 import { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsBulkUpdateObject } from '../saved_objects_client';
+import { extensionsMock } from './extensions/extensions.mock';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -63,15 +72,10 @@ describe('SavedObjectsRepository Security Extension', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let mockSecurityExt: ReturnType<typeof savedObjectsSecurityExtensionMock.create>;
+  let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
-
-  const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
-    new Error('Unauthorized'),
-    'User lacks priviliges'
-  );
 
   const instantiateRepository = () => {
     const allTypes = registry.getAllTypes().map((type) => type.name);
@@ -91,64 +95,11 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
   };
 
-  const setupCheckAuthorized = () => {
-    mockSecurityExt.checkAuthorization.mockResolvedValue({
-      status: 'fully_authorized',
-      typeMap: authMap,
-    });
-  };
-
-  const setupCheckPartiallyAuthorized = () => {
-    mockSecurityExt.checkAuthorization.mockResolvedValue({
-      status: 'partially_authorized',
-      typeMap: authMap,
-    });
-  };
-
-  const setupCheckUnauthorized = () => {
-    mockSecurityExt.checkAuthorization.mockResolvedValue({
-      status: 'unauthorized',
-      typeMap: new Map([]),
-    });
-  };
-
-  const setupEnforceFailure = () => {
-    mockSecurityExt.enforceAuthorization.mockImplementation(
-      (params: EnforceAuthorizationParams<string>) => {
-        const { auditCallback } = params;
-        auditCallback?.(enforceError);
-        throw enforceError;
-      }
-    );
-  };
-
-  const setupEnforceSuccess = () => {
-    mockSecurityExt.enforceAuthorization.mockImplementation(
-      (params: EnforceAuthorizationParams<string>) => {
-        const { auditCallback } = params;
-        auditCallback?.(undefined);
-      }
-    );
-  };
-
-  const setupRedactPassthrough = () => {
-    mockSecurityExt.redactNamespaces.mockImplementation(({ savedObject: object }) => {
-      return object;
-    });
-  };
-
-  const checkAuthError = SavedObjectsErrorHelpers.createBadRequestError(
-    'Failed to check authorization'
-  );
   const type = 'index-pattern';
   const id = 'logstash-*';
   const namespace = 'foo-namespace';
   const attributes = { attr1: 'one', attr2: 'two', attr3: 'three' };
   const multiNamespaceObjNamespaces = ['ns-1', 'ns-2', namespace];
-  const authRecord: Record<string, AuthorizationTypeEntry> = {
-    get: { authorizedSpaces: ['bar'] },
-  };
-  const authMap = Object.freeze(new Map([['foo', authRecord]]));
 
   beforeEach(() => {
     pointInTimeFinderMock.mockClear();
@@ -164,7 +115,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     serializer = createSpySerializer(registry);
 
     // create a mock saved objects encryption extension
-    mockSecurityExt = savedObjectsSecurityExtensionMock.create();
+    mockSecurityExt = extensionsMock.createSecurityExtension();
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
@@ -188,8 +139,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         getSuccess(client, repository, registry, type, id, { namespace })
@@ -197,16 +148,11 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      // expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-      //   expect.objectContaining({
-      //     action: 'get',
-      //   })
-      // );
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const result = await getSuccess(client, repository, registry, type, id, { namespace });
 
@@ -247,7 +193,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await getSuccess(client, repository, registry, type, id, { namespace });
 
@@ -269,8 +215,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       await getSuccess(client, repository, registry, type, id, { namespace });
 
@@ -287,9 +233,9 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       await getSuccess(client, repository, registry, type, id, { namespace });
 
@@ -301,8 +247,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         getSuccess(client, repository, registry, type, id, { namespace })
@@ -328,8 +274,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         updateSuccess(client, repository, registry, type, id, attributes, { namespace })
@@ -340,8 +286,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const result = await updateSuccess(client, repository, registry, type, id, attributes, {
         namespace,
@@ -423,8 +369,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
 
@@ -441,9 +387,9 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
 
@@ -456,8 +402,8 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
     test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         updateSuccess(client, repository, registry, type, id, { namespace })
@@ -483,8 +429,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
         enforceError
@@ -495,8 +441,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const result = await repository.create(type, attributes, {
         namespace,
@@ -559,7 +505,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
         namespace,
@@ -586,8 +532,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       await repository.create(type, attributes, { namespace });
 
@@ -608,9 +554,9 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized();
-      setupEnforceSuccess();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       await repository.create(type, attributes, { namespace });
 
@@ -627,8 +573,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
         enforceError
@@ -665,8 +611,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
@@ -677,8 +623,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns empty object result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const result = await deleteSuccess(client, repository, registry, type, id, {
         namespace,
@@ -713,7 +659,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, id, {
         namespace,
@@ -738,9 +684,9 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       await deleteSuccess(client, repository, registry, type, id, { namespace });
 
@@ -754,8 +700,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
@@ -781,8 +727,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
@@ -793,8 +739,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
@@ -824,7 +770,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls enforceAuthorization with type/namespace map`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
@@ -846,9 +792,9 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
@@ -862,8 +808,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
@@ -892,8 +838,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
@@ -904,8 +850,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
         namespace,
@@ -961,7 +907,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls enforceAuthorization with type/namespace map`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace });
 
@@ -991,7 +937,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       client.openPointInTime.mockResponseOnce({ id });
       const result = await repository.openPointInTimeForType(type);
@@ -1003,7 +949,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       client.openPointInTime.mockResponseOnce({ id });
       await repository.openPointInTimeForType(type);
@@ -1016,12 +962,12 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`throws an error when unauthorized`, async () => {
-      setupCheckUnauthorized();
+      setupCheckUnauthorized(mockSecurityExt);
       await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
     });
 
     test(`adds audit event when unauthorized`, async () => {
-      setupCheckUnauthorized();
+      setupCheckUnauthorized(mockSecurityExt);
 
       await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
 
@@ -1033,7 +979,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
       client.openPointInTime.mockResponseOnce({ id });
       await repository.openPointInTimeForType(type, { namespaces: [namespace] });
 
@@ -1083,7 +1029,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns empty result when unauthorized`, async () => {
-      setupCheckUnauthorized();
+      setupCheckUnauthorized(mockSecurityExt);
 
       const result = await repository.find({ type });
 
@@ -1097,8 +1043,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result of es find when fully authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
         client,
@@ -1127,8 +1073,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result of es find when partially authorized`, async () => {
-      setupCheckPartiallyAuthorized();
-      setupRedactPassthrough();
+      setupCheckPartiallyAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
         client,
@@ -1158,8 +1104,8 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     // toDo: I cannot seem to figure out this behavior
     test.skip(`throws BadRequestError when searching across namespaces when spaces is disabled`, async () => {
-      setupCheckPartiallyAuthorized();
-      setupRedactPassthrough();
+      setupCheckPartiallyAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const namespaces = ['some-ns', 'cant-get-there-from-here', 'forbidden-ns'];
       const options = { type: [type, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE], namespaces };
@@ -1169,8 +1115,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      setupCheckPartiallyAuthorized();
-      setupRedactPassthrough();
+      setupCheckPartiallyAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
       await findSuccess(client, repository, { type, namespaces: [namespace] });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(2);
@@ -1190,8 +1136,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const { generatedResults } = await findSuccess(client, repository, {
         type,
@@ -1209,8 +1155,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit per object event when successful`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const { generatedResults } = await findSuccess(client, repository, {
         type,
@@ -1235,7 +1181,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized();
+      setupCheckUnauthorized(mockSecurityExt);
 
       await repository.find({ type });
 
@@ -1286,8 +1232,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace })
@@ -1313,8 +1259,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const { result, mockResponse } = await bulkGetSuccess(
         client,
@@ -1379,7 +1325,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       const objB = { ...obj2, namespaces: ['ns-3'] }; // use a different namespace than the options namespace;
       const optionsNamespace = 'ns-4';
 
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkGetSuccess(client, repository, registry, [objA, objB], {
         namespace: optionsNamespace,
@@ -1406,8 +1352,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
 
@@ -1432,9 +1378,9 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkGetSuccess(client, repository, registry, objects, { namespace });
@@ -1449,8 +1395,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized();
-      setupEnforceFailure();
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await expect(
@@ -1500,8 +1446,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(
         bulkCreateSuccess(client, repository, [obj1, obj2], { namespace })
@@ -1512,8 +1458,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       const result = await bulkCreateSuccess(client, repository, objects);
@@ -1527,7 +1473,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls checkAuthorization with type, actions, and namespace`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkCreateSuccess(client, repository, [obj1, obj2], {
         namespace,
@@ -1562,7 +1508,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
@@ -1602,7 +1548,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
@@ -1628,8 +1574,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
@@ -1653,8 +1599,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkCreateSuccess(client, repository, objects, { namespace });
@@ -1670,8 +1616,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized();
-      setupEnforceFailure();
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await expect(bulkCreateSuccess(client, repository, objects, { namespace })).rejects.toThrow(
@@ -1711,8 +1657,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propogates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized();
-      setupEnforceFailure();
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       await expect(bulkUpdateSuccess(client, repository, registry, [obj1, obj2])).rejects.toThrow(
         enforceError
@@ -1723,8 +1669,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       const result = await bulkUpdateSuccess(client, repository, registry, objects);
@@ -1738,7 +1684,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls checkAuthorization with type, actions, and namespace`, async () => {
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
         namespace,
@@ -1770,7 +1716,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace: 'ns-2', // object namespace
       };
 
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkUpdateSuccess(client, repository, registry, [objA, objB], {
         namespace,
@@ -1802,7 +1748,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace: 'ns-2', // object namespace
       };
 
-      setupCheckAuthorized();
+      setupCheckAuthorized(mockSecurityExt);
 
       await bulkUpdateSuccess(client, repository, registry, [objA, objB], {
         namespace,
@@ -1829,8 +1775,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized();
-      setupRedactPassthrough();
+      setupCheckAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
@@ -1853,8 +1799,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized();
-      setupEnforceSuccess();
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
@@ -1870,8 +1816,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized();
-      setupEnforceFailure();
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await expect(

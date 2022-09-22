@@ -43,6 +43,11 @@ import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from
 // import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
 // import { ElasticsearchClient } from '../../../elasticsearch';
 import { SavedObjectsErrorHelpers } from './errors';
+import {
+  AuthorizationTypeEntry,
+  EnforceAuthorizationParams,
+  ISavedObjectsSecurityExtension,
+} from './extensions';
 
 export const DEFAULT_SPACE = 'default';
 
@@ -210,6 +215,78 @@ export const mappings: SavedObjectsTypeMappingDefinition = {
       },
     },
   },
+};
+
+export const authRecord: Record<string, AuthorizationTypeEntry> = {
+  get: { authorizedSpaces: ['bar'] },
+};
+export const authMap = Object.freeze(new Map([['foo', authRecord]]));
+
+export const checkAuthError = SavedObjectsErrorHelpers.createBadRequestError(
+  'Failed to check authorization'
+);
+
+export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
+  new Error('Unauthorized'),
+  'User lacks priviliges'
+);
+
+export const setupCheckAuthorized = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.checkAuthorization.mockResolvedValue({
+    status: 'fully_authorized',
+    typeMap: authMap,
+  });
+};
+
+export const setupCheckPartiallyAuthorized = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.checkAuthorization.mockResolvedValue({
+    status: 'partially_authorized',
+    typeMap: authMap,
+  });
+};
+
+export const setupCheckUnauthorized = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.checkAuthorization.mockResolvedValue({
+    status: 'unauthorized',
+    typeMap: new Map([]),
+  });
+};
+
+export const setupEnforceSuccess = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.enforceAuthorization.mockImplementation(
+    (params: EnforceAuthorizationParams<string>) => {
+      const { auditCallback } = params;
+      auditCallback?.(undefined);
+    }
+  );
+};
+
+export const setupEnforceFailure = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.enforceAuthorization.mockImplementation(
+    (params: EnforceAuthorizationParams<string>) => {
+      const { auditCallback } = params;
+      auditCallback?.(enforceError);
+      throw enforceError;
+    }
+  );
+};
+
+export const setupRedactPassthrough = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.redactNamespaces.mockImplementation(({ savedObject: object }) => {
+    return object;
+  });
 };
 
 export const createType = (
@@ -770,6 +847,11 @@ export const getSuccess = async (
 };
 
 export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
+  // console.log(
+  //   `*** setA: ${JSON.stringify(Array.from(setA.entries()))}, setB: ${JSON.stringify(
+  //     Array.from(setB.entries())
+  //   )}`
+  // );
   return isEqual(Array(setA).sort(), Array(setB).sort());
 }
 

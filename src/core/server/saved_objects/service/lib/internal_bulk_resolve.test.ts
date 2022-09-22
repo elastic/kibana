@@ -24,7 +24,8 @@ import { SavedObjectsUtils } from './utils';
 import { normalizeNamespace } from './internal_utils';
 
 import type { ISavedObjectsEncryptionExtension } from '../../..';
-import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
+// import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
+import { extensionsMock } from './extensions/extensions.mock';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';
@@ -376,7 +377,7 @@ describe('internalBulkResolve', () => {
         { type: OBJ_TYPE, id: '11' }, // non encryptable type
         { type: ENCRYPTED_TYPE, id: '12' }, // encryptable type
       ];
-      const encryptionExtMock = savedObjectsEncryptionExtensionMock.create();
+      const encryptionExtMock = extensionsMock.createEncryptionExtension();
       const params = setup(objects, { namespace }, encryptionExtMock);
       mockBulkResults(
         // No alias matches
