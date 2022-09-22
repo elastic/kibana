@@ -3406,6 +3406,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/gateway@link:bazel-bin/packages/kbn-gateway":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:bazel-bin/packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -7512,6 +7516,10 @@
   uid ""
 
 "@types/kbn__ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__gateway@link:bazel-bin/packages/kbn-gateway/npm_module_types":
   version "0.0.0"
   uid ""
 
