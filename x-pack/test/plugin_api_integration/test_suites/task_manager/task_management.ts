@@ -689,18 +689,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
-        const tasks = (await currentTasks()).docs;
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(true);
       });
 
       // disable the task
       await bulkDisable([scheduledTask.id]);
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(false);
       });
 
       // re-enable the task
@@ -708,9 +707,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const now = Date.now();
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-
-        const task = getTaskById(tasks, scheduledTask.id);
+        const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
 
