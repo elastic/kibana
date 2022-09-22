@@ -61,7 +61,11 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
     {
       field: 'name',
       name: 'Name',
-      render: (name, item) => <EuiLink onClick={() => setSelectedItem(item)}>{name}</EuiLink>,
+      render: (name, item) => (
+        <EuiLink disabled={isDeletingFile} onClick={() => setSelectedItem(item)}>
+          {name}
+        </EuiLink>
+      ),
     },
     {
       field: 'status',
@@ -84,6 +88,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           isPrimary: true,
           render: (item) => (
             <EuiButtonIcon
+              disabled={isDeletingFile}
               aria-label="View file details"
               iconType="eye"
               onClick={() => setSelectedItem(item)}
@@ -146,6 +151,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           onDismiss={() => setShowUploadModal(false)}
           onUploaded={() => {
             notifications.toasts.addSuccess('Uploaded file!');
+            refetch();
             setShowUploadModal(false);
           }}
         />
