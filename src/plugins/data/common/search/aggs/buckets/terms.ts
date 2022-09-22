@@ -43,8 +43,8 @@ export interface CommonAggParamsTerms extends BaseAggParams {
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string[] | number[];
-  include?: string[] | number[];
+  exclude?: string[] | string | number[];
+  include?: string[] | string | number[];
   includeIsRegex?: boolean;
   excludeIsRegex?: boolean;
 }

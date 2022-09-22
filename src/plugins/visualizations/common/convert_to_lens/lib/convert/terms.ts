@@ -77,13 +77,22 @@ export const convertToTermsParams = ({
 
   return {
     size: aggParams.size ?? 10,
-    include: aggParams.include ?? [],
+    include: aggParams.include
+      ? Array.isArray(aggParams.include)
+        ? aggParams.include
+        : [aggParams.include]
+      : [],
     includeIsRegex: aggParams.includeIsRegex,
-    exclude: aggParams.exclude ?? [],
+    exclude: aggParams.exclude
+      ? Array.isArray(aggParams.exclude)
+        ? aggParams.exclude
+        : [aggParams.exclude]
+      : [],
     excludeIsRegex: aggParams.excludeIsRegex,
     otherBucket: aggParams.otherBucket,
     orderDirection: aggParams.order?.value ?? 'desc',
     parentFormat: { id: 'terms' },
+    missingBucket: aggParams.missingBucket,
     ...orderByWithAgg,
   };
 };
