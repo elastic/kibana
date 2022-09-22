@@ -55,7 +55,6 @@ export const toggleColumn = ({
   const currentIndex = columnIds.indexOf(columnId);
   const isVisible = currentIndex >= 0;
 
-  // if the column is shown, remove it
   if (isVisible) {
     return remove({ columnIds, index: currentIndex });
   }
