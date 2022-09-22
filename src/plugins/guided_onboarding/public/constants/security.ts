@@ -16,28 +16,38 @@ export const securityConfig: GuideConfig = {
     {
       id: 'add_data',
       title: 'Add and view your data',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
     {
       id: 'rules',
       title: 'Turn on rules',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
     {
       id: 'alerts',
       title: 'View Alerts',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
     {
       id: 'cases',
       title: 'Cases and investigations',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    },
-    {
-      id: 'do_more',
-      title: 'Do more with Elastic Security',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
   ],
 };
