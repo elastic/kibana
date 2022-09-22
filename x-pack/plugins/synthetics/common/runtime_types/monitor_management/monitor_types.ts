@@ -404,6 +404,8 @@ export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({
     secrets: t.string,
+  }),
+  t.partial({
     custom_heartbeat_id: t.string,
   }),
 ]);
