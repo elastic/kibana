@@ -27,10 +27,12 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
 
   if (osquery) {
     const { disabled, permissionDenied } = osquery?.fetchInstallationStatus();
-    const disabledOsqueryPermission =
-      !application?.capabilities?.osquery?.readSavedQueries ||
-      !application?.capabilities?.osquery?.runSavedQueries ||
-      !application?.capabilities?.osquery?.readPacks;
+    const disabledOsqueryPermission = !(
+      application?.capabilities?.osquery?.writeLiveQueries ||
+      (application?.capabilities?.osquery?.runSavedQueries &&
+        (application?.capabilities?.osquery?.readSavedQueries ||
+          application?.capabilities?.osquery?.readPacks))
+    );
 
     if (permissionDenied || disabledOsqueryPermission) {
       return (
