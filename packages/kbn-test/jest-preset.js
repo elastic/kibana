@@ -55,8 +55,8 @@ module.exports = {
     // on CI, use the production build of react(-dom) which disables warning logging that nobody is paying attention to in CI anyway
     ...(process.env.CI
       ? {
-          react: '<rootDir>/node_modules/react/cjs/react.production.min.js',
-          'react-dom': '<rootDir>/node_modules/react-dom/cjs/react-dom.production.min.js',
+          '^react$': '<rootDir>/node_modules/react/cjs/react.production.min.js',
+          '^react-dom$': '<rootDir>/node_modules/react-dom/cjs/react-dom.production.min.js',
         }
       : {}),
   },
