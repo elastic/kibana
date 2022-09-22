@@ -917,7 +917,11 @@ export interface Visualization<T = unknown, P = unknown> {
   /** Visualizations can have references as well */
   getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Hydrate from persistable state and references to final state */
-  fromPersistableState?: (state: P, references?: SavedObjectReference[]) => T;
+  fromPersistableState?: (
+    state: P,
+    references?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  ) => T;
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */

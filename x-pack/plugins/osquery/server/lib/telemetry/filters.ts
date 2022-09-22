@@ -19,6 +19,8 @@ export const savedQueryEventFields: AllowlistFields = {
   platform: true,
   version: true,
   interval: true,
+  snapshot: true,
+  removed: true,
   ecs_mapping: true,
 };
 
