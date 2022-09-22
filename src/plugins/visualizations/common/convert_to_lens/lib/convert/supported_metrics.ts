@@ -21,6 +21,7 @@ interface AggWithFormula {
 export type AggOptions<T> = {
   isFullReference: boolean;
   isFieldRequired: boolean;
+  supportedDataTypes: readonly string[];
 } & (T extends Exclude<Operation, 'formula'> ? Agg : AggWithFormula);
 
 // list of supported TSVB aggregation types in Lens
@@ -61,36 +62,56 @@ export type SupportedMetrics = LocalSupportedMetrics & {
   [Key in UnsupportedSupportedMetrics]?: null;
 };
 
+const supportedDataTypesWithDate = ['number', 'date', 'histogram'] as const;
+const supportedDataTypes = ['number', 'histogram'] as const;
+const extendedSupportedDataTypes = [
+  'string',
+  'boolean',
+  'number',
+  'number_range',
+  'ip',
+  'ip_range',
+  'date',
+  'date_range',
+  'murmur3',
+] as const;
+
 export const SUPPORTED_METRICS: SupportedMetrics = {
   avg: {
     name: 'average',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: ['number'],
   },
   cardinality: {
     name: 'unique_count',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: extendedSupportedDataTypes,
   },
   count: {
     name: 'count',
     isFullReference: false,
     isFieldRequired: false,
+    supportedDataTypes: [],
   },
   moving_avg: {
     name: 'moving_average',
     isFullReference: true,
     isFieldRequired: true,
+    supportedDataTypes: ['number'],
   },
   derivative: {
     name: 'differences',
     isFullReference: true,
     isFieldRequired: true,
+    supportedDataTypes: ['number'],
   },
   cumulative_sum: {
     name: 'cumulative_sum',
     isFullReference: true,
     isFieldRequired: true,
+    supportedDataTypes: ['number'],
   },
   avg_bucket: {
     name: 'formula',
@@ -98,6 +119,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_average',
+    supportedDataTypes: ['number'],
   },
   max_bucket: {
     name: 'formula',
@@ -105,6 +127,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_max',
+    supportedDataTypes: ['number'],
   },
   min_bucket: {
     name: 'formula',
@@ -112,6 +135,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_min',
+    supportedDataTypes: ['number'],
   },
   sum_bucket: {
     name: 'formula',
@@ -119,66 +143,79 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_sum',
+    supportedDataTypes: ['number'],
   },
   max: {
     name: 'max',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: supportedDataTypesWithDate,
   },
   min: {
     name: 'min',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: supportedDataTypesWithDate,
   },
   percentiles: {
     name: 'percentile',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
   single_percentile: {
     name: 'percentile',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
   percentile_ranks: {
     name: 'percentile_rank',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
   single_percentile_rank: {
     name: 'percentile_rank',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
   sum: {
     name: 'sum',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
   top_hits: {
     name: 'last_value',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: extendedSupportedDataTypes,
   },
   top_metrics: {
     name: 'last_value',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: extendedSupportedDataTypes,
   },
   value_count: {
     name: 'count',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes: extendedSupportedDataTypes,
   },
   std_dev: {
     name: 'standard_deviation',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
   median: {
     name: 'median',
     isFullReference: false,
     isFieldRequired: true,
+    supportedDataTypes,
   },
 } as const;
 

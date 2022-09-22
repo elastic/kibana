@@ -22,6 +22,7 @@ import {
   SumColumn,
 } from './types';
 import { getFieldNameFromField } from '../utils';
+import { isFieldValid } from '../../utils';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -92,7 +93,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   }
 
   const field = dataView.getFieldByName(sourceField);
-  if (!field && aggregation.isFieldRequired) {
+  if (!isFieldValid(field, aggregation)) {
     return null;
   }
 
