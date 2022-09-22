@@ -32536,7 +32536,6 @@
     "xpack.triggersActionsUI.sections.editConnectorForm.descriptionText": "Ce connecteur est en lecture seule.",
     "xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle": "Modifier un connecteur",
     "xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel": "En savoir plus sur les connecteurs préconfigurés.",
-    "xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel": "Enregistrer et fermer",
     "xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel": "Enregistrer",
     "xpack.triggersActionsUI.sections.editConnectorForm.tabText": "Configuration",
     "xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText": "Impossible de mettre à jour un connecteur.",

@@ -32510,7 +32510,6 @@
     "xpack.triggersActionsUI.sections.editConnectorForm.descriptionText": "このコネクターは読み取り専用です。",
     "xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle": "コネクターを編集",
     "xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel": "あらかじめ構成されたコネクターの詳細をご覧ください。",
-    "xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel": "保存して閉じる",
     "xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel": "保存",
     "xpack.triggersActionsUI.sections.editConnectorForm.tabText": "構成",
     "xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText": "コネクターを更新できません。",

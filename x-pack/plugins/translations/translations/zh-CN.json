@@ -32544,7 +32544,6 @@
     "xpack.triggersActionsUI.sections.editConnectorForm.descriptionText": "此连接器为只读。",
     "xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle": "编辑连接器",
     "xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel": "详细了解预配置的连接器。",
-    "xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel": "保存并关闭",
     "xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel": "保存",
     "xpack.triggersActionsUI.sections.editConnectorForm.tabText": "配置",
     "xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText": "无法更新连接器。",
