@@ -8,16 +8,16 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     class="euiBadgeGroup__item"
   >
     <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
       href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__text"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
           red
         </span>
@@ -28,16 +28,16 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     class="euiBadgeGroup__item"
   >
     <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
       href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__text"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
           green
         </span>
@@ -48,16 +48,16 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     class="euiBadgeGroup__item"
   >
     <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
       href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__text"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
           blue
         </span>
@@ -68,16 +68,16 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     class="euiBadgeGroup__item"
   >
     <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
       href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__text"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
           black
         </span>
@@ -88,16 +88,16 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     class="euiBadgeGroup__item"
   >
     <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
       href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
       rel="noreferrer"
       style="max-width:120px"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__text"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
           purple
         </span>
@@ -109,13 +109,13 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   >
     <button
       aria-label="Click to view remaining tags"
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+      class="euiBadge emotion-euiBadge-clickable-hollow"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__text"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
           +1
         </span>
