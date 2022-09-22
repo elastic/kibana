@@ -28,7 +28,7 @@ export const createRules = async ({
 
   // Mute the rule if it is first created with the explicit no actions
   if (params.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
-    await rulesClient.muteAll({ id: rule.id });
+    // await rulesClient.muteAll({ id: rule.id });
   }
 
   return rule;

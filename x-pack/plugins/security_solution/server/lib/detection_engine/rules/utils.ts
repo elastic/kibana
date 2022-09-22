@@ -140,7 +140,7 @@ export const maybeMute = async ({
   if (muteAll && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
     await rulesClient.unmuteAll({ id });
   } else if (!muteAll && throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
-    await rulesClient.muteAll({ id });
+    // await rulesClient.muteAll({ id });
   } else {
     // Do nothing, no-operation
   }
