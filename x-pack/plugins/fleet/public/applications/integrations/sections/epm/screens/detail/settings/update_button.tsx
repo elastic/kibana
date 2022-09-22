@@ -173,36 +173,57 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     setIsUpgradingPackagePolicies(true);
 
     await installPackage({ name, version, title });
+    try {
+      const { data } = await sendUpgradePackagePolicy(
+        // Only upgrade policies that don't have conflicts
+        packagePolicyIds.filter(
+          (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
+        )
+      );
+      if (data) {
+        setIsUpgradingPackagePolicies(false);
 
-    await sendUpgradePackagePolicy(
-      // Only upgrade policies that don't have conflicts
-      packagePolicyIds.filter(
-        (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-      )
-    );
+        notifications.toasts.addSuccess({
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+              defaultMessage="Updated {title} and upgraded policies"
+              values={{ title }}
+            />,
+            { theme$ }
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+              defaultMessage="Successfully updated {title} and upgraded policies"
+              values={{ title }}
+            />,
+            { theme$ }
+          ),
+        });
 
-    setIsUpgradingPackagePolicies(false);
-
-    notifications.toasts.addSuccess({
-      title: toMountPoint(
-        <FormattedMessage
-          id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-          defaultMessage="Updated {title} and upgraded policies"
-          values={{ title }}
-        />,
-        { theme$ }
-      ),
-      text: toMountPoint(
-        <FormattedMessage
-          id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-          defaultMessage="Successfully updated {title} and upgraded policies"
-          values={{ title }}
-        />,
-        { theme$ }
-      ),
-    });
-
-    navigateToNewSettingsPage();
+        navigateToNewSettingsPage();
+      }
+    } catch (error) {
+      notifications.toasts.addWarning({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpgradeErrorTitle"
+            defaultMessage="Failed to upgrade {title} package"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageupgradeErrorDescription"
+            defaultMessage="Something went wrong while trying to upgrade this package. Please try again later."
+          />,
+          { theme$ }
+        ),
+        iconType: 'alert',
+      });
+    }
   }, [
     dryRunData,
     installPackage,
