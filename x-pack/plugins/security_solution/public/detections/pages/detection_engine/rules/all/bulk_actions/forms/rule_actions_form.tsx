@@ -167,16 +167,14 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       />
       <EuiSpacer size="m" />
 
-      <>
-        <UseField
-          path="actions"
-          component={RuleActionsField}
-          componentProps={{
-            messageVariables,
-          }}
-        />
-        <EuiSpacer size="m" />
-      </>
+      <UseField
+        path="actions"
+        component={RuleActionsField}
+        componentProps={{
+          messageVariables,
+        }}
+      />
+      <EuiSpacer size="m" />
 
       <CommonUseField
         path="overwrite"

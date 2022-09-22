@@ -8,7 +8,11 @@
 
 import * as t from 'io-ts';
 
-export const throttle = t.string;
+export const throttle = t.union([
+  t.null,
+  t.literal('onActiveAlert'),
+  t.literal('onThrottleInterval'),
+]);
 export type Throttle = t.TypeOf<typeof throttle>;
 
 export const throttleOrNull = t.union([throttle, t.null]);
