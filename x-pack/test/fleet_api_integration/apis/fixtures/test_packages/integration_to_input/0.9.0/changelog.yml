@@ -1,0 +1,26 @@
+# newer versions go on top
+- version: "1.0.0"
+  changes:
+    - description: Release Custom Logs as GA
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/2538
+- version: "0.5.1"
+  changes:
+    - description: Uniform with guidelines
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/2059
+- version: "0.5.0"
+  changes:
+    - description: Update integration description
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/1364
+- version: "0.4.6"
+  changes:
+    - description: Updating package owner
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/766
+- version: "0.1.0"
+  changes:
+    - description: initial release
+      type: enhancement # can be one of: enhancement, bugfix, breaking-change
+      link: https://github.com/elastic/package-storage/pull/30
