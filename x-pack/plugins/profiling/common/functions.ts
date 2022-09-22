@@ -8,6 +8,8 @@ import * as t from 'io-ts';
 import { createFrameGroup, createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
+  emptyExecutable,
+  emptyStackFrame,
   emptyStackTrace,
   Executable,
   FileID,
@@ -66,8 +68,8 @@ export function createTopNFunctions(
       const frameID = stackTrace.FrameIDs[i];
       const fileID = stackTrace.FileIDs[i];
       const addressOrLine = stackTrace.AddressOrLines[i];
-      const frame = stackFrames.get(frameID)!;
-      const executable = executables.get(fileID)!;
+      const frame = stackFrames.get(frameID) ?? emptyStackFrame;
+      const executable = executables.get(fileID) ?? emptyExecutable;
 
       const frameGroup = createFrameGroup(
         fileID,
