@@ -349,7 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      it.only('correctly counts alerts ignoring duplicates', async () => {
+      it('correctly counts alerts ignoring duplicates', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         /**
          * Adds three comments of type alerts.
