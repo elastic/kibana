@@ -214,6 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // remove columns
             for (const field of fields) {
               await testSubjects.click(`toggleColumnButton-${field}`);
+              await testSubjects.click(`tableDocViewRow-${field}`);
             }
 
             const headerWithoutFields = await docTable.getHeaderFields();
