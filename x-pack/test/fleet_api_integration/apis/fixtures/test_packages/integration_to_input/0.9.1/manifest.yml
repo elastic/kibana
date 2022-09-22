@@ -4,13 +4,13 @@ title: Custom Logs
 description: >-
   This package goes from an integration package to an input package
 type: input
-version: 1.0.0
+version: 0.9.1
 license: basic
 categories:
   - custom
 policy_templates:
   - name: logs
-    type: logfile
+    type: logs
     title: Custom log file
     description: Collect your custom log files.
     input: logfile
