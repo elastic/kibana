@@ -11,7 +11,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { omit } from 'lodash';
 import { KbnClientRequesterError } from '@kbn/test';
 import { AxiosError } from 'axios';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SecurityServiceProvider } from '../../../../test/common/services/security';
 
 type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
@@ -90,12 +89,7 @@ const customRoles = {
     elasticsearch: {
       indices: [
         {
-          names: [
-            ProcessorEvent.transaction,
-            ProcessorEvent.span,
-            ProcessorEvent.metric,
-            ProcessorEvent.error,
-          ],
+          names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
           privileges: ['monitor'],
         },
       ],
