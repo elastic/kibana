@@ -320,10 +320,37 @@ const rules = {
     geohash_grid: {
       __template: {
         field: '',
-        precision: 3,
+        precision: 5,
       },
       field: '{field}',
       precision: { __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+      size: 10,
+      shard_size: 10,
+    },
+    geohex_grid: {
+      __template: {
+        field: '',
+        precision: 6,
+      },
+      field: '{field}',
+      precision: {
+        __one_of: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      },
+      size: 10,
+      shard_size: 10,
+    },
+    geotile_grid: {
+      __template: {
+        field: '',
+        precision: 7,
+      },
+      field: '{field}',
+      precision: {
+        __one_of: [
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29,
+        ],
+      },
       size: 10,
       shard_size: 10,
     },
