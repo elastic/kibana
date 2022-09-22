@@ -9,21 +9,24 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 
-import { enterpriseSearchFeatureId, enableIndexPipelinesTab } from '../common/ui_settings_keys';
+import {
+  enterpriseSearchFeatureId,
+  enableBehavioralAnalyticsSection,
+} from '../common/ui_settings_keys';
 
 /**
  * uiSettings definitions for Enterprise Search
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
-  [enableIndexPipelinesTab]: {
+  [enableBehavioralAnalyticsSection]: {
     category: [enterpriseSearchFeatureId],
-    description: i18n.translate('xpack.enterpriseSearch.uiSettings.indexPipelines.description', {
-      defaultMessage: 'Enable the new index pipelines tab in Enterprise Search.',
+    description: i18n.translate('xpack.enterpriseSearch.uiSettings.analytics.description', {
+      defaultMessage: 'Enable the new Analytics section in Enterprise Search.',
     }),
-    name: i18n.translate('xpack.enterpriseSearch.uiSettings.indexPipelines.name', {
-      defaultMessage: 'Enable index pipelines',
+    name: i18n.translate('xpack.enterpriseSearch.uiSettings.analytics.name', {
+      defaultMessage: 'Enable Behavioral Analytics',
     }),
-    requiresPageReload: false,
+    requiresPageReload: true,
     schema: schema.boolean(),
     value: false,
   },

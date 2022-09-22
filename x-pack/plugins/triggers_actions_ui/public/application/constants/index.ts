@@ -12,6 +12,7 @@ export {
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+export { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '@kbn/stack-connectors-plugin/common';
 
 export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
@@ -87,3 +88,4 @@ export const LOCKED_COLUMNS = [
 
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
 export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];
+export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';

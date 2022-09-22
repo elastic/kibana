@@ -21,6 +21,11 @@ export const method = 'put' as const;
 export const bodySchema = schema.stream();
 type Body = TypeOf<typeof bodySchema>;
 
+export const querySchema = schema.object({
+  selfDestructOnAbort: schema.maybe(schema.boolean()),
+});
+type Query = Ensure<UploadFileKindHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
+
 export const paramsSchema = schema.object({
   id: schema.string(),
 });
@@ -28,7 +33,7 @@ type Params = Ensure<UploadFileKindHttpEndpoint['inputs']['params'], TypeOf<type
 
 type Response = UploadFileKindHttpEndpoint['output'];
 
-export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
+export const handler: FileKindsRequestHandler<Params, Query, Body> = async (
   { files, fileKind },
   req,
   res
@@ -40,6 +45,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   const sub = req.events.aborted$.subscribe(abort$);
 
   const { fileService } = await files;
+  const { logger } = fileService;
   const {
     body: stream,
     params: { id },
@@ -55,7 +61,14 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     ) {
       return res.badRequest({ body: { message: e.message } });
     } else if (e instanceof fileErrors.AbortedUploadError) {
+      fileService.usageCounter?.('UPLOAD_ERROR_ABORT');
       fileService.logger.error(e);
+      if (req.query.selfDestructOnAbort) {
+        logger.info(
+          `File (id: ${file.id}) upload aborted. Deleting file due to self-destruct flag.`
+        );
+        file.delete(); // fire and forget
+      }
       return res.customError({ body: { message: e.message }, statusCode: 499 });
     }
     throw e;

@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -26,7 +35,6 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
-import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -54,9 +62,11 @@ import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
+import { useLicense } from '../../../common/hooks/use_license';
 
+const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
@@ -75,6 +85,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const { signalIndexName } = useSignalIndex();
 
   const capabilities = useMlCapabilities();
   const kibana = useKibana();
@@ -84,22 +95,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
-  const updateDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        })
-      );
-    },
-    [dispatch]
-  );
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -135,7 +132,18 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_HOST_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
 
   return (
     <>
@@ -188,26 +196,35 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   />
                 )}
               </AnomalyTableProvider>
-
               <EuiHorizontalRule />
-
-              <HostsDetailsKpiComponent
-                filterQuery={filterQuery}
-                from={from}
-                indexNames={selectedPatterns}
-                setQuery={setQuery}
-                to={to}
-                updateDateRange={updateDateRange}
-                skip={isInitializing}
-              />
-
               <EuiSpacer />
+
+              {canReadAlerts && (
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <AlertsByStatus
+                        signalIndexName={signalIndexName}
+                        entityFilter={entityFilter}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <AlertCountByRuleByStatus
+                        entityFilter={entityFilter}
+                        signalIndexName={signalIndexName}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                </>
+              )}
 
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isRiskyHostsEnabled: isPlatinumOrTrialLicense,
                   hostName: detailName,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 

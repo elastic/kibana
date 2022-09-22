@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
@@ -14,15 +14,16 @@ import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../common/constants';
+import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [_, { isModuleEnabled }] = useHostRiskScore();
+    const [loading, { isLicenseValid, isModuleEnabled }] = useHostRiskScore();
 
     return (
       <>
-        {isModuleEnabled === false && (
+        {isLicenseValid && !isModuleEnabled && !loading && (
           <>
             <CallOutSwitcher
               namespace="hosts"
@@ -34,9 +35,11 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
                 description: (
                   <>
                     {i18n.LEARN_MORE}{' '}
-                    <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                      {i18n.HOST_RISK_DATA}
-                    </EuiLink>
+                    <RiskScoreDocLink
+                      external={false}
+                      riskScoreEntity={RiskScoreEntity.host}
+                      title={i18n.HOST_RISK_DATA}
+                    />
                     <EuiSpacer />
                   </>
                 ),
