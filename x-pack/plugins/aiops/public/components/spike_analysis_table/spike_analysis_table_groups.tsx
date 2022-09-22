@@ -35,6 +35,7 @@ import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { SpikeAnalysisTable } from './spike_analysis_table';
+import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
@@ -65,14 +66,6 @@ interface SpikeAnalysisTableProps {
   groupTableItems: GroupTableItem[];
   dataViewId?: string;
   loading: boolean;
-  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  onPinnedGroup?: (group: GroupTableItem | null) => void;
-  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  onSelectedGroup?: (group: GroupTableItem | null) => void;
-  pinnedChangePoint?: ChangePoint | null;
-  pinnedGroup?: GroupTableItem | null;
-  selectedChangePoint?: ChangePoint;
-  selectedGroup?: GroupTableItem;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -80,14 +73,6 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   groupTableItems,
   dataViewId,
   loading,
-  onPinnedChangePoint,
-  onPinnedGroup,
-  onSelectedChangePoint,
-  onSelectedGroup,
-  pinnedChangePoint,
-  pinnedGroup,
-  selectedChangePoint,
-  selectedGroup,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -99,6 +84,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
+
+  const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
+    useSpikeAnalysisTableRowContext();
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -131,10 +119,6 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <SpikeAnalysisTable
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
-          onPinnedChangePoint={onPinnedChangePoint}
-          onSelectedChangePoint={onSelectedChangePoint}
-          pinnedChangePoint={pinnedChangePoint}
-          selectedChangePoint={selectedChangePoint}
           dataViewId={dataViewId}
         />
       );
@@ -503,23 +487,17 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         return {
           'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
           onClick: () => {
-            if (onPinnedGroup) {
-              if (group.id === pinnedGroup?.id) {
-                onPinnedGroup(null);
-              } else {
-                onPinnedGroup(group);
-              }
+            if (group.id === pinnedGroup?.id) {
+              setPinnedGroup(null);
+            } else {
+              setPinnedGroup(group);
             }
           },
           onMouseEnter: () => {
-            if (onSelectedGroup) {
-              onSelectedGroup(group);
-            }
+            setSelectedGroup(group);
           },
           onMouseLeave: () => {
-            if (onSelectedGroup) {
-              onSelectedGroup(null);
-            }
+            setSelectedGroup(null);
           },
           style: getRowStyle(group),
         };

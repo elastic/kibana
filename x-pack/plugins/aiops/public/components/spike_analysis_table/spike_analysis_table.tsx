@@ -30,6 +30,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
+import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const ACTIONS_COLUMN_WIDTH = '60px';
@@ -49,23 +50,18 @@ interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
   dataViewId?: string;
   loading: boolean;
-  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  pinnedChangePoint?: ChangePoint | null;
-  selectedChangePoint?: ChangePoint;
 }
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
   dataViewId,
   loading,
-  onPinnedChangePoint,
-  onSelectedChangePoint,
-  pinnedChangePoint,
-  selectedChangePoint,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
+
+  const { pinnedChangePoint, selectedChangePoint, setPinnedChangePoint, setSelectedChangePoint } =
+    useSpikeAnalysisTableRowContext();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -369,26 +365,20 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         return {
           'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
           onClick: () => {
-            if (onPinnedChangePoint) {
-              if (
-                changePoint.fieldName === pinnedChangePoint?.fieldName &&
-                changePoint.fieldValue === pinnedChangePoint?.fieldValue
-              ) {
-                onPinnedChangePoint(null);
-              } else {
-                onPinnedChangePoint(changePoint);
-              }
+            if (
+              changePoint.fieldName === pinnedChangePoint?.fieldName &&
+              changePoint.fieldValue === pinnedChangePoint?.fieldValue
+            ) {
+              setPinnedChangePoint(null);
+            } else {
+              setPinnedChangePoint(changePoint);
             }
           },
           onMouseEnter: () => {
-            if (onSelectedChangePoint) {
-              onSelectedChangePoint(changePoint);
-            }
+            setSelectedChangePoint(changePoint);
           },
           onMouseLeave: () => {
-            if (onSelectedChangePoint) {
-              onSelectedChangePoint(null);
-            }
+            setSelectedChangePoint(null);
           },
           style: getRowStyle(changePoint),
         };

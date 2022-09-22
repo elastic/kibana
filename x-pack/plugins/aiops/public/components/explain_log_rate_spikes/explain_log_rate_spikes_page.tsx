@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
+import React, { useCallback, useEffect, useState, FC } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -39,6 +39,7 @@ import { SearchPanel } from '../search_panel';
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
+import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './explain_log_rate_spikes_page.scss';
@@ -68,6 +69,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   savedSearch,
 }) => {
   const { data: dataService } = useAiopsAppContext();
+
+  const {
+    currentSelectedChangePoint,
+    currentSelectedGroup,
+    setPinnedChangePoint,
+    setPinnedGroup,
+    setSelectedChangePoint,
+    setSelectedGroup,
+  } = useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -104,29 +114,6 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     [currentSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
-  const [pinnedGroup, setPinnedGroup] = useState<GroupTableItem | null>(null);
-  const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePoint | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState<GroupTableItem | null>(null);
-
-  // If a row is pinned, still overrule with a potentially hovered row.
-  const currentSelectedChangePoint = useMemo(() => {
-    if (selectedChangePoint) {
-      return selectedChangePoint;
-    } else if (pinnedChangePoint) {
-      return pinnedChangePoint;
-    }
-  }, [pinnedChangePoint, selectedChangePoint]);
-
-  // If a group is pinned, still overrule with a potentially hovered group.
-  const currentSelectedGroup = useMemo(() => {
-    if (selectedGroup) {
-      return selectedGroup;
-    } else if (pinnedGroup) {
-      return pinnedGroup;
-    }
-  }, [selectedGroup, pinnedGroup]);
-
   const {
     documentStats,
     timefilter,
@@ -139,9 +126,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     { currentDataView: dataView, currentSavedSearch },
     aiopsListState,
     setGlobalState,
-    currentSelectedChangePoint,
-    undefined,
-    currentSelectedGroup
+    undefined
   );
 
   const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
@@ -191,6 +176,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   function clearSelection() {
     setWindowParameters(undefined);
     setPinnedChangePoint(null);
+    setPinnedGroup(null);
     setSelectedChangePoint(null);
     setSelectedGroup(null);
   }
@@ -274,14 +260,6 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   latest={latest}
                   windowParameters={windowParameters}
                   searchQuery={searchQuery}
-                  onPinnedChangePoint={setPinnedChangePoint}
-                  onPinnedGroup={setPinnedGroup}
-                  onSelectedChangePoint={setSelectedChangePoint}
-                  onSelectedGroup={setSelectedGroup}
-                  pinnedChangePoint={pinnedChangePoint}
-                  pinnedGroup={pinnedGroup}
-                  selectedChangePoint={currentSelectedChangePoint}
-                  selectedGroup={currentSelectedGroup}
                 />
               )}
               {windowParameters === undefined && (
