@@ -54,24 +54,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow adding and using a field', async () => {
-      await monacoEditor.setCodeEditorValue('SELECT extension, bytes FROM "log*"');
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.switchToVisualization('lnsMetric');
       await PageObjects.lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
-        field: 'bytes',
+        field: 'average',
       });
 
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].title).to.eql('bytes');
+      expect(metricData[0].title).to.eql('average');
     });
 
-    it('should allow switching to another query', async () => {
-      await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
-      );
+    it('should allow switching to another chart', async () => {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.switchToVisualization('bar');
@@ -80,10 +79,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'extension',
       });
 
-      await PageObjects.lens.configureTextBasedLanguagesDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        field: 'average',
-      });
       await PageObjects.lens.waitForVisualization('xyVisChart');
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data!);
@@ -109,7 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow saving the text based languages chart into a saved object', async () => {
       await switchToTextBasedLanguage('SQL');
-      await monacoEditor.setCodeEditorValue('SELECT extension, bytes FROM "log*"');
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.configureTextBasedLanguagesDimension({
@@ -119,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        field: 'bytes',
+        field: 'average',
       });
       await PageObjects.lens.waitForVisualization('xyVisChart');
       await PageObjects.lens.save('Lens with text based language');
