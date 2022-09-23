@@ -20,36 +20,40 @@ export const getDataSourceInfo = async (
   seriesTimeField: string | undefined,
   dataViews: DataViewsPublicPluginStart
 ) => {
-  let indexPatternId =
-    modelIndexPattern && !isStringTypeIndexPattern(modelIndexPattern) ? modelIndexPattern.id : '';
+  try {
+    let indexPatternId =
+      modelIndexPattern && !isStringTypeIndexPattern(modelIndexPattern) ? modelIndexPattern.id : '';
 
-  let timeField = modelTimeField;
-  let indexPattern: DataView | null | undefined;
-  // handle override index pattern
-  if (isOverwritten) {
-    const fetchedIndexPattern = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
-    indexPattern = fetchedIndexPattern.indexPattern;
+    let timeField = modelTimeField;
+    let indexPattern: DataView | null | undefined;
+    // handle override index pattern
+    if (isOverwritten) {
+      const fetchedIndexPattern = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
+      indexPattern = fetchedIndexPattern.indexPattern;
 
-    if (indexPattern) {
-      indexPatternId = indexPattern.id ?? '';
-      timeField = seriesTimeField ?? indexPattern.timeFieldName;
+      if (indexPattern) {
+        indexPatternId = indexPattern.id ?? '';
+        timeField = seriesTimeField ?? indexPattern.timeFieldName;
+      }
     }
-  }
 
-  if (!indexPatternId) {
-    indexPattern = await dataViews.getDefault();
-    indexPatternId = indexPattern?.id ?? '';
-    timeField = indexPattern?.timeFieldName;
-  } else {
-    indexPattern = await dataViews.get(indexPatternId);
-    if (!timeField) {
-      timeField = indexPattern.timeFieldName;
+    if (!indexPatternId) {
+      indexPattern = await dataViews.getDefault();
+      indexPatternId = indexPattern?.id ?? '';
+      timeField = indexPattern?.timeFieldName;
+    } else {
+      indexPattern = await dataViews.get(indexPatternId);
+      if (!timeField) {
+        timeField = indexPattern.timeFieldName;
+      }
     }
-  }
 
-  return {
-    indexPatternId,
-    timeField,
-    indexPattern,
-  };
+    return {
+      indexPatternId,
+      timeField,
+      indexPattern,
+    };
+  } catch (e) {
+    return null;
+  }
 };

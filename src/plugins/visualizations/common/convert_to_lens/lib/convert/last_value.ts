@@ -9,8 +9,10 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { LastValueParams } from '../../types';
+import { isFieldValid } from '../../utils';
 import { getFieldNameFromField } from '../utils';
 import { createColumn, getFormat } from './column';
+import { SUPPORTED_METRICS } from './supported_metrics';
 import { CommonColumnConverterArgs, LastValueColumn } from './types';
 
 const convertToLastValueParams = (
@@ -18,7 +20,7 @@ const convertToLastValueParams = (
 ): LastValueParams => {
   return {
     sortField: agg.aggParams!.sortField!.name,
-    showArrayValues: agg.aggType === METRIC_TYPES.TOP_HITS ? true : false,
+    showArrayValues: agg.aggType === METRIC_TYPES.TOP_HITS,
   };
 };
 
@@ -41,7 +43,7 @@ export const convertToLastValueColumn = (
   }
 
   const field = dataView.getFieldByName(fieldName);
-  if (!field) {
+  if (!isFieldValid(field, SUPPORTED_METRICS[agg.aggType])) {
     return null;
   }
 

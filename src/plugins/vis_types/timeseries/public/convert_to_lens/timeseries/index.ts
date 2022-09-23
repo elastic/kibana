@@ -61,7 +61,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
 
-    const { indexPatternId, indexPattern, timeField } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -69,7 +69,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       series.series_time_field,
       dataViews
     );
+    if (!datasourceInfo) {
+      return null;
+    }
 
+    const { indexPatternId, indexPattern, timeField } = datasourceInfo;
     if (!timeField) {
       return null;
     }
@@ -102,6 +106,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
   }
 
   const configLayers = await getLayers(extendedLayers, model, dataViews);
+  if (configLayers === null) {
+    return null;
+  }
+
   const configuration = getConfiguration(model, configLayers);
   const layers = Object.values(excludeMetaFromLayers(extendedLayers));
   const annotationIndexPatterns = configuration.layers.reduce<string[]>((acc, layer) => {
