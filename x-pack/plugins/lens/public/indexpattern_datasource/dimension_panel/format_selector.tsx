@@ -12,7 +12,7 @@ import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 import { useDebouncedValue } from '../../shared_components';
 
-const supportedFormats: Record<string, { title: string }> = {
+const supportedFormats: Record<string, { title: string; defaultDecimals?: number }> = {
   number: {
     title: i18n.translate('xpack.lens.indexPattern.numberFormatLabel', {
       defaultMessage: 'Number',
@@ -27,6 +27,12 @@ const supportedFormats: Record<string, { title: string }> = {
     title: i18n.translate('xpack.lens.indexPattern.bytesFormatLabel', {
       defaultMessage: 'Bytes (1024)',
     }),
+  },
+  bits: {
+    title: i18n.translate('xpack.lens.indexPattern.bitsFormatLabel', {
+      defaultMessage: 'Bits (1000)',
+    }),
+    defaultDecimals: 0,
   },
 };
 
@@ -118,10 +124,13 @@ export function FormatSelector(props: FormatSelectorProps) {
         onChange();
         return;
       }
+      const id = choices[0].value;
+      const defaultDecimals = supportedFormats[id].defaultDecimals;
       onChange({
         id: choices[0].value,
-        params: { decimals },
+        params: { decimals: defaultDecimals ?? decimals },
       });
+      setDecimals(defaultDecimals ?? decimals);
     },
     [onChange, decimals]
   );
