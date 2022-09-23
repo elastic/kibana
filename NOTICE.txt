@@ -251,6 +251,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 Portions of this code are licensed under the following license:
+
+---
+Portions of this code are licensed under the following license:
 For license information please see https://edge.fullstory.com/s/fs.js.LICENSE.txt
 
 ---
