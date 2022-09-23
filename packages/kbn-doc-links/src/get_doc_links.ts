@@ -338,7 +338,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
       remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
-      secureCluster: `${ELASTICSEARCH_DOCS}secure_cluster.html`,
+      secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
       shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
       sortSearch: `${ELASTICSEARCH_DOCS}sort-search-results.html`,
       transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
