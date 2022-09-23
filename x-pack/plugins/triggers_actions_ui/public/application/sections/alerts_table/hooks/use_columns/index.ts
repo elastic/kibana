@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  presets: ['@kbn/babel-preset/webpack_preset'],
-  plugins: ['@babel/plugin-proposal-class-properties'],
-};
+export * from './use_columns';
