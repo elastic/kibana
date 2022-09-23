@@ -56,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow adding and using a field', async () => {
       await monacoEditor.setCodeEditorValue('SELECT extension, bytes FROM "log*"');
       await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.switchToVisualization('lnsMetric');
       await PageObjects.lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
@@ -110,6 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await switchToTextBasedLanguage('SQL');
       await monacoEditor.setCodeEditorValue('SELECT extension, bytes FROM "log*"');
       await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         field: 'extension',
