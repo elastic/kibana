@@ -599,7 +599,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'This Kibana request creates a new package policy.',
       }),
     ];
-  }, [packagePolicy, newAgentPolicy, withSysMonitoring]);
+  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab]);
 
   // Display package error if there is one
   if (packageInfoError) {
