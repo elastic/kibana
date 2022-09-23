@@ -8,11 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, SavedObjectsClient } from '@kbn/core/server';
-import {
-  guidedSetupDefaultState,
-  guidedSetupSavedObjectsId,
-  guidedSetupSavedObjectsType,
-} from '../saved_objects';
+import { guidedSetupDefaultState } from '../../common/constants';
+import { guidedSetupSavedObjectsId, guidedSetupSavedObjectsType } from '../saved_objects';
 
 const doesGuidedSetupExist = async (savedObjectsClient: SavedObjectsClient): Promise<boolean> => {
   return savedObjectsClient
@@ -52,18 +49,39 @@ export function defineRoutes(router: IRouter) {
       path: '/api/guided_onboarding/state',
       validate: {
         body: schema.object({
-          activeGuide: schema.maybe(schema.string()),
-          activeStep: schema.maybe(schema.string()),
+          search: schema.object({
+            status: schema.string(),
+            steps: schema.arrayOf(
+              schema.object({
+                status: schema.string(),
+                id: schema.string(),
+              })
+            ),
+          }),
+          observability: schema.object({
+            status: schema.string(),
+            steps: schema.arrayOf(
+              schema.object({
+                status: schema.string(),
+                id: schema.string(),
+              })
+            ),
+          }),
+          security: schema.object({
+            status: schema.string(),
+            steps: schema.arrayOf(
+              schema.object({
+                status: schema.string(),
+                id: schema.string(),
+              })
+            ),
+          }),
         }),
       },
     },
     async (context, request, response) => {
-      const activeGuide = request.body.activeGuide;
-      const activeStep = request.body.activeStep;
-      const attributes = {
-        activeGuide: activeGuide ?? 'unset',
-        activeStep: activeStep ?? 'unset',
-      };
+      const attributes = request.body;
+
       const coreContext = await context.core;
       const soClient = coreContext.savedObjects.client as SavedObjectsClient;
 
@@ -82,7 +100,6 @@ export function defineRoutes(router: IRouter) {
         const guidedSetupSO = await soClient.create(
           guidedSetupSavedObjectsType,
           {
-            ...guidedSetupDefaultState,
             ...attributes,
           },
           {

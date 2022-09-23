@@ -7,7 +7,7 @@
  */
 
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { UseCase } from '../common/types';
+import { GuideStatus, StepStatus, UseCase } from '../common/types';
 import { ApiService } from './services/api';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -20,10 +20,20 @@ export interface GuidedOnboardingPluginStart {
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
-export interface GuidedOnboardingState {
-  activeGuide: UseCase | 'unset';
-  activeStep: string | 'unset' | 'completed';
+
+export interface GuideState {
+  id: UseCase;
+  status: GuideStatus;
+  activeStep?: string;
+  steps: Array<{
+    id: string;
+    status: StepStatus;
+  }>;
 }
+
+export type GuidedOnboardingState = {
+  [key in UseCase]: GuideState;
+};
 
 export interface ClientConfigType {
   ui: boolean;

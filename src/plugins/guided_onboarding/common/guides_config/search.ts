@@ -50,6 +50,10 @@ export const searchConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepThree?showTour=true',
+      },
     },
   ],
 };

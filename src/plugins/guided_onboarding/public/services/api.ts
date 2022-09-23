@@ -9,8 +9,8 @@
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common/constants';
-import { UseCase } from '../../common/types';
+import { API_BASE_PATH, getDefaultStepsStatus } from '../../common/constants';
+import type { StepStatus, UseCase } from '../../common/types';
 import { GuidedOnboardingState } from '../types';
 import { getNextStep, isLastStep } from './helpers';
 
@@ -39,6 +39,45 @@ export class ApiService {
           : of(state)
       )
     );
+  }
+
+  public async activateGuide(
+    guideID: UseCase
+  ): Promise<{ state: GuidedOnboardingState } | undefined> {
+    const guidesState = await firstValueFrom(this.fetchGuideState$());
+
+    const updatedSteps = guidesState[guideID].steps.map((step, stepIndex) => {
+      const isFirstStep = stepIndex === 0;
+
+      // Only the first step should be activated
+      if (isFirstStep) {
+        return {
+          ...step,
+          status: 'active',
+        };
+      }
+
+      return step;
+    });
+
+    const updatedState = Object.keys(guidesState).reduce((acc, currentGuideId) => {
+      if (currentGuideId === guideID) {
+        // Mark the selected guide as active
+        acc[currentGuideId] = {
+          status: 'active',
+          steps: updatedSteps,
+        };
+      } else {
+        // Reset any all other guides to inactive; only 1 guide can be active at a time
+        acc[currentGuideId] = {
+          status: 'inactive',
+          steps: [...guidesState[guideID].steps],
+        };
+      }
+      return acc;
+    }, {});
+
+    return await this.updateGuideState(updatedState);
   }
 
   /**
@@ -77,12 +116,45 @@ export class ApiService {
    * @param {string} stepID the id of the step in the guide
    * @return {Observable} an observable with the boolean value
    */
-  public isGuideStepActive$(guideID: string, stepID: string): Observable<boolean> {
+  public isGuideStepActive$(guideID: UseCase, stepID: string): Observable<boolean> {
     return this.fetchGuideState$().pipe(
       map((state) => {
-        return state ? state.activeGuide === guideID && state.activeStep === stepID : false;
+        const selectedGuide = state[guideID];
+        const selectedStep = selectedGuide.steps.find((step) => step.id === stepID);
+        return selectedStep ? selectedStep.status === 'in_progress' : false;
       })
     );
+  }
+
+  public async startGuideStep(
+    guideID: UseCase,
+    stepID: string
+  ): Promise<{ state: GuidedOnboardingState } | undefined> {
+    const guidesState = await firstValueFrom(this.fetchGuideState$());
+    const currentGuide = guidesState[guideID];
+
+    const updatedSteps = currentGuide.steps.map((step, stepIndex) => {
+      // Mark the current step as in_progress
+      if (step.id === stepID) {
+        return {
+          id: step.id,
+          status: 'in_progress',
+        };
+      }
+
+      // All other steps return as-is
+      return step;
+    });
+
+    const updatedState = {
+      ...guidesState,
+      [guideID]: {
+        status: 'in_progress',
+        steps: updatedSteps,
+      },
+    };
+
+    return await this.updateGuideState(updatedState);
   }
 
   /**
@@ -94,23 +166,53 @@ export class ApiService {
    * @return {Promise} a promise with the updated state or undefined if the operation fails
    */
   public async completeGuideStep(
-    guideID: string,
+    guideID: UseCase,
     stepID: string
   ): Promise<{ state: GuidedOnboardingState } | undefined> {
-    const isStepActive = await firstValueFrom(this.isGuideStepActive$(guideID, stepID));
-    if (isStepActive) {
-      if (isLastStep(guideID, stepID)) {
-        await this.updateGuideState({ activeGuide: guideID as UseCase, activeStep: 'completed' });
-      } else {
-        const nextStepID = getNextStep(guideID, stepID);
-        if (nextStepID !== undefined) {
-          await this.updateGuideState({
-            activeGuide: guideID as UseCase,
-            activeStep: nextStepID,
-          });
+    const guidesState = await firstValueFrom(this.fetchGuideState$());
+
+    // TODO update helpers file
+    const currentGuide = guidesState[guideID];
+    const currentStepIndex = currentGuide.steps.findIndex((step) => step.id === stepID);
+    const currentStep = currentGuide.steps[currentStepIndex];
+    const isCurrentStepInProgress = currentStep ? currentStep.status === 'in_progress' : false;
+
+    if (isCurrentStepInProgress) {
+      const updatedSteps = currentGuide.steps.map((step, stepIndex) => {
+        const isCurrentStep = step.id === currentStep!.id;
+        const isNextStep = stepIndex === currentStepIndex + 1;
+
+        // Mark the current step as complete
+        if (isCurrentStep) {
+          return {
+            id: step.id,
+            status: 'complete',
+          };
         }
-      }
+
+        // Update the next step to active status
+        if (isNextStep) {
+          return {
+            id: step.id,
+            status: 'active',
+          };
+        }
+
+        // All other steps return as-is
+        return step;
+      });
+
+      const updatedState = {
+        ...guidesState,
+        [guideID]: {
+          status: isLastStep(guideID, stepID) ? 'ready_to_complete' : 'in_progress',
+          steps: updatedSteps,
+        },
+      };
+
+      await this.updateGuideState(updatedState);
     }
+
     return undefined;
   }
 }

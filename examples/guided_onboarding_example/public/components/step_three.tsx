@@ -18,11 +18,11 @@ import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
-interface StepTwoProps {
+interface StepThreeProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
-export const StepTwo = (props: StepTwoProps) => {
+export const StepThree = (props: StepThreeProps) => {
   const {
     guidedOnboarding: { guidedOnboardingApi },
   } = props;
@@ -44,8 +44,8 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="guidedOnboardingExample.stepTwo.title"
-              defaultMessage="Example step 2"
+              id="guidedOnboardingExample.stepThree.title"
+              defaultMessage="Example step 3"
             />
           </h2>
         </EuiTitle>
@@ -54,7 +54,7 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="guidedOnboardingExample.guidesSelection.stepTwo.explanation"
+              id="guidedOnboardingExample.guidesSelection.stepThree.explanation"
               defaultMessage="The EUI tour on this page is displayed, when a url param 'showTour' is set to 'true'."
             />
           </p>
@@ -63,27 +63,27 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiTourStep
           content={
             <EuiText>
-              <p>Click this button to complete step 2.</p>
+              <p>Click this button to complete step 3.</p>
             </EuiText>
           }
           isStepOpen={isTourStepOpen}
           minWidth={300}
           onFinish={() => {
-            history.push('/stepTwo');
+            history.push('/stepThree');
             query.set('showTour', 'false');
             setIsTourStepOpen(false);
           }}
           step={1}
           stepsTotal={1}
-          title="Step Browse documents"
+          title="Step Build search experience"
           anchorPosition="rightUp"
         >
           <EuiButton
             onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('search', 'browse_docs');
+              await guidedOnboardingApi?.completeGuideStep('search', 'search_experience');
             }}
           >
-            Complete step 2
+            Complete step 3
           </EuiButton>
         </EuiTourStep>
       </EuiPageContentBody>

@@ -43,12 +43,8 @@ export const Main = (props: MainProps) => {
   const history = useHistory();
   const [guideState, setGuideState] = useState<GuidedOnboardingState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<
-    GuidedOnboardingState['activeGuide'] | undefined
-  >(undefined);
-  const [selectedStep, setSelectedStep] = useState<GuidedOnboardingState['activeStep'] | undefined>(
-    undefined
-  );
+  const [selectedGuide, setSelectedGuide] = useState<UseCase | undefined>(undefined);
+  const [selectedStep, setSelectedStep] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const subscription = guidedOnboardingApi
@@ -60,10 +56,7 @@ export const Main = (props: MainProps) => {
   }, [guidedOnboardingApi]);
 
   const startGuide = async (guide: UseCase) => {
-    const response = await guidedOnboardingApi?.updateGuideState({
-      activeGuide: guide,
-      activeStep: 'add_data',
-    });
+    const response = await guidedOnboardingApi?.activateGuide(guide);
 
     if (response) {
       notifications.toasts.addSuccess(

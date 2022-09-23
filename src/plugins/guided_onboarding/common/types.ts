@@ -8,7 +8,22 @@
 
 export type UseCase = 'observability' | 'security' | 'search';
 
-export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
+/**
+ * Inactive: Guide is inactive
+ * Active: Guide has been initiated, but no steps have been started
+ * In progress: Guide has been initiated and steps are in progress
+ * Ready to complete: Steps have been completed, but "Continue using Elastic" has not been clicked
+ * Complete: Steps and guide have been completed
+ */
+export type GuideStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_complete' | 'complete';
+
+/**
+ * Inactive: Step has not started
+ * Active: Step is ready to start (i.e., guide has been activated)
+ * In progress: Step has been started and is in progress
+ * Complete: Step has been completed
+ */
+export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'complete';
 
 export interface StepConfig {
   id: string;
