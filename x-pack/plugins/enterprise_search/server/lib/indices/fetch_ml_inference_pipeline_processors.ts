@@ -150,7 +150,7 @@ export const fetchMlInferencePipelineProcessors = async (
   // the possible pipeline data.
   if (mlInferencePipelineProcessorNames.length === 0) return [] as InferencePipeline[];
 
-  let pipelineProcessorInferenceData = await fetchPipelineProcessorInferenceData(
+  const pipelineProcessorInferenceData = await fetchPipelineProcessorInferenceData(
     client,
     mlInferencePipelineProcessorNames
   );
