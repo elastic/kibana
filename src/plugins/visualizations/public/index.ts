@@ -74,4 +74,4 @@ export {
 } from './triggers';
 
 export const convertToLensModule = import('./convert_to_lens');
-export { getDataViewByIndexPatternId } from './convert_to_lens/utils';
+export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';

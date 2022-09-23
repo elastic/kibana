@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
 import { InferencePipeline } from '../../../common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
+  getMlModelTypesForModelConfig,
+  getMlModelConfigsForModelIds,
   fetchMlInferencePipelineProcessorNames,
   fetchMlInferencePipelineProcessors,
   fetchPipelineProcessorInferenceData,
@@ -195,6 +199,95 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
 
     expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
       id: 'ml-inference-pipeline-1,ml-inference-pipeline-2,non-ml-inference-pipeline',
+    });
+    expect(response).toEqual(expected);
+  });
+});
+
+describe('getMlModelTypesForModelConfig lib function', () => {
+  const mockModel: MlTrainedModelConfig = {
+    inference_config: {
+      ner: {},
+    },
+    input: {
+      field_names: [],
+    },
+    model_id: 'test_id',
+    model_type: 'pytorch',
+    tags: ['test_tag'],
+  };
+  const builtInMockModel: MlTrainedModelConfig = {
+    inference_config: {
+      text_classification: {},
+    },
+    input: {
+      field_names: [],
+    },
+    model_id: 'test_id',
+    model_type: 'lang_ident',
+    tags: [BUILT_IN_MODEL_TAG],
+  };
+
+  it('should return the model type and inference config type', () => {
+    const expected = ['pytorch', 'ner'];
+    const response = getMlModelTypesForModelConfig(mockModel);
+    expect(response.sort()).toEqual(expected.sort());
+  });
+
+  it('should include the built in type', () => {
+    const expected = ['lang_ident', 'text_classification', BUILT_IN_MODEL_TAG];
+    const response = getMlModelTypesForModelConfig(builtInMockModel);
+    expect(response.sort()).toEqual(expected.sort());
+  });
+});
+
+describe('getMlModelConfigsForModelIds lib function', () => {
+  const mockClient = {
+    ml: {
+      getTrainedModels: jest.fn(),
+      getTrainedModelsStats: jest.fn(),
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should fetch the models that we ask for', async () => {
+    mockClient.ml.getTrainedModels.mockImplementation(() =>
+      Promise.resolve(mockGetTrainedModelsData)
+    );
+    mockClient.ml.getTrainedModelsStats.mockImplementation(() =>
+      Promise.resolve(mockGetTrainedModelStats)
+    );
+
+    const input = {
+      'trained-model-id-1': {
+        isDeployed: true,
+        pipelineName: '',
+        trainedModelName: 'trained-model-id-1',
+        types: ['pytorch', 'ner'],
+      },
+      'trained-model-id-2': {
+        isDeployed: true,
+        pipelineName: '',
+        trainedModelName: 'trained-model-id-2',
+        types: ['pytorch', 'ner'],
+      },
+    } as Record<string, InferencePipeline>;
+
+    const expected = {
+      'trained-model-id-2': input['trained-model-id-2'],
+    };
+    const response = await getMlModelConfigsForModelIds(
+      mockClient as unknown as ElasticsearchClient,
+      ['trained-model-id-2']
+    );
+    expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
+      model_id: 'trained-model-id-2',
+    });
+    expect(mockClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+      model_id: 'trained-model-id-2',
     });
     expect(response).toEqual(expected);
   });
