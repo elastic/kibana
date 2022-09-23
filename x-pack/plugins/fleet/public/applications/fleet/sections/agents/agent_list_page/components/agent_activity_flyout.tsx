@@ -143,7 +143,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                   body={
                     <FormattedMessage
                       id="xpack.fleet.agentActivityFlyout.noActivityDescription"
-                      defaultMessage="Activity feed will appear here as agents get enrolled, upgraded, or configured."
+                      defaultMessage="Activity feed will appear here as agents are reassigned, upgraded, or unenrolled."
                     />
                   }
                 />
@@ -237,6 +237,16 @@ const actionNames: {
     inProgressText: 'Unenrolling',
     completedText: 'unenrolled',
     cancelledText: 'unenrollment',
+  },
+  FORCE_UNENROLL: {
+    inProgressText: 'Force unenrolling',
+    completedText: 'force unenrolled',
+    cancelledText: 'force unenrollment',
+  },
+  UPDATE_TAGS: {
+    inProgressText: 'Updating tags of',
+    completedText: 'updated tags',
+    cancelledText: 'update tags',
   },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
@@ -357,7 +367,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           <p>
             <FormattedMessage
               id="xpack.fleet.agentActivityFlyout.failureDescription"
-              defaultMessage=" A problem occured during this operation."
+              defaultMessage=" A problem occurred during this operation."
             />
             &nbsp;
             {inProgressDescription(action.creationTime)}
