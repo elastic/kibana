@@ -108,6 +108,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow saving the text based languages chart into a saved object', async () => {
       await switchToTextBasedLanguage('SQL');
+      await monacoEditor.setCodeEditorValue('SELECT extension, bytes FROM "log*"');
+      await testSubjects.click('querySubmitButton');
       await PageObjects.lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         field: 'extension',
