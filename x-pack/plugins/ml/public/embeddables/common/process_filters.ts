@@ -13,12 +13,15 @@ import {
   Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
+import { getDefaultQuery } from '@kbn/data-plugin/public';
 
 export function processFilters(
-  filters: Filter[],
-  query: Query,
+  optionalFilters?: Filter[],
+  optionalQuery?: Query,
   controlledBy?: string
 ): estypes.QueryDslQueryContainer {
+  const filters = optionalFilters ?? [];
+  const query = optionalQuery ?? getDefaultQuery();
   const inputQuery =
     query.language === 'kuery'
       ? toElasticsearchQuery(fromKueryExpression(query.query as string))

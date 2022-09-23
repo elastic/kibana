@@ -28,47 +28,57 @@ export const initComponent = memoize(
         const inputProps =
           persistableStateAttachmentState as unknown as AnomalySwimlaneEmbeddableInput;
 
+        const listItems = [
+          {
+            title: (
+              <FormattedMessage
+                id="xpack.ml.cases.anomalySwimLane.description.jobIdsLabel"
+                defaultMessage="Job IDs"
+              />
+            ),
+            description: inputProps.jobIds.join(', '),
+          },
+          ...(inputProps.viewBy
+            ? [
+                {
+                  title: (
+                    <FormattedMessage
+                      id="xpack.ml.cases.anomalySwimLane.description.viewByLabel"
+                      defaultMessage="View by"
+                    />
+                  ),
+                  description: inputProps.viewBy,
+                },
+              ]
+            : []),
+          {
+            title: (
+              <FormattedMessage
+                id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
+                defaultMessage="Time range"
+              />
+            ),
+            description: `${dataFormatter.convert(
+              inputProps.timeRange.from
+            )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+          },
+        ];
+
+        if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
+          listItems.push({
+            title: (
+              <FormattedMessage
+                id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
+                defaultMessage="Query"
+              />
+            ),
+            description: inputProps.query?.query,
+          });
+        }
+
         return (
           <>
-            <EuiDescriptionList
-              compressed
-              type={'inline'}
-              listItems={[
-                {
-                  title: (
-                    <FormattedMessage
-                      id="xpack.ml.cases.anomalySwimLane.description.jobIdsLabel"
-                      defaultMessage="Job IDs"
-                    />
-                  ),
-                  description: inputProps.jobIds.join(', '),
-                },
-                ...(inputProps.viewBy
-                  ? [
-                      {
-                        title: (
-                          <FormattedMessage
-                            id="xpack.ml.cases.anomalySwimLane.description.viewByLabel"
-                            defaultMessage="View by"
-                          />
-                        ),
-                        description: inputProps.viewBy,
-                      },
-                    ]
-                  : []),
-                {
-                  title: (
-                    <FormattedMessage
-                      id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
-                      defaultMessage="Time range"
-                    />
-                  ),
-                  description: `${dataFormatter.convert(
-                    inputProps.timeRange.from
-                  )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
-                },
-              ]}
-            />
+            <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
             <EmbeddableComponent {...inputProps} />
           </>
         );
