@@ -379,19 +379,21 @@ export function LayerPanel(
 
             if (!isEmptyLayer) {
               if (group.requiredMinDimensionCount) {
-                errorText = i18n.translate(
-                  'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
-                  {
-                    defaultMessage: 'Requires {requiredMinDimensionCount} fields',
-                    values: {
-                      requiredMinDimensionCount: group.requiredMinDimensionCount,
-                    },
-                  }
-                );
-              } else if (group.required && group.accessors.length === 0) {
-                errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
-                  defaultMessage: 'Requires field',
-                });
+                if (group.requiredMinDimensionCount > 1) {
+                  errorText = i18n.translate(
+                    'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                    {
+                      defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                      values: {
+                        requiredMinDimensionCount: group.requiredMinDimensionCount,
+                      },
+                    }
+                  );
+                } else if (group.requiredMinDimensionCount && group.accessors.length === 0) {
+                  errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                    defaultMessage: 'Requires field',
+                  });
+                }
               } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
                 errorText = i18n.translate(
                   'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
@@ -405,7 +407,7 @@ export function LayerPanel(
                 );
               }
             }
-            const isOptional = !group.required && !group.suggestedValue;
+            const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"

@@ -243,7 +243,7 @@ describe('LayerPanel', () => {
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
-            required: true,
+            requiredMinDimensionCount: 1,
           },
         ],
       });

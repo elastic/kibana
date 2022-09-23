@@ -280,7 +280,7 @@ export const getDatatableVisualization = ({
             }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
         },
