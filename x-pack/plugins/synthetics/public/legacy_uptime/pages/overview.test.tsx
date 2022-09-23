@@ -9,8 +9,7 @@ import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
 
-// FLAKY: https://github.com/elastic/kibana/issues/131346
-describe.skip('MonitorPage', () => {
+describe('MonitorPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText, findByPlaceholderText } = render(<OverviewPageComponent />);
 
