@@ -58,13 +58,13 @@ export const command = {
     const forceInstall =
       args.getBooleanValue('force-install') ?? haveNodeModulesBeenManuallyDeleted();
 
-    Bazel.tryRemovingBazeliskFromYarnGlobal(log);
+    await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
 
     // Install bazel machinery tools if needed
-    Bazel.ensureInstalled(log);
+    await Bazel.ensureInstalled(log);
 
     // Setup remote cache settings in .bazelrc.cache if needed
-    setupRemoteCache(log);
+    await setupRemoteCache(log);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
