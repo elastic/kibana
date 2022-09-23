@@ -10,8 +10,9 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
-import { AlertsTableStorage } from '../alerts_table_state';
-import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
+import { AlertsTableStorage } from '../../alerts_table_state';
+import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
+import { toggleColumn } from './toggle_column';
 
 interface UseColumnsArgs {
   featureIds: AlertConsumers[];
@@ -79,27 +80,34 @@ const populateColumns = (
   });
 };
 
+const getColumnIds = (columns: EuiDataGridColumn[]): string[] => {
+  return columns.map((column: EuiDataGridColumn) => column.id);
+};
+
 const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => {
   return columns.find(({ id }: { id: string }) => id === columnId);
+};
+
+const getColumnsByColumnIds = (columns: EuiDataGridColumn[], columnIds: string[]) => {
+  return columnIds
+    .map((columnId: string) => columns.find((column: EuiDataGridColumn) => column.id === columnId))
+    .filter(Boolean) as EuiDataGridColumn[];
 };
 
 const persist = ({
   id,
   storageAlertsTable,
   columns,
-  visibleColumns,
   storage,
 }: {
   id: string;
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   columns: EuiDataGridColumn[];
-  visibleColumns: string[];
 }) => {
   storageAlertsTable.current = {
     ...storageAlertsTable.current,
     columns,
-    visibleColumns,
   };
   storage.current.set(id, storageAlertsTable.current);
 };
@@ -116,9 +124,6 @@ export const useColumns = ({
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
-  const [visibleColumns, setVisibleColumns] = useState(
-    storageAlertsTable.current.visibleColumns ?? []
-  );
 
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
@@ -128,108 +133,58 @@ export const useColumns = ({
     setColumns(populatedColumns);
   }, [browserFields, columns, isBrowserFieldDataLoading, isColumnsPopulated]);
 
-  const onColumnsChange = useCallback(
-    (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
+  const setColumnsAndSave = useCallback(
+    (newColumns: EuiDataGridColumn[]) => {
       setColumns(newColumns);
       persist({
         id,
         storage,
         storageAlertsTable,
         columns: newColumns,
-        visibleColumns: newVisibleColumns,
       });
     },
     [id, storage, storageAlertsTable]
   );
 
-  const onChangeVisibleColumns = useCallback(
-    (newColumns: string[]) => {
-      setVisibleColumns(newColumns);
-      onColumnsChange(
-        columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
-        newColumns
-      );
+  const setColumnsByColumnIds = useCallback(
+    (columnIds: string[]) => {
+      const newColumns = getColumnsByColumnIds(columns, columnIds);
+      setColumnsAndSave(newColumns);
     },
-    [onColumnsChange, columns]
+    [setColumnsAndSave, columns]
   );
 
   const onToggleColumn = useCallback(
     (columnId: string): void => {
-      const visibleIndex = visibleColumns.indexOf(columnId);
-      const defaultIndex = defaultColumns.findIndex(
-        (column: EuiDataGridColumn) => column.id === columnId
-      );
+      const newColumnIds = toggleColumn({
+        columnId,
+        columnIds: getColumnIds(columns),
+        defaultColumns,
+      });
 
-      const isVisible = visibleIndex >= 0;
-      const isInDefaultConfig = defaultIndex >= 0;
-
-      let newColumnIds: string[] = [];
-
-      // if the column is shown, remove it
-      if (isVisible) {
-        newColumnIds = [
-          ...visibleColumns.slice(0, visibleIndex),
-          ...visibleColumns.slice(visibleIndex + 1),
-        ];
-      }
-
-      // if the column isn't shown but it's part of the default config
-      // insert into the same position as in the default config
-      if (!isVisible && isInDefaultConfig) {
-        newColumnIds = [
-          ...visibleColumns.slice(0, defaultIndex),
-          columnId,
-          ...visibleColumns.slice(defaultIndex),
-        ];
-      }
-
-      // if the column isn't shown and it's not part of the default config
-      // push it into the second position. Behaviour copied by t_grid, security
-      // does this to insert right after the timestamp column
-      if (!isVisible && !isInDefaultConfig) {
-        newColumnIds = [visibleColumns[0], columnId, ...visibleColumns.slice(1)];
-      }
-
-      const newColumns = newColumnIds.map((_columnId) => {
+      const newColumns = newColumnIds.map((_columnId: string) => {
         const column = getColumnByColumnId(defaultColumns, _columnId);
         return euiColumnFactory(column ? column : { id: _columnId }, browserFields);
       });
 
-      setVisibleColumns(newColumnIds);
-      setColumns(newColumns);
-      persist({
-        id,
-        storage,
-        storageAlertsTable,
-        columns: newColumns,
-        visibleColumns: newColumnIds,
-      });
+      setColumnsAndSave(newColumns);
     },
-    [browserFields, defaultColumns, id, storage, storageAlertsTable, visibleColumns]
+    [browserFields, columns, defaultColumns, setColumnsAndSave]
   );
 
   const onResetColumns = useCallback(() => {
-    const newVisibleColumns = defaultColumns.map((column) => column.id);
     const populatedDefaultColumns = populateColumns(defaultColumns, browserFields);
-    setVisibleColumns(newVisibleColumns);
-    setColumns(populatedDefaultColumns);
-    persist({
-      id,
-      storage,
-      storageAlertsTable,
-      columns: populatedDefaultColumns,
-      visibleColumns: newVisibleColumns,
-    });
-  }, [browserFields, defaultColumns, id, storage, storageAlertsTable]);
+    setColumnsAndSave(populatedDefaultColumns);
+  }, [browserFields, defaultColumns, setColumnsAndSave]);
 
   return {
     columns,
+    visibleColumns: getColumnIds(columns),
     isBrowserFieldDataLoading,
     browserFields,
-    visibleColumns,
-    onColumnsChange,
+    onColumnsChange: setColumnsAndSave,
     onToggleColumn,
     onResetColumns,
-    onChangeVisibleColumns,
+    onChangeVisibleColumns: setColumnsByColumnIds,
   };
 };
