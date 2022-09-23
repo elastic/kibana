@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
@@ -120,6 +121,12 @@ export class RequestHandler {
 
     if (!licenseResults.enableLinks) {
       return this.res.forbidden({ body: licenseResults.message });
+    }
+
+    if (jobParams.browserTimezone && !moment.tz.zone(jobParams.browserTimezone)) {
+      return this.res.badRequest({
+        body: `Invalid timezone "${jobParams.browserTimezone ?? ''}".`,
+      });
     }
 
     try {
