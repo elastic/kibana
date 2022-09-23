@@ -279,13 +279,7 @@
         "description": [],
         "signature": [
           "<Services extends Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">>(services: Services) => ",
           {
             "pluginId": "kibanaReact",
@@ -328,13 +322,7 @@
         "description": [],
         "signature": [
           "(services: Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">) => ",
           {
             "pluginId": "kibanaReact",
@@ -357,13 +345,7 @@
             "description": [],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
             "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
@@ -384,13 +366,7 @@
         "description": [],
         "signature": [
           "(services: Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">) => ",
           {
             "pluginId": "kibanaReact",
@@ -413,13 +389,7 @@
             "description": [],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
             "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
@@ -1858,13 +1828,7 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "> & Extra>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
@@ -3365,13 +3329,7 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">>>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",

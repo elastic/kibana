@@ -891,13 +891,7 @@
             "text": "IUnifiedSearchPluginServices"
           },
           " extends Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">"
         ],
         "path": "src/plugins/unified_search/public/types.ts",

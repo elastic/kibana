@@ -2429,13 +2429,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,

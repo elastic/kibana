@@ -24,13 +24,7 @@
             "description": [],
             "signature": [
               "{ services: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               " & ",
               "CanvasStartDeps",
               " & { canvas: ",
