@@ -7,7 +7,6 @@
  */
 
 import fetch from 'node-fetch';
-import Semver from 'semver';
 import { Logger } from '../../utils/create_logger';
 
 export class ApmSynthtraceKibanaClient {
@@ -53,23 +52,37 @@ export class ApmSynthtraceKibanaClient {
       return kibanaUrl;
     });
   }
-  async fetchLatestApmPackageVersion(currentKibanaVersion: string) {
-    const url = `https://epr-snapshot.elastic.co/search?package=apm&prerelease=true&all=true&kibana.version=${currentKibanaVersion}`;
-    const response = await fetch(url, { method: 'GET' });
-    const json = (await response.json()) as Array<{ version: string }>;
-    const packageVersions = (json ?? []).map((item) => item.version).sort(Semver.rcompare);
-    const validPackageVersions = packageVersions.filter((v) => Semver.valid(v));
-    const bestMatch = validPackageVersions[0];
-    if (!bestMatch) {
-      throw new Error(
-        `None of the available APM package versions matches the current Kibana version (${currentKibanaVersion}). The latest available version is ${packageVersions[0]}. This can happen if the Kibana version was recently bumped, and no matching APM package was released. Reach out to the fleet team if this persists.`
-      );
-    }
-    return bestMatch;
+  async fetchLatestApmPackageVersion(
+    kibanaUrl: string,
+    version: string,
+    username: string,
+    password: string
+  ) {
+    const url = `${kibanaUrl}/api/fleet/epm/packages/apm`;
+    console.log({ url });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'kbn-xsrf': 'kibana',
+      },
+    });
+    const json = (await response.json()) as { item: { latestVersion: string } };
+    const { latestVersion } = json.item;
+    console.log({ latestVersion });
+    return latestVersion;
   }
 
   async installApmPackage(kibanaUrl: string, version: string, username: string, password: string) {
-    const packageVersion = await this.fetchLatestApmPackageVersion(version);
+    const packageVersion = await this.fetchLatestApmPackageVersion(
+      kibanaUrl,
+      version,
+      username,
+      password
+    );
     const response = await fetch(`${kibanaUrl}/api/fleet/epm/packages/apm/${packageVersion}`, {
       method: 'POST',
       headers: {
