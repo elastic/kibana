@@ -15,6 +15,7 @@ describe('unpackProcessorEvents', () => {
     const request = {
       apm: { events: ['transaction', 'error'] },
       body: {
+        track_total_hits: false,
         size: 0,
         query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
       },

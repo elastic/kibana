@@ -23,6 +23,7 @@ export async function getRootTransactionByTraceId(
       events: [ProcessorEvent.transaction as const],
     },
     body: {
+      track_total_hits: false,
       size: 1,
       query: {
         bool: {

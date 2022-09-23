@@ -78,6 +78,7 @@ export async function getIsUsingServiceDestinationMetrics({
           events: [getProcessorEventForServiceDestinationStatistics(true)],
         },
         body: {
+          track_total_hits: 1,
           size: 1,
           terminate_after: 1,
           query: {

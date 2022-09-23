@@ -41,6 +41,7 @@ export async function getErrorGroupSample({
       events: [ProcessorEvent.error as const],
     },
     body: {
+      track_total_hits: true,
       size: 1,
       query: {
         bool: {

@@ -97,6 +97,7 @@ export async function getTopDependencyOperations({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

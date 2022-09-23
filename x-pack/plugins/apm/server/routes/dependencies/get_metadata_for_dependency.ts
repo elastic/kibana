@@ -31,6 +31,7 @@ export async function getMetadataForDependency({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: 1,
         query: {
           bool: {

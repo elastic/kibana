@@ -52,6 +52,7 @@ export async function getDerivedServiceAnnotations({
           ],
         },
         body: {
+          track_total_hits: false,
           size: 0,
           query: {
             bool: {
@@ -83,6 +84,7 @@ export async function getDerivedServiceAnnotations({
             ],
           },
           body: {
+            track_total_hits: false,
             size: 1,
             query: {
               bool: {

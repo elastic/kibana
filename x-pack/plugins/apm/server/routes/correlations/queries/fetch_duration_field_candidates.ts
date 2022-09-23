@@ -65,6 +65,7 @@ export const fetchDurationFieldCandidates = async ({
         events: [eventType],
       },
       body: {
+        track_total_hits: false,
         fields: ['*'],
         _source: false,
         query: getCommonCorrelationsQuery({

@@ -42,6 +42,7 @@ export const fetchFieldValuePairs = async ({
               events: [eventType],
             },
             body: {
+              track_total_hits: false,
               size: 0,
               query: getCommonCorrelationsQuery({
                 start,

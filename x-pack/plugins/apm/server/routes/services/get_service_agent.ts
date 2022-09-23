@@ -48,6 +48,7 @@ export async function getServiceAgent({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
       _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],
       query: {

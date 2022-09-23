@@ -52,6 +52,7 @@ export async function getEventMetadata({
       events: [processorEvent],
     },
     body: {
+      track_total_hits: false,
       query: {
         bool: { filter },
       },
