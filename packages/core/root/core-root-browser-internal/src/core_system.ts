@@ -49,7 +49,10 @@ import {
 
 import './core_system.scss';
 
-interface Params {
+/**
+ * @internal
+ */
+export interface CoreSystemParams {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
@@ -98,7 +101,7 @@ export class CoreSystem {
   private readonly executionContext: ExecutionContextService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
-  constructor(params: Params) {
+  constructor(params: CoreSystemParams) {
     const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;

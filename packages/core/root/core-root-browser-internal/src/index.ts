@@ -7,4 +7,5 @@
  */
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';
-export type { CoreSystem } from './core_system';
+export { CoreSystem } from './core_system';
+export type { CoreSystemParams } from './core_system';

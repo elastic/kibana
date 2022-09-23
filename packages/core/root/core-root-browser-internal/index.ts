@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { CoreSystem, __kbnBootstrap__ } from './src';
+export type { CoreSystemParams } from './src';
