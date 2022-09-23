@@ -312,7 +312,7 @@ export async function mgetStackTraces({
     );
   }
 
-  return { stackTraces, stackFrameDocIDs, executableDocIDs };
+  return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
 export async function mgetStackFrames({

@@ -13,6 +13,7 @@ import {
   emptyStackTrace,
   Executable,
   FileID,
+  getCalleeLabel,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
@@ -20,33 +21,81 @@ import {
   StackTraceID,
 } from './profiling';
 
-export interface CalleeNode {
-  Callees: Map<FrameGroupID, CalleeNode>;
-  FrameMetadata: StackFrameMetadata;
-  FrameGroupID: FrameGroupID;
-  Samples: number;
-  CountInclusive: number;
-  CountExclusive: number;
-}
-
-export function createCalleeNode(
-  frameMetadata: StackFrameMetadata,
-  frameGroupID: FrameGroupID,
-  samples: number
-): CalleeNode {
-  return {
-    Callees: new Map<FrameGroupID, CalleeNode>(),
-    FrameMetadata: frameMetadata,
-    FrameGroupID: frameGroupID,
-    Samples: samples,
-    CountInclusive: 0,
-    CountExclusive: 0,
-  };
-}
+type NodeID = number;
 
 export interface CalleeTree {
-  root: CalleeNode;
-  size: number;
+  Size: number;
+  Edges: Array<Map<FrameGroupID, NodeID>>;
+
+  FrameGroupID: FrameGroupID[];
+  FrameType: number[];
+  FrameID: StackFrameID[];
+  FileID: FileID[];
+  Label: string[];
+
+  Samples: number[];
+  CountInclusive: number[];
+  CountExclusive: number[];
+}
+
+function initCalleeTree(capacity: number): CalleeTree {
+  const metadata = createStackFrameMetadata();
+  const frameGroupID = createFrameGroupID(
+    metadata.FileID,
+    metadata.AddressOrLine,
+    metadata.ExeFileName,
+    metadata.SourceFilename,
+    metadata.FunctionName
+  );
+  const tree: CalleeTree = {
+    Size: 1,
+    Edges: new Array(capacity),
+    FrameGroupID: new Array(capacity),
+    FrameType: new Array(capacity),
+    FrameID: new Array(capacity),
+    FileID: new Array(capacity),
+    Label: new Array(capacity),
+    Samples: new Array(capacity),
+    CountInclusive: new Array(capacity),
+    CountExclusive: new Array(capacity),
+  };
+
+  tree.Edges[0] = new Map<FrameGroupID, NodeID>();
+  tree.FrameGroupID[0] = frameGroupID;
+  tree.FrameType[0] = metadata.FrameType;
+  tree.FrameID[0] = metadata.FrameID;
+  tree.FileID[0] = metadata.FileID;
+  tree.Label[0] = 'root: Represents 100% of CPU time.';
+  tree.Samples[0] = 0;
+  tree.CountInclusive[0] = 0;
+  tree.CountExclusive[0] = 0;
+
+  return tree;
+}
+
+function insertNode(
+  tree: CalleeTree,
+  parent: NodeID,
+  metadata: StackFrameMetadata,
+  frameGroupID: FrameGroupID,
+  samples: number
+) {
+  const node = tree.Size;
+
+  tree.Edges[parent].set(frameGroupID, node);
+  tree.Edges[node] = new Map<FrameGroupID, NodeID>();
+  tree.FrameGroupID[node] = frameGroupID;
+  tree.FrameType[node] = metadata.FrameType;
+  tree.FrameID[node] = metadata.FrameID;
+  tree.FileID[node] = metadata.FileID;
+  tree.Label[node] = getCalleeLabel(metadata);
+  tree.Samples[node] = samples;
+  tree.CountInclusive[node] = 0;
+  tree.CountExclusive[node] = 0;
+
+  tree.Size++;
+
+  return node;
 }
 
 // createCalleeTree creates a tree in the internal representation from a
@@ -60,19 +109,10 @@ export function createCalleeTree(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>
+  executables: Map<FileID, Executable>,
+  totalFrames: number
 ): CalleeTree {
-  // Create a root node for the tree
-  const rootFrame = createStackFrameMetadata();
-  const rootFrameGroupID = createFrameGroupID(
-    rootFrame.FileID,
-    rootFrame.AddressOrLine,
-    rootFrame.ExeFileName,
-    rootFrame.SourceFilename,
-    rootFrame.FunctionName
-  );
-  const root = createCalleeNode(rootFrame, rootFrameGroupID, 0);
-  const tree: CalleeTree = { root, size: 1 };
+  const tree = initCalleeTree(totalFrames);
 
   const sortedStackTraceIDs = new Array<StackTraceID>();
   for (const trace of stackTraces.keys()) {
@@ -94,10 +134,10 @@ export function createCalleeTree(
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
     const lenStackTrace = stackTrace.FrameIDs.length;
-    const samples = events.get(stackTraceID)!;
+    const samples = events.get(stackTraceID) ?? 0;
 
-    let currentNode = root;
-    root.Samples += samples;
+    let currentNode = 0;
+    tree.Samples[currentNode] += samples;
 
     for (let i = 0; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
@@ -114,10 +154,10 @@ export function createCalleeTree(
         frame.FunctionName
       );
 
-      let node = currentNode.Callees.get(frameGroupID);
+      let node = tree.Edges[currentNode].get(frameGroupID);
 
       if (node === undefined) {
-        const callee = createStackFrameMetadata({
+        const metadata = createStackFrameMetadata({
           FrameID: frameID,
           FileID: fileID,
           AddressOrLine: addressOrLine,
@@ -129,41 +169,41 @@ export function createCalleeTree(
           ExeFileName: executable.FileName,
         });
 
-        node = createCalleeNode(callee, frameGroupID, samples);
-        currentNode.Callees.set(frameGroupID, node);
-        tree.size++;
+        node = insertNode(tree, currentNode, metadata, frameGroupID, samples);
       } else {
-        node.Samples += samples;
+        tree.Samples[node] += samples;
       }
 
-      node.CountInclusive += samples;
+      tree.CountInclusive[node] += samples;
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
-        node.CountExclusive += samples;
+        tree.CountExclusive[node] += samples;
       }
       currentNode = node;
     }
   }
 
-  root.CountExclusive = 0;
-  root.CountInclusive = root.Samples;
+  tree.CountExclusive[0] = 0;
+  tree.CountInclusive[0] = tree.Samples[0];
 
   return tree;
 }
 
-export function sortCalleeNodes(nodes: Map<FrameGroupID, CalleeNode>): CalleeNode[] {
-  const sortedNodes = new Array<CalleeNode>();
-  for (const [_, node] of nodes) {
-    sortedNodes.push(node);
+export function sortEdges(tree: CalleeTree, node: NodeID): NodeID[] {
+  const sortedNodes = new Array<NodeID>(tree.Edges[node].size);
+  let i = 0;
+  for (const [_, n] of tree.Edges[node]) {
+    sortedNodes[i] = n;
+    i++;
   }
   return sortedNodes.sort((n1, n2) => {
-    if (n1.Samples > n2.Samples) {
+    if (tree.Samples[n1] > tree.Samples[n2]) {
       return -1;
     }
-    if (n1.Samples < n2.Samples) {
+    if (tree.Samples[n1] < tree.Samples[n2]) {
       return 1;
     }
-    return n1.FrameGroupID.localeCompare(n2.FrameGroupID);
+    return tree.FrameGroupID[n1].localeCompare(tree.FrameGroupID[n2]);
   });
 }

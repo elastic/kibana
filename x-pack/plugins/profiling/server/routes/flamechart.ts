@@ -42,17 +42,30 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
         });
         const totalSeconds = timeTo - timeFrom;
 
-        const { stackTraces, executables, stackFrames, eventsIndex, totalCount, stackTraceEvents } =
-          await getExecutablesAndStackTraces({
-            logger,
-            client: createProfilingEsClient({ request, esClient }),
-            filter,
-            sampleSize: targetSampleSize,
-          });
+        const {
+          stackTraces,
+          executables,
+          stackFrames,
+          eventsIndex,
+          totalCount,
+          totalFrames,
+          stackTraceEvents,
+        } = await getExecutablesAndStackTraces({
+          logger,
+          client: createProfilingEsClient({ request, esClient }),
+          filter,
+          sampleSize: targetSampleSize,
+        });
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
           const t0 = Date.now();
-          const tree = createCalleeTree(stackTraceEvents, stackTraces, stackFrames, executables);
+          const tree = createCalleeTree(
+            stackTraceEvents,
+            stackTraces,
+            stackFrames,
+            executables,
+            totalFrames
+          );
           logger.info(`creating callee tree took ${Date.now() - t0} ms`);
 
           const t1 = Date.now();

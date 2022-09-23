@@ -6,8 +6,7 @@
  */
 
 import fnv from 'fnv-plus';
-import { CalleeTree, sortCalleeNodes } from './callee';
-import { getCalleeLabel } from './profiling';
+import { CalleeTree, sortEdges } from './callee';
 
 interface ColumnarCallee {
   Label: string[];
@@ -99,67 +98,53 @@ function normalize(n: number, lower: number, upper: number): number {
 // will later need to be normalized into the response ultimately consumed by
 // the flamegraph.
 export function createColumnarCallee(tree: CalleeTree): ColumnarCallee {
-  const numCallees = tree.size;
+  const size = tree.Size;
   const columnar: ColumnarCallee = {
-    Label: new Array<string>(numCallees),
-    Value: new Array<number>(numCallees),
-    X: new Array<number>(numCallees),
-    Y: new Array<number>(numCallees),
-    Color: new Array<number>(numCallees * 4),
-    CountInclusive: new Array<number>(numCallees),
-    CountExclusive: new Array<number>(numCallees),
-    ID: new Array<string>(numCallees),
-    FrameID: new Array<string>(numCallees),
-    ExecutableID: new Array<string>(numCallees),
+    Label: tree.Label.slice(0, size),
+    Value: tree.Samples.slice(0, size),
+    X: new Array<number>(size),
+    Y: new Array<number>(size),
+    Color: new Array<number>(size * 4),
+    CountInclusive: tree.CountInclusive.slice(0, size),
+    CountExclusive: tree.CountExclusive.slice(0, size),
+    ID: new Array<string>(size),
+    FrameID: tree.FrameID.slice(0, size),
+    ExecutableID: tree.FileID.slice(0, size),
   };
 
-  const queue = [{ x: 0, depth: 1, node: tree.root, parentID: 'root' }];
+  const queue = [{ x: 0, depth: 1, node: 0, parentID: 'root' }];
 
-  let idx = 0;
   while (queue.length > 0) {
     const { x, depth, node, parentID } = queue.pop()!;
 
-    if (x === 0 && depth === 1) {
-      columnar.Label[idx] = 'root: Represents 100% of CPU time.';
-    } else {
-      columnar.Label[idx] = getCalleeLabel(node.FrameMetadata);
-    }
-    columnar.Value[idx] = node.Samples;
-    columnar.X[idx] = x;
-    columnar.Y[idx] = depth;
+    columnar.X[node] = x;
+    columnar.Y[node] = depth;
 
-    const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameMetadata.FrameType, x));
-    const j = 4 * idx;
+    const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(tree.FrameType[node], x));
+    const j = 4 * node;
     columnar.Color[j] = red;
     columnar.Color[j + 1] = green;
     columnar.Color[j + 2] = blue;
     columnar.Color[j + 3] = alpha;
 
-    columnar.CountInclusive[idx] = node.CountInclusive;
-    columnar.CountExclusive[idx] = node.CountExclusive;
+    const id = fnv.fast1a64utf(`${parentID}${tree.FrameGroupID[node]}`).toString();
 
-    const id = fnv.fast1a64utf(`${parentID}${node.FrameGroupID}`).toString();
-
-    columnar.ID[idx] = id;
-    columnar.FrameID[idx] = node.FrameMetadata.FrameID;
-    columnar.ExecutableID[idx] = node.FrameMetadata.FileID;
+    columnar.ID[node] = id;
 
     // For a deterministic result we have to walk the callees in a deterministic
     // order. A deterministic result allows deterministic UI views, something
     // that users expect.
-    const callees = sortCalleeNodes(node.Callees);
+    const children = sortEdges(tree, node);
 
     let delta = 0;
-    for (const callee of callees) {
-      delta += callee.Samples;
+    for (const child of children) {
+      delta += columnar.Value[child];
     }
 
-    for (let i = callees.length - 1; i >= 0; i--) {
-      delta -= callees[i].Samples;
-      queue.push({ x: x + delta, depth: depth + 1, node: callees[i], parentID: id });
+    for (let i = children.length - 1; i >= 0; i--) {
+      delta -= columnar.Value[children[i]];
+      queue.push({ x: x + delta, depth: depth + 1, node: children[i], parentID: id });
     }
-
-    idx++;
   }
 
   return columnar;

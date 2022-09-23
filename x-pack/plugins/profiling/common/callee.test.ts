@@ -13,11 +13,12 @@ import { events, stackTraces, stackFrames, executables } from './__fixtures__/st
 describe('Callee operations', () => {
   test('1', () => {
     const totalSamples = sum([...events.values()]);
+    const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
-    const tree = createCalleeTree(events, stackTraces, stackFrames, executables);
+    const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
 
-    expect(tree.root.Samples).toEqual(totalSamples);
-    expect(tree.root.CountInclusive).toEqual(totalSamples);
-    expect(tree.root.CountExclusive).toEqual(0);
+    expect(tree.Samples[0]).toEqual(totalSamples);
+    expect(tree.CountInclusive[0]).toEqual(totalSamples);
+    expect(tree.CountExclusive[0]).toEqual(0);
   });
 });
