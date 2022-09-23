@@ -70,6 +70,9 @@ const applyPaletteToColumnConfig = (
   }
 };
 
+const ENABLE_MULTIPLE_METRICS_ACTION_ID = 'enableMultipleMetricsAction';
+const DISABLE_MULTIPLE_METRICS_ACTION_ID = 'disableMultipleMetricsAction';
+
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
@@ -262,7 +265,7 @@ export const getPieVisualization = ({
         }),
       },
       accessors: layer.metrics.map((columnId) => ({ columnId })),
-      supportsMoreColumns: true,
+      supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
       filterOperations: numberMetricOperations,
       required: true,
       dataTestSubj: 'lnsPie_sizeByDimensionPanel',
@@ -460,5 +463,48 @@ export const getPieVisualization = ({
           },
         ]
       : [];
+  },
+
+  getLayerActions(layerId, state) {
+    const layerInQuestion = state.layers.find((layer) => layer.layerId === layerId);
+
+    if (!layerInQuestion) {
+      return [];
+    }
+
+    return layerInQuestion.allowMultipleMetrics
+      ? [
+          {
+            id: DISABLE_MULTIPLE_METRICS_ACTION_ID,
+            displayName: 'Disable multiple metrics',
+            icon: 'visPie',
+            isCompatible: true,
+          },
+        ]
+      : [
+          {
+            id: ENABLE_MULTIPLE_METRICS_ACTION_ID,
+            displayName: 'Enable multiple metrics',
+            icon: 'visPie',
+            isCompatible: true,
+          },
+        ];
+  },
+
+  onLayerAction(layerId, actionId, state) {
+    return {
+      ...state,
+      layers: state.layers.map((layer) => {
+        const ret: PieLayerState =
+          layer.layerId !== layerId
+            ? layer
+            : {
+                ...layer,
+                allowMultipleMetrics: actionId === ENABLE_MULTIPLE_METRICS_ACTION_ID,
+              };
+
+        return ret;
+      }),
+    };
   },
 });

@@ -66,6 +66,7 @@ export interface SharedPieLayerState {
   metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
+  allowMultipleMetrics?: boolean;
   collapseFns?: Record<string, string>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;

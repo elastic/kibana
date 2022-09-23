@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
+import { StateSetter } from '../../../../types';
 import type { LayerType, Visualization } from '../../../..';
 import type { LayerAction } from './types';
 
@@ -28,10 +29,13 @@ export interface LayerActionsProps {
   onRemoveLayer: () => void;
   onCloneLayer: () => void;
   layerIndex: number;
+  layerId: string;
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
+  visualizationState: unknown;
   layerType?: LayerType;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
+  updateVisualization: StateSetter<unknown, unknown>;
 }
 
 /** @internal **/
@@ -120,6 +124,21 @@ export const LayerActions = (props: LayerActionsProps) => {
           isOnlyLayer: props.isOnlyLayer,
           core: props.core,
         }),
+        ...(props.activeVisualization.getLayerActions
+          ? props.activeVisualization.getLayerActions(props.layerId, props.visualizationState)
+          : []
+        ).map((partialAction) => ({
+          ...partialAction,
+          execute: () => {
+            props.updateVisualization(
+              props.activeVisualization.onLayerAction!(
+                props.layerId,
+                partialAction.id,
+                props.visualizationState
+              )
+            );
+          },
+        })),
       ].filter((i) => i.isCompatible),
     [props]
   );

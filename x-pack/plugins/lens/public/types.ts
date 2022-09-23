@@ -50,6 +50,7 @@ import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+import { LayerAction } from './editor_frame_service/editor_frame/config_panel/layer_actions/types';
 
 export interface IndexPatternRef {
   id: string;
@@ -1124,6 +1125,10 @@ export interface Visualization<T = unknown, P = unknown> {
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion;
+
+  getLayerActions?: (layerId: string, state: T) => Array<Omit<LayerAction, 'execute'>>;
+
+  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
 }
 
 // Use same technique as TriggerContext
