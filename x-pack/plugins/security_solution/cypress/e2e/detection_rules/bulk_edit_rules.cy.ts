@@ -493,7 +493,7 @@ describe('Detection rules, bulk edit', () => {
     });
   });
 
-  describe.only('Schedule', () => {
+  describe('Schedule', () => {
     it('Default values are applied to bulk edit schedule fields', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
       clickUpdateScheduleMenuItem();
