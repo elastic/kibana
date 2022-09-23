@@ -80,7 +80,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const { overallAnnotations } = explorerState;
 
-    const { filterActive } = useObservable(
+    const { filterActive, queryString } = useObservable(
       anomalyExplorerCommonStateService.getFilterSettings$(),
       anomalyExplorerCommonStateService.getFilterSettings()
     );
@@ -420,6 +420,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }}
             jobIds={selectedJobs.map(({ id }) => id)}
             viewBy={viewBySwimlaneFieldName!}
+            queryString={queryString}
           />
         )}
       </>
