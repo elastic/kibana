@@ -14,13 +14,19 @@ import { ExternalUrlConfig } from './external_url';
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
 const invalidHostnames = ['asdf$%^', '0'];
 
+let mockHostname = 'kibana-hostname';
+
 jest.mock('os', () => {
   const original = jest.requireActual('os');
 
   return {
     ...original,
-    hostname: () => 'kibana-hostname',
+    hostname: () => mockHostname,
   };
+});
+
+beforeEach(() => {
+  mockHostname = 'kibana-hostname';
 });
 
 test('has defaults for config', () => {
@@ -245,10 +251,19 @@ test('accepts only valid uuids for server.uuid', () => {
   );
 });
 
-test('uses os.hostname() as default for server.name', () => {
-  const httpSchema = config.schema;
-  const validated = httpSchema.validate({});
-  expect(validated.name).toEqual('kibana-hostname');
+describe('server.name', () => {
+  test('uses os.hostname() as default for server.name', () => {
+    const httpSchema = config.schema;
+    const validated = httpSchema.validate({});
+    expect(validated.name).toEqual('kibana-hostname');
+  });
+
+  test('removes non-ascii characters from os.hostname() when used as default', () => {
+    mockHostname = 'Apple’s amazing idea♥';
+    const httpSchema = config.schema;
+    const validated = httpSchema.validate({});
+    expect(validated.name).toEqual('Apples amazing idea');
+  });
 });
 
 test('throws if xsrf.allowlist element does not start with a slash', () => {
