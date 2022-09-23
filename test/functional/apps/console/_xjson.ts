@@ -18,7 +18,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   describe('XJSON', function testXjson() {
     this.tags('includeFirefox');
     before(async () => {
-      log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await retry.try(async () => {
         await PageObjects.console.collapseHelp();
@@ -35,68 +34,124 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.header.waitUntilLoadingHasFinished();
     };
 
-    describe('inline HTTP requests', () => {
-      it('should not trigger validation errors with a valid request', async () => {
-        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": "bar"');
-        expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
+    describe('inline http request', () => {
+      it('should have method and path', async () => {
+        await PageObjects.console.enterRequest('\n PUT foo/bar');
+        expect(await PageObjects.console.getRequestMethod()).to.be('PUT');
+        expect(await PageObjects.console.getRequestPath()).to.be('foo/bar');
+      });
+
+      it('should have optional query parameters', async () => {
+        await PageObjects.console.enterRequest('\n GET foo/bar?pretty');
+        expect(await PageObjects.console.getRequestQueryParams()).to.be('pretty');
+      });
+
+      it('should have optional request body', async () => {
+        await PageObjects.console.enterRequest('\n POST foo/bar\n {"foo": "bar"}');
+        log.debug('request body: ' + (await PageObjects.console.getRequestBody()));
+        expect(await PageObjects.console.getRequestBody()).to.be('{"foo": "bar"}');
+      });
+
+      it('should not have validation errors', async () => {
+        await PageObjects.console.enterRequest('\n GET foo/bar');
         expect(await PageObjects.console.hasErrorMarker()).to.be(false);
       });
 
-      it('should trigger validation errors with an invalid request', async () => {
-        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": \'\'');
-        expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
-        expect(await PageObjects.console.hasErrorMarker()).to.be(true);
+      it('should have validation error for invalid method', async () => {
+        await PageObjects.console.enterRequest('\n FOO foo/bar');
+        // Retry because the error marker is not always immediately visible.
+        await retry.try(async () => {
+          expect(await PageObjects.console.hasErrorMarker()).to.be(true);
+        });
       });
 
-      it('should trigger validation errors with an invalid syntax', async () => {
-        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": \'\'');
-        expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
+      it('should have validation error for invalid path', async () => {
+        await PageObjects.console.enterRequest('\n GET');
+        // Retry because the error marker is not always immediately visible.
+        await retry.try(async () => {
+          expect(await PageObjects.console.hasErrorMarker()).to.be(true);
+        });
       });
 
-      it('should be correctly syntax highlighted', async () => {
-        const methodTokenColor = '#c80a68';
-        const urlTokenColor = '#00756c';
-        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": "bar"');
-        const methodTokenColorRGB = await PageObjects.console.getTokenColor('ace_method');
-        const urlColorRGB = await PageObjects.console.getTokenColor('ace_url');
-        // getTokenColor returns rgb value of css color property, we need to convert rgb to hex to compare it to the actual value
-        expect(rgbToHex(methodTokenColorRGB)).to.eql(methodTokenColor);
-        expect(rgbToHex(urlColorRGB)).to.eql(urlTokenColor);
+      it('should have validation error for invalid body', async () => {
+        await PageObjects.console.enterRequest('\n POST foo/bar\n {"foo": "bar"');
+        // Retry because the error marker is not always immediately visible.
+        await retry.try(async () => {
+          expect(await PageObjects.console.hasErrorMarker()).to.be(true);
+        });
       });
-    });
 
-    describe('multiple bodies for msearch requests', () => {
-      it('should not trigger validation errors', async () => {
-        await executeRequest(
+      it('should have correct syntax highlighting', async () => {
+        await PageObjects.console.enterRequest('\n GET foo/bar');
+        expect(await PageObjects.console.getRequestLineHighlighting()).to.contain(
+          'ace_method ace_whitespace ace_url ace_part ace_url ace_slash ace_url ace_part'
+        );
+      });
+
+      it('should have correct syntax highlighting for method', async () => {
+        await PageObjects.console.enterRequest('\n PUT foo/bar');
+        const color = await PageObjects.console.getRequestMethodColor();
+        expect(rgbToHex(color)).to.be('#c80a68');
+      });
+
+      it('should have correct syntax highlighting for path', async () => {
+        await PageObjects.console.enterRequest('\n PUT foo/bar');
+        const color = await PageObjects.console.getRequestPathColor();
+        expect(rgbToHex(color)).to.be('#00756c');
+      });
+
+      it('should have correct syntax highlighting for query', async () => {
+        await PageObjects.console.enterRequest('\n PUT foo/bar?pretty');
+        const color = await PageObjects.console.getRequestQueryColor();
+        expect(rgbToHex(color)).to.be('#00756c');
+      });
+
+      it('should have correct syntax highlighting for body', async () => {
+        await PageObjects.console.enterRequest('\n PUT foo/bar\n {"foo": "bar"}');
+        const color = await PageObjects.console.getRequestBodyColor();
+        expect(rgbToHex(color)).to.be('#343741');
+      });
+
+      it('should have multiple bodies for _msearch requests', async () => {
+        await PageObjects.console.enterRequest(
           '\nGET foo/_msearch \n{}\n{"query": {"match_all": {}}}\n{"index": "bar"}\n{"query": {"match_all": {}}}'
+        );
+        expect(await PageObjects.console.getRequestBodyCount()).to.be(4);
+      });
+
+      it('should not trigger error for multiple bodies for _msearch requests', async () => {
+        await PageObjects.console.enterRequest(
+          '\nGET foo/_msearch \n{}\n{"query": {"match_all": {}}}\n{"index": "bar"}\n{"query": {"match_all": {}}}'
+        );
+        // Retry until typing is finished.
+        await retry.try(async () => {
+          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
+        });
+      });
+
+      it('should not trigger validation errors for multiple JSON blocks', async () => {
+        await PageObjects.console.enterRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
+        await PageObjects.console.enterRequest('\nPOST test/doc/2 \n{\n "foo": "baz"');
+        await PageObjects.console.enterRequest('\nPOST test/doc/3 \n{\n "foo": "qux"');
+        // Retry until typing is finished.
+        await retry.try(async () => {
+          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
+        });
+      });
+
+      it('should allow escaping quotation mark by wrapping it in triple quotes', async () => {
+        await PageObjects.console.enterRequest(
+          '\nPOST test/_doc/1 \n{\n "foo": """look "escaped" quotes"""'
         );
         expect(await PageObjects.console.hasErrorMarker()).to.be(false);
       });
-    });
 
-    describe('multiple JSON blocks', () => {
-      it('should not trigger validation errors', async () => {
-        await executeRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
-        await executeRequest('\nPOST test/doc/2 \n{\n "foo": "baz"');
-        await executeRequest('\nPOST test/doc/3 \n{\n "foo": "qux"');
-        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
-      });
-    });
-
-    describe('triple quoted strings', () => {
-      it('should allow escaping quotation mark by wrapping it in triple quotes', async () => {
-        await executeRequest('\nPOST test/_doc/1 \n{\n "foo": """look "escaped" quotes"""');
-        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
-      });
-    });
-
-    describe('inline comments', () => {
-      it('should be correctly syntax highlighted', async () => {
-        const commentTokenColor = '#41755c';
-        await PageObjects.console.enterRequest('\n GET _search // inline comment');
-        const commentTokenColorRGB = await PageObjects.console.getTokenColor('ace_comment');
-        // getTokenColor returns rgb value of css color property, we need to convert rgb to hex to compare it to the actual value
-        expect(rgbToHex(commentTokenColorRGB)).to.eql(commentTokenColor);
+      it('should have correct syntax highlighting for inline comments', async () => {
+        await PageObjects.console.enterRequest(
+          '\nPOST test/_doc/1 \n{\n "foo": "bar" # inline comment'
+        );
+        const color = await PageObjects.console.getCommentColor();
+        expect(rgbToHex(color)).to.be('#41755c');
       });
 
       it('should allow inline comments in request url row', async () => {
@@ -110,18 +165,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(await PageObjects.console.hasErrorMarker()).to.be(false);
         expect(await PageObjects.console.getResponseStatus()).to.eql(200);
       });
-    });
 
-    describe('with a request using a deprecated feature', () => {
-      it('should print a warning into the response pane above the JSON', async () => {
+      it('should print warning for deprecated request', async () => {
         await executeRequest('\nGET .kibana');
         expect(await PageObjects.console.responseHasDeprecationWarning()).to.be(true);
       });
-    });
 
-    describe('with a request using no deprecated feature', () => {
-      it('should not print a warning into the response pane', async () => {
-        await executeRequest();
+      it('should not print warning for non-deprecated request', async () => {
+        await executeRequest('\n GET _search');
         expect(await PageObjects.console.responseHasDeprecationWarning()).to.be(false);
       });
     });
