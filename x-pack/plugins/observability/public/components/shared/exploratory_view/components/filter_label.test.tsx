@@ -11,9 +11,11 @@ import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_help
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
+import 'jest-canvas-mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/115324
-describe.skip('FilterLabel', function () {
+jest.setTimeout(10 * 1000);
+
+describe('FilterLabel', function () {
   mockAppDataView();
 
   const invertFilter = jest.fn();
@@ -35,17 +37,15 @@ describe.skip('FilterLabel', function () {
       />
     );
 
-    await waitFor(() => {
-      screen.getByText('elastic-co');
-      screen.getByText(/web application:/i);
-      screen.getByTitle('Delete Web Application: elastic-co');
-      screen.getByRole('button', {
-        name: /delete web application: elastic-co/i,
-      });
+    await waitFor(async () => {
+      expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+      expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+      expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
+      expect(await screen.findByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
     });
   });
 
-  it.skip('should delete filter', async function () {
+  it('should delete filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
@@ -60,16 +60,14 @@ describe.skip('FilterLabel', function () {
       />
     );
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByLabelText('Filter actions'));
-    });
+    fireEvent.click(await screen.findByLabelText('Filter actions'));
 
-    fireEvent.click(screen.getByTestId('deleteFilter'));
+    fireEvent.click(await screen.findByTestId('deleteFilter'));
     expect(removeFilter).toHaveBeenCalledTimes(1);
     expect(removeFilter).toHaveBeenCalledWith('service.name', 'elastic-co', false);
   });
 
-  it.skip('should invert filter', async function () {
+  it('should invert filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
@@ -84,11 +82,9 @@ describe.skip('FilterLabel', function () {
       />
     );
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByLabelText('Filter actions'));
-    });
+    fireEvent.click(await screen.findByLabelText('Filter actions'));
 
-    fireEvent.click(screen.getByTestId('negateFilter'));
+    fireEvent.click(await screen.findByTestId('negateFilter'));
     expect(invertFilter).toHaveBeenCalledTimes(1);
     expect(invertFilter).toHaveBeenCalledWith({
       field: 'service.name',
@@ -111,14 +107,14 @@ describe.skip('FilterLabel', function () {
       />
     );
 
-    await waitFor(() => {
-      screen.getByText('elastic-co');
-      screen.getByText(/web application:/i);
-      screen.getByTitle('Delete NOT Web Application: elastic-co');
-      screen.getByRole('button', {
+    expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+    expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
+    expect(await screen.findByTitle('Delete NOT Web Application: elastic-co')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', {
         name: /delete not web application: elastic-co/i,
-      });
-    });
+      })
+    ).toBeInTheDocument();
   });
 
   it('should build filter meta', function () {
