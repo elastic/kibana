@@ -6,7 +6,7 @@
  */
 
 import { Action } from 'redux';
-import { State } from '../../../types';
+import { State } from '../../types';
 
 export interface RecordedPayload {
   previousState: State;
