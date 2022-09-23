@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
+import { DataView, DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { isFieldValid, SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
-import { isMetricWithField, getStdDeviationFormula } from '../convert';
+import { isMetricWithField, getStdDeviationFormula, ExtendedColumnConverterArgs } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
 import {
   getFieldNameFromField,
@@ -59,13 +59,40 @@ const METRIC_OPS_WITHOUT_PARAMS: string[] = [
   Operations.COUNT,
 ];
 
+const isDataViewField = (field: string | DataViewField): field is DataViewField => {
+  if (field && typeof field === 'object') {
+    return true;
+  }
+  return false;
+};
+
+const isValidAgg = (agg: SchemaConfig<METRIC_TYPES>, dataView: DataView) => {
+  const aggregation = SUPPORTED_METRICS[agg.aggType];
+  if (!aggregation) {
+    return false;
+  }
+  if (isMetricWithField(agg)) {
+    if (!agg.aggParams?.field) {
+      return false;
+    }
+    const sourceField = getFieldNameFromField(agg.aggParams?.field);
+    const field = dataView.getFieldByName(sourceField!);
+    if (!isFieldValid(field, aggregation)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 const getFormulaForAggsWithoutParams = (
   agg: SchemaConfig<METRIC_TYPES>,
+  dataView: DataView,
   selector: string | undefined,
   reducedTimeRange?: string
 ) => {
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!op) {
+  if (!isValidAgg(agg, dataView) || !op) {
     return null;
   }
 
@@ -75,12 +102,13 @@ const getFormulaForAggsWithoutParams = (
 
 const getFormulaForPercentileRanks = (
   agg: SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
+  dataView: DataView,
   selector: string | undefined,
   reducedTimeRange?: string
 ) => {
   const value = Number(agg.aggId?.split('.')[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!op) {
+  if (!isValidAgg(agg, dataView) || !op) {
     return null;
   }
 
@@ -90,12 +118,13 @@ const getFormulaForPercentileRanks = (
 
 const getFormulaForPercentile = (
   agg: SchemaConfig<METRIC_TYPES.PERCENTILES>,
+  dataView: DataView,
   selector: string,
   reducedTimeRange?: string
 ) => {
   const percentile = Number(agg.aggId?.split('.')[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!op) {
+  if (!isValidAgg(agg, dataView) || !op) {
     return null;
   }
 
@@ -105,17 +134,11 @@ const getFormulaForPercentile = (
   )})`;
 };
 
-const isDataViewField = (field: string | DataViewField): field is DataViewField => {
-  if (field && typeof field === 'object') {
-    return true;
-  }
-  return false;
-};
-
-const getFormulaForSubMetric = (
-  agg: SchemaConfig,
-  aggs: Array<SchemaConfig<METRIC_TYPES>>
-): string | null => {
+const getFormulaForSubMetric = ({
+  agg,
+  dataView,
+  aggs,
+}: ExtendedColumnConverterArgs<METRIC_TYPES>): string | null => {
   const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
@@ -125,13 +148,14 @@ const getFormulaForSubMetric = (
     PARENT_PIPELINE_OPS.includes(op.name) ||
     SIBLING_PIPELINE_AGGS.includes(agg.aggType as METRIC_TYPES)
   ) {
-    return getFormulaForPipelineAgg(agg as PipelineAggs, aggs);
+    return getFormulaForPipelineAgg({ agg: agg as PipelineAggs, aggs, dataView });
   }
 
   if (METRIC_OPS_WITHOUT_PARAMS.includes(op.name)) {
     const metricAgg = agg as MetricAggsWithoutParams;
     return getFormulaForAggsWithoutParams(
       metricAgg,
+      dataView,
       metricAgg.aggParams && 'field' in metricAgg.aggParams
         ? isDataViewField(metricAgg.aggParams.field)
           ? metricAgg.aggParams?.field.displayName
@@ -143,24 +167,29 @@ const getFormulaForSubMetric = (
   if (op.name === Operations.PERCENTILE_RANK) {
     const percentileRanksAgg = agg as SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>;
 
-    return getFormulaForPercentileRanks(percentileRanksAgg, percentileRanksAgg.aggParams?.field);
+    return getFormulaForPercentileRanks(
+      percentileRanksAgg,
+      dataView,
+      percentileRanksAgg.aggParams?.field
+    );
   }
 
   return null;
 };
 
-export const getFormulaForPipelineAgg = (
-  agg: SchemaConfig<
-    | METRIC_TYPES.CUMULATIVE_SUM
-    | METRIC_TYPES.DERIVATIVE
-    | METRIC_TYPES.MOVING_FN
-    | METRIC_TYPES.AVG_BUCKET
-    | METRIC_TYPES.MAX_BUCKET
-    | METRIC_TYPES.MIN_BUCKET
-    | METRIC_TYPES.SUM_BUCKET
-  >,
-  aggs: Array<SchemaConfig<METRIC_TYPES>>
-) => {
+export const getFormulaForPipelineAgg = ({
+  agg,
+  dataView,
+  aggs,
+}: ExtendedColumnConverterArgs<
+  | METRIC_TYPES.CUMULATIVE_SUM
+  | METRIC_TYPES.DERIVATIVE
+  | METRIC_TYPES.MOVING_FN
+  | METRIC_TYPES.AVG_BUCKET
+  | METRIC_TYPES.MAX_BUCKET
+  | METRIC_TYPES.MIN_BUCKET
+  | METRIC_TYPES.SUM_BUCKET
+>) => {
   const { aggType } = agg;
   const supportedAgg = SUPPORTED_METRICS[aggType];
   if (!supportedAgg) {
@@ -172,7 +201,11 @@ export const getFormulaForPipelineAgg = (
     return null;
   }
 
-  const subFormula = getFormulaForSubMetric(metricAgg, aggs);
+  const subFormula = getFormulaForSubMetric({
+    agg: metricAgg,
+    aggs,
+    dataView,
+  });
   if (subFormula === null) {
     return null;
   }
@@ -185,28 +218,41 @@ export const getFormulaForPipelineAgg = (
   return subFormula;
 };
 
-export const getFormulaForAgg = (
-  agg: SchemaConfig<METRIC_TYPES>,
-  aggs: Array<SchemaConfig<METRIC_TYPES>>
-) => {
+export const getFormulaForAgg = ({
+  agg,
+  aggs,
+  dataView,
+}: ExtendedColumnConverterArgs<METRIC_TYPES>) => {
   if (isPipeline(agg)) {
-    return getFormulaForPipelineAgg(agg, aggs);
+    return getFormulaForPipelineAgg({ agg, aggs, dataView });
   }
 
   if (isPercentileAgg(agg)) {
-    return getFormulaForPercentile(agg, getFieldNameFromField(agg.aggParams?.field) ?? '');
+    return getFormulaForPercentile(
+      agg,
+      dataView,
+      getFieldNameFromField(agg.aggParams?.field) ?? ''
+    );
   }
 
   if (isPercentileRankAgg(agg)) {
-    return getFormulaForPercentileRanks(agg, getFieldNameFromField(agg.aggParams?.field) ?? '');
+    return getFormulaForPercentileRanks(
+      agg,
+      dataView,
+      getFieldNameFromField(agg.aggParams?.field) ?? ''
+    );
   }
 
   if (isStdDevAgg(agg) && agg.aggId) {
+    if (!isValidAgg(agg, dataView)) {
+      return null;
+    }
     return getStdDeviationFormula(agg.aggId, getFieldNameFromField(agg.aggParams?.field) ?? '');
   }
 
   return getFormulaForAggsWithoutParams(
     agg,
+    dataView,
     isMetricWithField(agg) ? getFieldNameFromField(agg.aggParams?.field) ?? '' : ''
   );
 };
