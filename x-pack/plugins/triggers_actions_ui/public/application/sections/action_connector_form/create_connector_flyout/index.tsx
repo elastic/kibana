@@ -164,15 +164,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
       >
-        {actionType == null ? (
-          <ActionTypeMenu
-            featureId={featureId}
-            onActionTypeChange={setActionType}
-            setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
-            actionTypeRegistry={actionTypeRegistry}
-          />
-        ) : null}
-        {actionType != null ? (
+        {hasConnectorTypeSelected ? (
           <>
             <ConnectorForm
               actionTypeModel={actionTypeModel}
@@ -180,52 +172,57 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               isEdit={false}
               onChange={setFormState}
             />
-            {preSubmitValidationErrorMessage}
+            {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
 
-            {hasConnectorTypeSelected ? (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <>
-                    {onTestConnector && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          color="success"
-                          data-test-subj="create-connector-flyout-save-test-btn"
-                          type="submit"
-                          isLoading={isSaving}
-                          disabled={hasErrors || !canSave}
-                          onClick={onTestConnector != null ? testConnector : undefined}
-                        >
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                            defaultMessage="Save & test"
-                          />
-                        </EuiButton>
-                      </EuiFlexItem>
-                    )}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <>
+                  {onTestConnector && (
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        fill
                         color="success"
-                        data-test-subj="create-connector-flyout-save-btn"
+                        data-test-subj="create-connector-flyout-save-test-btn"
                         type="submit"
                         isLoading={isSaving}
                         disabled={hasErrors || !canSave}
-                        onClick={onSubmit}
+                        onClick={onTestConnector != null ? testConnector : undefined}
                       >
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                          defaultMessage="Save"
+                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
+                          defaultMessage="Save & test"
                         />
                       </EuiButton>
                     </EuiFlexItem>
-                    <EuiFlexItem />
-                  </>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ) : null}
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      color="success"
+                      data-test-subj="create-connector-flyout-save-btn"
+                      type="submit"
+                      isLoading={isSaving}
+                      disabled={hasErrors || !canSave}
+                      onClick={onSubmit}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
+                        defaultMessage="Save"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem />
+                </>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </>
-        ) : null}
+        ) : (
+          <ActionTypeMenu
+            featureId={featureId}
+            onActionTypeChange={setActionType}
+            setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        )}
       </EuiFlyoutBody>
       <FlyoutFooter
         hasConnectorTypeSelected={hasConnectorTypeSelected}
