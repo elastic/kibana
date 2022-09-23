@@ -30,6 +30,7 @@ import { AuditAction, ISavedObjectsSecurityExtension } from './extensions';
 import {
   authMap,
   checkAuthError,
+  createBadRequestErrorPayload,
   enforceError,
   mapsAreEqual,
   setsAreEqual,
@@ -664,6 +665,22 @@ describe('#updateObjectsSpaces', () => {
         params = setup({ objects, spacesToAdd }, mockSecurityExt);
         mockMgetResults({ found: true, namespaces: [EXISTING_SPACE] }); // result for obj1
         mockBulkResults({ error: false }); // result for obj1
+      });
+
+      test(`propogates error from es client bulk get`, async () => {
+        setupCheckAuthorized(mockSecurityExt);
+        setupEnforceSuccess(mockSecurityExt);
+        setupRedactPassthrough(mockSecurityExt);
+
+        const error = SavedObjectsErrorHelpers.createBadRequestError('OOPS!');
+
+        mockGetBulkOperationError.mockReset();
+        client.bulk.mockReset();
+        client.bulk.mockImplementationOnce(() => {
+          throw error;
+        });
+
+        await expect(updateObjectsSpaces(params)).rejects.toThrow(error);
       });
 
       test(`propogates decorated errror when checkAuthorization rejects promise`, async () => {
