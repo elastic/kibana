@@ -18,13 +18,7 @@
             "text": "Plugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "triggersActionsUi",
@@ -83,13 +77,7 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -109,13 +97,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, plugins: PluginsSetup) => ",
               {
                 "pluginId": "triggersActionsUi",
@@ -137,13 +119,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -4187,13 +4163,7 @@
             "text": "TriggersAndActionsUiServices"
           },
           " extends ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          }
+          "CoreStart"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
         "deprecated": false,
@@ -7282,7 +7252,7 @@
         "label": "BASE_TRIGGERS_ACTIONS_UI_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/triggers_actions_ui\""
+          "\"/internal/triggers_actions_ui\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/index.ts",
         "deprecated": false,
