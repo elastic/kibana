@@ -503,7 +503,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const DataSource = useMemo(() => {
     return (
-      <RuleTypeEuiFormRow id="dataSourceSelector" label={i18n.SOURCE} $isVisible={true} fullWidth>
+      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
