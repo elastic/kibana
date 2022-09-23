@@ -8,6 +8,9 @@
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+import { getMlModelTypesForModelConfig } from '../indices/fetch_ml_inference_pipeline_processors';
+
 export interface CreatedPipelines {
   created: string[];
 }
@@ -35,7 +38,7 @@ export const createIndexPipelineDefinitions = (
   // TODO: add back descriptions (see: https://github.com/elastic/elasticsearch-specification/issues/1827)
   esClient.ingest.putPipeline({
     description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
-    id: `${indexName}@ml-inference`,
+    id: getInferencePipelineNameFromIndexName(indexName),
     processors: [],
     version: 1,
   });
@@ -97,7 +100,7 @@ export const createIndexPipelineDefinitions = (
       {
         pipeline: {
           if: 'ctx?._run_ml_inference == true',
-          name: `${indexName}@ml-inference`,
+          name: getInferencePipelineNameFromIndexName(indexName),
           on_failure: [
             {
               append: {
@@ -228,7 +231,9 @@ export const createIndexPipelineDefinitions = (
     ],
     version: 1,
   });
-  return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
+  return {
+    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
+  };
 };
 
 /**
@@ -251,11 +256,10 @@ export const formatMlPipelineBody = async (
   // if model returned no input field, insert a placeholder
   const modelInputField =
     model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
-  const modelType = model.model_type;
+  const modelTypes = getMlModelTypesForModelConfig(model);
   const modelVersion = model.version;
   return {
     description: '',
-    version: 1,
     processors: [
       {
         remove: {
@@ -265,11 +269,11 @@ export const formatMlPipelineBody = async (
       },
       {
         inference: {
-          model_id: modelId,
-          target_field: `ml.inference.${destinationField}`,
           field_map: {
             [sourceField]: modelInputField,
           },
+          model_id: modelId,
+          target_field: `ml.inference.${destinationField}`,
         },
       },
       {
@@ -277,14 +281,15 @@ export const formatMlPipelineBody = async (
           field: '_source._ingest.processors',
           value: [
             {
-              type: modelType,
               model_id: modelId,
               model_version: modelVersion,
               processed_timestamp: '{{{ _ingest.timestamp }}}',
+              types: modelTypes,
             },
           ],
         },
       },
     ],
+    version: 1,
   };
 };

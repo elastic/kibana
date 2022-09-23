@@ -2429,13 +2429,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
@@ -2540,6 +2534,26 @@
                 "docId": "kibVisualizationsPluginApi",
                 "section": "def-public.PersistedState",
                 "text": "PersistedState"
+              }
+            ],
+            "path": "src/plugins/visualizations/public/visualize_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.EditorRenderProps.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
               }
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
@@ -7068,6 +7082,62 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.isAnnotationsLayer",
+        "type": "Function",
+        "tags": [],
+        "label": "isAnnotationsLayer",
+        "description": [],
+        "signature": [
+          "(layer: Pick<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.XYLayerConfig",
+            "text": "XYLayerConfig"
+          },
+          ", \"layerType\">) => layer is ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.XYAnnotationsLayerConfig",
+            "text": "XYAnnotationsLayerConfig"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.isAnnotationsLayer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "layer",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.XYLayerConfig",
+                "text": "XYLayerConfig"
+              },
+              ", \"layerType\">"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.isVisDimension",
         "type": "Function",
         "tags": [],
@@ -7964,6 +8034,155 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.EventAnnotationConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventAnnotationConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "{ type: \"kibana_query\"; } & ",
+              "Query"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.timeField",
+            "type": "string",
+            "tags": [],
+            "label": "timeField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.extraFields",
+            "type": "Array",
+            "tags": [],
+            "label": "extraFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.isHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"query\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.EventAnnotationConfig.key",
+            "type": "Object",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "{ type: \"point_in_time\"; }"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9527,6 +9746,88 @@
             "label": "uiStateJSON",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.XYAnnotationsLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYAnnotationsLayerConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYAnnotationsLayerConfig.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYAnnotationsLayerConfig.annotations",
+            "type": "Array",
+            "tags": [],
+            "label": "annotations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYAnnotationsLayerConfig.ignoreGlobalFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYAnnotationsLayerConfig.layerType",
+            "type": "string",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"annotations\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYAnnotationsLayerConfig.indexPatternId",
+            "type": "string",
+            "tags": [],
+            "label": "indexPatternId",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11742,6 +12043,14 @@
             "docId": "kibVisualizationsPluginApi",
             "section": "def-common.XYReferenceLineLayerConfig",
             "text": "XYReferenceLineLayerConfig"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.XYAnnotationsLayerConfig",
+            "text": "XYAnnotationsLayerConfig"
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",

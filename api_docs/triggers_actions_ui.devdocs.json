@@ -18,13 +18,7 @@
             "text": "Plugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "triggersActionsUi",
@@ -83,13 +77,7 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -109,13 +97,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, plugins: PluginsSetup) => ",
               {
                 "pluginId": "triggersActionsUi",
@@ -137,13 +119,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -2339,6 +2315,150 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.browserFields",
+            "type": "Any",
+            "tags": [],
+            "label": "browserFields",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.onToggleColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggleColumn",
+            "description": [],
+            "signature": [
+              "(columnId: string) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.AlertsTableProps.onToggleColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "columnId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.onResetColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "onResetColumns",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.onColumnsChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onColumnsChange",
+            "description": [],
+            "signature": [
+              "(columns: ",
+              "EuiDataGridColumn",
+              "[], visibleColumns: string[]) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.AlertsTableProps.onColumnsChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "columns",
+                "description": [],
+                "signature": [
+                  "EuiDataGridColumn",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.AlertsTableProps.onColumnsChange.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "visibleColumns",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.onChangeVisibleColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeVisibleColumns",
+            "description": [],
+            "signature": [
+              "(newColumns: string[]) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.AlertsTableProps.onChangeVisibleColumns.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "newColumns",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2766,8 +2886,14 @@
               "A map of categoryId -> metadata about the fields in that category"
             ],
             "signature": [
-              "{ readonly [x: string]: Partial<",
-              "BrowserField",
+              "{ [x: string]: Partial<",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "common",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-common.BrowserField",
+                "text": "BrowserField"
+              },
               ">; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
@@ -4037,13 +4163,7 @@
             "text": "TriggersAndActionsUiServices"
           },
           " extends ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          }
+          "CoreStart"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
         "deprecated": false,
@@ -7132,7 +7252,7 @@
         "label": "BASE_TRIGGERS_ACTIONS_UI_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/triggers_actions_ui\""
+          "\"/internal/triggers_actions_ui\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/index.ts",
         "deprecated": false,
