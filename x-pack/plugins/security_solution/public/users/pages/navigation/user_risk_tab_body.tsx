@@ -105,7 +105,7 @@ const UserRiskTabBodyComponent: React.FC<
   }
 
   if (isModuleEnabled && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refetch} />;
   }
 
   const lastUsertRiskItem: UserRiskScore | null =

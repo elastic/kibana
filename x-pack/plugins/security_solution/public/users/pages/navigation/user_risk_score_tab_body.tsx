@@ -95,7 +95,7 @@ export const UserRiskScoreQueryTabBody = ({
   }
 
   if (isModuleEnabled && userSeveritySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refetch} />;
   }
 
   return (

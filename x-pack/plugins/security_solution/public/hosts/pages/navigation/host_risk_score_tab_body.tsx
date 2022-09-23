@@ -99,7 +99,7 @@ export const HostRiskScoreQueryTabBody = ({
     data &&
     data.length === 0
   ) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refetch} />;
   }
 
   return (

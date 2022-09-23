@@ -144,7 +144,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
   }
 
   if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refreshPage} />;
   }
 
   return (

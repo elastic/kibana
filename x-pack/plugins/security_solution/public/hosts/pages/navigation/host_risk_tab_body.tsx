@@ -116,7 +116,7 @@ const HostRiskTabBodyComponent: React.FC<
   }
 
   if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refetch} />;
   }
 
   return (
