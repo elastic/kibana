@@ -120,19 +120,12 @@ export class JourneyFtrHarness {
     await Promise.all([
       this.setupApm(),
       this.setupBrowserAndPage(),
-      (async () => {
-        await Promise.all([
-          asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-            await this.esArchiver.load(esArchive);
-          }),
-          asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-            await this.kibanaServer.importExport.load(kbnArchive);
-          }),
-        ]);
-
-        // wait after loading the data, before doing any querying in tests
-        await setTimeout(10_000);
-      })(),
+      asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+        await this.esArchiver.load(esArchive);
+      }),
+      asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+        await this.kibanaServer.importExport.load(kbnArchive);
+      }),
     ]);
   }
 
