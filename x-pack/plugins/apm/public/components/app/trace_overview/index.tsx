@@ -13,6 +13,7 @@ import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
 export function TraceOverview({ children }: { children: React.ReactElement }) {
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
@@ -62,7 +63,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiTabs>
+        <EuiTabs size="l">
           <EuiTab href={topTracesLink} isSelected={routePath === '/traces'}>
             {i18n.translate('xpack.apm.traceOverview.topTracesTab', {
               defaultMessage: 'Top traces',
@@ -70,6 +71,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
           </EuiTab>
           <EuiTab
             href={explorerLink}
+            append={<TechnicalPreviewBadge icon="beaker" />}
             isSelected={routePath === '/traces/explorer'}
           >
             {i18n.translate('xpack.apm.traceOverview.traceExplorerTab', {

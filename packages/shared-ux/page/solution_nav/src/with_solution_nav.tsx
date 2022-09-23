@@ -8,27 +8,20 @@
 
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import {
-  useIsWithinBreakpoints,
-  useEuiTheme,
-  useIsWithinMinBreakpoint,
-  EuiPageSidebarProps,
-} from '@elastic/eui';
+import { SerializedStyles } from '@emotion/serialize';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
+import { useIsWithinBreakpoints, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
-
-import './with_solution_nav.scss';
+import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-// TODO: Would be nice to grab these from KibanaPageTemplate or vice-versa
-interface TemplateProps {
-  pageSideBar?: ReactNode;
-  pageSideBarProps?: Partial<EuiPageSidebarProps>;
+type TemplateProps = Pick<KibanaPageTemplateProps, 'pageSideBar' | 'pageSideBarProps'> & {
   children?: ReactNode;
-}
+};
 
 type Props<P> = P &
   TemplateProps & {
@@ -58,8 +51,8 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const { canBeCollapsed = true } = solutionNav;
     const isSidebarShrunk =
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
+    const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      'kbnSolutionNav__sidebar',
       'kbnStickyMenu',
       {
         'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
@@ -75,11 +68,12 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       />
     );
 
-    const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
+    const pageSideBarProps: TemplateProps['pageSideBarProps'] & { css: SerializedStyles } = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
+      css: withSolutionNavStyles,
     };
 
     return (
