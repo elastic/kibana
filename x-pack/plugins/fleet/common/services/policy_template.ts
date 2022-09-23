@@ -106,4 +106,4 @@ const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntr
 const createDefaultDatasetName = (
   packageInfo: PackageInfo,
   policyTemplate: RegistryPolicyInputOnlyTemplate
-): string => packageInfo.name + '.' + policyTemplate.type;
+): string => packageInfo.name + '.' + policyTemplate.name;
