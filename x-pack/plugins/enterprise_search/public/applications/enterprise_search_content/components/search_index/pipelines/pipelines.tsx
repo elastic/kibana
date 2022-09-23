@@ -30,8 +30,8 @@ export const SearchIndexPipelines: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
+      <EuiFlexGroup direction="row" wrap>
+        <EuiFlexItem grow={5}>
           <DataPanel
             hasBorder
             footerDocLink={
@@ -65,7 +65,7 @@ export const SearchIndexPipelines: React.FC = () => {
             <IngestPipelinesCard />
           </DataPanel>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={5}>
           <DataPanel
             hasBorder
             footerDocLink={
