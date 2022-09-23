@@ -60,6 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             it(`User ${user.username} can delete a case while on a specific case page`, async () => {
               await cases.singleCase.deleteCase();
+              await cases.casesTable.waitForTableToFinishLoading();
               await cases.casesTable.validateCasesTableHasNthRows(1);
             });
           });
