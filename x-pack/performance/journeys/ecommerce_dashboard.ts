@@ -30,7 +30,7 @@ export const journey = new Journey({
   })
 
   .step('Remove Ecommerce Sample Data if installed', async ({ page, log, toasts }) => {
-    if (process.env.CI || !(await page.$(subj('removeSampleDataSetecommerce')))) {
+    if (!(await page.$(subj('removeSampleDataSetecommerce')))) {
       log.info('Ecommerce data does not need to be removed');
       return;
     }

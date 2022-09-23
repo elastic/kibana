@@ -30,7 +30,7 @@ export const journey = new Journey({
   })
 
   .step('Remove Flights Sample Data if installed', async ({ page, log, toasts }) => {
-    if (process.env.CI || !(await page.$(subj('removeSampleDataSetflights')))) {
+    if (!(await page.$(subj('removeSampleDataSetflights')))) {
       log.info('Flights data does not need to be removed');
       return;
     }
