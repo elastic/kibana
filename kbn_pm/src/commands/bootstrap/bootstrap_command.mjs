@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { spawnSync } from '../../lib/spawn.mjs';
+import { run } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
 import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
@@ -58,13 +58,13 @@ export const command = {
     const forceInstall =
       args.getBooleanValue('force-install') ?? haveNodeModulesBeenManuallyDeleted();
 
-    Bazel.tryRemovingBazeliskFromYarnGlobal(log);
+    await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
 
     // Install bazel machinery tools if needed
-    Bazel.ensureInstalled(log);
+    await Bazel.ensureInstalled(log);
 
     // Setup remote cache settings in .bazelrc.cache if needed
-    setupRemoteCache(log);
+    await setupRemoteCache(log);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -116,7 +116,7 @@ export const command = {
     if (vscodeConfig) {
       await time('update vscode config', async () => {
         // Update vscode settings
-        spawnSync('node', ['scripts/update_vscode_config']);
+        await run('node', ['scripts/update_vscode_config']);
 
         log.success('vscode config updated');
       });
