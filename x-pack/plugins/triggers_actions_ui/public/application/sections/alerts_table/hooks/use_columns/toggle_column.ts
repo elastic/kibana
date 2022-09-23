@@ -38,10 +38,10 @@ const insert = ({
 };
 
 /**
- * @param param.columnId id of the column to be removed/inserted
- * @param param.columnIds Current array of columnIds in the grid
- * @param param.defaultColumns Those initial columns set up in the configuration before being modified by the user
- * @returns the new list of columns to be shown
+ * @param param.column column to be removed/inserted
+ * @param param.columns current array of columns in the grid
+ * @param param.defaultColumns Initial columns set up in the configuration before being modified by the user
+ * @returns the new list of columns
  */
 export const toggleColumn = ({
   column,
