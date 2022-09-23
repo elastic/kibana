@@ -29,7 +29,7 @@ export const SearchIndexPipelines: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" wrap>
         <EuiFlexItem grow={5}>
           <DataPanel
             hasBorder
