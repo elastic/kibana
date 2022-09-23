@@ -146,7 +146,7 @@ describe('#getNodePlatforms()', () => {
     });
     const platforms = config.getNodePlatforms();
     expect(platforms).toBeInstanceOf(Array);
-    if (process.platform !== 'linux') {
+    if (!(process.platform === 'linux' && process.arch === 'x64')) {
       expect(platforms).toHaveLength(2);
       expect(platforms[0]).toBe(config.getPlatformForThisOs());
       expect(platforms[1]).toBe(config.getPlatform('linux', 'x64'));
