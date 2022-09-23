@@ -25170,6 +25170,7 @@
     "xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescription": "{integrationsCount, plural, =1 {以下の統合} other {以下の1つ以上の統合}}をインストールおよび構成し、この検出ルールに必要なデータを取り込みます。",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescriptionInstalledVersionTooltip": "バージョン不一致 - 解決してください。バージョン`{requiredVersion}`が必要なときのインストール済みバージョン`{installedVersion}`",
     "xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription": "{countError, plural, one {このタブ} other {これらのタブ}}に無効な入力があります：{tabHasError}",
+    "xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle": "アクション",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription": "作成者：{by} 日付：{date}",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip": "ルール実行のギャップの期間（hh:mm:ss:SSS）。ルールルックバックを調整するか、ギャップの軽減については{seeDocs}してください。",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchLimitExceededLabel": "{totalItems}件以上のルール実行が指定されたフィルターと一致します。最新の「@timestamp」で最初の{maxItems}を表示しています。さらにフィルターを絞り込み、追加の実行イベントを表示します。",

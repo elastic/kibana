@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { AgentSelection } from '../../common/schemas/common';
+import type { AgentSelection } from '@kbn/osquery-io-ts-types';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/routes/live_query';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';

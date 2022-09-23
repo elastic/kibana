@@ -3521,6 +3521,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/osquery-io-ts-types@link:bazel-bin/packages/kbn-osquery-io-ts-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/performance-testing-dataset-extractor@link:bazel-bin/packages/kbn-performance-testing-dataset-extractor":
   version "0.0.0"
   uid ""
@@ -7604,6 +7608,10 @@
   uid ""
 
 "@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__osquery-io-ts-types@link:bazel-bin/packages/kbn-osquery-io-ts-types/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -140,7 +140,7 @@ describe('rule helpers', () => {
         enabled: true,
         throttle: 'no_actions',
         actions: [],
-        responseActions: [],
+        responseActions: undefined,
       };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
@@ -411,7 +411,7 @@ describe('rule helpers', () => {
             actionTypeId: 'action_type_id',
           },
         ],
-        responseActions: [],
+        responseActions: undefined,
         enabled: mockedRule.enabled,
         throttle: 'no_actions',
       };

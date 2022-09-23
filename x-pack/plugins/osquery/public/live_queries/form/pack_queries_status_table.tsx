@@ -34,7 +34,7 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import styled from 'styled-components';
-import type { ECSMapping } from '../../../common/schemas/common';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { SECURITY_APP_NAME } from '../../timelines/get_add_to_timeline';
 import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';

@@ -25200,6 +25200,7 @@
     "xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescriptionInstalledVersionTooltip": "版本不匹配 -- 请解决！已安装版本 `{installedVersion}`，而所需版本为 `{requiredVersion}`",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.popoverTitle": "有 [{integrationsCount}] 个相关{integrationsCount, plural, other {集成}}可用",
     "xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription": "您在{countError, plural, other {以下选项卡}}中的输入无效：{tabHasError}",
+    "xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle": "操作",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription": "由 {by} 于 {date}创建",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip": "规则执行中缺口的持续时间 (hh:mm:ss:SSS)。调整规则回查或{seeDocs}以缩小缺口。",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchLimitExceededLabel": "超过 {totalItems} 个规则执行与提供的筛选相匹配。正在按最近的“@timestamp”显示前 {maxItems} 项。进一步限制筛选以查看其他执行事件。",

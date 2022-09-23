@@ -23,8 +23,8 @@ import { useHistory } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 
 import type { SavedObject } from '@kbn/core/public';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { Direction } from '../../../../common/search_strategy';
-import type { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';

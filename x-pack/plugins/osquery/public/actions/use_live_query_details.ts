@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
-import type { ECSMapping } from '../../common/schemas/common';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';

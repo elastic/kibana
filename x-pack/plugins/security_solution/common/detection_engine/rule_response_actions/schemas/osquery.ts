@@ -6,28 +6,22 @@
  */
 
 import * as t from 'io-ts';
+import { ecsMapping, arrayQueries } from '@kbn/osquery-io-ts-types';
 
-export const OsqueryParams = t.intersection([
-  t.type({
-    id: t.string,
-  }),
-  t.partial({
-    query: t.union([t.string, t.undefined]),
-    ecs_mapping: t.record(t.string, t.record(t.string, t.any)),
-    queries: t.array(
-      t.intersection([
-        t.type({
-          id: t.string,
-          query: t.string,
-        }),
-        t.partial({
-          ecs_mapping: t.record(t.string, t.record(t.string, t.any)),
-          platform: t.union([t.string, t.undefined]),
-          interval: t.union([t.number, t.undefined]),
-        }),
-      ])
-    ),
-    packId: t.union([t.string, t.undefined]),
-    savedQueryId: t.union([t.string, t.undefined]),
-  }),
-]);
+export const OsqueryParams = t.type({
+  id: t.string,
+  query: t.union([t.string, t.undefined]),
+  ecs_mapping: t.union([ecsMapping, t.undefined]),
+  queries: t.union([arrayQueries, t.undefined]),
+  pack_id: t.union([t.string, t.undefined]),
+  saved_query_id: t.union([t.string, t.undefined]),
+});
+
+export const OsqueryParamsCamelCase = t.type({
+  id: t.string,
+  query: t.union([t.string, t.undefined]),
+  ecsMapping: t.union([ecsMapping, t.undefined]),
+  queries: t.union([arrayQueries, t.undefined]),
+  packId: t.union([t.string, t.undefined]),
+  savedQueryId: t.union([t.string, t.undefined]),
+});

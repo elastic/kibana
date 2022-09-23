@@ -76,7 +76,7 @@ export const getActionsStepsData = (
     response_actions?: ResponseAction[];
   }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [], response_actions: responseActions = [] } = rule;
+  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),

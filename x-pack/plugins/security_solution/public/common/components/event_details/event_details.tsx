@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -50,21 +51,6 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
 type EventViewTab = EuiTabbedContentTab;
-
-export interface AlertRawEventData {
-  _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: Array<{
-      response_actions: Array<{
-        action_type_id: string;
-        params: Record<string, unknown>;
-      }>;
-    }>;
-    ['kibana.alert.rule.name']: string[];
-  };
-  [key: string]: unknown;
-}
 
 export type EventViewId =
   | EventsViewType.tableView
@@ -130,6 +116,7 @@ const TabContentWrapper = styled.div`
 const RendererContainer = styled.div`
   overflow-x: auto;
   padding-right: ${(props) => props.theme.eui.euiSizeXS};
+
   & .${DETAILS_CLASS_NAME} .euiFlexGroup {
     justify-content: flex-start;
   }
@@ -397,7 +384,6 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as AlertRawEventData,
-    id,
   });
 
   const tabs = useMemo(() => {

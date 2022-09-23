@@ -12,7 +12,7 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import type { ECSMapping } from '../../../common/schemas/common/utils';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useFormContext } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
@@ -98,7 +98,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
               id: watchedValues.id,
               savedQueryId: watchedValues.savedQueryId,
               query: watchedValues.query,
-              ecs_mapping: watchedValues.ecs_mapping,
+              ecsMapping: watchedValues.ecs_mapping,
             },
           },
         });
@@ -139,12 +139,17 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
 
   useEffectOnce(() => {
     if (defaultParams && defaultParams.id) {
-      const { packId, ...restParams } = defaultParams;
+      const { packId, ecsMapping, ...restParams } = defaultParams;
+      // TODO change map into forEach, and type defaultParams
       map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
         if (!isEmpty(value)) {
           setValue(key, value);
         }
       });
+
+      if (!isEmpty(ecsMapping)) {
+        setValue('ecs_mapping', ecsMapping);
+      }
 
       if (!isEmpty(packId)) {
         setValue('packId', [packId]);

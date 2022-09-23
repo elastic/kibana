@@ -7,9 +7,7 @@
 
 import { isEmpty, reduce } from 'lodash';
 import type { DefaultValues } from 'react-hook-form';
-import type { ECSMapping } from './schemas';
-
-export type { ECSMapping };
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 export type ECSMappingArray = Array<{
   key: string;

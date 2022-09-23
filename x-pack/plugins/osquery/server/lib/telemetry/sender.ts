@@ -209,12 +209,14 @@ export class TelemetryEventsSender {
           type: 'boolean',
           _meta: {
             description: '',
+            optional: true,
           },
         },
         prebuilt: {
           type: 'boolean',
           _meta: {
             description: '',
+            optional: true,
           },
         },
         ecs_mapping: {
