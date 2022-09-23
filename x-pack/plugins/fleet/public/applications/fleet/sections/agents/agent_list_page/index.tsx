@@ -547,6 +547,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
   ];
 
+  const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+    fetchData({ refreshTags });
+    setShowAgentActivityTour({ isOpen: true });
+  };
+
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -576,7 +581,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agents={[agentToReassign]}
             onClose={() => {
               setAgentToReassign(undefined);
-              fetchData();
+              refreshAgents();
             }}
           />
         </EuiPortal>
@@ -588,7 +593,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToUnenroll(undefined);
-              fetchData({ refreshTags: true });
+              refreshAgents({ refreshTags: true });
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
@@ -602,7 +607,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToUpgrade(undefined);
-              fetchData();
+              refreshAgents();
             }}
           />
         </EuiPortal>
@@ -614,7 +619,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           selectedTags={agentToAddRemoveTags?.tags ?? []}
           button={tagsPopoverButton!}
           onTagsUpdated={() => {
-            fetchData();
+            refreshAgents();
           }}
           onClosePopover={() => {
             setShowTagsAddRemove(false);
@@ -651,10 +656,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
-          Promise.all([fetchData({ refreshTags })]);
-          setShowAgentActivityTour({ isOpen: true });
-        }}
+        refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}
