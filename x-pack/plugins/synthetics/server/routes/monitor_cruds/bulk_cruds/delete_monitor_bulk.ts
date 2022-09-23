@@ -43,11 +43,12 @@ export const deleteMonitorBulk = async ({
       savedObjectsClient,
       spaceId
     );
-    const deletePromises = monitors.map((monitor) =>
-      savedObjectsClient.delete(syntheticsMonitorType, monitor.id)
+
+    const deletePromises = savedObjectsClient.bulkDelete(
+      monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
     );
 
-    const [errors] = await Promise.all([deleteSyncPromise, ...deletePromises]);
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromises]);
 
     monitors.forEach((monitor) => {
       sendTelemetryEvents(
