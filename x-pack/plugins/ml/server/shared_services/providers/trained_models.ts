@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { GetGuards } from '../shared_services';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
   trainedModelsProvider(
