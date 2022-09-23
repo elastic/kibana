@@ -136,7 +136,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                 const key = (item as typeof item & { id?: string }).id ?? `${index}`;
                 return (
                   <EuiFlexItem key={key} grow={1}>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
+                    <EuiFlexGroup gutterSize="xs" direction="row">
                       {item.nested === 'child' && <MyBeautifulLine grow={false} />}
                       <MyOverflowContainer grow={1}>
                         <BuilderEntryItem

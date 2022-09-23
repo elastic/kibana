@@ -1,0 +1,530 @@
+{
+  "id": "@kbn/core-lifecycle-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-lifecycle-browser",
+        "id": "def-common.CoreSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreSetup",
+        "description": [
+          "\nCore services exposed to the `Plugin` setup lifecycle\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<TPluginsStart, TStart>"
+        ],
+        "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServiceSetup}"
+            ],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [
+              "{@link ApplicationSetup}"
+            ],
+            "signature": [
+              "ApplicationSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.fatalErrors",
+            "type": "Object",
+            "tags": [],
+            "label": "fatalErrors",
+            "description": [
+              "{@link FatalErrorsSetup}"
+            ],
+            "signature": [
+              "FatalErrorsSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "{@link HttpSetup}"
+            ],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [
+              "{@link NotificationsSetup}"
+            ],
+            "signature": [
+              "NotificationsSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [
+              "{@link IUiSettingsClient}"
+            ],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextSetup}"
+            ],
+            "signature": [
+              "ExecutionContextSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.injectedMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "injectedMetadata",
+            "description": [
+              "{@link InjectedMetadataSetup}"
+            ],
+            "signature": [
+              "InjectedMetadataSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "{@link ThemeServiceSetup}"
+            ],
+            "signature": [
+              "ThemeServiceSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.getStartServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getStartServices",
+            "description": [
+              "{@link StartServicesAccessor}"
+            ],
+            "signature": [
+              "() => Promise<[",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
+              ", TPluginsStart, TStart]>"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-lifecycle-browser",
+        "id": "def-common.CoreStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreStart",
+        "description": [
+          "\nCore services exposed to the `Plugin` start lifecycle\n"
+        ],
+        "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServiceStart}"
+            ],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [
+              "{@link ApplicationStart}"
+            ],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [
+              "{@link ChromeStart}"
+            ],
+            "signature": [
+              "ChromeStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [
+              "{@link DocLinksStart}"
+            ],
+            "signature": [
+              "DocLinksStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextStart}"
+            ],
+            "signature": [
+              "ExecutionContextSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "{@link HttpStart}"
+            ],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [
+              "{@link SavedObjectsStart}"
+            ],
+            "signature": [
+              "SavedObjectsStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [
+              "{@link I18nStart}"
+            ],
+            "signature": [
+              "I18nStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [
+              "{@link NotificationsStart}"
+            ],
+            "signature": [
+              "NotificationsStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.overlays",
+            "type": "Object",
+            "tags": [],
+            "label": "overlays",
+            "description": [
+              "{@link OverlayStart}"
+            ],
+            "signature": [
+              "OverlayStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [
+              "{@link IUiSettingsClient}"
+            ],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.fatalErrors",
+            "type": "Object",
+            "tags": [],
+            "label": "fatalErrors",
+            "description": [
+              "{@link FatalErrorsStart}"
+            ],
+            "signature": [
+              "FatalErrorsSetup"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.deprecations",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecations",
+            "description": [
+              "{@link DeprecationsServiceStart}"
+            ],
+            "signature": [
+              "DeprecationsServiceStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "{@link ThemeServiceStart}"
+            ],
+            "signature": [
+              "ThemeServiceStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.injectedMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "injectedMetadata",
+            "description": [
+              "{@link InjectedMetadataStart}"
+            ],
+            "signature": [
+              "InjectedMetadataStart"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-lifecycle-browser",
+        "id": "def-common.StartServicesAccessor",
+        "type": "Type",
+        "tags": [],
+        "label": "StartServicesAccessor",
+        "description": [
+          "\nAllows plugins to get access to APIs available in start inside async\nhandlers, such as {@link App.mount}. Promise will not resolve until Core\nand plugin dependencies have completed `start`.\n"
+        ],
+        "signature": [
+          "() => Promise<[",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
+            "text": "CoreStart"
+          },
+          ", TPluginsStart, TStart]>"
+        ],
+        "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
