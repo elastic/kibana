@@ -13,8 +13,6 @@ import {
   EuiLink,
   EuiButton,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -275,31 +273,27 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                     />
                     {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
                     {showButtons && (
-                      <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            fill
-                            iconType={isSaved ? 'check' : undefined}
-                            color="success"
-                            data-test-subj="edit-connector-flyout-save-btn"
-                            isLoading={isSaving}
-                            onClick={onClickSave}
-                            disabled={!isFormModified || hasErrors || isSaving}
-                          >
-                            {isSaved ? (
-                              <FormattedMessage
-                                id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
-                                defaultMessage="Changes Saved"
-                              />
-                            ) : (
-                              <FormattedMessage
-                                id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                                defaultMessage="Save"
-                              />
-                            )}
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                      <EuiButton
+                        fill
+                        iconType={isSaved ? 'check' : undefined}
+                        color="success"
+                        data-test-subj="edit-connector-flyout-save-btn"
+                        isLoading={isSaving}
+                        onClick={onClickSave}
+                        disabled={!isFormModified || hasErrors || isSaving}
+                      >
+                        {isSaved ? (
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
+                            defaultMessage="Changes Saved"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                            defaultMessage="Save"
+                          />
+                        )}
+                      </EuiButton>
                     )}
                   </>
                 )}
