@@ -437,6 +437,60 @@ the security incident. The IPs are added as observables to the security incident
 `message`::
 (Required, string) The message to log.
 =====
+
+.{swimlane} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. It must be `pushToService`.
+
+`subActionParams`::
+(Required, object) The set of configuration properties.
++
+.Properties of `subActionParams`
+[%collapsible%open]
+======
+`comments`:::
+(Optional, array of objects) Additional information that is sent to {swimlane}.
++
+.Properties of `comments` objects
+[%collapsible%open]
+=======
+comment::::
+(string) A comment related to the incident. For example, describe how to
+troubleshoot the issue.
+
+commentId::::
+(integer) A unique identifier for the comment.
+
+=======
+
+`incident`:::
+(Required, object) Information necessary to create or update a {swimlane} incident.
++
+.Properties of `incident`
+[%collapsible%open]
+=======
+`alertId`::::
+(Optional, string) The alert identifier.
+
+`caseId`::::
+(Optional, string) The case identifier for the incident.
+
+`caseName`::::
+(Optional, string) The case name for the incident.
+
+`description`::::
+(Optional, string) The description of the incident.
+
+`ruleName`::::
+(Optional, string) The rule name.
+
+`severity`::::
+(Optional, string) The severity of the incident.
+=======
+======
+=====
 ====
 --
 
@@ -549,6 +603,41 @@ The API returns the following:
 }
 --------------------------------------------------
 
+Create then update a {swimlane} incident:
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/a4746470-2f94-11ed-b0e0-87533c532698/_execute
+{
+  "params":{
+    "subAction":"pushToService",
+    "subActionParams":{
+      "incident":{
+        "description":"Description of the incident",
+        "caseName":"Case name",
+        "caseId":"1000"
+      },
+      "comments":[
+        {"commentId":"1","comment":"A comment about the incident"}
+      ]
+    }
+  }
+}
+
+POST api/actions/connector/a4746470-2f94-11ed-b0e0-87533c532698/_execute
+{
+  "params":{
+    "subAction":"pushToService",
+    "subActionParams":{
+      "incident":{
+        "caseId":"1000",
+        "caseName":"A new case name"
+      }
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
 Retrieve the list of choices for a {sn-itom} connector:
 
 [source,sh]
@@ -584,3 +673,4 @@ The API returns the severity and urgency choices, for example:
   "connector_id":"9d9be270-2fd2-11ed-b0e0-87533c532698"
 }
 --------------------------------------------------
+
