@@ -7,13 +7,12 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
-import { AlertsTableStorage } from '../../../alerts_table_state';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
-import { toggleColumn } from './toggle_column';
-import { useFetchBrowserFieldCapabilities } from '.../use_fetch_browser_fields_capabilities';
+import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 
 interface UseColumnsArgs {
   featureIds: AlertConsumers[];
@@ -71,6 +70,10 @@ const getBrowserFieldProps = (
   }
 
   const category = getFieldCategoryFromColumnId(columnId);
+  if (!browserFields[category]) {
+    return notFoundSpecs;
+  }
+
   const categorySpecs = browserFields[category].fields;
   if (!categorySpecs) {
     return notFoundSpecs;
