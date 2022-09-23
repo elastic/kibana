@@ -57,7 +57,7 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
       )}
       <EuiFlexItem>
         <NewSearchIndexTemplate
-          docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
+          docsUrl={docLinks.connectors}
           disabled={isGated}
           error={errorToText(error)}
           title={
