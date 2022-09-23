@@ -9,6 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, GenericValidationResult } from '../../../../types';
 import { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../types';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 export function getActionType(): ActionTypeModel<
   XmattersConfig,
@@ -45,5 +46,12 @@ export function getActionType(): ActionTypeModel<
     },
     actionConnectorFields: lazy(() => import('./xmatters_connectors')),
     actionParamsFields: lazy(() => import('./xmatters_params')),
+    defaultActionParams: {
+      alertActionGroupName: `{{${AlertProvidedActionVariables.alertActionGroupName}}}`,
+      signalId: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      ruleName: `{{${AlertProvidedActionVariables.ruleName}}}`,
+      date: `{{${AlertProvidedActionVariables.date}}}`,
+      spaceId: `{{${AlertProvidedActionVariables.ruleSpaceId}}}`,
+    },
   };
 }
