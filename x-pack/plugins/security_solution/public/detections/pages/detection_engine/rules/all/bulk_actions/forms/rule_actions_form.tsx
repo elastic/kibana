@@ -12,6 +12,7 @@ import type {
   RuleAction,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ThrottleForBulkActionsOrNull } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import {
   useForm,
@@ -42,7 +43,7 @@ import { validateRuleActionsField } from '../../../../../../containers/detection
 const CommonUseField = getUseField({ component: Field });
 
 export interface RuleActionsFormData {
-  throttle: string;
+  throttle: ThrottleForBulkActionsOrNull;
   actions: RuleAction[];
   overwrite: boolean;
 }

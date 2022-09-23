@@ -12,7 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the TimeDuration as:
  *   - A string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time
- *   - in the format {safe_integer}{timeUnit}, e.g. "30s", "1m", "2h"
+ *   - in the format {safe_integer}{timeUnit}, e.g. "30s", "1m", "2h", "7d"
  */
 export const TimeDuration = new t.Type<string, string, unknown>(
   'TimeDuration',
@@ -30,7 +30,7 @@ export const TimeDuration = new t.Type<string, string, unknown>(
         if (
           time >= 1 &&
           Number.isSafeInteger(time) &&
-          (unit === 's' || unit === 'm' || unit === 'h')
+          (unit === 's' || unit === 'm' || unit === 'h' || unit === 'd')
         ) {
           return t.success(input);
         } else {

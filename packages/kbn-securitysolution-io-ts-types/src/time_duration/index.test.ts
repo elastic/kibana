@@ -50,6 +50,15 @@ describe('TimeDuration', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('it should validate a correctly formed TimeDuration with time unit of days', () => {
+    const payload = '7d';
+    const decoded = TimeDuration.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should NOT validate a negative TimeDuration', () => {
     const payload = '-10s';
     const decoded = TimeDuration.decode(payload);
