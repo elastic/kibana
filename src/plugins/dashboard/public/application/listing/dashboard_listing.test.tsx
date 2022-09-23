@@ -57,7 +57,12 @@ function mountWith({
             }}
             savedObjectsTagging={
               {
-                ui: { ...savedObjectsTagging },
+                ui: {
+                  ...savedObjectsTagging,
+                  components: {
+                    TagList: () => null,
+                  },
+                },
               } as unknown as TableListViewKibanaDependencies['savedObjectsTagging']
             }
             FormattedRelative={FormattedRelative}
