@@ -19,6 +19,7 @@ const createStartContractMock = () => {
       bulkCreate: jest.fn(),
       bulkResolve: jest.fn(),
       bulkUpdate: jest.fn(),
+      bulkDelete: jest.fn(),
       delete: jest.fn(),
       bulkGet: jest.fn(),
       find: jest.fn(),

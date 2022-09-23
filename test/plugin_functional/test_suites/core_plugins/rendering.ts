@@ -106,6 +106,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.pageSize (number)',
         'data.search.sessions.trackingInterval (duration)',
         'enterpriseSearch.host (string)',
+        'guidedOnboarding.ui (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'map.emsFileApiUrl (string)',
         'map.emsFontLibraryUrl (string)',
@@ -163,7 +164,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.enabled (boolean)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
-        'xpack.apm.profilingEnabled (boolean)',
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',
@@ -196,8 +196,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
-        'xpack.osquery.packs (boolean)',
-        'xpack.osquery.savedQueries (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
@@ -221,6 +219,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.enabled (boolean)',
+        'xpack.observability.unsafe.slo.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

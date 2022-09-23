@@ -16,7 +16,13 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, DatasourceDataPanelProps, DatasourceMap, FramePublicAPI } from '../../types';
+import {
+  StateSetter,
+  DatasourceDataPanelProps,
+  DatasourceMap,
+  FramePublicAPI,
+  VisualizationMap,
+} from '../../types';
 import {
   switchDatasource,
   useLensDispatch,
@@ -27,14 +33,16 @@ import {
   selectExecutionContext,
   selectActiveDatasourceId,
   selectDatasourceStates,
+  selectVisualizationState,
 } from '../../state_management';
 import { initializeSources } from './state_helpers';
-import type { IndexPatternServiceAPI } from '../../indexpattern_service/service';
+import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { changeIndexPattern } from '../../state_management/lens_slice';
 import { getInitialDataViewsObject } from '../../utils';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
@@ -48,6 +56,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const externalContext = useLensSelector(selectExecutionContext);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const visualizationState = useLensSelector(selectVisualizationState);
 
   const datasourceIsLoading = activeDatasourceId
     ? datasourceStates[activeDatasourceId].isLoading
@@ -74,6 +83,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       initializeSources(
         {
           datasourceMap: props.datasourceMap,
+          visualizationMap: props.visualizationMap,
+          visualizationState,
           datasourceStates,
           dataViews: props.plugins.dataViews,
           references: undefined,
@@ -84,29 +95,38 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         {
           isFullEditor: true,
         }
-      ).then(({ states, indexPatterns, indexPatternRefs }) => {
-        const newDatasourceStates = Object.entries(states).reduce(
-          (state, [datasourceId, datasourceState]) => ({
-            ...state,
-            [datasourceId]: {
-              ...datasourceState,
-              isLoading: false,
-            },
-          }),
-          {}
-        );
-        dispatchLens(
-          setState({
-            datasourceStates: newDatasourceStates,
-            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-          })
-        );
-      });
+      ).then(
+        ({
+          datasourceStates: newDatasourceStates,
+          visualizationState: newVizState,
+          indexPatterns,
+          indexPatternRefs,
+        }) => {
+          dispatchLens(
+            setState({
+              visualization: { ...visualizationState, state: newVizState },
+              datasourceStates: Object.entries(newDatasourceStates).reduce(
+                (state, [datasourceId, datasourceState]) => ({
+                  ...state,
+                  [datasourceId]: {
+                    ...datasourceState,
+                    isLoading: false,
+                  },
+                }),
+                {}
+              ),
+              dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+            })
+          );
+        }
+      );
     }
   }, [
     datasourceStates,
+    visualizationState,
     activeDatasourceId,
     props.datasourceMap,
+    props.visualizationMap,
     dispatchLens,
     props.plugins.dataViews,
     props.core.uiSettings,
@@ -145,6 +165,19 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     onChangeIndexPattern,
     indexPatternService: props.indexPatternService,
     frame: props.frame,
+    // Visualization can handle dataViews, so need to pass to the data panel the full list of used dataViews
+    usedIndexPatterns: [
+      ...((activeDatasourceId &&
+        props.datasourceMap[activeDatasourceId]?.getUsedDataViews(
+          datasourceStates[activeDatasourceId].state
+        )) ||
+        []),
+      ...((visualizationState.activeId &&
+        props.visualizationMap[visualizationState.activeId]?.getUsedDataViews?.(
+          visualizationState.state
+        )) ||
+        []),
+    ],
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

@@ -39,6 +39,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -69,6 +70,7 @@
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -81,6 +83,7 @@
         "description": [],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utility-types",
@@ -100,7 +103,8 @@
               }
             ],
             "path": "packages/kbn-utility-types/src/serializable/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -126,6 +130,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/utility-types",
@@ -139,6 +144,7 @@
             ],
             "path": "packages/kbn-utility-types/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/utility-types",
@@ -152,6 +158,7 @@
                 ],
                 "path": "packages/kbn-utility-types/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -187,6 +194,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -217,6 +225,7 @@
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }
@@ -240,6 +249,7 @@
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -258,6 +268,7 @@
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -277,6 +288,7 @@
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -293,6 +305,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -312,6 +325,7 @@
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -334,6 +348,7 @@
         ],
         "path": "packages/kbn-utility-types/src/dot.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -366,6 +381,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -388,6 +404,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -406,6 +423,7 @@
         ],
         "path": "packages/kbn-utility-types/src/dot.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -422,6 +440,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -452,6 +471,7 @@
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -468,6 +488,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -484,6 +505,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -500,6 +522,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -519,6 +542,7 @@
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -535,6 +559,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -551,6 +576,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -575,6 +601,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -605,6 +632,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -629,6 +657,7 @@
         ],
         "path": "packages/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -645,6 +674,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -661,6 +691,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -685,6 +716,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -701,6 +733,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -717,6 +750,7 @@
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

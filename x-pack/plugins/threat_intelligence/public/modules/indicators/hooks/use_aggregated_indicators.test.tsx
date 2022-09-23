@@ -15,15 +15,15 @@ import {
   useAggregatedIndicators,
   UseAggregatedIndicatorsParam,
 } from './use_aggregated_indicators';
-import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import {
   TestProvidersComponent,
   mockedSearchService,
   mockedTimefilterService,
 } from '../../../common/mocks/test_providers';
-import { useFilters } from './use_filters';
+import { useFilters } from '../../query_bar/hooks/use_filters';
 
-jest.mock('./use_filters/use_filters');
+jest.mock('../../query_bar/hooks/use_filters/use_filters');
 
 const aggregationResponse = {
   rawResponse: { aggregations: { [AGGREGATION_NAME]: { buckets: [] } } },

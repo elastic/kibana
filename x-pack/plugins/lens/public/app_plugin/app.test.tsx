@@ -242,7 +242,7 @@ describe('Lens App', () => {
           topNavMenuEntryGenerators: [getterFn],
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
         },
         preloadedState,
@@ -252,7 +252,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
           visualizationState: preloadedState.visualization.state,
           visualizationId: preloadedState.visualization.activeId,
@@ -504,6 +504,7 @@ describe('Lens App', () => {
               isTimeBased: expect.any(Function),
               fields: [],
               isPersisted: expect.any(Function),
+              toSpec: expect.any(Function),
             },
           ],
         }),

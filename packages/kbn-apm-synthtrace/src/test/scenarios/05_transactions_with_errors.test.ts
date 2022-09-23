@@ -14,13 +14,15 @@ describe('transactions with errors', () => {
   const timestamp = new Date('2021-01-01T00:00:00.000Z').getTime();
 
   beforeEach(() => {
-    instance = apm.service('opbeans-java', 'production', 'java').instance('instance');
+    instance = apm
+      .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
+      .instance('instance');
   });
   it('generates error events', () => {
     const events = instance
-      .transaction('GET /api')
+      .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
-      .errors(instance.error('test error').timestamp(timestamp))
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
     const errorEvents = events.filter((event) => event['processor.event'] === 'error');
@@ -39,9 +41,9 @@ describe('transactions with errors', () => {
 
   it('sets the transaction and trace id', () => {
     const [transaction, error] = instance
-      .transaction('GET /api')
+      .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
-      .errors(instance.error('test error').timestamp(timestamp))
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
     const keys = ['transaction.id', 'trace.id', 'transaction.type'];
@@ -55,9 +57,9 @@ describe('transactions with errors', () => {
 
   it('sets the error grouping key', () => {
     const [, error] = instance
-      .transaction('GET /api')
+      .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
-      .errors(instance.error('test error').timestamp(timestamp))
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
     expect(error['error.grouping_name']).toEqual('test error');

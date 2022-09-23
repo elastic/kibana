@@ -26,6 +26,11 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import {
+  isInputOnlyPolicyTemplate,
+  isIntegrationPolicyTemplate,
+} from '../../../../../../../common/services';
+
 import { useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
@@ -132,8 +137,12 @@ function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
     return pkg.categories;
   }
 
-  const allCategories = pkg.policy_templates?.reduce((accumulator, integration) => {
-    return [...accumulator, ...(integration.categories || [])];
+  const allCategories = pkg.policy_templates?.reduce((accumulator, policyTemplate) => {
+    if (isInputOnlyPolicyTemplate(policyTemplate)) {
+      // input only policy templates do not have categories
+      return accumulator;
+    }
+    return [...accumulator, ...(policyTemplate.categories || [])];
   }, pkg.categories || []);
 
   return _.uniq(allCategories);
@@ -160,8 +169,13 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       ...acc,
       topPackage,
       ...(doesPackageHaveIntegrations(pkg)
-        ? policyTemplates.map((integration) => {
-            const { name, title, description, icons, categories = [] } = integration;
+        ? policyTemplates.map((policyTemplate) => {
+            const { name, title, description, icons } = policyTemplate;
+
+            const categories =
+              isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
+                ? policyTemplate.categories
+                : [];
             const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
@@ -254,7 +268,7 @@ export const AvailablePackages: React.FC<{
   ];
 
   const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard({ getAbsolutePath, getHref, item });
+    return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
   });
 
   cards.sort((a, b) => {
@@ -370,7 +384,7 @@ export const AvailablePackages: React.FC<{
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint and Cloud Security',
+                defaultMessage: 'Elastic Defend',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:

@@ -27,6 +27,7 @@ export const CategorizationPerPartitionField: FC = () => {
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
   useEffect(() => {
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

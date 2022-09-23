@@ -191,6 +191,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     aggOption,
     fieldOption,
@@ -211,6 +212,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       const overField = getField(overFieldOption.label);
       setExcludeFrequentEnabled(byField !== null || overField !== null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

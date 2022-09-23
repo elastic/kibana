@@ -80,6 +80,7 @@ import {
   timestampOverrideFallbackDisabledOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
+import { ResponseActionRuleParamsOrUndefined } from '../../../../common/detection_engine/rule_response_actions/schemas';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 
@@ -165,6 +166,7 @@ const querySpecificRuleParams = t.exact(
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
     dataViewId: dataViewIdOrUndefined,
+    responseActions: ResponseActionRuleParamsOrUndefined,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -181,10 +183,17 @@ const savedQuerySpecificRuleParams = t.type({
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,
+  responseActions: ResponseActionRuleParamsOrUndefined,
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
 export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
+
+export const unifiedQueryRuleParams = t.intersection([
+  baseRuleParams,
+  t.union([querySpecificRuleParams, savedQuerySpecificRuleParams]),
+]);
+export type UnifiedQueryRuleParams = t.TypeOf<typeof unifiedQueryRuleParams>;
 
 const thresholdSpecificRuleParams = t.type({
   type: t.literal('threshold'),

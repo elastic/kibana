@@ -32,6 +32,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -52,7 +53,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -73,7 +75,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -94,7 +97,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -106,7 +110,8 @@
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -118,7 +123,8 @@
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -132,6 +138,7 @@
         "description": [],
         "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -155,6 +162,7 @@
             ],
             "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -172,6 +180,7 @@
             ],
             "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -187,6 +196,7 @@
         "description": [],
         "path": "x-pack/plugins/security/public/ui_api/change_password/change_password.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -205,7 +215,8 @@
               }
             ],
             "path": "x-pack/plugins/security/public/ui_api/change_password/change_password.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -219,6 +230,7 @@
         "description": [],
         "path": "x-pack/plugins/security/public/ui_api/personal_info/personal_info.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -237,7 +249,8 @@
               }
             ],
             "path": "x-pack/plugins/security/public/ui_api/personal_info/personal_info.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -251,6 +264,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/licensing/license_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -264,6 +278,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -279,6 +294,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -301,6 +317,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -316,6 +333,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -329,6 +347,7 @@
                 ],
                 "path": "x-pack/plugins/security/common/licensing/license_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -354,7 +373,8 @@
               ">"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -370,6 +390,7 @@
         ],
         "path": "x-pack/plugins/security/common/licensing/license_features.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -381,7 +402,8 @@
               "\nIndicates whether we show login page or skip it."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -393,7 +415,8 @@
               "\nIndicates whether we allow login or disable it on the login page."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -405,7 +428,8 @@
               "\nIndicates whether we show security links throughout the kibana app."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -417,7 +441,8 @@
               "\nIndicates whether we show the Role Mappings UI."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -429,7 +454,8 @@
               "\nIndicates whether we allow users to access agreement UI and acknowledge it."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -441,7 +467,8 @@
               "\nIndicates whether we allow logging of audit events."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -453,7 +480,8 @@
               "\nIndicates whether we allow users to define document level security in roles."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -465,7 +493,8 @@
               "\nIndicates whether we allow users to define field level security in roles."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -477,7 +506,8 @@
               "\nIndicates whether we allow Role-based access control (RBAC)."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -489,7 +519,21 @@
               "\nIndicates whether we allow sub-feature privileges."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -511,7 +555,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -525,6 +570,7 @@
         "description": [],
         "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -550,6 +596,7 @@
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -575,6 +622,7 @@
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -595,6 +643,7 @@
                 ],
                 "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -612,6 +661,7 @@
         "description": [],
         "path": "x-pack/plugins/security/public/ui_api/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -640,7 +690,8 @@
               ">; }"
             ],
             "path": "x-pack/plugins/security/public/ui_api/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -654,6 +705,7 @@
         "description": [],
         "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -663,7 +715,8 @@
             "label": "label",
             "description": [],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -676,7 +729,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -686,7 +740,8 @@
             "label": "href",
             "description": [],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -699,7 +754,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -712,7 +768,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -728,6 +785,7 @@
         ],
         "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -742,7 +800,8 @@
               "Set<string>"
             ],
             "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -757,7 +816,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -773,6 +833,7 @@
         ],
         "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -784,7 +845,8 @@
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
             "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -800,6 +862,7 @@
         ],
         "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -811,7 +874,8 @@
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
             "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -826,7 +890,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -841,7 +906,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -869,6 +935,7 @@
         ],
         "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -882,6 +949,7 @@
       "description": [],
       "path": "x-pack/plugins/security/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "security",
@@ -902,7 +970,8 @@
             }
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -923,7 +992,8 @@
             }
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -938,6 +1008,7 @@
       "description": [],
       "path": "x-pack/plugins/security/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "security",
@@ -958,7 +1029,8 @@
             }
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -979,7 +1051,8 @@
             }
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -1066,7 +1139,8 @@
             "<D>[]>; }"
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -1090,6 +1164,7 @@
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
           "deprecated": true,
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "enterpriseSearch",
@@ -1140,6 +1215,7 @@
         ],
         "path": "x-pack/plugins/security/server/audit/audit_events.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1149,7 +1225,8 @@
             "label": "message",
             "description": [],
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1162,7 +1239,8 @@
               "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1176,6 +1254,7 @@
         "description": [],
         "path": "x-pack/plugins/security/server/audit/audit_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1199,6 +1278,7 @@
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -1219,6 +1299,7 @@
                 ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1234,7 +1315,8 @@
               "\nIndicates whether audit logging is enabled or not.\n\nUseful for skipping resource-intense operations that don't need to be performed when audit\nlogging is disabled."
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1248,6 +1330,7 @@
         "description": [],
         "path": "x-pack/plugins/security/server/audit/audit_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1272,6 +1355,7 @@
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -1286,6 +1370,7 @@
                 ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1310,7 +1395,8 @@
               }
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1343,6 +1429,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1363,7 +1450,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1384,7 +1472,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1405,7 +1494,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1417,7 +1507,8 @@
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1429,7 +1520,8 @@
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1445,6 +1537,7 @@
         ],
         "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1527,7 +1620,8 @@
               " | null>; }"
             ],
             "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1551,6 +1645,7 @@
             ],
             "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -1565,6 +1660,7 @@
                 ],
                 "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1584,6 +1680,7 @@
         ],
         "path": "x-pack/plugins/security/server/authorization/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1598,7 +1695,8 @@
               "string | string[] | undefined"
             ],
             "path": "x-pack/plugins/security/server/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1613,7 +1711,8 @@
               "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
             ],
             "path": "x-pack/plugins/security/server/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1629,6 +1728,7 @@
         ],
         "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1640,7 +1740,8 @@
               "\nUnique id for this API key"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1652,7 +1753,8 @@
               "\nName for this API key"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1667,7 +1769,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1679,7 +1782,8 @@
               "\nGenerated API key"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1693,6 +1797,7 @@
         "description": [],
         "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1704,7 +1809,8 @@
               "\nUnique id for this API key"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1716,7 +1822,8 @@
               "\nName for this API key"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1728,7 +1835,8 @@
               "\nGenerated API key"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1744,6 +1852,7 @@
         ],
         "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1758,7 +1867,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1773,7 +1883,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1785,7 +1896,8 @@
               "\nThe number of errors that were encountered when invalidating the API keys."
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1800,7 +1912,8 @@
               "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1816,6 +1929,7 @@
         ],
         "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1828,7 +1942,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1844,6 +1959,7 @@
         ],
         "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1858,7 +1974,8 @@
               "Set<string>"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1873,7 +1990,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1889,6 +2007,7 @@
         ],
         "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1904,7 +2023,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1919,7 +2039,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1935,6 +2056,7 @@
         ],
         "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -1946,7 +2068,8 @@
               "\nThe id of the Kibana Space."
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -1961,7 +2084,8 @@
               "{ kibana: string[]; }"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1977,6 +2101,7 @@
         ],
         "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2024,6 +2149,7 @@
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -2045,6 +2171,7 @@
                 ],
                 "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2088,6 +2215,7 @@
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -2109,6 +2237,7 @@
                 ],
                 "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2152,6 +2281,7 @@
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -2173,6 +2303,7 @@
                 ],
                 "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2192,6 +2323,7 @@
         ],
         "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2203,7 +2335,8 @@
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2218,7 +2351,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2233,7 +2367,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2255,7 +2390,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2272,6 +2408,7 @@
         "description": [],
         "path": "x-pack/plugins/security/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2286,6 +2423,7 @@
         ],
         "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2302,6 +2440,7 @@
         ],
         "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2318,6 +2457,7 @@
         ],
         "path": "x-pack/plugins/security/server/routes/tags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2333,6 +2473,7 @@
       ],
       "path": "x-pack/plugins/security/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "security",
@@ -2358,6 +2499,7 @@
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": true,
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "encryptedSavedObjects",
@@ -2441,6 +2583,7 @@
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": true,
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "actions",
@@ -2499,7 +2642,8 @@
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -2520,7 +2664,8 @@
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -2541,7 +2686,8 @@
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -2557,6 +2703,7 @@
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -2575,6 +2722,7 @@
       ],
       "path": "x-pack/plugins/security/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "security",
@@ -2595,7 +2743,8 @@
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -2616,7 +2765,8 @@
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "security",
@@ -2637,7 +2787,8 @@
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -2669,6 +2820,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2690,6 +2842,7 @@
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2707,6 +2860,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/api_key.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2716,7 +2870,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2726,7 +2881,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2736,7 +2892,8 @@
             "label": "username",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2746,7 +2903,8 @@
             "label": "realm",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2756,7 +2914,8 @@
             "label": "creation",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2766,7 +2925,8 @@
             "label": "expiration",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2776,7 +2936,8 @@
             "label": "invalidated",
             "description": [],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2789,7 +2950,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2822,6 +2984,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2842,7 +3005,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2863,7 +3027,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2884,7 +3049,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2896,7 +3062,8 @@
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2908,7 +3075,8 @@
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2924,6 +3092,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/authentication_provider.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2935,7 +3104,8 @@
               "\nType of the Kibana authentication provider."
             ],
             "path": "x-pack/plugins/security/common/model/authentication_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -2947,7 +3117,8 @@
               "\nName of the Kibana authentication provider (arbitrary string)."
             ],
             "path": "x-pack/plugins/security/common/model/authentication_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2961,6 +3132,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/features_privileges.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -2973,7 +3145,8 @@
               "[featureId: string]:  string[]"
             ],
             "path": "x-pack/plugins/security/common/model/features_privileges.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2989,6 +3162,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3000,7 +3174,8 @@
               "\nUsername of the user."
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3015,7 +3190,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3030,7 +3206,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3072,6 +3249,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3101,7 +3279,8 @@
               ", \"authentication_provider\">"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3115,6 +3294,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/deprecations.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3127,7 +3307,8 @@
               "GetDeprecationsContext"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3137,7 +3318,8 @@
             "label": "featureId",
             "description": [],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3151,6 +3333,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/deprecations.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3170,7 +3353,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3184,7 +3368,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3198,6 +3383,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/deprecations.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3227,6 +3413,7 @@
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -3246,6 +3433,7 @@
                 ],
                 "path": "x-pack/plugins/security/common/model/deprecations.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3263,6 +3451,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/role.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3272,7 +3461,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3293,7 +3483,8 @@
               "[]; run_as: string[]; }"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3313,7 +3504,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3326,7 +3518,8 @@
               "{ [anyKey: string]: any; } | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3339,7 +3532,8 @@
               "{ [anyKey: string]: any; } | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3352,7 +3546,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3365,7 +3560,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3379,6 +3575,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/role.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3391,7 +3588,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3404,7 +3602,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3417,7 +3616,8 @@
               "{ grant?: string[] | undefined; except?: string[] | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3430,7 +3630,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3444,6 +3645,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/model/role.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3456,7 +3658,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3469,7 +3672,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3488,7 +3692,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3501,7 +3706,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3515,6 +3721,7 @@
         "description": [],
         "path": "x-pack/plugins/security/common/licensing/license_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3528,6 +3735,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3543,6 +3751,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3565,6 +3774,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3580,6 +3790,7 @@
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "security",
@@ -3593,6 +3804,7 @@
                 ],
                 "path": "x-pack/plugins/security/common/licensing/license_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3618,7 +3830,8 @@
               ">"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3634,6 +3847,7 @@
         ],
         "path": "x-pack/plugins/security/common/licensing/license_features.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3645,7 +3859,8 @@
               "\nIndicates whether we show login page or skip it."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3657,7 +3872,8 @@
               "\nIndicates whether we allow login or disable it on the login page."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3669,7 +3885,8 @@
               "\nIndicates whether we show security links throughout the kibana app."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3681,7 +3898,8 @@
               "\nIndicates whether we show the Role Mappings UI."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3693,7 +3911,8 @@
               "\nIndicates whether we allow users to access agreement UI and acknowledge it."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3705,7 +3924,8 @@
               "\nIndicates whether we allow logging of audit events."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3717,7 +3937,8 @@
               "\nIndicates whether we allow users to define document level security in roles."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3729,7 +3950,8 @@
               "\nIndicates whether we allow users to define field level security in roles."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3741,7 +3963,8 @@
               "\nIndicates whether we allow Role-based access control (RBAC)."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3753,7 +3976,21 @@
               "\nIndicates whether we allow sub-feature privileges."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3775,7 +4012,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3791,6 +4029,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3800,7 +4039,8 @@
             "label": "username",
             "description": [],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3813,7 +4053,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3826,7 +4067,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3839,7 +4081,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3849,7 +4092,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3862,7 +4106,8 @@
               "{ _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3888,6 +4133,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3899,7 +4145,8 @@
               "\nUnique ID for of the user profile."
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3911,7 +4158,8 @@
               "\nIndicates whether user profile is enabled or not."
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3932,7 +4180,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3947,7 +4196,8 @@
               "{ [P in keyof D]?: D[P] | undefined; }"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3963,6 +4213,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -3977,7 +4228,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -3992,7 +4244,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4007,7 +4260,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4023,6 +4277,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -4034,7 +4289,8 @@
               "\nUsername of the user."
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4049,7 +4305,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4064,7 +4321,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4097,6 +4355,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -4111,7 +4370,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4123,7 +4383,8 @@
               "\nName of the Elasticsearch security realm that was used to authenticate user."
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4138,7 +4399,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4172,6 +4434,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -4192,7 +4455,8 @@
               }
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4207,7 +4471,8 @@
               "L"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4223,6 +4488,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "security",
@@ -4234,7 +4500,8 @@
               "\nArbitrary name of the security realm."
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "security",
@@ -4246,7 +4513,8 @@
               "\nType of the security realm (file, native, saml etc.)."
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4268,6 +4536,7 @@
         ],
         "path": "x-pack/plugins/security/common/licensing/license_features.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4284,6 +4553,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4300,6 +4570,7 @@
         ],
         "path": "x-pack/plugins/security/common/model/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

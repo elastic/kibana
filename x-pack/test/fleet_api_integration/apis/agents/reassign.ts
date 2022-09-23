@@ -199,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should bulk reassign multiple agents by kuery in batches', async () => {
-        const { body: unenrolledBody } = await supertest
+        const { body } = await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -209,17 +209,37 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({
-          agent1: { success: true },
-          agent2: { success: true },
-          agent3: { success: true },
-          agent4: { success: true },
-        });
+        const actionId = body.actionId;
 
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.policy_id).to.eql('policy2');
+        const verifyActionResult = async () => {
+          const { body: result } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+          expect(result.total).to.eql(4);
+          result.items.forEach((agent: any) => {
+            expect(agent.policy_id).to.eql('policy2');
+          });
+        };
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 2) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
         });
       });
 

@@ -35,6 +35,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
@@ -66,6 +67,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
       loadChart();
       setIsValid(aggFieldPair !== null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aggFieldPair]);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
       setBucketSpanMs(jobCreator.bucketSpanMs);
       loadChart();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   async function loadChart() {

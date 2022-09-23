@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_EVENT_MODULE]: 'auditd',
           [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
           [ALERT_REASON]:
-            'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
+            'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
           [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
           [ALERT_STATUS]: 'active',
           [ALERT_UUID]: fullSignal[ALERT_UUID],
@@ -1356,6 +1356,63 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ]);
+        });
+      });
+
+      describe('alerts should be be enriched', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        });
+
+        it('should be enriched with host risk score', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*',
+            threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+            threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+            threat_mapping: [
+              // We match host.name against host.name
+              {
+                entries: [
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const createdRule = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, createdRule.id);
+          await waitForSignalsToBePresent(supertest, log, 10, [createdRule.id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [createdRule.id]);
+          expect(signalsOpen.hits.hits.length).equal(10);
+          const fullSource = signalsOpen.hits.hits.find(
+            (signal) =>
+              (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
+          );
+          const fullSignal = fullSource?._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
+
+          expect(fullSignal?.host?.risk?.calculated_level).to.eql('Critical');
+          expect(fullSignal?.host?.risk?.calculated_score_norm).to.eql(70);
         });
       });
     });

@@ -193,6 +193,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -317,6 +320,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -373,6 +379,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -593,6 +602,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -717,6 +729,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -773,6 +788,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -945,6 +963,9 @@ paths:
                             username:
                               type: string
                               example: elastic
+                            profile_uid:
+                              type: string
+                              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                           nullable: true
                           example: null
                         comments:
@@ -1073,6 +1094,9 @@ paths:
                             username:
                               type: string
                               example: elastic
+                            profile_uid:
+                              type: string
+                              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                         description:
                           type: string
                           example: A case description.
@@ -1130,6 +1154,9 @@ paths:
                             username:
                               type: string
                               example: elastic
+                            profile_uid:
+                              type: string
+                              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                           nullable: true
                           example: null
                         version:
@@ -2096,10 +2123,16 @@ paths:
                   properties:
                     email:
                       type: string
+                      example: null
                     full_name:
                       type: string
+                      example: null
                     username:
                       type: string
+                      example: elastic
+                    profile_uid:
+                      type: string
+                      example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
@@ -2227,6 +2260,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -2351,6 +2387,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -2407,6 +2446,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -2498,6 +2540,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -2622,6 +2667,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -2678,6 +2726,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -2755,6 +2806,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -2879,6 +2933,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -2935,6 +2992,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -3070,6 +3130,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -3194,6 +3257,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -3250,6 +3316,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -3470,6 +3539,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -3594,6 +3666,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -3650,6 +3725,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -3873,6 +3951,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -3997,6 +4078,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -4053,6 +4137,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -4228,6 +4315,9 @@ paths:
                             username:
                               type: string
                               example: elastic
+                            profile_uid:
+                              type: string
+                              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                           nullable: true
                           example: null
                         comments:
@@ -4356,6 +4446,9 @@ paths:
                             username:
                               type: string
                               example: elastic
+                            profile_uid:
+                              type: string
+                              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                         description:
                           type: string
                           example: A case description.
@@ -4413,6 +4506,9 @@ paths:
                             username:
                               type: string
                               example: elastic
+                            profile_uid:
+                              type: string
+                              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                           nullable: true
                           example: null
                         version:
@@ -5384,10 +5480,16 @@ paths:
                   properties:
                     email:
                       type: string
+                      example: null
                     full_name:
                       type: string
+                      example: null
                     username:
                       type: string
+                      example: elastic
+                    profile_uid:
+                      type: string
+                      example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
@@ -5518,6 +5620,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -5642,6 +5747,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -5698,6 +5806,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -5791,6 +5902,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -5915,6 +6029,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -5971,6 +6088,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -6050,6 +6170,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -6174,6 +6297,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -6230,6 +6356,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -6369,6 +6498,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   comments:
@@ -6493,6 +6625,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   description:
                     type: string
                     example: A case description.
@@ -6549,6 +6684,9 @@ paths:
                       username:
                         type: string
                         example: elastic
+                      profile_uid:
+                        type: string
+                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     nullable: true
                     example: null
                   version:
@@ -6749,6 +6887,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
         id:
           type: string
           example: 73362370-ab1a-11ec-985f-97e55adae8b9
@@ -6774,6 +6915,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
         rule:
           type: object
@@ -6805,6 +6949,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
         version:
           type: string
           example: WzMwNDgsMV0=
@@ -6830,6 +6977,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
         id:
           type: string
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
@@ -6852,6 +7002,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
           example: null
         type:
@@ -6874,6 +7027,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
           example: null
         version:
@@ -6907,6 +7063,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
     status:
       type: string
@@ -7490,6 +7649,9 @@ components:
             username:
               type: string
               example: elastic
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
         owner:
           $ref: '#/components/schemas/owners'
         payload:

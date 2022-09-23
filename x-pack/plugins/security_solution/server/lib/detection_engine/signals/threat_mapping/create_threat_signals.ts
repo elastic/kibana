@@ -29,7 +29,6 @@ export const createThreatSignals = async ({
   completeRule,
   concurrentSearches,
   eventsTelemetry,
-  exceptionItems,
   filters,
   inputIndex,
   itemsPerSearch,
@@ -53,6 +52,8 @@ export const createThreatSignals = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
@@ -80,13 +81,13 @@ export const createThreatSignals = async ({
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
-    exceptionItems,
     tuple,
     query,
     language,
     filters: allEventFilters,
     primaryTimestamp,
     secondaryTimestamp,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
@@ -108,11 +109,11 @@ export const createThreatSignals = async ({
 
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
-    exceptionItems,
     threatFilters: allThreatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
@@ -123,7 +124,6 @@ export const createThreatSignals = async ({
   };
 
   const threatEnrichment = buildThreatEnrichment({
-    exceptionItems,
     ruleExecutionLogger,
     services,
     threatFilters: allThreatFilters,
@@ -134,6 +134,7 @@ export const createThreatSignals = async ({
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
     listClient,
+    exceptionFilter,
   });
 
   const createSignals = async ({
@@ -184,7 +185,6 @@ export const createThreatSignals = async ({
         getEventList({
           services,
           ruleExecutionLogger,
-          exceptionItems,
           filters: allEventFilters,
           query,
           language,
@@ -195,6 +195,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
         }),
 
       createSignal: (slicedChunk) =>
@@ -205,7 +206,6 @@ export const createThreatSignals = async ({
           currentEventList: slicedChunk,
           currentResult: results,
           eventsTelemetry,
-          exceptionItems,
           filters: allEventFilters,
           inputIndex,
           language,
@@ -231,6 +231,8 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         }),
     });
   } else {
@@ -239,7 +241,6 @@ export const createThreatSignals = async ({
       getDocumentList: async ({ searchAfter }) =>
         getThreatList({
           esClient: services.scopedClusterClient.asCurrentUser,
-          exceptionItems,
           threatFilters: allThreatFilters,
           query: threatQuery,
           language: threatLanguage,
@@ -252,6 +253,7 @@ export const createThreatSignals = async ({
           reassignPitId: reassignThreatPitId,
           runtimeMappings,
           listClient,
+          exceptionFilter,
         }),
 
       createSignal: (slicedChunk) =>
@@ -262,7 +264,6 @@ export const createThreatSignals = async ({
           currentResult: results,
           currentThreatList: slicedChunk,
           eventsTelemetry,
-          exceptionItems,
           filters: allEventFilters,
           inputIndex,
           language,
@@ -281,6 +282,8 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         }),
     });
   }

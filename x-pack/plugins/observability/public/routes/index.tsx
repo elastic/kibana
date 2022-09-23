@@ -117,7 +117,7 @@ export const routes = {
     params: {},
     exact: true,
   },
-  '/alerts/:alertId': {
+  '/alerts/rules/:ruleId/alerts/:alertId': {
     handler: () => {
       return <AlertDetailsPage />;
     },

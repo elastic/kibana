@@ -88,9 +88,16 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
+  public async openControlsMenu() {
+    const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
+    if (!isOpen) {
+      await this.testSubjects.click('dashboard-controls-menu-button');
+    }
+  }
+
   public async openCreateControlFlyout() {
     this.log.debug(`Opening flyout for creating a control`);
-    await this.testSubjects.click('dashboard-controls-menu-button');
+    await this.openControlsMenu();
     await this.testSubjects.click('controls-create-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
@@ -104,7 +111,7 @@ export class DashboardPageControls extends FtrService {
 
   public async openControlGroupSettingsFlyout() {
     this.log.debug('Open controls group settings flyout');
-    await this.testSubjects.click('dashboard-controls-menu-button');
+    await this.openControlsMenu();
     await this.testSubjects.click('controls-settings-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-group-settings-flyout');
@@ -261,11 +268,17 @@ export class DashboardPageControls extends FtrService {
     await this.controlEditorSave();
   }
 
+  public async createTimeSliderControl() {
+    this.log.debug(`Creating time slider control`);
+    await this.openControlsMenu();
+    await this.testSubjects.click('controls-create-timeslider-button');
+  }
+
   public async hoverOverExistingControl(controlId: string) {
     const elementToHover = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-edit`);
+      await this.testSubjects.existOrFail(`control-action-${controlId}-delete`);
     });
   }
 
@@ -273,7 +286,7 @@ export class DashboardPageControls extends FtrService {
     const elementToClick = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToClick.click();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-edit`);
+      await this.testSubjects.existOrFail(`control-action-${controlId}-delete`);
     });
   }
 
@@ -510,5 +523,24 @@ export class DashboardPageControls extends FtrService {
     await this.rangeSliderOpenPopover(controlId);
     await this.rangeSliderPopoverAssertOpen();
     await this.testSubjects.click('rangeSlider__clearRangeButton');
+  }
+
+  public async validateRange(
+    compare: 'value' | 'placeholder', // if 'value', compare actual selections; otherwise, compare the default range
+    controlId: string,
+    expectedLowerBound: string,
+    expectedUpperBound: string
+  ) {
+    expect(await this.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
+      expectedLowerBound
+    );
+    expect(await this.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
+      expectedUpperBound
+    );
+  }
+
+  // Time slider functions
+  public async gotoNextTimeSlice() {
+    await this.testSubjects.click('timeSlider-nextTimeWindow');
   }
 }

@@ -38,7 +38,6 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.queryAnnotation.args.filter', {
         defaultMessage: `Annotation filter`,
       }),
-      required: true,
     },
     extraFields: {
       multi: true,
@@ -48,7 +47,6 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       }),
     },
     timeField: {
-      required: true,
       types: ['string'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.timeField', {
         defaultMessage: `The time field of the annotation`,
@@ -104,6 +102,13 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.queryAnnotation.args.isHidden', {
         defaultMessage: `Switch to hide annotation`,
       }),
+    },
+    ignoreGlobalFilters: {
+      types: ['boolean'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.ignoreGlobalFilters', {
+        defaultMessage: `Switch to ignore global filters for the annotation`,
+      }),
+      default: true,
     },
   },
   fn: function fn(input: unknown, args: QueryPointEventAnnotationArgs) {

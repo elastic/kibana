@@ -151,6 +151,13 @@ export function createTestConfig(config: ApmFtrConfig) {
               es,
               logger,
             }),
+            monitorIndicesUser: await getApmApiClient({
+              kibanaServer,
+              security,
+              username: ApmUsername.apmMonitorIndices,
+              es,
+              logger,
+            }),
           };
         },
         ml: MachineLearningAPIProvider,
