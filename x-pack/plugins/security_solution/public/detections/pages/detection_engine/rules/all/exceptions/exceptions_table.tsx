@@ -409,6 +409,7 @@ export const ExceptionListsTable = React.memo(() => {
   }, []);
 
   const [openAddExceptionFlyout, setOpenAddExceptionFlyout] = useState(false);
+  const [isCreateExceptionsFlyoutOpen, setIsCreateExceptionsFlyoutOpen] = useState(false);
 
   return (
     <>
@@ -429,14 +430,27 @@ export const ExceptionListsTable = React.memo(() => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiPopover button={<EuiButton iconType={'arrowDown'}>{'Create'}</EuiButton>}>
+          <EuiPopover
+            isOpen={isCreateExceptionsFlyoutOpen}
+            closePopover={() => setIsCreateExceptionsFlyoutOpen(false)}
+            button={
+              <EuiButton
+                iconType={'arrowDown'}
+                onClick={() => setIsCreateExceptionsFlyoutOpen(true)}
+              >
+                {'Create'}
+              </EuiButton>
+            }
+          >
             <EuiContextMenuPanel
               size="s"
               items={[
                 <EuiContextMenuItem
                   key={'ruleException'}
                   onClick={() => setOpenAddExceptionFlyout(true)}
-                />,
+                >
+                  {'New Rule Exception'}
+                </EuiContextMenuItem>,
               ]}
             />
           </EuiPopover>
