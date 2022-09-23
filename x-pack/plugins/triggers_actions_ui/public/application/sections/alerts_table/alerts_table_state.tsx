@@ -145,6 +145,13 @@ const AlertsTableState = ({
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
 
+  useEffect(() => {
+    console.log(`=${new Date()}=============>mount`);
+    return () => {
+      console.log(`=${new Date()}=============>unmount`);
+    };
+  }, []);
+
   const [
     isLoading,
     {
@@ -163,7 +170,7 @@ const AlertsTableState = ({
     sort,
     skip: false,
   });
-  console.log('==============>isLoading', isLoading);
+  console.log(`=${new Date()}=============>isLoading`, isLoading);
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
@@ -279,7 +286,7 @@ const AlertsTableState = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshNow]);
 
-  console.log('==============>alertsCount:', alertsCount);
+  console.log(`=${new Date()}=============>alertsCount:`, alertsCount);
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && <EmptyState />}
