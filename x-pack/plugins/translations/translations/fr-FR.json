@@ -32434,6 +32434,7 @@
     "xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL": "URL non valide",
     "xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText": "Un nom est requis.",
     "xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription": "Chargement des paramètres du connecteur…",
+    "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "Actions",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "Ajouter une action",
     "xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipTitle": "Connecteur déclassé",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "Obtenir davantage de connecteurs",

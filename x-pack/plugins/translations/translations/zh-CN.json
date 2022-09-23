@@ -32442,6 +32442,7 @@
     "xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL": "URL 无效",
     "xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText": "“名称”必填。",
     "xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription": "正在加载连接器设置……",
+    "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "操作",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "添加操作",
     "xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipTitle": "过时连接器",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "获取更多连接器",

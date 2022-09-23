@@ -69,6 +69,22 @@ const getThrottleOptions = (throttle?: string | null) => {
   return THROTTLE_OPTIONS;
 };
 
+const DisplayActionsHeader = () => {
+  return (
+    <>
+      <EuiTitle size="s">
+        <h4>
+          <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   addPadding = false,
   defaultValues,
@@ -177,21 +193,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [isLoading, isLoadingCaseAction, ruleType, throttleOptions]
   );
 
-  const displayActionsHeader = useMemo(() => {
-    return (
-      <>
-        <EuiTitle size="s">
-          <h4>
-            <FormattedMessage
-              defaultMessage="Actions"
-              id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
-            />
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-      </>
-    );
-  }, []);
   const displayActionsOptions = useMemo(
     () =>
       throttle !== stepActionsDefaultValue.throttle ? (
@@ -224,7 +225,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
       <>
-        {displayActionsHeader}
+        <DisplayActionsHeader />
         <UseField
           path="throttle"
           component={ThrottleSelectField}
@@ -251,7 +252,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     );
   }, [
     application.capabilities.actions.show,
-    displayActionsHeader,
     displayActionsOptions,
     displayResponseActionsOptions,
     responseActionsEnabled,

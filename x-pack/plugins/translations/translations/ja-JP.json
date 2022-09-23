@@ -32408,6 +32408,7 @@
     "xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL": "無効なURL",
     "xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText": "名前が必要です。",
     "xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription": "コネクター設定を読み込んでいます...",
+    "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "アクション",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "アクションの追加",
     "xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipTitle": "廃止予定のコネクター",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "その他のコネクターを取得",
