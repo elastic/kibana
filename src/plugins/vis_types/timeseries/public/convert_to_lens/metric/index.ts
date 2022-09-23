@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
-import { getIndexPatternIds } from '@kbn/visualizations-plugin/common';
+import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
