@@ -111,8 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/116056
-  describe.skip('POST data_frame/_evaluate', () => {
+  describe('POST data_frame/_evaluate', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
