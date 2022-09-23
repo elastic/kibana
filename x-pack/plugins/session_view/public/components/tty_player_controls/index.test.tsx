@@ -97,7 +97,7 @@ describe('TTYPlayerControls component', () => {
   it('clicking on end button triggers onSeekLine', async () => {
     renderResult = mockedContext.render(<TTYPlayerControls {...props} />);
     renderResult.queryByTestId('sessionView:TTYPlayerControlsEnd')?.click();
-    expect(props.onSeekLine).toHaveBeenCalledWith(10);
+    expect(props.onSeekLine).toHaveBeenCalledWith(9);
   });
 
   it('render output markers', async () => {
