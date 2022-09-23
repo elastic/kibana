@@ -70,6 +70,7 @@ const getConfig = (): FieldConfig<CaseAssignees> => ({
 const userProfileToComboBoxOption = (userProfile: UserProfileWithAvatar) => ({
   label: getUserDisplayName(userProfile.user),
   value: userProfile.uid,
+  key: userProfile.uid,
   user: userProfile.user,
   data: userProfile.data,
 });

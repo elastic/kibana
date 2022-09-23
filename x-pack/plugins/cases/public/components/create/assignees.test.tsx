@@ -13,7 +13,7 @@ import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { Assignees } from './assignees';
 import { FormProps } from './schema';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, screen } from '@testing-library/react';
 import * as api from '../../containers/user_profiles/api';
 import { UserProfile } from '@kbn/user-profile-components';
 
@@ -148,6 +148,60 @@ describe('Assignees', () => {
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
+    });
+  });
+
+  it('allows selection of similarly named users', async () => {
+    const similarProfiles: UserProfile[] = [
+      {
+        uid: '123',
+        enabled: true,
+        data: {},
+        user: {
+          username: '123',
+          full_name: 'Turtle',
+        },
+      },
+      {
+        uid: '456',
+        enabled: true,
+        data: {},
+        user: {
+          username: '456',
+          full_name: 'turtle',
+        },
+      },
+    ];
+
+    const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
+    spyOnSuggestUserProfiles.mockResolvedValue(similarProfiles);
+
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Assignees isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+    });
+
+    act(() => {
+      userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Turtle')).toBeInTheDocument();
+      expect(screen.getByText('turtle')).toBeInTheDocument();
+    });
+
+    act(() => {
+      userEvent.click(screen.getByText('Turtle'));
+    });
+
+    // ensure that the similar user is still available for selection
+    await waitFor(() => {
+      expect(screen.getByText('turtle')).toBeInTheDocument();
     });
   });
 });
