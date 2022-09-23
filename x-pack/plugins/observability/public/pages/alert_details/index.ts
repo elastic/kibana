@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './common';
-export * from './indicators';
+export { AlertDetails } from './components';
