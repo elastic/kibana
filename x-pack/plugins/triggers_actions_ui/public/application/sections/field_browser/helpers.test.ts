@@ -17,10 +17,6 @@ import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 describe('helpers', () => {
   describe('categoryHasFields', () => {
-    test('it returns false if the category fields property is undefined', () => {
-      expect(categoryHasFields({})).toBe(false);
-    });
-
     test('it returns false if the category fields property is empty', () => {
       expect(categoryHasFields({ fields: {} })).toBe(false);
     });
@@ -79,10 +75,6 @@ describe('helpers', () => {
   });
 
   describe('getFieldCount', () => {
-    test('it returns 0 if the category fields property is undefined', () => {
-      expect(getFieldCount({})).toEqual(0);
-    });
-
     test('it returns 0 if the category fields property is empty', () => {
       expect(getFieldCount({ fields: {} })).toEqual(0);
     });

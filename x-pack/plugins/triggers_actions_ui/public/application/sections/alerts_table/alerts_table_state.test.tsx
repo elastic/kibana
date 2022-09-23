@@ -255,14 +255,23 @@ describe('AlertsTableState', () => {
           [AlertsField.uuid]: {
             category: 'kibana',
             name: AlertsField.uuid,
+            searchable: false,
+            aggregatable: false,
+            type: 'string',
           },
           [AlertsField.name]: {
             category: 'kibana',
             name: AlertsField.name,
+            searchable: false,
+            aggregatable: false,
+            type: 'string',
           },
           [AlertsField.reason]: {
             category: 'kibana',
             name: AlertsField.reason,
+            searchable: false,
+            aggregatable: false,
+            type: 'string',
           },
         },
       },

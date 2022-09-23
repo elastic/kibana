@@ -9,8 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import * as t from 'io-ts';
 
-import type { IFieldSubType } from '@kbn/es-query';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -306,20 +305,36 @@ export interface ClusterPutComponentTemplateBody {
   };
 }
 
-export interface BrowserField {
-  aggregatable: boolean;
+export type BrowserField = FieldSpec & {
   category: string;
   description?: string | null;
   example?: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
   format?: string;
-  indexes: string[];
-  name: string;
-  searchable: boolean;
-  type: string;
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
-  runtimeField?: RuntimeField;
+  indexes?: string[];
+};
+
+export interface BrowserFieldCategory {
+  fields: { [fieldName: string]: BrowserField };
 }
 
-export type BrowserFields = Record<string, Partial<BrowserField>>;
+export interface BrowserFields {
+  [category: string]: BrowserFieldCategory;
+}
+
+// export interface BrowserField {
+//   aggregatable: boolean;
+//   category: string;
+//   description?: string | null;
+//   example?: string | number | null;
+//   fields: Readonly<Record<string, Partial<BrowserField>>>;
+//   format?: string;
+//   indexes: string[];
+//   name: string;
+//   searchable: boolean;
+//   type: string;
+//   subType?: IFieldSubType;
+//   readFromDocValues: boolean;
+//   runtimeField?: RuntimeField;
+// }
+
+// export type BrowserFields = Record<string, Partial<BrowserField>>;

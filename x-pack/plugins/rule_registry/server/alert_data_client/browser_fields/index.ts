@@ -18,10 +18,10 @@ const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   return name[0];
 };
 
-const browserFieldFactory = (
+const browserFieldByNameFactory = (
   fieldCapability: FieldDescriptor,
   category: string
-): Readonly<Record<string, Partial<BrowserField>>> => {
+): { [fielName: string]: BrowserField } => {
   return {
     [fieldCapability.name]: {
       ...fieldCapability,
@@ -33,12 +33,14 @@ const browserFieldFactory = (
 export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): BrowserFields => {
   return fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
     const category = getFieldCategory(field);
-    const browserField = browserFieldFactory(field, category);
+    const browserFieldByName = browserFieldByNameFactory(field, category);
 
     if (browserFields[category]) {
-      browserFields[category] = { fields: { ...browserFields[category].fields, ...browserField } };
+      browserFields[category] = {
+        fields: { ...browserFields[category].fields, ...browserFieldByName },
+      };
     } else {
-      browserFields[category] = { fields: browserField };
+      browserFields[category] = { fields: browserFieldByName };
     }
 
     return browserFields;
