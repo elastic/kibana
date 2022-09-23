@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, SECURITY_SOLUTION_ID } from './plugin';
+export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';

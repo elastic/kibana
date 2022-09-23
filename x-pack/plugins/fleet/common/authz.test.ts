@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core-capabilities-common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import {
   calculatePackagePrivilegesFromCapabilities,
   calculatePackagePrivilegesFromKibanaPrivileges,
 } from './authz';
-import { ENDPOINT_PRIVILEGES, SECURITY_SOLUTION_ID } from './constants';
+import { ENDPOINT_PRIVILEGES } from './constants';
+
+const SECURITY_SOLUTION_ID = DEFAULT_APP_CATEGORIES.security.id;
 
 function generateActions(privileges: string[] = [], overrides: Record<string, boolean> = {}) {
   return privileges.reduce((acc, privilege) => {
@@ -29,7 +31,7 @@ function generateActions(privileges: string[] = [], overrides: Record<string, bo
 describe('fleet authz', () => {
   describe('calculatePackagePrivilegesFromCapabilities', () => {
     it('calculates privileges correctly', () => {
-      const endpointCapablities = {
+      const endpointCapabilities = {
         writeEndpointList: true,
         writeTrustedApplications: true,
         writePolicyManagement: false,
@@ -39,12 +41,15 @@ describe('fleet authz', () => {
       };
       const expected = {
         endpoint: {
-          actions: generateActions(ENDPOINT_PRIVILEGES, endpointCapablities),
+          actions: generateActions(ENDPOINT_PRIVILEGES, endpointCapabilities),
         },
       };
       const actual = calculatePackagePrivilegesFromCapabilities({
-        siem: endpointCapablities,
-      } as unknown as Capabilities);
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        siem: endpointCapabilities,
+      });
 
       expect(actual).toEqual(expected);
     });

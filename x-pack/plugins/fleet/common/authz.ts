@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
-import { SECURITY_SOLUTION_ID, ENDPOINT_PRIVILEGES } from './constants';
+import { ENDPOINT_PRIVILEGES } from './constants';
 
 export interface FleetAuthz {
   fleet: {
@@ -117,9 +118,9 @@ function getAuthorizationFromPrivileges(
     authorized: boolean;
   }>,
   searchPrivilege: string
-) {
+): boolean {
   const privilege = kibanaPrivileges.find((p) =>
-    p.privilege.endsWith(`${SECURITY_SOLUTION_ID}-${searchPrivilege}`)
+    p.privilege.endsWith(`${DEFAULT_APP_CATEGORIES.security.id}-${searchPrivilege}`)
   );
   return privilege?.authorized || false;
 }

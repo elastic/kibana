@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type {
   IRouter,
   RouteConfig,
@@ -21,7 +22,7 @@ import { calculateAuthz, calculatePackagePrivilegesFromKibanaPrivileges } from '
 
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
-import { PLUGIN_ID, SECURITY_SOLUTION_ID, ENDPOINT_PRIVILEGES } from '../constants';
+import { PLUGIN_ID, ENDPOINT_PRIVILEGES } from '../constants';
 
 function checkSecurityEnabled() {
   return appContextService.getSecurityLicense().isEnabled();
@@ -64,7 +65,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
     const endpointPrivileges = ENDPOINT_PRIVILEGES.map((privilege) =>
-      security.authz.actions.api.get(`${SECURITY_SOLUTION_ID}-${privilege}`)
+      security.authz.actions.api.get(`${DEFAULT_APP_CATEGORIES.security.id}-${privilege}`)
     );
     const { privileges } = await checkPrivileges({
       kibana: [

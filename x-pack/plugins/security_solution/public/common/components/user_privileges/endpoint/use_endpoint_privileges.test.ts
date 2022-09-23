@@ -30,7 +30,7 @@ jest.mock('../../../hooks/use_license', () => {
   };
 });
 jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+  useIsExperimentalFeatureEnabled: jest.fn((feature: string) => feature === 'endpointRbacEnabled'),
 }));
 
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
