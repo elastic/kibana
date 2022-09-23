@@ -45,8 +45,8 @@ const actionParams = {
 const connector: ActionConnector = {
   secrets: {},
   config: {},
-  id: 'it',
-  actionTypeId: '.it',
+  id: 'test',
+  actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
   isDeprecated: false,
