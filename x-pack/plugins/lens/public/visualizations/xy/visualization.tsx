@@ -18,7 +18,6 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { EuiSwitch } from '@elastic/eui';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { generateId } from '../../id_generator';
 import { renewIDs } from '../../utils';
@@ -28,13 +27,13 @@ import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
 import {
-  State,
+  type State,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type SeriesType,
+  type XYSuggestion,
+  type PersistedState,
   visualizationTypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  SeriesType,
-  XYSuggestion,
-  PersistedState,
 } from './types';
 import { layerTypes } from '../../../common';
 import {
@@ -80,12 +79,13 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState } from './types';
+import type { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { createAnnotationActions } from './annotations/actions';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -241,36 +241,7 @@ export const getXyVisualization = ({
     const layer = state.layers[layerIndex];
     const actions = [];
     if (isAnnotationsLayer(layer)) {
-      const label = i18n.translate('xpack.lens.xyChart.annotations.ignoreGlobalFiltersName', {
-        defaultMessage: 'Ignore global filters',
-      });
-      actions.push({
-        id: 'ignoreGlobalFilters',
-        name: label,
-        description: i18n.translate(
-          'xpack.lens.xyChart.annotations.ignoreGlobalFiltersDescription',
-          {
-            defaultMessage:
-              'All the dimensions configured in this layer ignore filters defined at kibana level.',
-          }
-        ),
-        fn: () => {
-          const newLayers = [...state.layers];
-          newLayers[layerIndex] = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
-          return setState({ ...state, layers: newLayers });
-        },
-        icon: (
-          <EuiSwitch
-            compressed
-            showLabel={false}
-            name="ignoreGlobalFilters"
-            id="ignoreGlobalFilters"
-            label={label}
-            checked={layer.ignoreGlobalFilters}
-            onChange={() => {}}
-          />
-        ),
-      });
+      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
     }
     return actions;
   },

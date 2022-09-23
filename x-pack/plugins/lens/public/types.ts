@@ -30,6 +30,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { EuiButtonIconColor } from '@elastic/eui';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -508,6 +509,17 @@ export interface DatasourceDataPanelProps<T = unknown> {
   usedIndexPatterns?: string[];
 }
 
+/** @internal **/
+export interface LayerAction {
+  displayName: string;
+  description?: string;
+  execute: () => void | Promise<void>;
+  icon: IconType;
+  color?: EuiButtonIconColor;
+  isCompatible: boolean;
+  'data-test-subj'?: string;
+}
+
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
    * For example, limiting to only bucketed or only numeric operations.
@@ -747,15 +759,6 @@ export interface Suggestion {
   keptLayerIds: string[];
 }
 
-export interface LayerAction<T extends unknown = unknown> {
-  id: string;
-  name: string;
-  description?: string;
-  fn?: () => void;
-  icon?: React.ReactElement;
-  color?: string;
-}
-
 /**
  * Object passed to `getSuggestions` of a visualization.
  * It contains a possible table the current datasource could
@@ -973,7 +976,7 @@ export interface Visualization<T = unknown, P = unknown> {
     layerId: string,
     state: T,
     setState: StateSetter<T>
-  ) => Array<LayerAction<T>>;
+  ) => LayerAction[];
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */
