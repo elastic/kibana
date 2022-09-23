@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { Fragment, useEffect, useState, useMemo, useCallback } from 'react';
 import { difference } from 'lodash';
 import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
@@ -54,16 +54,18 @@ export const TagsAddRemove: React.FC<Props> = ({
   onClosePopover,
 }: Props) => {
   const labelsFromTags = useCallback(
-    (tags: string[]) =>
+    (tags: string[], selected: string[]) =>
       tags.map((tag: string) => ({
         label: tag,
-        checked: selectedTags.includes(tag) ? 'on' : undefined,
+        checked: selected.includes(tag) ? 'on' : undefined,
         onFocusBadge: false,
       })),
-    [selectedTags]
+    []
   );
 
-  const [labels, setLabels] = useState<Array<EuiSelectableOption<any>>>(labelsFromTags(allTags));
+  const [labels, setLabels] = useState<Array<EuiSelectableOption<any>>>(
+    labelsFromTags(allTags, selectedTags)
+  );
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(true);
   const [isTagHovered, setIsTagHovered] = useState<{ [tagName: string]: boolean }>({});
@@ -76,13 +78,30 @@ export const TagsAddRemove: React.FC<Props> = ({
 
   // update labels after tags changing
   useEffect(() => {
-    setLabels(labelsFromTags(allTags));
-  }, [allTags, labelsFromTags]);
+    setLabels(labelsFromTags(allTags, selectedTags));
+  }, [allTags, labelsFromTags, selectedTags]);
 
   const isExactMatch = useMemo(
     () => labels.some((label) => label.label === searchValue),
     [labels, searchValue]
   );
+
+  const handleTagsUpdated = (
+    tagsToAdd: string[],
+    tagsToRemove: string[],
+    hasCompleted: boolean = true,
+    isRenameOrDelete = false
+  ) => {
+    if (hasCompleted) {
+      return onTagsUpdated();
+    }
+    const newSelectedTags = difference(selectedTags, tagsToRemove).concat(tagsToAdd);
+    const allTagsWithNew = allTags.includes(tagsToAdd[0]) ? allTags : allTags.concat(tagsToAdd);
+    const allTagsWithRemove = isRenameOrDelete
+      ? difference(allTagsWithNew, tagsToRemove)
+      : allTagsWithNew;
+    setLabels(labelsFromTags(allTagsWithRemove, newSelectedTags));
+  };
 
   const updateTags = async (
     tagsToAdd: string[],
@@ -90,10 +109,11 @@ export const TagsAddRemove: React.FC<Props> = ({
     successMessage?: string,
     errorMessage?: string
   ) => {
+    const newSelectedTags = difference(selectedTags, tagsToRemove).concat(tagsToAdd);
     if (agentId) {
       updateTagsHook.updateTags(
         agentId,
-        difference(selectedTags, tagsToRemove).concat(tagsToAdd),
+        newSelectedTags,
         () => onTagsUpdated(),
         successMessage,
         errorMessage
@@ -103,7 +123,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         agents!,
         tagsToAdd,
         tagsToRemove,
-        () => onTagsUpdated(),
+        (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
         successMessage,
         errorMessage
       );
@@ -133,7 +153,9 @@ export const TagsAddRemove: React.FC<Props> = ({
           <TagOptions
             tagName={option.label}
             isTagHovered={isTagHovered[option.label]}
-            onTagsUpdated={onTagsUpdated}
+            onTagsUpdated={(tagsToAdd, tagsToRemove, hasCompleted) =>
+              handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted, true)
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>

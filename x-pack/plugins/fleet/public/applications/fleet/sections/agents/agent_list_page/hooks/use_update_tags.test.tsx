@@ -35,10 +35,11 @@ describe('useUpdateTags', () => {
   const mockOnSuccess = jest.fn();
   beforeEach(() => {
     mockSendPutAgentTagsUpdate.mockReset();
+    mockSendPostBulkAgentTagsUpdate.mockReset();
     mockOnSuccess.mockReset();
   });
   it('should call onSuccess when update tags succeeds', async () => {
-    mockSendPutAgentTagsUpdate.mockResolvedValueOnce({});
+    mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ data: {} });
 
     const { result } = renderHook(() => useUpdateTags());
     await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
@@ -61,7 +62,7 @@ describe('useUpdateTags', () => {
   });
 
   it('should call onSuccess when bulk update tags succeeds', async () => {
-    mockSendPostBulkAgentTagsUpdate.mockResolvedValueOnce({});
+    mockSendPostBulkAgentTagsUpdate.mockResolvedValueOnce({ data: { actionId: 'action' } });
 
     const { result } = renderHook(() => useUpdateTags());
     await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
