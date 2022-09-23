@@ -15,7 +15,7 @@ export interface TrainedModelsProvider {
     savedObjectsClient: SavedObjectsClientContract
   ): {
     getTrainedModels(modelId?: string): Promise<estypes.MlGetTrainedModelsResponse>;
-    getTrainedModelStats(modelId?: string): Promise<estypes.MlGetTrainedModelsStatsResponse>;
+    getTrainedModelsStats(modelId?: string): Promise<estypes.MlGetTrainedModelsStatsResponse>;
   };
 }
 
@@ -33,7 +33,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               );
             });
         },
-        async getTrainedModelStats(modelId?: string) {
+        async getTrainedModelsStats(modelId?: string) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
