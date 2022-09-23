@@ -63,11 +63,6 @@ export async function getServiceAggregatedTransactionDetailedStats({
         field: TRANSACTION_DURATION_SUMMARY,
       },
     },
-    total_doc: {
-      value_count: {
-        field: TRANSACTION_DURATION_SUMMARY,
-      },
-    },
     failure_count: {
       sum: {
         field: TRANSACTION_FAILURE_COUNT,
@@ -133,17 +128,6 @@ export async function getServiceAggregatedTransactionDetailedStats({
                         },
                         aggs: metrics,
                       },
-                      bucket_sort: {
-                        bucket_sort: {
-                          sort: [
-                            {
-                              total_doc: {
-                                order: 'desc',
-                              },
-                            },
-                          ],
-                        },
-                      },
                     },
                   },
                 },
@@ -186,7 +170,7 @@ export async function getServiceAggregatedTransactionDetailedStats({
             y: calculateThroughputWithRange({
               start,
               end,
-              value: dateBucket.total_doc.value,
+              value: dateBucket.doc_count,
             }),
           })
         ),

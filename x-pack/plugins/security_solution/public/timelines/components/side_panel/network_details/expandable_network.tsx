@@ -21,7 +21,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { networkToCriteria } from '../../../../common/components/ml/criteria/network_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useKibana } from '../../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';

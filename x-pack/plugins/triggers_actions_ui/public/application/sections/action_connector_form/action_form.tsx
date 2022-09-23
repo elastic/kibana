@@ -37,7 +37,6 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
@@ -61,7 +60,7 @@ export interface ActionAccordionFormProps {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  getDefaultActionParams?: DefaultActionParamsGetter;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 }
 
@@ -84,7 +83,7 @@ export const ActionForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
-  getDefaultActionParams,
+  recoveryActionGroup,
   isActionGroupDisabledForActionType,
 }: ActionAccordionFormProps) => {
   const {
@@ -361,7 +360,7 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
-              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              recoveryActionGroup={recoveryActionGroup}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
