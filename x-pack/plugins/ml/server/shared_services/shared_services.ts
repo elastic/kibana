@@ -24,6 +24,7 @@ import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
 import { ModulesProvider, getModulesProvider } from './providers/modules';
 import { ResultsServiceProvider, getResultsServiceProvider } from './providers/results_service';
+import { TrainedModelsProvider, getTrainedModelsProvider } from './providers/trained_models';
 import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
@@ -53,7 +54,8 @@ export type SharedServices = JobServiceProvider &
   MlSystemProvider &
   ModulesProvider &
   ResultsServiceProvider &
-  MlAlertingServiceProvider;
+  MlAlertingServiceProvider &
+  TrainedModelsProvider;
 
 export type MlServicesProviders = JobsHealthServiceProvider;
 
@@ -174,6 +176,7 @@ export function createSharedServices(
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
+      ...getTrainedModelsProvider(getGuards),
     },
     /**
      * Services providers for ML internal usage
