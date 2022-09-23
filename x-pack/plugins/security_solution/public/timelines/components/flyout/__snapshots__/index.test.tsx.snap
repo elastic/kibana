@@ -60,7 +60,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
             >
               <button
                 aria-label="Add new timeline or template"
-                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--medium add-timeline-button"
+                class="euiButtonIcon euiButtonIcon--medium add-timeline-button emotion-euiButtonIcon-empty-primary-hoverStyles"
                 data-test-subj="settings-plus-in-circle"
                 type="button"
               >
@@ -80,7 +80,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
           <button
             aria-label="Open timeline Untitled timeline"
             aria-pressed="false"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushBoth c1 active-timeline-button"
+            class="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushBoth c1 active-timeline-button css-9t7nyf-empty-primary"
             data-test-subj="flyoutOverlay"
             type="button"
           >
@@ -97,7 +97,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <span
-                      class="euiToolTipAnchor"
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                     >
                       <div
                         class="euiHealth c2 emotion-euiHealth-s"
