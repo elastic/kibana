@@ -8,8 +8,10 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import React from 'react';
+import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { NoData } from '../../../../components/empty_states';
 import { InfraClientStartDeps } from '../../../../types';
 
 const getLensHostsTable = (
@@ -288,6 +290,26 @@ export const HostsTable: React.FunctionComponent<Props> = ({
     services: { lens },
   } = useKibana<InfraClientStartDeps>();
   const LensComponent = lens?.EmbeddableComponent;
+  const [noData, setNoData] = useState(false);
+
+  if (noData) {
+    return (
+      <NoData
+        titleText={i18n.translate('xpack.infra.metrics.emptyViewTitle', {
+          defaultMessage: 'There is no data to display.',
+        })}
+        bodyText={i18n.translate('xpack.infra.metrics.emptyViewDescription', {
+          defaultMessage: 'Try adjusting your time or filter.',
+        })}
+        refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
+          defaultMessage: 'Check for new data',
+        })}
+        // TODO implement refetch
+        onRefetch={() => {}}
+        testString="metricsEmptyViewState"
+      />
+    );
+  }
 
   return (
     <LensComponent
@@ -295,6 +317,11 @@ export const HostsTable: React.FunctionComponent<Props> = ({
       timeRange={timeRange}
       attributes={getLensHostsTable(dataView, query)}
       searchSessionId={searchSessionId}
+      onLoad={(isLoading, adapters) => {
+        if (!isLoading && adapters?.tables) {
+          setNoData(adapters?.tables.tables.default?.rows.length === 0);
+        }
+      }}
     />
   );
 };
