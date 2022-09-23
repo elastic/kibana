@@ -84,7 +84,7 @@ export const UserRiskScoreQueryTabBody = ({
     return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !loading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.user}

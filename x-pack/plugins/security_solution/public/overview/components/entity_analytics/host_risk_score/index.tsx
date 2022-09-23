@@ -81,7 +81,6 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     deleteQuery,
     inspect: inspectKpi,
   });
-
   const [
     isTableLoading,
     { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
@@ -130,11 +129,11 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsHostRiskScoreDisable refetch={refreshPage} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !isTableLoading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.host}

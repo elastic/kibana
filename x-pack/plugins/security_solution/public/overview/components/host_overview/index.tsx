@@ -93,7 +93,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
       }),
       [from, to]
     );
-
     const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,

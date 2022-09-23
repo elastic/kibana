@@ -60,7 +60,6 @@ export const HostRiskScoreQueryTabBody = ({
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
   const { from, to } = useGlobalTime();
-
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const [
@@ -83,7 +82,7 @@ export const HostRiskScoreQueryTabBody = ({
     return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !loading) {
     return (
       <RiskScoresDeprecated
         refetch={refetch}
@@ -93,7 +92,13 @@ export const HostRiskScoreQueryTabBody = ({
     );
   }
 
-  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
+  if (
+    !loading &&
+    isModuleEnabled &&
+    severitySelectionRedux.length === 0 &&
+    data &&
+    data.length === 0
+  ) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 

@@ -226,10 +226,25 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && isLicenseValid && isEnabled && !isDeprecated) {
+    if (
+      !skip &&
+      !isDeprecatedLoading &&
+      riskScoreRequest != null &&
+      isLicenseValid &&
+      isEnabled &&
+      !isDeprecated
+    ) {
       search(riskScoreRequest);
     }
-  }, [isEnabled, isDeprecated, isLicenseValid, riskScoreRequest, search, skip]);
+  }, [
+    isEnabled,
+    isDeprecated,
+    isLicenseValid,
+    isDeprecatedLoading,
+    riskScoreRequest,
+    search,
+    skip,
+  ]);
 
   return [loading || isDeprecatedLoading, riskScoreResponse];
 };

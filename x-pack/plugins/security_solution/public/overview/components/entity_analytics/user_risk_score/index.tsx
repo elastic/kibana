@@ -129,11 +129,11 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsUserRiskScoreDisable refetch={refreshPage} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !isTableLoading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.user}
