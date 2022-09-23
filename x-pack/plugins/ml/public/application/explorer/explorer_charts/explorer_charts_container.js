@@ -7,7 +7,6 @@
 import './_index.scss';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { escapeKuery } from '@kbn/es-query';
 
 import {
   EuiButtonEmpty,
@@ -46,6 +45,7 @@ import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
+import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
@@ -67,7 +67,7 @@ const openInMapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.openInM
 
 export function getEntitiesQuery(series) {
   const queryString = series.entityFields
-    ?.map(({ fieldName, fieldValue }) => `${escapeKuery(fieldName)}:${escapeKuery(fieldValue)}`)
+    ?.map(({ fieldName, fieldValue }) => escapeKueryForFieldValuePair(fieldName, fieldValue))
     .join(' or ');
   const query = {
     language: SEARCH_QUERY_LANGUAGE.KUERY,
