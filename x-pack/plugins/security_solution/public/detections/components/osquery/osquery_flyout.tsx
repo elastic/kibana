@@ -34,7 +34,6 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   const handleAddToTimeline = useHandleAddToTimeline();
 
   if (osquery?.OsqueryAction) {
-        onClick: () => {},
     return (
       <EuiFlyout
         ownFocus
