@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { NonEmptyArray, TimeDuration, enumeration } from '@kbn/securitysolution-io-ts-types';
 
 import {
-  throttleForBulkActions,
   action_group as actionGroup,
   action_params as actionParams,
   action_id as actionId,
@@ -40,6 +39,12 @@ export enum BulkActionEditType {
   'set_rule_actions' = 'set_rule_actions',
   'set_schedule' = 'set_schedule',
 }
+
+export const throttleForBulkActions = t.union([
+  t.literal('rule'),
+  TimeDuration({ allowedUnits: ['h', 'd'] }),
+]);
+export type ThrottleForBulkActions = t.TypeOf<typeof throttleForBulkActions>;
 
 const bulkActionEditPayloadTags = t.type({
   type: t.union([
@@ -106,8 +111,8 @@ export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPay
 const bulkActionEditPayloadSchedule = t.type({
   type: t.literal(BulkActionEditType.set_schedule),
   value: t.type({
-    interval: TimeDuration,
-    lookback: TimeDuration,
+    interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
+    lookback: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
   }),
 });
 export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;

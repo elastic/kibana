@@ -9,17 +9,9 @@
 import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
-export const throttle = t.union([t.literal('no_actions'), t.literal('rule'), TimeDuration]);
+export const throttle = t.union([
+  t.literal('no_actions'),
+  t.literal('rule'),
+  TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
+]);
 export type Throttle = t.TypeOf<typeof throttle>;
-
-export const throttleForBulkActions = t.union([t.literal('rule'), TimeDuration]);
-export type ThrottleForBulkActions = t.TypeOf<typeof throttleForBulkActions>;
-
-export const throttleOrNull = t.union([throttle, t.null]);
-export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
-
-export const throttleForBulkActionsOrNull = t.union([throttleForBulkActions, t.null]);
-export type ThrottleForBulkActionsOrNull = t.TypeOf<typeof throttleForBulkActionsOrNull>;
-
-export const throttleOrNullOrUndefined = t.union([throttle, t.null, t.undefined]);
-export type ThrottleOrUndefinedOrNull = t.TypeOf<typeof throttleOrNullOrUndefined>;

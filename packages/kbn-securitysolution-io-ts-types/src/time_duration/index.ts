@@ -14,36 +14,32 @@ import { Either } from 'fp-ts/lib/Either';
  *   - A string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time
  *   - in the format {safe_integer}{timeUnit}, e.g. "30s", "1m", "2h", "7d"
  */
-export const TimeDuration = new t.Type<string, string, unknown>(
-  'TimeDuration',
-  t.string.is,
-  (input, context): Either<t.Errors, string> => {
-    if (typeof input === 'string' && input.trim() !== '') {
-      try {
-        const inputLength = input.length;
-        const unit = input.trim().at(-1);
-        const time = parseFloat(input.trim().substring(0, inputLength - 1));
 
-        if (!Number.isInteger(time)) {
+type TimeUnits = 's' | 'm' | 'h' | 'd' | 'w' | 'y';
+export const TimeDuration = ({ allowedUnits }: { allowedUnits: TimeUnits[] }) => {
+  return new t.Type<string, string, unknown>(
+    'TimeDuration',
+    t.string.is,
+    (input, context): Either<t.Errors, string> => {
+      if (typeof input === 'string' && input.trim() !== '') {
+        try {
+          const inputLength = input.length;
+          const time = Number(input.trim().substring(0, inputLength - 1));
+          const unit = input.trim().at(-1);
+          if (time >= 1 && Number.isSafeInteger(time) && allowedUnits.includes(unit as TimeUnits)) {
+            return t.success(input);
+          } else {
+            return t.failure(input, context);
+          }
+        } catch (error) {
           return t.failure(input, context);
         }
-        if (
-          time >= 1 &&
-          Number.isSafeInteger(time) &&
-          (unit === 's' || unit === 'm' || unit === 'h' || unit === 'd')
-        ) {
-          return t.success(input);
-        } else {
-          return t.failure(input, context);
-        }
-      } catch (error) {
+      } else {
         return t.failure(input, context);
       }
-    } else {
-      return t.failure(input, context);
-    }
-  },
-  t.identity
-);
+    },
+    t.identity
+  );
+};
 
 export type TimeDurationC = typeof TimeDuration;
