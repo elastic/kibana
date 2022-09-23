@@ -41,7 +41,7 @@ export const command = {
     ]);
 
     const quiet = args.getBooleanValue('quiet');
-    Bazel.expungeCache(log, { quiet });
-    Bazel.cleanDiskCache(log);
+    await Bazel.expungeCache(log, { quiet });
+    await Bazel.cleanDiskCache(log);
   },
 };

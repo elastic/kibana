@@ -243,9 +243,16 @@ const actionNames: {
     completedText: 'force unenrolled',
     cancelledText: 'force unenrollment',
   },
+  UPDATE_TAGS: {
+    inProgressText: 'Updating tags of',
+    completedText: 'updated tags',
+    cancelledText: 'update tags',
+  },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
+
+const getAction = (type?: string) => actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 
 const inProgressTitleColor = '#0077CC';
 
@@ -271,7 +278,7 @@ const inProgressTitle = (action: ActionStatus) => (
           ? action.nbAgentsActioned
           : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
       agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-      inProgressText: actionNames[action.type ?? 'ACTION'].inProgressText,
+      inProgressText: getAction(action.type).inProgressText,
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
@@ -301,7 +308,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
               ? action.nbAgentsAck
               : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
           agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-          completedText: actionNames[action.type ?? 'ACTION'].completedText,
+          completedText: getAction(action.type).completedText,
         }}
       />
     </EuiText>
@@ -362,7 +369,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           <p>
             <FormattedMessage
               id="xpack.fleet.agentActivityFlyout.failureDescription"
-              defaultMessage=" A problem occured during this operation."
+              defaultMessage=" A problem occurred during this operation."
             />
             &nbsp;
             {inProgressDescription(action.creationTime)}
@@ -379,7 +386,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
             id="xpack.fleet.agentActivityFlyout.cancelledTitle"
             defaultMessage="Agent {cancelledText} cancelled"
             values={{
-              cancelledText: actionNames[action.type ?? 'ACTION'].cancelledText,
+              cancelledText: getAction(action.type).cancelledText,
             }}
           />
         </EuiText>
@@ -405,7 +412,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
             id="xpack.fleet.agentActivityFlyout.expiredTitle"
             defaultMessage="Agent {expiredText} expired"
             values={{
-              expiredText: actionNames[action.type ?? 'ACTION'].cancelledText,
+              expiredText: getAction(action.type).cancelledText,
             }}
           />
         </EuiText>
