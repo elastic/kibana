@@ -266,6 +266,11 @@ const useFetchAlerts = ({
 
   useEffect(() => {
     if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {
+      console.log(`=${new Date()}=============>alertRequest`, JSON.stringify(alertRequest));
+      console.log(
+        `=${new Date()}=============>prevAlertRequest.current`,
+        JSON.stringify(prevAlertRequest.current)
+      );
       fetchAlerts(alertRequest);
     }
   }, [alertRequest, fetchAlerts]);
