@@ -115,7 +115,7 @@ emit("");
 
 A single runtime field can also produce multiple subfields when the type `Composite` is selected. The script editor provides default types that can be customized for each subfields.
 
-Return keyworld and double type subfields. Note that the first argument for `emit` is the name of the subfield.
+Return `keyword` and `double` type subfields. Note that the first argument for `emit` is the name of the subfield.
 
 [source,text]
 ----
