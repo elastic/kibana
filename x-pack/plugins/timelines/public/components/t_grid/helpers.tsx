@@ -249,7 +249,6 @@ export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
     containerElement?.querySelector<HTMLDivElement>(`.${EVENTS_TABLE_CLASS_NAME}`)
   );
 
-
 export const isSelectableView = (timelineId: string): boolean =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage;
 

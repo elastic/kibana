@@ -85,18 +85,18 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             for (const savedField of savedFields) {
               if (fieldName && fieldName !== savedField.name) {
                 // Remove old field from event table when renaming a field
-              removeColumn(fieldName);
+                removeColumn(fieldName);
               }
 
               // Add the saved column field to the table in any case
 
-            upsertColumn(
-              {
-                columnHeaderType: defaultColumnHeaderType,
-                id: savedField.name,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              },
-              0
+              upsertColumn(
+                {
+                  columnHeaderType: defaultColumnHeaderType,
+                  id: savedField.name,
+                  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+                },
+                0
               );
             }
             if (editorActionsRef) {
