@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig } from '@kbn/data-plugin/common';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig, SupportedAggregation } from './types';
 
 interface SchemaConfigParams {
@@ -14,7 +14,7 @@ interface SchemaConfigParams {
   useGeocentroid?: boolean;
 }
 
-export function convertToSchemaConfig(agg: IAggConfig): SchemaConfig {
+export function convertToSchemaConfig(agg: IAggConfig): SchemaConfig<METRIC_TYPES> {
   const aggType = agg.type.name as SupportedAggregation;
   const hasSubAgg = [
     'derivative',
@@ -47,5 +47,5 @@ export function convertToSchemaConfig(agg: IAggConfig): SchemaConfig {
     aggType,
     aggId: agg.id,
     aggParams: agg.params,
-  } as SchemaConfig;
+  } as SchemaConfig<METRIC_TYPES>;
 }

@@ -70,10 +70,11 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     if (!metricAgg) {
       return null;
     }
-    const percentageColumn = getPercentageColumnFormulaColumn(
-      metricAgg as SchemaConfig<METRIC_TYPES>,
-      visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>
-    );
+    const percentageColumn = getPercentageColumnFormulaColumn({
+      agg: metricAgg as SchemaConfig<METRIC_TYPES>,
+      dataView,
+      aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
+    });
     if (!percentageColumn) {
       return null;
     }
