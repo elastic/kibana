@@ -32,7 +32,10 @@ export const TTYPlayerControlsMarkers = ({
   onChange,
   onSeekLine,
 }: Props) => {
-  const progress = useMemo(() => (currentLine / linesLength) * 100, [currentLine, linesLength]);
+  const progress = useMemo(
+    () => (currentLine / (linesLength - 1)) * 100,
+    [currentLine, linesLength]
+  );
 
   const styles = useStyles(progress);
 
@@ -90,7 +93,7 @@ export const TTYPlayerControlsMarkers = ({
           // markers positions are absolute, setting higher z-index on the selected one in case there
           // are severals next to each other
           const markerWrapperPositioning = {
-            left: `${(line / linesLength) * 100}%`,
+            left: `${(line / (linesLength - 1)) * 100}%`,
             zIndex: selected ? 3 : 2,
           };
 

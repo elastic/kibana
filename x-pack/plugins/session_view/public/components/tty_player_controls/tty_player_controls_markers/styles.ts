@@ -85,7 +85,7 @@ export const useStyles = (progress: number) => {
       "input[type='range']::-moz-range-thumb": customThumb,
       '.euiRangeHighlight__progress': {
         backgroundColor: euiVars.euiColorVis0_behindText,
-        width: progress + '%',
+        width: progress + '%!important',
         borderBottomRightRadius: 0,
         borderTopRightRadius: 0,
       },
