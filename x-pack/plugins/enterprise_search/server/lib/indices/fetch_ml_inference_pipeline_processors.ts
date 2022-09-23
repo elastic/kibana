@@ -58,6 +58,7 @@ export const fetchPipelineProcessorInferenceData = async (
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
         pipelineProcessorData.push({
+          isAllocated: false,
           isDeployed: false,
           pipelineName: pipelineProcessorName,
           trainedModelName,
@@ -98,6 +99,7 @@ export const getMlModelConfigsForModelIds = async (
 
     if (trainedModelNames.includes(trainedModelName)) {
       modelConfigs[trainedModelName] = {
+        isAllocated: false,
         isDeployed: false,
         pipelineName: '',
         trainedModelName,
@@ -110,7 +112,12 @@ export const getMlModelConfigsForModelIds = async (
     const trainedModelName = trainedModelStats.model_id;
     if (modelConfigs.hasOwnProperty(trainedModelName)) {
       const isDeployed = trainedModelStats.deployment_stats?.state === 'started';
+      const isAllocated =
+        (trainedModelStats.deployment_stats?.allocation_status?.allocation_count ?? 0) > 0;
       modelConfigs[trainedModelName].isDeployed = isDeployed;
+      modelConfigs[trainedModelName].isAllocated = isAllocated;
+      modelConfigs[trainedModelName].modelState = trainedModelStats.deployment_stats?.state;
+      modelConfigs[trainedModelName].modelStateReason = trainedModelStats.deployment_stats?.reason;
     }
   });
 
@@ -131,11 +138,14 @@ export const fetchAndAddTrainedModelData = async (
     if (!model) {
       return data;
     }
-    const { types, isDeployed } = model;
+    const { types, isDeployed, isAllocated, modelState, modelStateReason } = model;
     return {
       ...data,
       types,
       isDeployed,
+      isAllocated,
+      modelState,
+      modelStateReason,
     };
   });
 };

@@ -7,6 +7,9 @@
 
 export interface InferencePipeline {
   isDeployed: boolean;
+  isAllocated: boolean;
+  modelState?: string;
+  modelStateReason?: string;
   pipelineName: string;
   types: string[];
 }

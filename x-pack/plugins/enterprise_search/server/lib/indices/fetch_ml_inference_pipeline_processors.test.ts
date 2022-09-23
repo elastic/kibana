@@ -169,34 +169,76 @@ const mockGetTrainedModelsData = {
       model_type: 'pytorch',
       tags: [],
     },
+    {
+      inference_config: { text_classification: {} },
+      model_id: 'trained-model-id-3',
+      model_type: 'pytorch',
+      tags: [],
+    },
+    {
+      inference_config: { fill_mask: {} },
+      model_id: 'trained-model-id-4',
+      model_type: 'pytorch',
+      tags: [],
+    },
   ],
 };
 
 const mockGetTrainedModelStats = {
-  count: 1,
+  count: 4,
   trained_model_stats: [
     {
       model_id: 'trained-model-id-1',
     },
     {
       deployment_stats: {
+        allocation_status: {
+          allocation_count: 1,
+        },
         state: 'started',
       },
       model_id: 'trained-model-id-2',
     },
+    {
+      deployment_stats: {
+        allocation_status: {
+          allocation_count: 1,
+        },
+        state: 'failed',
+        reason: 'something is wrong, boom',
+      },
+      model_id: 'trained-model-id-3',
+    },
+    {
+      deployment_stats: {
+        allocation_status: {
+          allocation_count: 1,
+        },
+        state: 'starting',
+      },
+      model_id: 'trained-model-id-4',
+    },
   ],
 };
 
-const trainedModelDataObject = {
+const trainedModelDataObject: Record<string, InferencePipeline> = {
   'trained-model-id-1': {
+    isAllocated: false,
     isDeployed: false,
     pipelineName: 'ml-inference-pipeline-1',
     types: ['lang_ident', 'ner'],
   },
   'trained-model-id-2': {
+    isAllocated: true,
     isDeployed: true,
     pipelineName: 'ml-inference-pipeline-2',
     types: ['pytorch', 'ner'],
+  },
+  'ml-inference-pipeline-3': {
+    isAllocated: false,
+    isDeployed: false,
+    pipelineName: 'ml-inference-pipeline-3',
+    types: ['lang_ident', 'ner'],
   },
 };
 
@@ -256,12 +298,14 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
 
     const expected = [
       {
+        isAllocated: false,
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
         types: [],
       },
       {
+        isAllocated: false,
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
@@ -340,13 +384,17 @@ describe('getMlModelConfigsForModelIds lib function', () => {
 
     const input = {
       'trained-model-id-1': {
+        isAllocated: true,
         isDeployed: true,
+        modelState: 'started',
         pipelineName: '',
         trainedModelName: 'trained-model-id-1',
         types: ['pytorch', 'ner'],
       },
       'trained-model-id-2': {
+        isAllocated: true,
         isDeployed: true,
+        modelState: 'started',
         pipelineName: '',
         trainedModelName: 'trained-model-id-2',
         types: ['pytorch', 'ner'],
@@ -392,31 +440,67 @@ describe('fetchAndAddTrainedModelData lib function', () => {
 
     const pipelines: InferencePipelineData[] = [
       {
+        isAllocated: false,
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
         types: [],
       },
       {
+        isAllocated: false,
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
+        types: [],
+      },
+      {
+        isAllocated: false,
+        isDeployed: false,
+        pipelineName: 'ml-inference-pipeline-3',
+        trainedModelName: 'trained-model-id-3',
+        types: [],
+      },
+      {
+        isAllocated: false,
+        isDeployed: false,
+        pipelineName: 'ml-inference-pipeline-4',
+        trainedModelName: 'trained-model-id-4',
         types: [],
       },
     ];
 
     const expected: InferencePipelineData[] = [
       {
+        isAllocated: false,
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
         types: ['lang_ident', 'ner'],
       },
       {
+        isAllocated: true,
         isDeployed: true,
+        modelState: 'started',
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
         types: ['pytorch', 'ner'],
+      },
+      {
+        isAllocated: true,
+        isDeployed: false,
+        modelState: 'failed',
+        modelStateReason: 'something is wrong, boom',
+        pipelineName: 'ml-inference-pipeline-3',
+        trainedModelName: 'trained-model-id-3',
+        types: ['pytorch', 'text_classification'],
+      },
+      {
+        isAllocated: true,
+        isDeployed: false,
+        modelState: 'starting',
+        pipelineName: 'ml-inference-pipeline-4',
+        trainedModelName: 'trained-model-id-4',
+        types: ['pytorch', 'fill_mask'],
       },
     ];
 
@@ -426,10 +510,10 @@ describe('fetchAndAddTrainedModelData lib function', () => {
     );
 
     expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
-      model_id: 'trained-model-id-1,trained-model-id-2',
+      model_id: 'trained-model-id-1,trained-model-id-2,trained-model-id-3,trained-model-id-4',
     });
     expect(mockClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
-      model_id: 'trained-model-id-1,trained-model-id-2',
+      model_id: 'trained-model-id-1,trained-model-id-2,trained-model-id-3,trained-model-id-4',
     });
     expect(response).toEqual(expected);
   });
@@ -551,11 +635,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
 
       const expected: InferencePipeline[] = [
         trainedModelDataObject['trained-model-id-1'],
-        {
-          isDeployed: false,
-          pipelineName: 'ml-inference-pipeline-3',
-          types: ['lang_ident', 'ner'],
-        },
+        trainedModelDataObject['ml-inference-pipeline-3'],
       ];
 
       const response = await fetchMlInferencePipelineProcessors(
