@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe.only('Observability UI', () => {
+  describe('Observability UI', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await PageObjects.common.navigateToApp('observability');
