@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-module.exports = {
-  presets: ['@kbn/babel-preset/webpack_preset'],
-  plugins: ['@babel/plugin-proposal-class-properties'],
-};
+export {
+  convertKueryToDslFilter,
+  convertKueryToElasticSearchQuery,
+  convertToBuildEsQuery,
+  escapeKuery,
+  escapeQueryValue,
+  combineQueries,
+} from '@kbn/timelines-plugin/public';
