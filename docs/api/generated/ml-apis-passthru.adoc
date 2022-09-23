@@ -1,4 +1,5 @@
 ++++
+<div class="openapi">
   <h2>Access</h2>
     <ol>
       <li>APIKey KeyParamName:ApiKey KeyInQuery:false KeyInHeader:true</li>
@@ -182,5 +183,5 @@
       <div class="param">success (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> The success or failure of the synchronization. </div>
     </div>  <!-- field-items -->
   </div>
-  </body>
+</div>
 ++++
