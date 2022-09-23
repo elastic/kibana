@@ -8,10 +8,11 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
-import { PercentileRanksParams } from '../..';
+import { isFieldValid, PercentileRanksParams } from '../..';
 import { getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
 import { PercentileRanksColumn, CommonColumnConverterArgs } from './types';
+import { SUPPORTED_METRICS } from './supported_metrics';
 
 export const convertToPercentileRankParams = (value: number): PercentileRanksParams => ({
   value: Number(value),
@@ -68,7 +69,7 @@ export const convertToPercentileRankColumn = (
   }
 
   const field = dataView.getFieldByName(fieldName);
-  if (!field) {
+  if (!isFieldValid(field, SUPPORTED_METRICS[agg.aggType])) {
     return null;
   }
 

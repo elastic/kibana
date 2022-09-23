@@ -23,6 +23,7 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
     getPercentageColumnFormulaColumn: jest.fn(() => mockGetPercentageColumnFormulaColumn()),
   }),
   getVisSchemas: jest.fn(() => mockGetVisSchemas()),
+  getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
 }));
 
 jest.mock('./configurations', () => ({

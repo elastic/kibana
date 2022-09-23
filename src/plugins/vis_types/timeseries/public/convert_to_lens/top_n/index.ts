@@ -48,7 +48,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       return null;
     }
 
-    const { indexPatternId, indexPattern } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -57,6 +57,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       dataViews
     );
 
+    if (!datasourceInfo) {
+      return null;
+    }
+
+    const { indexPatternId, indexPattern } = datasourceInfo;
     const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
     // handle multiple metrics
@@ -80,6 +85,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   }
 
   const configLayers = await getLayers(extendedLayers, model, dataViews);
+  if (configLayers === null) {
+    return null;
+  }
+
   const layers = Object.values(excludeMetaFromLayers(extendedLayers));
   return {
     type: 'lnsXY',

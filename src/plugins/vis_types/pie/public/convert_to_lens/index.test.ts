@@ -20,6 +20,7 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
   convertToLensModule: Promise.resolve({
     getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
   }),
+  getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
 }));
 
 jest.mock('./configurations', () => ({

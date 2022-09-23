@@ -7,7 +7,10 @@
  */
 
 import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
-import { convertToLensModule } from '@kbn/visualizations-plugin/public';
+import {
+  convertToLensModule,
+  getDataViewByIndexPatternId,
+} from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
@@ -34,14 +37,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
   }
 
   const dataViews = getDataViewsStart();
-  let dataView;
-  try {
-    dataView = vis.data.indexPattern?.id
-      ? await dataViews.get(vis.data.indexPattern.id)
-      : await dataViews.getDefault();
-  } catch (err) {
-    return null;
-  }
+  const dataView = await getDataViewByIndexPatternId(vis.data.indexPattern?.id, dataViews);
 
   if (!dataView) {
     return null;
