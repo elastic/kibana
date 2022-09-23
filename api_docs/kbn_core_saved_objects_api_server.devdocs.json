@@ -446,6 +446,97 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.ISavedObjectsRepository.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDeletes multiple documents at once"
+            ],
+            "signature": [
+              "(objects: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteObject",
+                "text": "SavedObjectsBulkDeleteObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteOptions",
+                "text": "SavedObjectsBulkDeleteOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteResponse",
+                "text": "SavedObjectsBulkDeleteResponse"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id and type"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsBulkDeleteObject",
+                    "text": "SavedObjectsBulkDeleteObject"
+                  },
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsBulkDeleteOptions",
+                    "text": "SavedObjectsBulkDeleteOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "- { statuses: [{ id, type, success, error: { message } }] }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.ISavedObjectsRepository.deleteByNamespace",
             "type": "Function",
             "tags": [],
@@ -2133,6 +2224,215 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsBulkDeleteObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteObject",
+        "description": [
+          "\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsBulkDeleteOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsBulkDeleteOptions",
+            "text": "SavedObjectsBulkDeleteOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "The Elasticsearch Refresh setting for this operation"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteOptions.force",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "force",
+            "description": [
+              "\nForce deletion of all objects that exists in multiple namespaces, applied to all objects."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsBulkDeleteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteResponse",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteResponse.statuses",
+            "type": "Array",
+            "tags": [],
+            "label": "statuses",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteStatus",
+                "text": "SavedObjectsBulkDeleteStatus"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsBulkDeleteStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteStatus",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteStatus.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteStatus.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteStatus.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [
+              "The status of deleting the object: true for deleted, false for error"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkDeleteStatus.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "Reason the object could not be deleted (success is false)"
+            ],
+            "signature": [
+              "SavedObjectError",
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-server.SavedObjectsBulkGetObject",
         "type": "Interface",
         "tags": [],
@@ -2928,6 +3228,93 @@
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
                     "section": "def-server.SavedObjectsDeleteOptions",
                     "text": "SavedObjectsDeleteOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsClientContract.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDeletes multiple SavedObjects batched together as a single request\n"
+            ],
+            "signature": [
+              "(objects: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteObject",
+                "text": "SavedObjectsBulkDeleteObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteOptions",
+                "text": "SavedObjectsBulkDeleteOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteResponse",
+                "text": "SavedObjectsBulkDeleteResponse"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsBulkDeleteObject",
+                    "text": "SavedObjectsBulkDeleteObject"
+                  },
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsBulkDeleteOptions",
+                    "text": "SavedObjectsBulkDeleteOptions"
                   },
                   " | undefined"
                 ],

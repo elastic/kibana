@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_COLDSTART,
   METRICSET_NAME,
@@ -20,13 +21,14 @@ const chartBase: ChartBase = {
     defaultMessage: 'Cold start',
   }),
   key: 'cold_start_count',
-  type: 'linemark',
-  yUnit: 'number',
+  type: 'bar',
+  yUnit: 'integer',
   series: {
     coldStart: {
       title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
         defaultMessage: 'Cold start',
       }),
+      color: theme.euiColorVis5,
     },
   },
 };

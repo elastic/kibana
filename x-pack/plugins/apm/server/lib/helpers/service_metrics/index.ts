@@ -8,23 +8,22 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getSearchAggregatedServiceMetrics({
-  config,
+  serviceMetricsEnabled,
   start,
   end,
   apmEventClient,
   kuery,
 }: {
-  config: APMConfig;
+  serviceMetricsEnabled: boolean;
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
   kuery: string;
 }): Promise<boolean> {
-  if (config.searchAggregatedServiceMetrics) {
+  if (serviceMetricsEnabled) {
     return getHasAggregatedServicesMetrics({
       start,
       end,

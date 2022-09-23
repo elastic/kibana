@@ -13,6 +13,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   MonitorFields,
@@ -153,11 +154,13 @@ export const syncEditedMonitor = async ({
       monitorWithRevision
     );
 
-    const editSyncPromise = syntheticsMonitorClient.editMonitor(
-      normalizedMonitor as MonitorFields,
-      previousMonitor.id,
+    const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
+
+    const editSyncPromise = syntheticsMonitorClient.editMonitors(
+      [{ monitor: normalizedMonitor as MonitorFields, id: previousMonitor.id, previousMonitor }],
       request,
       savedObjectsClient,
+      allPrivateLocations,
       spaceId
     );
 

@@ -14,7 +14,7 @@ import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType, HostsType } from '../../../../hosts/store/model';
 import { getHostRiskScoreColumns } from './columns';
-import { LastUpdatedAt } from '../../detection_response/utils';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useHostRiskScore, useHostRiskScoreKpi } from '../../../../risk_score/containers';
 

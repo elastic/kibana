@@ -11,11 +11,13 @@ import { APMConfig } from '../..';
 
 export async function getServiceInventorySearchSource({
   config,
+  serviceMetricsEnabled,
   apmEventClient,
   start,
   end,
   kuery,
 }: {
+  serviceMetricsEnabled: boolean;
   config: APMConfig;
   apmEventClient: APMEventClient;
   start: number;
@@ -26,7 +28,6 @@ export async function getServiceInventorySearchSource({
   searchAggregatedServiceMetrics: boolean;
 }> {
   const commonProps = {
-    config,
     apmEventClient,
     kuery,
     start,
@@ -34,8 +35,11 @@ export async function getServiceInventorySearchSource({
   };
   const [searchAggregatedTransactions, searchAggregatedServiceMetrics] =
     await Promise.all([
-      getSearchAggregatedTransactions(commonProps),
-      getSearchAggregatedServiceMetrics(commonProps),
+      getSearchAggregatedTransactions({ ...commonProps, config }),
+      getSearchAggregatedServiceMetrics({
+        ...commonProps,
+        serviceMetricsEnabled,
+      }),
     ]);
 
   return {

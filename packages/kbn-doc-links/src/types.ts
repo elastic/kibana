@@ -331,6 +331,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsCommandReference: string;
   }>;
   readonly alerting: Record<string, string>;
   readonly maps: Readonly<{

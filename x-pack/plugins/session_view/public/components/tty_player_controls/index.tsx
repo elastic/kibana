@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
+  EuiButtonIconProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
 import { ProcessStartMarker, ProcessEvent } from '../../../common/types/process_tree';
@@ -53,6 +54,13 @@ export const TTYPlayerControls = ({
   textSizer,
 }: TTYPlayerControlsDeps) => {
   const styles = useStyles();
+
+  const commonButtonProps: Partial<EuiButtonIconProps> = {
+    display: 'empty',
+    size: 's',
+    color: 'ghost',
+    css: styles.controlButton,
+  };
 
   const onLineChange = useCallback(
     (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
@@ -111,65 +119,55 @@ export const TTYPlayerControls = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_START}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsStart"
               iconType="arrowStart"
-              display="empty"
-              size="m"
               aria-label={TTY_START}
               onClick={seekToStart}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_PREVIOUS}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsPrevious"
               iconType="arrowLeft"
-              display="empty"
-              size="m"
               aria-label={TTY_PREVIOUS}
               onClick={seekToPrevProcess}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={isPlaying ? TTY_PAUSE : TTY_PLAY}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsPlay"
               iconType={isPlaying ? 'pause' : 'playFilled'}
-              display="empty"
-              size="m"
               aria-label={isPlaying ? TTY_PAUSE : TTY_PLAY}
               onClick={onTogglePlayback}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_NEXT}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsNext"
               iconType="arrowRight"
-              display="empty"
-              size="m"
               aria-label={TTY_NEXT}
               onClick={seekToNextProcess}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_END}>
             <EuiButtonIcon
-              css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsEnd"
               iconType="arrowEnd"
-              display="empty"
-              size="m"
               aria-label={TTY_END}
               onClick={seekToEnd}
+              {...commonButtonProps}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -179,6 +177,7 @@ export const TTYPlayerControls = ({
             linesLength={linesLength}
             currentLine={currentLine}
             onChange={onLineChange}
+            onSeekLine={onSeekLine}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -188,6 +187,7 @@ export const TTYPlayerControls = ({
             onClick={handleViewInSession}
             iconType="arrowRight"
             aria-label={VIEW_IN_SESSION}
+            color="ghost"
           >
             {VIEW_IN_SESSION}
           </EuiButtonEmpty>

@@ -19,23 +19,24 @@ const pixelsToPercent = (containerHeight: number, pixels: number) =>
 export const DiscoverPanelsResizable = ({
   className,
   resizeRef,
-  initialTopPanelHeight,
+  topPanelHeight,
   minTopPanelHeight,
   minMainPanelHeight,
   topPanel,
   mainPanel,
+  onTopPanelHeightChange,
 }: {
   className?: string;
   resizeRef: RefObject<HTMLDivElement>;
-  initialTopPanelHeight: number;
+  topPanelHeight: number;
   minTopPanelHeight: number;
   minMainPanelHeight: number;
   topPanel: ReactElement;
   mainPanel: ReactElement;
+  onTopPanelHeightChange: (height: number) => void;
 }) => {
   const topPanelId = useGeneratedHtmlId({ prefix: 'topPanel' });
   const { height: containerHeight } = useResizeObserver(resizeRef.current);
-  const [topPanelHeight, setTopPanelHeight] = useState(initialTopPanelHeight);
   const [panelSizes, setPanelSizes] = useState({ topPanelSize: 0, mainPanelSize: 0 });
 
   // EuiResizableContainer doesn't work properly when used with react-reverse-portal and
@@ -69,9 +70,13 @@ export const DiscoverPanelsResizable = ({
   // the effect below to update the panel sizes.
   const onPanelSizeChange = useCallback(
     ({ [topPanelId]: topPanelSize }: { [key: string]: number }) => {
-      setTopPanelHeight(percentToPixels(containerHeight, topPanelSize));
+      const newTopPanelHeight = percentToPixels(containerHeight, topPanelSize);
+
+      if (newTopPanelHeight !== topPanelHeight) {
+        onTopPanelHeightChange(newTopPanelHeight);
+      }
     },
-    [containerHeight, topPanelId]
+    [containerHeight, onTopPanelHeightChange, topPanelHeight, topPanelId]
   );
 
   // This effect will update the panel sizes based on the top panel height whenever
