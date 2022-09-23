@@ -21,7 +21,12 @@ export const PRODUCT_ORIGIN_HEADER = 'x-elastic-product-origin';
 /**
  * @internal
  */
-export const RESERVED_HEADERS = deepFreeze([PRODUCT_ORIGIN_HEADER]);
+export const USER_AGENT_HEADER = 'user-agent';
+
+/**
+ * @internal
+ */
+export const RESERVED_HEADERS = deepFreeze([PRODUCT_ORIGIN_HEADER, USER_AGENT_HEADER]);
 
 /**
  * @internal
@@ -31,3 +36,13 @@ export const DEFAULT_HEADERS = deepFreeze({
   // access system indices using the standard ES APIs.
   [PRODUCT_ORIGIN_HEADER]: 'kibana',
 });
+
+/**
+ * @internal
+ */
+export function getDefaultHeaders(kibanaVersion: string) {
+  return {
+    ...DEFAULT_HEADERS,
+    [USER_AGENT_HEADER]: `Kibana/${kibanaVersion}`,
+  };
+}

@@ -9,7 +9,7 @@
 import { duration } from 'moment';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
-import { DEFAULT_HEADERS } from './headers';
+import { getDefaultHeaders } from './headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -27,15 +27,16 @@ const createConfig = (
   };
 };
 
+const kibanaVersion = '1.0.0';
+const defaultHeaders = getDefaultHeaders(kibanaVersion);
+
 describe('parseClientOptions', () => {
   it('includes headers designing the HTTP request as originating from Kibana by default', () => {
     const config = createConfig({});
 
-    expect(parseClientOptions(config, false)).toEqual(
+    expect(parseClientOptions(config, false, kibanaVersion)).toEqual(
       expect.objectContaining({
-        headers: {
-          ...DEFAULT_HEADERS,
-        },
+        headers: defaultHeaders,
       })
     );
   });
@@ -43,7 +44,7 @@ describe('parseClientOptions', () => {
   it('specifies `headers.maxSockets` Infinity and `keepAlive` true by default', () => {
     const config = createConfig({});
 
-    expect(parseClientOptions(config, false)).toEqual(
+    expect(parseClientOptions(config, false, kibanaVersion)).toEqual(
       expect.objectContaining({
         agent: {
           keepAlive: true,
@@ -62,10 +63,10 @@ describe('parseClientOptions', () => {
         },
       });
 
-      expect(parseClientOptions(config, false)).toEqual(
+      expect(parseClientOptions(config, false, kibanaVersion)).toEqual(
         expect.objectContaining({
           headers: {
-            ...DEFAULT_HEADERS,
+            ...defaultHeaders,
             foo: 'bar',
             hello: 'dolly',
           },
@@ -74,16 +75,20 @@ describe('parseClientOptions', () => {
     });
 
     it('`customHeaders` take precedence to default kibana headers', () => {
-      const customHeader = {
-        [Object.keys(DEFAULT_HEADERS)[0]]: 'foo',
-      };
+      const customHeader: Record<string, string> = {};
+      for (const header in defaultHeaders) {
+        if (defaultHeaders.hasOwnProperty(header)) {
+          customHeader[header] = 'foo';
+        }
+      }
+
       const config = createConfig({
         customHeaders: {
           ...customHeader,
         },
       });
 
-      expect(parseClientOptions(config, false)).toEqual(
+      expect(parseClientOptions(config, false, kibanaVersion)).toEqual(
         expect.objectContaining({
           headers: {
             ...customHeader,
@@ -94,41 +99,57 @@ describe('parseClientOptions', () => {
 
     describe('`keepAlive` option', () => {
       it('`keepAlive` is true', () => {
-        const options = parseClientOptions(createConfig({ keepAlive: true }), false);
+        const options = parseClientOptions(createConfig({ keepAlive: true }), false, kibanaVersion);
         expect(options.agent).toHaveProperty('keepAlive', true);
       });
 
       it('`keepAlive` is false', () => {
-        const options = parseClientOptions(createConfig({ keepAlive: false }), false);
+        const options = parseClientOptions(
+          createConfig({ keepAlive: false }),
+          false,
+          kibanaVersion
+        );
         expect(options.agent).toHaveProperty('keepAlive', false);
       });
 
       it('`keepAlive` is undefined', () => {
-        const options = parseClientOptions(createConfig({}), false);
+        const options = parseClientOptions(createConfig({}), false, kibanaVersion);
         expect(options.agent).toHaveProperty('keepAlive', true);
       });
     });
 
     describe('`maxSockets` option', () => {
       it('uses the specified config value', () => {
-        const options = parseClientOptions(createConfig({ maxSockets: 1024 }), false);
+        const options = parseClientOptions(
+          createConfig({ maxSockets: 1024 }),
+          false,
+          kibanaVersion
+        );
         expect(options.agent).toHaveProperty('maxSockets', 1024);
       });
 
       it('defaults to `Infinity` if not specified by the config', () => {
-        const options = parseClientOptions(createConfig({}), false);
+        const options = parseClientOptions(createConfig({}), false, kibanaVersion);
         expect(options.agent).toHaveProperty('maxSockets', Infinity);
       });
     });
 
     describe('`compression` option', () => {
       it('`compression` is true', () => {
-        const options = parseClientOptions(createConfig({ compression: true }), false);
+        const options = parseClientOptions(
+          createConfig({ compression: true }),
+          false,
+          kibanaVersion
+        );
         expect(options.compression).toBe(true);
       });
 
       it('`compression` is false', () => {
-        const options = parseClientOptions(createConfig({ compression: false }), false);
+        const options = parseClientOptions(
+          createConfig({ compression: false }),
+          false,
+          kibanaVersion
+        );
         expect(options.compression).toBe(false);
       });
     });
@@ -139,7 +160,8 @@ describe('parseClientOptions', () => {
           createConfig({
             sniffOnStart: true,
           }),
-          false
+          false,
+          kibanaVersion
         ).sniffOnStart
       ).toEqual(true);
 
@@ -148,7 +170,8 @@ describe('parseClientOptions', () => {
           createConfig({
             sniffOnStart: false,
           }),
-          false
+          false,
+          kibanaVersion
         ).sniffOnStart
       ).toEqual(false);
     });
@@ -158,7 +181,8 @@ describe('parseClientOptions', () => {
           createConfig({
             sniffOnConnectionFault: true,
           }),
-          false
+          false,
+          kibanaVersion
         ).sniffOnConnectionFault
       ).toEqual(true);
 
@@ -167,7 +191,8 @@ describe('parseClientOptions', () => {
           createConfig({
             sniffOnConnectionFault: false,
           }),
-          false
+          false,
+          kibanaVersion
         ).sniffOnConnectionFault
       ).toEqual(false);
     });
@@ -177,7 +202,8 @@ describe('parseClientOptions', () => {
           createConfig({
             sniffInterval: false,
           }),
-          false
+          false,
+          kibanaVersion
         ).sniffInterval
       ).toEqual(false);
 
@@ -186,7 +212,8 @@ describe('parseClientOptions', () => {
           createConfig({
             sniffInterval: duration(100, 'ms'),
           }),
-          false
+          false,
+          kibanaVersion
         ).sniffInterval
       ).toEqual(100);
     });
@@ -196,7 +223,8 @@ describe('parseClientOptions', () => {
         createConfig({
           hosts: ['http://node-A:9200', 'http://node-B', 'https://node-C'],
         }),
-        false
+        false,
+        kibanaVersion
       );
 
       expect(options.nodes).toMatchInlineSnapshot(`
@@ -215,7 +243,11 @@ describe('parseClientOptions', () => {
     });
 
     it('`caFingerprint` option', () => {
-      const options = parseClientOptions(createConfig({ caFingerprint: 'ab:cd:ef' }), false);
+      const options = parseClientOptions(
+        createConfig({ caFingerprint: 'ab:cd:ef' }),
+        false,
+        kibanaVersion
+      );
 
       expect(options.caFingerprint).toBe('ab:cd:ef');
     });
@@ -229,7 +261,8 @@ describe('parseClientOptions', () => {
             createConfig({
               username: 'user',
             }),
-            false
+            false,
+            kibanaVersion
           ).auth
         ).toBeUndefined();
 
@@ -238,7 +271,8 @@ describe('parseClientOptions', () => {
             createConfig({
               password: 'pass',
             }),
-            false
+            false,
+            kibanaVersion
           ).auth
         ).toBeUndefined();
 
@@ -248,7 +282,8 @@ describe('parseClientOptions', () => {
               username: 'user',
               password: 'pass',
             }),
-            false
+            false,
+            kibanaVersion
           )
         ).toEqual(
           expect.objectContaining({
@@ -266,7 +301,8 @@ describe('parseClientOptions', () => {
             createConfig({
               serviceAccountToken: 'ABC123',
             }),
-            false
+            false,
+            kibanaVersion
           )
         ).toEqual(
           expect.objectContaining({
@@ -283,7 +319,8 @@ describe('parseClientOptions', () => {
             serviceAccountToken: 'ABC123',
             hosts: ['http://node-A:9200'],
           }),
-          true
+          true,
+          kibanaVersion
         );
         expect(options.nodes).toMatchInlineSnapshot(`
                   Array [
@@ -302,7 +339,8 @@ describe('parseClientOptions', () => {
               username: 'user',
               password: 'pass',
             }),
-            true
+            true,
+            kibanaVersion
           ).auth
         ).toBeUndefined();
       });
@@ -314,7 +352,8 @@ describe('parseClientOptions', () => {
             password: 'pass',
             hosts: ['http://node-A:9200'],
           }),
-          true
+          true,
+          kibanaVersion
         );
         expect(options.nodes).toMatchInlineSnapshot(`
                   Array [
@@ -331,7 +370,8 @@ describe('parseClientOptions', () => {
             createConfig({
               serviceAccountToken: 'ABC123',
             }),
-            true
+            true,
+            kibanaVersion
           ).headers
         ).not.toHaveProperty('authorization');
       });
@@ -342,7 +382,8 @@ describe('parseClientOptions', () => {
             serviceAccountToken: 'ABC123',
             hosts: ['http://node-A:9200'],
           }),
-          true
+          true,
+          kibanaVersion
         );
         expect(options.nodes).toMatchInlineSnapshot(`
                   Array [
@@ -357,8 +398,8 @@ describe('parseClientOptions', () => {
 
   describe('tls config', () => {
     it('does not generate tls option is ssl config is not set', () => {
-      expect(parseClientOptions(createConfig({}), false).tls).toBeUndefined();
-      expect(parseClientOptions(createConfig({}), true).tls).toBeUndefined();
+      expect(parseClientOptions(createConfig({}), false, kibanaVersion).tls).toBeUndefined();
+      expect(parseClientOptions(createConfig({}), true, kibanaVersion).tls).toBeUndefined();
     });
 
     it('handles the `certificateAuthorities` option', () => {
@@ -367,7 +408,8 @@ describe('parseClientOptions', () => {
           createConfig({
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
-          false
+          false,
+          kibanaVersion
         ).tls!.ca
       ).toEqual(['content-of-ca-path']);
       expect(
@@ -375,7 +417,8 @@ describe('parseClientOptions', () => {
           createConfig({
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
-          true
+          true,
+          kibanaVersion
         ).tls!.ca
       ).toEqual(['content-of-ca-path']);
     });
@@ -389,7 +432,8 @@ describe('parseClientOptions', () => {
                 verificationMode: 'none',
               },
             }),
-            false
+            false,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -406,7 +450,8 @@ describe('parseClientOptions', () => {
                 verificationMode: 'certificate',
               },
             }),
-            false
+            false,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -424,7 +469,8 @@ describe('parseClientOptions', () => {
                 verificationMode: 'full',
               },
             }),
-            false
+            false,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -442,7 +488,8 @@ describe('parseClientOptions', () => {
                   verificationMode: 'unknown' as any,
                 },
               }),
-              false
+              false,
+              kibanaVersion
             ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
       });
@@ -455,7 +502,8 @@ describe('parseClientOptions', () => {
                   verificationMode: undefined as any,
                 },
               }),
-              false
+              false,
+              kibanaVersion
             ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
       });
@@ -472,7 +520,8 @@ describe('parseClientOptions', () => {
                 keyPassphrase: 'passphrase',
               },
             }),
-            false
+            false,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -492,7 +541,8 @@ describe('parseClientOptions', () => {
                 keyPassphrase: 'passphrase',
               },
             }),
-            false
+            false,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -513,7 +563,8 @@ describe('parseClientOptions', () => {
                 keyPassphrase: 'passphrase',
               },
             }),
-            false
+            false,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -537,7 +588,8 @@ describe('parseClientOptions', () => {
                 keyPassphrase: 'passphrase',
               },
             }),
-            true
+            true,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
@@ -557,7 +609,8 @@ describe('parseClientOptions', () => {
                 alwaysPresentCertificate: true,
               },
             }),
-            true
+            true,
+            kibanaVersion
           ).tls
         ).toMatchInlineSnapshot(`
         Object {
