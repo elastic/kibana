@@ -82,7 +82,11 @@ export class UserProfileService {
     try {
       this.validateInitialization();
 
-      const licensingService = new LicensingService(this.options.licensingPluginStart.license$);
+      const licensingService = new LicensingService(
+        this.options.licensingPluginStart.license$,
+        this.options.licensingPluginStart.featureUsage.notifyUsage
+      );
+
       const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
       if (!hasPlatinumLicenseOrGreater) {
