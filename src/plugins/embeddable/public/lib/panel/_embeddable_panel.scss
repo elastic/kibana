@@ -29,6 +29,13 @@
   .embPanel__content--fullWidth {
     width: 100%;
   }
+
+  .embPanel__content--error {
+    &:hover {
+      box-shadow: none;
+      transform: none;
+    }
+  }
 }
 
 // HEADER
