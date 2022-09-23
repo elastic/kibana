@@ -2,7 +2,133 @@
   "id": "files",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "files",
+        "id": "def-public.FilesContext",
+        "type": "Function",
+        "tags": [],
+        "label": "FilesContext",
+        "description": [],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/files/public/components/context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "path": "x-pack/plugins/files/public/components/context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Image",
+        "type": "Function",
+        "tags": [
+          "note"
+        ],
+        "label": "Image",
+        "description": [
+          "\nA viewport-aware component that displays an image. This component is a very\nthin wrapper around the img tag.\n"
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " & React.RefAttributes<HTMLImageElement>>"
+        ],
+        "path": "x-pack/plugins/files/public/components/image/image.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Image.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.UploadFile",
+        "type": "Function",
+        "tags": [],
+        "label": "UploadFile",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<string>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/files/public/components/upload_file/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.UploadFile.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "files",
@@ -62,7 +188,7 @@
                   "- create file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -97,7 +223,7 @@
                   "- delete file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -140,7 +266,7 @@
                   "- get file by ID args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -191,7 +317,7 @@
                   "- list files args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -234,7 +360,7 @@
                   "- update file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -252,7 +378,7 @@
               "\nStream the contents of the file to Kibana server for storage.\n"
             ],
             "signature": [
-              "(args: { body: unknown; } & { id: string; } & { kind: string; }) => Promise<{ ok: true; size: number; }>"
+              "(args: { body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }) => Promise<{ ok: true; size: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -269,7 +395,7 @@
                   "- upload file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -304,7 +430,7 @@
                   "- download file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -398,7 +524,7 @@
                   "- File share arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -433,7 +559,7 @@
                   "- File unshare arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -476,7 +602,7 @@
                   "- Get file share arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -527,7 +653,7 @@
                   "- Get file share arguments"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; }"
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
@@ -612,6 +738,270 @@
                   "string"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " extends React.ImgHTMLAttributes<HTMLImageElement>"
+        ],
+        "path": "x-pack/plugins/files/public/components/image/image.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.src",
+            "type": "string",
+            "tags": [],
+            "label": "src",
+            "description": [],
+            "path": "x-pack/plugins/files/public/components/image/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.alt",
+            "type": "string",
+            "tags": [],
+            "label": "alt",
+            "description": [],
+            "path": "x-pack/plugins/files/public/components/image/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onFirstVisible",
+            "type": "Function",
+            "tags": [],
+            "label": "onFirstVisible",
+            "description": [
+              "\nEmits when the image first becomes visible"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/image/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nUploadFile component props"
+        ],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<Kind>"
+        ],
+        "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.kind",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "kind",
+            "description": [
+              "\nA file kind that should be registered during plugin startup. See {@link FileServiceStart}."
+            ],
+            "signature": [
+              "Kind"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA files client that will be used process uploads."
+            ],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.FilesClient",
+                "text": "FilesClient"
+              }
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.allowClear",
+            "type": "CompoundType",
+            "tags": [
+              "note"
+            ],
+            "label": "allowClear",
+            "description": [
+              "\nAllow users to clear a file after uploading.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.immediate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "immediate",
+            "description": [
+              "\nStart uploading the file as soon as it is provided\nby the user."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nMetadata that you want to associate with any uploaded files"
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.allowRepeatedUploads",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "allowRepeatedUploads",
+            "description": [
+              "\nWhether this component should display a \"done\" state after processing an\nupload or return to the initial state to allow for another upload.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onDone",
+            "type": "Function",
+            "tags": [],
+            "label": "onDone",
+            "description": [
+              "\nCalled when the an upload process fully completes"
+            ],
+            "signature": [
+              "(files: UploadedFile[]) => void"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onDone.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "files",
+                "description": [],
+                "signature": [
+                  "UploadedFile[]"
+                ],
+                "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.Props.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [
+              "\nCalled when an error occurs during upload"
+            ],
+            "signature": [
+              "((e: Error) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.Props.onError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "x-pack/plugins/files/public/components/upload_file/upload_file.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -762,7 +1152,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>; }>; upload: (arg: Omit<{ body: unknown; } & { id: string; } & { kind: string; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<{ id: string; fileName?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
+          "<unknown>; }>; upload: (arg: Omit<{ body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<{ id: string; fileName?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -835,6 +1225,98 @@
       }
     ],
     "objects": [],
+    "setup": {
+      "parentPluginId": "files",
+      "id": "def-public.FilesSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "FilesSetup",
+      "description": [
+        "\nPublic setup-phase contract"
+      ],
+      "path": "x-pack/plugins/files/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "files",
+          "id": "def-public.FilesSetup.filesClientFactory",
+          "type": "Object",
+          "tags": [
+            "track-adoption"
+          ],
+          "label": "filesClientFactory",
+          "description": [
+            "\nA factory for creating an {@link FilesClient} instance. This requires a\nregistered {@link FileKind}.\n"
+          ],
+          "signature": [
+            {
+              "pluginId": "files",
+              "scope": "public",
+              "docId": "kibFilesPluginApi",
+              "section": "def-public.FilesClientFactory",
+              "text": "FilesClientFactory"
+            }
+          ],
+          "path": "x-pack/plugins/files/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": true,
+          "references": []
+        },
+        {
+          "parentPluginId": "files",
+          "id": "def-public.FilesSetup.registerFileKind",
+          "type": "Function",
+          "tags": [],
+          "label": "registerFileKind",
+          "description": [
+            "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
+          ],
+          "signature": [
+            "(fileKind: ",
+            {
+              "pluginId": "files",
+              "scope": "common",
+              "docId": "kibFilesPluginApi",
+              "section": "def-common.FileKind",
+              "text": "FileKind"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/plugins/files/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "files",
+              "id": "def-public.FilesSetup.registerFileKind.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "fileKind",
+              "description": [
+                "- the file kind to register"
+              ],
+              "signature": [
+                {
+                  "pluginId": "files",
+                  "scope": "common",
+                  "docId": "kibFilesPluginApi",
+                  "section": "def-common.FileKind",
+                  "text": "FileKind"
+                }
+              ],
+              "path": "x-pack/plugins/files/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
     "start": {
       "parentPluginId": "files",
       "id": "def-public.FilesStart",
@@ -843,13 +1325,15 @@
       "label": "FilesStart",
       "description": [],
       "signature": [
+        "{ filesClientFactory: ",
         {
           "pluginId": "files",
           "scope": "public",
           "docId": "kibFilesPluginApi",
-          "section": "def-public.FilesSetup",
-          "text": "FilesSetup"
-        }
+          "section": "def-public.FilesClientFactory",
+          "text": "FilesClientFactory"
+        },
+        "; }"
       ],
       "path": "x-pack/plugins/files/public/plugin.ts",
       "deprecated": false,
@@ -5015,7 +5499,9 @@
           "parentPluginId": "files",
           "id": "def-server.FilesSetup.registerFileKind",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "registerFileKind",
           "description": [
             "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
@@ -5033,7 +5519,8 @@
           ],
           "path": "x-pack/plugins/files/server/types.ts",
           "deprecated": false,
-          "trackAdoption": false,
+          "trackAdoption": true,
+          "references": [],
           "children": [
             {
               "parentPluginId": "files",
@@ -5082,10 +5569,12 @@
           "parentPluginId": "files",
           "id": "def-server.FilesStart.fileServiceFactory",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "fileServiceFactory",
           "description": [
-            "\nCreate an instance of {@link FileServiceStart}."
+            "\nCreate an instance of {@link FileServiceStart}.\n"
           ],
           "signature": [
             {
@@ -5098,7 +5587,8 @@
           ],
           "path": "x-pack/plugins/files/server/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": true,
+          "references": []
         }
       ],
       "lifecycle": "start",

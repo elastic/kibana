@@ -65,9 +65,14 @@ const existsSchema = s.object({
 // For more details see how the types are defined in the elasticsearch javascript client:
 // https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
 const boolSchema = s.object({
-  bool: s.object({
-    must_not: s.oneOf([termSchema]),
-  }),
+  bool: s.oneOf([
+    s.object({
+      must_not: s.oneOf([termSchema, existsSchema]),
+    }),
+    s.object({
+      filter: s.oneOf([termSchema, existsSchema]),
+    }),
+  ]),
 });
 
 const orderSchema = s.oneOf([
