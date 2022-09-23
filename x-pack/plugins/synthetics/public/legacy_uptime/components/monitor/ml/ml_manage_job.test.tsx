@@ -43,7 +43,7 @@ describe('Manage ML Job', () => {
     });
 
     it('does not display an informative tooltip', async () => {
-      const { getByText, findByText } = render(
+      const { getByText, queryByText } = render(
         <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
         {
           state: makeMlCapabilities(),
@@ -57,10 +57,9 @@ describe('Manage ML Job', () => {
       await waitForEuiPopoverOpen();
 
       userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
-
-      await expect(() =>
-        findByText('You need write access to Uptime to create anomaly alerts.')
-      ).rejects.toEqual(expect.anything());
+      expect(
+        await queryByText('You need write access to Uptime to create anomaly alerts.')
+      ).toBeNull();
     });
   });
 
