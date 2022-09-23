@@ -65,6 +65,7 @@ export interface HeaderPageProps extends HeaderProps {
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
+  rightSideItems?: React.ReactNode[];
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -105,6 +106,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   children,
   draggableArguments,
   isLoading,
+  rightSideItems,
   subtitle,
   subtitle2,
   title,

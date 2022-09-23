@@ -43,6 +43,7 @@ import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
+import { useOpenAlertDetailsAction } from './use_open_alert_details';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -50,18 +51,17 @@ interface AlertContextMenuProps {
   columnValues: string;
   disabled: boolean;
   ecsRowData: Ecs;
-  refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
   scopeId: string;
 }
 
+// eslint-disable-next-line complexity
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
   columnValues,
   disabled,
   ecsRowData,
-  refetch,
   onRuleChange,
   scopeId,
   globalQuery,
@@ -209,6 +209,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
 
+  const { alertDetailsActionItems } = useOpenAlertDetailsAction({
+    alertId,
+    closePopover,
+    ruleId,
+  });
+
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -217,6 +223,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...statusActionItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
+            ...alertDetailsActionItems,
           ]
         : [
             ...addToCaseActionItems,
@@ -231,6 +238,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       exceptionActionItems,
       agentId,
       osqueryActionItems,
+      alertDetailsActionItems,
       eventFilterActionItems,
     ]
   );
