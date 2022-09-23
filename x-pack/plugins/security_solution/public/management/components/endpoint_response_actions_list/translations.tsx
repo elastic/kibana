@@ -95,8 +95,8 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: `Actions log : {hostname}`,
       values: { hostname },
     }),
-  pageTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.title', {
-    defaultMessage: 'Response actions',
+  pageSubTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.pageSubTitle', {
+    defaultMessage: 'View the history of response actions performed on hosts.',
   }),
   fetchError: i18n.translate('xpack.securitySolution.responseActionsList.list.errorMessage', {
     defaultMessage: 'Error while retrieving response actions',
@@ -110,6 +110,11 @@ export const UX_MESSAGES = Object.freeze({
   filterSearchPlaceholder: (filterName: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.filter.searchPlaceholder', {
       defaultMessage: 'Search {filterName}',
+      values: { filterName },
+    }),
+  filterEmptyMessage: (filterName: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.filter.emptyMessage', {
+      defaultMessage: 'No {filterName} available',
       values: { filterName },
     }),
   badge: {
@@ -155,12 +160,17 @@ export const UX_MESSAGES = Object.freeze({
     }),
 });
 
-// TODO: Add more filter names here (hosts, statuses) etc
 export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
   }),
+  hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.Hosts', {
+    defaultMessage: 'Hosts',
+  }),
   statuses: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.statuses', {
     defaultMessage: 'Statuses',
+  }),
+  users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
+    defaultMessage: 'Filter by user or comma separated list of users',
   }),
 });

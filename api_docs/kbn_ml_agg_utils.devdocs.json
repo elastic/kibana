@@ -544,6 +544,28 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.total_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_doc_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.total_bg_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_bg_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
             "id": "def-server.ChangePoint.score",
             "type": "number",
             "tags": [],
@@ -594,6 +616,141 @@
                 "text": "ChangePointHistogramItem"
               },
               "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointGroup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointGroup",
+        "description": [
+          "\nTree leaves"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "ChangePointGroupItem[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointGroupHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointGroupHistogram",
+        "description": [
+          "\nChange point histogram data for a group of field/value pairs."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroupHistogram.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroupHistogram.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[]"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,

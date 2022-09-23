@@ -18,6 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
 import {
@@ -31,7 +32,6 @@ import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
-import { RemoveLayerButton } from './remove_layer_button';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
@@ -43,7 +43,6 @@ import {
   selectDatasourceStates,
 } from '../../../state_management';
 import { onDropForVisualization } from './buttons/drop_targets_utils';
-import { LayerContextMenu } from './layer_context_menu';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -64,6 +63,7 @@ export function LayerPanel(
       newVisualizationState: unknown
     ) => void;
     onRemoveLayer: () => void;
+    onCloneLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
     onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
@@ -86,6 +86,7 @@ export function LayerPanel(
     layerId,
     isOnlyLayer,
     onRemoveLayer,
+    onCloneLayer,
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
@@ -96,6 +97,7 @@ export function LayerPanel(
     updateDatasourceAsync,
     visualizationState,
     onChangeIndexPattern,
+    core,
   } = props;
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -306,12 +308,12 @@ export function LayerPanel(
 
   const { dataViews } = props.framePublicAPI;
 
-  const availableActions =
-    activeVisualization.getSupportedActionsForLayer?.(
-      layerId,
-      visualizationState,
-      props.updateVisualization
-    ) ?? [];
+  // const availableActions =
+  //   activeVisualization.getSupportedActionsForLayer?.(
+  //     layerId,
+  //     visualizationState,
+  //     props.updateVisualization
+  //   ) ?? [];
 
   return (
     <>
@@ -335,26 +337,15 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {availableActions.length ? (
-                  <LayerContextMenu
-                    actions={availableActions}
-                    removeAction={{
-                      onRemoveLayer,
-                      layerIndex,
-                      isOnlyLayer,
-                      activeVisualization,
-                      layerType: activeVisualization.getLayerType(layerId, visualizationState),
-                    }}
-                  />
-                ) : (
-                  <RemoveLayerButton
-                    onRemoveLayer={onRemoveLayer}
-                    layerIndex={layerIndex}
-                    isOnlyLayer={isOnlyLayer}
-                    activeVisualization={activeVisualization}
-                    layerType={activeVisualization.getLayerType(layerId, visualizationState)}
-                  />
-                )}
+                <LayerActions
+                  layerIndex={layerIndex}
+                  isOnlyLayer={isOnlyLayer}
+                  activeVisualization={activeVisualization}
+                  layerType={activeVisualization.getLayerType(layerId, visualizationState)}
+                  onRemoveLayer={onRemoveLayer}
+                  onCloneLayer={onCloneLayer}
+                  core={core}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
@@ -391,26 +382,36 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
-            let isMissing = false;
+            let errorText: string = '';
 
             if (!isEmptyLayer) {
               if (group.requiredMinDimensionCount) {
-                isMissing = group.accessors.length < group.requiredMinDimensionCount;
-              } else if (group.required) {
-                isMissing = group.accessors.length === 0;
-              }
-            }
-
-            const isMissingError = group.requiredMinDimensionCount
-              ? i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
-                  defaultMessage: 'Requires {requiredMinDimensionCount} fields',
-                  values: {
-                    requiredMinDimensionCount: group.requiredMinDimensionCount,
-                  },
-                })
-              : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                errorText = i18n.translate(
+                  'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                  {
+                    defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                    values: {
+                      requiredMinDimensionCount: group.requiredMinDimensionCount,
+                    },
+                  }
+                );
+              } else if (group.required && group.accessors.length === 0) {
+                errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
                   defaultMessage: 'Requires field',
                 });
+              } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
+                errorText = i18n.translate(
+                  'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
+                  {
+                    defaultMessage:
+                      'Please remove {dimensionsTooMany, plural, one {a dimension} other {{dimensionsTooMany} dimensions}}',
+                    values: {
+                      dimensionsTooMany: group.dimensionsTooMany,
+                    },
+                  }
+                );
+              }
+            }
             const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
@@ -446,8 +447,8 @@ export function LayerPanel(
                 }
                 labelType="legend"
                 key={group.groupId}
-                isInvalid={isMissing}
-                error={isMissing ? isMissingError : []}
+                isInvalid={Boolean(errorText)}
+                error={errorText}
               >
                 <>
                   {group.accessors.length ? (

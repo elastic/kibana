@@ -108,6 +108,7 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.queryAnnotation.args.ignoreGlobalFilters', {
         defaultMessage: `Switch to ignore global filters for the annotation`,
       }),
+      default: true,
     },
   },
   fn: function fn(input: unknown, args: QueryPointEventAnnotationArgs) {

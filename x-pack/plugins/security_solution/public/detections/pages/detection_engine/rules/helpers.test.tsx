@@ -54,6 +54,7 @@ describe('rule helpers', () => {
         dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
+        shouldLoadQueryDynamically: true,
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -139,6 +140,7 @@ describe('rule helpers', () => {
         enabled: true,
         throttle: 'no_actions',
         actions: [],
+        responseActions: [],
       };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
@@ -256,6 +258,7 @@ describe('rule helpers', () => {
         },
         newTermsFields: [],
         historyWindowSize: '7d',
+        shouldLoadQueryDynamically: true,
       };
 
       expect(result).toEqual(expected);
@@ -309,6 +312,7 @@ describe('rule helpers', () => {
         },
         newTermsFields: [],
         historyWindowSize: '7d',
+        shouldLoadQueryDynamically: false,
       };
 
       expect(result).toEqual(expected);
@@ -407,6 +411,7 @@ describe('rule helpers', () => {
             actionTypeId: 'action_type_id',
           },
         ],
+        responseActions: [],
         enabled: mockedRule.enabled,
         throttle: 'no_actions',
       };

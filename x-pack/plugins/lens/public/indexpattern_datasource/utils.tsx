@@ -18,6 +18,7 @@ import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
+import { renewIDs } from '../utils';
 import type {
   IndexPatternLayer,
   IndexPatternPersistedState,
@@ -511,14 +512,6 @@ export function getFiltersInLayer(
   indexPattern: IndexPattern,
   timeRange: TimeRange | undefined
 ) {
-  if (indexPattern.spec) {
-    return {
-      error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
-        defaultMessage:
-          '"Explore data in Discover" does not support unsaved data views. Save the data view to switch to Discover.',
-      }),
-    };
-  }
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
   const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
     ['enabled', 'disabled'] as const
@@ -622,3 +615,22 @@ export function getFiltersInLayer(
     },
   };
 }
+
+export const cloneLayer = (
+  layers: Record<string, IndexPatternLayer>,
+  layerId: string,
+  newLayerId: string,
+  getNewId: (id: string) => string
+) => {
+  if (layers[layerId]) {
+    return {
+      ...layers,
+      [newLayerId]: renewIDs(
+        layers[layerId],
+        Object.keys(layers[layerId]?.columns ?? {}),
+        getNewId
+      ),
+    };
+  }
+  return layers;
+};

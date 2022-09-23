@@ -13,13 +13,18 @@ import { useHttp } from '../../../common/lib/kibana';
 import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 
+interface ErrorType {
+  statusCode: number;
+  message: string;
+}
+
 export const useGetEndpointActionList = (
   query: EndpointActionListRequestQuery,
-  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError> = {}
-): UseQueryResult<ActionListApiResponse, IHttpFetchError> => {
+  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError<ErrorType>> = {}
+): UseQueryResult<ActionListApiResponse, IHttpFetchError<ErrorType>> => {
   const http = useHttp();
 
-  return useQuery<ActionListApiResponse, IHttpFetchError>({
+  return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
     queryFn: async () => {
