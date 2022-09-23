@@ -96,6 +96,7 @@ export const createMlInferencePipeline = async (
 
   // Generate pipeline with default processors
   const mlInferencePipeline = await formatMlPipelineBody(
+    inferencePipelineGeneratedName,
     modelId,
     sourceField,
     destinationField,

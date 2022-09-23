@@ -18,6 +18,7 @@ import {
   fetchMlInferencePipelineProcessorNames,
   fetchMlInferencePipelineProcessors,
   fetchPipelineProcessorInferenceData,
+  InferencePipelineData,
 } from './fetch_ml_inference_pipeline_processors';
 
 const mockGetPipeline = {
@@ -190,13 +191,11 @@ const trainedModelDataObject = {
   'trained-model-id-1': {
     isDeployed: false,
     pipelineName: 'ml-inference-pipeline-1',
-    trainedModelName: 'trained-model-id-1',
     types: ['lang_ident', 'ner'],
   },
   'trained-model-id-2': {
     isDeployed: true,
     pipelineName: 'ml-inference-pipeline-2',
-    trainedModelName: 'trained-model-id-2',
     types: ['pytorch', 'ner'],
   },
 };
@@ -391,7 +390,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
       Promise.resolve(mockGetTrainedModelStats)
     );
 
-    const pipelines: InferencePipeline[] = [
+    const pipelines: InferencePipelineData[] = [
       {
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-1',
@@ -406,7 +405,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
       },
     ];
 
-    const expected: InferencePipeline[] = [
+    const expected: InferencePipelineData[] = [
       {
         isDeployed: false,
         pipelineName: 'ml-inference-pipeline-1',
@@ -555,7 +554,6 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
         {
           isDeployed: false,
           pipelineName: 'ml-inference-pipeline-3',
-          trainedModelName: 'trained-model-id-1',
           types: ['lang_ident', 'ner'],
         },
       ];

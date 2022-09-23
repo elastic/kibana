@@ -20,7 +20,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -35,7 +34,6 @@ import { PipelinesLogic } from './pipelines_logic';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
-  trainedModelName,
   isDeployed,
   types,
 }) => {
@@ -129,9 +127,6 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTextColor color="subdued">{trainedModelName}</EuiTextColor>
-            </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
                 {isDeployed && (

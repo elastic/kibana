@@ -12,6 +12,10 @@ import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_a
 import { InferencePipeline } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
+export type InferencePipelineData = InferencePipeline & {
+  trainedModelName: string;
+};
+
 export const fetchMlInferencePipelineProcessorNames = async (
   client: ElasticsearchClient,
   indexName: string
@@ -37,7 +41,7 @@ export const fetchMlInferencePipelineProcessorNames = async (
 export const fetchPipelineProcessorInferenceData = async (
   client: ElasticsearchClient,
   mlInferencePipelineProcessorNames: string[]
-): Promise<InferencePipeline[]> => {
+): Promise<InferencePipelineData[]> => {
   const mlInferencePipelineProcessorConfigs = await client.ingest.getPipeline({
     id: mlInferencePipelineProcessorNames.join(),
   });
@@ -62,7 +66,7 @@ export const fetchPipelineProcessorInferenceData = async (
 
       return pipelineProcessorData;
     },
-    [] as InferencePipeline[]
+    [] as InferencePipelineData[]
   );
 };
 
@@ -81,13 +85,13 @@ export const getMlModelTypesForModelConfig = (trainedModel: MlTrainedModelConfig
 export const getMlModelConfigsForModelIds = async (
   client: ElasticsearchClient,
   trainedModelNames: string[]
-): Promise<Record<string, InferencePipeline>> => {
+): Promise<Record<string, InferencePipelineData>> => {
   const [trainedModels, trainedModelsStats] = await Promise.all([
     client.ml.getTrainedModels({ model_id: trainedModelNames.join() }),
     client.ml.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
   ]);
 
-  const modelConfigs: Record<string, InferencePipeline> = {};
+  const modelConfigs: Record<string, InferencePipelineData> = {};
 
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
     const trainedModelName = trainedModelData.model_id;
@@ -115,8 +119,8 @@ export const getMlModelConfigsForModelIds = async (
 
 export const fetchAndAddTrainedModelData = async (
   client: ElasticsearchClient,
-  pipelineProcessorData: InferencePipeline[]
-): Promise<InferencePipeline[]> => {
+  pipelineProcessorData: InferencePipelineData[]
+): Promise<InferencePipelineData[]> => {
   const trainedModelNames = Array.from(
     new Set(pipelineProcessorData.map((pipeline) => pipeline.trainedModelName))
   );
@@ -160,5 +164,9 @@ export const fetchMlInferencePipelineProcessors = async (
   // inference processors, return early to avoid fetching all of the possible trained model data.
   if (pipelineProcessorInferenceData.length === 0) return [] as InferencePipeline[];
 
-  return await fetchAndAddTrainedModelData(client, pipelineProcessorInferenceData);
+  const pipelines = await fetchAndAddTrainedModelData(client, pipelineProcessorInferenceData);
+
+  // Due to restrictions with Kibana spaces we do not want to return the trained model name
+  // to the UI. So we remove it from the data structure here.
+  return pipelines.map(({ trainedModelName, ...pipeline }) => pipeline);
 };

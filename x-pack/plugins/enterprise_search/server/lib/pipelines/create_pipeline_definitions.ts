@@ -228,6 +228,7 @@ export const createIndexPipelineDefinitions = (
  * @param esClient the Elasticsearch Client to use when retrieving model details.
  */
 export const formatMlPipelineBody = async (
+  pipelineName: string,
   modelId: string,
   sourceField: string,
   destinationField: string,
@@ -264,8 +265,8 @@ export const formatMlPipelineBody = async (
           field: '_source._ingest.processors',
           value: [
             {
-              model_id: modelId,
               model_version: modelVersion,
+              pipeline: pipelineName,
               processed_timestamp: '{{{ _ingest.timestamp }}}',
               types: modelTypes,
             },
