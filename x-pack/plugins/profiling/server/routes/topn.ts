@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
-import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
+import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
@@ -142,9 +142,7 @@ export async function topNElasticSearchQuery({
   );
 
   const metadata = await withProfilingSpan('collect_stackframe_metadata', async () => {
-    return fromMapToRecord(
-      groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables)
-    );
+    return groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables);
   });
 
   logger.info('returning payload response to client');
