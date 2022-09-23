@@ -39,7 +39,7 @@ jest.mock('../../../../common/containers/sourcerer', () => {
 describe('useDetailPanel', () => {
   const defaultProps: UseDetailPanelConfig = {
     sourcererScope: SourcererScopeName.detections,
-    timelineId: TimelineId.test,
+    scopeId: TimelineId.test,
   };
   const mockGetExpandedDetail = jest.fn().mockImplementation(() => ({}));
   beforeEach(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TGridModel } from '../../../timelines/store/data_table/model';
+import type { SubsetTGridModel } from '../../../timelines/store/data_table/model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -63,7 +63,7 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
 export const getSessionsDefaultModel = (
   columns: ColumnHeaderOptions[],
   defaultColumns: ColumnHeaderOptions[]
-): TGridModel => ({
+): SubsetTGridModel => ({
   ...tableDefaults,
   columns,
   defaultColumns,

@@ -85,7 +85,15 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            graphEventId=""
+            SessionView={<div />}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
+          />
         </TestProviders>
       );
 
@@ -105,7 +113,15 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            graphEventId=""
+            SessionView={<div />}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
+          />
         </TestProviders>
       );
 
@@ -153,7 +169,15 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            graphEventId=""
+            SessionView={<div />}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
+          />
         </TestProviders>
       );
 
@@ -173,7 +197,15 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            graphEventId=""
+            SessionView={<div />}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
+          />
         </TestProviders>
       );
 
@@ -212,7 +244,15 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            graphEventId=""
+            SessionView={<div />}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
+          />
         </TestProviders>
       );
 
@@ -252,9 +292,13 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            timelineId={timelineId}
+            graphEventId=""
             SessionView={<div />}
-            Navigation={<div>{'Close Session'}</div>}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
           />
         </TestProviders>
       );
@@ -293,9 +337,13 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            timelineId={timelineId}
+            graphEventId=""
             SessionView={<div />}
-            Navigation={<div>{'Close Session'}</div>}
+            Navigation={<div />}
+            componentInstanceID={''}
+            isInTimeline={false}
+            sessionViewConfig={null}
+            updateTimelineGraphEventId={(graphEventId: string) => {}}
           />
         </TestProviders>
       );

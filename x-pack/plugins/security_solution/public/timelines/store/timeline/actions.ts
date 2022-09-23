@@ -263,3 +263,12 @@ export const clearSelected = actionCreator<{
 
 export const initializeTimelineSettings =
   actionCreator<InitialyzeTimelineSettings>('INITIALIZE_TIMELINE');
+
+export const updateItemsPerPage = actionCreator<{ id: string; itemsPerPage: number }>(
+  'UPDATE_ITEMS_PER_PAGE'
+);
+
+export const updateItemsPerPageOptions = actionCreator<{
+  id: string;
+  itemsPerPageOptions: number[];
+}>('UPDATE_ITEMS_PER_PAGE_OPTIONS');

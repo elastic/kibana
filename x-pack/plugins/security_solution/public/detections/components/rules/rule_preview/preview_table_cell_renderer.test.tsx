@@ -69,7 +69,7 @@ describe('PreviewTableCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={timelineId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -104,7 +104,7 @@ describe('PreviewTableCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={timelineId}
               truncate={truncate}
             />
           </DroppableWrapper>
@@ -152,7 +152,7 @@ describe('PreviewTableCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={timelineId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>

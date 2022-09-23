@@ -17,7 +17,7 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types/timeline';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -78,7 +78,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   );
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT =
-    isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions ? 5 : 4;
+    isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 5 : 4;
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]

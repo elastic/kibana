@@ -88,7 +88,7 @@ const ReasonCell: React.FC<{
       rowRenderer.renderRow({
         data: ecsData,
         isDraggable: false,
-        timelineId: scopeId,
+        scopeId,
       })
     );
   }, [rowRenderer, ecsData, scopeId]);

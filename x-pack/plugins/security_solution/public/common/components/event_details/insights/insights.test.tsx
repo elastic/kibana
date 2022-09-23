@@ -90,7 +90,7 @@ describe('Insights', () => {
   it('does not render when there is no content to show', () => {
     render(
       <TestProviders>
-        <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />
+        <Insights browserFields={{}} eventId="test" data={[]} scopeId="" />
       </TestProviders>
     );
 
@@ -110,7 +110,7 @@ describe('Insights', () => {
 
     render(
       <TestProviders>
-        <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />
+        <Insights browserFields={{}} eventId="test" data={[]} scopeId="" />
       </TestProviders>
     );
 
@@ -128,7 +128,7 @@ describe('Insights', () => {
 
         render(
           <TestProviders>
-            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+            <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
           </TestProviders>
         );
 
@@ -145,7 +145,7 @@ describe('Insights', () => {
 
         render(
           <TestProviders>
-            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+            <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
           </TestProviders>
         );
 
@@ -163,7 +163,7 @@ describe('Insights', () => {
 
       render(
         <TestProviders>
-          <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+          <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
         </TestProviders>
       );
 

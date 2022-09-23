@@ -18,7 +18,7 @@ const props = {
     contextId: 'detections-page',
     eventId: 'testid',
     fieldType: 'string',
-    timelineId: 'detections-page',
+    scopeId: 'detections-page',
     data: {
       field: 'kibana.alert.workflow_status',
       format: 'string',
@@ -46,7 +46,7 @@ const props = {
     },
   },
   indexName: '.internal.alerts-security.alerts-default-000001',
-  timelineId: 'detections-page',
+  scopeId: 'detections-page',
   handleOnEventClosed: jest.fn(),
 };
 

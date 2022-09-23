@@ -45,7 +45,8 @@ describe('RelatedAlertsBySession', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
+          isInTimeline={false}
         />
       </TestProviders>
     );
@@ -65,7 +66,8 @@ describe('RelatedAlertsBySession', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
+          isInTimeline={false}
         />
       </TestProviders>
     );
@@ -85,7 +87,8 @@ describe('RelatedAlertsBySession', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
+          isInTimeline={false}
         />
       </TestProviders>
     );
@@ -109,7 +112,8 @@ describe('RelatedAlertsBySession', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
+          isInTimeline={false}
         />
       </TestProviders>
     );

@@ -12,8 +12,7 @@ describe('selectors', () => {
   describe('timelineBodySelector', () => {
     it('returns the expected results', () => {
       const expected = mockGlobalState.timeline.timelineById.test;
-      const { dataViewId, documentType, defaultColumns, isLoading, queryFields, selectAll, title } =
-        expected;
+      const { dataViewId, documentType, defaultColumns, isLoading, queryFields, title } = expected;
 
       const id = 'test';
 
@@ -24,7 +23,6 @@ describe('selectors', () => {
           defaultColumns,
           isLoading,
           queryFields,
-          selectAll,
           title,
         },
         timeline: expected,

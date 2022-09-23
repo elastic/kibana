@@ -300,7 +300,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 barChart={barChartData}
                 configs={barchartConfigs}
                 stackByField={selectedStackByOption.value}
-                id={scopeId}
+                scopeId={scopeId}
               />
             )
           ) : null}

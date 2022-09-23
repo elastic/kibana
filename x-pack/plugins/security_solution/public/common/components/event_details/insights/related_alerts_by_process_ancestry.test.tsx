@@ -43,6 +43,8 @@ const props = {
     values: ['original'],
     isObjectArray: false,
   },
+  scopeId: 'table-test',
+  isInTimeline: false,
 };
 describe('RelatedAlertsByProcessAncestry', () => {
   beforeEach(() => {

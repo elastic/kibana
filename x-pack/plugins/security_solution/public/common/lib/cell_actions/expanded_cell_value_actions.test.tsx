@@ -22,7 +22,7 @@ describe('ExpandedCellValueActions', () => {
     },
     globalFilters: [],
     onFilterAdded: () => {},
-    timelineId: 'mockTimelineId',
+    scopeId: 'mockTimelineId',
     value: ['mock value'],
   };
   const wrapper = shallow(<ExpandedCellValueActions {...props} />);

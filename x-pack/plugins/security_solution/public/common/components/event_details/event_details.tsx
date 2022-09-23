@@ -294,7 +294,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       isLicenseValid,
       isReadOnly,
       renderer,
-      scopeId,
       userRisk,
     ]
   );

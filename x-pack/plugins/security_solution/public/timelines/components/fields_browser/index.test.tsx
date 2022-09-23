@@ -70,7 +70,8 @@ const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,
-        timelineId: TimelineId.test,
+        removeColumn: () => {},
+        upsertColumn: () => {},
         ...props,
       }),
     {

@@ -39,8 +39,9 @@ describe('show topN button', () => {
     onClick: jest.fn(),
     ownFocus: false,
     showTopN: false,
-    timelineId: 'timeline-1',
+    scopeId: 'timeline-1',
     value: ['rule_name'],
+    isInTimeline: true,
   };
 
   describe('button', () => {
@@ -178,9 +179,7 @@ describe('show topN button', () => {
       expect(wrapper.find('[data-test-subj="top-n"]').prop('toggleTopN')).toEqual(
         testProps.onClick
       );
-      expect(wrapper.find('[data-test-subj="top-n"]').prop('timelineId')).toEqual(
-        testProps.timelineId
-      );
+      expect(wrapper.find('[data-test-subj="top-n"]').prop('scopeId')).toEqual(testProps.scopeId);
       expect(wrapper.find('[data-test-subj="top-n"]').prop('onFilterAdded')).toEqual(
         testProps.onFilterAdded
       );

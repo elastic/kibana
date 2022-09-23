@@ -96,7 +96,7 @@ describe('Details Panel Component', () => {
     isFlyoutView: false,
     runtimeMappings: {},
     tabType: TimelineTabs.query,
-    timelineId: 'test',
+    scopeId: 'test',
   };
 
   const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
@@ -132,7 +132,7 @@ describe('Details Panel Component', () => {
           isFlyoutView={false}
           runtimeMappings={Object {}}
           tabType="query"
-          timelineId="test"
+          scopeId="test"
         />
       `);
     });
@@ -224,7 +224,7 @@ describe('Details Panel Component', () => {
       const currentProps = {
         ...mockProps,
         tabType: TimelineTabs.pinned,
-        timelineId: TimelineId.active,
+        scopeId: TimelineId.active,
       };
       const wrapper = mount(
         <TestProviders store={store}>
