@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-/**@deprecated use `@kbn/shared-ux-avatar-user-profile-components` */
 export type { UserAvatarProps, UserProfileWithAvatar } from './src/user_avatar';
 export type { UserProfilesSelectableProps } from './src/user_profiles_selectable';
 export type { UserProfilesPopoverProps } from './src/user_profiles_popover';
