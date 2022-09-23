@@ -27,7 +27,11 @@ import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
 import type { CreatePackagePolicyRequest } from '../../../../../../../common/types';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { dataTypes, FLEET_SYSTEM_PACKAGE } from '../../../../../../../common/constants';
+import {
+  dataTypes,
+  FLEET_SYSTEM_PACKAGE,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../../common/constants';
 import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
@@ -557,7 +561,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
-  const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
+    ExperimentalFeaturesService.get();
+
+  const showDevtoolsRequest =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
+    isShowDevtoolRequestExperimentEnabled;
+
   const devtoolRequest = useMemo(
     () =>
       generateCreatePackagePolicyDevToolsRequest({

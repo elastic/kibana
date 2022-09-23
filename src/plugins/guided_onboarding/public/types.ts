@@ -26,7 +26,7 @@ export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
 export interface StepConfig {
   id: string;
   title: string;
-  description: string;
+  descriptionList: string[];
   location?: {
     appID: string;
     path: string;
