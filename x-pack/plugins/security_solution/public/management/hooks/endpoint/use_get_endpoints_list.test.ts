@@ -11,6 +11,7 @@ import { useGetEndpointsList } from './use_get_endpoints_list';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
+import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -106,5 +107,55 @@ describe('useGetEndpointsList hook', () => {
         enabled: false,
       })
     );
+  });
+
+  it('should also list inactive agents', async () => {
+    const getApiResponse = apiMocks.responseProvider.metadataList.getMockImplementation();
+
+    // set a few of the agents as inactive/unenrolled
+    apiMocks.responseProvider.metadataList.mockImplementation(() => {
+      if (getApiResponse) {
+        return {
+          ...getApiResponse(),
+          data: getApiResponse().data.map((item, i) => {
+            const isInactiveIndex = [0, 1, 3].includes(i);
+            return {
+              ...item,
+              host_status: isInactiveIndex ? HostStatus.INACTIVE : item.host_status,
+              metadata: {
+                ...item.metadata,
+                host: {
+                  ...item.metadata.host,
+                  hostname: isInactiveIndex
+                    ? `${item.metadata.host.hostname}-inactive`
+                    : item.metadata.host.hostname,
+                },
+                Endpoint: {
+                  ...item.metadata.Endpoint,
+                  status: isInactiveIndex
+                    ? EndpointStatus.unenrolled
+                    : item.metadata.Endpoint.status,
+                },
+              },
+            };
+          }),
+        };
+      }
+      throw new Error('some error');
+    });
+
+    // verify metadata list does indeed have inactive agents
+    expect(
+      apiMocks.responseProvider
+        .metadataList()
+        .data.map((item) => item.host_status)
+        .filter((status) => status === 'inactive').length
+    ).toEqual(3);
+
+    // verify useGetEndpointsList hook returns the same inactive agents
+    const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: 'inactive' }));
+    expect(
+      res.data?.map((host) => host.name.split('-')[2]).filter((name) => name === 'inactive').length
+    ).toEqual(3);
   });
 });
