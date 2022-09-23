@@ -42,6 +42,7 @@ export async function getActionStatuses(
             agent_count: {
               cardinality: {
                 field: 'agent_id',
+                precision_threshold: 40000, // max value
               },
             },
           },
