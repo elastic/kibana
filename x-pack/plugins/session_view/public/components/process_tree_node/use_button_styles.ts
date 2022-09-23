@@ -74,6 +74,24 @@ export const useButtonStyles = () => {
       },
     };
 
+    const outputButton: CSSObject = {
+      ...button,
+      color: euiVars.euiColorVis1,
+      background: transparentize(euiVars.euiColorVis1, 0.04),
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis1, 0.48)}`,
+      '&&:hover, &&:focus': {
+        background: transparentize(euiVars.euiColorVis1, 0.12),
+        textDecoration: 'none',
+      },
+      '&.isExpanded': {
+        color: colors.ghost,
+        background: euiVars.euiColorVis1,
+        '&:hover, &:focus': {
+          background: `${euiVars.euiColorVis1}`,
+        },
+      },
+    };
+
     const userChangedButton: CSSObject = {
       ...button,
       cursor: 'default',
@@ -97,6 +115,7 @@ export const useButtonStyles = () => {
       buttonArrow,
       button,
       alertButton,
+      outputButton,
       userChangedButton,
       buttonSize,
     };

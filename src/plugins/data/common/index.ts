@@ -33,7 +33,6 @@ export type {
   SavedQuery,
   SavedQueryAttributes,
   SavedQueryTimeFilter,
-  FilterValueFormatter,
   KbnFieldTypeOptions,
   Query,
 } from './types';

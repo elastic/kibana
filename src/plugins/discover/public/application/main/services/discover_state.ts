@@ -9,7 +9,6 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
 import {
   Filter,
   FilterStateStore,
@@ -37,11 +36,14 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getStateDefaults } from '../utils/get_state_defaults';
+import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
+import { getValidFilters } from '../../../utils/get_valid_filters';
 
 export interface AppState {
   /**
@@ -107,29 +109,17 @@ export interface AppStateUrl extends Omit<AppState, 'sort'> {
 
 interface GetStateParams {
   /**
-   * Default state used for merging with with URL state to get the initial state
-   */
-  getStateDefaults?: () => AppState;
-  /**
-   * Determins the use of long vs. short/hashed urls
-   */
-  storeInSessionStorage?: boolean;
-  /**
    * Browser history
    */
   history: History;
-
   /**
-   * Core's notifications.toasts service
-   * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
+   * The current savedSearch
    */
-  toasts?: NotificationsStart['toasts'];
-
+  savedSearch: SavedSearch;
   /**
    * core ui settings service
    */
-  uiSettings: IUiSettingsClient;
+  services: DiscoverServices;
 }
 
 export interface GetStateReturn {
@@ -178,9 +168,9 @@ export interface GetStateReturn {
    */
   isAppStateDirty: () => boolean;
   /**
-   * Reset AppState to default, discarding all changes
+   * Reset AppState by the given savedSearch discarding all changes
    */
-  resetAppState: () => void;
+  resetAppState: (nextSavedSearch: SavedSearch) => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
@@ -194,14 +184,13 @@ const GLOBAL_STATE_URL_KEY = '_g';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({
-  getStateDefaults,
-  storeInSessionStorage = false,
-  history,
-  toasts,
-  uiSettings,
-}: GetStateParams): GetStateReturn {
-  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
+export function getState({ history, savedSearch, services }: GetStateParams): GetStateReturn {
+  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
+  const toasts = services.core.notifications.toasts;
+  const defaultAppState = getStateDefaults({
+    savedSearch,
+    services,
+  });
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -215,7 +204,7 @@ export function getState({
       ...defaultAppState,
       ...appStateFromUrl,
     },
-    uiSettings
+    services.uiSettings
   );
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
@@ -274,10 +263,10 @@ export function getState({
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    resetAppState: () => {
+    resetAppState: (nextSavedSearch: SavedSearch) => {
       const defaultState = handleSourceColumnState(
-        getStateDefaults ? getStateDefaults() : {},
-        uiSettings
+        getStateDefaults({ savedSearch: nextSavedSearch, services }),
+        services.uiSettings
       );
       setState(appStateContainerModified, defaultState);
     },
@@ -318,6 +307,14 @@ export function getState({
         data.query,
         stateStorage
       );
+
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      const currentFilters = filterManager.getFilters();
+      const validFilters = getValidFilters(dataView, currentFilters);
+      if (!isEqual(currentFilters, validFilters)) {
+        filterManager.setFilters(validFilters);
+      }
 
       const { start, stop } = syncAppState();
 

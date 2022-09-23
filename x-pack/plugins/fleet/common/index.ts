@@ -60,6 +60,7 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  INVALID_NAMESPACE_CHARACTERS,
   // TODO Should probably not be exposed by Fleet
   decodeCloudId,
 } from './services';

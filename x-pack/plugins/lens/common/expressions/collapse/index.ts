@@ -13,7 +13,7 @@ type CollapseFunction = 'sum' | 'avg' | 'min' | 'max';
 export interface CollapseArgs {
   by?: string[];
   metric?: string[];
-  fn: CollapseFunction | CollapseFunction[];
+  fn: CollapseFunction[];
 }
 
 /**

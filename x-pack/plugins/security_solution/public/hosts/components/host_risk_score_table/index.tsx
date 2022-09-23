@@ -16,7 +16,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostRiskScoreColumns } from './columns';
 import type {
-  HostsRiskScore,
+  HostRiskScore,
   RiskScoreItem,
   RiskScoreSortField,
   RiskSeverity,
@@ -50,7 +50,7 @@ const IconWrapper = styled.span`
 const tableType = hostsModel.HostsTableType.risk;
 
 interface HostRiskScoreTableProps {
-  data: HostsRiskScore[];
+  data: HostRiskScore[];
   id: string;
   isInspect: boolean;
   loading: boolean;
@@ -63,8 +63,8 @@ interface HostRiskScoreTableProps {
 
 export type HostRiskScoreColumns = [
   Columns<RiskScoreItem[RiskScoreFields.hostName]>,
-  Columns<RiskScoreItem[RiskScoreFields.riskScore]>,
-  Columns<RiskScoreItem[RiskScoreFields.risk]>
+  Columns<RiskScoreItem[RiskScoreFields.hostRiskScore]>,
+  Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
 ];
 
 const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({

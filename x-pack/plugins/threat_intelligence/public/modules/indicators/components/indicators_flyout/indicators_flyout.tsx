@@ -7,8 +7,11 @@
 
 import React, { useMemo, useState, VFC } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTab,
@@ -18,18 +21,21 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InvestigateInTimelineButton } from '../../../timeline/components/investigate_in_timeline_button';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
-import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
-import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
+import { IndicatorsFlyoutJson } from './tabs/indicators_flyout_json/indicators_flyout_json';
+import { IndicatorsFlyoutTable } from './tabs/indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
+import { IndicatorsFlyoutOverview } from './tabs/indicators_flyout_overview';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
 export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
+export const INVESTIGATE_IN_TIMELINE_BUTTON_ID = 'tiIndicatorFlyoutInvestigateInTimelineButton';
 
 const enum TAB_IDS {
+  overview,
   table,
   json,
 }
@@ -40,10 +46,6 @@ export interface IndicatorsFlyoutProps {
    */
   indicator: Indicator;
   /**
-   * Object mapping each field with their type to ease display in the {@link IndicatorsFlyoutTable} component.
-   */
-  fieldTypesMap: { [id: string]: string };
-  /**
    * Event to close flyout (used by {@link EuiFlyout}).
    */
   closeFlyout: () => void;
@@ -52,15 +54,26 @@ export interface IndicatorsFlyoutProps {
 /**
  * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
  */
-export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
-  indicator,
-  fieldTypesMap,
-  closeFlyout,
-}) => {
-  const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.table);
+export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeFlyout }) => {
+  const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
   const tabs = useMemo(
     () => [
+      {
+        id: TAB_IDS.overview,
+        name: (
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.flyout.overviewTabLabel"
+            defaultMessage="Overview"
+          />
+        ),
+        content: (
+          <IndicatorsFlyoutOverview
+            indicator={indicator}
+            onViewAllFieldsInTable={() => setSelectedTabId(TAB_IDS.table)}
+          />
+        ),
+      },
       {
         id: TAB_IDS.table,
         name: (
@@ -69,7 +82,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
             defaultMessage="Table"
           />
         ),
-        content: <IndicatorsFlyoutTable indicator={indicator} fieldTypesMap={fieldTypesMap} />,
+        content: <IndicatorsFlyoutTable indicator={indicator} />,
       },
       {
         id: TAB_IDS.json,
@@ -82,7 +95,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         content: <IndicatorsFlyoutJson indicator={indicator} />,
       },
     ],
-    [indicator, fieldTypesMap]
+    [indicator]
   );
   const onSelectedTabChanged = (id: number) => setSelectedTabId(id);
 
@@ -102,7 +115,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   );
 
   const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
-  const displayNameValue = unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
@@ -113,9 +126,8 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         <EuiTitle>
           <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId}>
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.flyout.panelTitle"
-              defaultMessage="Indicator: {title}"
-              values={{ title: displayNameValue }}
+              id="xpack.threatIntelligence.indicator.flyout.panelTitleWithOverviewTab"
+              defaultMessage="Indicator details"
             />
           </h2>
         </EuiTitle>
@@ -135,6 +147,16 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <InvestigateInTimelineButton
+              data={indicator}
+              data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_ID}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

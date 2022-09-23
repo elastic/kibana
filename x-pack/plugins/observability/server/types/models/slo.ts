@@ -7,22 +7,35 @@
 
 import * as t from 'io-ts';
 
-import { indicatorSchema, rollingTimeWindowSchema } from '../schema';
+import {
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  indicatorSchema,
+  indicatorTypesSchema,
+  rollingTimeWindowSchema,
+} from '../schema';
 
 const baseSLOSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
-  indicator: indicatorSchema,
   time_window: rollingTimeWindowSchema,
+  indicator: indicatorSchema,
   budgeting_method: t.literal('occurrences'),
   objective: t.type({
     target: t.number,
   }),
-  settings: t.partial({
-    destination_index: t.string,
-  }),
 });
+
+export const apmTransactionErrorRateSLOSchema = t.intersection([
+  baseSLOSchema,
+  t.type({ indicator: apmTransactionErrorRateIndicatorSchema }),
+]);
+
+export const apmTransactionDurationSLOSchema = t.intersection([
+  baseSLOSchema,
+  t.type({ indicator: apmTransactionDurationIndicatorSchema }),
+]);
 
 const storedSLOSchema = t.intersection([
   baseSLOSchema,
@@ -30,4 +43,10 @@ const storedSLOSchema = t.intersection([
 ]);
 
 export type SLO = t.TypeOf<typeof baseSLOSchema>;
+export type APMTransactionErrorRateSLO = t.TypeOf<typeof apmTransactionErrorRateSLOSchema>;
+export type APMTransactionDurationSLO = t.TypeOf<typeof apmTransactionDurationSLOSchema>;
+
+export type SLI = t.TypeOf<typeof indicatorSchema>;
+export type SLITypes = t.TypeOf<typeof indicatorTypesSchema>;
+
 export type StoredSLO = t.TypeOf<typeof storedSLOSchema>;

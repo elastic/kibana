@@ -16,6 +16,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
+  ACTION_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -31,6 +32,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
+  ACTION_HISTORY,
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
@@ -41,6 +43,7 @@ import {
   manageCategories as cloudSecurityPostureCategories,
   manageLinks as cloudSecurityPostureLinks,
 } from '../cloud_security_posture/links';
+import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
 import { IconEndpointPolicies } from './icons/endpoint_policies';
@@ -69,6 +72,7 @@ const categories = [
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.actionHistory,
     ],
   },
   ...cloudSecurityPostureCategories,
@@ -199,6 +203,17 @@ export const links: LinkItem = {
       }),
       landingIcon: IconBlocklist,
       path: BLOCKLIST_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.actionHistory,
+      title: ACTION_HISTORY,
+      description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
+        defaultMessage: 'View the history of response actions performed on hosts.',
+      }),
+      landingIcon: IconActionHistory,
+      path: ACTION_HISTORY_PATH,
       skipUrlState: true,
       hideTimeline: true,
     },

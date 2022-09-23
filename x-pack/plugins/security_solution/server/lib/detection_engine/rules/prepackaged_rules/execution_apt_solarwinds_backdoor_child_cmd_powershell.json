@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Command Execution via SolarWinds Process",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and process.name: (\"cmd.exe\", \"powershell.exe\") and\nprocess.parent.name: (\n     \"ConfigurationWizard*.exe\",\n     \"NetflowDatabaseMaintenance*.exe\",\n     \"NetFlowService*.exe\",\n     \"SolarWinds.Administration*.exe\",\n     \"SolarWinds.Collector.Service*.exe\",\n     \"SolarwindsDiagnostics*.exe\"\n     )\n",
+  "query": "process where event.type == \"start\" and process.name: (\"cmd.exe\", \"powershell.exe\") and\nprocess.parent.name: (\n     \"ConfigurationWizard*.exe\",\n     \"NetflowDatabaseMaintenance*.exe\",\n     \"NetFlowService*.exe\",\n     \"SolarWinds.Administration*.exe\",\n     \"SolarWinds.Collector.Service*.exe\",\n     \"SolarwindsDiagnostics*.exe\"\n     )\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html",
     "https://github.com/mandiant/sunburst_countermeasures/blob/main/rules/SUNBURST/hxioc/SUNBURST%20SUSPICIOUS%20FILEWRITES%20(METHODOLOGY).ioc"
@@ -90,5 +90,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 101
 }

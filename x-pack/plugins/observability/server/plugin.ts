@@ -74,7 +74,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -145,7 +145,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const { spacesService } = plugins.spaces;
-
     const { ruleDataService } = plugins.ruleRegistry;
 
     registerRoutes({

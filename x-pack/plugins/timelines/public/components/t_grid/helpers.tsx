@@ -17,8 +17,9 @@ import {
   stopPropagationAndPreventDefault,
 } from '../../../common/utils/accessibility';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
+import { DataProviderType, EXISTS_OPERATOR, TimelineId } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
+import type { ViewSelection } from './event_rendered_view/selector';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
@@ -143,6 +144,10 @@ interface CombineQueries {
   kqlMode: string;
 }
 
+export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
+  return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
+};
+
 export const combineQueries = ({
   config,
   dataProviders,
@@ -153,37 +158,9 @@ export const combineQueries = ({
   kqlMode,
 }: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
+  if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-
-    return {
-      filterQuery,
-      kqlError,
-    };
-  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query})`;
-
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-
-    return {
-      filterQuery,
-      kqlError,
-    };
-  } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
-
+  } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
@@ -196,11 +173,20 @@ export const combineQueries = ({
       kqlError,
     };
   }
+
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
-  const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
-    kqlQuery.query as string
-  )})`;
+
+  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
+
+  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+
+  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
+
+  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
+
+  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
+
+  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
@@ -376,3 +362,29 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
 export const resetKeyboardFocus = () => {
   document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
 };
+
+export const isSelectableView = (timelineId: string): boolean =>
+  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage;
+
+export const isViewSelection = (value: unknown): value is ViewSelection =>
+  value === 'gridView' || value === 'eventRenderedView';
+
+/** always returns a valid default `ViewSelection` */
+export const getDefaultViewSelection = ({
+  timelineId,
+  value,
+}: {
+  timelineId: string;
+  value: unknown;
+}): ViewSelection => {
+  const defaultViewSelection = 'gridView';
+
+  if (!isSelectableView(timelineId)) {
+    return defaultViewSelection;
+  } else {
+    return isViewSelection(value) ? value : defaultViewSelection;
+  }
+};
+
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';

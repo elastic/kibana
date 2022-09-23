@@ -30,7 +30,14 @@ export type AgentStatus =
 
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
-export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
+export type AgentActionType =
+  | 'UNENROLL'
+  | 'UPGRADE'
+  | 'SETTINGS'
+  | 'POLICY_REASSIGN'
+  | 'CANCEL'
+  | 'FORCE_UNENROLL'
+  | 'UPDATE_TAGS';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -47,6 +54,7 @@ export interface NewAgentAction {
   start_time?: string;
   minimum_execution_duration?: number;
   source_uri?: string;
+  total?: number;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -80,6 +88,7 @@ interface AgentBase {
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
+  components?: FleetServerAgentComponent[];
 }
 
 export interface Agent extends AgentBase {
@@ -104,7 +113,29 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
-interface FleetServerAgentComponentUnit {
+export interface ActionStatus {
+  actionId: string;
+  // how many agents are successfully included in action documents
+  nbAgentsActionCreated: number;
+  // how many agents acknowledged the action sucessfully (completed)
+  nbAgentsAck: number;
+  // how many agents failed
+  nbAgentsFailed: number;
+  version?: string;
+  startTime?: string;
+  type?: string;
+  // how many agents were actioned by the user
+  nbAgentsActioned: number;
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  expiration?: string;
+  completionTime?: string;
+  cancellationTime?: string;
+  newPolicyId?: string;
+  creationTime: string;
+}
+
+// Generated from FleetServer schema.json
+export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
   status: FleetServerAgentComponentStatus;
@@ -121,8 +152,6 @@ interface FleetServerAgentComponent {
   message: string;
   units: FleetServerAgentComponentUnit[];
 }
-
-// Initially generated from FleetServer schema.json
 
 /**
  * An Elastic Agent that has enrolled into Fleet
@@ -309,5 +338,7 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
+
+  total?: number;
   [k: string]: unknown;
 }

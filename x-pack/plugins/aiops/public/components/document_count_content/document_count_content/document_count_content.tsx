@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
-import { min, max } from 'd3-array';
+import React, { useEffect, useState, FC, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -51,8 +50,12 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   }, [windowParameters]);
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const timeRangeEarliest = min(bucketTimestamps);
-  const timeRangeLatest = max(bucketTimestamps);
+  const timeRangeEarliest = Math.min(...bucketTimestamps);
+  const timeRangeLatest = Math.max(...bucketTimestamps);
+  const chartPointsSplitLabel = useMemo(
+    () => `${changePoint?.fieldName}:${changePoint?.fieldValue}`,
+    [changePoint]
+  );
 
   if (
     documentCountStats === undefined ||
@@ -118,7 +121,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           timeRangeEarliest={timeRangeEarliest}
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
-          changePoint={changePoint}
+          chartPointsSplitLabel={chartPointsSplitLabel}
           isBrushCleared={isBrushCleared}
         />
       )}

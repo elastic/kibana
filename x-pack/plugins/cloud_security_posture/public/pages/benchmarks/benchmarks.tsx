@@ -45,8 +45,8 @@ const AddCisIntegrationButton = () => {
       isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel"
-        defaultMessage="Add a CIS integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
+        defaultMessage="Add a KSPM integration"
       />
     </EuiButton>
   );
@@ -143,7 +143,6 @@ export const Benchmarks = () => {
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            isBeta
             title={i18n.translate(
               'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
               { defaultMessage: 'Benchmark Integrations' }

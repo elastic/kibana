@@ -6,3 +6,4 @@
  */
 
 export { templateActionVariable } from './template_action_variable';
+export { isRuleSnoozed } from './is_rule_snoozed';

@@ -80,7 +80,7 @@ export class ServiceAPIClient {
   }
 
   async post(data: ServiceData) {
-    return this.callAPI('POST', data);
+    return this.callAPI('PUT', data);
   }
 
   async put(data: ServiceData) {

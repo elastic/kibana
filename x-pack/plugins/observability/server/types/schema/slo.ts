@@ -7,10 +7,12 @@
 
 import * as t from 'io-ts';
 
-const allOrAnyString = t.union([t.literal('ALL'), t.string]);
+export const ALL_VALUE = 'ALL';
+const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
-const apmTransactionDurationIndicatorSchema = t.type({
-  type: t.literal('slo.apm.transaction_duration'),
+const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
+export const apmTransactionDurationIndicatorSchema = t.type({
+  type: apmTransactionDurationIndicatorTypeSchema,
   params: t.type({
     environment: allOrAnyString,
     service: allOrAnyString,
@@ -20,8 +22,9 @@ const apmTransactionDurationIndicatorSchema = t.type({
   }),
 });
 
-const apmTransactionErrorRateIndicatorSchema = t.type({
-  type: t.literal('slo.apm.transaction_error_rate'),
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
+export const apmTransactionErrorRateIndicatorSchema = t.type({
+  type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
     t.type({
       environment: allOrAnyString,
@@ -42,31 +45,40 @@ export const rollingTimeWindowSchema = t.type({
   is_rolling: t.literal(true),
 });
 
+export const indicatorTypesSchema = t.union([
+  apmTransactionDurationIndicatorTypeSchema,
+  apmTransactionErrorRateIndicatorTypeSchema,
+]);
+
 export const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 ]);
 
-const sloOptionalSettingsSchema = t.partial({
-  settings: t.partial({
-    destination_index: t.string,
+const createSLOBodySchema = t.type({
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: rollingTimeWindowSchema,
+  budgeting_method: t.literal('occurrences'),
+  objective: t.type({
+    target: t.number,
   }),
 });
 
-const createSLOBodySchema = t.intersection([
-  t.type({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    time_window: rollingTimeWindowSchema,
-    budgeting_method: t.literal('occurrences'),
-    objective: t.type({
-      target: t.number,
-    }),
-  }),
-  sloOptionalSettingsSchema,
-]);
+const createSLOResponseSchema = t.type({
+  id: t.string,
+});
+
+export type CreateSLOParams = t.TypeOf<typeof createSLOBodySchema>;
+export type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 
 export const createSLOParamsSchema = t.type({
   body: createSLOBodySchema,
+});
+
+export const deleteSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
 });

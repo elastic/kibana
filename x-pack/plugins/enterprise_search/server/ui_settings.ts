@@ -9,21 +9,24 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 
-import { enterpriseSearchFeatureId, enableIndexTransformsTab } from '../common/ui_settings_keys';
+import {
+  enterpriseSearchFeatureId,
+  enableBehavioralAnalyticsSection,
+} from '../common/ui_settings_keys';
 
 /**
  * uiSettings definitions for Enterprise Search
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
-  [enableIndexTransformsTab]: {
+  [enableBehavioralAnalyticsSection]: {
     category: [enterpriseSearchFeatureId],
-    description: i18n.translate('xpack.enterpriseSearch.uiSettings.indexTransforms.description', {
-      defaultMessage: 'Enable the new index transforms tab in Enterprise Search.',
+    description: i18n.translate('xpack.enterpriseSearch.uiSettings.analytics.description', {
+      defaultMessage: 'Enable the new Analytics section in Enterprise Search.',
     }),
-    name: i18n.translate('xpack.enterpriseSearch.uiSettings.indexTransforms.name', {
-      defaultMessage: 'Enable index transforms',
+    name: i18n.translate('xpack.enterpriseSearch.uiSettings.analytics.name', {
+      defaultMessage: 'Enable Behavioral Analytics',
     }),
-    requiresPageReload: false,
+    requiresPageReload: true,
     schema: schema.boolean(),
     value: false,
   },

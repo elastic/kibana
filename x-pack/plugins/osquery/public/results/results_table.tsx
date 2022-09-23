@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
 import type { ECSMapping } from '../../common/schemas/common';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
@@ -45,14 +46,15 @@ import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const DataContext = createContext<ResultEdges>([]);
 
-interface ResultsTableComponentProps {
+export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
   ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
+  addToCase?: ({ actionId }: { actionId?: string }) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -62,6 +64,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   addToTimeline,
+  addToCase,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -343,10 +346,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             startDate={startDate}
           />
           {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
+          {addToCase && addToCase({ actionId })}
         </>
       ),
     }),
-    [actionId, addToTimeline, endDate, startDate]
+    [actionId, addToCase, addToTimeline, endDate, startDate]
   );
 
   useEffect(

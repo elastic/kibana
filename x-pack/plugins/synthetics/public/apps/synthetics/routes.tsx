@@ -17,10 +17,9 @@ import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
-import { RunTestManually } from './components/monitor_summary/run_test_manually';
-import { MonitorSummaryHeaderContent } from './components/monitor_summary/monitor_summary_header_content';
-import { MonitorSummaryTitle } from './components/monitor_summary/monitor_summary_title';
-import { MonitorSummaryPage } from './components/monitor_summary/monitor_summary';
+import { MonitorDetailsPageHeader } from './components/monitor_details/monitor_details_page_header';
+import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
+import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
 import { OverviewPage } from './components/monitors_page/overview/overview_page';
@@ -79,22 +78,17 @@ const getRoutes = (
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
-        defaultMessage: 'Synthetics Getting Started | {baseTitle}',
+      title: i18n.translate('xpack.synthetics.monitorDetails.title', {
+        defaultMessage: 'Synthetics Monitor Details | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      component: () => <MonitorSummaryPage />,
-      dataTestSubj: 'syntheticsGettingStartedPage',
-      pageSectionProps: {
-        alignment: 'center',
-        paddingSize: 'none',
-      },
+      component: () => <MonitorDetailsPage />,
+      dataTestSubj: 'syntheticsMonitorDetailsPage',
       pageHeader: {
-        paddingSize: 'none',
-        children: <MonitorSummaryHeaderContent />,
-        pageTitle: <MonitorSummaryTitle />,
-        rightSideItems: [<RunTestManually />],
+        children: <MonitorDetailsPageHeader />,
+        pageTitle: <MonitorDetailsPageTitle />,
+        // rightSideItems: [<RunTestManually />],
       },
     },
     {

@@ -25,31 +25,6 @@ export type {
   FindActionResult,
 } from './types';
 
-export type {
-  CasesWebhookActionTypeId,
-  CasesWebhookActionParams,
-  EmailActionTypeId,
-  EmailActionParams,
-  IndexActionTypeId,
-  IndexActionParams,
-  PagerDutyActionTypeId,
-  PagerDutyActionParams,
-  ServerLogActionTypeId,
-  ServerLogActionParams,
-  SlackActionTypeId,
-  SlackActionParams,
-  WebhookActionTypeId,
-  WebhookActionParams,
-  ServiceNowITSMActionTypeId,
-  ServiceNowSIRActionTypeId,
-  ServiceNowActionParams,
-  JiraActionTypeId,
-  JiraActionParams,
-  ResilientActionTypeId,
-  ResilientActionParams,
-  TeamsActionTypeId,
-  TeamsActionParams,
-} from './builtin_action_types';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';

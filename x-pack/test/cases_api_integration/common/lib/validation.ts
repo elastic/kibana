@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CaseResponse, CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import { xorWith, isEqual } from 'lodash';
 
 /**
  * Ensure that the result of the alerts API request matches with the cases created for the test.
@@ -29,13 +30,12 @@ export function validateCasesFromAlertIDResponse(
  * Compares two arrays to determine if they are sort of equal. This function returns true if the arrays contain the same
  * elements but the ordering does not matter.
  */
-export function arraysToEqual(array1?: object[], array2?: object[]) {
+export function arraysToEqual<T>(array1?: T[], array2?: T[]) {
   if (!array1 || !array2 || array1.length !== array2.length) {
     return false;
   }
 
-  const array1AsSet = new Set(array1);
-  return array2.every((item) => array1AsSet.has(item));
+  return xorWith(array1, array2, isEqual).length === 0;
 }
 
 /**

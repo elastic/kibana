@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { transformRuleToAlertAction, transformAlertToRuleAction } from './transform_actions';
+import {
+  transformRuleToAlertAction,
+  transformAlertToRuleAction,
+  transformRuleToAlertResponseAction,
+  transformAlertToRuleResponseAction,
+} from './transform_actions';
+import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
 
 describe('transform_actions', () => {
   test('it should transform RuleAlertAction[] to RuleAction[]', () => {
@@ -35,6 +41,33 @@ describe('transform_actions', () => {
     expect(ruleAction).toEqual({
       id: alertAction.id,
       group: alertAction.group,
+      action_type_id: alertAction.actionTypeId,
+      params: alertAction.params,
+    });
+  });
+  test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
+    const ruleAction = {
+      action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        id: 'test',
+      },
+    };
+    const alertAction = transformRuleToAlertResponseAction(ruleAction);
+    expect(alertAction).toEqual({
+      actionTypeId: ruleAction.action_type_id,
+      params: ruleAction.params,
+    });
+  });
+
+  test('it should transform RuleResponseAction[] to ResponseAction[]', () => {
+    const alertAction = {
+      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        id: 'test',
+      },
+    };
+    const ruleAction = transformAlertToRuleResponseAction(alertAction);
+    expect(ruleAction).toEqual({
       action_type_id: alertAction.actionTypeId,
       params: alertAction.params,
     });

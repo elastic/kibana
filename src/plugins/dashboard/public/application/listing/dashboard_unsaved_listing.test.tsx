@@ -5,20 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
+import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
-import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardSavedObject } from '../..';
 import { DashboardAppServices } from '../../types';
-import { SavedObjectLoader } from '../../services/saved_objects';
-import { KibanaContextProvider } from '../../services/kibana_react';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { makeDefaultServices } from '../test_helpers';
+import { SavedObjectLoader } from '../../services/saved_object_loader';
+import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+import { pluginServices } from '../../services/plugin_services';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   dashboardUnsavedOne: {
@@ -67,6 +68,8 @@ function mountWith({
   }> = ({ children }) => {
     return (
       <I18nProvider>
+        {/* Only the old savedObjects service is used for `DashboardUnsavedListing`, so will need to wrap this in 
+        `DashboardServicesProvider` instead once that is removed as part of https://github.com/elastic/kibana/pull/138774*/}
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
       </I18nProvider>
     );
@@ -125,7 +128,7 @@ describe('Unsaved listing', () => {
   });
 
   it('Shows a warning then clears changes when delete unsaved changes is pressed', async () => {
-    const { services, component } = mountWith({});
+    const { component } = mountWith({});
     const getDiscardButton = () =>
       findTestSubject(component, 'discard-unsaved-Dashboard-Unsaved-One');
     await waitFor(() => {
@@ -135,8 +138,8 @@ describe('Unsaved listing', () => {
     getDiscardButton().simulate('click');
     waitFor(() => {
       component.update();
-      expect(services.core.overlays.openConfirm).toHaveBeenCalled();
-      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith(
+      expect(pluginServices.getServices().overlays.openConfirm).toHaveBeenCalled();
+      expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );
     });
@@ -162,12 +165,16 @@ describe('Unsaved listing', () => {
     const { component } = mountWith({ services, props });
     waitFor(() => {
       component.update();
-      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase1');
-      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase2');
+      expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(
+        'failCase1'
+      );
+      expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(
+        'failCase2'
+      );
 
       // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
       expect(
-        services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges
+        pluginServices.getServices().dashboardSessionStorage.getDashboardIdsWithUnsavedChanges
       ).toHaveBeenCalledTimes(2);
     });
   });

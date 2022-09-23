@@ -16,9 +16,14 @@ import {
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -39,11 +44,13 @@ import { useManageCaseAction } from './use_manage_case_action';
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
+  ruleType?: Type;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
+  responseActions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
 };
@@ -68,6 +75,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   onSubmit,
   setForm,
   actionMessageParams,
+  ruleType,
 }) => {
   const [isLoadingCaseAction] = useManageCaseAction();
   const {
@@ -76,6 +84,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
+  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {
@@ -83,6 +92,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }),
     [application]
   );
+
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
@@ -111,7 +121,19 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
+  const saveClickRef = useRef<{ onSaveClick: () => Promise<boolean> | null }>({
+    onSaveClick: () => null,
+  });
+
   const getData = useCallback(async () => {
+    const isResponseActionsInvalid = await saveClickRef.current.onSaveClick();
+    if (isResponseActionsInvalid) {
+      return {
+        isValid: false,
+        data: getFormData(),
+      };
+    }
+
     const result = await submit();
     return result?.isValid
       ? result
@@ -167,6 +189,18 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       ),
     [throttle, actionMessageParams]
   );
+  const displayResponseActionsOptions = useMemo(() => {
+    if (isQueryRule(ruleType)) {
+      return (
+        <>
+          <UseArray path="responseActions">
+            {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+          </UseArray>
+        </>
+      );
+    }
+    return null;
+  }, [ruleType]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
@@ -177,6 +211,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           componentProps={throttleFieldComponentProps}
         />
         {displayActionsOptions}
+        {responseActionsEnabled && displayResponseActionsOptions}
+
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
@@ -193,7 +229,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         <UseField path="enabled" component={GhostFormField} />
       </>
     );
-  }, [application.capabilities.actions.show, displayActionsOptions, throttleFieldComponentProps]);
+  }, [
+    application.capabilities.actions.show,
+    displayActionsOptions,
+    displayResponseActionsOptions,
+    responseActionsEnabled,
+    throttleFieldComponentProps,
+  ]);
 
   if (isReadOnlyView) {
     return (
