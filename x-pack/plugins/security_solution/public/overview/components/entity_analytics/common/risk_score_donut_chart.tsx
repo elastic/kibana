@@ -10,7 +10,6 @@ import type { MouseEventHandler } from 'react';
 import React from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
-import { LinkAnchor } from '../../../../common/components/links';
 import type { SeverityCount } from '../../../../common/components/severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
@@ -56,11 +55,7 @@ export const RiskScoreDonutChart = ({ severityCount, onClick, href }: RiskScoreD
           data={donutChartData ?? null}
           fillColor={fillColor}
           height={DONUT_HEIGHT}
-          label={
-            <LinkAnchor data-test-subj="view-total-button" onClick={onClick} href={href}>
-              {i18n.TOTAL_LABEL}
-            </LinkAnchor>
-          }
+          label={i18n.TOTAL_LABEL}
           title={<ChartLabel count={total} />}
           totalCount={total}
         />
