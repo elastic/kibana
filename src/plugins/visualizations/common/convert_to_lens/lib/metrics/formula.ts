@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
+import { isFieldValid, SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
 import { isMetricWithField, getStdDeviationFormula, ExtendedColumnConverterArgs } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
@@ -59,6 +59,32 @@ const METRIC_OPS_WITHOUT_PARAMS: string[] = [
   Operations.COUNT,
 ];
 
+const isDataViewField = (field: string | DataViewField): field is DataViewField => {
+  if (field && typeof field === 'object') {
+    return true;
+  }
+  return false;
+};
+
+const isValidAgg = (agg: SchemaConfig<METRIC_TYPES>, dataView: DataView) => {
+  const aggregation = SUPPORTED_METRICS[agg.aggType];
+  if (!aggregation) {
+    return false;
+  }
+  if (isMetricWithField(agg)) {
+    if (!agg.aggParams?.field) {
+      return false;
+    }
+    const sourceField = getFieldNameFromField(agg.aggParams?.field);
+    const field = dataView.getFieldByName(sourceField!);
+    if (!isFieldValid(field, aggregation)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 const getFormulaForAggsWithoutParams = (
   agg: SchemaConfig<METRIC_TYPES>,
   dataView: DataView,
@@ -66,7 +92,7 @@ const getFormulaForAggsWithoutParams = (
   reducedTimeRange?: string
 ) => {
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!op) {
+  if (!isValidAgg(agg, dataView) || !op) {
     return null;
   }
 
@@ -82,7 +108,7 @@ const getFormulaForPercentileRanks = (
 ) => {
   const value = Number(agg.aggId?.split('.')[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!op) {
+  if (!isValidAgg(agg, dataView) || !op) {
     return null;
   }
 
@@ -98,7 +124,7 @@ const getFormulaForPercentile = (
 ) => {
   const percentile = Number(agg.aggId?.split('.')[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!op) {
+  if (!isValidAgg(agg, dataView) || !op) {
     return null;
   }
 
@@ -106,13 +132,6 @@ const getFormulaForPercentile = (
   return `${formula}(${selector}, percentile=${percentile}${addTimeRangeToFormula(
     reducedTimeRange
   )})`;
-};
-
-const isDataViewField = (field: string | DataViewField): field is DataViewField => {
-  if (field && typeof field === 'object') {
-    return true;
-  }
-  return false;
 };
 
 const getFormulaForSubMetric = ({
@@ -225,6 +244,9 @@ export const getFormulaForAgg = ({
   }
 
   if (isStdDevAgg(agg) && agg.aggId) {
+    if (!isValidAgg(agg, dataView)) {
+      return null;
+    }
     return getStdDeviationFormula(agg.aggId, getFieldNameFromField(agg.aggParams?.field) ?? '');
   }
 
