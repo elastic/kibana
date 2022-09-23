@@ -47,6 +47,8 @@ import {
   LOAD_START,
 } from './events';
 
+import './core_system.scss';
+
 interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
