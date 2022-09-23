@@ -58,7 +58,8 @@ export const getTTYQueryPredicates = async (
   if (lastEventHits.length > 0) {
     const lastEvent: ProcessEvent = lastEventHits[0]._source as ProcessEvent;
     const lastEventTime = lastEvent['@timestamp'];
-    const rangeEnd = lastEventTime ? parse(lastEventTime).toISOString() : new Date().toISOString();
+    const rangeEnd =
+      (lastEventTime && parse(lastEventTime)?.toISOString()) || new Date().toISOString();
     const range = [lastEvent?.process?.entry_leader?.start, rangeEnd];
     const tty = lastEvent?.process?.entry_leader?.tty;
     const hostId = lastEvent?.host?.id;
