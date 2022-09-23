@@ -102,9 +102,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('metric');
       });
 
-      it('should hide the "Edit Visualization in Lens" menu item', async () => {
+      it('should show the "Edit Visualization in Lens" menu item', async () => {
         const button = await testSubjects.exists('visualizeEditInLensButton');
-        expect(button).to.eql(false);
+        expect(button).to.eql(true);
       });
     });
 
