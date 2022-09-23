@@ -12,7 +12,7 @@ import type {
   RuleAction,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ThrottleForBulkActions } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import type { FormSchema } from '../../../../../../../shared_imports';
 import {
   useForm,
@@ -22,8 +22,11 @@ import {
   getUseField,
   Field,
 } from '../../../../../../../shared_imports';
-import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type {
+  BulkActionEditPayload,
+  ThrottleForBulkActions,
+} from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { NOTIFICATION_THROTTLE_RULE } from '../../../../../../../../common/constants';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
