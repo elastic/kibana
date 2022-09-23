@@ -10,18 +10,18 @@ import { ILicense, LicenseType, LicensingPluginStart } from '@kbn/licensing-plug
 
 export class LicensingService {
   private readonly license$: Observable<ILicense>;
-  private _notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage'] | null = null;
+  private readonly _notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage'];
 
-  constructor(license$: Observable<ILicense>) {
+  constructor(
+    license$: Observable<ILicense>,
+    notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']
+  ) {
     this.license$ = license$;
-  }
-
-  public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
     this._notifyUsage = notifyUsage;
   }
 
   public notifyUsage(featureName: string) {
-    this._notifyUsage?.(featureName);
+    this._notifyUsage(featureName);
   }
 
   public async getLicenseInformation(): Promise<ILicense> {
