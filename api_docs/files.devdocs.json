@@ -378,7 +378,7 @@
               "\nStream the contents of the file to Kibana server for storage.\n"
             ],
             "signature": [
-              "(args: { body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; }) => Promise<{ ok: true; size: number; }>"
+              "(args: { body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }) => Promise<{ ok: true; size: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -1152,7 +1152,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>; }>; upload: (arg: Omit<{ body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<{ id: string; fileName?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
+          "<unknown>; }>; upload: (arg: Omit<{ body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<{ id: string; fileName?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1242,10 +1242,12 @@
           "parentPluginId": "files",
           "id": "def-public.FilesSetup.filesClientFactory",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "filesClientFactory",
           "description": [
-            "\nA factory for creating an {@link FilesClient} instance. This requires a\nregistered {@link FileKind}."
+            "\nA factory for creating an {@link FilesClient} instance. This requires a\nregistered {@link FileKind}.\n"
           ],
           "signature": [
             {
@@ -1258,7 +1260,8 @@
           ],
           "path": "x-pack/plugins/files/public/plugin.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": true,
+          "references": []
         },
         {
           "parentPluginId": "files",
@@ -5496,7 +5499,9 @@
           "parentPluginId": "files",
           "id": "def-server.FilesSetup.registerFileKind",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "registerFileKind",
           "description": [
             "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
@@ -5514,7 +5519,8 @@
           ],
           "path": "x-pack/plugins/files/server/types.ts",
           "deprecated": false,
-          "trackAdoption": false,
+          "trackAdoption": true,
+          "references": [],
           "children": [
             {
               "parentPluginId": "files",
@@ -5563,10 +5569,12 @@
           "parentPluginId": "files",
           "id": "def-server.FilesStart.fileServiceFactory",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "fileServiceFactory",
           "description": [
-            "\nCreate an instance of {@link FileServiceStart}."
+            "\nCreate an instance of {@link FileServiceStart}.\n"
           ],
           "signature": [
             {
@@ -5579,7 +5587,8 @@
           ],
           "path": "x-pack/plugins/files/server/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": true,
+          "references": []
         }
       ],
       "lifecycle": "start",
