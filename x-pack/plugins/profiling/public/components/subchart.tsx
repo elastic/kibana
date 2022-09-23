@@ -84,7 +84,9 @@ export const SubChart: React.FC<SubChartProps> = ({
     },
     query: {
       ...query,
-      kuery: `${getFieldNameForTopNType(path.topNType)}:"${category}"`,
+      kuery: `${query.kuery ? `(${query.kuery}) AND ` : ''}${getFieldNameForTopNType(
+        path.topNType
+      )}:"${category}"`,
     },
   });
 
