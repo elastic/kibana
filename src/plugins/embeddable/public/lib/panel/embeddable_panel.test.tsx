@@ -218,6 +218,7 @@ describe('HelloWorldContainer in error state', () => {
   test('renders a custom fatal error', () => {
     embeddable.triggerError(new Error('something'), true);
     component.update();
+    component.mount();
 
     const embeddableError = findTestSubject(component, 'embeddableError');
 
