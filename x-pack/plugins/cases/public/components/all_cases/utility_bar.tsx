@@ -43,14 +43,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   const [deleteCases, setDeleteCases] = useState<DeleteCase[]>([]);
 
   // Delete case
-  const {
-    dispatchResetIsDeleted,
-    handleOnDeleteConfirm,
-    handleToggleModal,
-    isLoading: isDeleting,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-  } = useDeleteCases();
+  const { mutate } = useDeleteCases();
 
   // Update case
   const {
@@ -60,23 +53,24 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     updateBulkStatus,
   } = useUpdateCases();
 
-  useEffect(() => {
-    handleIsLoading(isDeleting);
-  }, [handleIsLoading, isDeleting]);
+  // useEffect(() => {
+  //   handleIsLoading(isDeleting);
+  // }, [handleIsLoading, isDeleting]);
 
   useEffect(() => {
     handleIsLoading(isUpdating);
   }, [handleIsLoading, isUpdating]);
+
   useEffect(() => {
-    if (isDeleted) {
-      if (refreshCases != null) refreshCases();
-      dispatchResetIsDeleted();
-    }
+    // if (isDeleted) {
+    //   if (refreshCases != null) refreshCases();
+    //   dispatchResetIsDeleted();
+    // }
     if (isUpdated) {
       if (refreshCases != null) refreshCases();
       dispatchResetIsUpdated();
     }
-  }, [isDeleted, isUpdated, refreshCases, dispatchResetIsDeleted, dispatchResetIsUpdated]);
+  }, [isUpdated, refreshCases, dispatchResetIsUpdated]);
 
   const toggleBulkDeleteModal = useCallback(
     (cases: Case[]) => {
@@ -97,6 +91,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     },
     [selectedCases, updateBulkStatus]
   );
+
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
       <EuiContextMenuPanel
