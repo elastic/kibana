@@ -66,40 +66,40 @@ describe('count operation', () => {
         expect(keys).toMatchInlineSnapshot(`
           Array [
             Array [
-              "aggValueCount-bytes-undefined-false",
-              "aggValueCount-bytes-undefined-false",
+              "aggValueCount-bytes-false-undefined",
+              "aggValueCount-bytes-false-undefined",
             ],
             Array [
-              "filtered-aggValueCount-undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
-              "filtered-aggValueCount-undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
+              "aggValueCount-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggValueCount-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"GA\\" ",
             ],
             Array [
-              "filtered-aggValueCount-undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-              "filtered-aggValueCount-undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+              "aggValueCount-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggValueCount-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"AL\\" ",
             ],
             Array [
-              "filtered-aggValueCount-undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-              "filtered-aggValueCount-undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "aggValueCount-filtered-bytes-false-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "aggValueCount-filtered-bytes-false-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
             ],
             Array [
-              "filtered-aggValueCount-1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-              "filtered-aggValueCount-1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+              "aggValueCount-filtered-bytes-false-1m-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggValueCount-filtered-bytes-false-1m-undefined-kql-geo.dest: \\"AL\\" ",
             ],
             Array [
-              "aggCount-undefined-undefined-true",
-              "aggCount-undefined-undefined-true",
+              "aggCount-undefined-true-undefined",
+              "aggCount-undefined-true-undefined",
             ],
             Array [
-              "aggCount-undefined-undefined-false",
-              "aggCount-undefined-undefined-false",
+              "aggCount-undefined-false-undefined",
+              "aggCount-undefined-false-undefined",
             ],
             Array [
-              "aggValueCount-agent.keyword-undefined-false",
-              "aggValueCount-agent.keyword-undefined-false",
+              "aggValueCount-agent.keyword-false-undefined",
+              "aggValueCount-agent.keyword-false-undefined",
             ],
             Array [
-              "aggValueCount-agent.keyword-undefined-true",
-              "aggValueCount-agent.keyword-undefined-true",
+              "aggValueCount-agent.keyword-true-undefined",
+              "aggValueCount-agent.keyword-true-undefined",
             ],
           ]
         `);

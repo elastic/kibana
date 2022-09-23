@@ -17,13 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import {
-  buildExpressionFunction,
-  ExpressionAstExpressionBuilder,
-  ExpressionAstFunctionBuilder,
-  AnyExpressionFunctionDefinition,
-} from '@kbn/expressions-plugin/public';
-import { ExpressionFunctionKql, ExpressionFunctionLucene } from '@kbn/data-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../types';
@@ -39,6 +33,7 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from '../../dedupe_aggs';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -265,41 +260,11 @@ export const lastValueOperation: OperationDefinition<
   },
 
   getGroupByKey: (agg) => {
-    const {
-      functions: [fnBuilder],
-    } = agg;
-
-    if (fnBuilder.name === 'aggFilteredMetric') {
-      const metricFnBuilder = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
-        | ExpressionAstFunctionBuilder<AnyExpressionFunctionDefinition>
-        | undefined;
-
-      if (metricFnBuilder && ['aggTopHit', 'aggTopMetrics'].includes(metricFnBuilder.name)) {
-        const aggFilterFnBuilder = (
-          fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
-        ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
-
-        let groupKey = `${metricFnBuilder.name}-${aggFilterFnBuilder.getArgument('timeWindow')}-${
-          metricFnBuilder.getArgument('field')?.[0]
-        }-${
-          fnBuilder.getArgument('timeShift')?.[0] // we get this from the parent agg
-        }`;
-
-        const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
-          | ExpressionAstExpressionBuilder
-          | undefined;
-
-        if (filterExpression) {
-          const filterFnBuilder = filterExpression.functions[0] as
-            | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
-            | undefined;
-
-          groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
-        }
-
-        return groupKey;
-      }
-    }
+    return getGroupByKey(
+      agg,
+      ['aggTopHit', 'aggTopMetrics'],
+      [{ name: 'field' }, { name: 'sortField' }]
+    );
   },
 
   isTransferable: (column, newIndexPattern) => {

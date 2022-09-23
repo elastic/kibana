@@ -70,48 +70,48 @@ describe('metrics', () => {
 
       it('snapshot', () => {
         expect(keys).toMatchInlineSnapshot(`
-        Array [
           Array [
-            "bytes-undefined-false",
-            "bytes-undefined-false",
-          ],
-          Array [
-            "bytes-undefined-true",
-            "bytes-undefined-true",
-          ],
-          Array [
-            "hour_of_day-undefined-false",
-            "hour_of_day-undefined-false",
-          ],
-          Array [
-            "machine.ram-1h-false",
-            "machine.ram-1h-false",
-          ],
-          Array [
-            "machine.ram-2h-false",
-            "machine.ram-2h-false",
-          ],
-          Array [
-            "undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
-            "undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
-          ],
-          Array [
-            "undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
-            "undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
-          ],
-          Array [
-            "undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-            "undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-          ],
-          Array [
-            "undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-            "undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-          ],
-          Array [
-            "1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-            "1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-          ],
-        ]
+            Array [
+              "aggSum-bytes-false-undefined",
+              "aggSum-bytes-false-undefined",
+            ],
+            Array [
+              "aggSum-bytes-true-undefined",
+              "aggSum-bytes-true-undefined",
+            ],
+            Array [
+              "aggSum-hour_of_day-false-undefined",
+              "aggSum-hour_of_day-false-undefined",
+            ],
+            Array [
+              "aggSum-machine.ram-false-1h",
+              "aggSum-machine.ram-false-1h",
+            ],
+            Array [
+              "aggSum-machine.ram-false-2h",
+              "aggSum-machine.ram-false-2h",
+            ],
+            Array [
+              "aggSum-filtered-bytes-true-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggSum-filtered-bytes-true-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+            ],
+            Array [
+              "aggSum-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggSum-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+            ],
+            Array [
+              "aggSum-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggSum-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+            ],
+            Array [
+              "aggSum-filtered-bytes-false-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "aggSum-filtered-bytes-false-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+            ],
+            Array [
+              "aggSum-filtered-bytes-false-1m-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggSum-filtered-bytes-false-1m-undefined-kql-geo.dest: \\"AL\\" ",
+            ],
+          ]
         `);
       });
     });

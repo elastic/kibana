@@ -971,41 +971,41 @@ describe('last_value', () => {
 
       it('snapshot', () => {
         expect(keys).toMatchInlineSnapshot(`
-        Array [
           Array [
-            "aggTopMetrics-undefined-bytes-undefined-kql-bytes: *",
-            "aggTopMetrics-undefined-bytes-undefined-kql-bytes: *",
-          ],
-          Array [
-            "aggTopMetrics-undefined-machine.ram-undefined-kql-machine.ram: *",
-            "aggTopMetrics-undefined-machine.ram-undefined-kql-machine.ram: *",
-          ],
-          Array [
-            "aggTopMetrics-undefined-machine.ram-1h-kql-machine.ram: *",
-            "aggTopMetrics-undefined-machine.ram-1h-kql-machine.ram: *",
-          ],
-          Array [
-            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"GA\\" ",
-            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"GA\\" ",
-          ],
-          Array [
-            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-            "aggTopMetrics-undefined-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-          ],
-          Array [
-            "aggTopMetrics-undefined-bytes-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-            "aggTopMetrics-undefined-bytes-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-          ],
-          Array [
-            "aggTopMetrics-1m-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-            "aggTopMetrics-1m-bytes-undefined-kql-geo.dest: \\"AL\\" ",
-          ],
-          Array [
-            "aggTopHit-undefined-bytes-undefined-kql-bytes: *",
-            "aggTopHit-undefined-bytes-undefined-kql-bytes: *",
-          ],
-        ]
-      `);
+            Array [
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-kql-bytes: *",
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-kql-bytes: *",
+            ],
+            Array [
+              "aggTopMetrics-filtered-machine.ram-timestamp-undefined-undefined-kql-machine.ram: *",
+              "aggTopMetrics-filtered-machine.ram-timestamp-undefined-undefined-kql-machine.ram: *",
+            ],
+            Array [
+              "aggTopMetrics-filtered-machine.ram-timestamp-undefined-1h-kql-machine.ram: *",
+              "aggTopMetrics-filtered-machine.ram-timestamp-undefined-1h-kql-machine.ram: *",
+            ],
+            Array [
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+            ],
+            Array [
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+            ],
+            Array [
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "aggTopMetrics-filtered-bytes-timestamp-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+            ],
+            Array [
+              "aggTopMetrics-filtered-bytes-timestamp-1m-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggTopMetrics-filtered-bytes-timestamp-1m-undefined-kql-geo.dest: \\"AL\\" ",
+            ],
+            Array [
+              "aggTopHit-filtered-bytes-timestamp-undefined-undefined-kql-bytes: *",
+              "aggTopHit-filtered-bytes-timestamp-undefined-undefined-kql-bytes: *",
+            ],
+          ]
+        `);
       });
     });
 

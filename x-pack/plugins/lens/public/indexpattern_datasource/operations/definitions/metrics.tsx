@@ -9,16 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import {
-  buildExpressionFunction,
-  ExpressionAstExpressionBuilder,
-  ExpressionAstFunctionBuilder,
-} from '@kbn/expressions-plugin/public';
-import {
-  AggFunctionsMapping,
-  ExpressionFunctionKql,
-  ExpressionFunctionLucene,
-} from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -37,6 +28,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from '../../dedupe_aggs';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -208,51 +200,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }).toAst();
     },
     getGroupByKey: (agg) => {
-      let groupKey;
-
-      const {
-        functions: [fnBuilder],
-      } = agg;
-
-      const metricType = typeToFn[type];
-
-      if (fnBuilder.name === metricType) {
-        groupKey = `${fnBuilder.getArgument('field')?.[0]}-${
-          fnBuilder.getArgument('timeShift')?.[0]
-        }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`; // boolean coersion since "undefined" is effectively the same as "false"
-      }
-
-      if (fnBuilder.name === 'aggFilteredMetric') {
-        const metricFnBuilder = (
-          fnBuilder.getArgument('customMetric')?.[0] as ExpressionAstExpressionBuilder
-        ).functions[0];
-
-        if (metricFnBuilder?.name === metricType) {
-          const aggFilterFnBuilder = (
-            fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
-          ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
-
-          groupKey = `${aggFilterFnBuilder.getArgument('timeWindow')?.[0]}-${
-            metricFnBuilder.getArgument('field')?.[0]
-          }-${fnBuilder.getArgument('timeShift')?.[0]}-${Boolean(
-            metricFnBuilder.getArgument('emptyAsNull')?.[0]
-          )}`;
-
-          const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
-            | ExpressionAstExpressionBuilder
-            | undefined;
-
-          if (filterExpression) {
-            const filterFnBuilder = filterExpression.functions[0] as
-              | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
-              | undefined;
-
-            groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
-          }
-        }
-      }
-
-      return groupKey;
+      return getGroupByKey(
+        agg,
+        [typeToFn[type]],
+        [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+      );
     },
 
     getErrorMessage: (layer, columnId, indexPattern) =>

@@ -63,32 +63,32 @@ describe('unique values function', () => {
         expect(keys).toMatchInlineSnapshot(`
           Array [
             Array [
-              "bytes-undefined-false",
-              "bytes-undefined-false",
+              "aggCardinality-bytes-false-undefined",
+              "aggCardinality-bytes-false-undefined",
             ],
             Array [
-              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
-              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"GA\\" ",
+              "aggCardinality-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggCardinality-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"GA\\" ",
             ],
             Array [
-              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-              "filtered-undefined-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+              "aggCardinality-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggCardinality-filtered-bytes-false-undefined-undefined-kql-geo.dest: \\"AL\\" ",
             ],
             Array [
-              "filtered-undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
-              "filtered-undefined-bytes-undefined-false-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "aggCardinality-filtered-bytes-false-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+              "aggCardinality-filtered-bytes-false-undefined-undefined-lucene-\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
             ],
             Array [
-              "filtered-1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
-              "filtered-1m-bytes-undefined-false-kql-geo.dest: \\"AL\\" ",
+              "aggCardinality-filtered-bytes-false-1m-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggCardinality-filtered-bytes-false-1m-undefined-kql-geo.dest: \\"AL\\" ",
             ],
             Array [
-              "bytes-undefined-true",
-              "bytes-undefined-true",
+              "aggCardinality-bytes-true-undefined",
+              "aggCardinality-bytes-true-undefined",
             ],
             Array [
-              "filtered-undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
-              "filtered-undefined-bytes-undefined-true-kql-geo.dest: \\"GA\\" ",
+              "aggCardinality-filtered-bytes-true-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggCardinality-filtered-bytes-true-undefined-undefined-kql-geo.dest: \\"GA\\" ",
             ],
           ]
         `);
