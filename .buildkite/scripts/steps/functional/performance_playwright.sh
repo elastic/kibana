@@ -35,7 +35,28 @@ trap 'killall node -q' EXIT
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
 
-for journey in x-pack/performance/journeys/*; do
+echo "--- determining which journeys to run"
+
+journeys=$(buildkite-agent meta-data get "failed-journeys" --default '')
+if [ "$journeys" != "" ]; then
+  echo "re-running failed journeys:${journeys}"
+else
+  paths=()
+  for path in x-pack/performance/journeys/*; do
+    paths+=("$path")
+  done
+  journeys=$(printf "%s\n" "${paths[@]}")
+  echo "running discovered journeys:${journeys}"
+fi
+
+# track failed journeys here which might get written to metadata
+failedJourneys=()
+
+while read -r journey; do
+  if [ "$journey" == "" ]; then
+    continue;
+  fi
+
   echo "--- $journey - 🔎 Start es"
 
   node scripts/es snapshot&
@@ -70,6 +91,7 @@ for journey in x-pack/performance/journeys/*; do
     set -e
 
     if [ $status -ne 0 ]; then
+      failedJourneys+=("$journey")
       echo "^^^ +++"
       echo "❌ FTR failed with status code: $status"
       break
@@ -95,8 +117,12 @@ for journey in x-pack/performance/journeys/*; do
       sleep 5;
     fi
   done
+done <<< "$journeys"
 
-  if [ $status -ne 0 ]; then
-    exit 1
-  fi
-done
+echo "--- report/record failed journeys"
+if [ "${failedJourneys[*]}" != "" ]; then
+  buildkite-agent meta-data set "failed-journeys" "$(printf "%s\n" "${failedJourneys[@]}")"
+
+  echo "failed journeys: ${failedJourneys[*]}"
+  exit 1
+fi
