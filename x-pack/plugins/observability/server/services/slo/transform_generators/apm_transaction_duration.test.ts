@@ -25,13 +25,13 @@ describe('APM Transaction Duration Transform Generator', () => {
     });
   });
 
-  it("does not include the query filter when params are 'ALL'", async () => {
+  it("does not include the query filter when params are '*'", async () => {
     const anSLO = createSLO(
       createAPMTransactionDurationIndicator({
-        environment: 'ALL',
-        service: 'ALL',
-        transaction_name: 'ALL',
-        transaction_type: 'ALL',
+        environment: '*',
+        service: '*',
+        transaction_name: '*',
+        transaction_type: '*',
       })
     );
     const transform = generator.getTransformParams(anSLO, 'my-namespace');

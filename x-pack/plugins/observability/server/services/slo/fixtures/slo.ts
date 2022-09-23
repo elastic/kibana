@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { SLI, SLO } from '../../../types/models';
-import { CreateSLOParams } from '../../../types/schema';
+import { CreateSLOParams } from '../../../types/rest_specs';
 
 const commonSLO: Omit<CreateSLOParams, 'indicator'> = {
   name: 'irrelevant',

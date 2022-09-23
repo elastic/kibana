@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './common';
-export * from './indicators';
+import * as t from 'io-ts';
+
+const ALL_VALUE = '*';
+
+const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
+
+export { allOrAnyString, ALL_VALUE };

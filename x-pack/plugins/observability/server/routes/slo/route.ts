@@ -18,7 +18,7 @@ import {
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { SLITypes } from '../../types/models';
-import { createSLOParamsSchema, deleteSLOParamsSchema } from '../../types/schema';
+import { createSLOParamsSchema, deleteSLOParamsSchema } from '../../types/rest_specs';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<SLITypes, TransformGenerator> = {
