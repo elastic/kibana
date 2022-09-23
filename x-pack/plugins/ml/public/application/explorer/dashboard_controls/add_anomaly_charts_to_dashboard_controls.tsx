@@ -9,7 +9,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, htmlIdGenerator, formatDate } from '@elastic/eui';
 import type { Query, TimeRange } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
-import { AppStateSelectedCells, getSelectionInfluencers, getSelectionTimeRange } from '../explorer_utils';
+import { TimeRangeBounds } from '../../util/time_buckets';
+import {
+  AppStateSelectedCells,
+  getSelectionInfluencers,
+  getSelectionTimeRange,
+} from '../explorer_utils';
 import { isDefined } from '../../../../common/types/guards';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
@@ -23,8 +28,7 @@ import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../embeddables';
 import { getDefaultExplorerChartsPanelTitle } from '../../../embeddables/anomaly_charts/anomaly_charts_embeddable';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../../embeddables/anomaly_charts/anomaly_charts_initializer';
-import { TimeRangeBounds } from '@kbn/ml-plugin/public/application/util/time_buckets';
-import { useTimeRangeUpdates } from '@kbn/ml-plugin/public/application/contexts/kibana/use_timefilter';
+import { useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
@@ -47,9 +51,8 @@ export interface AddToDashboardControlProps {
 export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
-                                                                                     interval,
-                                                                                     bounds
-
+  interval,
+  bounds,
 }) => {
   const [severity] = useTableSeverity();
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
@@ -60,7 +63,6 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     anomalyExplorerCommonStateService.getFilterSettings()
   );
   const globalTimeRange = useTimeRangeUpdates();
-
 
   const selectedCells = useObservable(
     anomalyTimelineStateService.getSelectedCells$(),

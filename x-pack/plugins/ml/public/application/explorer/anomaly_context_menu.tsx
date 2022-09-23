@@ -16,10 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../contexts/kibana';
-import {
-  AppStateSelectedCells,
-  ExplorerJob,
-} from './explorer_utils';
+import { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_anomaly_charts_to_dashboard_controls';
 
