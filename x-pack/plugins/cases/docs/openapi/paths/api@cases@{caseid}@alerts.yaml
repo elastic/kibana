@@ -7,7 +7,6 @@ get:
   operationId: getCaseAlertsDefaultSpace
   tags:
     - cases
-    - kibana
   x-technical-preview: true
   parameters:
     - $ref: ../components/parameters/case_id.yaml

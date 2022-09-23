@@ -7,7 +7,6 @@ get:
     feature privileges, depending on the owner of the cases you're seeking.
   tags:
     - cases
-    - kibana
   deprecated: true
   parameters:
     - $ref: '../components/parameters/owner.yaml'
