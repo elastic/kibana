@@ -49,7 +49,7 @@ export const updateAndPickupMappings = ({
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        body: mappings,
+        ...mappings,
       })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts

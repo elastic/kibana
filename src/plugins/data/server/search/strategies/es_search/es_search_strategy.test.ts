@@ -15,6 +15,7 @@ import { SearchStrategyDependencies } from '../../types';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { firstValueFrom } from 'rxjs';
 
 describe('ES search strategy', () => {
   const successBody = {
@@ -105,6 +106,19 @@ describe('ES search strategy', () => {
         done();
       }));
 
+  it('calls the client with transport options', async () => {
+    const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
+    await firstValueFrom(
+      esSearchStrategyProvider(mockConfig$, mockLogger).search(
+        { params },
+        { transport: { maxRetries: 5 } },
+        getMockedDeps()
+      )
+    );
+    const [, searchOptions] = esClient.search.mock.calls[0];
+    expect(searchOptions).toEqual({ signal: undefined, maxRetries: 5 });
+  });
+
   it('can be aborted', async () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
@@ -120,6 +134,7 @@ describe('ES search strategy', () => {
       ...params,
       track_total_hits: true,
     });
+    expect(esClient.search.mock.calls[0][1]).toEqual({ signal: expect.any(AbortSignal) });
   });
 
   it('throws normalized error if ResponseError is thrown', async (done) => {

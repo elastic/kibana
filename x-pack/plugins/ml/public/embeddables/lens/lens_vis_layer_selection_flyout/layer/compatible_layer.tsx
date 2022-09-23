@@ -84,6 +84,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         data.query.timefilter.timefilter,
         mlApiServices
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
   );
 

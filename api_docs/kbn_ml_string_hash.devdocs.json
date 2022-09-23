@@ -25,6 +25,7 @@
         ],
         "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-string-hash",
@@ -38,6 +39,7 @@
             ],
             "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

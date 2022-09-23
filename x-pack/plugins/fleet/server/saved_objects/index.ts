@@ -271,6 +271,18 @@ const getSavedObjectTypes = (
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
         install_format_schema_version: { type: 'version' },
+        experimental_data_stream_features: {
+          type: 'nested',
+          properties: {
+            data_stream: { type: 'keyword' },
+            features: {
+              type: 'nested',
+              properties: {
+                synthetic_source: { type: 'boolean' },
+              },
+            },
+          },
+        },
       },
     },
     migrations: {

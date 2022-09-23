@@ -161,7 +161,6 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
           type: 'icon',
         },
         {
-          available: (index) => !isCrawlerIndex(index),
           color: 'danger',
           description: 'Delete this index',
           icon: 'trash',

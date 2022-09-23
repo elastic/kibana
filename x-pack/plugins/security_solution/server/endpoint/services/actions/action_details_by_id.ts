@@ -13,6 +13,8 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
+  getAgentHostNamesWithIds,
+  getActionStatus,
 } from './utils';
 import type {
   ActionDetails,
@@ -27,9 +29,11 @@ import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import type { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
   actionId: string
 ): Promise<ActionDetails> => {
   let actionRequestsLogEntries: EndpointActivityLogAction[];
@@ -106,19 +110,37 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
+  // get host metadata info with queried agents
+  const agentsHostInfo = await getAgentHostNamesWithIds({
+    esClient,
+    metadataService,
+    agentIds: normalizedActionRequest.agents,
+  });
+
   const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
     getActionCompletionInfo(normalizedActionRequest.agents, actionResponses);
+
+  const { isExpired, status } = getActionStatus({
+    expirationDate: normalizedActionRequest.expiration,
+    isCompleted,
+    wasSuccessful,
+  });
 
   const actionDetails: ActionDetails = {
     id: actionId,
     agents: normalizedActionRequest.agents,
+    hosts: normalizedActionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+      acc[id] = { name: agentsHostInfo[id] ?? '' };
+      return acc;
+    }, {}),
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
     isCompleted,
     completedAt,
     wasSuccessful,
     errors,
-    isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
+    isExpired,
+    status,
     outputs,
     agentState,
     createdBy: normalizedActionRequest.createdBy,

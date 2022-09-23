@@ -32,6 +32,7 @@ export const manualPointEventAnnotation: ExpressionFunctionDefinition<
   inputTypes: ['null'],
   args: {
     id: {
+      required: true,
       types: ['string'],
       help: i18n.translate('eventAnnotation.manualAnnotation.args.id', {
         defaultMessage: `Id for annotation`,
@@ -112,6 +113,7 @@ export const manualRangeEventAnnotation: ExpressionFunctionDefinition<
   inputTypes: ['null'],
   args: {
     id: {
+      required: true,
       types: ['string'],
       help: i18n.translate('eventAnnotation.rangeAnnotation.args.id', {
         defaultMessage: `Id for annotation`,

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -87,7 +88,10 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const input = useObservable(embeddableInput);
 
   useEffect(() => {
     onInputChange({
@@ -97,6 +101,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       severity: severity.val,
       entityFields: selectedEntities,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity, selectedEntities]);
 
   const {
@@ -112,14 +117,29 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     severity.val,
     { onRenderComplete, onError, onLoading }
   );
+
+  // Holds the container height for previously fetched data
+  const containerHeightRef = useRef<number>();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
+      // Keep previous container height so it doesn't change the page layout
+      if (!isExplorerLoading) {
+        containerHeightRef.current = e.height;
+      }
+
       if (Math.abs(chartWidth - e.width) > 20) {
         setChartWidth(e.width);
       }
     }, RESIZE_THROTTLE_TIME_MS),
-    [chartWidth]
+    [!isExplorerLoading, chartWidth]
   );
+
+  const containerHeight = useMemo(() => {
+    // Persists container height during loading to prevent page from jumping
+    return isExplorerLoading ? containerHeightRef.current : undefined;
+  }, [isExplorerLoading]);
 
   if (error) {
     return (
@@ -167,6 +187,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
             overflowY: 'auto',
             overflowX: 'hidden',
             padding: '8px',
+            height: containerHeight,
           }}
           data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
           ref={resizeRef}
@@ -201,6 +222,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
               chartsService={chartsService}
+              timeRange={input?.timeRange}
             />
           )}
         </div>

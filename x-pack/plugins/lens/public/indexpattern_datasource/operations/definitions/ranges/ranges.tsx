@@ -71,7 +71,11 @@ function getFieldDefaultFormat(indexPattern: IndexPattern, field: IndexPatternFi
   return undefined;
 }
 
-export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field'> = {
+export const rangeOperation: OperationDefinition<
+  RangeIndexPatternColumn,
+  'field',
+  RangeColumnParams
+> = {
   type: 'range',
   displayName: i18n.translate('xpack.lens.indexPattern.intervals', {
     defaultMessage: 'Intervals',
@@ -98,7 +102,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
       defaultMessage: 'Missing field',
     }),
-  buildColumn({ field }) {
+  buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,
       dataType: 'number', // string for Range
@@ -107,12 +111,12 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       isBucketed: true,
       scale: 'interval', // ordinal for Range
       params: {
-        includeEmptyRows: true,
-        type: MODES.Histogram,
-        ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-        maxBars: AUTO_BARS,
-        format: undefined,
-        parentFormat: undefined,
+        includeEmptyRows: columnParams?.includeEmptyRows ?? true,
+        type: columnParams?.type ?? MODES.Histogram,
+        ranges: columnParams?.ranges ?? [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+        maxBars: columnParams?.maxBars ?? AUTO_BARS,
+        format: columnParams?.format,
+        parentFormat: columnParams?.parentFormat,
       },
     };
   },
@@ -191,13 +195,14 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       numberFormat &&
       supportedFormats[numberFormat.id] &&
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
+    const numberFormatId = numberFormat && supportedFormats[numberFormat.id].formatId;
 
     const rangeFormatter = fieldFormats.deserialize({
       ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
         ...(numberFormat
-          ? { id: numberFormat.id, params: { pattern: numberFormatterPattern } }
+          ? { id: numberFormatId, params: { pattern: numberFormatterPattern } }
           : getFieldDefaultFormat(indexPattern, currentField)),
       },
     });

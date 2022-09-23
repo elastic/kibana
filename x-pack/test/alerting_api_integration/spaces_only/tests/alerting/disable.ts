@@ -15,6 +15,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   getEventLog,
+  TaskManagerDoc,
 } from '../../../common/lib';
 import { validateEvent } from './event_log';
 
@@ -31,11 +32,12 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask._source!;
     }
 
     it('should handle disable rule request appropriately', async () => {
@@ -48,12 +50,16 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       await ruleUtils.disable(createdRule.id);
 
-      try {
-        await getScheduledTask(createdRule.scheduled_task_id);
-        throw new Error('Should have removed scheduled task');
-      } catch (e) {
-        expect(e.meta.statusCode).to.eql(404);
-      }
+      // task doc should still exist but be disabled
+      const taskRecord = await getScheduledTask(createdRule.scheduled_task_id);
+      expect(taskRecord.type).to.eql('task');
+      expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+      expect(JSON.parse(taskRecord.task.params)).to.eql({
+        alertId: createdRule.id,
+        spaceId: Spaces.space1.id,
+        consumer: 'alertsFixture',
+      });
+      expect(taskRecord.task.enabled).to.eql(false);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -188,12 +194,16 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           .set('kbn-xsrf', 'foo')
           .expect(204);
 
-        try {
-          await getScheduledTask(createdRule.scheduled_task_id);
-          throw new Error('Should have removed scheduled task');
-        } catch (e) {
-          expect(e.meta.statusCode).to.eql(404);
-        }
+        // task doc should still exist but be disabled
+        const taskRecord = await getScheduledTask(createdRule.scheduled_task_id);
+        expect(taskRecord.type).to.eql('task');
+        expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+        expect(JSON.parse(taskRecord.task.params)).to.eql({
+          alertId: createdRule.id,
+          spaceId: Spaces.space1.id,
+          consumer: 'alertsFixture',
+        });
+        expect(taskRecord.task.enabled).to.eql(false);
 
         // Ensure AAD isn't broken
         await checkAAD({

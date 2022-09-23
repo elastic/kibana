@@ -210,6 +210,7 @@ export const LensTopNavMenu = ({
   onAppLeave,
   redirectToOrigin,
   datasourceMap,
+  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
@@ -218,6 +219,7 @@ export const LensTopNavMenu = ({
   initialContext,
   theme$,
   indexPatternService,
+  currentDoc,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -304,11 +306,15 @@ export const LensTopNavMenu = ({
           {}
         ),
         datasourceStates,
+        visualizationState: visualization.state,
+        activeVisualization: visualization.activeId
+          ? visualizationMap[visualization.activeId]
+          : undefined,
       })
     );
     // Add ad-hoc data views from the Lens state even if they are not used
     Object.values(dataViews.indexPatterns)
-      .filter((indexPattern) => indexPattern.spec)
+      .filter((indexPattern) => !indexPattern.isPersisted)
       .forEach((indexPattern) => {
         indexPatternIds.add(indexPattern.id);
       });
@@ -336,6 +342,8 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     rejectedIndexPatterns,
     datasourceMap,
+    visualizationMap,
+    visualization,
     indexPatterns,
     dataViewsService,
     dataViews,
@@ -377,6 +385,7 @@ export const LensTopNavMenu = ({
         query,
         filters,
         initialContext,
+        currentDoc,
       });
       return menuEntry ? [menuEntry] : [];
     });
@@ -391,6 +400,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     initialContext,
+    currentDoc,
   ]);
 
   const layerMetaInfo = useMemo(() => {
@@ -540,7 +550,7 @@ export const LensTopNavMenu = ({
           );
 
           return discover.locator!.getRedirectUrl({
-            indexPatternId: meta.id,
+            dataViewSpec: dataViews.indexPatterns[meta.id].spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
             query: newQuery,
@@ -584,6 +594,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     indexPatterns,
+    dataViews.indexPatterns,
     data.query.timefilter.timefilter,
     lensStore,
     theme$,

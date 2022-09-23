@@ -11,6 +11,7 @@
         "description": [],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "urlForwarding",
@@ -21,13 +22,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -40,6 +35,7 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "urlForwarding",
@@ -49,13 +45,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
                   {
                     "pluginId": "urlForwarding",
@@ -68,6 +58,7 @@
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -82,13 +73,7 @@
             "description": [],
             "signature": [
               "({ application, http: { basePath } }: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -101,6 +86,7 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "urlForwarding",
@@ -110,16 +96,11 @@
                 "label": "{ application, http: { basePath } }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -140,6 +121,7 @@
         "description": [],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "urlForwarding",
@@ -149,7 +131,8 @@
             "label": "legacyAppId",
             "description": [],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "urlForwarding",
@@ -159,7 +142,8 @@
             "label": "newAppId",
             "description": [],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "urlForwarding",
@@ -173,6 +157,7 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "urlForwarding",
@@ -186,6 +171,7 @@
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -209,6 +195,7 @@
         ],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -231,6 +218,7 @@
         ],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -24,6 +24,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../id_generator');
 
@@ -36,6 +37,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -545,13 +547,16 @@ describe('xy_suggestions', () => {
     );
   });
 
-  test('passes annotation layer without modifying it', () => {
+  test('passes annotation layer for date histogram data layer', () => {
     const annotationLayer: XYAnnotationLayerConfig = {
       layerId: 'second',
       layerType: layerTypes.ANNOTATIONS,
+      indexPatternId: 'indexPattern1',
+      ignoreGlobalFilters: true,
       annotations: [
         {
           id: '1',
+          type: 'manual',
           key: {
             type: 'point_in_time',
             timestamp: '2020-20-22',
@@ -571,8 +576,8 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: layerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'date',
-          xAccessor: 'product',
+          splitAccessor: 'product',
+          xAccessor: 'date',
         },
         annotationLayer,
       ],
@@ -592,6 +597,64 @@ describe('xy_suggestions', () => {
       expect(suggestion.state.layers).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
+            layerType: layerTypes.ANNOTATIONS,
+          }),
+        ])
+      )
+    );
+  });
+
+  test('does not pass annotation layer if x-axis is not date histogram', () => {
+    const annotationLayer: XYAnnotationLayerConfig = {
+      layerId: 'second',
+      layerType: layerTypes.ANNOTATIONS,
+      indexPatternId: 'indexPattern1',
+      ignoreGlobalFilters: true,
+      annotations: [
+        {
+          id: '1',
+          type: 'manual',
+          key: {
+            type: 'point_in_time',
+            timestamp: '2020-20-22',
+          },
+          label: 'annotation',
+        },
+      ],
+    };
+
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      layers: [
+        {
+          layerId: 'first',
+          accessors: ['price'],
+          seriesType: 'bar',
+          layerType: layerTypes.DATA,
+          xAccessor: 'date',
+          splitAccessor: 'price2',
+        },
+        annotationLayer,
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date'), numCol('price2')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    suggestions.every((suggestion) =>
+      expect(suggestion.state.layers).toEqual(
+        expect.arrayContaining([
+          expect.not.objectContaining({
             layerType: layerTypes.ANNOTATIONS,
           }),
         ])

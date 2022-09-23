@@ -17,7 +17,7 @@ import { PackageInfo } from '@kbn/config';
 import { AuthStatus } from '@kbn/core-http-server';
 import { UiPlugins } from '../../plugins';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({

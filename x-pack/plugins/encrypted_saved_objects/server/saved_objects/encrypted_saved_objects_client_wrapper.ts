@@ -10,6 +10,8 @@ import type {
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResponse,
@@ -164,6 +166,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async delete(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return await this.options.baseClient.delete(type, id, options);
+  }
+
+  public async bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options?: SavedObjectsBulkDeleteOptions
+  ) {
+    return await this.options.baseClient.bulkDelete(objects, options);
   }
 
   public async find<T, A>(options: SavedObjectsFindOptions) {

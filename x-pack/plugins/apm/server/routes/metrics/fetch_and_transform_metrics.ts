@@ -8,7 +8,7 @@
 import { Unionize } from 'utility-types';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getVizColorForIndex } from '../../../common/viz_colors';
@@ -21,6 +21,7 @@ import {
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -42,9 +43,22 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
   };
 };
 
-export type GenericMetricsChart = Awaited<
-  ReturnType<typeof fetchAndTransformMetrics>
->;
+export type GenericMetricsChart = Awaited<FetchAndTransformMetrics>;
+
+export interface FetchAndTransformMetrics {
+  title: string;
+  key: string;
+  yUnit: YUnit;
+  series: Array<{
+    title: string;
+    key: string;
+    type: ChartType;
+    color: string;
+    overallValue: number;
+    data: Coordinate[];
+  }>;
+  description?: string;
+}
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
@@ -70,7 +84,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs: T;
   additionalFilters?: QueryDslQueryContainer[];
   operationName: string;
-}) {
+}): Promise<FetchAndTransformMetrics> {
   const { apmEventClient, config } = setup;
 
   const params: GenericMetricsRequest = {
@@ -78,6 +92,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: 1,
       size: 0,
       query: {
         bool: {
@@ -115,6 +130,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     title: chartBase.title,
     key: chartBase.key,
     yUnit: chartBase.yUnit,
+    description: chartBase.description,
     series:
       hits.total.value === 0
         ? []

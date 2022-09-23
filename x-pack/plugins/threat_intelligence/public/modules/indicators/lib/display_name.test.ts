@@ -5,75 +5,106 @@
  * 2.0.
  */
 
-import {
-  generateMockBaseIndicator,
-  generateMockFileIndicator,
-  generateMockIpIndicator,
-  generateMockUrlIndicator,
-  generateMockFileMd5Indicator,
-  generateMockDomainIndicator,
-  generateMockEmailAddrIndicator,
-  generateMockDomainNameIndicator,
-  generateMockX509CertificateIndicator,
-  generateMockX509SerialIndicator,
-  generateMockUnknownIndicator,
-  generateMockWindowsRegistryKeyIndicator,
-  generateMockAutonomousSystemIndicator,
-  generateMockMacAddressIndicator,
-  Indicator,
-  RawIndicatorFieldId,
-} from '../../../../common/types/indicator';
-import { getDisplayName } from './display_name';
+import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from './display_name';
 
-type ExpectedIndicatorValue = string | null;
+describe('display name generation', () => {
+  describe('threatIndicatorNamesScript()', () => {
+    it('should generate a valid painless script', () => {
+      expect(threatIndicatorNamesScript()).toMatchInlineSnapshot(`
+        "if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='ipv4-addr') { if (doc['threat.indicator.ip'].value!=null) { return emit(doc['threat.indicator.ip'].value) } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='ipv6-addr') { if (doc['threat.indicator.ip'].value!=null) { return emit(doc['threat.indicator.ip'].value) } }
 
-const cases: Array<[Indicator, ExpectedIndicatorValue]> = [
-  [generateMockIpIndicator(), '12.68.554.87'],
-  [generateMockUrlIndicator(), 'https://google.com'],
-  [generateMockFileIndicator(), 'sample_sha256_hash'],
-  [generateMockFileMd5Indicator(), 'sample_md5_hash'],
-  [generateMockEmailAddrIndicator(), 'sample@example.com'],
-  [generateMockDomainIndicator(), 'google.com'],
-  [generateMockDomainNameIndicator(), 'google.com'],
-  [generateMockX509CertificateIndicator(), 'sample_serial_number'],
-  [generateMockX509SerialIndicator(), 'sample_serial_bla'],
-  [generateMockUnknownIndicator(), 'sample_id'],
-  [generateMockWindowsRegistryKeyIndicator(), 'sample_registry_key'],
-  [generateMockAutonomousSystemIndicator(), 'sample_as_number'],
-  [generateMockMacAddressIndicator(), 'sample_mac_address'],
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='file') { if (doc['threat.indicator.file.hash.sha256'].value!=null) { return emit(doc['threat.indicator.file.hash.sha256'].value) }
+        if (doc['threat.indicator.file.hash.md5'].value!=null) { return emit(doc['threat.indicator.file.hash.md5'].value) }
+        if (doc['threat.indicator.file.hash.sha1'].value!=null) { return emit(doc['threat.indicator.file.hash.sha1'].value) }
+        if (doc['threat.indicator.file.hash.sha224'].value!=null) { return emit(doc['threat.indicator.file.hash.sha224'].value) }
+        if (doc['threat.indicator.file.hash.sha3-224'].value!=null) { return emit(doc['threat.indicator.file.hash.sha3-224'].value) }
+        if (doc['threat.indicator.file.hash.sha3-256'].value!=null) { return emit(doc['threat.indicator.file.hash.sha3-256'].value) }
+        if (doc['threat.indicator.file.hash.sha384'].value!=null) { return emit(doc['threat.indicator.file.hash.sha384'].value) }
+        if (doc['threat.indicator.file.hash.sha3-384'].value!=null) { return emit(doc['threat.indicator.file.hash.sha3-384'].value) }
+        if (doc['threat.indicator.file.hash.sha512'].value!=null) { return emit(doc['threat.indicator.file.hash.sha512'].value) }
+        if (doc['threat.indicator.file.hash.sha3-512'].value!=null) { return emit(doc['threat.indicator.file.hash.sha3-512'].value) }
+        if (doc['threat.indicator.file.hash.sha512/224'].value!=null) { return emit(doc['threat.indicator.file.hash.sha512/224'].value) }
+        if (doc['threat.indicator.file.hash.sha512/256'].value!=null) { return emit(doc['threat.indicator.file.hash.sha512/256'].value) }
+        if (doc['threat.indicator.file.ssdeep'].value!=null) { return emit(doc['threat.indicator.file.ssdeep'].value) }
+        if (doc['threat.indicator.file.tlsh'].value!=null) { return emit(doc['threat.indicator.file.tlsh'].value) }
+        if (doc['threat.indicator.file.impfuzzy'].value!=null) { return emit(doc['threat.indicator.file.impfuzzy'].value) }
+        if (doc['threat.indicator.file.imphash'].value!=null) { return emit(doc['threat.indicator.file.imphash'].value) }
+        if (doc['threat.indicator.file.pehash'].value!=null) { return emit(doc['threat.indicator.file.pehash'].value) }
+        if (doc['threat.indicator.file.vhash'].value!=null) { return emit(doc['threat.indicator.file.vhash'].value) } }
 
-  // Indicator with no fields should yield null as a display value
-  [{ fields: {} }, null],
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='url') { if (doc['threat.indicator.url.full'].value!=null) { return emit(doc['threat.indicator.url.full'].value) } }
 
-  // Same for an empty object
-  [{} as any, null],
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain') { if (doc['threat.indicator.url.domain'].value!=null) { return emit(doc['threat.indicator.url.domain'].value) } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain-name') { if (doc['threat.indicator.url.domain'].value!=null) { return emit(doc['threat.indicator.url.domain'].value) } }
 
-  // And falsy value
-  [null, null],
-];
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='x509-certificate') { if (doc['threat.indicator.x509.serial_number'].value!=null) { return emit(doc['threat.indicator.x509.serial_number'].value) } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='x509 serial') { if (doc['threat.indicator.x509.serial_number'].value!=null) { return emit(doc['threat.indicator.x509.serial_number'].value) } }
 
-describe('getDisplayName()', () => {
-  describe.each<[Indicator, ExpectedIndicatorValue]>(cases)(
-    '%s',
-    (indicator, expectedDisplayValue) => {
-      it(`should render the indicator as ${expectedDisplayValue}`, () => {
-        expect(getDisplayName(indicator).value).toEqual(expectedDisplayValue);
-      });
-    }
-  );
-});
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='email-addr') { if (doc['threat.indicator.email.address'].value!=null) { return emit(doc['threat.indicator.email.address'].value) } }
 
-describe('displayValueField()', () => {
-  it('should return correct RawIndicatorFieldId for valid field', () => {
-    const mockIndicator = generateMockIpIndicator();
-    const result = getDisplayName(mockIndicator);
-    expect(result.field).toEqual(RawIndicatorFieldId.Ip);
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='unknown') { if (doc['_id'].value!=null) { return emit(doc['_id'].value) } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='email') { if (doc['_id'].value!=null) { return emit(doc['_id'].value) } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='email-message') { if (doc['_id'].value!=null) { return emit(doc['_id'].value) } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='windows-registry-key') { if (doc['threat.indicator.registry.key'].value!=null) { return emit(doc['threat.indicator.registry.key'].value) } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='autonomous-system') { if (doc['threat.indicator.as.number'].value!=null) { return emit(doc['threat.indicator.as.number'].value) } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='mac-addr') { if (doc['threat.indicator.mac'].value!=null) { return emit(doc['threat.indicator.mac'].value) } }
+
+        return emit('')"
+      `);
+    });
   });
 
-  it('should return null for invalid field', () => {
-    const mockIndicator = generateMockBaseIndicator();
-    mockIndicator.fields['threat.indicator.type'] = ['abc'];
-    const result = getDisplayName(mockIndicator);
-    expect(result.field).toEqual(RawIndicatorFieldId.Id);
+  describe('threatIndicatorNamesOriginScript()', () => {
+    it('should generate a valid painless script', () => {
+      expect(threatIndicatorNamesOriginScript()).toMatchInlineSnapshot(`
+        "if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='ipv4-addr') { if (doc['threat.indicator.ip'].value!=null) { return emit('threat.indicator.ip') } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='ipv6-addr') { if (doc['threat.indicator.ip'].value!=null) { return emit('threat.indicator.ip') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='file') { if (doc['threat.indicator.file.hash.sha256'].value!=null) { return emit('threat.indicator.file.hash.sha256') }
+        if (doc['threat.indicator.file.hash.md5'].value!=null) { return emit('threat.indicator.file.hash.md5') }
+        if (doc['threat.indicator.file.hash.sha1'].value!=null) { return emit('threat.indicator.file.hash.sha1') }
+        if (doc['threat.indicator.file.hash.sha224'].value!=null) { return emit('threat.indicator.file.hash.sha224') }
+        if (doc['threat.indicator.file.hash.sha3-224'].value!=null) { return emit('threat.indicator.file.hash.sha3-224') }
+        if (doc['threat.indicator.file.hash.sha3-256'].value!=null) { return emit('threat.indicator.file.hash.sha3-256') }
+        if (doc['threat.indicator.file.hash.sha384'].value!=null) { return emit('threat.indicator.file.hash.sha384') }
+        if (doc['threat.indicator.file.hash.sha3-384'].value!=null) { return emit('threat.indicator.file.hash.sha3-384') }
+        if (doc['threat.indicator.file.hash.sha512'].value!=null) { return emit('threat.indicator.file.hash.sha512') }
+        if (doc['threat.indicator.file.hash.sha3-512'].value!=null) { return emit('threat.indicator.file.hash.sha3-512') }
+        if (doc['threat.indicator.file.hash.sha512/224'].value!=null) { return emit('threat.indicator.file.hash.sha512/224') }
+        if (doc['threat.indicator.file.hash.sha512/256'].value!=null) { return emit('threat.indicator.file.hash.sha512/256') }
+        if (doc['threat.indicator.file.ssdeep'].value!=null) { return emit('threat.indicator.file.ssdeep') }
+        if (doc['threat.indicator.file.tlsh'].value!=null) { return emit('threat.indicator.file.tlsh') }
+        if (doc['threat.indicator.file.impfuzzy'].value!=null) { return emit('threat.indicator.file.impfuzzy') }
+        if (doc['threat.indicator.file.imphash'].value!=null) { return emit('threat.indicator.file.imphash') }
+        if (doc['threat.indicator.file.pehash'].value!=null) { return emit('threat.indicator.file.pehash') }
+        if (doc['threat.indicator.file.vhash'].value!=null) { return emit('threat.indicator.file.vhash') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='url') { if (doc['threat.indicator.url.full'].value!=null) { return emit('threat.indicator.url.full') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain') { if (doc['threat.indicator.url.domain'].value!=null) { return emit('threat.indicator.url.domain') } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain-name') { if (doc['threat.indicator.url.domain'].value!=null) { return emit('threat.indicator.url.domain') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='x509-certificate') { if (doc['threat.indicator.x509.serial_number'].value!=null) { return emit('threat.indicator.x509.serial_number') } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='x509 serial') { if (doc['threat.indicator.x509.serial_number'].value!=null) { return emit('threat.indicator.x509.serial_number') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='email-addr') { if (doc['threat.indicator.email.address'].value!=null) { return emit('threat.indicator.email.address') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='unknown') { if (doc['_id'].value!=null) { return emit('_id') } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='email') { if (doc['_id'].value!=null) { return emit('_id') } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='email-message') { if (doc['_id'].value!=null) { return emit('_id') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='windows-registry-key') { if (doc['threat.indicator.registry.key'].value!=null) { return emit('threat.indicator.registry.key') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='autonomous-system') { if (doc['threat.indicator.as.number'].value!=null) { return emit('threat.indicator.as.number') } }
+
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='mac-addr') { if (doc['threat.indicator.mac'].value!=null) { return emit('threat.indicator.mac') } }
+
+        return emit('')"
+      `);
+    });
   });
 });

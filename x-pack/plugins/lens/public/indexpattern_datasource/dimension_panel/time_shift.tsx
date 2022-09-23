@@ -9,8 +9,6 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-
-import type { Query } from '@kbn/es-query';
 import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
@@ -25,12 +23,6 @@ import {
   timeShiftOptions,
 } from '../time_shift_utils';
 import type { IndexPattern } from '../../types';
-
-// to do: get the language from uiSettings
-export const defaultFilter: Query = {
-  query: '',
-  language: 'kuery',
-};
 
 export function setTimeShift(
   columnId: string,

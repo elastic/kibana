@@ -29,13 +29,11 @@ import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { AddExceptionComments } from '../../../../../common/components/exceptions/add_exception_comments';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { filterIndexPatterns } from '../../../../../common/components/exceptions/helpers';
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
@@ -57,6 +55,8 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../co
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
+import { filterIndexPatterns } from '../../../../../detection_engine/rule_exceptions/utils/helpers';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -316,7 +316,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const commentsInputMemo = useMemo(
       () => (
-        <AddExceptionComments
+        <ExceptionItemComments
           exceptionItemComments={existingComments}
           newCommentValue={newComment}
           newCommentOnChange={handleOnChangeComment}

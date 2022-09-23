@@ -33,6 +33,10 @@
   padding: $euiSizeS;
 }
 
+.lnsFormula__docsHeader {
+  margin: 0;
+}
+
 .lnsFormula__editorFooter {
   // make sure docs are rendered in front of monaco
   z-index: 1;

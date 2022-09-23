@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const USER_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.usersRiskDashboard.userRiskToolTip',
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.userRiskToolTip',
   {
     defaultMessage:
       'User risk classification is determined by User risk score. Users classified as Critical or High are indicated as risky.',
@@ -16,46 +16,50 @@ export const USER_RISK_TOOLTIP = i18n.translate(
 );
 
 export const USER_RISK = i18n.translate(
-  'xpack.securitySolution.usersRiskDashboard.userRiskClassificationTitle',
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.userRiskClassificationTitle',
   {
     defaultMessage: 'User risk classification',
   }
 );
 
 export const USER_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.usersRiskDashboard.userRiskScoreTitle',
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.userRiskScoreTitle',
   {
     defaultMessage: 'User risk score',
   }
 );
 
-export const USER_NAME = i18n.translate('xpack.securitySolution.usersRiskDashboard.userNameTitle', {
-  defaultMessage: 'User Name',
-});
-
-export const USER_RISK_TITLE = i18n.translate('xpack.securitySolution.usersRiskDashboard.title', {
-  defaultMessage: 'User Risk Scores',
-});
-
-export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.usersRiskDashboard.totalLabel', {
-  defaultMessage: 'Total',
-});
-
-export const VIEW_ALL = i18n.translate('xpack.securitySolution.usersRiskDashboard.viewAllLabel', {
-  defaultMessage: 'View all',
-});
-
-export const ENABLE_USER_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.usersRiskDashboard.enableUserRiskScore',
+export const USER_NAME = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.userNameTitle',
   {
-    defaultMessage: 'Enable User Risk Score',
+    defaultMessage: 'User Name',
   }
 );
 
-export const ENABLE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.usersRiskDashboard.enableUserRiskScoreDescription',
+export const TOTAL_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.totalLabel',
   {
-    defaultMessage:
-      'Once you have enabled this feature you can get quick access to the user risk scores in this section.',
+    defaultMessage: 'Total',
+  }
+);
+
+export const VIEW_ALL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.viewAllLabel',
+  {
+    defaultMessage: 'View all',
+  }
+);
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.learnMore',
+  {
+    defaultMessage: 'Learn more',
+  }
+);
+
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableViaDevToolsButtonTitle',
+  {
+    defaultMessage: 'Enable via Dev Tools',
   }
 );

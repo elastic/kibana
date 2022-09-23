@@ -34,6 +34,7 @@ export const useTimefilter = ({
     } else if (autoRefreshSelector === false) {
       timefilter.disableAutoRefreshSelector();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRangeSelector, autoRefreshSelector]);
 
   return timefilter;

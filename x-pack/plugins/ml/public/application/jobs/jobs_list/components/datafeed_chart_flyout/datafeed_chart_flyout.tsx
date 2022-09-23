@@ -189,6 +189,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       displayErrorToast(error, title);
     }
     setIsLoadingChartData(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endDate, data.bucketSpan]);
 
   const getJobAndSnapshotData = useCallback(async () => {
@@ -218,10 +219,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     } catch (error) {
       displayErrorToast(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   useEffect(function loadInitialData() {
     getJobAndSnapshotData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -231,6 +234,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
         getChartData();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [endDate, data.bucketSpan]
   );
 
@@ -644,6 +648,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
     return () => {
       unsetShowFunction();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isVisible === true && job !== undefined) {

@@ -14,8 +14,7 @@ export const paths = {
     rules: RULES_PAGE_LINK,
     ruleDetails: (ruleId?: string | null) =>
       ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
-    alertDetails: (alertId?: string | null) =>
-      alertId ? `${ALERT_PAGE_LINK}/${encodeURI(alertId)}` : ALERT_PAGE_LINK,
+    alertDetails: (alertId: string) => `${ALERT_PAGE_LINK}/${encodeURI(alertId)}`,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
