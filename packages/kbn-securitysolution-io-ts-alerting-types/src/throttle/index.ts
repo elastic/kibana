@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 export const throttle = t.union([
   t.literal('no_actions'),
   t.literal('rule'),
-  TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
+  TimeDuration({ allowedUnits: ['h', 'd'] }),
 ]);
 export type Throttle = t.TypeOf<typeof throttle>;
 
