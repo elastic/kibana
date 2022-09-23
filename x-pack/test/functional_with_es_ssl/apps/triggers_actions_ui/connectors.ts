@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe('Connectors xxx', function () {
+  describe('Connectors', function () {
     before(async () => {
       const { body: createdAction } = await supertest
         .post(`/api/actions/connector`)
