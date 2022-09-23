@@ -10,6 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCode,
+  EuiCallOut,
+  EuiLink,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiFormRow,
@@ -64,14 +66,12 @@ export const defaultValues = {
   fileName: '',
 };
 
-const getDefaultTab = (defaultConfig: SourceConfig, isZipUrlSourceEnabled = true) => {
+const getDefaultTab = (defaultConfig: SourceConfig) => {
   if (defaultConfig.inlineScript && defaultConfig.isGeneratedScript) {
     return SourceType.SCRIPT_RECORDER;
-  } else if (defaultConfig.inlineScript) {
+  } else {
     return SourceType.INLINE;
   }
-
-  return isZipUrlSourceEnabled ? SourceType.ZIP : SourceType.INLINE;
 };
 
 export const SourceField = ({
@@ -81,9 +81,7 @@ export const SourceField = ({
   validate,
 }: Props) => {
   const { isZipUrlSourceEnabled } = usePolicyConfigContext();
-  const [sourceType, setSourceType] = useState<SourceType>(
-    getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
-  );
+  const [sourceType, setSourceType] = useState<SourceType>(getDefaultTab(defaultConfig));
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
   useEffect(() => {
@@ -146,11 +144,133 @@ export const SourceField = ({
   const zipUrlSourceTabId = 'syntheticsBrowserZipURLConfig';
   const allTabs = [
     {
+      id: 'syntheticsBrowserInlineConfig',
+      name: (
+        <FormattedMessage
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label"
+          defaultMessage="Inline script"
+        />
+      ),
+      'data-test-subj': `syntheticsSourceTab__inline`,
+      content: (
+        <>
+          <EuiFormRow
+            isInvalid={isSourceInlineInvalid}
+            error={
+              <FormattedMessage
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
+                defaultMessage="Script is required"
+              />
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
+                defaultMessage="Runs Synthetic test scripts that are defined inline."
+              />
+            }
+          >
+            <CodeEditor
+              ariaLabel={i18n.translate(
+                'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
+                {
+                  defaultMessage: 'JavaScript code editor',
+                }
+              )}
+              id="javascript"
+              languageId={MonacoEditorLangId.JAVASCRIPT}
+              onChange={(code) => {
+                setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }));
+                onFieldBlur(ConfigKey.SOURCE_INLINE);
+              }}
+              value={config.inlineScript}
+            />
+          </EuiFormRow>
+          {params}
+        </>
+      ),
+    },
+    {
+      id: 'syntheticsBrowserScriptRecorderConfig',
+      name: (
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
+              defaultMessage="Script recorder"
+            />
+          </EuiFlexItem>
+          <StyledBetaBadgeWrapper grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate(
+                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
+                {
+                  defaultMessage: 'Tech preview',
+                }
+              )}
+              iconType="beaker"
+              tooltipContent={i18n.translate(
+                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
+                {
+                  defaultMessage:
+                    'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',
+                }
+              )}
+            />
+          </StyledBetaBadgeWrapper>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
+      content: (
+        <>
+          <ScriptRecorderFields
+            onChange={({ scriptText, fileName }) =>
+              setConfig((prevConfig) => ({
+                ...prevConfig,
+                inlineScript: scriptText,
+                isGeneratedScript: true,
+                fileName,
+              }))
+            }
+            script={config.inlineScript}
+            fileName={config.fileName}
+          />
+          <EuiSpacer size="s" />
+          {params}
+        </>
+      ),
+    },
+    {
       id: zipUrlSourceTabId,
       name: zipUrlLabel,
       'data-test-subj': `syntheticsSourceTab__zipUrl`,
       content: (
         <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.title"
+                defaultMessage="Deprecated"
+              />
+            }
+            size="s"
+            color="warning"
+          >
+            <FormattedMessage
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.content"
+              defaultMessage="Zip URL source is deprecated and will be removed in a future version. Project monitors are now available to create monitors from a remote repository. For more information, {link}"
+              values={{
+                link: (
+                  <EuiLink target="_blank" href="" external>
+                    <FormattedMessage
+                      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                      defaultMessage="read the documentation"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
           <EuiSpacer size="m" />
           <EuiFormRow
             label={zipUrlLabel}
@@ -168,14 +288,16 @@ export const SourceField = ({
               />
             }
           >
-            <EuiFieldText
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
-              }
-              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
-              value={config.zipUrl}
-              data-test-subj="syntheticsBrowserZipUrl"
-            />
+            <>
+              <EuiFieldText
+                onChange={({ target: { value } }) =>
+                  setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
+                }
+                onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
+                value={config.zipUrl}
+                data-test-subj="syntheticsBrowserZipUrl"
+              />
+            </>
           </EuiFormRow>
           <ZipUrlTLSFields />
           <EuiFormRow
@@ -275,102 +397,6 @@ export const SourceField = ({
               data-test-subj="syntheticsBrowserZipUrlPassword"
             />
           </EuiFormRow>
-        </>
-      ),
-    },
-    {
-      id: 'syntheticsBrowserInlineConfig',
-      name: (
-        <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label"
-          defaultMessage="Inline script"
-        />
-      ),
-      'data-test-subj': `syntheticsSourceTab__inline`,
-      content: (
-        <>
-          <EuiFormRow
-            isInvalid={isSourceInlineInvalid}
-            error={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
-                defaultMessage="Script is required"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
-                defaultMessage="Runs Synthetic test scripts that are defined inline."
-              />
-            }
-          >
-            <CodeEditor
-              ariaLabel={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
-                {
-                  defaultMessage: 'JavaScript code editor',
-                }
-              )}
-              id="javascript"
-              languageId={MonacoEditorLangId.JAVASCRIPT}
-              onChange={(code) => {
-                setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }));
-                onFieldBlur(ConfigKey.SOURCE_INLINE);
-              }}
-              value={config.inlineScript}
-            />
-          </EuiFormRow>
-          {params}
-        </>
-      ),
-    },
-    {
-      id: 'syntheticsBrowserScriptRecorderConfig',
-      name: (
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
-              defaultMessage="Script recorder"
-            />
-          </EuiFlexItem>
-          <StyledBetaBadgeWrapper grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
-                {
-                  defaultMessage: 'Tech preview',
-                }
-              )}
-              iconType="beaker"
-              tooltipContent={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
-                {
-                  defaultMessage:
-                    'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',
-                }
-              )}
-            />
-          </StyledBetaBadgeWrapper>
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
-      content: (
-        <>
-          <ScriptRecorderFields
-            onChange={({ scriptText, fileName }) =>
-              setConfig((prevConfig) => ({
-                ...prevConfig,
-                inlineScript: scriptText,
-                isGeneratedScript: true,
-                fileName,
-              }))
-            }
-            script={config.inlineScript}
-            fileName={config.fileName}
-          />
-          <EuiSpacer size="s" />
-          {params}
         </>
       ),
     },
