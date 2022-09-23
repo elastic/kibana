@@ -14,6 +14,13 @@ export const MESSAGE = i18n.translate(
   }
 );
 
+export const OPEN_ALERT_DETAILS_PAGE = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.openAlertDetails',
+  {
+    defaultMessage: 'Open alert details page',
+  }
+);
+
 export const CLOSE = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.closeEventDetailsLabel',
   {

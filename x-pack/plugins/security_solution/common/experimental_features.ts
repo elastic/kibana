@@ -64,6 +64,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables endpoint package level rbac
    */
   endpointRbacEnabled: false,
+
+  /**
+   * Enables the alert details page currently only accessible via the alert details flyout
+   */
+  alertDetailsPageEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

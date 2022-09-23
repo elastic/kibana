@@ -41,6 +41,7 @@ import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/t
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
+import { useOpenAlertDetailsAction } from './use_open_alert_details';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -201,6 +202,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
 
+  const { alertDetailsActionItems } = useOpenAlertDetailsAction({
+    eventId: ecsRowData?._id,
+    closePopover,
+    ruleId,
+  });
+
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -209,6 +216,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...statusActionItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
+            ...alertDetailsActionItems,
           ]
         : [
             ...addToCaseActionItems,
@@ -223,6 +231,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       exceptionActionItems,
       agentId,
       osqueryActionItems,
+      alertDetailsActionItems,
       eventFilterActionItems,
     ]
   );
