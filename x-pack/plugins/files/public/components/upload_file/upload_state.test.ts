@@ -33,6 +33,36 @@ describe('UploadState', () => {
     testScheduler = getTestScheduler();
   });
 
+  it('calls file client with expected arguments', async () => {
+    testScheduler.run(({ expectObservable, cold, flush }) => {
+      const file1 = { name: 'test.png', size: 1 } as File;
+
+      uploadState.setFiles([file1]);
+
+      // Simulate upload being triggered async
+      const upload$ = cold('--a|').pipe(tap(uploadState.upload));
+
+      expectObservable(upload$).toBe('--a|');
+
+      flush();
+
+      expect(filesClient.create).toHaveBeenCalledTimes(1);
+      expect(filesClient.create).toHaveBeenNthCalledWith(1, {
+        kind: 'test',
+        meta: 'a',
+        mimeType: 'image/png',
+        name: 'test',
+      });
+      expect(filesClient.upload).toHaveBeenCalledTimes(1);
+      expect(filesClient.upload).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          selfDestructOnAbort: true,
+        })
+      );
+    });
+  });
+
   it('uploads all provided files and reports errors', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       const file1 = { name: 'test', size: 1 } as File;
@@ -132,7 +162,6 @@ describe('UploadState', () => {
         name: 'test 2',
       });
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
-      expect(filesClient.delete).toHaveBeenCalledTimes(2);
     });
   });
 
