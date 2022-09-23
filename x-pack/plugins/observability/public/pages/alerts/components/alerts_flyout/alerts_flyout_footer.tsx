@@ -23,13 +23,7 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
       <EuiFlexItem grow={false}>
         <EuiButton
           href={
-            prepend &&
-            prepend(
-              paths.observability.alertDetails(
-                alert.fields['kibana.alert.uuid'],
-                alert.fields['kibana.alert.rule.uuid']
-              )
-            )
+            prepend && prepend(paths.observability.alertDetails(alert.fields['kibana.alert.uuid']))
           }
           data-test-subj="alertsFlyoutAlertDetailsButton"
           fill

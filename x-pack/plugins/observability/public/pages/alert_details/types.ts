@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-export interface PageHeaderProps {
-  alert: unknown;
+import { TopAlert } from '../alerts/containers/alerts_page/types';
+
+export interface AlertSummaryProps {
+  alert: TopAlert | null;
 }
 
 export interface AlertDetailsPathParams {
   alertId: string;
-}
-
-export interface AlertSummaryItemProps {
-  formattedMessageId: string;
-  defaultMessage: string;
-  children: JSX.Element;
 }
 
 export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';

@@ -8,7 +8,7 @@
 import { useState, useMemo, useEffect } from 'react';
 
 import { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../utils/kibana_react';
 
 type DataFetcher<T, R> = (params: T, ctrl: AbortController, http: HttpSetup) => Promise<R>;
 
