@@ -4,37 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Ensure } from '@kbn/utility-types';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { FileShareNotFoundError } from '../../../file_share_service/errors';
-import { FileGetShareHttpEndpoint, FILES_API_ROUTES } from '../../api_routes';
-import type { FileKind } from '../../../../common/types';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
+import type { FileKind, FileShareJSON } from '../../../../common/types';
 
-import { FileKindRouter, FileKindsRequestHandler } from '../types';
+import { CreateHandler, FileKindRouter } from '../types';
 
 export const method = 'get' as const;
 
-export const paramsSchema = schema.object({
-  id: schema.string(),
-});
+const rt = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
 
-type Params = Ensure<FileGetShareHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
+export type Endpoint = CreateRouteDefinition<typeof rt, { share: FileShareJSON }>;
 
-type Response = FileGetShareHttpEndpoint['output'];
-
-export const handler: FileKindsRequestHandler<Params, unknown, unknown> = async (
-  { files },
-  req,
-  res
-) => {
+export const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
   const {
     params: { id },
   } = req;
 
   try {
-    const body: Response = { share: await fileService.asCurrentUser().getShareObject({ id }) };
+    const body: Endpoint['output'] = {
+      share: await fileService.asCurrentUser().getShareObject({ id }),
+    };
     return res.ok({
       body,
     });
@@ -51,9 +48,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
     fileKindRouter[method](
       {
         path: FILES_API_ROUTES.fileKind.getGetShareRoute(fileKind.id),
-        validate: {
-          params: paramsSchema,
-        },
+        validate: { ...rt },
         options: {
           tags: fileKind.http.share.tags,
         },

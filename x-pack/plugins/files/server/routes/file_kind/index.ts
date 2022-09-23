@@ -9,6 +9,7 @@ import { FileKind } from '../../../common/types';
 import { FilesRouter } from '../types';
 
 import { enhanceRouter } from './enhance_router';
+
 import * as create from './create';
 import * as upload from './upload';
 import * as update from './update';
