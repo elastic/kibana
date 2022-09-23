@@ -381,7 +381,6 @@ paths:
         name: ignoreUnverified
         description: Ignore if the package is fails signature verification
         in: query
-    required: true
     post:
       summary: Packages - Install
       tags: []
@@ -772,6 +771,10 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  actionId:
+                    type: string
+                    description: action id when running in async mode (>10k agents)
                 additionalProperties:
                   type: object
                   properties:
@@ -1139,6 +1142,10 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  actionId:
+                    type: string
+                    description: action id when running in async mode (>10k agents)
                 additionalProperties:
                   type: object
                   properties:
@@ -1185,6 +1192,10 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  actionId:
+                    type: string
+                    description: action id when running in async mode (>10k agents)
                 additionalProperties:
                   type: object
                   properties:
@@ -1236,6 +1247,10 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  actionId:
+                    type: string
+                    description: action id when running in async mode (>10k agents)
                 additionalProperties:
                   type: object
                   properties:
@@ -1332,7 +1347,7 @@ paths:
           name: full
           description: >-
             When set to true, retrieve the related package policies for each
-            agent policy/
+            agent policy.
       description: ''
     post:
       summary: Agent policy - Create
