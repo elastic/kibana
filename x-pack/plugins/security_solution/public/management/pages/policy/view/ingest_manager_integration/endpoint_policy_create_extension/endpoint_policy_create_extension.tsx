@@ -75,7 +75,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     // / Endpoint Radio Options (NGAV and EDRs)
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
     const [behaviorProtectionChecked, setBehaviorProtectionChecked] = useState(false);
-    const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
+    const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('ALL_EVENTS');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
     const initialRender = useRef(true);
 
@@ -305,20 +305,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               helpText={
                 <HelpTextWithPadding>
                   <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeInteractiveOnlyInfo"
-                    defaultMessage="Monitors and collects session data from interactive sessions only. "
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getCloudEventsProps('INTERACTIVE_ONLY')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
                     id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeComprehensiveInfo"
                     defaultMessage="Monitors and collects session data from all process executions. "
                   />
@@ -326,6 +312,20 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               }
             >
               <EuiRadio {...getCloudEventsProps('ALL_EVENTS')} />
+            </EuiFormRow>
+            <EuiSpacer size="s" />
+            <EuiFormRow
+              fullWidth
+              helpText={
+                <HelpTextWithPadding>
+                  <FormattedMessage
+                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeInteractiveOnlyInfo"
+                    defaultMessage="Monitors and collects session data from interactive sessions only. "
+                  />
+                </HelpTextWithPadding>
+              }
+            >
+              <EuiRadio {...getCloudEventsProps('INTERACTIVE_ONLY')} />
             </EuiFormRow>
             {isPlatinumPlus && (
               <>
