@@ -89,6 +89,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
         validate: {
           body: bodySchema,
           params: paramsSchema,
+          query: querySchema,
         },
         options: {
           tags: fileKind.http.create.tags,
