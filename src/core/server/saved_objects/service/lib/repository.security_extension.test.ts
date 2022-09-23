@@ -1102,18 +1102,6 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
-    // toDo: I cannot seem to figure out this behavior
-    test.skip(`throws BadRequestError when searching across namespaces when spaces is disabled`, async () => {
-      setupCheckPartiallyAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-
-      const namespaces = ['some-ns', 'cant-get-there-from-here', 'forbidden-ns'];
-      const options = { type: [type, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE], namespaces };
-
-      // await findSuccess(client, repository, options);
-      await expect(repository.find(options)).rejects.toThrow('DOOD');
-    });
-
     test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
       setupCheckPartiallyAuthorized(mockSecurityExt);
       setupRedactPassthrough(mockSecurityExt);
