@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { stringHash } from '@kbn/ml-string-hash';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
-import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type {
+  AnomalyChartsEmbeddableInput,
+  AnomalySwimlaneEmbeddableInput,
+} from '@kbn/ml-plugin/public/embeddables';
+import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
@@ -480,14 +482,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const expectedAttachment = {
               jobIds: [testData.jobConfig.job_id],
-              timeRange: {
-                from: '2016-02-07T00:00:00.000Z',
-                to: '2016-02-11T23:59:54.000Z',
-              },
               maxSeriesToPlot: 6,
             } as AnomalyChartsEmbeddableInput;
 
-            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+            // @ts-expect-error Setting id to be undefined here
+            // since time range expected is of the chart plotEarliest/plotLatest, not of the global time range
+            // but, chart time range might vary depends on the time of the test
+            // we don't know the hashed string id for sure
+            expectedAttachment.id = undefined;
 
             await ml.cases.assertCaseWithAnomalyChartsAttachment(
               {
