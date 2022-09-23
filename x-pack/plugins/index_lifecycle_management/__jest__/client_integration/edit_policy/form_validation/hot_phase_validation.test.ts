@@ -10,7 +10,8 @@ import { i18nTexts } from '../../../../public/application/sections/edit_policy/i
 import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
-describe('<EditPolicy /> hot phase validation', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141645
+describe.skip('<EditPolicy /> hot phase validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

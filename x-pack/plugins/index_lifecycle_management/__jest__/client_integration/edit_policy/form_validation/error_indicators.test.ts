@@ -9,7 +9,8 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
-describe('<EditPolicy /> error indicators', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141645
+describe.skip('<EditPolicy /> error indicators', () => {
   let testBed: ValidationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 

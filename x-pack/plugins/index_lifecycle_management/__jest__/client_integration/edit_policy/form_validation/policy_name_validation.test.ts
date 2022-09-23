@@ -11,7 +11,8 @@ import { setupEnvironment } from '../../helpers';
 import { getGeneratedPolicies } from '../constants';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
-describe('<EditPolicy /> policy name validation', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141645
+describe.skip('<EditPolicy /> policy name validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
