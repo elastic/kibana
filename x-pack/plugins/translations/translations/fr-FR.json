@@ -11160,7 +11160,6 @@
     "xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel": "Gérer les domaines",
     "xpack.enterpriseSearch.content.searchIndex.index.syncSuccess.message": "Une synchronisation a été programmée avec succès, en attente de son activation par un connecteur.",
     "xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel": "Mappings d’index",
-    "xpack.enterpriseSearch.content.searchIndex.mappings.description": "Vos documents sont constitués d'un ensemble de champs. Les mappings d'index donnent à chaque champ un type (tel que `keyword`, `number` ou `date`) et des champs secondaires supplémentaires. Ces mappings d'index déterminent les fonctions disponibles dans votre réglage de pertinence et votre expérience de recherche.",
     "xpack.enterpriseSearch.content.searchIndex.mappings.docLink": "En savoir plus",
     "xpack.enterpriseSearch.content.searchIndex.mappings.title": "À propos des mappings d’index",
     "xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle": "Documents",

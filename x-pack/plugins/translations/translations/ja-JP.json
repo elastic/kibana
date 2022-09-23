@@ -11146,7 +11146,6 @@
     "xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel": "ドメインを管理",
     "xpack.enterpriseSearch.content.searchIndex.index.syncSuccess.message": "同期が正常にスケジュールされました。コネクターによって取得されるのを待機しています",
     "xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel": "インデックスマッピング",
-    "xpack.enterpriseSearch.content.searchIndex.mappings.description": "ドキュメントには、複数のフィールドのセットがあります。インデックスマッピングでは、各フィールドに型（「キーワード」、「数値」、「日付」など）と、追加のサブフィールドが指定されます。これらのインデックスマッピングでは、関連性の調整と検索エクスペリエンスで使用可能な機能が決まります。",
     "xpack.enterpriseSearch.content.searchIndex.mappings.docLink": "詳細",
     "xpack.enterpriseSearch.content.searchIndex.mappings.title": "インデックスマッピングについて",
     "xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle": "ドキュメント",
