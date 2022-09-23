@@ -50,13 +50,13 @@ export async function getExecutablesAndStackTraces({
     if (totalCount > sampleSize * 1.1) {
       p = sampleSize / totalCount;
       logger.info('downsampling events with p=' + p);
-      const t0 = new Date().getTime();
+      const t0 = Date.now();
       const downsampledTotalCount = downsampleEventsRandomly(
         stackTraceEvents,
         p,
         filter.toString()
       );
-      logger.info(`downsampling events took ${new Date().getTime() - t0} ms`);
+      logger.info(`downsampling events took ${Date.now() - t0} ms`);
       logger.info('downsampled total count: ' + downsampledTotalCount);
       logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
     }
