@@ -79,6 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'extension',
       });
 
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        field: 'average',
+      });
+
       await PageObjects.lens.waitForVisualization('xyVisChart');
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data!);
