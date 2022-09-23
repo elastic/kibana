@@ -68,7 +68,7 @@ export function runLengthEncode(input: number[]): Buffer {
     return Buffer.from(output);
   }
 
-  let count = 0;
+  let count = 1;
   let current = input[0];
 
   for (let i = 1; i < input.length; i++) {
@@ -79,13 +79,13 @@ export function runLengthEncode(input: number[]): Buffer {
       continue;
     }
 
-    output.push(count + 1, current);
+    output.push(count, current);
 
-    count = 0;
+    count = 1;
     current = next;
   }
 
-  output.push(count + 1, current);
+  output.push(count, current);
 
   return Buffer.from(output);
 }
@@ -269,7 +269,7 @@ export async function mgetStackTraces({
   const stackFrameDocIDs = new Set<string>();
   const executableDocIDs = new Set<string>();
 
-  const t0 = new Date().getTime();
+  const t0 = Date.now();
   // flatMap() is significantly slower than an explicit for loop
   for (const res of stackResponses) {
     for (const trace of res.docs) {
@@ -298,7 +298,7 @@ export async function mgetStackTraces({
       }
     }
   }
-  logger.info(`processing data took ${new Date().getTime() - t0} ms`);
+  logger.info(`processing data took ${Date.now() - t0} ms`);
 
   if (stackTraces.size !== 0) {
     logger.info('Average size of stacktrace: ' + totalFrames / stackTraces.size);
@@ -336,7 +336,7 @@ export async function mgetStackFrames({
 
   // Create a lookup map StackFrameID -> StackFrame.
   let framesFound = 0;
-  const t0 = new Date().getTime();
+  const t0 = Date.now();
   const docs = resStackFrames.docs;
   for (const frame of docs) {
     if ('error' in frame) {
@@ -361,7 +361,7 @@ export async function mgetStackFrames({
       });
     }
   }
-  logger.info(`processing data took ${new Date().getTime() - t0} ms`);
+  logger.info(`processing data took ${Date.now() - t0} ms`);
 
   logger.info('found ' + framesFound + ' / ' + stackFrameIDs.size + ' frames');
 
@@ -391,7 +391,7 @@ export async function mgetExecutables({
 
   // Create a lookup map StackFrameID -> StackFrame.
   let exeFound = 0;
-  const t0 = new Date().getTime();
+  const t0 = Date.now();
   const docs = resExecutables.docs;
   for (const exe of docs) {
     if ('error' in exe) {
@@ -408,7 +408,7 @@ export async function mgetExecutables({
       });
     }
   }
-  logger.info(`processing data took ${new Date().getTime() - t0} ms`);
+  logger.info(`processing data took ${Date.now() - t0} ms`);
 
   logger.info('found ' + exeFound + ' / ' + executableIDs.size + ' executables');
 

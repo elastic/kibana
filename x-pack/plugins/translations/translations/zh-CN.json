@@ -11162,7 +11162,6 @@
     "xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel": "管理域",
     "xpack.enterpriseSearch.content.searchIndex.index.syncSuccess.message": "已成功计划同步，等待连接器提取",
     "xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel": "索引映射",
-    "xpack.enterpriseSearch.content.searchIndex.mappings.description": "您的文档由一组字段构成。索引映射为每个字段提供类型（例如，`关键字`、`数字`或`日期`）和其他子字段。这些索引映射确定您的相关性调整和搜索体验中可用的功能。",
     "xpack.enterpriseSearch.content.searchIndex.mappings.docLink": "了解详情",
     "xpack.enterpriseSearch.content.searchIndex.mappings.title": "关于索引映射",
     "xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle": "文档",

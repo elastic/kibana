@@ -83,6 +83,36 @@ describe('getFilterClickData', () => {
     expect(data[1].value).toEqual(1);
   });
 
+  it('returns the correct filters for small multiples if there are no bucket dimensions', () => {
+    const clickedLayers = [
+      {
+        groupByRollup: 'Count',
+        value: 797,
+        depth: 0,
+        path: [],
+        sortIndex: 0,
+        smAccessorValue: 'ES-Air',
+      },
+    ];
+    const splitDimension = {
+      id: 'col-0-2',
+      name: 'Carrier: Descending',
+    } as DatatableColumn;
+    const data = getFilterClickData(
+      clickedLayers,
+      [{ name: 'Count' }],
+      visData,
+      visData,
+      1,
+      splitDimension
+    );
+    expect(data.length).toEqual(2);
+    expect(data[0].value).toEqual('Count');
+    expect(data[0].row).toEqual(4);
+    expect(data[1].column).toEqual(0);
+    expect(data[1].value).toEqual('ES-Air');
+  });
+
   describe('multi-metric scenarios', () => {
     describe('without any original bucket columns', () => {
       const originalTable: Datatable = {
