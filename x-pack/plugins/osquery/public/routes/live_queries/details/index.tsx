@@ -7,9 +7,10 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { AddToCaseButton } from '../../../cases/add_to_cases_button';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
@@ -52,6 +53,19 @@ const LiveQueryDetailsPageComponent = () => {
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
+  const addToCaseButton = useCallback(
+    (payload) => (
+      <AddToCaseButton
+        queryId={payload.queryId}
+        actionId={actionId}
+        agentIds={data?.agents}
+        isIcon={payload.isIcon}
+        isDisabled={payload.isDisabled}
+        iconProps={payload.iconProps}
+      />
+    ),
+    [data?.agents, actionId]
+  );
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
@@ -61,6 +75,8 @@ const LiveQueryDetailsPageComponent = () => {
         startDate={data?.['@timestamp']}
         expirationDate={data?.expiration}
         agentIds={data?.agents}
+        addToCase={addToCaseButton}
+        showResultsHeader
       />
     </WithHeaderLayout>
   );

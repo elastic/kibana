@@ -15,6 +15,7 @@ import {
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
   DeleteOnePackagePolicyRequestSchema,
+  BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
@@ -28,6 +29,7 @@ import {
   dryRunUpgradePackagePolicyHandler,
   getOrphanedPackagePolicies,
   deleteOnePackagePolicyHandler,
+  bulkGetPackagePoliciesHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -41,6 +43,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getPackagePoliciesHandler
+  );
+
+  router.post(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
+      validate: BulkGetPackagePoliciesRequestSchema,
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    },
+    bulkGetPackagePoliciesHandler
   );
 
   // Get one
@@ -71,9 +84,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreatePackagePolicyRequestSchema,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
     },
     createPackagePolicyHandler
   );

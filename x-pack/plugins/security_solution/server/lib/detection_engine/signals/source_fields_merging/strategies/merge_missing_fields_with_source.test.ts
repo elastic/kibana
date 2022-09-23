@@ -370,9 +370,9 @@ describe('merge_missing_fields_with_source', () => {
       /**
        * tests for https://github.com/elastic/kibana/issues/135963
        * This test will fail when we replace the import
-       * import { set } from '@elastic/safer-lodash-set';
+       * import { set } from '@kbn/safer-lodash-set';
        * to use the fp version
-       * import { set } from '@elastic/safer-lodash-set/fp';
+       * import { set } from '@kbn/safer-lodash-set/fp';
        * and switch around the return inside of filteredEntries.reduce
        * to be the following:
        * return set(fieldsKey, valueToMerge, merged);

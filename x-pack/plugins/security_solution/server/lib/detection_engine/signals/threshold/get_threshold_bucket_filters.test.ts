@@ -13,7 +13,7 @@ describe('getThresholdBucketFilters', () => {
   it('should generate filters for threshold signal detection with dupe mitigation', async () => {
     const result = await getThresholdBucketFilters({
       signalHistory: sampleThresholdSignalHistory(),
-      primaryTimestamp: TIMESTAMP,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(result).toEqual([
       {

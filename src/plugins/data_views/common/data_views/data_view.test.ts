@@ -7,13 +7,14 @@
  */
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec } from '../types';
+import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { stubLogstashFields } from '../field.stub';
 import { DataViewField } from '../fields';
-import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
 import { DataView } from './data_view';
 
 class MockFieldFormatter {}
@@ -93,6 +94,29 @@ describe('IndexPattern', () => {
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
       expect(indexPattern.fields[0]).toHaveProperty('isMapped');
+    });
+  });
+
+  describe('isTSDBMode', () => {
+    const tsdbField: FieldSpec = {
+      name: 'tsdb-metric-field',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+      timeSeriesMetric: 'gauge',
+    };
+
+    test('should return false if no fields are tsdb fields', () => {
+      expect(indexPattern.isTSDBMode()).toBe(false);
+    });
+
+    test('should return true if some fields are tsdb fields', () => {
+      indexPattern.fields.add(tsdbField);
+      expect(indexPattern.isTSDBMode()).toBe(true);
+    });
+
+    afterAll(() => {
+      indexPattern.fields.remove(tsdbField);
     });
   });
 
@@ -239,10 +263,10 @@ describe('IndexPattern', () => {
       },
       fields: {
         a: {
-          type: 'keyword' as RuntimeTypeExceptComposite,
+          type: 'keyword' as RuntimePrimitiveTypes,
         },
         b: {
-          type: 'long' as RuntimeTypeExceptComposite,
+          type: 'long' as RuntimePrimitiveTypes,
         },
       },
     };

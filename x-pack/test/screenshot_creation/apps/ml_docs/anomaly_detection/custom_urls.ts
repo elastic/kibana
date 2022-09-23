@@ -13,7 +13,7 @@ import { ECOMMERCE_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.openEditCustomUrlsForJobTab(ecommerceJobConfig.job_id);
       const existingCustomUrlCount = await ml.jobTable.getExistingCustomUrlCount();
       await ml.jobTable.fillInDashboardUrlForm(testDashboardCustomUrl);
-      await mlScreenshots.takeScreenshot('ml-customurl-edit', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-customurl-edit', screenshotDirectories);
 
       await ml.testExecution.logTestStep('add the custom url and save the job');
       await ml.jobTable.saveCustomUrl(testDashboardCustomUrl.label, existingCustomUrlCount);
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.anomaliesTable.scrollTableIntoView();
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
 
-      await mlScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
     });
   });
 }

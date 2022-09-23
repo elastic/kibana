@@ -26,7 +26,7 @@ import {
   SLICES,
 } from './constants';
 import { RangePopover } from './advanced_editor';
-import { DragDropBuckets } from '../shared_components';
+import { DragDropBuckets } from '../../../../shared_components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 import { IndexPattern } from '../../../../types';
 
@@ -125,6 +125,8 @@ const defaultOptions = {
         aggregatable: true,
       },
     ]),
+    isPersisted: true,
+    spec: {},
   },
   operationDefinitionMap: {},
   isFullscreen: false,

@@ -5,28 +5,62 @@
  * 2.0.
  */
 
+import { FileJSON } from '../common';
 import type {
-  HttpApiInterfaceEntryDefinition,
-  CreateFileKindHttpEndpoint,
-  DeleteFileKindHttpEndpoint,
-  DownloadFileKindHttpEndpoint,
-  GetByIdFileKindHttpEndpoint,
+  FindFilesHttpEndpoint,
+  FileShareHttpEndpoint,
+  FileUnshareHttpEndpoint,
+  FileGetShareHttpEndpoint,
+  FilesMetricsHttpEndpoint,
   ListFileKindHttpEndpoint,
+  CreateFileKindHttpEndpoint,
+  FileListSharesHttpEndpoint,
   UpdateFileKindHttpEndpoint,
   UploadFileKindHttpEndpoint,
+  DeleteFileKindHttpEndpoint,
+  GetByIdFileKindHttpEndpoint,
+  DownloadFileKindHttpEndpoint,
+  FilePublicDownloadHttpEndpoint,
+  HttpApiInterfaceEntryDefinition,
 } from '../common/api_routes';
 
-/**
- * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
- */
-type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
+type UnscopedClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
   args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
 ) => Promise<E['output']>;
 
 /**
+ * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
+ */
+type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition, ExtraArgs extends {} = {}> = (
+  args: Parameters<UnscopedClientMethodFrom<E>>[0] & { kind: string } & ExtraArgs
+) => Promise<E['output']>;
+
+interface GlobalEndpoints {
+  /**
+   * Get metrics of file system, like storage usage.
+   *
+   * @param args - Get metrics arguments
+   */
+  getMetrics: () => Promise<FilesMetricsHttpEndpoint['output']>;
+  /**
+   * Download a file, bypassing regular security by way of a
+   * secret share token.
+   *
+   * @param args - Get public download arguments.
+   */
+  publicDownload: UnscopedClientMethodFrom<FilePublicDownloadHttpEndpoint>;
+  /**
+   * Find a set of files given some filters.
+   *
+   * @param args - File filters
+   */
+  find: UnscopedClientMethodFrom<FindFilesHttpEndpoint>;
+}
+
+/**
  * A client that can be used to manage a specific {@link FileKind}.
  */
-export interface FilesClient {
+export interface FilesClient extends GlobalEndpoints {
   /**
    * Create a new file object with the provided metadata.
    *
@@ -62,23 +96,79 @@ export interface FilesClient {
    *
    * @param args - upload file args
    */
-  upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
+  upload: ClientMethodFrom<
+    UploadFileKindHttpEndpoint,
+    { abortSignal?: AbortSignal; contentType?: string }
+  >;
   /**
    * Stream a download of the file object's content.
    *
    * @param args - download file args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
+  /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   */
+  getDownloadHref: (file: FileJSON) => string;
+  /**
+   * Share a file by creating a new file share instance.
+   *
+   * @note This returns the secret token that can be used
+   * to access a file via the public download enpoint.
+   *
+   * @param args - File share arguments
+   */
+  share: ClientMethodFrom<FileShareHttpEndpoint>;
+  /**
+   * Delete a file share instance.
+   *
+   * @param args - File unshare arguments
+   */
+  unshare: ClientMethodFrom<FileUnshareHttpEndpoint>;
+  /**
+   * Get a file share instance.
+   *
+   * @param args - Get file share arguments
+   */
+  getShare: ClientMethodFrom<FileGetShareHttpEndpoint>;
+  /**
+   * List all file shares. Optionally scoping to a specific
+   * file.
+   *
+   * @param args - Get file share arguments
+   */
+  listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
 }
 
+export type FilesClientResponses = {
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+};
+
 /**
- * A factory for creating a {@link FilesClient}
+ * A files client that is scoped to a specific {@link FileKind}.
+ *
+ * More convenient if you want to re-use the same client for the same file kind
+ * and not specify the kind every time.
+ */
+export type ScopedFilesClient = {
+  [K in keyof FilesClient]: K extends 'list'
+    ? (arg?: Omit<Parameters<FilesClient[K]>[0], 'kind'>) => ReturnType<FilesClient[K]>
+    : (arg: Omit<Parameters<FilesClient[K]>[0], 'kind'>) => ReturnType<FilesClient[K]>;
+};
+
+/**
+ * A factory for creating a {@link ScopedFilesClient}
  */
 export interface FilesClientFactory {
   /**
-   * Create a {@link FileClient} for a given {@link FileKind}.
+   * Create a files client.
+   */
+  asUnscoped(): FilesClient;
+  /**
+   * Create a {@link ScopedFileClient} for a given {@link FileKind}.
    *
    * @param fileKind - The {@link FileKind} to create a client for.
    */
-  asScoped(fileKind: string): FilesClient;
+  asScoped(fileKind: string): ScopedFilesClient;
 }

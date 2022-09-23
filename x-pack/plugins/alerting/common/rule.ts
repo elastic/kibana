@@ -45,6 +45,7 @@ export enum RuleExecutionStatusErrorReasons {
 
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
+  MAX_ALERTS = 'maxAlerts',
 }
 
 export interface RuleExecutionStatus {

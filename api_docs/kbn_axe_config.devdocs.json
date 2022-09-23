@@ -30,8 +30,9 @@
         "tags": [],
         "label": "AXE_CONFIG",
         "description": [],
-        "path": "packages/kbn-axe-config/src/index.ts",
+        "path": "packages/kbn-axe-config/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/axe-config",
@@ -43,8 +44,9 @@
             "signature": [
               "{ id: string; selector: string; }[]"
             ],
-            "path": "packages/kbn-axe-config/src/index.ts",
-            "deprecated": false
+            "path": "packages/kbn-axe-config/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -56,8 +58,9 @@
         "tags": [],
         "label": "AXE_OPTIONS",
         "description": [],
-        "path": "packages/kbn-axe-config/src/index.ts",
+        "path": "packages/kbn-axe-config/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/axe-config",
@@ -69,8 +72,9 @@
             "signature": [
               "\"raw\" | \"v2\" | \"v1\" | \"raw-env\" | \"no-passes\""
             ],
-            "path": "packages/kbn-axe-config/src/index.ts",
-            "deprecated": false
+            "path": "packages/kbn-axe-config/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/axe-config",
@@ -82,8 +86,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-axe-config/src/index.ts",
-            "deprecated": false
+            "path": "packages/kbn-axe-config/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/axe-config",
@@ -92,8 +97,9 @@
             "tags": [],
             "label": "rules",
             "description": [],
-            "path": "packages/kbn-axe-config/src/index.ts",
+            "path": "packages/kbn-axe-config/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/axe-config",
@@ -102,8 +108,9 @@
                 "tags": [],
                 "label": "'color-contrast'",
                 "description": [],
-                "path": "packages/kbn-axe-config/src/index.ts",
+                "path": "packages/kbn-axe-config/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/axe-config",
@@ -112,8 +119,9 @@
                     "tags": [],
                     "label": "enabled",
                     "description": [],
-                    "path": "packages/kbn-axe-config/src/index.ts",
-                    "deprecated": false
+                    "path": "packages/kbn-axe-config/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -124,8 +132,9 @@
                 "tags": [],
                 "label": "bypass",
                 "description": [],
-                "path": "packages/kbn-axe-config/src/index.ts",
+                "path": "packages/kbn-axe-config/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/axe-config",
@@ -134,8 +143,9 @@
                     "tags": [],
                     "label": "enabled",
                     "description": [],
-                    "path": "packages/kbn-axe-config/src/index.ts",
-                    "deprecated": false
+                    "path": "packages/kbn-axe-config/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }

@@ -16,7 +16,7 @@ import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { LogRecord } from '@kbn/logging';
-import { retryAsync } from '../../../saved_objects/migrations/test_helpers/retry_async';
+import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;

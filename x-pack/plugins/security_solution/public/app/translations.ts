@@ -18,6 +18,13 @@ export const DETECTION_RESPONSE = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalytics',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -113,12 +120,9 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
-export const RESPONSE_ACTIONS = i18n.translate(
-  'xpack.securitySolution.navigation.responseActions',
-  {
-    defaultMessage: 'Response Actions',
-  }
-);
+export const ACTION_HISTORY = i18n.translate('xpack.securitySolution.navigation.actionHistory', {
+  defaultMessage: 'Action history',
+});
 
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
@@ -145,6 +149,6 @@ export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPer
 export const THREAT_INTELLIGENCE = i18n.translate(
   'xpack.securitySolution.navigation.threatIntelligence',
   {
-    defaultMessage: 'Threat Intelligence',
+    defaultMessage: 'Intelligence',
   }
 );

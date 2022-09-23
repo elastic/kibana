@@ -42,6 +42,14 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
   name: { type: 'keyword' },
+  pipeline: {
+    properties: {
+      extract_binary_content: { type: 'boolean' },
+      name: { type: 'keyword' },
+      reduce_whitespace: { type: 'boolean' },
+      run_ml_inference: { type: 'boolean' },
+    },
+  },
   scheduling: {
     properties: {
       enabled: { type: 'boolean' },
@@ -53,19 +61,38 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   sync_now: { type: 'boolean' },
 };
 
+const defaultSettings: IndicesIndexSettings = {
+  auto_expand_replicas: '0-3',
+  hidden: true,
+  number_of_replicas: 0,
+};
+
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: true,
+  default_name: 'ent-search-generic-ingestion',
+  default_reduce_whitespace: true,
+  default_run_ml_inference: true,
+};
+
 const indices: IndexDefinition[] = [
   {
     aliases: ['.elastic-connectors'],
     mappings: {
       _meta: {
+        pipeline: defaultConnectorsPipelineMeta,
         version: '1',
       },
       properties: connectorMappingsProperties,
     },
     name: '.elastic-connectors-v1',
-    settings: {
-      hidden: true,
-    },
+    settings: defaultSettings,
   },
   {
     aliases: ['.elastic-connectors-sync-jobs'],
@@ -75,7 +102,7 @@ const indices: IndexDefinition[] = [
       },
       properties: {
         completed_at: { type: 'date' },
-        connector: connectorMappingsProperties,
+        connector: { properties: connectorMappingsProperties },
         connector_id: {
           type: 'keyword',
         },
@@ -92,9 +119,7 @@ const indices: IndexDefinition[] = [
       },
     },
     name: '.elastic-connectors-sync-jobs-v1',
-    settings: {
-      hidden: true,
-    },
+    settings: defaultSettings,
   },
 ];
 

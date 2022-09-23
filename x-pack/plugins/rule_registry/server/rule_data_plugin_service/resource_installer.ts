@@ -180,10 +180,25 @@ export class ResourceInstaller {
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
-    const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
-      name: index,
-    });
+
+    let simulatedIndexMapping: estypes.IndicesSimulateIndexTemplateResponse;
+    try {
+      simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
+        name: index,
+      });
+    } catch (err) {
+      logger.error(
+        `Ignored PUT mappings for alias ${alias}; error generating simulated mappings: ${err.message}`
+      );
+      return;
+    }
+
     const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
+
+    if (simulatedMapping == null) {
+      logger.error(`Ignored PUT mappings for alias ${alias}; simulated mappings were empty`);
+      return;
+    }
 
     try {
       await clusterClient.indices.putMapping({
@@ -337,6 +352,7 @@ export class ResourceInstaller {
               rollover_alias: primaryNamespacedAlias,
             },
             'index.mapping.total_fields.limit': 1700,
+            auto_expand_replicas: '0-1',
           },
           mappings: {
             dynamic: false,

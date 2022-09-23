@@ -325,6 +325,7 @@ interface BaseOperationDefinitionProps<
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
@@ -348,9 +349,9 @@ interface BaseOperationDefinitionProps<
    */
   filterable?: boolean | { helpMessage: string };
   /**
-   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   * Time range reducable operations can have a reduced time range defined at the dimension level - under the hood this will be translated into a filter on the defined time field
    */
-  windowable?: boolean;
+  canReduceTimeRange?: boolean;
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -439,6 +440,11 @@ interface OperationParam {
   defaultValue?: string | number;
 }
 
+interface FilterParams {
+  kql?: string;
+  lucene?: string;
+}
+
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
@@ -496,12 +502,10 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: P & {
-      kql?: string;
-      lucene?: string;
       shift?: string;
-      window?: string;
+      reducedTimeRange?: string;
       usedInMath?: boolean;
-    }
+    } & FilterParams
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -552,6 +556,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
@@ -611,10 +616,8 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
       previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
-      kql?: string;
-      lucene?: string;
       shift?: string;
-    }
+    } & FilterParams
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
@@ -640,7 +643,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     arg: BaseBuildColumnArgs & {
       previousColumn?: GenericIndexPatternColumn;
     },
-    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'],
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & FilterParams,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ReferenceBasedIndexPatternColumn & C;
   /**

@@ -30,13 +30,13 @@ describe('processAlerts', () => {
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '2': existingAlert1,
         '3': existingAlert2,
       };
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '1': newAlert,
       };
 
@@ -44,8 +44,14 @@ describe('processAlerts', () => {
       updatedAlerts['2'].scheduleActions('default', { foo: '1' });
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
-      // @ts-expect-error
-      const { newAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { newAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(newAlerts).toEqual({ '1': newAlert });
     });
@@ -56,13 +62,13 @@ describe('processAlerts', () => {
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('3');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('4');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '3': existingAlert1,
         '4': existingAlert2,
       };
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '1': newAlert1,
         '2': newAlert2,
       };
@@ -75,8 +81,14 @@ describe('processAlerts', () => {
       expect(newAlert1.getState()).toStrictEqual({});
       expect(newAlert2.getState()).toStrictEqual({});
 
-      // @ts-expect-error
-      const { newAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { newAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
 
@@ -106,13 +118,13 @@ describe('processAlerts', () => {
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '2': existingAlert1,
         '3': existingAlert2,
       };
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '1': newAlert,
       };
 
@@ -120,8 +132,14 @@ describe('processAlerts', () => {
       updatedAlerts['2'].scheduleActions('default', { foo: '1' });
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
-      // @ts-expect-error
-      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -135,15 +153,15 @@ describe('processAlerts', () => {
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '2': existingAlert1,
         '3': existingAlert2,
       };
-      originalAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
-      originalAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
+      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
+      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '1': newAlert,
       };
 
@@ -151,8 +169,14 @@ describe('processAlerts', () => {
       updatedAlerts['2'].scheduleActions('default', { foo: '1' });
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
-      // @ts-expect-error
-      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -184,13 +208,13 @@ describe('processAlerts', () => {
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '2': existingAlert1,
         '3': existingAlert2,
       };
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '1': newAlert,
       };
 
@@ -198,8 +222,14 @@ describe('processAlerts', () => {
       updatedAlerts['2'].scheduleActions('default', { foo: '1' });
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
-      // @ts-expect-error
-      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -231,23 +261,23 @@ describe('processAlerts', () => {
       const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '2': existingAlert1,
         '3': existingAlert2,
       };
-      originalAlerts['2'].replaceState({
+      existingAlerts['2'].replaceState({
         stateField1: 'xyz',
         start: '1969-12-30T00:00:00.000Z',
         duration: 33000,
       });
-      originalAlerts['3'].replaceState({
+      existingAlerts['3'].replaceState({
         anotherState: true,
         start: '1969-12-31T07:34:00.000Z',
         duration: 23532,
       });
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '1': newAlert,
       };
 
@@ -255,8 +285,14 @@ describe('processAlerts', () => {
       updatedAlerts['2'].scheduleActions('default', { foo: '1' });
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
-      // @ts-expect-error
-      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -294,18 +330,24 @@ describe('processAlerts', () => {
       const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
       const recoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('2');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '1': activeAlert,
         '2': recoveredAlert,
       };
 
-      const updatedAlerts = cloneDeep(originalAlerts);
+      const updatedAlerts = cloneDeep(existingAlerts);
 
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
       updatedAlerts['2'].setContext({ foo: '2' });
 
-      // @ts-expect-error
-      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'] });
     });
@@ -314,19 +356,25 @@ describe('processAlerts', () => {
       const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
       const notRecoveredAlert = new Alert<{}, {}, DefaultActionGroupId>('2');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '1': activeAlert,
       };
 
       const updatedAlerts = {
-        ...cloneDeep(originalAlerts),
+        ...cloneDeep(existingAlerts),
         '2': notRecoveredAlert,
       };
 
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
 
-      // @ts-expect-error
-      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(recoveredAlerts).toEqual({});
     });
@@ -336,20 +384,26 @@ describe('processAlerts', () => {
       const recoveredAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const recoveredAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '1': activeAlert,
         '2': recoveredAlert1,
         '3': recoveredAlert2,
       };
-      originalAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
-      originalAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
+      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
+      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
 
-      const updatedAlerts = cloneDeep(originalAlerts);
+      const updatedAlerts = cloneDeep(existingAlerts);
 
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
 
-      // @ts-expect-error
-      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
 
@@ -377,17 +431,23 @@ describe('processAlerts', () => {
       const recoveredAlert1 = new Alert<{}, {}, DefaultActionGroupId>('2');
       const recoveredAlert2 = new Alert<{}, {}, DefaultActionGroupId>('3');
 
-      const originalAlerts = {
+      const existingAlerts = {
         '1': activeAlert,
         '2': recoveredAlert1,
         '3': recoveredAlert2,
       };
-      const updatedAlerts = cloneDeep(originalAlerts);
+      const updatedAlerts = cloneDeep(existingAlerts);
 
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
 
-      // @ts-expect-error
-      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+      });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
 
@@ -408,6 +468,158 @@ describe('processAlerts', () => {
       expect(recoveredAlert1State.end).not.toBeDefined();
       // @ts-expect-error
       expect(recoveredAlert2State.end).not.toBeDefined();
+    });
+  });
+
+  describe('when hasReachedAlertLimit is true', () => {
+    test('does not calculate recovered alerts', () => {
+      const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1');
+      const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('2');
+      const existingAlert3 = new Alert<{}, {}, DefaultActionGroupId>('3');
+      const existingAlert4 = new Alert<{}, {}, DefaultActionGroupId>('4');
+      const existingAlert5 = new Alert<{}, {}, DefaultActionGroupId>('5');
+      const newAlert6 = new Alert<{}, {}, DefaultActionGroupId>('6');
+      const newAlert7 = new Alert<{}, {}, DefaultActionGroupId>('7');
+
+      const existingAlerts = {
+        '1': existingAlert1,
+        '2': existingAlert2,
+        '3': existingAlert3,
+        '4': existingAlert4,
+        '5': existingAlert5,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '6': newAlert6,
+        '7': newAlert7,
+      };
+
+      updatedAlerts['1'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['4'].scheduleActions('default', { foo: '2' });
+      // intentionally not scheduling actions for alert "5"
+      updatedAlerts['6'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['7'].scheduleActions('default', { foo: '2' });
+
+      const { recoveredAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: true,
+        alertLimit: 7,
+      });
+
+      expect(recoveredAlerts).toEqual({});
+    });
+
+    test('persists existing alerts', () => {
+      const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1');
+      const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('2');
+      const existingAlert3 = new Alert<{}, {}, DefaultActionGroupId>('3');
+      const existingAlert4 = new Alert<{}, {}, DefaultActionGroupId>('4');
+      const existingAlert5 = new Alert<{}, {}, DefaultActionGroupId>('5');
+
+      const existingAlerts = {
+        '1': existingAlert1,
+        '2': existingAlert2,
+        '3': existingAlert3,
+        '4': existingAlert4,
+        '5': existingAlert5,
+      };
+
+      const updatedAlerts = cloneDeep(existingAlerts);
+
+      updatedAlerts['1'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['4'].scheduleActions('default', { foo: '2' });
+      // intentionally not scheduling actions for alert "5"
+
+      const { activeAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: true,
+        alertLimit: 7,
+      });
+
+      expect(activeAlerts).toEqual({
+        '1': updatedAlerts['1'],
+        '2': updatedAlerts['2'],
+        '3': updatedAlerts['3'],
+        '4': updatedAlerts['4'],
+        '5': existingAlert5,
+      });
+    });
+
+    test('adds new alerts up to max allowed', () => {
+      const MAX_ALERTS = 7;
+      const existingAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1');
+      const existingAlert2 = new Alert<{}, {}, DefaultActionGroupId>('2');
+      const existingAlert3 = new Alert<{}, {}, DefaultActionGroupId>('3');
+      const existingAlert4 = new Alert<{}, {}, DefaultActionGroupId>('4');
+      const existingAlert5 = new Alert<{}, {}, DefaultActionGroupId>('5');
+      const newAlert6 = new Alert<{}, {}, DefaultActionGroupId>('6');
+      const newAlert7 = new Alert<{}, {}, DefaultActionGroupId>('7');
+      const newAlert8 = new Alert<{}, {}, DefaultActionGroupId>('8');
+      const newAlert9 = new Alert<{}, {}, DefaultActionGroupId>('9');
+      const newAlert10 = new Alert<{}, {}, DefaultActionGroupId>('10');
+
+      const existingAlerts = {
+        '1': existingAlert1,
+        '2': existingAlert2,
+        '3': existingAlert3,
+        '4': existingAlert4,
+        '5': existingAlert5,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '6': newAlert6,
+        '7': newAlert7,
+        '8': newAlert8,
+        '9': newAlert9,
+        '10': newAlert10,
+      };
+
+      updatedAlerts['1'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default', { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['4'].scheduleActions('default', { foo: '2' });
+      // intentionally not scheduling actions for alert "5"
+      updatedAlerts['6'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['7'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['8'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['9'].scheduleActions('default', { foo: '2' });
+      updatedAlerts['10'].scheduleActions('default', { foo: '2' });
+
+      const { activeAlerts, newAlerts } = processAlerts({
+        // @ts-expect-error
+        alerts: updatedAlerts,
+        // @ts-expect-error
+        existingAlerts,
+        hasReachedAlertLimit: true,
+        alertLimit: MAX_ALERTS,
+      });
+
+      expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
+      expect(activeAlerts).toEqual({
+        '1': updatedAlerts['1'],
+        '2': updatedAlerts['2'],
+        '3': updatedAlerts['3'],
+        '4': updatedAlerts['4'],
+        '5': existingAlert5,
+        '6': newAlert6,
+        '7': newAlert7,
+      });
+      expect(newAlerts).toEqual({
+        '6': newAlert6,
+        '7': newAlert7,
+      });
     });
   });
 });

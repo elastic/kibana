@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -138,8 +138,8 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionType: actionTypesIndex[action.actionTypeId]
             ? actionTypesIndex[action.actionTypeId].name
             : action.actionTypeId,
-          featureIds: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].supportedFeatureIds
+          compatibility: actionTypesIndex[action.actionTypeId]
+            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
             : [],
         };
       })
@@ -272,22 +272,28 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'featureIds',
+      field: 'compatibility',
+      'data-test-subj': 'connectorsTableCell-compatibility',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.compatibility',
         {
-          defaultMessage: 'Availability',
+          defaultMessage: 'Compatibility',
         }
       ),
       sortable: false,
       truncateText: true,
-      render: (availability: string[]) => {
+      render: (compatibility: string[]) => {
         return (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {(availability ?? []).map((featureId: string) => (
-              <EuiFlexItem grow={false} key={featureId}>
-                <EuiBadge data-test-subj="connectorsTableCell-featureIds" color="default">
-                  {getConnectorFeatureName(featureId)}
+          <EuiFlexGroup
+            wrap
+            responsive={false}
+            gutterSize="xs"
+            data-test-subj="compatibility-content"
+          >
+            {compatibility.map((compatibilityItem: string) => (
+              <EuiFlexItem grow={false} key={compatibilityItem}>
+                <EuiBadge data-test-subj="connectorsTableCell-compatibility-badge" color="default">
+                  {compatibilityItem}
                 </EuiBadge>
               </EuiFlexItem>
             ))}

@@ -41,6 +41,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const chance = new Chance();
 
@@ -76,6 +77,7 @@ describe('Cloud Security Posture Plugin', () => {
       data: dataPluginMock.createStartContract(),
       taskManager: taskManagerMock.createStart(),
       security: securityMock.createStart(),
+      licensing: licensingMock.createStart(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
@@ -241,7 +243,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-      packageMock.vars = { dataYaml: { type: 'foo' } };
+      packageMock.vars = { runtimeCfg: { type: 'foo' } };
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
@@ -272,8 +274,8 @@ describe('Cloud Security Posture Plugin', () => {
         );
         if (fleetMock.packagePolicyService.update.mock.calls.length) {
           expect(updatedPackagePolicy).toHaveProperty('vars');
-          expect(updatedPackagePolicy.vars).toHaveProperty('dataYaml');
-          expect(updatedPackagePolicy.vars!.dataYaml).toHaveProperty('value');
+          expect(updatedPackagePolicy.vars).toHaveProperty('runtimeCfg');
+          expect(updatedPackagePolicy.vars!.runtimeCfg).toHaveProperty('value');
         }
       }
       expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);

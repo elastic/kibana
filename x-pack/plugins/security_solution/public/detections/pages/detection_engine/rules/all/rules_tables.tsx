@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import {
   EuiBasicTable,
   EuiConfirmModal,
@@ -33,7 +31,7 @@ import { showRulesTable } from './helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesUtilityBar } from './utility_bar';
+import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
 import { useBulkActionsConfirmation } from './bulk_actions/use_bulk_actions_confirmation';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
@@ -147,7 +145,6 @@ export const RulesTables = React.memo<RulesTableProps>(
     } = useBulkEditFormFlyout();
 
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
-    const hasPagination = pagination.total > pagination.perPage;
 
     const { isBulkActionsDryRunLoading, executeBulkActionsDryRun } = useBulkActionsDryRun();
 
@@ -222,6 +219,12 @@ export const RulesTables = React.memo<RulesTableProps>(
            */
           if (isSelectAllCalled.current) {
             isSelectAllCalled.current = false;
+            // Handle special case of unselecting all rules via checkbox
+            // after all rules were selected via Bulk select.
+            if (selected.length === 0) {
+              setIsAllSelected(false);
+              setSelectedRuleIds([]);
+            }
           } else {
             setSelectedRuleIds(selected.map(({ id }) => id));
             setIsAllSelected(false);
@@ -271,6 +274,7 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const shouldShowLinearProgress = isFetched && isRefetching;
     const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isActionInProgress;
+
     return (
       <>
         {shouldShowLinearProgress && (
@@ -334,10 +338,9 @@ export const RulesTables = React.memo<RulesTableProps>(
         )}
         {shouldShowRulesTable && (
           <>
-            <AllRulesUtilityBar
+            <RulesTableUtilityBar
               canBulkEdit={hasPermissions}
-              hasPagination={hasPagination}
-              paginationTotal={pagination.total ?? 0}
+              pagination={pagination}
               numberSelectedItems={selectedItemsCount}
               onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
               onRefresh={handleRefreshRules}
@@ -347,7 +350,6 @@ export const RulesTables = React.memo<RulesTableProps>(
               onToggleSelectAll={toggleSelectAll}
               isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
               hasDisabledActions={loadingRulesAction != null}
-              hasBulkActions
             />
             <EuiBasicTable
               itemId="id"

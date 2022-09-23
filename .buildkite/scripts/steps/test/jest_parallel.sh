@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/../../common/util.sh"
 export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 # a jest failure will result in the script returning an exit code of 10
@@ -9,8 +10,10 @@ exitCode=0
 results=()
 
 if [[ "$1" == 'jest.config.js' ]]; then
-  # run unit tests in parallel
-  parallelism="-w2"
+  # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
+  # https://github.com/elastic/kibana/issues/141477
+  # parallelism="-w2"
+  parallelism="--runInBand"
   TEST_TYPE="unit"
 else
   # run integration tests in-band
@@ -20,16 +23,22 @@ fi
 
 export TEST_TYPE
 echo "--- downloading jest test run order"
-buildkite-agent artifact download jest_run_order.json .
+download_artifact jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
+
+  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  echo "actual full command is:"
+  echo "$cmd"
+  echo ""
+
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
   set +e;
-  NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
+  eval "$cmd"
   lastCode=$?
   set -e;
 

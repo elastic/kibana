@@ -12,6 +12,556 @@
     "classes": [
       {
         "parentPluginId": "@kbn/dev-cli-runner",
+        "id": "def-server.FlagsReader",
+        "type": "Class",
+        "tags": [],
+        "label": "FlagsReader",
+        "description": [],
+        "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "flags",
+                "description": [],
+                "signature": [
+                  "Record<string, FlagValue | undefined>"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/dev-cli-runner",
+                    "id": "def-server.FlagsReader.Unnamed.$2.aliases",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "aliases",
+                    "description": [],
+                    "signature": [
+                      "Record<string, string> | undefined"
+                    ],
+                    "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.arrayOfStrings",
+            "type": "Function",
+            "tags": [],
+            "label": "arrayOfStrings",
+            "description": [
+              "\nRead a string flag that supports multiple instances into an array of strings. If the\nflag is only passed once an array with a single item will be returned. If the flag is not\npassed then undefined will be returned."
+            ],
+            "signature": [
+              "(key: string) => string[] | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.arrayOfStrings.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.requiredArrayOfStrings",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredArrayOfStrings",
+            "description": [
+              "\nSame as #arrayOfStrings() except when the flag is not passed a \"flag error\" is thrown telling\nthe user that the flag is required and shows them the help text."
+            ],
+            "signature": [
+              "(key: string) => string[]"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.requiredArrayOfStrings.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.string",
+            "type": "Function",
+            "tags": [],
+            "label": "string",
+            "description": [
+              "\nRead the value of a string flag. If the flag is passed multiple times the last value is returned. If\nthe flag is not passed then undefined is returned."
+            ],
+            "signature": [
+              "(key: string) => string | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.string.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.enum",
+            "type": "Function",
+            "tags": [],
+            "label": "enum",
+            "description": [
+              "\nSame as #string() except when the flag is passed it is validated against a list\nof valid values"
+            ],
+            "signature": [
+              "<T extends string>(key: string, values: readonly T[]) => T | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.enum.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.enum.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "values",
+                "description": [],
+                "signature": [
+                  "readonly T[]"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.requiredString",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredString",
+            "description": [
+              "\nSame as #string() except when a flag is not passed a \"flag error\" is thrown telling the user\nthat the flag is required and shows them the help text."
+            ],
+            "signature": [
+              "(key: string) => string"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.requiredString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.path",
+            "type": "Function",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "\nSame as #string(), except that when there is a value for the string it is resolved to an\nabsolute path based on the current working directory"
+            ],
+            "signature": [
+              "(key: string) => string | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.path.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.requiredPath",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredPath",
+            "description": [
+              "\nSame as #requiredString() except that values are converted to absolute paths based on the\ncurrent working directory"
+            ],
+            "signature": [
+              "(key: string) => string"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.requiredPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.arrayOfPaths",
+            "type": "Function",
+            "tags": [],
+            "label": "arrayOfPaths",
+            "description": [
+              "\nSame as #arrayOfStrings(), except that when there are values they are resolved to\nabsolute paths based on the current working directory"
+            ],
+            "signature": [
+              "(key: string) => string[] | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.arrayOfPaths.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.requiredArrayOfPaths",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredArrayOfPaths",
+            "description": [
+              "\nSame as #requiredArrayOfStrings(), except that values are resolved to absolute paths\nbased on the current working directory"
+            ],
+            "signature": [
+              "(key: string) => string[]"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.requiredArrayOfPaths.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.number",
+            "type": "Function",
+            "tags": [],
+            "label": "number",
+            "description": [
+              "\nParsed the provided flag as a number, if the value does not parse to a valid number\nusing Number.parseFloat() then a \"flag error\" is thrown. If the flag is not passed\nundefined is returned."
+            ],
+            "signature": [
+              "(key: string) => number | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.number.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.requiredNumber",
+            "type": "Function",
+            "tags": [],
+            "label": "requiredNumber",
+            "description": [
+              "\nSame as #number() except that when the flag is missing a \"flag error\" is thrown"
+            ],
+            "signature": [
+              "(key: string) => number"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.requiredNumber.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.boolean",
+            "type": "Function",
+            "tags": [],
+            "label": "boolean",
+            "description": [
+              "\nRead a boolean flag value, if the flag is properly defined as a \"boolean\" in the run options\nthen the value will always be a boolean, defaulting to `false`, so there is no need for an\noptional/requiredBoolean() method."
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-cli-runner",
+                "id": "def-server.FlagsReader.boolean.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.getPositionals",
+            "type": "Function",
+            "tags": [],
+            "label": "getPositionals",
+            "description": [
+              "\nGet the positional arguments passed, includes any values that are not associated with\na specific --flag"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.getUnused",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnused",
+            "description": [
+              "\nReturns all of the unused flags. When a flag is read via any of the key-specific methods\nthe key is marked as \"used\" and this method will return a map of just the flags which\nhave not been used yet (excluding the default flags like --debug, --verbose, and --help)"
+            ],
+            "signature": [
+              "() => Map<string, FlagValue>"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.FlagsReader.getUsed",
+            "type": "Function",
+            "tags": [],
+            "label": "getUsed",
+            "description": [
+              "\nReturns all of the used flags. When a flag is read via any of the key-specific methods\nthe key is marked as \"used\" and from then on this method will return a map including that\nand any other key used by these methods."
+            ],
+            "signature": [
+              "() => Map<string, FlagValue>"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags_reader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-cli-runner",
         "id": "def-server.RunWithCommands",
         "type": "Class",
         "tags": [],
@@ -29,6 +579,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -42,6 +593,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -62,6 +614,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -83,6 +636,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -116,6 +670,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -136,6 +691,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -153,6 +709,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -188,6 +745,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -201,6 +759,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -222,6 +781,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -236,6 +796,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -277,6 +838,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -296,6 +858,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -316,6 +879,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -350,6 +914,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -369,6 +934,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -389,6 +955,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -416,6 +983,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -425,7 +993,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -447,6 +1016,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -467,7 +1037,8 @@
                   " & T"
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -482,7 +1053,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -495,7 +1067,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -515,7 +1088,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -529,6 +1103,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -541,7 +1116,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -554,7 +1130,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -567,7 +1144,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -580,7 +1158,8 @@
               "{ [key: string]: string | string[]; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -593,7 +1172,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -606,7 +1186,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -619,7 +1200,8 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -633,6 +1215,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -642,7 +1225,8 @@
             "label": "verbose",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -652,7 +1236,8 @@
             "label": "quiet",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -662,7 +1247,8 @@
             "label": "silent",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -672,7 +1258,8 @@
             "label": "debug",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -682,7 +1269,8 @@
             "label": "help",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -695,7 +1283,8 @@
               "string[]"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -708,7 +1297,8 @@
               "string[]"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -721,7 +1311,8 @@
               "[key: string]:  string | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -735,6 +1326,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -747,7 +1339,8 @@
               "ToolingLog"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -766,7 +1359,8 @@
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -779,7 +1373,8 @@
               "ProcRunner"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -792,7 +1387,8 @@
               "Map<string, string | number | boolean>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -814,6 +1410,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -833,10 +1430,31 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.RunContext.flagsReader",
+            "type": "Object",
+            "tags": [],
+            "label": "flagsReader",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-cli-runner",
+                "scope": "server",
+                "docId": "kibKbnDevCliRunnerPluginApi",
+                "section": "def-server.FlagsReader",
+                "text": "FlagsReader"
+              }
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -850,6 +1468,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -862,7 +1481,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -875,7 +1495,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -885,10 +1506,11 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -908,7 +1530,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -932,6 +1555,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -941,10 +1565,11 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -957,7 +1582,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -970,7 +1596,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -990,7 +1617,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -1012,6 +1640,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -1031,6 +1660,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1056,6 +1686,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/cleanup.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1080,6 +1711,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1100,7 +1732,8 @@
               " & T"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1125,6 +1758,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1144,13 +1778,40 @@
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dev-cli-runner",
+        "id": "def-server.DEFAULT_FLAG_ALIASES",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_FLAG_ALIASES",
+        "description": [],
+        "path": "packages/kbn-dev-cli-runner/src/flags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-server.DEFAULT_FLAG_ALIASES.v",
+            "type": "string",
+            "tags": [],
+            "label": "v",
+            "description": [],
+            "path": "packages/kbn-dev-cli-runner/src/flags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

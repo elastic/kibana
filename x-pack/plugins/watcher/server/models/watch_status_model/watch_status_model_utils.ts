@@ -28,7 +28,7 @@ export const deriveActionStatusTotals = (
   return result;
 };
 
-export const deriveLastFired = (actionStatuses: ClientWatchStatusModel['actionStatuses']) => {
+export const deriveLastExecution = (actionStatuses: ClientWatchStatusModel['actionStatuses']) => {
   const actionStatus = maxBy(actionStatuses, 'lastExecution');
   if (actionStatus) {
     return actionStatus.lastExecution;
@@ -41,7 +41,7 @@ export const deriveState = (
   actionStatuses: ClientWatchStatusModel['actionStatuses']
 ) => {
   if (!isActive) {
-    return WATCH_STATES.DISABLED;
+    return WATCH_STATES.INACTIVE;
   }
 
   if (watchState === 'failed') {
@@ -58,16 +58,7 @@ export const deriveState = (
     return WATCH_STATES.CONFIG_ERROR;
   }
 
-  const firingTotal =
-    totals[ACTION_STATES.FIRING] +
-    totals[ACTION_STATES.ACKNOWLEDGED] +
-    totals[ACTION_STATES.THROTTLED];
-
-  if (firingTotal > 0) {
-    return WATCH_STATES.FIRING;
-  }
-
-  return WATCH_STATES.OK;
+  return WATCH_STATES.ACTIVE;
 };
 
 export const deriveComment = (
@@ -76,34 +67,33 @@ export const deriveComment = (
 ) => {
   const totals = deriveActionStatusTotals(actionStatuses);
   const totalActions = actionStatuses ? actionStatuses.length : 0;
-  let result = WATCH_STATE_COMMENTS.OK;
 
-  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
-    result = WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
+  if (!isActive) {
+    return WATCH_STATE_COMMENTS.OK;
   }
 
-  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
-    result = WATCH_STATE_COMMENTS.THROTTLED;
-  }
-
-  if (totals[ACTION_STATES.ACKNOWLEDGED] > 0 && totals[ACTION_STATES.ACKNOWLEDGED] < totalActions) {
-    result = WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
+  if (totals[ACTION_STATES.ERROR] > 0) {
+    return WATCH_STATE_COMMENTS.FAILING;
   }
 
   if (
     totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
     totals[ACTION_STATES.ACKNOWLEDGED] === totalActions
   ) {
-    result = WATCH_STATE_COMMENTS.ACKNOWLEDGED;
+    return WATCH_STATE_COMMENTS.ACKNOWLEDGED;
   }
 
-  if (totals[ACTION_STATES.ERROR] > 0) {
-    result = WATCH_STATE_COMMENTS.FAILING;
+  if (totals[ACTION_STATES.ACKNOWLEDGED] > 0 && totals[ACTION_STATES.ACKNOWLEDGED] < totalActions) {
+    return WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
   }
 
-  if (!isActive) {
-    result = WATCH_STATE_COMMENTS.OK;
+  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
+    return WATCH_STATE_COMMENTS.THROTTLED;
   }
 
-  return result;
+  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
+    return WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
+  }
+
+  return WATCH_STATE_COMMENTS.OK;
 };

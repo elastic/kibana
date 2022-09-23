@@ -7,7 +7,7 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { Query } from '..';
+import { Query } from '../..';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { BoolQuery } from './types';

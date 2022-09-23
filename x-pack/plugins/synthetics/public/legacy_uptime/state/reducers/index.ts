@@ -6,27 +6,50 @@
  */
 
 import { combineReducers } from 'redux';
-import { agentPoliciesReducer } from '../private_locations';
-import { monitorReducer } from './monitor';
-import { uiReducer } from './ui';
-import { monitorStatusReducer } from './monitor_status';
-import { monitorListReducer } from './monitor_list';
-import { dynamicSettingsReducer } from './dynamic_settings';
-import { pingReducer } from './ping';
-import { pingListReducer } from './ping_list';
-import { monitorDurationReducer } from './monitor_duration';
-import { indexStatusReducer } from './index_status';
-import { mlJobsReducer } from './ml_anomaly';
-import { certificatesReducer } from '../certificates/certificates';
+import { agentPoliciesReducer, AgentPoliciesState } from '../private_locations';
+import { monitorReducer, MonitorState } from './monitor';
+import { uiReducer, UiState } from './ui';
+import { monitorStatusReducer, MonitorStatusState } from './monitor_status';
+import { monitorListReducer, MonitorList } from './monitor_list';
+import { dynamicSettingsReducer, DynamicSettingsState } from './dynamic_settings';
+import { pingReducer, PingState } from './ping';
+import { pingListReducer, PingListState } from './ping_list';
+import { monitorDurationReducer, MonitorDuration } from './monitor_duration';
+import { indexStatusReducer, IndexStatusState } from './index_status';
+import { mlJobsReducer, MLJobState } from './ml_anomaly';
+import { certificatesReducer, CertificatesState } from '../certificates/certificates';
 import { selectedFiltersReducer } from './selected_filters';
-import { alertsReducer } from '../alerts/alerts';
-import { journeyReducer } from './journey';
-import { networkEventsReducer } from './network_events';
-import { syntheticsReducer } from './synthetics';
-import { monitorManagementListReducer } from './monitor_management';
-import { testNowRunsReducer } from './test_now_runs';
+import { SelectedFilters } from '../actions/selected_filters';
+import { alertsReducer, AlertState } from '../alerts/alerts';
+import { JourneyKVP, journeyReducer } from './journey';
+import { networkEventsReducer, NetworkEventsState } from './network_events';
+import { syntheticsReducer, SyntheticsReducerState } from './synthetics';
+import { monitorManagementListReducer, MonitorManagementList } from './monitor_management';
+import { testNowRunsReducer, TestNowRunsState } from './test_now_runs';
 
-export const rootReducer = combineReducers({
+export interface RootState {
+  monitor: MonitorState;
+  ui: UiState;
+  monitorList: MonitorList;
+  monitorManagementList: MonitorManagementList;
+  monitorStatus: MonitorStatusState;
+  dynamicSettings: DynamicSettingsState;
+  ping: PingState;
+  pingList: PingListState;
+  ml: MLJobState;
+  monitorDuration: MonitorDuration;
+  indexStatus: IndexStatusState;
+  certificates: CertificatesState;
+  selectedFilters: SelectedFilters | null;
+  alerts: AlertState;
+  journeys: JourneyKVP;
+  networkEvents: NetworkEventsState;
+  synthetics: SyntheticsReducerState;
+  testNowRuns: TestNowRunsState;
+  agentPolicies: AgentPoliciesState;
+}
+
+export const rootReducer = combineReducers<RootState>({
   monitor: monitorReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,

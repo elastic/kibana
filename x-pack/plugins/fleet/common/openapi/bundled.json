@@ -557,6 +557,18 @@
                           ]
                         },
                         "savedObject": {
+                          "type": "object"
+                        },
+                        "latestVersion": {
+                          "type": "string"
+                        },
+                        "keepPoliciesUpToDate": {
+                          "type": "boolean"
+                        },
+                        "notice": {
+                          "type": "string"
+                        },
+                        "licensePath": {
                           "type": "string"
                         }
                       },
@@ -594,6 +606,14 @@
           "name": "pkgVersion",
           "in": "path",
           "required": true
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ],
       "post": {
@@ -1232,6 +1252,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -1345,6 +1371,104 @@
           }
         },
         "operationId": "agents-current-upgrades"
+      }
+    },
+    "/agents/action_status": {
+      "get": {
+        "summary": "Agents - Action status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "actionId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "COMPLETE",
+                              "EXPIRED",
+                              "CANCELLED",
+                              "FAILED",
+                              "IN_PROGRESS"
+                            ]
+                          },
+                          "nbAgentsActioned": {
+                            "type": "number"
+                          },
+                          "nbAgentsActionCreated": {
+                            "type": "number"
+                          },
+                          "nbAgentsAck": {
+                            "type": "number"
+                          },
+                          "nbAgentsFailed": {
+                            "type": "number"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "startTime": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "expiration": {
+                            "type": "string"
+                          },
+                          "completionTime": {
+                            "type": "string"
+                          },
+                          "cancellationTime": {
+                            "type": "string"
+                          },
+                          "newPolicyId": {
+                            "type": "string"
+                          },
+                          "creationTime": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "actionId",
+                          "complete",
+                          "nbAgentsActioned",
+                          "nbAgentsActionCreated",
+                          "nbAgentsAck",
+                          "nbAgentsFailed",
+                          "status",
+                          "creationTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agents-action-status"
       }
     },
     "/agents/{agentId}": {
@@ -1723,6 +1847,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -1799,6 +1929,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -1882,6 +2018,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -2033,6 +2175,14 @@
           },
           {
             "$ref": "#/components/parameters/kuery"
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "full",
+            "description": "When set to true, retrieve the related package policies for each agent policy."
           }
         ],
         "description": ""
@@ -2213,6 +2363,66 @@
           },
           "description": ""
         }
+      }
+    },
+    "/agent_policies/_bulk_get": {
+      "post": {
+        "summary": "Agent policies - Bulk Get",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of agent policy ids"
+                  },
+                  "full": {
+                    "type": "boolean",
+                    "description": "get full policies with package policies populated"
+                  },
+                  "ignoreMissing": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/agent_policy"
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-get-agent-policies",
+        "security": [],
+        "parameters": []
       }
     },
     "/agent_policies/delete": {
@@ -2671,28 +2881,37 @@
           }
         },
         "requestBody": {
+          "description": "You should use inputs as an object and not use the deprecated inputs array.",
           "content": {
             "application/json": {
               "schema": {
-                "allOf": [
+                "oneOf": [
                   {
-                    "$ref": "#/components/schemas/new_package_policy"
+                    "$ref": "#/components/schemas/simplified_package_policy"
                   },
                   {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
+                    "deprecated": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/new_package_policy"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "force": {
+                            "type": "boolean"
+                          }
+                        }
                       }
-                    }
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "force": {
-                        "type": "boolean"
-                      }
-                    }
+                    ]
                   }
                 ]
               }
@@ -2704,6 +2923,62 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      }
+    },
+    "/package_policies/_bulk_get": {
+      "post": {
+        "summary": "Package policies - Bulk Get",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of package policy ids"
+                  },
+                  "ignoreMissing": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/package_policy"
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-get-package-policies",
+        "security": [],
+        "parameters": []
       }
     },
     "/package_policies/delete": {
@@ -2938,18 +3213,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/components/schemas/package_policy"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/simplified_package_policy"
                     },
-                    "sucess": {
-                      "type": "boolean"
+                    {
+                      "type": "object",
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/package_policy"
+                        },
+                        "sucess": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "item",
+                        "sucess"
+                      ]
                     }
-                  },
-                  "required": [
-                    "item",
-                    "sucess"
                   ]
                 }
               }
@@ -3956,6 +4238,26 @@
           "version": {
             "type": "string"
           },
+          "release": {
+            "type": "string",
+            "enum": [
+              "experimental",
+              "beta",
+              "ga"
+            ]
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "license": {
+                "type": "string",
+                "enum": [
+                  "Apache-2.0",
+                  "Elastic-2.0"
+                ]
+              }
+            }
+          },
           "readme": {
             "type": "string"
           },
@@ -3971,34 +4273,32 @@
               "type": "string"
             }
           },
-          "requirement": {
-            "oneOf": [
-              {
+          "conditions": {
+            "type": "object",
+            "properties": {
+              "kibana": {
+                "type": "object",
                 "properties": {
-                  "kibana": {
-                    "type": "object",
-                    "properties": {
-                      "versions": {
-                        "type": "string"
-                      }
-                    }
+                  "versions": {
+                    "type": "string"
                   }
                 }
               },
-              {
+              "elasticsearch": {
+                "type": "object",
                 "properties": {
-                  "elasticsearch": {
-                    "type": "object",
-                    "properties": {
-                      "versions": {
-                        "type": "string"
-                      }
-                    }
+                  "subscription": {
+                    "type": "string",
+                    "enum": [
+                      "basic",
+                      "gold",
+                      "platinum",
+                      "enterprise"
+                    ]
                   }
                 }
               }
-            ],
-            "type": "object"
+            }
           },
           "screenshots": {
             "type": "array",
@@ -4102,6 +4402,22 @@
           },
           "path": {
             "type": "string"
+          },
+          "elasticsearch": {
+            "type": "object",
+            "properties": {
+              "privileges": {
+                "type": "object",
+                "properties": {
+                  "cluster": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "required": [
@@ -4111,7 +4427,7 @@
           "description",
           "type",
           "categories",
-          "requirement",
+          "conditions",
           "assets",
           "format_version",
           "download",
@@ -4219,6 +4535,72 @@
           "warning"
         ]
       },
+      "agent_component_status": {
+        "title": "Agent component status",
+        "type": "string",
+        "enum": [
+          "starting",
+          "configuring",
+          "healthy",
+          "degraded",
+          "failed",
+          "stopping",
+          "stopped"
+        ]
+      },
+      "agent_component_unit_type": {
+        "title": "Agent component unit type",
+        "type": "string",
+        "enum": [
+          "input",
+          "output"
+        ]
+      },
+      "agent_component_unit": {
+        "title": "Agent component unit",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/agent_component_unit_type"
+          },
+          "status": {
+            "$ref": "#/components/schemas/agent_component_status"
+          },
+          "message": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          }
+        }
+      },
+      "agent_component": {
+        "title": "Agent component",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/agent_component_status"
+          },
+          "message": {
+            "type": "string"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent_component_unit"
+            }
+          }
+        }
+      },
       "agent": {
         "title": "Agent",
         "type": "object",
@@ -4270,6 +4652,12 @@
           },
           "default_api_key": {
             "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent_component"
+            }
           }
         },
         "required": [
@@ -4392,7 +4780,6 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "POLICY_CHANGE",
                   "UNENROLL",
                   "UPGRADE",
                   "POLICY_REASSIGN"
@@ -4505,7 +4892,8 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",
@@ -4601,21 +4989,12 @@
                   "inactive"
                 ]
               },
-              "packagePolicies": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/package_policy"
-                    }
-                  }
-                ]
+              "package_policies": {
+                "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/package_policy"
+                }
               },
               "updated_on": {
                 "type": "string",
@@ -4723,6 +5102,96 @@
           "api_key",
           "active",
           "created_at"
+        ]
+      },
+      "simplified_package_policy": {
+        "title": "Simplified Package Policy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Package policy unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Package policy name (should be unique)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Package policy description"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "namespace by default \"default\""
+          },
+          "policy_id": {
+            "type": "string",
+            "description": "Agent policy ID where that package policy will be added"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Package name"
+              },
+              "version": {
+                "type": "string",
+                "description": "Package version"
+              }
+            },
+            "required": [
+              "name",
+              "version"
+            ]
+          },
+          "vars": {
+            "type": "object",
+            "description": "Package root level variable (see integration documentation for more information)"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Package policy inputs (see integration documentation to know what inputs are available)",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "enable or disable that input, (default to true)"
+                },
+                "vars": {
+                  "type": "object",
+                  "description": "Input level variable (see integration documentation for more information)"
+                },
+                "streams": {
+                  "type": "object",
+                  "description": "Input streams (see integration documentation to know what streams are available)",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "enable or disable that stream, (default to true)"
+                      },
+                      "vars": {
+                        "type": "object",
+                        "description": "Stream level variable (see integration documentation for more information)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force package policy creation even if package is not verified, or if the agent policy is managed."
+          }
+        },
+        "required": [
+          "name",
+          "policy_id",
+          "package"
         ]
       },
       "upgrade_diff": {
@@ -4915,7 +5384,9 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Not supported output can be set at the agent policy level only",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",

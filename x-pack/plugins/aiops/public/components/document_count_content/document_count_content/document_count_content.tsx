@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, FC } from 'react';
+
+import React, { useEffect, useState, FC, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -48,24 +49,36 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     setIsBrushCleared(windowParameters === undefined);
   }, [windowParameters]);
 
-  if (documentCountStats === undefined) {
+  const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
+  const timeRangeEarliest = Math.min(...bucketTimestamps);
+  const timeRangeLatest = Math.max(...bucketTimestamps);
+  const chartPointsSplitLabel = useMemo(
+    () => `${changePoint?.fieldName}:${changePoint?.fieldValue}`,
+    [changePoint]
+  );
+
+  if (
+    documentCountStats === undefined ||
+    documentCountStats.buckets === undefined ||
+    timeRangeEarliest === undefined ||
+    timeRangeLatest === undefined
+  ) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
 
-  const { timeRangeEarliest, timeRangeLatest } = documentCountStats;
-  if (timeRangeEarliest === undefined || timeRangeLatest === undefined)
-    return <TotalCountHeader totalCount={totalCount} />;
-
-  let chartPoints: DocumentCountChartPoint[] = [];
-  if (documentCountStats.buckets !== undefined) {
-    const buckets: Record<string, number> = documentCountStats?.buckets;
-    chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
-  }
+  const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
+    ([time, value]) => ({
+      time: +time,
+      value,
+    })
+  );
 
   let chartPointsSplit: DocumentCountChartPoint[] | undefined;
   if (documentCountStatsSplit?.buckets !== undefined) {
-    const buckets: Record<string, number> = documentCountStatsSplit?.buckets;
-    chartPointsSplit = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
+    chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
+      time: +time,
+      value,
+    }));
   }
 
   function brushSelectionUpdate(d: WindowParameters, force: boolean) {
@@ -93,7 +106,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             <EuiButtonEmpty
               onClick={clearSelection}
               size="xs"
-              data-test-sub="aiopsClearSelectionBadge"
+              data-test-subj="aiopsClearSelectionBadge"
             >
               {clearSelectionLabel}
             </EuiButtonEmpty>
@@ -108,7 +121,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           timeRangeEarliest={timeRangeEarliest}
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
-          changePoint={changePoint}
+          chartPointsSplitLabel={chartPointsSplitLabel}
           isBrushCleared={isBrushCleared}
         />
       )}

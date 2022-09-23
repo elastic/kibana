@@ -34,6 +34,7 @@ import { toggle } from './toggle';
 import { visdimension } from './vis_dimension';
 import { colorPicker } from './color_picker';
 import { editor } from './editor';
+import { partitionLabels } from './partition_labels';
 
 import { SetupInitializer } from '../../plugin';
 
@@ -55,6 +56,7 @@ export const args = [
   visdimension,
   colorPicker,
   editor,
+  partitionLabels,
 ];
 
 export const initializers = [dateFormatInitializer, numberFormatInitializer];

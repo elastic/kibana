@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
+import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,
@@ -20,9 +21,6 @@ import {
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
-import { LensIconChartBarHorizontal } from '../../assets/chart_bar_horizontal';
-import { LensIconChartMixedXy } from '../../assets/chart_mixed_xy';
-import { LensIconChartBarStacked } from '../../assets/chart_bar_stacked';
 import { LayerType } from '../../../common';
 
 export function getAxisName(
@@ -192,7 +190,7 @@ export function getDescription(state?: State) {
 
   if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
-      icon: LensIconChartBarHorizontal,
+      icon: IconChartBarHorizontal,
       label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
         defaultMessage: 'Mixed bar horizontal',
       }),
@@ -201,7 +199,7 @@ export function getDescription(state?: State) {
 
   if (visualizationType === 'mixed') {
     return {
-      icon: LensIconChartMixedXy,
+      icon: IconChartMixedXy,
       label: i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
         defaultMessage: 'Mixed XY',
       }),
@@ -214,7 +212,7 @@ export function getDescription(state?: State) {
   };
 }
 
-export const defaultIcon = LensIconChartBarStacked;
+export const defaultIcon = IconChartBarStacked;
 export const defaultSeriesType = 'bar_stacked';
 
 export const supportedDataLayer = {
@@ -222,7 +220,7 @@ export const supportedDataLayer = {
   label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
     defaultMessage: 'Visualization',
   }),
-  icon: LensIconChartMixedXy,
+  icon: IconChartMixedXy,
 };
 
 // i18n ids cannot be dynamically generated, hence the function below
@@ -277,10 +275,18 @@ const newLayerFn = {
     layerType: layerTypes.REFERENCELINE,
     accessors: [],
   }),
-  [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
+  [layerTypes.ANNOTATIONS]: ({
+    layerId,
+    indexPatternId,
+  }: {
+    layerId: string;
+    indexPatternId: string;
+  }): XYAnnotationLayerConfig => ({
     layerId,
     layerType: layerTypes.ANNOTATIONS,
     annotations: [],
+    indexPatternId,
+    ignoreGlobalFilters: true,
   }),
 };
 
@@ -288,12 +294,14 @@ export function newLayerState({
   layerId,
   layerType = layerTypes.DATA,
   seriesType,
+  indexPatternId,
 }: {
   layerId: string;
   layerType?: LayerType;
   seriesType: SeriesType;
+  indexPatternId: string;
 }) {
-  return newLayerFn[layerType]({ layerId, seriesType });
+  return newLayerFn[layerType]({ layerId, seriesType, indexPatternId });
 }
 
 export function getLayersByType(state: State, byType?: string) {

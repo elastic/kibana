@@ -107,14 +107,14 @@ export interface DetailPanelOrchestrator {
     name: string;
     type: string;
     ip: string;
+    parent: {
+      type: string;
+    };
   };
   namespace: string;
   cluster: {
     name: string;
     id: string;
-  };
-  parent: {
-    type: string;
   };
 }
 

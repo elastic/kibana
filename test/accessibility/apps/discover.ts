@@ -117,13 +117,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab(0);
-      await testSubjects.click('openFieldActionsButton-Cancelled');
+      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
+        await testSubjects.click('openFieldActionsButton-Cancelled');
+      } else {
+        await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
+      }
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for data-grid table with columns', async () => {
       await testSubjects.click('toggleColumnButton-Cancelled');
-      await testSubjects.click('openFieldActionsButton-Carrier');
+      if (await testSubjects.exists('openFieldActionsButton-Carrier')) {
+        await testSubjects.click('openFieldActionsButton-Carrier');
+      } else {
+        await testSubjects.existOrFail('fieldActionsGroup-Carrier');
+      }
       await testSubjects.click('toggleColumnButton-Carrier');
       await testSubjects.click('euiFlyoutCloseButton');
       await toasts.dismissAllToasts();
@@ -155,8 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('discoverChartOptionsToggle');
     });
 
-    // https://github.com/elastic/eui/issues/5900
-    it.skip('a11y test for data grid sort panel', async () => {
+    it('a11y test for data grid sort panel', async () => {
       await testSubjects.click('dataGridColumnSortingButton');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);

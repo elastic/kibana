@@ -72,6 +72,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
+
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -88,6 +89,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
                 navTabs[SecurityPageName.cloudSecurityPostureDashboard],
+                navTabs[SecurityPageName.entityAnalytics],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
@@ -113,10 +115,11 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
                   : []),
-                ...(navTabs[SecurityPageName.threatIntelligence] != null
-                  ? [navTabs[SecurityPageName.threatIntelligence]]
-                  : []),
               ],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.intelligence],
+              items: [navTabs[SecurityPageName.threatIntelligenceIndicators]],
             },
             {
               ...securityNavGroup[SecurityNavGroupKey.investigate],
@@ -135,6 +138,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                navTabs[SecurityPageName.actionHistory],
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },

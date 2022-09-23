@@ -16,10 +16,10 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { CIS_INTEGRATION_INPUTS_MAP } from '../../../common/constants';
+import { cloudPostureIntegrations } from '../../common/constants';
+import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 
-export type InputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
+export type InputType = typeof CLOUDBEAT_EKS | typeof CLOUDBEAT_VANILLA;
 
 interface Props {
   type: InputType;
@@ -27,22 +27,8 @@ interface Props {
   isDisabled?: boolean;
 }
 
-const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> = [
-  {
-    value: 'cloudbeat/vanilla',
-    label: i18n.translate(
-      'xpack.csp.createPackagePolicy.stepConfigure.integrationSettingsSection.vanillaKubernetesDeploymentOption',
-      { defaultMessage: 'Unmanaged Kubernetes' }
-    ),
-  },
-  {
-    value: 'cloudbeat/eks',
-    label: i18n.translate(
-      'xpack.csp.createPackagePolicy.stepConfigure.integrationSettingsSection.eksKubernetesDeploymentOption',
-      { defaultMessage: 'EKS (Elastic Kubernetes Service)' }
-    ),
-  },
-];
+const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> =
+  cloudPostureIntegrations.kspm.options.map((o) => ({ value: o.type, label: o.name }));
 
 const KubernetesDeploymentFieldLabel = () => (
   <EuiToolTip

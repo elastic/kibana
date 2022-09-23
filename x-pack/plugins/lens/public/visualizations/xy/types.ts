@@ -22,17 +22,20 @@ import type {
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
-import { LensIconChartArea } from '../../assets/chart_area';
-import { LensIconChartAreaStacked } from '../../assets/chart_area_stacked';
-import { LensIconChartAreaPercentage } from '../../assets/chart_area_percentage';
-import { LensIconChartBar } from '../../assets/chart_bar';
-import { LensIconChartBarStacked } from '../../assets/chart_bar_stacked';
-import { LensIconChartBarPercentage } from '../../assets/chart_bar_percentage';
-import { LensIconChartBarHorizontal } from '../../assets/chart_bar_horizontal';
-import { LensIconChartBarHorizontalStacked } from '../../assets/chart_bar_horizontal_stacked';
-import { LensIconChartBarHorizontalPercentage } from '../../assets/chart_bar_horizontal_percentage';
-import { LensIconChartLine } from '../../assets/chart_line';
+import {
+  IconChartArea,
+  IconChartLine,
+  IconChartAreaStacked,
+  IconChartBarHorizontalStacked,
+  IconChartBarHorizontalPercentage,
+  IconChartAreaPercentage,
+  IconChartBar,
+  IconChartBarStacked,
+  IconChartBarPercentage,
+  IconChartBarHorizontal,
+} from '@kbn/chart-icons';
 
+import { DistributiveOmit } from '@elastic/eui';
 import type { VisualizationType, Suggestion } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
@@ -79,7 +82,7 @@ export interface YConfig {
   color?: string;
   icon?: string;
   lineWidth?: number;
-  lineStyle?: LineStyle;
+  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
@@ -113,7 +116,10 @@ export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
+  hide?: boolean;
+  indexPatternId: string;
   simpleView?: boolean;
+  ignoreGlobalFilters: boolean;
 }
 
 export type XYLayerConfig =
@@ -152,10 +158,17 @@ export interface XYState {
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
+  showCurrentTimeMarker?: boolean;
   valuesInLegend?: boolean;
 }
 
 export type State = XYState;
+
+export type XYPersistedState = Omit<XYState, 'layers'> & {
+  layers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>>;
+};
+
+export type PersistedState = XYPersistedState;
 
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
@@ -168,7 +181,7 @@ const groupLabelForLineAndArea = i18n.translate('xpack.lens.xyVisualization.line
 export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
-    icon: LensIconChartBar,
+    icon: IconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar vertical',
     }),
@@ -177,7 +190,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'bar_horizontal',
-    icon: LensIconChartBarHorizontal,
+    icon: IconChartBarHorizontal,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
       defaultMessage: 'H. Bar',
     }),
@@ -188,7 +201,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'bar_stacked',
-    icon: LensIconChartBarStacked,
+    icon: IconChartBarStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Bar vertical stacked',
     }),
@@ -196,7 +209,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'bar_percentage_stacked',
-    icon: LensIconChartBarPercentage,
+    icon: IconChartBarPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Bar vertical percentage',
     }),
@@ -204,7 +217,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'bar_horizontal_stacked',
-    icon: LensIconChartBarHorizontalStacked,
+    icon: IconChartBarHorizontalStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'H. Stacked bar',
     }),
@@ -215,7 +228,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'bar_horizontal_percentage_stacked',
-    icon: LensIconChartBarHorizontalPercentage,
+    icon: IconChartBarHorizontalPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
       defaultMessage: 'H. Percentage bar',
     }),
@@ -229,7 +242,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'area',
-    icon: LensIconChartArea,
+    icon: IconChartArea,
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
@@ -237,7 +250,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'area_stacked',
-    icon: LensIconChartAreaStacked,
+    icon: IconChartAreaStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Area stacked',
     }),
@@ -245,7 +258,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'area_percentage_stacked',
-    icon: LensIconChartAreaPercentage,
+    icon: IconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Area percentage',
     }),
@@ -253,7 +266,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
   {
     id: 'line',
-    icon: LensIconChartLine,
+    icon: IconChartLine,
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),

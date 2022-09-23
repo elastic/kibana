@@ -41,6 +41,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
+        spaces: config.xpack.api.get('services.spaces'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,

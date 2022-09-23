@@ -69,7 +69,7 @@ const Header: React.FunctionComponent<{
   return (
     <>
       <EuiTitle size="m">
-        <h2>
+        <h2 data-test-subj="addFleetServerHeader">
           <FormattedMessage
             id="xpack.fleet.fleetServerFlyout.title"
             defaultMessage="Add a Fleet Server"

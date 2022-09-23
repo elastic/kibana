@@ -61,10 +61,12 @@ export function useAnomalyExplorerContextValue(
 
   const [, , tableSeverityState] = useTableSeverity();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
 
   const anomalyTimelineService = useMemo(() => {
     return new AnomalyTimelineService(timefilter, uiSettings, mlResultsService);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return useMemo(() => {
@@ -98,5 +100,6 @@ export function useAnomalyExplorerContextValue(
       anomalyTimelineStateService,
       chartsStateService,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

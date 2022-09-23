@@ -12,9 +12,9 @@ import { BrowserRouter as Router, Route, RouteComponentProps, withRouter } from 
 
 import {
   EuiPage,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageSideBar,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiSideNav,
 } from '@elastic/eui';
 import 'brace/mode/json';

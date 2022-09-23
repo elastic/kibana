@@ -15,6 +15,8 @@ import {
   query,
   versionOrUndefined,
   interval,
+  snapshotOrUndefined,
+  removedOrUndefined,
   ecsMappingOrUndefined,
 } from '../../common/schemas';
 import type { RequiredKeepUndefined } from '../../../types';
@@ -26,6 +28,8 @@ export const createSavedQueryRequestSchema = t.type({
   query,
   version: versionOrUndefined,
   interval,
+  snapshot: snapshotOrUndefined,
+  removed: removedOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
 });
 

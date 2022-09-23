@@ -50,6 +50,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
       getUrlForApp('management', {
         path: 'kibana/indexPatterns',
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

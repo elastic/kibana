@@ -20,8 +20,7 @@ import type {
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
-
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 type Maybe<T> = T | undefined;

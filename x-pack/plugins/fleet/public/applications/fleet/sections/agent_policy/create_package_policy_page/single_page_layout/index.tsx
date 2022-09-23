@@ -27,7 +27,11 @@ import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
 import type { CreatePackagePolicyRequest } from '../../../../../../../common/types';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { dataTypes, FLEET_SYSTEM_PACKAGE } from '../../../../../../../common/constants';
+import {
+  dataTypes,
+  FLEET_SYSTEM_PACKAGE,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../../common/constants';
 import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
@@ -43,12 +47,21 @@ import {
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
 } from '../../../../hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../../components';
+import {
+  Loading,
+  Error,
+  ExtensionWrapper,
+  DevtoolsRequestFlyoutButton,
+} from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { useUIExtension } from '../../../../hooks';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
-import { pkgKeyFromPackageInfo, isVerificationError } from '../../../../services';
+import {
+  pkgKeyFromPackageInfo,
+  isVerificationError,
+  ExperimentalFeaturesService,
+} from '../../../../services';
 
 import type {
   PackagePolicyFormState,
@@ -60,13 +73,13 @@ import { IntegrationBreadcrumb } from '../components';
 
 import type { PackagePolicyValidationResults } from '../services';
 import { validatePackagePolicy, validationHasErrors } from '../services';
-
 import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
   SelectedPolicyTab,
   StepSelectHosts,
 } from '../components';
+import { generateCreatePackagePolicyDevToolsRequest } from '../../services';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 
@@ -143,7 +156,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '',
     inputs: [],
   });
 
@@ -549,6 +561,21 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
+  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
+    ExperimentalFeaturesService.get();
+
+  const showDevtoolsRequest =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
+    isShowDevtoolRequestExperimentEnabled;
+
+  const devtoolRequest = useMemo(
+    () =>
+      generateCreatePackagePolicyDevToolsRequest({
+        ...packagePolicy,
+      }),
+    [packagePolicy]
+  );
+
   // Display package error if there is one
   if (packageInfoError) {
     return (
@@ -563,6 +590,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -618,6 +646,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {showDevtoolsRequest ? (
+                  <EuiFlexItem grow={false}>
+                    <DevtoolsRequestFlyoutButton
+                      request={devtoolRequest}
+                      description={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.devtoolsRequestDescription',
+                        {
+                          defaultMessage: 'This Kibana request creates a new package policy.',
+                        }
+                      )}
+                      btnProps={{
+                        color: 'ghost',
+                      }}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={() => onSubmit()}

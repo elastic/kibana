@@ -22,13 +22,10 @@ import {
   getFormatFromPreviousColumn,
   isColumnOfType,
 } from './helpers';
-import {
-  adjustTimeScaleLabelSuffix,
-  adjustTimeScaleOnOtherColumnChange,
-} from '../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -50,8 +47,12 @@ function ofName(
   field: IndexPatternField | undefined,
   timeShift: string | undefined,
   timeScale: string | undefined,
-  window: string | undefined
+  reducedTimeRange: string | undefined
 ) {
+  if (field?.customLabel) {
+    return field.customLabel;
+  }
+
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
       ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
@@ -66,7 +67,7 @@ function ofName(
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -91,13 +92,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
-      getColumnWindowError(layer, columnId, indexPattern),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.window),
+      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
   },
@@ -113,7 +114,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   getDefaultLabel: (column, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
-    return ofName(field, column.timeShift, column.timeScale, column.window);
+    return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {
     return {
@@ -121,8 +122,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         field,
         previousColumn?.timeShift,
         previousColumn?.timeScale,
-        previousColumn?.window
+        previousColumn?.reducedTimeRange
       ),
+      customLabel: Boolean(field.customLabel),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
@@ -131,7 +133,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
@@ -181,8 +183,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  onOtherColumnChanged: (layer, thisColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {
@@ -191,7 +191,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         enabled: true,
         schema: 'metric',
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
+        timeShift: column.filter || column.reducedTimeRange ? undefined : column.timeShift,
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     } else {
@@ -201,7 +201,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         schema: 'metric',
         field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
+        timeShift: column.filter || column.reducedTimeRange ? undefined : column.timeShift,
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     }
@@ -219,7 +219,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   documentation: {
     section: 'elasticsearch',
     signature: i18n.translate('xpack.lens.indexPattern.count.signature', {

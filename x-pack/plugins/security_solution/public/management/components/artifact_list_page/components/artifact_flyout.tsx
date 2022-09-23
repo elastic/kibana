@@ -231,7 +231,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [externalSubmitHandlerError, internalSubmitError, submitHandler]);
 
     const {
-      isLoading: isLoadingItemForEdit,
+      isRefetching: isLoadingItemForEdit,
       error,
       refetch: fetchItemForEdit,
     } = useGetArtifact(apiClient, urlParams.itemId ?? '', undefined, {

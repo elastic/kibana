@@ -29,7 +29,7 @@ export default {
 
 const mock = new NoDataViewsPromptStorybookMock();
 
-export const NoDataViews = (params: NoDataViewsPromptStorybookParams) => {
+export const Prompt = (params: NoDataViewsPromptStorybookParams) => {
   return (
     <NoDataViewsPromptProvider {...mock.getServices(params)}>
       <NoDataViewsPrompt {...mock.getProps()} />
@@ -37,4 +37,4 @@ export const NoDataViews = (params: NoDataViewsPromptStorybookParams) => {
   );
 };
 
-NoDataViews.argTypes = mock.getArgumentTypes();
+Prompt.argTypes = mock.getArgumentTypes();

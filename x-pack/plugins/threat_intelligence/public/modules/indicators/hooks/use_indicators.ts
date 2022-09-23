@@ -13,10 +13,13 @@ import {
 } from '@kbn/data-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useInspector } from '../../../hooks/use_inspector';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_THREAT_INDEX_KEY, THREAT_QUERY_BASE } from '../../../../common/constants';
+import { useSourcererDataView } from './use_sourcerer_data_view';
+import { getRuntimeMappings } from '../lib/get_runtime_mappings';
+import { getIndicatorsQuery } from '../lib/get_indicators_query';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -26,6 +29,7 @@ export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
   timeRange?: TimeRange;
+  sorting: any[];
 }
 
 export interface UseIndicatorsValue {
@@ -35,7 +39,6 @@ export interface UseIndicatorsValue {
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  firstLoad: boolean;
   loading: boolean;
 }
 
@@ -46,7 +49,7 @@ export interface RawIndicatorsResponse {
   };
 }
 
-interface Pagination {
+export interface Pagination {
   pageSize: number;
   pageIndex: number;
   pageSizeOptions: number[];
@@ -55,25 +58,23 @@ interface Pagination {
 export const useIndicators = ({
   filters,
   filterQuery,
+  sorting,
   timeRange,
 }: UseIndicatorsParams): UseIndicatorsValue => {
   const {
     services: {
       data: { search: searchService },
-      uiSettings,
     },
   } = useKibana();
-  const defaultThreatIndices = useMemo(
-    () => uiSettings.get(DEFAULT_THREAT_INDEX_KEY),
-    [uiSettings]
-  );
+  const { selectedPatterns } = useSourcererDataView();
+
+  const { inspectorAdapters } = useInspector();
 
   const searchSubscription$ = useRef<Subscription>();
   const abortController = useRef(new AbortController());
 
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [indicatorCount, setIndicatorCount] = useState<number>(0);
-  const [firstLoad, setFirstLoad] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [pagination, setPagination] = useState({
@@ -82,36 +83,9 @@ export const useIndicators = ({
     pageSizeOptions: PAGE_SIZES,
   });
 
-  const queryToExecute = useMemo(
-    () =>
-      buildEsQuery(
-        undefined,
-        [
-          {
-            query: THREAT_QUERY_BASE,
-            language: 'kuery',
-          },
-          {
-            query: filterQuery.query as string,
-            language: 'kuery',
-          },
-        ],
-        [
-          ...filters,
-          {
-            query: {
-              range: {
-                ['@timestamp']: {
-                  gte: timeRange?.from,
-                  lte: timeRange?.to,
-                },
-              },
-            },
-            meta: {},
-          },
-        ]
-      ),
-    [filterQuery, filters, timeRange?.from, timeRange?.to]
+  const query = useMemo(
+    () => getIndicatorsQuery({ filters, timeRange, filterQuery }),
+    [filterQuery, filters, timeRange]
   );
 
   const loadData = useCallback(
@@ -120,17 +94,30 @@ export const useIndicators = ({
 
       setLoading(true);
 
+      const request = inspectorAdapters.requests.start('Indicator search', {});
+
+      request.stats({
+        indexPattern: {
+          label: 'Index patterns',
+          value: selectedPatterns,
+        },
+      });
+
+      const requestBody = {
+        query,
+        runtime_mappings: getRuntimeMappings(),
+        fields: [{ field: '*', include_unmapped: true }],
+        size,
+        from,
+        sort: sorting.map(({ id, direction }) => ({ [id]: direction })),
+      };
+
       searchSubscription$.current = searchService
         .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(
           {
             params: {
-              index: defaultThreatIndices,
-              body: {
-                size,
-                from,
-                fields: [{ field: '*', include_unmapped: true }],
-                query: queryToExecute,
-              },
+              index: selectedPatterns,
+              body: requestBody,
             },
           },
           {
@@ -143,24 +130,31 @@ export const useIndicators = ({
             setIndicatorCount(response.rawResponse.hits.total || 0);
 
             if (isCompleteResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
+              request.stats({}).ok({ json: response });
+              request.json(requestBody);
             } else if (isErrorResponse(response)) {
+              setLoading(false);
+              request.error({ json: response });
               searchSubscription$.current?.unsubscribe();
             }
-
-            setFirstLoad(false);
-            setLoading(false);
           },
-          error: (msg) => {
-            searchService.showError(msg);
+          error: (requestError) => {
+            searchService.showError(requestError);
             searchSubscription$.current?.unsubscribe();
 
-            setFirstLoad(false);
+            if (requestError instanceof Error && requestError.name.includes('Abort')) {
+              inspectorAdapters.requests.reset();
+            } else {
+              request.error({ json: requestError });
+            }
+
             setLoading(false);
           },
         });
     },
-    [queryToExecute, defaultThreatIndices, searchService]
+    [inspectorAdapters.requests, query, searchService, selectedPatterns, sorting]
   );
 
   const onChangeItemsPerPage = useCallback(
@@ -201,7 +195,6 @@ export const useIndicators = ({
     pagination,
     onChangePage,
     onChangeItemsPerPage,
-    firstLoad,
     loading,
     handleRefresh,
   };

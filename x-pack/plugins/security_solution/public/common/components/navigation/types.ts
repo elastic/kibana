@@ -27,6 +27,7 @@ export enum SecurityNavGroupKey {
   detect = 'detect',
   findings = 'findings',
   explore = 'explore',
+  intelligence = 'intelligence',
   investigate = 'investigate',
   manage = 'manage',
 }
@@ -47,9 +48,10 @@ export type UrlStateType =
   | 'timeline'
   | 'explore'
   | 'dashboards'
-  | 'threat_intelligence'
+  | 'indicators'
   | 'cloud_posture'
-  | 'findings';
+  | 'findings'
+  | 'entity_analytics';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
@@ -60,9 +62,13 @@ export interface NavTab {
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }
 export const securityNavKeys = [
   SecurityPageName.alerts,
+  SecurityPageName.actionHistory,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
   SecurityPageName.case,
@@ -75,17 +81,17 @@ export const securityNavKeys = [
   SecurityPageName.hosts,
   SecurityPageName.network,
   SecurityPageName.overview,
-  SecurityPageName.responseActions,
   SecurityPageName.rules,
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
-  SecurityPageName.threatIntelligence,
+  SecurityPageName.threatIntelligenceIndicators,
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
   SecurityPageName.cloudSecurityPostureRules,
+  SecurityPageName.entityAnalytics,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
@@ -110,4 +116,7 @@ export interface NavLinkItem {
   title: string;
   skipUrlState?: boolean;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }

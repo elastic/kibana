@@ -159,6 +159,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     if (jobIsCompleted && isRegressionJob) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIsCompleted]);
 
   const stateValues: any = { ...item.stats };

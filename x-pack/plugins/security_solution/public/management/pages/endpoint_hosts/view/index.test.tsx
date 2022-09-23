@@ -1066,9 +1066,11 @@ describe('when on the endpoint list page', () => {
 
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
+
       const agentPolicy = generator.generateAgentPolicy();
       agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
+      packagePolicy.policy_id = agentPolicyId;
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: hostInfo,
@@ -1112,19 +1114,6 @@ describe('when on the endpoint list page', () => {
     it('shows the Responder option when all 3 processes capabilities are present in the endpoint', async () => {
       const responderButton = await renderResult.findByTestId('console');
       expect(responderButton).not.toHaveAttribute('disabled');
-    });
-
-    it('disables the Responder option and shows a tooltip when no processes capabilities are present in the endpoint', async () => {
-      const firstActionButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[0];
-      const secondActionButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[1];
-
-      reactTestingLibrary.act(() => {
-        // close any open action menus
-        userEvent.click(firstActionButton);
-        userEvent.click(secondActionButton);
-      });
-      const responderButton = await renderResult.findByTestId('console');
-      expect(responderButton).toHaveAttribute('disabled');
     });
 
     it('navigates to the Actions log flyout', async () => {

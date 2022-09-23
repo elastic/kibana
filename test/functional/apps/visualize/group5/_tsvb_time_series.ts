@@ -193,6 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             });
 
             await testSubjects.click('applyFiltersPopoverButton');
+            await dashboard.waitForRenderComplete();
           };
 
           const cleanup = async () => {

@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiSpacer,
   EuiText,
   EuiTitle,

@@ -13,6 +13,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -36,6 +37,8 @@ import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from '../signals/get_input_output_index';
+import { TIMESTAMP_RUNTIME_FIELD } from './constants';
+import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -136,6 +139,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             primaryTimestamp !== TIMESTAMP && !timestampOverrideFallbackDisabled
               ? TIMESTAMP
               : undefined;
+
+          // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
+          // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
+          // runtime field, so we just use @timestamp directly.
+          const { aggregatableTimestampField, timestampRuntimeMappings } =
+            secondaryTimestamp && timestampOverride
+              ? {
+                  aggregatableTimestampField: TIMESTAMP_RUNTIME_FIELD,
+                  timestampRuntimeMappings: buildTimestampRuntimeMapping({
+                    timestampOverride,
+                  }),
+                }
+              : {
+                  aggregatableTimestampField: primaryTimestamp,
+                  timestampRuntimeMappings: undefined,
+                };
 
           /**
            * Data Views Logic
@@ -282,6 +301,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               indicesToQuery: inputIndex,
             });
 
+            const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
+              alias: null,
+              excludeExceptions: true,
+              chunkSize: 10,
+              lists: exceptionItems,
+              listClient,
+            });
+
             if (!skipExecution) {
               for (const tuple of tuples) {
                 const runResult = await type.executor({
@@ -291,8 +318,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   runOpts: {
                     completeRule,
                     inputIndex,
-                    exceptionItems,
-                    runtimeMappings,
+                    exceptionFilter,
+                    unprocessedExceptions,
+                    runtimeMappings: {
+                      ...runtimeMappings,
+                      ...timestampRuntimeMappings,
+                    },
                     searchAfterSize,
                     tuple,
                     bulkCreate,
@@ -304,6 +335,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     primaryTimestamp,
                     secondaryTimestamp,
                     ruleExecutionLogger,
+                    aggregatableTimestampField,
                   },
                 });
 

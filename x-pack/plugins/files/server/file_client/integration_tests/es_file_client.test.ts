@@ -8,7 +8,8 @@ import { Readable } from 'stream';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TestEnvironmentUtils, setupIntegrationEnvironment } from '../../test_utils';
 import { createEsFileClient } from '../create_es_file_client';
-import { FileClient } from '../file_client';
+import { FileClient } from '../types';
+import { FileMetadata } from '../../../common';
 
 /**
  * This file client is using Elasticsearch interfaces directly to manage files.
@@ -17,6 +18,8 @@ describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
   let testHarness: TestEnvironmentUtils;
+  const blobStorageIndex = '.kibana-test-blob';
+  const metadataIndex = '.kibana-test-metadata';
 
   beforeAll(async () => {
     testHarness = await setupIntegrationEnvironment();
@@ -25,8 +28,8 @@ describe('ES-index-backed file client', () => {
 
   beforeEach(() => {
     fileClient = createEsFileClient({
-      blobStorageIndex: '.kibana-test-blob',
-      metadataIndex: '.kibana-test-metadata',
+      blobStorageIndex,
+      metadataIndex,
       elasticsearchClient: esClient,
       logger: loggingSystemMock.create().get(),
     });
@@ -40,64 +43,46 @@ describe('ES-index-backed file client', () => {
     const file = await fileClient.create({
       id: '123',
       metadata: {
-        Status: 'AWAITING_UPLOAD',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
         name: 'cool name',
       },
     });
-    expect(file).toEqual(
+    expect(file.toJSON()).toEqual(
       expect.objectContaining({
         id: '123',
-        metadata: {
-          FileKind: 'none',
-          Status: 'AWAITING_UPLOAD',
-          Updated: expect.any(String),
-          created: expect.any(String),
-          name: 'cool name',
-        },
+        fileKind: 'none',
+        status: 'AWAITING_UPLOAD',
+        updated: expect.any(String),
+        created: expect.any(String),
+        name: 'cool name',
       })
     );
     await fileClient.delete({ id: file.id, hasContent: false });
   });
 
   test('uploads and downloads file content', async () => {
-    let { id, metadata } = await fileClient.create({
+    const file = await fileClient.create({
       id: '123',
       metadata: {
-        Status: 'AWAITING_UPLOAD',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
         name: 'cool name',
       },
     });
-
-    const { size } = await fileClient.upload(id, Readable.from([Buffer.from('test')]));
-    ({ id, metadata } = await fileClient.update({
-      id,
-      metadata: { ...metadata, size, Status: 'READY' },
-    }));
-
-    const file = await fileClient.get({ id });
-    const rs = await fileClient.download({ id: file.id, size: file.metadata.size });
+    await file.uploadContent(Readable.from([Buffer.from('test')]));
+    const rs = await file.downloadContent();
     const chunks: Buffer[] = [];
     for await (const chunk of rs) {
       chunks.push(chunk);
     }
     expect(Buffer.concat(chunks).toString('utf-8')).toBe('test');
 
-    await fileClient.delete({ id, hasContent: true });
+    await fileClient.delete({ id: file.id, hasContent: true });
   });
 
   test('searches across files', async () => {
     const { id: id1 } = await fileClient.create({
       id: '123',
       metadata: {
-        Status: 'AWAITING_UPLOAD',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
         name: 'cool name 1',
-        Meta: {
+        meta: {
           test: '1',
         },
       },
@@ -105,27 +90,23 @@ describe('ES-index-backed file client', () => {
     const { id: id2 } = await fileClient.create({
       id: '1234',
       metadata: {
-        Status: 'UPLOADING',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
         name: 'cool name 2',
-        Meta: {
+        meta: {
           test: '2',
         },
       },
     });
-    const { id: id3 } = await fileClient.create({
+    const file3 = await fileClient.create({
       id: '12345',
       metadata: {
-        Status: 'READY',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
         name: 'cool name 3',
-        Meta: {
+        meta: {
           test: '3',
         },
       },
     });
+
+    await file3.uploadContent(Readable.from(['test']));
 
     {
       const results = await fileClient.find({
@@ -137,7 +118,7 @@ describe('ES-index-backed file client', () => {
 
       expect(results[0]).toEqual(
         expect.objectContaining({
-          id: id3,
+          id: file3.id,
         })
       );
     }
@@ -147,7 +128,7 @@ describe('ES-index-backed file client', () => {
         status: ['READY', 'AWAITING_UPLOAD'],
       });
 
-      expect(results).toHaveLength(2);
+      expect(results).toHaveLength(3);
 
       expect(results[0]).toEqual(
         expect.objectContaining({
@@ -157,7 +138,13 @@ describe('ES-index-backed file client', () => {
 
       expect(results[1]).toEqual(
         expect.objectContaining({
-          id: id3,
+          id: id2,
+        })
+      );
+
+      expect(results[2]).toEqual(
+        expect.objectContaining({
+          id: file3.id,
         })
       );
     }
@@ -165,7 +152,7 @@ describe('ES-index-backed file client', () => {
     await Promise.all([
       fileClient.delete({ id: id1 }),
       fileClient.delete({ id: id2 }),
-      fileClient.delete({ id: id3 }),
+      fileClient.delete({ id: file3.id }),
     ]);
   });
 
@@ -173,24 +160,23 @@ describe('ES-index-backed file client', () => {
     const { id: id1 } = await fileClient.create({
       id: '123',
       metadata: {
-        Status: 'AWAITING_UPLOAD',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
         name: 'cool name 1',
-        Meta: {
+        meta: {
           test: '1',
         },
       },
     });
-    const { id: id2 } = await fileClient.create({
-      id: '1234',
-      metadata: {
-        Status: 'DELETED',
-        created: new Date().toISOString(),
-        Updated: new Date().toISOString(),
-        name: 'cool name 2',
-        Meta: {
-          test: '2',
+    const id2 = '1234';
+    await esClient.index<{ file: FileMetadata }>({
+      id: id2,
+      index: metadataIndex,
+      document: {
+        file: {
+          FileKind: 'none',
+          Status: 'DELETED',
+          Updated: new Date().toISOString(),
+          created: new Date().toISOString(),
+          name: 'coolname',
         },
       },
     });
@@ -198,17 +184,15 @@ describe('ES-index-backed file client', () => {
     const list = await fileClient.list();
 
     expect(list).toHaveLength(1);
-    expect(list[0]).toEqual(
+    expect(list[0].toJSON()).toEqual(
       expect.objectContaining({
         id: '123',
-        metadata: {
-          FileKind: 'none',
-          Meta: { test: '1' },
-          Status: 'AWAITING_UPLOAD',
-          Updated: expect.any(String),
-          created: expect.any(String),
-          name: 'cool name 1',
-        },
+        fileKind: 'none',
+        meta: { test: '1' },
+        status: 'AWAITING_UPLOAD',
+        updated: expect.any(String),
+        created: expect.any(String),
+        name: 'cool name 1',
       })
     );
 

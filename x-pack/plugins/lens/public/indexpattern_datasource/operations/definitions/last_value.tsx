@@ -32,9 +32,9 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
-function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.lastValueOf', {
       defaultMessage: 'Last value of {name}',
@@ -47,7 +47,7 @@ function ofName(name: string, timeShift: string | undefined, window: string | un
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -134,7 +134,11 @@ export const lastValueOperation: OperationDefinition<
     defaultMessage: 'Last value',
   }),
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.timeShift,
+      column.reducedTimeRange
+    ),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -147,7 +151,7 @@ export const lastValueOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
@@ -189,7 +193,7 @@ export const lastValueOperation: OperationDefinition<
       errorMessages = [invalidSortFieldMessage];
     }
     errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
-    errorMessages.push(...(getColumnWindowError(layer, columnId, indexPattern) || []));
+    errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
@@ -209,7 +213,7 @@ export const lastValueOperation: OperationDefinition<
     const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
 
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
@@ -217,7 +221,7 @@ export const lastValueOperation: OperationDefinition<
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         showArrayValues,
         sortField: lastValueParams?.sortField || sortField,
@@ -226,7 +230,7 @@ export const lastValueOperation: OperationDefinition<
     };
   },
   filterable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   shiftable: true,
   toEsAggsFn: (column, columnId, indexPattern) => {
     const initialArgs = {

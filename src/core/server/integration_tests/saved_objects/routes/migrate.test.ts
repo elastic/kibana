@@ -22,7 +22,7 @@ describe('SavedObjects /_migrate endpoint', () => {
     await root.setup();
     await root.start();
     migratorInstanceMock.runMigrations.mockClear();
-  }, 30000);
+  });
 
   afterEach(async () => {
     await root.shutdown();

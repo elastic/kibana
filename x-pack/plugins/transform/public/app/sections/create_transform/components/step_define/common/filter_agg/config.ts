@@ -7,7 +7,7 @@
 
 import { jsonStringValidator } from '../../../../../../common/validators';
 import {
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
@@ -29,7 +29,7 @@ import {
 export function getFilterAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
 ): PivotAggsConfigFilter {
-  const field = isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : null;
+  const field = isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : null;
 
   return {
     ...commonConfig,
@@ -50,6 +50,7 @@ export function getFilterAggConfig(
     },
     setUiConfigFromEs(esAggDefinition) {
       const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
+      // @ts-ignore conflicts with a union type
       const filterAggConfig = esAggDefinition[filterAgg];
 
       const aggTypeConfig = getFilterAggTypeConfig(filterAgg, field as string, filterAggConfig);

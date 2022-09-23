@@ -25,6 +25,8 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -88,6 +90,7 @@ import {
   setTheme,
   setExecutionContext,
   setFieldFormats,
+  setSavedObjectTagging,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 
@@ -134,6 +137,7 @@ export interface VisualizationsStartDeps {
   urlForwarding: UrlForwardingStart;
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -286,6 +290,7 @@ export class VisualizationsPlugin
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          unifiedSearch: pluginsStart.unifiedSearch,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -376,6 +381,10 @@ export class VisualizationsPlugin
 
     if (spaces) {
       setSpaces(spaces);
+    }
+
+    if (savedObjectsTaggingOss) {
+      setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
     return {

@@ -16,15 +16,16 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
-import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers, AccessorConfig } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
+import { FormatSelectorOptions } from '../../indexpattern_datasource/dimension_panel/format_selector';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -125,7 +126,8 @@ const toExpression = (
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
-          secondaryPrefix: state.secondaryPrefix ? [state.secondaryPrefix] : [],
+          secondaryPrefix:
+            typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
           max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
@@ -154,6 +156,28 @@ const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
 });
 
+const removeMetricDimension = (state: MetricVisualizationState) => {
+  delete state.metricAccessor;
+  delete state.palette;
+  delete state.color;
+};
+
+const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
+  delete state.secondaryMetricAccessor;
+  delete state.secondaryPrefix;
+};
+
+const removeMaxDimension = (state: MetricVisualizationState) => {
+  delete state.maxAccessor;
+  delete state.progressDirection;
+};
+
+const removeBreakdownByDimension = (state: MetricVisualizationState) => {
+  delete state.breakdownByAccessor;
+  delete state.collapseFn;
+  delete state.maxCols;
+};
+
 export const getMetricVisualization = ({
   paletteService,
   theme,
@@ -166,7 +190,7 @@ export const getMetricVisualization = ({
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
       groupLabel: metricGroupLabel,
       showExperimentalBadge: true,
@@ -180,14 +204,13 @@ export const getMetricVisualization = ({
 
   clearLayer(state) {
     const newState = { ...state };
-    delete newState.metricAccessor;
-    delete newState.secondaryMetricAccessor;
-    delete newState.secondaryPrefix;
-    delete newState.breakdownByAccessor;
-    delete newState.collapseFn;
-    delete newState.maxAccessor;
-    delete newState.palette;
-    // TODO - clear more?
+    delete newState.subtitle;
+
+    removeMetricDimension(newState);
+    removeSecondaryMetricDimension(newState);
+    removeMaxDimension(newState);
+    removeBreakdownByDimension(newState);
+
     return newState;
   },
 
@@ -197,7 +220,7 @@ export const getMetricVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
     };
   },
@@ -244,6 +267,10 @@ export const getMetricVisualization = ({
 
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
+    const formatterOptions: FormatSelectorOptions = {
+      disableExtraOptions: true,
+    };
+
     return {
       groups: [
         {
@@ -269,7 +296,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.metricAccessor,
           filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
           required: true,
         },
         {
@@ -294,7 +322,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
           filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
           required: false,
         },
         {
@@ -317,8 +346,10 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
+          formatSelectorOptions: formatterOptions,
           supportStaticValue: true,
+          prioritizedOperation: 'max',
           required: false,
           groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
             defaultMessage:
@@ -343,7 +374,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.breakdownByAccessor,
           filterOperations: isBucketed,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
           required: false,
         },
       ],
@@ -404,20 +436,16 @@ export const getMetricVisualization = ({
     const updated = { ...prevState };
 
     if (prevState.metricAccessor === columnId) {
-      delete updated.metricAccessor;
-      delete updated.palette;
-      delete updated.color;
+      removeMetricDimension(updated);
     }
     if (prevState.secondaryMetricAccessor === columnId) {
-      delete updated.secondaryMetricAccessor;
-      delete updated.secondaryPrefix;
+      removeSecondaryMetricDimension(updated);
     }
     if (prevState.maxAccessor === columnId) {
-      delete updated.maxAccessor;
+      removeMaxDimension(updated);
     }
     if (prevState.breakdownByAccessor === columnId) {
-      delete updated.breakdownByAccessor;
-      delete updated.collapseFn;
+      removeBreakdownByDimension(updated);
     }
 
     return updated;

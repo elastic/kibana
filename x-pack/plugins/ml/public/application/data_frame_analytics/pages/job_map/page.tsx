@@ -69,6 +69,7 @@ export const Page: FC = () => {
 
   useEffect(function checkJobs() {
     checkJobsExist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getEmptyState = () => {

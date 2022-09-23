@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -36,6 +37,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -49,6 +51,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -85,6 +88,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -98,6 +102,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -111,6 +116,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -125,6 +131,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -154,6 +161,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/defer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -167,6 +175,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -180,7 +189,8 @@
                   "T"
                 ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -196,6 +206,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -209,7 +220,8 @@
                   "any"
                 ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -224,7 +236,8 @@
               "Promise<T>"
             ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -257,6 +270,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -270,6 +284,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -283,6 +298,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -318,6 +334,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -330,7 +347,8 @@
               "\"kbn.hashedItemsIndex.v1\""
             ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -346,6 +364,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -359,6 +378,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -376,6 +396,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -389,6 +410,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -403,6 +425,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -420,6 +443,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -433,6 +457,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -450,6 +475,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -463,6 +489,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -480,6 +507,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -514,6 +542,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -527,6 +556,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -540,6 +570,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -567,6 +598,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -580,6 +612,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -593,6 +626,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -612,6 +646,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -625,6 +660,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -638,6 +674,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -655,6 +692,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -668,6 +706,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -685,6 +724,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -700,6 +740,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -715,6 +756,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -730,6 +772,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -743,6 +786,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -760,6 +804,7 @@
         "description": [],
         "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -773,6 +818,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -786,6 +832,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -803,6 +850,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -818,6 +866,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -833,6 +882,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -860,6 +910,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -873,6 +924,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -886,6 +938,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -897,6 +950,7 @@
                 "description": [],
                 "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -909,7 +963,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -928,6 +983,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -945,6 +1001,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -958,6 +1015,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -977,6 +1035,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1011,6 +1070,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1024,6 +1084,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1037,6 +1098,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1073,6 +1135,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1086,6 +1149,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1099,6 +1163,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1135,6 +1200,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1144,7 +1210,8 @@
             "label": "savedObjectType",
             "description": [],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -1157,7 +1224,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -1171,6 +1239,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1184,6 +1253,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1198,6 +1268,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -1212,6 +1283,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -1226,6 +1298,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1261,6 +1334,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/storage/storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1280,7 +1354,8 @@
               "<any, void>"
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -1294,6 +1369,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1314,6 +1390,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1331,6 +1408,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1344,6 +1422,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1361,6 +1440,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1374,6 +1454,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1388,6 +1469,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1405,6 +1487,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1418,6 +1501,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1435,6 +1519,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1457,6 +1542,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1472,6 +1558,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1491,6 +1578,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/utils/diff_object.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1504,6 +1592,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/utils/diff_object.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1518,6 +1607,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/utils/diff_object.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1536,6 +1626,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1549,7 +1640,8 @@
               "object"
             ],
             "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1582,6 +1674,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1595,6 +1688,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1609,6 +1703,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1637,6 +1732,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1653,6 +1749,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1674,6 +1771,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1688,6 +1786,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1717,6 +1816,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1727,6 +1827,7 @@
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1736,7 +1837,8 @@
                 "label": "useHash",
                 "description": [],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1749,7 +1851,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1763,7 +1866,8 @@
                   "<unknown> | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1777,6 +1881,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -1790,6 +1895,7 @@
                     ],
                     "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -1807,6 +1913,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -1820,6 +1927,7 @@
                     ],
                     "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -1848,13 +1956,7 @@
           "<unknown>; }[]; storageKey: string; navLinkUpdater$: ",
           "BehaviorSubject",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppUpdater",
-            "text": "AppUpdater"
-          },
+          "AppUpdater",
           ">; toastNotifications: ",
           "IToasts",
           "; history?: ",
@@ -1866,6 +1968,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -1876,6 +1979,7 @@
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -1887,7 +1991,8 @@
                   "\nBase url of the current app. This will be used as a prefix for the\nnav link in the side bar"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1899,7 +2004,8 @@
                   "\nDefault sub url for this app. If the app is currently active or no sub url is already stored in session storage and the app hasn't been visited yet, the nav link will be set to this url."
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1916,7 +2022,8 @@
                   "<unknown>; }[]"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1928,7 +2035,8 @@
                   "\nKey used to store the current sub url in session storage. This key should only be used for one active url tracker at any given time."
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1942,17 +2050,12 @@
                 "signature": [
                   "BehaviorSubject",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.AppUpdater",
-                    "text": "AppUpdater"
-                  },
+                  "AppUpdater",
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1967,7 +2070,8 @@
                   "IToasts"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1983,7 +2087,8 @@
                   "<unknown> | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -2001,6 +2106,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [],
                 "returnComment": []
               },
@@ -2017,7 +2123,8 @@
                   "Storage | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -2033,6 +2140,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -2048,6 +2156,7 @@
                     ],
                     "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -2067,6 +2176,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -2080,6 +2190,7 @@
                     ],
                     "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -2109,6 +2220,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2125,6 +2237,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2141,6 +2254,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2167,6 +2281,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2183,6 +2298,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2210,6 +2326,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2225,6 +2342,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2244,13 +2362,7 @@
         ],
         "signature": [
           "<TPluginsStart extends object, TStart>(accessor: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.StartServicesAccessor",
-            "text": "StartServicesAccessor"
-          },
+          "StartServicesAccessor",
           "<TPluginsStart, TStart>) => ",
           {
             "pluginId": "kibanaUtils",
@@ -2260,17 +2372,12 @@
             "text": "StartServicesGetter"
           },
           "<TPluginsStart, TStart, ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">"
         ],
         "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2282,17 +2389,12 @@
               "Asynchronous start service accessor provided by platform."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.StartServicesAccessor",
-                "text": "StartServicesAccessor"
-              },
+              "StartServicesAccessor",
               "<TPluginsStart, TStart>"
             ],
             "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2323,6 +2425,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2338,6 +2441,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2366,6 +2470,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2381,6 +2486,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2397,6 +2503,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2433,6 +2540,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2448,6 +2556,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2464,6 +2573,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2480,6 +2590,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2503,6 +2614,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2571,6 +2683,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2587,6 +2700,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2600,6 +2714,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2614,6 +2729,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2635,6 +2751,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/url_tracker.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2648,6 +2765,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/url_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2662,6 +2780,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/url_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2688,6 +2807,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/defer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2704,6 +2824,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2717,6 +2838,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2735,6 +2857,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2748,6 +2871,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2766,6 +2890,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2779,6 +2904,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2793,6 +2919,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2811,6 +2938,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2824,6 +2952,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2838,6 +2967,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2860,6 +2990,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/history/get_query_params.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2874,6 +3005,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/get_query_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2894,6 +3026,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2907,6 +3040,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2921,6 +3055,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2932,6 +3067,7 @@
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -2941,7 +3077,8 @@
                 "label": "getFromHashQuery",
                 "description": [],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2963,6 +3100,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -2976,6 +3114,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2990,6 +3129,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -3001,6 +3141,7 @@
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -3010,7 +3151,8 @@
                 "label": "getFromHashQuery",
                 "description": [],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -3032,6 +3174,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3045,7 +3188,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -3058,7 +3202,8 @@
               "IUrlQueryMapperOptions"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3075,6 +3220,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3085,7 +3231,8 @@
             "label": "url",
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3102,6 +3249,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3115,6 +3263,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3135,6 +3284,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/of.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3150,6 +3300,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/of.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3168,6 +3319,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3181,6 +3333,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3200,13 +3353,7 @@
           "({\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n}: { history: ",
           "History",
           "<unknown>; navigateToApp: (appId: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.NavigateToAppOptions",
-            "text": "NavigateToAppOptions"
-          },
+          "NavigateToAppOptions",
           " | undefined) => Promise<void>; basePath: ",
           "IBasePath",
           "; mapping: string | Mapping; toastNotifications: ",
@@ -3233,6 +3380,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3243,6 +3391,7 @@
             "description": [],
             "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -3256,7 +3405,8 @@
                   "<unknown>"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -3267,17 +3417,12 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -3287,8 +3432,9 @@
                     "tags": [],
                     "label": "appId",
                     "description": [],
-                    "path": "src/core/public/application/types.ts",
-                    "deprecated": false
+                    "path": "node_modules/@types/kbn__core-application-browser/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "kibanaUtils",
@@ -3298,17 +3444,12 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "core",
-                        "scope": "public",
-                        "docId": "kibCoreApplicationPluginApi",
-                        "section": "def-public.NavigateToAppOptions",
-                        "text": "NavigateToAppOptions"
-                      },
+                      "NavigateToAppOptions",
                       " | undefined"
                     ],
-                    "path": "src/core/public/application/types.ts",
-                    "deprecated": false
+                    "path": "node_modules/@types/kbn__core-application-browser/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -3323,7 +3464,8 @@
                   "IBasePath"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -3338,7 +3480,8 @@
                   "string | Mapping"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -3353,7 +3496,8 @@
                   "IToasts"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -3377,6 +3521,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -3396,6 +3541,7 @@
                     ],
                     "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -3412,7 +3558,8 @@
                   "ThemeServiceStart"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -3434,6 +3581,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3448,6 +3596,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3462,6 +3611,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3476,6 +3626,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3498,6 +3649,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3511,6 +3663,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3529,6 +3682,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3551,6 +3705,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3564,6 +3719,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3582,6 +3738,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3600,6 +3757,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3613,6 +3771,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3633,6 +3792,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3646,6 +3806,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3660,6 +3821,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3671,6 +3833,7 @@
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -3680,7 +3843,8 @@
                 "label": "useHash",
                 "description": [],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -3693,7 +3857,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3709,6 +3874,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3749,6 +3915,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3771,6 +3938,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3811,6 +3979,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3835,6 +4004,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3855,6 +4025,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3868,7 +4039,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -3881,7 +4053,8 @@
               "IUrlQueryMapperOptions"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3898,6 +4071,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3908,7 +4082,8 @@
             "label": "url",
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3951,6 +4126,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -3966,6 +4142,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3990,6 +4167,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -4013,6 +4191,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4051,6 +4230,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4066,6 +4246,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4090,6 +4271,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4103,6 +4285,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4132,6 +4315,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4147,6 +4331,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "current state"
@@ -4166,6 +4351,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4181,6 +4367,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4200,7 +4387,8 @@
               "<State>"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4226,6 +4414,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4240,7 +4429,8 @@
               "Config"
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4256,6 +4446,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4269,6 +4460,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4287,7 +4479,8 @@
               "Context"
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4313,6 +4506,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4328,6 +4522,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4341,6 +4536,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4360,6 +4556,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4373,6 +4570,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4387,6 +4585,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4422,6 +4621,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -4439,6 +4639,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4454,6 +4655,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4467,6 +4669,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4497,6 +4700,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4510,6 +4714,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4523,6 +4728,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4537,6 +4743,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4548,6 +4755,7 @@
                 "description": [],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
@@ -4557,7 +4765,8 @@
                     "label": "replace",
                     "description": [],
                     "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -4576,6 +4785,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4589,6 +4799,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4608,6 +4819,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4621,6 +4833,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4640,6 +4853,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4656,7 +4870,8 @@
               "IKbnUrlControls"
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4690,6 +4905,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4703,6 +4919,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4716,6 +4933,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4746,6 +4964,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4759,6 +4978,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4772,6 +4992,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4786,6 +5007,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4803,6 +5025,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4816,6 +5039,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4845,6 +5069,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4856,7 +5081,8 @@
               "\nStorage key to use for syncing,\ne.g. storageKey '_a' should sync state to ?_a query param"
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4878,7 +5104,8 @@
               "<State>"
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4893,7 +5120,8 @@
               "StateStorage"
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4917,6 +5145,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/storage/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -4930,6 +5159,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4943,6 +5173,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4960,6 +5191,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -4973,6 +5205,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -4987,6 +5220,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5004,6 +5238,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5017,6 +5252,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5034,6 +5270,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -5059,6 +5296,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/storage/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -5072,6 +5310,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5085,6 +5324,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5102,6 +5342,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5115,6 +5356,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5129,6 +5371,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5146,6 +5389,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5159,6 +5403,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5176,6 +5421,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -5201,6 +5447,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -5216,6 +5463,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -5233,6 +5481,7 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -5258,6 +5507,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -5267,7 +5517,8 @@
             "label": "statusCode",
             "description": [],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5277,7 +5528,8 @@
             "label": "message",
             "description": [],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5290,7 +5542,8 @@
               "T | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5324,6 +5577,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -5337,6 +5591,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5354,6 +5609,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -5367,7 +5623,8 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -5381,7 +5638,8 @@
                   "<string, any[]>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -5405,6 +5663,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5425,6 +5684,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5444,6 +5704,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5458,6 +5719,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5483,6 +5745,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5503,6 +5766,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5520,6 +5784,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5533,6 +5798,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5570,6 +5836,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -5586,7 +5853,8 @@
               "<PureTransitions>[P]; }"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5615,7 +5883,8 @@
               "<PureSelectors>[P]; }"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5639,6 +5908,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -5654,6 +5924,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -5669,6 +5940,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -5685,6 +5957,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -5704,6 +5977,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -5727,6 +6001,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5743,6 +6018,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5756,7 +6032,8 @@
               "Result"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5769,7 +6046,8 @@
               "Result"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5796,6 +6074,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5810,6 +6089,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -5823,7 +6103,8 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -5844,6 +6125,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5857,7 +6139,8 @@
               "T"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5882,6 +6165,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5895,7 +6179,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5920,6 +6205,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5933,7 +6219,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5950,6 +6237,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -5968,6 +6256,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5981,7 +6270,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6020,6 +6310,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6035,7 +6326,8 @@
               "<string, any[]>) => void; }"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6060,6 +6352,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6073,7 +6366,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6110,6 +6404,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6133,6 +6428,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6146,7 +6442,8 @@
               "Args"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6167,6 +6464,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6180,7 +6478,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6201,6 +6500,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6214,7 +6514,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -6228,7 +6529,8 @@
               "<string, any[]>"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6245,6 +6547,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6258,7 +6561,8 @@
               "Args"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6275,6 +6579,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6288,7 +6593,8 @@
               "T"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6302,17 +6608,12 @@
         "description": [],
         "signature": [
           "() => StartServices<Plugins, OwnContract, ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">"
         ],
         "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -6329,6 +6630,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -6345,6 +6647,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -6371,6 +6674,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -6397,6 +6701,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -6419,6 +6724,7 @@
         ],
         "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6430,6 +6736,7 @@
         "description": [],
         "path": "src/plugins/kibana_utils/common/url/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6447,6 +6754,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -6461,7 +6769,8 @@
                   "<string>"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -6475,6 +6784,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -6485,7 +6795,8 @@
                     "label": "val",
                     "description": [],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "kibanaUtils",
@@ -6498,7 +6809,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -6510,7 +6822,8 @@
                 "label": "pctEncodeSpaces",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -6526,6 +6839,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -6536,7 +6850,8 @@
                 "label": "val",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -6546,7 +6861,8 @@
                 "label": "pctEncodeSpaces",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -6562,6 +6878,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -6572,7 +6889,8 @@
                 "label": "params",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -6582,7 +6900,8 @@
                 "label": "key",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -6595,7 +6914,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -6612,6 +6932,7 @@
       "description": [],
       "path": "src/plugins/kibana_utils/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "kibanaUtils",
@@ -6623,10 +6944,11 @@
           "signature": [
             "(history: Pick<",
             "History",
-            "<unknown>, \"replace\" | \"location\">) => void"
+            "<unknown>, \"location\" | \"replace\">) => void"
           ],
           "path": "src/plugins/kibana_utils/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "kibanaUtils",
@@ -6638,10 +6960,11 @@
               "signature": [
                 "Pick<",
                 "History",
-                "<unknown>, \"replace\" | \"location\">"
+                "<unknown>, \"location\" | \"replace\">"
               ],
               "path": "src/plugins/kibana_utils/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -6675,6 +6998,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6688,6 +7012,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -6701,6 +7026,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -6735,6 +7061,7 @@
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6747,7 +7074,8 @@
               "Record<string, any> | undefined"
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -6761,6 +7089,7 @@
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -6774,6 +7103,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6788,6 +7118,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -6802,6 +7133,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -6826,6 +7158,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6841,6 +7174,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6875,6 +7209,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6888,6 +7223,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6902,6 +7238,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6920,6 +7257,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6933,6 +7271,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6947,6 +7286,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6965,6 +7305,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -6978,6 +7319,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6992,6 +7334,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -7019,6 +7362,7 @@
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7034,6 +7378,7 @@
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -7085,6 +7430,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7104,6 +7450,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -7124,6 +7471,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -7156,6 +7504,7 @@
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7171,6 +7520,7 @@
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -7191,6 +7541,7 @@
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -7213,6 +7564,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -7229,6 +7581,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -7242,7 +7595,8 @@
               "T"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7258,6 +7612,7 @@
         "description": [],
         "path": "src/plugins/kibana_utils/common/url/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7275,6 +7630,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -7289,7 +7645,8 @@
                   "<string>"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -7303,6 +7660,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -7313,7 +7671,8 @@
                     "label": "val",
                     "description": [],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "kibanaUtils",
@@ -7326,7 +7685,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -7338,7 +7698,8 @@
                 "label": "pctEncodeSpaces",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -7354,6 +7715,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -7364,7 +7726,8 @@
                 "label": "val",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -7374,7 +7737,8 @@
                 "label": "pctEncodeSpaces",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -7390,6 +7754,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -7400,7 +7765,8 @@
                 "label": "params",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -7410,7 +7776,8 @@
                 "label": "key",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -7423,7 +7790,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -7455,6 +7823,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7468,6 +7837,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7481,6 +7851,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7517,6 +7888,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7530,6 +7902,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7543,6 +7916,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -7557,6 +7931,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7586,6 +7961,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/defer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7599,6 +7975,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -7612,7 +7989,8 @@
                   "T"
                 ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -7628,6 +8006,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -7641,7 +8020,8 @@
                   "any"
                 ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -7656,7 +8036,8 @@
               "Promise<T>"
             ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7689,6 +8070,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7702,6 +8084,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7715,6 +8098,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7751,6 +8135,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7764,6 +8149,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7777,6 +8163,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7804,6 +8191,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7817,6 +8205,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7830,6 +8219,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7866,6 +8256,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7879,6 +8270,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7892,6 +8284,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7928,6 +8321,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7941,6 +8335,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -7954,6 +8349,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -7990,6 +8386,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -7999,7 +8396,8 @@
             "label": "savedObjectType",
             "description": [],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -8012,7 +8410,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -8026,6 +8425,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -8039,6 +8439,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -8053,6 +8454,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -8067,6 +8469,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -8081,6 +8484,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -8105,6 +8509,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8120,6 +8525,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8138,6 +8544,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -8151,7 +8558,8 @@
               "object"
             ],
             "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8184,6 +8592,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8197,6 +8606,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8211,6 +8621,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8239,6 +8650,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8254,6 +8666,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8282,6 +8695,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8297,6 +8711,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8313,6 +8728,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8349,6 +8765,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8364,6 +8781,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8380,6 +8798,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8396,6 +8815,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8419,6 +8839,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -8487,6 +8908,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -8511,6 +8933,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/defer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -8529,6 +8952,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/distinct_until_changed_with_initial_value.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8542,6 +8966,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/distinct_until_changed_with_initial_value.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8556,6 +8981,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/distinct_until_changed_with_initial_value.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -8574,6 +9000,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8587,6 +9014,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8601,6 +9029,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8619,6 +9048,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8632,6 +9062,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8646,6 +9077,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8695,6 +9127,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8714,6 +9147,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8734,6 +9168,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8770,6 +9205,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8789,6 +9225,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8812,6 +9249,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8832,6 +9270,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/now.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -8850,6 +9289,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/of.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8865,6 +9305,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/of.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -8909,6 +9350,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -8924,6 +9366,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8948,6 +9391,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -8971,6 +9415,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -9009,6 +9454,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9024,6 +9470,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -9055,6 +9502,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9070,6 +9518,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "current state"
@@ -9089,6 +9538,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9104,6 +9554,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9123,7 +9574,8 @@
               "<State>"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9139,6 +9591,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9154,6 +9607,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9167,6 +9621,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9194,6 +9649,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/errors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9203,7 +9659,8 @@
             "label": "statusCode",
             "description": [],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9213,7 +9670,8 @@
             "label": "message",
             "description": [],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9226,7 +9684,8 @@
               "T | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9254,6 +9713,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9269,6 +9729,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9284,6 +9745,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -9300,6 +9762,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9323,6 +9786,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9338,6 +9802,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -9355,6 +9820,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9378,6 +9844,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9393,6 +9860,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9427,7 +9895,8 @@
               }
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9453,6 +9922,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9468,6 +9938,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9483,6 +9954,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -9497,6 +9969,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9520,6 +9993,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9535,6 +10009,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -9552,6 +10027,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9575,6 +10051,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9590,6 +10067,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9619,6 +10097,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9641,6 +10120,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9669,6 +10149,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -9704,6 +10185,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9717,6 +10199,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -9734,6 +10217,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -9747,7 +10231,8 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -9761,7 +10246,8 @@
                   "<string, any[]>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -9785,6 +10271,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9805,6 +10292,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9824,6 +10312,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9838,6 +10327,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9863,6 +10353,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9883,6 +10374,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9900,6 +10392,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -9913,6 +10406,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -9950,6 +10444,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -9966,7 +10461,8 @@
               "<PureTransitions>[P]; }"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9995,7 +10491,8 @@
               "<PureSelectors>[P]; }"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10019,6 +10516,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -10034,6 +10532,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
@@ -10049,6 +10548,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -10065,6 +10565,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -10084,6 +10585,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -10111,6 +10613,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -10120,7 +10623,8 @@
             "label": "version",
             "description": [],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -10133,7 +10637,8 @@
               "S"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10155,6 +10660,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -10171,6 +10677,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10184,7 +10691,8 @@
               "Result"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -10197,7 +10705,8 @@
               "Result"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10224,6 +10733,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10238,6 +10748,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -10251,7 +10762,8 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -10272,6 +10784,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10285,7 +10798,8 @@
               "T"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10310,6 +10824,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10323,7 +10838,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10348,6 +10864,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10361,7 +10878,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10378,6 +10896,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -10401,6 +10920,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -10419,6 +10939,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10432,7 +10953,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10471,6 +10993,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10486,7 +11009,8 @@
               "<string, any[]>) => void; }"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10503,6 +11027,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10516,7 +11041,8 @@
               "FromVersion"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10543,6 +11069,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -10577,6 +11104,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -10596,6 +11124,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10609,7 +11138,8 @@
               "SerializableRecord"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -10619,7 +11149,8 @@
             "label": "version",
             "description": [],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10644,6 +11175,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10657,7 +11189,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10694,6 +11227,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -10717,6 +11251,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10730,7 +11265,8 @@
               "Args"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10751,6 +11287,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10764,7 +11301,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10785,6 +11323,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10798,7 +11337,8 @@
               "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -10812,7 +11352,8 @@
               "<string, any[]>"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10829,6 +11370,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10842,7 +11384,8 @@
               "Args"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10859,6 +11402,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -10872,7 +11416,8 @@
               "T"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10899,6 +11444,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -10925,6 +11471,7 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -10938,6 +11485,7 @@
         "description": [],
         "path": "src/plugins/kibana_utils/common/url/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaUtils",
@@ -10955,6 +11503,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -10969,7 +11518,8 @@
                   "<string>"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -10983,6 +11533,7 @@
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -10993,7 +11544,8 @@
                     "label": "val",
                     "description": [],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "kibanaUtils",
@@ -11006,7 +11558,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -11018,7 +11571,8 @@
                 "label": "pctEncodeSpaces",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -11034,6 +11588,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -11044,7 +11599,8 @@
                 "label": "val",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -11054,7 +11610,8 @@
                 "label": "pctEncodeSpaces",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -11070,6 +11627,7 @@
             ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -11080,7 +11638,8 @@
                 "label": "params",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -11090,7 +11649,8 @@
                 "label": "key",
                 "description": [],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -11103,7 +11663,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

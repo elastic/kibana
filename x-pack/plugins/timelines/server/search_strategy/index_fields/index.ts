@@ -136,18 +136,20 @@ export const requestIndexFieldSearch = async (
       []
     );
     if (!request.onlyCheckIfIndicesExist) {
-      const fieldDescriptor = await Promise.all(
-        indicesExist.map(async (index, n) => {
-          if (index.startsWith('.alerts-observability')) {
-            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      const fieldDescriptor = (
+        await Promise.all(
+          indicesExist.map(async (index, n) => {
+            if (index.startsWith('.alerts-observability')) {
+              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+                pattern: index,
+              });
+            }
+            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
               pattern: index,
             });
-          }
-          return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
-            pattern: index,
-          });
-        })
-      );
+          })
+        )
+      ).map((response) => response.fields || []);
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   }

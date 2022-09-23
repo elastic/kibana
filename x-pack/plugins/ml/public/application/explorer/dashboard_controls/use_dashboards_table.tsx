@@ -35,6 +35,7 @@ export const useDashboardTable = () => {
     return () => {
       fetchDashboards.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const search: EuiTableProps['search'] = useMemo(() => {
@@ -48,10 +49,12 @@ export const useDashboardTable = () => {
         'data-test-subj': 'mlDashboardsSearchBox',
       },
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [dashboardItems, setDashboardItems] = useState<DashboardItem[]>([]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchDashboards = useCallback(
     debounce(async (query?: string) => {
       try {

@@ -23,7 +23,7 @@ import {
 import { noop } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../../../../../../common/constants';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import * as i18n from './translations';
 
@@ -34,6 +34,7 @@ export interface RulesFeatureTourContextType {
 
 export const SEARCH_CAPABILITIES_TOUR_ANCHOR = 'search-capabilities-tour-anchor';
 
+const TOUR_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE;
 const TOUR_POPOVER_WIDTH = 400;
 
 const tourConfig: EuiTourState = {
@@ -61,7 +62,7 @@ export const RulesFeatureTour: FC = () => {
   const restoredState = useMemo<EuiTourState>(
     () => ({
       ...tourConfig,
-      ...storage.get(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY),
+      ...storage.get(TOUR_STORAGE_KEY),
     }),
     [storage]
   );
@@ -70,7 +71,7 @@ export const RulesFeatureTour: FC = () => {
 
   useEffect(() => {
     const { isTourActive, currentTourStep } = tourState;
-    storage.set(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
+    storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
   const [shouldShowSearchCapabilitiesTour, setShouldShowSearchCapabilitiesTour] = useState(false);
