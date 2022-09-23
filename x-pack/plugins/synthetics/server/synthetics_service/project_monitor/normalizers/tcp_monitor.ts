@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   TCPFields,
+  TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
   NormalizedProjectProps,
   NormalizerResult,
   normalizeYamlConfig,
-  getValueInSeconds,
   getNormalizeCommonFields,
   getOptionalArrayField,
   getOptionalListField,
@@ -62,9 +62,9 @@ export const getNormalizeTCPFields = ({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     [ConfigKey.HOSTS]:
       getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
-    [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getValueInSeconds(monitor.timeout)
-      : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
+      ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
+      : defaultFields[ConfigKey.TLS_VERSION],
   };
   return {
     normalizedFields: {

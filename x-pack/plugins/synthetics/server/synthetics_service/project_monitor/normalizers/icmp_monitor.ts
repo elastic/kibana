@@ -62,9 +62,6 @@ export const getNormalizeICMPFields = ({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     [ConfigKey.HOSTS]:
       getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
-    [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getValueInSeconds(monitor.timeout)
-      : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.WAIT]: monitor.wait
       ? getValueInSeconds(monitor.wait) || defaultFields[ConfigKey.WAIT]
       : defaultFields[ConfigKey.WAIT],

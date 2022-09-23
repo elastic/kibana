@@ -68,8 +68,7 @@ describe('browser normalizers', () => {
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
         apmServiceName: 'cart-service',
-        type: DataStream.BROWSER,
-      },
+      } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
         id: 'test-id-2',
         screenshot: ScreenshotOption.ON,

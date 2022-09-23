@@ -68,6 +68,12 @@ describe('http normalizers', () => {
         unsupportedKey: {
           nestedUnsupportedKey: 'unsupportedValue',
         },
+        service: {
+          name: 'test service',
+        },
+        ssl: {
+          supported_protocols: ['TLSv1.2', 'TLSv1.3'],
+        },
       },
       {
         locations: ['localhost'],
@@ -96,6 +102,8 @@ describe('http normalizers', () => {
             positive: ['Saved', 'saved'],
           },
         },
+        'service.name': 'test service',
+        'ssl.supported_protocols': 'TLSv1.2,TLSv1.3',
       },
     ];
 
@@ -160,12 +168,12 @@ describe('http normalizers', () => {
               number: '60',
               unit: 'm',
             },
-            'service.name': '',
+            'service.name': 'test service',
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.key': '',
             'ssl.key_passphrase': '',
-            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.supported_protocols': ['TLSv1.2', 'TLSv1.3'],
             'ssl.verification_mode': 'full',
             tags: [],
             timeout: '80',
@@ -213,12 +221,12 @@ describe('http normalizers', () => {
               number: '60',
               unit: 'm',
             },
-            'service.name': '',
+            'service.name': 'test service',
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.key': '',
             'ssl.key_passphrase': '',
-            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.supported_protocols': ['TLSv1.2', 'TLSv1.3'],
             'ssl.verification_mode': 'full',
             tags: ['tag2', 'tag2'],
             timeout: '80',

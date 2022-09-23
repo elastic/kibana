@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, get } from 'lodash';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
@@ -65,13 +65,18 @@ export const getNormalizeCommonFields = ({
       privateLocations,
       publicLocations: locations,
     }),
-    [ConfigKey.APM_SERVICE_NAME]:
-      monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
+    [ConfigKey.APM_SERVICE_NAME]: getAPMServiceName(
+      monitor,
+      defaultFields[ConfigKey.APM_SERVICE_NAME]
+    ),
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getValueInSeconds(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
   };
   return {
     ...defaultFields,
@@ -85,6 +90,13 @@ export const getCustomHeartbeatId = (
   namespace: string
 ) => {
   return `${monitor.id}-${projectId}-${namespace}`;
+};
+
+export const getAPMServiceName = (monitor: ProjectMonitor, defaultValue: string) => {
+  if (monitor.apmServiceName) {
+    return monitor.apmServiceName;
+  }
+  return get(monitor, ConfigKey.APM_SERVICE_NAME) || defaultValue;
 };
 
 export const getMonitorLocations = ({
@@ -185,7 +197,7 @@ export const getOptionalArrayField = (value: string[] | string = '') => {
  * @param {Object} [monitor]
  * @returns {Object} Returns an object containing synthetics-compatible configuration keys
  */
-const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
+export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
   Object.keys(obj).reduce<Record<string, unknown>>((acc, k) => {
     const pre = prefix.length ? prefix + '.' : '';
     const key = pre + k;

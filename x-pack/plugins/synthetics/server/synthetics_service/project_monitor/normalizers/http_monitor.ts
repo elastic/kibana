@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
@@ -11,13 +12,13 @@ import {
   FormMonitorType,
   HTTPFields,
   Mode,
+  TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
   NormalizedProjectProps,
   NormalizerResult,
   getNormalizeCommonFields,
   normalizeYamlConfig,
-  getValueInSeconds,
   getOptionalListField,
   getOptionalArrayField,
   getUnsupportedKeysError,
@@ -62,13 +63,13 @@ export const getNormalizeHTTPFields = ({
     [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
     [ConfigKey.MAX_REDIRECTS]:
       monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
-    [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getValueInSeconds(monitor.timeout)
-      : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.REQUEST_BODY_CHECK]: getRequestBodyField(
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
       defaultFields[ConfigKey.REQUEST_BODY_CHECK]
     ),
+    [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
+      ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
+      : defaultFields[ConfigKey.TLS_VERSION],
   };
   return {
     normalizedFields: {
