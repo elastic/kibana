@@ -14,7 +14,7 @@ import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_throttle_null', () => {
   test('it should validate a throttle string', () => {
-    const payload: Throttle = 'some string';
+    const payload: Throttle = '7d';
     const decoded = DefaultThrottleNull.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -28,7 +28,7 @@ describe('default_throttle_null', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "DefaultThreatNull"',
+      'Invalid value "5" supplied to "DefaultThrottleNull"',
     ]);
     expect(message.schema).toEqual({});
   });

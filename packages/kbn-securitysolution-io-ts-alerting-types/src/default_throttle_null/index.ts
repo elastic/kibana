@@ -15,7 +15,7 @@ import { throttle, ThrottleOrNull } from '../throttle';
  *   - If null or undefined, then a null will be set
  */
 export const DefaultThrottleNull = new t.Type<ThrottleOrNull, ThrottleOrNull | undefined, unknown>(
-  'DefaultThreatNull',
+  'DefaultThrottleNull',
   throttle.is,
   (input, context): Either<t.Errors, ThrottleOrNull> =>
     input == null ? t.success(null) : throttle.validate(input, context),
