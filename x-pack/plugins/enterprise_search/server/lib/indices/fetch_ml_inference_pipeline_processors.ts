@@ -88,16 +88,15 @@ export const getMlModelConfigsForModelIds = async (
 ): Promise<Record<string, InferencePipeline>> => {
   // get all trained models from all spaces
   // this is safe because were in server land
-  const [allTrainedModels, allTrainedModelsStats] = await Promise.all([
-    client.ml.getTrainedModels({ model_id: trainedModelNames.join() }),
-    client.ml.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
-  ]);
-
-  // get all trained models for the current space
-  const [trainedModels, trainedModelsStats] = await Promise.all([
-    trainedModelsProvider.getTrainedModels({ model_id: trainedModelNames.join() }),
-    trainedModelsProvider.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
-  ]);
+  // also get all trained models for the current space
+  const ids = { model_id: trainedModelNames.join() };
+  const [allTrainedModels, allTrainedModelsStats, trainedModels, trainedModelsStats] =
+    await Promise.all([
+      client.ml.getTrainedModels(ids),
+      client.ml.getTrainedModelsStats(ids),
+      trainedModelsProvider.getTrainedModels(ids),
+      trainedModelsProvider.getTrainedModelsStats(ids),
+    ]);
 
   // find the trained models that aren't in the current space
   const hiddenTrainedModels = differenceWith(
