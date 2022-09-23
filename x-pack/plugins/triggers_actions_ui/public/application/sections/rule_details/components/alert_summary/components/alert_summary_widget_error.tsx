@@ -28,7 +28,7 @@ export const AlertSummaryWidgetError = () => {
           {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody"
-              defaultMessage=" There was an error loading the alerts summary. Contact your
+              defaultMessage="There was an error loading the alerts summary. Contact your
                 administrator for help."
             />
           }
