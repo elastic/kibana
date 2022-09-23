@@ -240,6 +240,12 @@ export function DualBrush({
           })
           .each((brushObject: DualBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+            // Ensure brush style is applied
+            brushObject.brush.extent([
+              [0, BRUSH_MARGIN],
+              [widthRef.current, BRUSH_HEIGHT - BRUSH_MARGIN],
+            ]);
+
             brushObject.brush(d3.select(n[i]));
             const xStart = x(brushObject.start) ?? 0;
             const xEnd = x(brushObject.end) ?? 0;
