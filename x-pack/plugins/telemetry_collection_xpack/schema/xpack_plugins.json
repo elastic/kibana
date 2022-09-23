@@ -265,6 +265,23 @@
               "type": "long"
             }
           }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -1690,6 +1707,19 @@
                   "type": "long"
                 }
               }
+            }
+          }
+        },
+        "count_rules_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
             }
           }
         },
@@ -4614,6 +4644,19 @@
           "properties": {
             "all": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4677,6 +4720,19 @@
             },
             "sec": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4693,6 +4749,19 @@
             },
             "obs": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4709,6 +4778,19 @@
             },
             "main": {
               "properties": {
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "total": {
                   "type": "long"
                 },
@@ -4912,6 +4994,62 @@
             "type": "keyword",
             "_meta": {
               "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
+    "cloud_security_posture": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "score": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
             }
           }
         }

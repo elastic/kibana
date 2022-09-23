@@ -13,10 +13,10 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
+  getSLOIngestPipelineName,
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
-  SLO_INGEST_PIPELINE_NAME,
   SLO_RESOURCES_VERSION,
 } from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
@@ -25,13 +25,17 @@ import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_temp
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 
 export interface ResourceInstaller {
-  ensureCommonResourcesInstalled(spaceId: string): Promise<void>;
+  ensureCommonResourcesInstalled(): Promise<void>;
 }
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private spaceId: string
+  ) {}
 
-  public async ensureCommonResourcesInstalled(spaceId: string = 'default'): Promise<void> {
+  public async ensureCommonResourcesInstalled(): Promise<void> {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();
 
     if (alreadyInstalled) {
@@ -60,8 +64,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(
-          SLO_INGEST_PIPELINE_NAME,
-          this.getPipelinePrefix(SLO_RESOURCES_VERSION, spaceId)
+          getSLOIngestPipelineName(this.spaceId),
+          this.getPipelinePrefix(SLO_RESOURCES_VERSION, this.spaceId)
         )
       );
     } catch (err) {
@@ -83,13 +87,12 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
     let ingestPipelineExists = false;
     try {
-      const pipeline = await this.esClient.ingest.getPipeline({
-        id: SLO_INGEST_PIPELINE_NAME,
-      });
+      const pipelineName = getSLOIngestPipelineName(this.spaceId);
+      const pipeline = await this.esClient.ingest.getPipeline({ id: pipelineName });
 
       ingestPipelineExists =
         // @ts-ignore _meta is not defined on the type
-        pipeline && pipeline[SLO_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
+        pipeline && pipeline[pipelineName]._meta.version === SLO_RESOURCES_VERSION;
     } catch (err) {
       return false;
     }

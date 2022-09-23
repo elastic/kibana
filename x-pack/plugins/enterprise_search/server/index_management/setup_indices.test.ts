@@ -46,6 +46,14 @@ describe('Setup Indices', () => {
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
       name: { type: 'keyword' },
+      pipeline: {
+        properties: {
+          extract_binary_content: { type: 'boolean' },
+          name: { type: 'keyword' },
+          reduce_whitespace: { type: 'boolean' },
+          run_ml_inference: { type: 'boolean' },
+        },
+      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },

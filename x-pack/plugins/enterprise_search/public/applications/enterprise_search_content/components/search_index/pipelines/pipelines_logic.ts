@@ -47,6 +47,11 @@ import {
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
 import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
+import {
+  DeleteMlInferencePipelineApiLogic,
+  DeleteMlInferencePipelineApiLogicArgs,
+  DeleteMlInferencePipelineResponse,
+} from '../../../api/ml_models/delete_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
@@ -54,8 +59,8 @@ type PipelinesActions = Pick<
   Actions<PostPipelineArgs, PostPipelineResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  closeModal: () => void;
   closeAddMlInferencePipelineModal: () => void;
+  closeModal: () => void;
   createCustomPipeline: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
@@ -68,6 +73,18 @@ type PipelinesActions = Pick<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
   >['apiSuccess'];
+  deleteMlPipeline: Actions<
+    DeleteMlInferencePipelineApiLogicArgs,
+    DeleteMlInferencePipelineResponse
+  >['makeRequest'];
+  deleteMlPipelineError: Actions<
+    DeleteMlInferencePipelineApiLogicArgs,
+    DeleteMlInferencePipelineResponse
+  >['apiError'];
+  deleteMlPipelineSuccess: Actions<
+    DeleteMlInferencePipelineApiLogicArgs,
+    DeleteMlInferencePipelineResponse
+  >['apiSuccess'];
   fetchCustomPipeline: Actions<
     FetchCustomPipelineApiLogicArgs,
     FetchCustomPipelineApiLogicResponse
@@ -77,12 +94,12 @@ type PipelinesActions = Pick<
   fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
+  openAddMlInferencePipelineModal: () => void;
   openModal: () => void;
   savePipeline: () => void;
   setPipelineState(pipeline: IngestPipelineParams): {
     pipeline: IngestPipelineParams;
   };
-  openAddMlInferencePipelineModal: () => void;
 };
 
 interface PipelinesValues {
@@ -90,19 +107,20 @@ interface PipelinesValues {
   canUseMlInferencePipeline: boolean;
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
+  hasIndexIngestionPipeline: boolean;
   index: FetchIndexApiResponse;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineState: IngestPipelineParams;
-  showModal: boolean;
   showAddMlInferencePipelineModal: boolean;
+  showModal: boolean;
 }
 
 export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions>>({
   actions: {
-    closeModal: true,
     closeAddMlInferencePipelineModal: true,
-    openModal: true,
+    closeModal: true,
     openAddMlInferencePipelineModal: true,
+    openModal: true,
     savePipeline: true,
     setPipelineState: (pipeline: IngestPipelineParams) => ({ pipeline }),
   },
@@ -129,6 +147,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
       CreateMlInferencePipelineApiLogic,
       ['apiSuccess as createMlInferencePipelineSuccess'],
+      DeleteMlInferencePipelineApiLogic,
+      [
+        'apiError as deleteMlPipelineError',
+        'apiSuccess as deleteMlPipelineSuccess',
+        'makeRequest as deleteMlPipeline',
+      ],
     ],
     values: [
       FetchDefaultPipelineApiLogic,
@@ -190,6 +214,23 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     createMlInferencePipelineSuccess: () => {
       actions.fetchMlInferenceProcessors({ indexName: values.index.name });
     },
+    deleteMlPipelineError: (error) => flashAPIErrors(error),
+    deleteMlPipelineSuccess: (value) => {
+      if (value.deleted) {
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.successToastDeleteMlPipeline.title',
+            {
+              defaultMessage: 'Deleted machine learning inference pipeline "{pipelineName}"',
+              values: {
+                pipelineName: value.deleted,
+              },
+            }
+          )
+        );
+      }
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+    },
     fetchIndexApiSuccess: (index) => {
       if (!values.showModal) {
         // Don't do this when the modal is open to avoid overwriting the values while editing
@@ -227,6 +268,14 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         setPipelineState: (_, { pipeline }) => pipeline,
       },
     ],
+    showAddMlInferencePipelineModal: [
+      false,
+      {
+        closeAddMlInferencePipelineModal: () => false,
+        createMlInferencePipelineSuccess: () => false,
+        openAddMlInferencePipelineModal: () => true,
+      },
+    ],
     showModal: [
       false,
       {
@@ -235,28 +284,32 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         openModal: () => true,
       },
     ],
-    showAddMlInferencePipelineModal: [
-      false,
-      {
-        createMlInferencePipelineSuccess: () => false,
-        closeAddMlInferencePipelineModal: () => false,
-        openAddMlInferencePipelineModal: () => true,
-      },
-    ],
   }),
   selectors: ({ selectors }) => ({
     canSetPipeline: [
       () => [selectors.index],
       (index: ElasticsearchIndexWithIngestion) => !isApiIndex(index),
     ],
-    canUseMlInferencePipeline: [
-      () => [selectors.canSetPipeline, selectors.pipelineState],
-      (canSetPipeline: boolean, pipelineState: IngestPipelineParams) =>
-        canSetPipeline && pipelineState.run_ml_inference,
-    ],
     defaultPipelineValues: [
       () => [selectors.defaultPipelineValuesData],
       (pipeline: IngestPipelineParams | null) => pipeline ?? DEFAULT_PIPELINE_VALUES,
+    ],
+    hasIndexIngestionPipeline: [
+      () => [selectors.pipelineState, selectors.defaultPipelineValues],
+      (pipelineState: IngestPipelineParams, defaultPipelineValues: IngestPipelineParams) =>
+        pipelineState.name !== defaultPipelineValues.name,
+    ],
+    canUseMlInferencePipeline: [
+      () => [
+        selectors.canSetPipeline,
+        selectors.hasIndexIngestionPipeline,
+        selectors.pipelineState,
+      ],
+      (
+        canSetPipeline: boolean,
+        hasIndexIngestionPipeline: boolean,
+        pipelineState: IngestPipelineParams
+      ) => canSetPipeline && hasIndexIngestionPipeline && pipelineState.run_ml_inference,
     ],
   }),
 });

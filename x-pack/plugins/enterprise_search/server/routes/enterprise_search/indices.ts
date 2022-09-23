@@ -39,6 +39,7 @@ import {
   isIndexNotFoundException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
+import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
 
 export function registerIndexRoutes({
   router,
@@ -460,7 +461,7 @@ export function registerIndexRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/_simulate',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate',
       validate: {
         body: schema.object({
           pipeline: schema.object({
@@ -513,7 +514,7 @@ export function registerIndexRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
       validate: {
         body: schema.object({
           description: schema.maybe(schema.string()),
@@ -530,7 +531,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const pipelineName = decodeURIComponent(request.params.pipelineName);
       const { client } = (await context.core).elasticsearch;
-      const pipelineId = `ml-inference-${pipelineName}`;
+      const pipelineId = getPrefixedInferencePipelineProcessorName(pipelineName);
       const defaultDescription = `ML inference pipeline for index ${indexName}`;
 
       if (!(await indexOrAliasExists(client, indexName))) {
@@ -571,7 +572,7 @@ export function registerIndexRoutes({
 
   router.delete(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
       validate: {
         params: schema.object({
           indexName: schema.string(),

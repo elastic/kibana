@@ -18,6 +18,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 interface GuidedOnboardingExampleAppDeps {
@@ -28,17 +30,14 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
   const { guidedOnboardingApi } = guidedOnboarding;
 
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
+
+  const isTourActive = useObservable(
+    guidedOnboardingApi!.isGuideStepActive$('search', 'add_data'),
+    false
+  );
   useEffect(() => {
-    const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {
-      const { activeGuide: guide, activeStep: step } = newState;
-
-      if (guide === 'search' && step === 'add_data') {
-        setIsTourStepOpen(true);
-      }
-    });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboardingApi]);
-
+    setIsTourStepOpen(isTourActive);
+  }, [isTourActive]);
   return (
     <>
       <EuiPageContentHeader>
@@ -79,10 +78,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
         >
           <EuiButton
             onClick={async () => {
-              await guidedOnboardingApi?.updateGuideState({
-                activeGuide: 'search',
-                activeStep: 'search_experience',
-              });
+              await guidedOnboardingApi?.completeGuideStep('search', 'add_data');
             }}
           >
             Complete step 1

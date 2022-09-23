@@ -36,7 +36,7 @@ export const MlInferencePipelineProcessorsCard: React.FC = () => {
             trainedModelName={item.trainedModelName}
             pipelineName={item.pipelineName}
             isDeployed={item.isDeployed}
-            modelType={item.modelType}
+            types={item.types}
           />
         </EuiFlexItem>
       ))}

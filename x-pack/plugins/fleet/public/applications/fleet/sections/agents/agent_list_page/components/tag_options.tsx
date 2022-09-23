@@ -25,7 +25,7 @@ import { sanitizeTag } from '../utils';
 interface Props {
   tagName: string;
   isTagHovered: boolean;
-  onTagsUpdated: () => void;
+  onTagsUpdated: (tagsToAdd: string[], tagsToRemove: string[], hasCompleted?: boolean) => void;
 }
 
 export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdated }: Props) => {
@@ -65,7 +65,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
       kuery,
       [newName],
       [tagName],
-      () => onTagsUpdated(),
+      (hasCompleted) => onTagsUpdated([newName], [tagName], hasCompleted),
       i18n.translate('xpack.fleet.renameAgentTags.successNotificationTitle', {
         defaultMessage: 'Tag renamed',
       }),
@@ -81,7 +81,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
       kuery,
       [],
       [tagName],
-      () => onTagsUpdated(),
+      (hasCompleted) => onTagsUpdated([], [tagName], hasCompleted),
       i18n.translate('xpack.fleet.deleteAgentTags.successNotificationTitle', {
         defaultMessage: 'Tag deleted',
       }),

@@ -26,7 +26,7 @@ export function TransformSourceSelectionProvider({ getService }: FtrProviderCont
     async selectSource(sourceName: string) {
       await this.filterSourceSelection(sourceName);
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry(`savedObjectTitle${sourceName}`);
+        await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
         await testSubjects.existOrFail('transformPageCreateTransform', { timeout: 10 * 1000 });
       });
     },

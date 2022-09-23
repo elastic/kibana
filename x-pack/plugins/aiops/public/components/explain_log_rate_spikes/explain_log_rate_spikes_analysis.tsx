@@ -32,6 +32,7 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
 import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
+import { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
@@ -56,6 +57,7 @@ interface ExplainLogRateSpikesAnalysisProps {
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
+  onSelectedGroup?: (group: GroupTableItem | null) => void;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -67,6 +69,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   onPinnedChangePoint,
   onSelectedChangePoint,
   selectedChangePoint,
+  onSelectedGroup,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -74,7 +77,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
-  const [groupResults, setGroupResults] = useState<boolean>(true);
+  const [groupResults, setGroupResults] = useState<boolean>(false);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
@@ -106,6 +109,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
   function startHandler() {
+    // Reset grouping to false when restarting the analysis.
+    setGroupResults(false);
+
     if (onPinnedChangePoint) {
       onPinnedChangePoint(null);
     }
@@ -124,7 +130,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(({ group, docCount }, index) => {
+    const tableItems = data.changePointsGroups.map(({ id, group, docCount, histogram, pValue }) => {
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
@@ -141,10 +147,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       });
 
       return {
-        id: index,
+        id,
         docCount,
+        pValue,
         group: dedupedGroup,
         repeatedValues,
+        histogram,
       };
     });
 
@@ -162,8 +170,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const groupItemCount = groupTableItems.reduce((p, c) => {
     return p + Object.keys(c.group).length;
   }, 0);
-  const foundGroups =
-    groupTableItems.length === 0 || (groupTableItems.length > 0 && groupItemCount > 0);
+  const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
@@ -178,6 +185,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       {showSpikeAnalysisTable && foundGroups && (
         <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
           <EuiSwitch
+            data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${groupResults ? ' checked' : ''}`}
             showLabel={false}
             label={''}
             checked={groupResults}
@@ -244,6 +252,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
+          onSelectedGroup={onSelectedGroup}
           dataViewId={dataView.id}
         />
       ) : null}

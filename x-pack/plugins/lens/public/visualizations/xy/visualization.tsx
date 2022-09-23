@@ -184,8 +184,8 @@ export const getXyVisualization = ({
     return extractReferences(state);
   },
 
-  fromPersistableState(state, references) {
-    return injectReferences(state, references);
+  fromPersistableState(state, references, initialContext) {
+    return injectReferences(state, references, initialContext);
   },
 
   getDescription,

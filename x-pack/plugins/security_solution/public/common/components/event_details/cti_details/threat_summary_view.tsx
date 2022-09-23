@@ -46,7 +46,7 @@ const StyledEnrichmentFieldTitle = styled(EuiTitle)`
 `;
 
 const EnrichmentFieldTitle: React.FC<{
-  title: string | undefined;
+  title: string | React.ReactNode | undefined;
 }> = ({ title }) => (
   <StyledEnrichmentFieldTitle size="xxxs">
     <h6>{title}</h6>
@@ -58,10 +58,10 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactNode }> = ({
-  field,
-  value,
-}) => (
+export const EnrichedDataRow: React.FC<{
+  field: string | React.ReactNode | undefined;
+  value: React.ReactNode;
+}> = ({ field, value }) => (
   <StyledEuiFlexGroup
     direction="row"
     gutterSize="none"
@@ -77,7 +77,7 @@ export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React
 );
 
 export const ThreatSummaryPanelHeader: React.FC<{
-  title: string;
+  title: string | React.ReactNode;
   toolTipContent: React.ReactNode;
 }> = ({ title, toolTipContent }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
