@@ -16,4 +16,5 @@ export interface DashboardSavedObjectsTaggingService {
   getTableColumnDefinition?: SavedObjectsTaggingApi['ui']['getTableColumnDefinition'];
   hasTagDecoration?: SavedObjectsTaggingApi['ui']['hasTagDecoration'];
   parseSearchQuery?: SavedObjectsTaggingApi['ui']['parseSearchQuery'];
+  getTagIdsFromReferences?: SavedObjectsTaggingApi['ui']['getTagIdsFromReferences'];
 }

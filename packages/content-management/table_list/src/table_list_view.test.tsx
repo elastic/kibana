@@ -148,8 +148,8 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2', 'Item 2 description', yesterdayToString], // Comes first as it is the latest updated
-        ['Item 1', 'Item 1 description', twoDaysAgoToString],
+        ['Item 2Item 2 descriptionelasticcloud', yesterdayToString], // Comes first as it is the latest updated
+        ['Item 1Item 1 descriptionelasticcloud', twoDaysAgoToString],
       ]);
     });
 
@@ -185,8 +185,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
-        ['Item 1', 'Item 1 description', updatedAtValues[0].format('LL')],
-        ['Item 2', 'Item 2 description', updatedAtValues[1].format('LL')],
+        ['Item 1Item 1 descriptionelasticcloud', updatedAtValues[0].format('LL')],
+        ['Item 2Item 2 descriptionelasticcloud', updatedAtValues[1].format('LL')],
       ]);
     });
 
@@ -209,8 +209,8 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 1', 'Item 1 description'], // Sorted by title
-        ['Item 2', 'Item 2 description'],
+        ['Item 1Item 1 descriptionelasticcloud'], // Sorted by title
+        ['Item 2Item 2 descriptionelasticcloud'],
       ]);
     });
 
@@ -235,9 +235,9 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2', 'Item 2 description', yesterdayToString],
-        ['Item 1', 'Item 1 description', twoDaysAgoToString],
-        ['Item 3', 'Item 3 description', '-'], // Empty column as no updatedAt provided
+        ['Item 2Item 2 descriptionelasticcloud', yesterdayToString],
+        ['Item 1Item 1 descriptionelasticcloud', twoDaysAgoToString],
+        ['Item 3Item 3 descriptionelasticcloud', '-'], // Empty column as no updatedAt provided
       ]);
     });
   });
@@ -273,8 +273,8 @@ describe('TableListView', () => {
       const [[firstRowTitle]] = tableCellsValues;
       const [lastRowTitle] = tableCellsValues[tableCellsValues.length - 1];
 
-      expect(firstRowTitle).toBe('Item 00');
-      expect(lastRowTitle).toBe('Item 19');
+      expect(firstRowTitle).toBe('Item 00elasticcloud');
+      expect(lastRowTitle).toBe('Item 19elasticcloud');
     });
 
     test('should navigate to page 2', async () => {
@@ -302,8 +302,8 @@ describe('TableListView', () => {
       const [[firstRowTitle]] = tableCellsValues;
       const [lastRowTitle] = tableCellsValues[tableCellsValues.length - 1];
 
-      expect(firstRowTitle).toBe('Item 20');
-      expect(lastRowTitle).toBe('Item 29');
+      expect(firstRowTitle).toBe('Item 20elasticcloud');
+      expect(lastRowTitle).toBe('Item 29elasticcloud');
     });
   });
 });

@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
 import { from } from 'rxjs';
+import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 
 import { Services } from './services';
 
@@ -14,6 +16,43 @@ import { Services } from './services';
  */
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 type ActionFn = (name: string) => any;
+
+const tags = [
+  {
+    name: 'elastic',
+    color: '#8dc4de',
+    description: 'elastic tag',
+  },
+  {
+    name: 'cloud',
+    color: '#f5ed14',
+    description: 'cloud tag',
+  },
+];
+
+export const TagList: Services['TagList'] = ({ onClick }) => {
+  return (
+    <EuiBadgeGroup>
+      {tags.map((tag) => (
+        <EuiBadge
+          key={tag.name}
+          onClick={() => {
+            if (onClick) {
+              onClick(tag);
+            }
+          }}
+          onClickAriaLabel="tag button"
+          iconOnClick={() => undefined}
+          iconOnClickAriaLabel=""
+          color={tag.color}
+          title={tag.description}
+        >
+          {tag.name}
+        </EuiBadge>
+      ))}
+    </EuiBadgeGroup>
+  );
+};
 
 /**
  * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.
@@ -27,6 +66,8 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     },
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,
+    TagList,
+    itemHasTags: () => true,
     ...params,
   };
 
