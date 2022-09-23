@@ -6,20 +6,22 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type {
   ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   Pagination,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
 import {
   deleteExceptionListItemById,
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
+import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -37,6 +39,10 @@ import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 
+const StyledText = styled(EuiText)`
+  font-style: italic;
+`;
+
 const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
 const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
   'loading',
@@ -51,7 +57,7 @@ const initialState: State = {
     pageIndex: 0,
     pageSize: 25,
     totalItemCount: 0,
-    pageSizeOptions: [1, 5, 10, 25, 50, 100, 200, 300],
+    pageSizeOptions: [5, 10, 25, 50, 100, 200, 300],
   },
   exceptions: [],
   exceptionToEdit: null,
@@ -154,7 +160,16 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(exceptionListsToQuery);
+  const [isLoadingReferences, allReferences] =
+    useFindExceptionListReferences(exceptionListsToQuery);
+
+  useEffect(() => {
+    if (isLoadingReferences) {
+      setViewerState('loading');
+    } else {
+      setViewerState(null);
+    }
+  }, [isLoadingReferences, setViewerState]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -212,11 +227,7 @@ const ExceptionsViewerComponent = ({
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
       try {
-        setViewerState('loading');
-
         const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
-
-        setViewerState(total > 0 ? null : 'empty');
 
         setExceptions({
           exceptions: data,
@@ -226,6 +237,8 @@ const ExceptionsViewerComponent = ({
             total,
           },
         });
+
+        setViewerState(total > 0 ? null : 'empty');
       } catch (e) {
         setViewerState('error');
 
@@ -321,6 +334,16 @@ const ExceptionsViewerComponent = ({
     [handleGetExceptionListItems, services.http, setViewerState, toasts]
   );
 
+  const ruleSettingsUrl = useMemo(
+    () =>
+      rule != null
+        ? services.application.getUrlForApp(
+            `security/detections/rules/id/${encodeURI(rule.id)}/edit`
+          )
+        : '',
+    [rule, services.application]
+  );
+
   // User privileges checks
   useEffect((): void => {
     setReadOnly(!canUserCRUD || !hasIndexWrite);
@@ -367,6 +390,54 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          <StyledText size="s">
+            {listType === ExceptionListTypeEnum.ENDPOINT ? (
+              <FormattedMessage
+                id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription"
+                defaultMessage="Endpoint exceptions are applied to the endpoint and the detection rule. View the {ruleSettings} 'About' advanced settings section for more details."
+                data-test-subj="exceptionsEndpointMessage"
+                values={{
+                  ruleSettings:
+                    rule == null ? (
+                      <FormattedMessage
+                        id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription.ruleSettingsLink"
+                        defaultMessage="rule settings"
+                      />
+                    ) : (
+                      <EuiLink href={ruleSettingsUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription.ruleSettingsLink"
+                          defaultMessage="rule settings"
+                        />
+                      </EuiLink>
+                    ),
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.exceptions.allExceptionItems.exceptionDetectionDetailsDescription"
+                defaultMessage="Rule exceptions are applied to the detection rule only. For endpoint exceptions view the {ruleSettings} 'About' advanced settings section for more details."
+                data-test-subj="exceptionsDetectionsMessage"
+                values={{
+                  ruleSettings:
+                    rule == null ? (
+                      <FormattedMessage
+                        id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription.ruleSettingsLink"
+                        defaultMessage="rule settings"
+                      />
+                    ) : (
+                      <EuiLink href={ruleSettingsUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.securitySolution.exceptions.allExceptionItems.exceptionEndpointDetailsDescription.ruleSettingsLink"
+                          defaultMessage="rule settings"
+                        />
+                      </EuiLink>
+                    ),
+                }}
+              />
+            )}
+          </StyledText>
+          <EuiSpacer size="l" />
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
               canAddException={isReadOnly}

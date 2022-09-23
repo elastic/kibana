@@ -157,7 +157,7 @@ export const referenceErrorMessage = (referenceCount: number) =>
 export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.searchPlaceholder',
   {
-    defaultMessage: 'e.g. Example List Name',
+    defaultMessage: 'Search by name or list id',
   }
 );
 
