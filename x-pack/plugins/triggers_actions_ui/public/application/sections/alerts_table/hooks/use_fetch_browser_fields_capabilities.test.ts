@@ -16,6 +16,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
 
   beforeEach(() => {
     httpMock = useKibana().services.http.get as jest.Mock;
+    httpMock.mockReturnValue({ fakeCategory: {} });
   });
 
   afterEach(() => {
@@ -27,5 +28,21 @@ describe('useFetchBrowserFieldCapabilities', () => {
 
     expect(httpMock).toHaveBeenCalledTimes(0);
     expect(result.current).toEqual([undefined, {}]);
+  });
+
+  it('should call the api only once', async () => {
+    const { result, waitForNextUpdate, rerender } = renderHook(() =>
+      useFetchBrowserFieldCapabilities({ featureIds: ['apm'] })
+    );
+
+    await waitForNextUpdate();
+
+    expect(httpMock).toHaveBeenCalledTimes(1);
+    expect(result.current).toEqual([false, { fakeCategory: {} }]);
+
+    rerender();
+
+    expect(httpMock).toHaveBeenCalledTimes(1);
+    expect(result.current).toEqual([false, { fakeCategory: {} }]);
   });
 });
