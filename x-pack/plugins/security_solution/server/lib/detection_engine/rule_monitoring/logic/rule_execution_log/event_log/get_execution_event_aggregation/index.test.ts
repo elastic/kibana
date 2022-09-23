@@ -251,7 +251,7 @@ describe('getExecutionEventAggregation', () => {
               },
               enrichmentDuration: {
                 min: {
-                  field: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+                  field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
                 },
               },
             },

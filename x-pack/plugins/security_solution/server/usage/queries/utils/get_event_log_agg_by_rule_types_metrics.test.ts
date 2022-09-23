@@ -74,6 +74,16 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
               field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
             },
           },
+          maxTotalEnrichmentDuration: {
+            max: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
+          minTotalEnrichmentDuration: {
+            min: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
         },
       },
     });
@@ -137,6 +147,16 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
           avgTotalSearchDuration: {
             avg: {
               field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+            },
+          },
+          maxTotalEnrichmentDuration: {
+            max: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
+          minTotalEnrichmentDuration: {
+            min: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
             },
           },
         },
@@ -204,6 +224,16 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
               field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
             },
           },
+          maxTotalEnrichmentDuration: {
+            max: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
+          minTotalEnrichmentDuration: {
+            min: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
         },
       },
       'siem.indicatorRule': {
@@ -261,6 +291,16 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
           avgTotalSearchDuration: {
             avg: {
               field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+            },
+          },
+          maxTotalEnrichmentDuration: {
+            max: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
+          minTotalEnrichmentDuration: {
+            min: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
             },
           },
         },
