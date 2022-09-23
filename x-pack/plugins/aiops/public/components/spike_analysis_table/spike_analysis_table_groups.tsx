@@ -383,7 +383,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.impactLabelColumnTooltip',
             {
               defaultMessage: 'The level of impact of the group on the message rate difference',
             }
