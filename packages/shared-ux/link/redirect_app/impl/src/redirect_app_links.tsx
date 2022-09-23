@@ -25,9 +25,7 @@ const isKibanaContract = (services: any): services is RedirectAppLinksKibanaDepe
  * with which consumers can wrap their components or solutions.
  */
 export const RedirectAppLinks: FC<RedirectAppLinksProps> = ({ children, ...props }) => {
-  const container = (
-    <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>
-  );
+  const container = <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>;
 
   if (isKibanaContract(props)) {
     const { coreStart } = props;
