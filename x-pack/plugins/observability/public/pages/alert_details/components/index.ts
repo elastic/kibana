@@ -6,3 +6,4 @@
  */
 
 export { AlertSummary } from './alert_summary';
+export { AlertDetails } from './alert_details';
