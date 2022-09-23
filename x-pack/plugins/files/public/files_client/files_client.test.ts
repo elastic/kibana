@@ -27,9 +27,7 @@ describe('apiRoutes', () => {
       `"/api/files/files/test/123"`
     );
 
-    expect(apiRoutes.getListRoute('test', 1, 1)).toMatchInlineSnapshot(
-      `"/api/files/files/test/list?page=1&perPage=1"`
-    );
+    expect(apiRoutes.getListRoute('test')).toMatchInlineSnapshot(`"/api/files/files/test/list"`);
 
     expect(apiRoutes.getByIdRoute('test', '123')).toMatchInlineSnapshot(
       `"/api/files/files/test/123"`
@@ -39,17 +37,13 @@ describe('apiRoutes', () => {
       `"/api/files/shares/test/123"`
     );
 
-    expect(apiRoutes.getListSharesRoute('test', 1, 1)).toMatchInlineSnapshot(
-      `"/api/files/shares/test?page=1&perPage=1"`
+    expect(apiRoutes.getListSharesRoute('test')).toMatchInlineSnapshot(`"/api/files/shares/test"`);
+
+    expect(apiRoutes.getPublicDownloadRoute('my-file.pdf')).toMatchInlineSnapshot(
+      `"/api/files/public/blob/my-file.pdf"`
     );
 
-    expect(apiRoutes.getPublicDownloadRoute('test', 'my-file.pdf')).toMatchInlineSnapshot(
-      `"/api/files/public/blob/my-file.pdf?token=test"`
-    );
-
-    expect(apiRoutes.getFindRoute(1, 1)).toMatchInlineSnapshot(
-      `"/api/files/find?page=1&perPage=1"`
-    );
+    expect(apiRoutes.getFindRoute()).toMatchInlineSnapshot(`"/api/files/find"`);
 
     expect(apiRoutes.getMetricsRoute()).toMatchInlineSnapshot(`"/api/files/metrics"`);
   });

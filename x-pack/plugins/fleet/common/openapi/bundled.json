@@ -606,6 +606,14 @@
           "name": "pkgVersion",
           "in": "path",
           "required": true
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ],
       "post": {
@@ -1244,6 +1252,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -1833,6 +1847,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -1909,6 +1929,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -1992,6 +2018,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string",
+                      "description": "action id when running in async mode (>10k agents)"
+                    }
+                  },
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
