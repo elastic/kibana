@@ -421,3 +421,11 @@ export interface TaskMetric {
   end_time: number;
   error_message?: string;
 }
+
+export interface TelemetryConfiguration {
+  telemetry_max_buffer_size: number;
+  max_security_list_telemetry_batch: number;
+  max_endpoint_telemetry_batch: number;
+  max_detection_rule_telemetry_batch: number;
+  max_detection_alerts_batch: number;
+}
