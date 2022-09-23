@@ -143,7 +143,14 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
         });
       }
     },
-    [dataView, selectedDataViewId, dataViewFieldEditor, indexFieldsSearch, removeColumn]
+    [
+      dataView,
+      selectedDataViewId,
+      dataViewFieldEditor,
+      indexFieldsSearch,
+      removeColumn,
+      startTransaction,
+    ]
   );
 
   const hasFieldEditPermission = useMemo(

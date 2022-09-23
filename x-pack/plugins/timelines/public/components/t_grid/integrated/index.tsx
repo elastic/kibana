@@ -199,7 +199,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [tableView, setTableView] = useState<ViewSelection>(
   const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
-  );
 
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageDataTable(state, id ?? '')

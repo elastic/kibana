@@ -221,7 +221,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                         contextId: EVENT_DETAILS_CONTEXT_ID,
                         data: detailsEcsData,
                         isDraggable: isDraggable ?? false,
-                        timelineId,
+                        scopeId,
                       })}
                     </RendererContainer>
                   </div>
@@ -294,7 +294,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isLicenseValid,
       isReadOnly,
       renderer,
-      timelineId,
+      scopeId,
       userRisk,
     ]
   );

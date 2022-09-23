@@ -194,7 +194,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     rawEventData,
     showAlertDetails,
     tabType,
-    timelineId,
+    scopeId,
   ]);
 
   if (!expandedEvent?.eventId) {
