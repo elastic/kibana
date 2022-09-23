@@ -2542,12 +2542,12 @@ describe('xy_visualization', () => {
         )
       ).toEqual([
         expect.objectContaining({
-          displayName: 'Ignore global filters',
+          displayName: 'Keep global filters',
           description:
-            'All the dimensions configured in this layer ignore filters defined at kibana level.',
-          icon: 'eyeClosed',
+            'All the dimensions configured in this layer respect filters defined at kibana level.',
+          icon: 'eye',
           isCompatible: true,
-          'data-test-subj': 'lnsXY_annotationLayer_ignoreFilters',
+          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
         }),
       ]);
     });

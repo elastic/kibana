@@ -20,7 +20,7 @@ export const createAnnotationActions = ({
   layerIndex: number;
   setState: StateSetter<XYState, unknown>;
 }): LayerAction[] => {
-  const label = layer.ignoreGlobalFilters
+  const label = !layer.ignoreGlobalFilters
     ? i18n.translate('xpack.lens.xyChart.annotations.ignoreGlobalFiltersLabel', {
         defaultMessage: 'Ignore global filters',
       })
@@ -30,7 +30,7 @@ export const createAnnotationActions = ({
   return [
     {
       displayName: label,
-      description: layer.ignoreGlobalFilters
+      description: !layer.ignoreGlobalFilters
         ? i18n.translate('xpack.lens.xyChart.annotations.ignoreGlobalFiltersDescription', {
             defaultMessage:
               'All the dimensions configured in this layer ignore filters defined at kibana level.',
@@ -44,11 +44,11 @@ export const createAnnotationActions = ({
         newLayers[layerIndex] = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
         return setState({ ...state, layers: newLayers });
       },
-      icon: layer.ignoreGlobalFilters ? 'eyeClosed' : 'eye',
+      icon: !layer.ignoreGlobalFilters ? 'eyeClosed' : 'eye',
       isCompatible: true,
-      'data-test-subj': layer.ignoreGlobalFilters
+      'data-test-subj': !layer.ignoreGlobalFilters
         ? 'lnsXY_annotationLayer_ignoreFilters'
-        : 'lns_annotationLayer_keepFilters',
+        : 'lnsXY_annotationLayer_keepFilters',
     },
   ];
 };
