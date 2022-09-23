@@ -11,6 +11,10 @@ is_test_execution_step
 rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
+function is_running {
+  kill -0 "$1" &>/dev/null
+}
+
 # unset env vars defined in other parts of CI for automatic APM collection of
 # Kibana. We manage APM config in our FTR config and performance service, and
 # APM treats config in the ENV with a very high precedence.
@@ -25,16 +29,17 @@ unset ELASTIC_APM_SERVER_URL
 unset ELASTIC_APM_SECRET_TOKEN
 unset ELASTIC_APM_GLOBAL_LABELS
 
-for journey in x-pack/performance/journeys/*; do
-  echo "--- $journey"
+# `kill $esPid` doesn't work, seems that kbn-es doesn't listen to signals correctly, this does work
+trap 'killall node -q' EXIT
 
-  echo "---     🔎 Start es"
+export TEST_ES_URL=http://elastic:changeme@localhost:9200
+export TEST_ES_DISABLE_STARTUP=true
+
+for journey in x-pack/performance/journeys/*; do
+  echo "--- $journey - 🔎 Start es"
+
   node scripts/es snapshot&
   export esPid=$!
-  trap 'kill ${esPid}' EXIT
-
-  export TEST_ES_URL=http://elastic:changeme@localhost:9200
-  export TEST_ES_DISABLE_STARTUP=true
 
   # Pings the es server every second for up to 2 minutes until it is green
   curl \
@@ -51,7 +56,7 @@ for journey in x-pack/performance/journeys/*; do
   phases=("WARMUP" "TEST")
   status=0
   for phase in "${phases[@]}"; do
-    echo "---     $phase"
+    echo "--- $journey - $phase"
 
     export TEST_PERFORMANCE_PHASE="$phase"
 
@@ -71,9 +76,25 @@ for journey in x-pack/performance/journeys/*; do
     fi
   done
 
-  echo "---     Shutdown ES"
-  kill $esPid;
+  # remove trap, we're manually shutting down
   trap - EXIT;
+
+  echo "--- $journey - 🔎 Shutdown ES"
+  killall node
+  echo "waiting for $esPid to exit gracefully";
+
+  timeout=30 #seconds
+  dur=0
+  while is_running $esPid; do
+    sleep 1;
+    ((dur=dur+1))
+    if [ $dur -ge $timeout ]; then
+      echo "es still running after $dur seconds, killing ES and node forcefully";
+      killall -SIGKILL java
+      killall -SIGKILL node
+      sleep 5;
+    fi
+  done
 
   if [ $status -ne 0 ]; then
     exit 1
