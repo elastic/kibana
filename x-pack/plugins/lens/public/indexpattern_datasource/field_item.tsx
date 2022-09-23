@@ -83,6 +83,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     removeField,
   } = props;
 
+  // TODO: convert field into DataViewField type
+
   const [infoIsOpen, setOpen] = useState(false);
 
   const closeAndEdit = useMemo(
