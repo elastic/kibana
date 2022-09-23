@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetGuards } from '../shared_services';
+import type {
   Job,
   JobStats,
   Datafeed,
   DatafeedStats,
 } from '../../../common/types/anomaly_detection_jobs';
-import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
