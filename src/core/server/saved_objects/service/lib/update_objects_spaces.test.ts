@@ -30,7 +30,6 @@ import { AuditAction, ISavedObjectsSecurityExtension } from './extensions';
 import {
   authMap,
   checkAuthError,
-  createBadRequestErrorPayload,
   enforceError,
   mapsAreEqual,
   setsAreEqual,
