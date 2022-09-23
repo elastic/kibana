@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { NonEmptyArray, TimeDuration, enumeration } from '@kbn/securitysolution-io-ts-types';
 
 import {
-  throttleForBulkActionsOrNull,
+  throttleForBulkActions,
   action_group as actionGroup,
   action_params as actionParams,
   action_id as actionId,
@@ -96,7 +96,7 @@ const bulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
   value: t.type({
-    throttle: throttleForBulkActionsOrNull,
+    throttle: throttleForBulkActions,
     actions: t.array(normalizedRuleAction),
   }),
 });
