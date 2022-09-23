@@ -98,7 +98,7 @@ describe('Stack trace operations', () => {
     }
   });
 
-  test('runLengthDecodeReverse with optional parameter', () => {
+  test('runLengthDecode with optional parameter', () => {
     const tests: Array<{
       bytes: Buffer;
       expected: number[];
@@ -118,7 +118,7 @@ describe('Stack trace operations', () => {
     }
   });
 
-  test('runLengthDecodeReverse without optional parameter', () => {
+  test('runLengthDecode without optional parameter', () => {
     const tests: Array<{
       bytes: Buffer;
       expected: number[];
@@ -135,6 +135,46 @@ describe('Stack trace operations', () => {
 
     for (const t of tests) {
       expect(runLengthDecode(t.bytes)).toEqual(t.expected);
+    }
+  });
+
+  test('runLengthDecode works for very long runs', () => {
+    const tests: Array<{
+      bytes: Buffer;
+      expected: number[];
+    }> = [
+      {
+        bytes: Buffer.from([0x5, 0x2, 0xff, 0x0]),
+        expected: [2, 2, 2, 2, 2].concat(Array(255).fill(0)),
+      },
+      {
+        bytes: Buffer.from([0xff, 0x2, 0x1, 0x2]),
+        expected: Array(256).fill(2),
+      },
+    ];
+
+    for (const t of tests) {
+      expect(runLengthDecode(t.bytes)).toEqual(t.expected);
+    }
+  });
+
+  test('runLengthEncode works for very long runs', () => {
+    const tests: Array<{
+      numbers: number[];
+      expected: Buffer;
+    }> = [
+      {
+        numbers: [2, 2, 2, 2, 2].concat(Array(255).fill(0)),
+        expected: Buffer.from([0x5, 0x2, 0xff, 0x0]),
+      },
+      {
+        numbers: Array(256).fill(2),
+        expected: Buffer.from([0xff, 0x2, 0x1, 0x2]),
+      },
+    ];
+
+    for (const t of tests) {
+      expect(runLengthEncode(t.numbers)).toEqual(t.expected);
     }
   });
 });
