@@ -59,8 +59,6 @@ export class ApmSynthtraceKibanaClient {
     password: string
   ) {
     const url = `${kibanaUrl}/api/fleet/epm/packages/apm`;
-    console.log({ url });
-
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -72,7 +70,6 @@ export class ApmSynthtraceKibanaClient {
     });
     const json = (await response.json()) as { item: { latestVersion: string } };
     const { latestVersion } = json.item;
-    console.log({ latestVersion });
     return latestVersion;
   }
 
