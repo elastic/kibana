@@ -42,7 +42,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
   placeholder,
   selectedField,
 }): JSX.Element => {
-  const getLabel = useCallback(({ message }): string => message, []);
+  const getLabel = useCallback(({ message }: OperatorOption) => message, []);
   const optionsMemo = useMemo(
     (): OperatorOption[] =>
       operatorOptions != null && operatorOptions.length > 0

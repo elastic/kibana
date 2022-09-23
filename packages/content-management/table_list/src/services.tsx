@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
@@ -54,7 +54,10 @@ const TableListViewContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const TableListViewProvider: FC<Services> = ({ children, ...services }) => {
+export const TableListViewProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   return <TableListViewContext.Provider value={services}>{children}</TableListViewContext.Provider>;
 };
 
@@ -126,10 +129,9 @@ export interface TableListViewKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const TableListViewKibanaProvider: FC<
+  PropsWithChildren<TableListViewKibanaDependencies>
+> = ({ children, ...services }) => {
   const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
 
   const getSearchBarFilters = useMemo(() => {
