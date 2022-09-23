@@ -14,7 +14,7 @@ import { createUICapabilities } from '@kbn/cases-plugin/common';
 
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
   const casesCapabilities = createUICapabilities();
