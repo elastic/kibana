@@ -225,7 +225,7 @@ export const useXtermPlayer = ({
       let linesToPrint;
 
       if (clear) {
-        linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber);
+        linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber + 1);
         try {
           terminal.reset();
           terminal.clear();
