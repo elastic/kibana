@@ -10,6 +10,7 @@ pageLoadAssetSize:
   cases: 144442
   charts: 55000
   cloud: 21076
+  cloudExperiments: 59358
   cloudSecurityPosture: 19109
   console: 46091
   controls: 40000
@@ -31,7 +32,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 35741
   esUiShared: 326654
-  eventAnnotation: 19334
+  eventAnnotation: 20500
   expressionError: 22127
   expressionGauge: 25000
   expressionHeatmap: 27505
@@ -110,7 +111,7 @@ pageLoadAssetSize:
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
-  threatIntelligence: 29195
+  threatIntelligence: 44299
   timelines: 327300
   transform: 41007
   triggersActionsUi: 119000

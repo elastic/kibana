@@ -22,8 +22,8 @@ interface AggWithFormula {
 export type AggOptions<T> = {
   isFullReference: boolean;
   isFieldRequired: boolean;
-  supportedPanelTypes: PANEL_TYPES[];
-  supportedTimeRangeModes: TIME_RANGE_DATA_MODES[];
+  supportedPanelTypes: readonly PANEL_TYPES[];
+  supportedTimeRangeModes: readonly TIME_RANGE_DATA_MODES[];
 } & (T extends Exclude<Operation, 'formula'> ? Agg : AggWithFormula);
 
 // list of supported TSVB aggregation types in Lens
@@ -99,29 +99,29 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     name: 'counter_rate',
     isFullReference: true,
     isFieldRequired: true,
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
     supportedTimeRangeModes,
   },
   moving_average: {
     name: 'moving_average',
     isFullReference: true,
     isFieldRequired: true,
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   derivative: {
     name: 'differences',
     isFullReference: true,
     isFieldRequired: true,
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   cumulative_sum: {
     name: 'cumulative_sum',
     isFullReference: true,
     isFieldRequired: true,
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   avg_bucket: {
     name: 'formula',
@@ -129,8 +129,8 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_average',
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   max_bucket: {
     name: 'formula',
@@ -138,8 +138,8 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_max',
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   min_bucket: {
     name: 'formula',
@@ -147,8 +147,8 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_min',
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   sum_bucket: {
     name: 'formula',
@@ -156,8 +156,8 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_sum',
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   max: {
     name: 'max',
@@ -225,8 +225,8 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'pick_max',
-    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as PANEL_TYPES[],
-    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as TIME_RANGE_DATA_MODES[],
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES] as const,
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE] as const,
   },
   static: {
     name: 'static_value',

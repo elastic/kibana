@@ -9,9 +9,9 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Column, ColumnWithMeta, SchemaConfig } from '@kbn/visualizations-plugin/common';
 import {
-  getColumnsFromVis,
+  convertToLensModule,
   getVisSchemas,
-  getPercentageColumnFormulaColumn,
+  getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
@@ -39,14 +39,13 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   }
 
   const dataViews = getDataViewsStart();
-  const dataView = vis.data.indexPattern?.id
-    ? await dataViews.get(vis.data.indexPattern.id)
-    : await dataViews.getDefault();
+  const dataView = await getDataViewByIndexPatternId(vis.data.indexPattern?.id, dataViews);
 
   if (!dataView) {
     return null;
   }
 
+  const { getColumnsFromVis, getPercentageColumnFormulaColumn } = await convertToLensModule;
   const result = getColumnsFromVis(
     vis,
     timefilter,
@@ -87,17 +86,18 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   }
 
   const layerId = uuid();
-
+  const indexPatternId = dataView.id!;
   return {
     type: 'lnsDatatable',
     layers: [
       {
-        indexPatternId: dataView.id!,
+        indexPatternId,
         layerId,
         columns: result.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
     configuration: getConfiguration(layerId, vis.params, result),
+    indexPatternIds: [indexPatternId],
   };
 };

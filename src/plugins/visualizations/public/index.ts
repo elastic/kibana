@@ -73,4 +73,5 @@ export {
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from './triggers';
 
-export { getColumnsFromVis, getPercentageColumnFormulaColumn } from './convert_to_lens';
+export const convertToLensModule = import('./convert_to_lens');
+export { getDataViewByIndexPatternId } from './convert_to_lens/utils';

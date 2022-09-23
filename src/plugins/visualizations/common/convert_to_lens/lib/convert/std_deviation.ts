@@ -7,6 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { isFieldValid } from '../../utils';
 import { addTimeRangeToFormula } from '../metrics/formula';
 import { getFieldNameFromField } from '../utils';
 import { createFormulaColumn } from './formula';
@@ -63,7 +64,7 @@ export const convertToStdDeviationFormulaColumns = (
     return null;
   }
   const field = dataView.getFieldByName(fieldName);
-  if (!field) {
+  if (!isFieldValid(field, SUPPORTED_METRICS[agg.aggType])) {
     return null;
   }
 

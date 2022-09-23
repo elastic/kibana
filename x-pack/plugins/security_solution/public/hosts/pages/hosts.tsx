@@ -30,7 +30,7 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import type { State } from '../../common/store';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
@@ -57,6 +57,7 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
+import { useLicense } from '../../common/hooks/use_license';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -146,6 +147,8 @@ const HostsComponent = () => {
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
       ?.querySelector<HTMLButtonElement>('.inspectButtonComponent:last-of-type')
@@ -205,6 +208,7 @@ const HostsComponent = () => {
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 

@@ -24,9 +24,6 @@ import {
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
-
 import type { TGridModel } from '@kbn/timelines-plugin/public';
 
 import { lastValueFrom } from 'rxjs';
@@ -46,6 +43,7 @@ import type {
   ThresholdAggregationData,
   UpdateAlertStatusActionProps,
   CreateTimelineProps,
+  GetExceptionFilter,
 } from './types';
 import type { Ecs } from '../../../../common/ecs';
 import type {
@@ -59,7 +57,7 @@ import {
   omitTypenameInTimeline,
   formatTimelineResultToModel,
 } from '../../../timelines/components/open_timeline/helpers';
-import { convertKueryToElasticSearchQuery } from '../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { getField, getFieldKey } from '../../../helpers';
 import {
   replaceTemplateFieldFromQuery,
@@ -410,7 +408,7 @@ const createThresholdTimeline = async (
     dataProviders?: DataProvider[];
     columns?: TGridModel['columns'];
   },
-  getExceptions: (ecs: Ecs) => Promise<ExceptionListItemSchema[]>
+  getExceptionFilter: GetExceptionFilter
 ) => {
   try {
     const alertResponse = await KibanaServices.get().http.fetch<
@@ -448,15 +446,11 @@ const createThresholdTimeline = async (
     const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(alertDoc);
-    const exceptions = await getExceptions(ecsData);
-    const exceptionsFilter =
-      buildExceptionFilter({
-        lists: exceptions,
-        excludeExceptions: true,
-        chunkSize: 10000,
-        alias: 'Exceptions',
-      }) ?? [];
-    const allFilters = (templateValues.filters ?? augmentedFilters).concat(exceptionsFilter);
+    const exceptionsFilter = await getExceptionFilter(ecsData);
+
+    const allFilters = (templateValues.filters ?? augmentedFilters).concat(
+      !exceptionsFilter ? [] : [exceptionsFilter]
+    );
 
     return createTimeline({
       from: thresholdFrom,
@@ -560,7 +554,7 @@ const createNewTermsTimeline = async (
     dataProviders?: DataProvider[];
     columns?: TGridModel['columns'];
   },
-  getExceptions: (ecs: Ecs) => Promise<ExceptionListItemSchema[]>
+  getExceptionFilter: GetExceptionFilter
 ) => {
   try {
     const alertResponse = await KibanaServices.get().http.fetch<
@@ -598,15 +592,9 @@ const createNewTermsTimeline = async (
     const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { from, to, dataProviders } = getNewTermsData(alertDoc);
-    const exceptions = await getExceptions(ecsData);
-    const exceptionsFilter =
-      buildExceptionFilter({
-        lists: exceptions,
-        excludeExceptions: true,
-        chunkSize: 10000,
-        alias: 'Exceptions',
-      }) ?? [];
-    const allFilters = (templateValues.filters ?? augmentedFilters).concat(exceptionsFilter);
+    const filter = await getExceptionFilter(ecsData);
+
+    const allFilters = (templateValues.filters ?? augmentedFilters).concat(!filter ? [] : [filter]);
     return createTimeline({
       from,
       notes: null,
@@ -678,7 +666,7 @@ export const sendAlertToTimelineAction = async ({
   ecsData: ecs,
   updateTimelineIsLoading,
   searchStrategyClient,
-  getExceptions,
+  getExceptionFilter,
 }: SendAlertToTimelineActionProps) => {
   /* FUTURE DEVELOPER
    * We are making an assumption here that if you have an array of ecs data they are all coming from the same rule
@@ -751,7 +739,7 @@ export const sendAlertToTimelineAction = async ({
               dataProviders,
               columns: timeline.columns,
             },
-            getExceptions
+            getExceptionFilter
           );
         } else if (isNewTermsAlert(ecsData)) {
           return createNewTermsTimeline(
@@ -764,7 +752,7 @@ export const sendAlertToTimelineAction = async ({
               dataProviders,
               columns: timeline.columns,
             },
-            getExceptions
+            getExceptionFilter
           );
         } else {
           return createTimeline({
@@ -819,9 +807,9 @@ export const sendAlertToTimelineAction = async ({
       });
     }
   } else if (isThresholdAlert(ecsData)) {
-    return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptions);
+    return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
-    return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptions);
+    return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlAlertWithGroupId(ecsData)) {

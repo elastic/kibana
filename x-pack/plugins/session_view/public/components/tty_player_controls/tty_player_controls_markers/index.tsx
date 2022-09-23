@@ -6,7 +6,7 @@
  */
 
 import React, { ChangeEvent, MouseEvent, useMemo } from 'react';
-import { EuiRange } from '@elastic/eui';
+import { EuiRange, EuiToolTip } from '@elastic/eui';
 import type { ProcessStartMarker } from '../../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { PlayHead } from './play_head';
@@ -16,11 +16,13 @@ type Props = {
   linesLength: number;
   currentLine: number;
   onChange: (e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => void;
+  onSeekLine(line: number): void;
 };
 
 type TTYPlayerLineMarker = {
   line: number;
   type: 'output' | 'data_limited';
+  name: string;
 };
 
 export const TTYPlayerControlsMarkers = ({
@@ -28,8 +30,11 @@ export const TTYPlayerControlsMarkers = ({
   linesLength,
   currentLine,
   onChange,
+  onSeekLine,
 }: Props) => {
-  const styles = useStyles();
+  const progress = useMemo(() => (currentLine / linesLength) * 100, [currentLine, linesLength]);
+
+  const styles = useStyles(progress);
 
   const markers = useMemo(() => {
     if (processStartMarkers.length < 1) {
@@ -41,21 +46,28 @@ export const TTYPlayerControlsMarkers = ({
           type:
             event.process?.io?.max_bytes_per_process_exceeded === true ? 'data_limited' : 'output',
           line,
+          name: event.process?.name,
         } as TTYPlayerLineMarker)
     );
   }, [processStartMarkers]);
 
   const markersLength = markers.length;
+
+  const currentSelectedType = useMemo(() => {
+    if (!markersLength) {
+      return undefined;
+    }
+    const currentSelected =
+      currentLine >= markers[markersLength - 1].line
+        ? markersLength - 1
+        : markers.findIndex((marker) => marker.line > currentLine) - 1;
+
+    return markers[Math.max(0, currentSelected)].type;
+  }, [currentLine, markers, markersLength]);
+
   if (!markersLength) {
     return null;
   }
-
-  const currentSelected =
-    currentLine >= markers[markersLength - 1].line
-      ? markersLength - 1
-      : markers.findIndex((marker) => marker.line > currentLine) - 1;
-
-  const currentSelectedType = markers[Math.max(0, currentSelected)].type;
 
   return (
     <>
@@ -68,35 +80,38 @@ export const TTYPlayerControlsMarkers = ({
         showRange
         css={styles.range}
       />
-      <PlayHead
-        css={styles.playHead(currentSelectedType)}
-        style={{ left: `${(currentLine * 100) / linesLength}%` }}
-      />
+      <PlayHead css={styles.playHead(currentSelectedType)} />
       <div css={styles.markersOverlay}>
-        {markers.map(({ line, type }, idx) => {
+        {markers.map(({ line, type, name }, idx) => {
           const selected =
             currentLine >= line &&
             (idx === markersLength - 1 || currentLine < markers[idx + 1].line);
 
           // markers positions are absolute, setting higher z-index on the selected one in case there
           // are severals next to each other
-          const style = {
-            left: `${(line * 100) / linesLength}%`,
+          const markerWrapperPositioning = {
+            left: `${(line / linesLength) * 100}%`,
             zIndex: selected ? 3 : 2,
           };
 
+          const onMarkerClick = () => onSeekLine(line);
+
           return (
-            <button
-              key={idx}
-              type="button"
-              value={line}
-              tabIndex={-1}
-              title={type}
-              css={styles.marker(type, selected)}
-              style={style}
-            >
-              {type}
-            </button>
+            <div key={idx} style={markerWrapperPositioning} css={styles.markerWrapper}>
+              <EuiToolTip title={name}>
+                <button
+                  type="button"
+                  value={line}
+                  tabIndex={-1}
+                  title={type}
+                  css={styles.marker(type, selected)}
+                  onClick={onMarkerClick}
+                  aria-label={name}
+                >
+                  {name}
+                </button>
+              </EuiToolTip>
+            </div>
           );
         })}
       </div>

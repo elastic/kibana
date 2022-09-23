@@ -30,7 +30,7 @@ import {
   HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -180,7 +180,7 @@ export const tasks: TelemetryTask[] = [
         SERVICE_VERSION,
         HOST_NAME,
         CONTAINER_ID,
-        POD_NAME,
+        KUBERNETES_POD_NAME,
       ].map((field) => ({ terms: { field, missing_bucket: true } }));
 
       const observerHostname = {
@@ -1206,7 +1206,7 @@ export const tasks: TelemetryTask[] = [
                             field: SERVICE_RUNTIME_VERSION,
                           },
                           {
-                            field: POD_NAME,
+                            field: KUBERNETES_POD_NAME,
                           },
                           {
                             field: CONTAINER_ID,
@@ -1314,7 +1314,7 @@ export const tasks: TelemetryTask[] = [
             kubernetes: {
               pod: {
                 name: serviceBucket.top_metrics?.top[0].metrics[
-                  POD_NAME
+                  KUBERNETES_POD_NAME
                 ] as string,
               },
             },

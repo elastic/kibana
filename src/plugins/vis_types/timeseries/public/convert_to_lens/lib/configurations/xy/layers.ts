@@ -7,13 +7,23 @@
  */
 
 import {
+  EventAnnotationConfig,
   FillTypes,
+  XYAnnotationsLayerConfig,
   XYLayerConfig,
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PaletteOutput } from '@kbn/coloring';
+import { v4 } from 'uuid';
+import { transparentize } from '@elastic/eui';
+import Color from 'color';
+import { euiLightVars } from '@kbn/ui-theme';
+import { groupBy } from 'lodash';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
+import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
-import type { Metric, Panel } from '../../../../../common/types';
+import type { Annotation, Metric, Panel } from '../../../../../common/types';
 import { getSeriesAgg } from '../../series';
 import {
   isPercentileRanksColumnWithMeta,
@@ -51,11 +61,16 @@ function getColor(
   return seriesColor;
 }
 
-export const getLayers = (
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
+
+export const getLayers = async (
   dataSourceLayers: Record<number, Layer>,
-  model: Panel
-): XYLayerConfig[] => {
-  return Object.keys(dataSourceLayers).map((key) => {
+  model: Panel,
+  dataViews: DataViewsPublicPluginStart
+): Promise<XYLayerConfig[] | null> => {
+  const nonAnnotationsLayers: XYLayerConfig[] = Object.keys(dataSourceLayers).map((key) => {
     const series = model.series[parseInt(key, 10)];
     const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
     const dataSourceLayer = dataSourceLayers[parseInt(key, 10)];
@@ -112,4 +127,81 @@ export const getLayers = (
       };
     }
   });
+  if (!model.annotations || !model.annotations.length) {
+    return nonAnnotationsLayers;
+  }
+
+  const annotationsByIndexPattern = groupBy(
+    model.annotations,
+    (a) => typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id
+  );
+
+  try {
+    const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
+      Object.entries(annotationsByIndexPattern).map(async ([indexPatternId, annotations]) => {
+        const convertedAnnotations: EventAnnotationConfig[] = [];
+        const { indexPattern } = (await fetchIndexPattern({ id: indexPatternId }, dataViews)) || {};
+
+        if (indexPattern) {
+          annotations.forEach((a: Annotation) => {
+            const lensAnnotation = convertAnnotation(a, indexPattern);
+            if (lensAnnotation) {
+              convertedAnnotations.push(lensAnnotation);
+            }
+          });
+          return {
+            layerId: v4(),
+            layerType: 'annotations',
+            ignoreGlobalFilters: true,
+            annotations: convertedAnnotations,
+            indexPatternId,
+          };
+        }
+      })
+    );
+
+    return nonAnnotationsLayers.concat(...annotationsLayers.filter(nonNullable));
+  } catch (e) {
+    return null;
+  }
+};
+
+const convertAnnotation = (
+  annotation: Annotation,
+  dataView: DataView
+): EventAnnotationConfig | undefined => {
+  if (annotation.query_string) {
+    const extraFields = annotation.fields
+      ? annotation.fields
+          ?.replace(/\s/g, '')
+          ?.split(',')
+          .map((field) => {
+            const dataViewField = dataView.getFieldByName(field);
+            return dataViewField && dataViewField.aggregatable ? field : undefined;
+          })
+          .filter(nonNullable)
+      : undefined;
+    return {
+      type: 'query',
+      id: annotation.id,
+      label: 'Event',
+      key: {
+        type: 'point_in_time',
+      },
+      color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+      timeField: annotation.time_field,
+      icon:
+        annotation.icon &&
+        ICON_TYPES_MAP[annotation.icon] &&
+        typeof ICON_TYPES_MAP[annotation.icon] === 'string'
+          ? ICON_TYPES_MAP[annotation.icon]
+          : 'triangle',
+      filter: {
+        type: 'kibana_query',
+        ...annotation.query_string,
+      },
+      extraFields,
+      isHidden: annotation.hidden,
+    };
+  }
 };
