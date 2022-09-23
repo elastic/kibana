@@ -14,8 +14,12 @@ export interface TrainedModelsProvider {
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): {
-    getTrainedModels(modelId?: string): Promise<estypes.MlGetTrainedModelsResponse>;
-    getTrainedModelsStats(modelId?: string): Promise<estypes.MlGetTrainedModelsStatsResponse>;
+    getTrainedModels(
+      params: estypes.MlGetTrainedModelsRequest
+    ): Promise<estypes.MlGetTrainedModelsResponse>;
+    getTrainedModelsStats(
+      params: estypes.MlGetTrainedModelsStatsRequest
+    ): Promise<estypes.MlGetTrainedModelsStatsResponse>;
   };
 }
 
@@ -23,24 +27,20 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
   return {
     trainedModelsProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       return {
-        async getTrainedModels(modelId?: string) {
+        async getTrainedModels(params: estypes.MlGetTrainedModelsRequest) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ mlClient }) => {
-              return mlClient.getTrainedModels(
-                modelId !== undefined ? { model_id: modelId } : undefined
-              );
+              return mlClient.getTrainedModels(params);
             });
         },
-        async getTrainedModelsStats(modelId?: string) {
+        async getTrainedModelsStats(params: estypes.MlGetTrainedModelsStatsRequest) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ mlClient }) => {
-              return mlClient.getTrainedModelsStats(
-                modelId !== undefined ? { model_id: modelId } : undefined
-              );
+              return mlClient.getTrainedModelsStats(params);
             });
         },
       };
