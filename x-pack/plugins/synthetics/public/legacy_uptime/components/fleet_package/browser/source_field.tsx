@@ -288,16 +288,14 @@ export const SourceField = ({
               />
             }
           >
-            <>
-              <EuiFieldText
-                onChange={({ target: { value } }) =>
-                  setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
-                }
-                onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
-                value={config.zipUrl}
-                data-test-subj="syntheticsBrowserZipUrl"
-              />
-            </>
+            <EuiFieldText
+              onChange={({ target: { value } }) =>
+                setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
+              }
+              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
+              value={config.zipUrl}
+              data-test-subj="syntheticsBrowserZipUrl"
+            />
           </EuiFormRow>
           <ZipUrlTLSFields />
           <EuiFormRow
