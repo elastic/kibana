@@ -32,9 +32,14 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
 const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 
+const validHostName = () => {
+  // see https://github.com/elastic/kibana/issues/139730
+  return hostname().replace(/[^\x00-\x7F]/g, '');
+};
+
 const configSchema = schema.object(
   {
-    name: schema.string({ defaultValue: () => hostname() }),
+    name: schema.string({ defaultValue: () => validHostName() }),
     autoListen: schema.boolean({ defaultValue: true }),
     publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     basePath: schema.maybe(
