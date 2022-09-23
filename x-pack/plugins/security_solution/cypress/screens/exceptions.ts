@@ -9,7 +9,7 @@ export const CLOSE_ALERTS_CHECKBOX = '[data-test-subj="bulkCloseAlertOnAddExcept
 
 export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExceptionCheckbox"]';
 
-export const CONFIRM_BTN = '[data-test-subj="add-exception-confirm-button"]';
+export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const FIELD_INPUT =
   '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';

@@ -120,7 +120,6 @@ export const addExceptionConditions = (exception: Exception) => {
 
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.exist');
 };
 
@@ -130,9 +129,11 @@ export const addExceptionFromRuleDetails = (exception: Exception) => {
   submitNewExceptionItem();
 };
 
-export const addFirstExceptionFromRuleDetails = (exception: Exception) => {
+export const addFirstExceptionFromRuleDetails = (exception: Exception, name: string) => {
   openExceptionFlyoutFromEmptyViewerPrompt();
+  addExceptionFlyoutItemName(name);
   addExceptionConditions(exception);
+  selectBulkCloseAlerts();
   submitNewExceptionItem();
 };
 

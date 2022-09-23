@@ -9,7 +9,7 @@ import { getNewRule } from '../../../objects/rule';
 
 import { createCustomRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addExceptionConditions,
@@ -37,18 +37,19 @@ import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions
 describe('Add endpoint exception from rule details', () => {
   before(() => {
     esArchiverResetKibana();
+    esArchiverLoad('auditbeat');
     login();
   });
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    // create rule with exceptions
+    // create rule with exception
     createEndpointExceptionList().then((response) => {
       createCustomRule(
         {
           ...getNewRule(),
-          customQuery: 'agent.name:*',
-          dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
+          customQuery: 'event.code:*',
+          dataSource: { index: ['auditbeat*'], type: 'indexPatterns' },
           exceptionLists: [
             {
               id: response.body.id,
@@ -67,6 +68,10 @@ describe('Add endpoint exception from rule details', () => {
     goToEndpointExceptionsTab();
   });
 
+  after(() => {
+    esArchiverUnload('auditbeat');
+  });
+
   it('Creates an exception item', () => {
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
@@ -79,7 +84,7 @@ describe('Add endpoint exception from rule details', () => {
 
     // add exception item conditions
     addExceptionConditions({
-      field: 'agent.name',
+      field: 'event.code',
       operator: 'is',
       values: ['foo'],
     });
@@ -103,13 +108,6 @@ describe('Add endpoint exception from rule details', () => {
 
     // new exception item displays
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-  });
-
-  // Trying to figure out with EUI why the search won't trigger
-  it('Can search for items', () => {
-    // displays existing exception items
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
 
     // can search for an exception value
     searchForExceptionItem('foo');

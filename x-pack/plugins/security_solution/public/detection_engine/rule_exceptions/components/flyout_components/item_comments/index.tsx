@@ -46,6 +46,7 @@ const ExceptionsFlyoutCommentsComponent: React.FC<ExceptionsFlyoutCommentsProps>
         <EuiSpacer size="s" />
         {existingComments != null ? (
           <ExceptionItemComments
+            expandComments
             exceptionItemComments={existingComments}
             newCommentValue={newComment}
             newCommentOnChange={onCommentChange}

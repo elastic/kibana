@@ -12,7 +12,6 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
-import { addExceptionListItem } from '@kbn/securitysolution-list-api';
 import { formatExceptionItemForUpdate } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -35,15 +34,14 @@ export const useCreateOrUpdateException = (): ReturnUseCreateOrUpdateException =
   } = useKibana();
   const [isLoading, setIsLoading] = useState(false);
   const addOrUpdateExceptionRef = useRef<CreateOrUpdateExceptionItemsFunc | null>(null);
-  const { updateExceptionListItem } = useApi(http);
+  const { addExceptionListItem, updateExceptionListItem } = useApi(http);
 
   useEffect(() => {
     const abortCtrl = new AbortController();
 
-    const onUpdateExceptionItemsAndAlertStatus: CreateOrUpdateExceptionItemsFunc = async ({
-      items,
-    }) => {
+    const onCreateOrUpdateExceptionItem: CreateOrUpdateExceptionItemsFunc = async ({ items }) => {
       setIsLoading(true);
+      console.log({ items });
       const itemsAdded = await Promise.all(
         items.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
           if ('id' in item && item.id != null) {
@@ -53,9 +51,7 @@ export const useCreateOrUpdateException = (): ReturnUseCreateOrUpdateException =
             });
           } else {
             return addExceptionListItem({
-              http,
               listItem: item,
-              signal: abortCtrl.signal,
             });
           }
         })
@@ -66,12 +62,12 @@ export const useCreateOrUpdateException = (): ReturnUseCreateOrUpdateException =
       return itemsAdded;
     };
 
-    addOrUpdateExceptionRef.current = onUpdateExceptionItemsAndAlertStatus;
+    addOrUpdateExceptionRef.current = onCreateOrUpdateExceptionItem;
     return (): void => {
       setIsLoading(false);
       abortCtrl.abort();
     };
-  }, [updateExceptionListItem, http]);
+  }, [updateExceptionListItem, http, addExceptionListItem]);
 
   return [isLoading, addOrUpdateExceptionRef.current];
 };

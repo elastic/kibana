@@ -16,17 +16,26 @@ import { useFindRules } from '../../../../../detections/pages/detection_engine/r
 import { getRulesSchema, getAddToRulesTableColumns } from './utils';
 
 interface ExceptionsAddToRulesComponentProps {
-  initiallySelectedRules: Rule[];
-  onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
+  filter?: string;
+  isEdit: boolean;
+  initiallySelectedRules?: Rule[];
+  onRuleSelectionChange?: (rulesSelectedToAdd: Rule[]) => void;
 }
 
 const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({
+  isEdit,
   initiallySelectedRules,
+  filter,
   onRuleSelectionChange,
 }): JSX.Element => {
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     isInMemorySorting: true,
-    filterOptions: undefined,
+    filterOptions: {
+      filter: filter ?? '',
+      showCustomRules: false,
+      showElasticRules: false,
+      tags: [],
+    },
     sortingOptions: undefined,
     pagination: undefined,
     refetchInterval: false,
@@ -52,9 +61,11 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
 
   const ruleSelectionValue = {
     onSelectionChange: (selection: Rule[]) => {
-      onRuleSelectionChange(selection);
+      if (onRuleSelectionChange != null) {
+        onRuleSelectionChange(selection);
+      }
     },
-    initialSelected: initiallySelectedRules,
+    initialSelected: initiallySelectedRules ?? [],
   };
 
   const searchOptions = useMemo(
@@ -89,7 +100,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
   return (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <>
-        <EuiText size="s">{myI18n.ADD_TO_SELECTED_RULES_DESCRIPTION}</EuiText>
+        {!isEdit && <EuiText size="s">{myI18n.ADD_TO_SELECTED_RULES_DESCRIPTION}</EuiText>}
         <EuiSpacer size="s" />
         <EuiInMemoryTable<Rule>
           tableCaption="Rules table"
@@ -107,9 +118,9 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
             setPagination({ pageIndex: index })
           }
           selection={ruleSelectionValue}
-          search={searchOptions}
+          search={isEdit ? undefined : searchOptions}
           sorting
-          isSelectable
+          isSelectable={!isEdit}
           data-test-subj="addExceptionToRulesTable"
         />
       </>

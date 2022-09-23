@@ -139,7 +139,6 @@ export const buildMultiRuleAlertsFilter = (ruleStaticIds: string[] | null): Filt
             key: ALERT_RULE_RULE_ID,
             params: {
               query: ruleStaticIds.join(', '),
-              default_operator: 'or',
             },
           },
           query: {

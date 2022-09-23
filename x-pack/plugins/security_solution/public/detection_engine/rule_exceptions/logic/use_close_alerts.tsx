@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
@@ -14,6 +14,7 @@ import { getUpdateAlertsQuery } from '../../../detections/components/alerts_tabl
 import {
   buildMultiRuleAlertsFilter,
   buildAlertStatusesFilter,
+  buildAlertsFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -48,19 +49,6 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
 
   const [isLoading, setIsLoading] = useState(false);
   const closeAlertsRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
-  const closeAlerts = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (ruleStaticIds, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
-      if (closeAlertsRef.current != null) {
-        closeAlertsRef.current(
-          ruleStaticIds,
-          exceptionItemsToAddOrUpdate,
-          alertIdToClose,
-          bulkCloseIndex
-        );
-      }
-    },
-    []
-  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -90,11 +78,10 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             'acknowledged',
             'in-progress',
           ]);
-
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildMultiRuleAlertsFilter(ruleStaticIds), ...alertStatusFilter],
+            [...ruleStaticIds.flatMap((id) => buildAlertsFilter(id)), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -142,5 +129,5 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
     };
   }, [addSuccess, addError, addWarning]);
 
-  return [isLoading, closeAlerts];
+  return [isLoading, closeAlertsRef.current];
 };

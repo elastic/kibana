@@ -112,6 +112,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       rules != null && rules.some((rule) => isEqlRule(rule.type) && hasEqlSequenceQuery(rule.query))
     );
   }, [rules]);
+  console.log('CONDITIONS', {exceptionListItems})
 
   // If editing an item (can only edit a single item at a time), get it's
   // list_id. Otherwise, if it is an item for an endpoint list, the list_id is
@@ -149,6 +150,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       >;
       errorExists: boolean;
     }) => {
+      console.log('CONDITIONS handleBuilderOnChange', {exceptionItems})
       onExceptionItemAdd(exceptionItems);
       onSetErrorExists(errorExists);
     },
@@ -245,7 +247,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         allowLargeValueLists,
         httpService: http,
         autocompleteService: unifiedSearch.autocomplete,
-        exceptionListItems: [],
+        exceptionListItems,
         listType: exceptionListType,
         osTypes,
         listId: listIdToUse,

@@ -66,7 +66,7 @@ describe('Add exception using data views from rule details', () => {
     esArchiverUnload('exceptions_2');
   });
 
-  it('Creates an exception item when none exist', () => {
+  it('Creates an exception item', () => {
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
@@ -76,7 +76,7 @@ describe('Add exception using data views from rule details', () => {
       field: 'agent.name',
       operator: 'is',
       values: ['foo'],
-    });
+    }, 'My item');
 
     // new exception item displays
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);

@@ -19,6 +19,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -61,6 +62,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               data-test-subj="ruleName"
               deepLinkId={SecurityPageName.rules}
               path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
+              external
             >
               {reference.name}
             </SecuritySolutionLinkAnchor>
@@ -68,6 +70,59 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         </EuiContextMenuItem>
       ));
     }, [references, dataTestSubj]);
+
+    const itemLink = useMemo((): JSX.Element => {
+      if (references == null) return <></>;
+
+      const exceptionList = references
+        .flatMap((reference) => reference.exception_lists)
+        .find((list) => list.list_id === item.list_id);
+
+      if (exceptionList == null) return <></>;
+
+      if (exceptionList.type === ExceptionListTypeEnum.RULE_DEFAULT) {
+        return (
+          <EuiFlexItem grow={false}>
+            <SecuritySolutionLinkAnchor
+              data-test-subj="ruleName"
+              deepLinkId={SecurityPageName.rules}
+              path={getRuleDetailsTabUrl(references[0].id, RuleDetailTabs.alerts)}
+              external
+            >
+              <EuiButtonEmpty
+                onClick={onAffectedRulesClick}
+                iconType="link"
+                data-test-subj={`${dataTestSubj}-ruleDefaultItem`}
+              >
+                {i18n.RULE_ITEM_TITLE}
+              </EuiButtonEmpty>
+            </SecuritySolutionLinkAnchor>
+          </EuiFlexItem>
+        );
+      } else {
+        return (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  onClick={onAffectedRulesClick}
+                  iconType="list"
+                  data-test-subj={`${dataTestSubj}-affectedRulesButton`}
+                >
+                  {i18n.AFFECTED_RULES(references?.length ?? 0)}
+                </EuiButtonEmpty>
+              }
+              panelPaddingSize="none"
+              isOpen={isPopoverOpen}
+              closePopover={onClosePopover}
+              data-test-subj={`${dataTestSubj}-items`}
+            >
+              <EuiContextMenuPanel size="s" items={itemActions} />
+            </EuiPopover>
+          </EuiFlexItem>
+        );
+      }
+    }, [references, item.list_id, dataTestSubj, isPopoverOpen, itemActions]);
 
     return (
       <EuiFlexGroup
@@ -94,25 +149,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
         </StyledFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                onClick={onAffectedRulesClick}
-                iconType="list"
-                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
-              >
-                {i18n.AFFECTED_RULES(references?.length ?? 0)}
-              </EuiButtonEmpty>
-            }
-            panelPaddingSize="none"
-            isOpen={isPopoverOpen}
-            closePopover={onClosePopover}
-            data-test-subj={`${dataTestSubj}-items`}
-          >
-            <EuiContextMenuPanel size="s" items={itemActions} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {itemLink}
       </EuiFlexGroup>
     );
   }

@@ -21,14 +21,14 @@ export const EDIT_EXCEPTION_SAVE_BUTTON = i18n.translate(
 export const EDIT_EXCEPTION_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.editException.editExceptionTitle',
   {
-    defaultMessage: 'Edit Rule Exception',
+    defaultMessage: 'Edit rule exception',
   }
 );
 
 export const EDIT_ENDPOINT_EXCEPTION_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.editException.editEndpointExceptionTitle',
   {
-    defaultMessage: 'Edit Endpoint Exception',
+    defaultMessage: 'Edit endpoint exception',
   }
 );
 

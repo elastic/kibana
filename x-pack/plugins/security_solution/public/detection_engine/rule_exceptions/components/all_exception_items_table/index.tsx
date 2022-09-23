@@ -332,12 +332,12 @@ const ExceptionsViewerComponent = ({
     <>
       {currenFlyout === 'editException' && exceptionToEdit != null && rule != null && (
         <EditExceptionFlyout
-          ruleName={rule.name}
-          ruleId={rule.id}
-          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
-          dataViewId={rule.data_view_id}
-          exceptionListType={'detection'}
-          exceptionItem={exceptionToEdit}
+          rule={rule}
+          list={rule.exceptions_list?.find(
+            ({ list_id: listId }) => listId === exceptionToEdit.list_id
+          )}
+          itemToEdit={exceptionToEdit}
+          showAlertCloseOptions
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="editExceptionItemFlyout"

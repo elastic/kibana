@@ -6,29 +6,20 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type {
-  ExceptionListSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { AlertData } from '../../utils/types';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useAddRuleDefaultException } from '../../logic/use_add_rule_exception';
-import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 
 export interface AddNewExceptionItemHookProps {
-  rules: Rule[] | null;
   itemsToAdd: ExceptionsBuilderReturnExceptionItem[];
-  selectedRulesToAddTo: Rule[];
   listType: ExceptionListTypeEnum;
-  bulkCloseAlerts: boolean;
-  closeSingleAlert: boolean;
-  alertData: AlertData | undefined;
-  bulkCloseIndex: string[] | undefined;
+  selectedRulesToAddTo: Rule[];
   addToSharedLists: boolean;
   addToRules: boolean;
   sharedLists: ExceptionListSchema[];
@@ -44,7 +35,6 @@ export type ReturnUseAddNewExceptionItems = [boolean, AddNewExceptionItemHookFun
  */
 export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
-  const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const [isAddRuleExceptionLoading, addRuleExceptions] = useAddRuleDefaultException();
   const [isAddingExceptions, addSharedExceptions] = useCreateOrUpdateException();
 
@@ -56,13 +46,9 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
     const abortCtrl = new AbortController();
 
     const addNewExceptions = async ({
-      rules,
       itemsToAdd,
+      listType,
       selectedRulesToAddTo,
-      bulkCloseAlerts,
-      closeSingleAlert,
-      alertData,
-      bulkCloseIndex,
       addToRules,
       addToSharedLists,
       sharedLists,
@@ -70,7 +56,11 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
       try {
         setIsLoading(true);
 
-        if (addToRules && addRuleExceptions != null) {
+        if (
+          addToRules &&
+          addRuleExceptions != null &&
+          listType !== ExceptionListTypeEnum.ENDPOINT
+        ) {
           await addRuleExceptions(itemsToAdd, selectedRulesToAddTo);
 
           const ruleNames = selectedRulesToAddTo.map(({ name }) => name).join(', ');
@@ -79,18 +69,11 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
             title: i18n.ADD_RULE_EXCEPTION_SUCCESS_TITLE,
             text: i18n.ADD_RULE_EXCEPTION_SUCCESS_TEXT(ruleNames),
           });
-
-          if (closeAlerts != null && (bulkCloseAlerts || closeSingleAlert)) {
-            const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-            await closeAlerts(
-              selectedRulesToAddTo.map(({ rule_id: ruleId }) => ruleId),
-              itemsToAdd,
-              alertIdToClose,
-              bulkCloseIndex
-            );
-          }
-        } else if (addToSharedLists && addSharedExceptions != null) {
-          await addSharedExceptions(itemsToAdd);
+        } else if (
+          (listType === ExceptionListTypeEnum.ENDPOINT || addToSharedLists) &&
+          addSharedExceptions != null
+        ) {
+          await addSharedExceptions({ items: itemsToAdd });
 
           const sharedListNames = sharedLists.map(({ name }) => name);
 
@@ -98,21 +81,6 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
             title: i18n.ADD_EXCEPTION_SUCCESS,
             text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
           });
-
-          if (
-            rules != null &&
-            rules.length > 0 &&
-            closeAlerts != null &&
-            (bulkCloseAlerts || closeSingleAlert)
-          ) {
-            const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-            await closeAlerts(
-              rules.map(({ rule_id: ruleId }) => ruleId),
-              itemsToAdd,
-              alertIdToClose,
-              bulkCloseIndex
-            );
-          }
         }
 
         if (isSubscribed) {
@@ -132,10 +100,10 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addSuccess, addError, addWarning, addRuleExceptions, addSharedExceptions, closeAlerts]);
+  }, [addSuccess, addError, addWarning, addRuleExceptions, addSharedExceptions]);
 
   return [
-    isLoading || isClosingAlerts || isAddingExceptions || isAddRuleExceptionLoading,
+    isLoading || isAddingExceptions || isAddRuleExceptionLoading,
     addNewExceptionsRef.current,
   ];
 };

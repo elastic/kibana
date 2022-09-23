@@ -36,15 +36,15 @@ const SectionHeader = styled(EuiTitle)`
 interface ExceptionsFlyoutAlertsActionsComponentProps {
   exceptionListItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionListType: ExceptionListType;
-  shouldCloseSingleAlert: boolean;
   shouldBulkCloseAlert: boolean;
   disableBulkClose: boolean;
-  alertData: AlertData | undefined;
-  alertStatus: Status | undefined;
-  isAlertDataLoading: boolean;
+  alertData?: AlertData;
+  alertStatus?: Status;
+  isAlertDataLoading?: boolean;
+  shouldCloseSingleAlert?: boolean;
   onUpdateBulkCloseIndex: (arg: string[] | undefined) => void;
   onBulkCloseCheckboxChange: (arg: boolean) => void;
-  onSingleAlertCloseCheckboxChange: (arg: boolean) => void;
+  onSingleAlertCloseCheckboxChange?: (arg: boolean) => void;
   onDisableBulkClose: (arg: boolean) => void;
 }
 
@@ -81,7 +81,9 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
 
   const handleCloseSingleAlertCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      onSingleAlertCloseCheckboxChange(event.currentTarget.checked);
+      if (onSingleAlertCloseCheckboxChange != null) {
+        onSingleAlertCloseCheckboxChange(event.currentTarget.checked);
+      }
     },
     [onSingleAlertCloseCheckboxChange]
   );

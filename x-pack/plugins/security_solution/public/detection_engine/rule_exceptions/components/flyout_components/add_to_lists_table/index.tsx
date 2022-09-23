@@ -18,8 +18,9 @@ import { useFindExceptionListReferences } from '../../../logic/use_find_referenc
 import type { RuleReferenceSchema } from '../../../../../../common/detection_engine/schemas/response';
 
 interface ExceptionsAddToListsComponentProps {
+  isEdit: boolean;
   sharedExceptionLists: ListArray;
-  onListSelectionChange: (listsSelectedToAdd: ExceptionListSchema[]) => void;
+  onListSelectionChange?: (listsSelectedToAdd: ExceptionListSchema[]) => void;
 }
 
 export interface TableListInterface extends ExceptionListSchema {
@@ -27,6 +28,7 @@ export interface TableListInterface extends ExceptionListSchema {
 }
 
 const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps> = ({
+  isEdit,
   sharedExceptionLists,
   onListSelectionChange,
 }): JSX.Element => {
@@ -81,7 +83,9 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
 
   const selectionValue = {
     onSelectionChange: (selection: TableListInterface[]) => {
-      onListSelectionChange(selection.map(({ references, ...rest }) => ({ ...rest })));
+      if (onListSelectionChange != null) {
+        onListSelectionChange(selection.map(({ references, ...rest }) => ({ ...rest })));
+      }
     },
     initialSelected: [],
   };
@@ -109,7 +113,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
             setPagination({ pageIndex: index })
           }
           selection={selectionValue}
-          isSelectable
+          isSelectable={!isEdit}
           sorting
           data-test-subj="addExceptionToSharedListsTable"
         />

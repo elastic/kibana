@@ -53,7 +53,8 @@ import { ExceptionsFlyoutComments } from '../flyout_components/item_comments';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
-import { entrichNewExceptionItems } from './utils';
+import { entrichNewExceptionItems } from '../flyout_components/utils';
+import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 
 export interface AddExceptionFlyoutProps {
   rules: Rule[] | null;
@@ -113,6 +114,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
+  const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
 
   const allowLargeValueLists = useMemo((): boolean => {
     if (rules != null && rules.length === 1) {
@@ -315,19 +317,24 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedOs: osTypesSelection,
         items: exceptionItems,
       });
+
       await submitNewExceptionItems({
-        rules,
         itemsToAdd: items,
         selectedRulesToAddTo,
         listType,
-        bulkCloseAlerts,
-        closeSingleAlert,
-        alertData,
-        bulkCloseIndex,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
         addToSharedLists: addToSharedLists && !isEmpty(exceptionListsToAddTo),
         sharedLists: exceptionListsToAddTo,
       });
+
+      const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
+      const ruleStaticIds = addToRules
+        ? selectedRulesToAddTo.map(({ rule_id: ruleId }) => ruleId)
+        : (rules ?? []).map(({ rule_id: ruleId }) => ruleId);
+
+      if (closeAlerts != null && !isEmpty(ruleStaticIds) && (bulkCloseAlerts || closeSingleAlert)) {
+        await closeAlerts(ruleStaticIds, items, alertIdToClose, bulkCloseIndex);
+      }
 
       // Rule only would have been updated if we had to create a rule default list
       // to attach to it, all shared lists would already be referenced on the rule
@@ -350,6 +357,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     closeSingleAlert,
     alertData,
     bulkCloseIndex,
+    closeAlerts,
     onConfirm,
     onCancel,
   ]);
@@ -357,12 +365,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
       isSubmitting ||
+      isClosingAlerts ||
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
       (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)),
     [
       isSubmitting,
+      isClosingAlerts,
       exceptionItemName,
       exceptionItems,
       itemConditionValidationErrorExists,

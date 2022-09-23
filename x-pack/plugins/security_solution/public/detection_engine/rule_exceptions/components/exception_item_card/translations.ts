@@ -179,3 +179,10 @@ export const AFFECTED_RULES = (numRules: number) =>
     values: { numRules },
     defaultMessage: 'Affects {numRules} {numRules, plural, =1 {rule} other {rules}}',
   });
+
+export const RULE_ITEM_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.ruleDefaultItem',
+  {
+    defaultMessage: 'Rule exception',
+  }
+);

@@ -93,7 +93,7 @@ export const filterExceptionItems = (
         return nestedAcc;
       } else {
         const [validatedEntry] = validate(strippedSingleEntry, entry);
-
+        console.log('VALIDATE ENTRY', {validatedEntry})
         if (validatedEntry != null) {
           return [...nestedAcc, singleEntry];
         }
@@ -831,8 +831,7 @@ export const getFormattedBuilderEntry = (
  *
  * @param patterns DataViewBase containing available fields on rule index
  * @param entries exception item entries
- * @param addNested boolean noting whether or not UI is currently
- * set to add a nested field
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry

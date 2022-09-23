@@ -16,6 +16,7 @@ import {
   EuiAccordion,
   EuiCommentList,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
@@ -25,6 +26,7 @@ import { getFormattedComments } from '../../utils/helpers';
 interface ExceptionItemCommentsProps {
   exceptionItemComments?: Comment[];
   newCommentValue: string;
+  expandComments?: boolean;
   newCommentOnChange: (value: string) => void;
 }
 
@@ -48,6 +50,7 @@ const CommentAccordion = styled(EuiAccordion)`
 export const ExceptionItemComments = memo(function ExceptionItemComments({
   exceptionItemComments,
   newCommentValue,
+  expandComments = false,
   newCommentOnChange,
 }: ExceptionItemCommentsProps) {
   const [shouldShowComments, setShouldShowComments] = useState(false);
@@ -80,7 +83,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
     setShouldShowComments(isOpen);
   }, []);
 
-  const shouldShowAccordion: boolean = useMemo(() => {
+  const exceptionItemsExist: boolean = useMemo(() => {
     return exceptionItemComments != null && exceptionItemComments.length > 0;
   }, [exceptionItemComments]);
 
@@ -108,7 +111,13 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 
   return (
     <div>
-      {shouldShowAccordion && (
+      {exceptionItemsExist && expandComments && (
+        <>
+          <EuiCommentList comments={formattedComments} />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {exceptionItemsExist && !expandComments && (
         <CommentAccordion
           id={'add-exception-comments-accordion'}
           buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
