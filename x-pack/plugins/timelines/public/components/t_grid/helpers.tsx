@@ -20,6 +20,8 @@ import {
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
+import { TableId } from '../../types';
+import { ViewSelection } from './event_rendered_view/selector';
 
 interface CombineQueries {
   config: EsQueryConfig;
@@ -250,7 +252,7 @@ export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
   );
 
 export const isSelectableView = (timelineId: string): boolean =>
-  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage;
+  timelineId === TableId.detectionsPage || timelineId === TableId.detectionsRulesDetailsPage;
 
 export const isViewSelection = (value: unknown): value is ViewSelection =>
   value === 'gridView' || value === 'eventRenderedView';

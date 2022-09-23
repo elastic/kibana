@@ -30,7 +30,7 @@ export interface TableState {
   tableById: TableById;
 }
 
-export enum TableIds {
+export enum TableId {
   usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
   networkPageEvents = 'network-page-events',

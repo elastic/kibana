@@ -11,9 +11,10 @@ import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
-import { ColumnHeaderOptions, TimelineId } from '../../common/types';
+import { ColumnHeaderOptions } from '../../common/types';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
 import { EventRenderedViewProps } from '../components/t_grid/event_rendered_view';
+import { TableId } from '../types';
 
 const columnHeaders: ColumnHeaderOptions[] = [
   {
@@ -102,7 +103,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   globalFullScreen: false,
   graphEventId: undefined,
   hasAlertsCrud: true,
-  id: TimelineId.active,
+  id: '',
   indexNames: mockIndexNames,
   indexPattern: mockIndexPattern,
   isLive: false,
@@ -142,6 +143,6 @@ export const eventRenderedProps: EventRenderedViewProps = {
   pageSize: 10,
   pageSizeOptions: [10, 25, 50, 100],
   rowRenderers: [],
-  timelineId: TimelineId.detectionsPage,
+  timelineId: TableId.detectionsPage,
   totalItemCount: 100,
 };

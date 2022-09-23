@@ -40,13 +40,13 @@ import type {
 import type { ESQuery } from '../../common/typed_json';
 import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
-import { TableIds } from '../store/t_grid/types';
+import { TableId } from '../store/t_grid/types';
 import * as i18n from './translations';
 import { getSearchTransactionName, useStartTransaction } from '../lib/apm/use_start_transaction';
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [TableIds.detectionsPage, TableIds.detectionsRulesDetailsPage];
+export const detectionsTimelineIds = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
 
 export type Refetch = () => void;
 
