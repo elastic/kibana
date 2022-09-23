@@ -1249,14 +1249,14 @@ export const tasks: TelemetryTask[] = [
       const envBuckets = response.aggregations?.environments.buckets ?? [];
       const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
         const envHash = createHash('sha256')
-          .update(envBucket.key)
+          .update(envBucket.key as string)
           .digest('hex');
         const serviceBuckets = envBucket.service_names?.buckets ?? [];
         return serviceBuckets.map((serviceBucket) => {
           const nameHash = createHash('sha256')
-            .update(serviceBucket.key)
+            .update(serviceBucket.key as string)
             .digest('hex');
-          const fullServiceName = `${envHash}~${nameHash}`;
+          const fullServiceName = `${nameHash}~${envHash}`;
           return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
