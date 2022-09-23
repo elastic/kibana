@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('console context menu', function testContextMenu() {
     before(async () => {
-      log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.closeHelpIfExists();
