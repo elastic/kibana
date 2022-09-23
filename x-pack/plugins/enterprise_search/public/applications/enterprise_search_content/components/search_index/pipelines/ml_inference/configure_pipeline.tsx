@@ -78,7 +78,7 @@ export const ConfigurePipeline: React.FC = () => {
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
               {
                 defaultMessage:
-                  'Pipeline names can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference-".',
+                  'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. The pipeline name will be automatically prefixed with "ml-inference-".',
               }
             )
           }
