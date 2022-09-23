@@ -235,6 +235,31 @@ describe('#checkAuthorization', () => {
         .set('c', { ['login:']: { authorizedSpaces: ['y'] } }),
     });
   });
+
+  test('conflicting privilege failsafe', async () => {
+    const conflictingPrivilegesResponse = {
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          // redundant conflicting privileges for space X, type B, action Foo
+          { resource: 'x', privilege: 'mock-saved_object:b/foo', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/foo', authorized: false },
+          { resource: 'y', privilege: 'mock-saved_object:b/foo', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse;
+
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(conflictingPrivilegesResponse);
+
+    const result = await securityExtension.checkAuthorization({ types, spaces, actions });
+    expect(result).toEqual({
+      status: 'fully_authorized',
+      typeMap: new Map().set('b', {
+        foo: { authorizedSpaces: ['y'] }, // should NOT be authorized for conflicted privilege
+      }),
+    });
+  });
 });
 
 describe('#enforceAuthorization', () => {

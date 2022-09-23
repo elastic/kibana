@@ -25,7 +25,7 @@ import { SavedObjectsSerializer } from '../../serialization';
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 
-import { ISavedObjectsEncryptionExtension, ISavedObjectsSpacesExtension } from './extensions';
+import { ISavedObjectsSecurityExtension, ISavedObjectsSpacesExtension } from './extensions';
 import { extensionsMock } from './extensions/extensions.mock';
 import {
   DEFAULT_SPACE,
@@ -46,6 +46,8 @@ import {
   MULTI_NAMESPACE_ISOLATED_TYPE,
   checkConflictsSuccess,
   MULTI_NAMESPACE_TYPE,
+  setupCheckUnauthorized,
+  generateIndexPatternSearchResults,
 } from './respository.test.common';
 import { SavedObjectsBulkUpdateObject, SavedObjectsResolveResponse } from '../saved_objects_client';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -62,6 +64,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
   let mockSpacesExt: jest.Mocked<ISavedObjectsSpacesExtension>;
+  let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -83,7 +86,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       serializer,
       allowedTypes,
       logger,
-      extensions: { spacesExtension: mockSpacesExt },
+      extensions: { spacesExtension: mockSpacesExt, securityExtension: mockSecurityExt },
     });
   };
 
@@ -130,7 +133,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         mockSpacesExt.getSearchableNamespaces.mockImplementation(
           (namespaces: string[] | undefined): Promise<string[]> => {
             if (!namespaces) {
-              return Promise.resolve([] as string[]);
+              return Promise.resolve(['current-space'] as string[]);
             } else if (!namespaces.length) {
               return Promise.resolve(namespaces);
             }
@@ -462,10 +465,12 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE, { namespaces: ['*'] });
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(['*']);
-          // It's not necessary to test the output of the mock...
-          // await expect(mockSpacesExt.getSearchableNamespaces).resolves.toBe(
-          //   availableSpaces.map((space) => space.id)
-          // );
+        });
+
+        test(`supplements options with the current namespace`, async () => {
+          await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(undefined); // will resolve current space
         });
       });
 
@@ -570,7 +575,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           );
         });
 
-        test(`replaces object namespaces '*' with available spaces`, async () => {
+        test(`calls getSearchableNamespaces with '*' when object namespaces includes '*'`, async () => {
           await bulkGetSuccess(client, repository, registry, [
             obj1,
             { ...obj2, namespaces: ['*'] },
@@ -760,14 +765,15 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       describe('#find', () => {
         test(`supplements internal parameters with options.type and options.namespaces`, async () => {
           const type = 'index-pattern';
-          await findSuccess(client, repository, { type, namespaces: [currentSpace.id] });
+          const spaceOverride = 'ns-4';
+          await findSuccess(client, repository, { type, namespaces: [spaceOverride] });
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
-          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith([currentSpace.id]);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith([spaceOverride]);
           expect(mockGetSearchDsl).toHaveBeenCalledWith(
             mappings,
             registry,
             expect.objectContaining({
-              namespaces: [currentSpace.id],
+              namespaces: [spaceOverride],
               type: [type],
             })
           );
@@ -779,6 +785,63 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(['*']);
         });
+
+        test(`supplements options with the current namespace`, async () => {
+          const type = 'index-pattern';
+          await findSuccess(client, repository, { type });
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(undefined); // will resolve current space
+        });
+      });
+    });
+  });
+
+  describe(`with security extension`, () => {
+    beforeEach(() => {
+      pointInTimeFinderMock.mockClear();
+      client = elasticsearchClientMock.createElasticsearchClient();
+      migrator = kibanaMigratorMock.create();
+      documentMigrator.prepareMigrations();
+      migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+      migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+      logger = loggerMock.create();
+      // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
+      serializer = createSpySerializer(registry);
+      // create a mock extensions
+      mockSpacesExt = extensionsMock.createSpacesExtension();
+      mockSecurityExt = extensionsMock.createSecurityExtension();
+      mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      mockGetSearchDsl.mockClear();
+      repository = instantiateRepository();
+      mockSpacesExt.getSearchableNamespaces.mockImplementation(
+        (namespaces: string[] | undefined): Promise<string[]> => {
+          if (!namespaces) {
+            return Promise.resolve([] as string[]);
+          } else if (!namespaces.length) {
+            return Promise.resolve(namespaces);
+          }
+          if (namespaces?.includes('*')) {
+            return Promise.resolve(availableSpaces.map((space) => space.id));
+          } else {
+            return Promise.resolve(
+              namespaces?.filter((namespace) =>
+                availableSpaces.some((space) => space.id === namespace)
+              )
+            );
+          }
+        }
+      );
+    });
+
+    describe(`#find`, () => {
+      test(`returns empty result if user is unauthorized`, async () => {
+        setupCheckUnauthorized(mockSecurityExt);
+        const type = 'index-pattern';
+        const spaceOverride = 'ns-4';
+        const generatedResults = generateIndexPatternSearchResults(spaceOverride);
+        client.search.mockResponseOnce(generatedResults);
+        const result = await repository.find({ type, namespaces: [spaceOverride] });
+        expect(result).toEqual(expect.objectContaining({ total: 0 }));
       });
     });
   });
