@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { differenceWith } from 'lodash';
+
 import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
+import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { InferencePipeline } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
@@ -80,12 +83,37 @@ export const getMlModelTypesForModelConfig = (trainedModel: MlTrainedModelConfig
 
 export const getMlModelConfigsForModelIds = async (
   client: ElasticsearchClient,
+  trainedModelsProvider: MlTrainedModels,
   trainedModelNames: string[]
 ): Promise<Record<string, InferencePipeline>> => {
-  const [trainedModels, trainedModelsStats] = await Promise.all([
+  // get all trained models from all spaces
+  // this is safe because were in server land
+  const [allTrainedModels, allTrainedModelsStats] = await Promise.all([
     client.ml.getTrainedModels({ model_id: trainedModelNames.join() }),
     client.ml.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
   ]);
+
+  // get all trained models for the current space
+  const [trainedModels, trainedModelsStats] = await Promise.all([
+    trainedModelsProvider.getTrainedModels({ model_id: trainedModelNames.join() }),
+    trainedModelsProvider.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
+  ]);
+
+  // find the trained models that aren't in the current space
+  const hiddenTrainedModels = differenceWith(
+    trainedModels.trained_model_configs,
+    allTrainedModels.trained_model_configs,
+    (t1, t2) => t1.model_id === t2.model_id
+  );
+  const hiddenTrainedModelsStats = differenceWith(
+    trainedModelsStats.trained_model_stats,
+    allTrainedModelsStats.trained_model_stats,
+    (t1, t2) => t1.model_id === t2.model_id
+  );
+
+  if (hiddenTrainedModels.length && hiddenTrainedModelsStats.length) {
+    // do something here, obfuscate the ids or whatever.
+  }
 
   const modelConfigs: Record<string, InferencePipeline> = {};
 
@@ -115,10 +143,15 @@ export const getMlModelConfigsForModelIds = async (
 
 export const fetchAndAddTrainedModelData = async (
   client: ElasticsearchClient,
+  trainedModelsProvider: MlTrainedModels,
   pipelineProcessorData: Record<string, InferencePipeline>
 ): Promise<Record<string, InferencePipeline>> => {
   const trainedModelNames = Object.keys(pipelineProcessorData);
-  const modelConfigs = await getMlModelConfigsForModelIds(client, trainedModelNames);
+  const modelConfigs = await getMlModelConfigsForModelIds(
+    client,
+    trainedModelsProvider,
+    trainedModelNames
+  );
 
   for (const [modelName, modelData] of Object.entries(modelConfigs)) {
     if (pipelineProcessorData.hasOwnProperty(modelName)) {
@@ -132,6 +165,7 @@ export const fetchAndAddTrainedModelData = async (
 
 export const fetchMlInferencePipelineProcessors = async (
   client: ElasticsearchClient,
+  trainedModelsProvider: MlTrainedModels,
   indexName: string
 ): Promise<InferencePipeline[]> => {
   const mlInferencePipelineProcessorNames = await fetchMlInferencePipelineProcessorNames(
@@ -157,6 +191,7 @@ export const fetchMlInferencePipelineProcessors = async (
 
   pipelineProcessorInferenceDataByTrainedModelName = await fetchAndAddTrainedModelData(
     client,
+    trainedModelsProvider,
     pipelineProcessorInferenceDataByTrainedModelName
   );
 
