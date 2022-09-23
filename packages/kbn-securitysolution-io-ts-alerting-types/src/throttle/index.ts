@@ -15,3 +15,6 @@ export const throttle = t.union([
   TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
 ]);
 export type Throttle = t.TypeOf<typeof throttle>;
+
+export const throttleOrNull = t.union([throttle, t.null]);
+export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
