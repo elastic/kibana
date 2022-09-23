@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type {
+  AlertsTableConfigurationRegistryContract,
+  GetRenderCellValue,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TimelineId } from '../../../../common/types';
-import { columns } from '../../../detections/configurations/security_solution_detections';
+import { getColumns } from '../../../detections/configurations/security_solution_detections';
+import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
+import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 
 const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract,
@@ -21,10 +26,18 @@ const registerAlertsTableConfiguration = (
     return;
   }
   const timelineStorage = getTimelinesInStorageByIds(storage, [TimelineId.detectionsPage]);
-  const alertColumns = timelineStorage?.[TimelineId.detectionsPage]?.columns ?? columns;
+  const columnsFormStorage = timelineStorage?.[TimelineId.detectionsPage]?.columns ?? [];
+  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
+
   registry.register({
     id: APP_ID,
+    casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
+    getRenderCellValue: useRenderCellValue as GetRenderCellValue,
+    useInternalFlyout: () => {
+      const { header, body, footer } = useToGetInternalFlyout();
+      return { header, body, footer };
+    },
   });
 };
 

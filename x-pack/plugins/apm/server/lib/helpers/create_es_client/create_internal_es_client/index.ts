@@ -7,10 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
@@ -74,7 +71,11 @@ export async function createInternalESClient({
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
         requestType: 'search',
-        cb: (signal) => asInternalUser.search(params, { signal, meta: true }),
+        cb: (signal) =>
+          asInternalUser.search(params, {
+            signal,
+            meta: true,
+          }) as Promise<{ body: any }>,
         params,
       });
     },

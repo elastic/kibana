@@ -28,7 +28,7 @@ describe('CustomIntegrationsPlugin', () => {
       expect(setup).toHaveProperty('getAppendCustomIntegrations');
     });
 
-    test('should register language clients', () => {
+    test('should register custom integrations', () => {
       const setup = new CustomIntegrationsPlugin(initContext).setup(mockCoreSetup);
       expect(setup.getAppendCustomIntegrations()).toEqual([
         {
@@ -40,7 +40,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/branch/introduction.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -52,7 +52,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/branch/ruby_client.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -64,7 +64,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/go-api/branch/overview.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -76,7 +76,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/net-api/branch/index.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -88,7 +88,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/php-api/branch/index.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -100,7 +100,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -112,7 +112,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/python-api/branch/index.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -124,7 +124,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -136,8 +136,22 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/branch/index.html',
           isBeta: false,
-          icons: [{ type: 'svg' }],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
+        },
+        {
+          id: 'placeholder.esf',
+          title: 'AWS Serverless Application Repository',
+          description:
+            'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
+          type: 'ui_link',
+          shipper: 'placeholders',
+          uiInternalPath: '',
+          uiExternalLink:
+            'https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['aws', 'custom'],
         },
       ]);
     });

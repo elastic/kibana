@@ -17,17 +17,22 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
-import {
-  storedPackagePoliciesToAgentPermissions,
-  DEFAULT_CLUSTER_PERMISSIONS,
-} from '../package_policies_to_agent_permissions';
-import { dataTypes, outputType } from '../../../common';
-import type { FullAgentPolicyOutputPermissions } from '../../../common';
+import { dataTypes, outputType } from '../../../common/constants';
+import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
+import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
+
+import { getPackageInfo } from '../epm/packages';
+import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
+import {
+  storedPackagePoliciesToAgentPermissions,
+  DEFAULT_CLUSTER_PERMISSIONS,
+} from './package_policies_to_agent_permissions';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -75,6 +80,37 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
+
+  const sourceUri = await getSourceUriForAgentPolicy(soClient, agentPolicy);
+
+  // Build up an in-memory object for looking up Package Info, so we don't have
+  // call `getPackageInfo` for every single policy, which incurs performance costs
+  const packageInfoCache = new Map<string, PackageInfo>();
+  for (const policy of agentPolicy.package_policies as PackagePolicy[]) {
+    if (!policy.package || packageInfoCache.has(pkgToPkgKey(policy.package))) {
+      continue;
+    }
+
+    // Prime the cache w/ just the package key - we'll fetch all the package
+    // info concurrently below
+    packageInfoCache.set(pkgToPkgKey(policy.package), {} as PackageInfo);
+  }
+
+  // Fetch all package info concurrently
+  await Promise.all(
+    Array.from(packageInfoCache.keys()).map(async (pkgKey) => {
+      const { pkgName, pkgVersion } = splitPkgKey(pkgKey);
+
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName,
+        pkgVersion,
+      });
+
+      packageInfoCache.set(pkgKey, packageInfo);
+    })
+  );
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -88,32 +124,33 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs: await storedPackagePoliciesToAgentInputs(
-      soClient,
       agentPolicy.package_policies as PackagePolicy[],
+      packageInfoCache,
       getOutputIdForAgentPolicy(dataOutput)
     ),
     revision: agentPolicy.revision,
-    ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-      ? {
-          agent: {
-            monitoring: {
+    agent: {
+      download: {
+        source_uri: sourceUri,
+      },
+      monitoring:
+        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
+          ? {
               namespace: agentPolicy.namespace,
               use_output: getOutputIdForAgentPolicy(monitoringOutput),
               enabled: true,
               logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            },
-          },
-        }
-      : {
-          agent: {
-            monitoring: { enabled: false, logs: false, metrics: false },
-          },
-        }),
+            }
+          : { enabled: false, logs: false, metrics: false },
+    },
   };
 
   const dataPermissions =
-    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies)) || {};
+    (await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      agentPolicy.package_policies
+    )) || {};
 
   dataPermissions._elastic_agent_checks = {
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
@@ -185,8 +222,8 @@ export function transformOutputToFullPolicyOutput(
   };
 
   if (output.type === outputType.Elasticsearch && standalone) {
-    newOutput.username = '{ES_USERNAME}';
-    newOutput.password = '{ES_PASSWORD}';
+    newOutput.username = '${ES_USERNAME}';
+    newOutput.password = '${ES_PASSWORD}';
   }
 
   return newOutput;

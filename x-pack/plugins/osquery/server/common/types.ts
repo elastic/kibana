@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export interface IQueryPayload {
   attributes?: {
@@ -20,8 +20,11 @@ export interface PackSavedObjectAttributes {
   queries: Array<{
     id: string;
     name: string;
+    query: string;
     interval: number;
-    ecs_mapping: Record<string, unknown>;
+    snapshot?: boolean;
+    removed?: boolean;
+    ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;
   enabled: boolean | undefined;
@@ -29,6 +32,24 @@ export interface PackSavedObjectAttributes {
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
+  policy_ids?: string[];
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
+
+export interface SavedQuerySavedObjectAttributes {
+  id: string;
+  description: string | undefined;
+  query: string;
+  interval: number | string;
+  snapshot?: boolean;
+  removed?: boolean;
+  platform: string;
+  ecs_mapping?: Array<Record<string, unknown>>;
+  created_at: string;
+  created_by: string | undefined;
+  updated_at: string;
+  updated_by: string | undefined;
+}
+
+export type SavedQuerySavedObject = SavedObject<PackSavedObjectAttributes>;

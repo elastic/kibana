@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { AppContextTestRender } from '../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../pages/mocks';
-import { ArtifactListPageProps } from './artifact_list_page';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import type { trustedAppsAllHttpMocks } from '../../mocks';
+import type { ArtifactListPageProps } from './artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  getArtifactListPageRenderingSetup,
-  getDeferred,
-  ArtifactListPageRenderingSetup,
-} from './mocks';
+import type { ArtifactListPageRenderingSetup } from './mocks';
+import { getArtifactListPageRenderingSetup } from './mocks';
+import { getDeferred } from '../mocks';
 
 jest.mock('../../../common/components/user_privileges');
 
-describe('When using the ArtifactListPage component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/140620
+describe.skip('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -157,7 +156,8 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-flyout')).toBeTruthy();
       });
 
-      it('should display the Delete modal when delete action is clicked', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/129837
+      it.skip('should display the Delete modal when delete action is clicked', async () => {
         const { getByTestId } = await renderWithListData();
         await clickCardAction('delete');
 
@@ -228,7 +228,8 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
-      it('should persist policy filter to the URL params', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/129837
+      it.skip('should persist policy filter to the URL params', async () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
         const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
 

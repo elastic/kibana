@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_UNCOMMON_PROCESSES = i18n.translate(
-  'xpack.securitySolution.uncommonProcesses.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on uncommon processes search`,
-  }
-);
-
 export const FAIL_UNCOMMON_PROCESSES = i18n.translate(
   'xpack.securitySolution.uncommonProcesses.failSearchDescription',
   {

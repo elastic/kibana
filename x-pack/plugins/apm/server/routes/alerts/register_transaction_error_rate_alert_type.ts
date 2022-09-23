@@ -15,6 +15,7 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -35,7 +36,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';

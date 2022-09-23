@@ -7,7 +7,6 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 

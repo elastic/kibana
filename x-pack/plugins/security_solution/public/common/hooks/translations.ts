@@ -19,20 +19,6 @@ export const ADDED_TO_TIMELINE_TEMPLATE_MESSAGE = (fieldOrValue: string) =>
     defaultMessage: `Added {fieldOrValue} to timeline template`,
   });
 
-export const STATUS_CODE = i18n.translate(
-  'xpack.securitySolution.components.ml.api.errors.statusCodeFailureTitle',
-  {
-    defaultMessage: 'Status Code:',
-  }
-);
-
-export const NETWORK_ERROR = i18n.translate(
-  'xpack.securitySolution.components.ml.api.errors.networkErrorFailureTitle',
-  {
-    defaultMessage: 'Network Error:',
-  }
-);
-
 export const INDEX_PATTERN_FETCH_FAILURE = i18n.translate(
   'xpack.securitySolution.components.mlPopup.hooks.errors.indexPatternFetchFailureTitle',
   {
@@ -51,5 +37,12 @@ export const EQL_TIME_INTERVAL_NOT_DEFINED = i18n.translate(
   'xpack.securitySolution.components.hooks.errors.timeIntervalsNotDefined',
   {
     defaultMessage: 'Time intervals are not defined.',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
   }
 );

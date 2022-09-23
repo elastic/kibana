@@ -27,10 +27,11 @@ import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   WARNING_ACTIONS,
+  NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
   ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
@@ -79,16 +80,16 @@ export async function registerMetricThresholdRuleType(
           sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          shouldDropPartialBuckets: schema.maybe(schema.boolean()),
         },
         { unknowns: 'allow' }
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createMetricThresholdExecutor(libs),
+    doesSetRecoveryContext: true,
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },

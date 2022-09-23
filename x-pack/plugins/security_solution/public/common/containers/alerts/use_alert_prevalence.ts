@@ -9,26 +9,28 @@ import { useEffect, useState } from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { useGlobalTime } from '../use_global_time';
-import { GenericBuckets } from '../../../../common/search_strategy';
+import type { GenericBuckets } from '../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 
 const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
-export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
 interface UseAlertPrevalenceOptions {
   field: string;
   value: string | string[] | undefined | null;
   timelineId: string;
   signalIndexName: string | null;
+  includeAlertIds?: boolean;
 }
 
 interface UserAlertPrevalenceResult {
   loading: boolean;
   count: undefined | number;
   error: boolean;
+  alertIds?: string[];
 }
 
 export const useAlertPrevalence = ({
@@ -36,23 +38,27 @@ export const useAlertPrevalence = ({
   value,
   timelineId,
   signalIndexName,
+  includeAlertIds = false,
 }: UseAlertPrevalenceOptions): UserAlertPrevalenceResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
-  const globalTime = useGlobalTime();
+  const globalTime = useGlobalTime(false);
 
   const { to, from } = timelineId === TimelineId.active ? timelineTime : globalTime;
-  const [initialQuery] = useState(() => generateAlertPrevalenceQuery(field, value, from, to));
+  const [initialQuery] = useState(() =>
+    generateAlertPrevalenceQuery(field, value, from, to, includeAlertIds)
+  );
 
-  const { loading, data, setQuery } = useQueryAlerts<{}, AlertPrevalenceAggregation>({
+  const { loading, data, setQuery } = useQueryAlerts<{ _id: string }, AlertPrevalenceAggregation>({
     query: initialQuery,
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.PREVALENCE,
   });
 
   useEffect(() => {
-    setQuery(generateAlertPrevalenceQuery(field, value, from, to));
-  }, [setQuery, field, value, from, to]);
+    setQuery(generateAlertPrevalenceQuery(field, value, from, to, includeAlertIds));
+  }, [setQuery, field, value, from, to, includeAlertIds]);
 
   let count: undefined | number;
   if (data) {
@@ -69,11 +75,13 @@ export const useAlertPrevalence = ({
   }
 
   const error = !loading && count === undefined;
+  const alertIds = data?.hits.hits.map(({ _id }) => _id);
 
   return {
     loading,
     count,
     error,
+    alertIds,
   };
 };
 
@@ -81,8 +89,14 @@ const generateAlertPrevalenceQuery = (
   field: string,
   value: string | string[] | undefined | null,
   from: string,
-  to: string
+  to: string,
+  includeAlertIds: boolean
 ) => {
+  // if we don't want the alert ids included, we set size to 0 to reduce the response payload
+  const size = includeAlertIds ? { size: DEFAULT_MAX_TABLE_QUERY_SIZE } : { size: 0 };
+  // in that case, we also want to make sure we're sorting the results by timestamp
+  const sort = includeAlertIds ? { sort: { '@timestamp': 'desc' } } : {};
+
   const actualValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
   let query;
   query = {
@@ -126,7 +140,9 @@ const generateAlertPrevalenceQuery = (
   }
 
   return {
-    size: 0,
+    ...size,
+    ...sort,
+    _source: false,
     aggs: {
       [ALERT_PREVALENCE_AGG]: {
         terms: {

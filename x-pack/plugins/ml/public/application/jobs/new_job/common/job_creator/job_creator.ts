@@ -28,6 +28,7 @@ import {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
+import { addExcludeFrozenToQuery } from '../../../../../../common/util/query_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -43,12 +44,14 @@ import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
+import { ml } from '../../../../services/ml_api_service';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: DataView;
   protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
+  protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
   protected _calendars: Calendar[];
   protected _datafeed_config: Datafeed;
@@ -77,7 +80,11 @@ export class JobCreator {
   constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
-    this._indexPatternTitle = indexPattern.title;
+
+    const title = this._indexPattern.title;
+    const name = this._indexPattern.getName();
+    this._indexPatternDisplayName = name === title ? name : `${name} (${title})`;
+    this._indexPatternTitle = title;
 
     this._job_config = createEmptyJob();
     this._calendars = [];
@@ -100,6 +107,10 @@ export class JobCreator {
 
   public get indexPatternTitle(): string {
     return this._indexPatternTitle;
+  }
+
+  public get indexPatternDisplayName(): string {
+    return this._indexPatternDisplayName;
   }
 
   protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {
@@ -760,6 +771,20 @@ export class JobCreator {
         aggregatable: true,
       }));
     }
+  }
+
+  // load the start and end times for the selected index
+  // and apply them to the job creator
+  public async autoSetTimeRange(excludeFrozenData = true) {
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: excludeFrozenData ? addExcludeFrozenToQuery(this.query) : this.query,
+      runtimeMappings: this.datafeedConfig.runtime_mappings,
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+
+    this.setTimeRange(start, end);
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {

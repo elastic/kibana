@@ -17,6 +17,7 @@
         ],
         "path": "x-pack/plugins/cloud/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -32,6 +33,7 @@
         "description": [],
         "path": "x-pack/plugins/cloud/public/plugin.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cloud",
@@ -44,7 +46,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -57,7 +60,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -70,7 +74,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -83,7 +88,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -96,7 +102,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -109,7 +116,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -119,10 +127,11 @@
             "label": "full_story",
             "description": [],
             "signature": [
-              "{ enabled: boolean; org_id?: string | undefined; }"
+              "{ enabled: boolean; org_id?: string | undefined; eventTypesAllowlist?: string[] | undefined; }"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
@@ -137,7 +146,8 @@
               "{ enabled: boolean; chatURL: string; }"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -151,6 +161,7 @@
         "description": [],
         "path": "x-pack/plugins/cloud/public/plugin.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cloud",
@@ -166,6 +177,7 @@
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -179,7 +191,8 @@
                   "P & { children?: React.ReactNode; }"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "cloud",
@@ -192,7 +205,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -212,6 +226,7 @@
       "description": [],
       "path": "x-pack/plugins/cloud/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "cloud",
@@ -224,7 +239,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -237,7 +253,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -250,7 +267,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -263,7 +281,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -276,7 +295,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -289,7 +309,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -302,7 +323,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -312,7 +334,8 @@
           "label": "isCloudEnabled",
           "description": [],
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -335,6 +358,7 @@
       "description": [],
       "path": "x-pack/plugins/cloud/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "cloud",
@@ -347,7 +371,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -360,7 +385,8 @@
             "string | undefined"
           ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -370,7 +396,22 @@
           "label": "isCloudEnabled",
           "description": [],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.instanceSizeMb",
+          "type": "number",
+          "tags": [],
+          "label": "instanceSizeMb",
+          "description": [],
+          "signature": [
+            "number | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -383,7 +424,8 @@
             "{ url?: string | undefined; secretToken?: string | undefined; }"
           ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",

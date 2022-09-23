@@ -18,10 +18,10 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { DefaultDraggable } from '../../../common/components/draggables';
-import { HostsTableColumns } from '.';
+import type { HostsTableColumns } from '.';
 
 import * as i18n from './translations';
-import { Maybe, RiskSeverity } from '../../../../common/search_strategy';
+import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 import { RiskScore } from '../../../common/components/severity/common';
 
@@ -51,6 +51,8 @@ export const getHostsColumns = (
                 kqlQuery: '',
                 queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
               }}
+              isAggregatable={true}
+              fieldType={'keyword'}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>

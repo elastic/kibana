@@ -9,10 +9,10 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash';
 // @ts-ignore no declaration
-import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
+import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldSelectionItem } from '../../../../common/analytics';
+import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 
@@ -128,6 +128,7 @@ export const AnalysisFieldsTable: FC<{
         });
       }
       setMinimumFieldsRequiredMessage(undefined);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableItems]);
 
     useEffect(() => {

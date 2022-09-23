@@ -1,0 +1,154 @@
+{
+  "id": "@kbn/yarn-lock-validator",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/yarn-lock-validator",
+        "id": "def-server.readYarnLock",
+        "type": "Function",
+        "tags": [],
+        "label": "readYarnLock",
+        "description": [
+          "\nParse any yarn.lock content into a YarnLock map"
+        ],
+        "signature": [
+          "() => Promise<",
+          {
+            "pluginId": "@kbn/yarn-lock-validator",
+            "scope": "server",
+            "docId": "kibKbnYarnLockValidatorPluginApi",
+            "section": "def-server.YarnLock",
+            "text": "YarnLock"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/yarn-lock-validator",
+        "id": "def-server.validateDependencies",
+        "type": "Function",
+        "tags": [],
+        "label": "validateDependencies",
+        "description": [
+          "\nValidates the passed yarn.lock file to ensure that we aren't accidentally reproducing\nspecific scenarios we have tried to remove from the codebase."
+        ],
+        "signature": [
+          "(log: ",
+          "SomeDevLog",
+          ", yarnLock: ",
+          {
+            "pluginId": "@kbn/yarn-lock-validator",
+            "scope": "server",
+            "docId": "kibKbnYarnLockValidatorPluginApi",
+            "section": "def-server.YarnLock",
+            "text": "YarnLock"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-server.validateDependencies.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              "SomeDevLog"
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-server.validateDependencies.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "yarnLock",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/yarn-lock-validator",
+                "scope": "server",
+                "docId": "kibKbnYarnLockValidatorPluginApi",
+                "section": "def-server.YarnLock",
+                "text": "YarnLock"
+              }
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/yarn-lock-validator",
+        "id": "def-server.YarnLock",
+        "type": "Interface",
+        "tags": [],
+        "label": "YarnLock",
+        "description": [
+          "\nParsed yarn.lock file contents mapping `name@versionRange` strings to information from\nthe yarn.lock file that is used to satisfy that request."
+        ],
+        "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-server.YarnLock.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }",
+            "description": [
+              "a simple map of `name@versionrange` tags to metadata about a package"
+            ],
+            "signature": [
+              "[key: string]:  { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }"
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
+import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 
 const ToolbarLayout = styled.div`
   display: grid;
@@ -48,6 +51,19 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
       state: { isInMemorySorting },
       actions: { setIsInMemorySorting },
     } = useRulesTableContext();
+    const { startTransaction } = useStartTransaction();
+
+    const handleInMemorySwitch = useCallback(
+      (e: EuiSwitchEvent) => {
+        startTransaction({
+          name: isInMemorySorting
+            ? RULES_TABLE_ACTIONS.PREVIEW_OFF
+            : RULES_TABLE_ACTIONS.PREVIEW_ON,
+        });
+        setIsInMemorySorting(e.target.checked);
+      },
+      [isInMemorySorting, setIsInMemorySorting, startTransaction]
+    );
 
     return (
       <ToolbarLayout>
@@ -66,9 +82,14 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
         </EuiTabs>
         <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
           <EuiSwitch
+            data-test-subj={
+              isInMemorySorting
+                ? 'allRulesTableTechnicalPreviewOff'
+                : 'allRulesTableTechnicalPreviewOn'
+            }
             label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
             checked={isInMemorySorting}
-            onChange={(e) => setIsInMemorySorting(e.target.checked)}
+            onChange={handleInMemorySwitch}
           />
         </EuiToolTip>
       </ToolbarLayout>

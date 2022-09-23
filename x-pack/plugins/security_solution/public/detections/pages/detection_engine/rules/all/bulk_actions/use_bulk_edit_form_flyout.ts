@@ -7,10 +7,10 @@
 import { useState, useCallback, useRef } from 'react';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
-import {
-  BulkActionEditType,
+import type {
   BulkActionEditPayload,
-} from '../../../../../../../common/detection_engine/schemas/common/schemas';
+  BulkActionEditType,
+} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { useBoolState } from '../../../../../../common/hooks/use_bool_state';
 
 export const useBulkEditFormFlyout = () => {

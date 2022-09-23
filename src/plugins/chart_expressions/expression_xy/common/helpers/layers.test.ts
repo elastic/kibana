@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { generateLayerId, appendLayerIds } from './layers';
+import { XYExtendedLayerConfigResult } from '../types';
+import { generateLayerId, appendLayerIds, getDataLayers } from './layers';
 
 describe('#generateLayerId', () => {
   it('should return the combination of keyword and index', () => {
@@ -45,5 +46,33 @@ describe('#appendLayerIds', () => {
 
     const layersWithIds = appendLayerIds(layers2, keyword);
     expect(layersWithIds).toStrictEqual(expectedLayerIds);
+  });
+});
+
+describe('#getDataLayers', () => {
+  it('should return only data layers', () => {
+    const layers: XYExtendedLayerConfigResult[] = [
+      {
+        type: 'extendedDataLayer',
+        layerType: 'data',
+        accessors: ['y'],
+        seriesType: 'bar',
+        xScaleType: 'time',
+        isHistogram: false,
+        isHorizontal: false,
+        isPercentage: false,
+        isStacked: false,
+        table: { rows: [], columns: [], type: 'datatable' },
+        palette: { type: 'system_palette', name: 'system' },
+      },
+      {
+        type: 'referenceLineLayer',
+        layerType: 'referenceLine',
+        accessors: ['y'],
+        table: { rows: [], columns: [], type: 'datatable' },
+      },
+    ];
+
+    expect(getDataLayers(layers)).toStrictEqual([layers[0]]);
   });
 });

@@ -15,28 +15,33 @@ import {
 import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
 import {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
-  XYCurveType,
+  XScaleType,
 } from '../../common';
-import { SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
 import {
   getColorAssignments,
   getFitOptions,
   GroupsConfiguration,
   getSeriesProps,
   DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+  hasMultipleLayersWithSplits,
 } from '../helpers';
 
 interface Props {
+  titles?: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
-  curveType?: XYCurveType;
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
@@ -47,13 +52,17 @@ interface Props {
   fillOpacity?: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
+  defaultXScaleType: XScaleType;
+  fieldFormats: LayersFieldFormats;
+  uiState?: PersistedState;
+  singleTable?: boolean;
 }
 
 export const DataLayers: FC<Props> = ({
+  titles = {},
   layers,
   endValue,
   timeZone,
-  curveType,
   syncColors,
   valueLabels,
   fillOpacity,
@@ -65,13 +74,60 @@ export const DataLayers: FC<Props> = ({
   shouldShowValueLabels,
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
+  defaultXScaleType,
+  fieldFormats,
+  uiState,
+  singleTable,
 }) => {
-  const colorAssignments = getColorAssignments(layers, formatFactory);
+  // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
+  const allYAccessors = layers.flatMap((layer) => layer.accessors);
+  const allColumnsToLabel = layers.reduce((acc, layer) => {
+    if (layer.columnToLabel) {
+      return { ...acc, ...JSON.parse(layer.columnToLabel) };
+    }
+
+    return acc;
+  }, {});
+  const allYTitles = Object.keys(titles).reduce((acc, key) => {
+    if (titles[key].yTitles) {
+      return { ...acc, ...titles[key].yTitles };
+    }
+    return acc;
+  }, {});
+  const colorAssignments = singleTable
+    ? getColorAssignments(
+        [
+          {
+            ...layers[0],
+            layerId: 'commonLayerId',
+            accessors: allYAccessors,
+            columnToLabel: JSON.stringify(allColumnsToLabel),
+          },
+        ],
+        { commonLayerId: { ...titles, yTitles: allYTitles } },
+        { commonLayerId: fieldFormats[layers[0].layerId] },
+        { commonLayerId: formattedDatatables[layers[0].layerId] }
+      )
+    : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+  const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
   return (
     <>
-      {layers.flatMap((layer) =>
-        layer.accessors.map((accessor, accessorIndex) => {
+      {layers.flatMap((layer) => {
+        const yPercentileAccessors: string[] = [];
+        const yAccessors: string[] = [];
+        layer.accessors.forEach((accessor) => {
+          const columnId = getAccessorByDimension(accessor, layer.table.columns);
+          if (columnId.includes('.')) {
+            yPercentileAccessors.push(columnId);
+          } else {
+            yAccessors.push(columnId);
+          }
+        });
+        return (
+          yPercentileAccessors.length ? [...yAccessors, yPercentileAccessors] : [...yAccessors]
+        ).map((accessor, accessorIndex) => {
           const { seriesType, columnToLabel, layerId } = layer;
+          const yColumnId = Array.isArray(accessor) ? accessor[0] : accessor;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -81,14 +137,17 @@ export const DataLayers: FC<Props> = ({
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const formattedDatatableInfo = formattedDatatables[layerId];
 
-          const isPercentage = seriesType.includes('percentage');
-
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
+
+          const isPercentage = yAxis?.mode
+            ? yAxis?.mode === AxisModes.PERCENTAGE
+            : layer.isPercentage;
 
           const seriesProps = getSeriesProps({
             layer,
+            titles: titles[layer.layerId],
             accessor,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
@@ -101,11 +160,17 @@ export const DataLayers: FC<Props> = ({
             timeZone,
             emphasizeFitting,
             fillOpacity,
+            defaultXScaleType,
+            fieldFormats,
+            uiState,
+            allYAccessors,
+            singleTable,
+            multipleLayersWithSplits,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
 
-          const curve = curveType ? CurveType[curveType] : undefined;
+          const curve = layer.curveType ? CurveType[layer.curveType] : undefined;
 
           switch (seriesType) {
             case SeriesTypes.LINE:
@@ -118,11 +183,6 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-            case SeriesTypes.BAR_STACKED:
-            case SeriesTypes.BAR_PERCENTAGE_STACKED:
-            case SeriesTypes.BAR_HORIZONTAL:
-            case SeriesTypes.BAR_HORIZONTAL_STACKED:
-            case SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED:
               const valueLabelsSettings = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
@@ -139,8 +199,7 @@ export const DataLayers: FC<Props> = ({
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
-            case SeriesTypes.AREA_STACKED:
-            case SeriesTypes.AREA_PERCENTAGE_STACKED:
+            case SeriesTypes.AREA:
               return (
                 <AreaSeries
                   key={index}
@@ -149,18 +208,9 @@ export const DataLayers: FC<Props> = ({
                   curve={curve}
                 />
               );
-            case SeriesTypes.AREA:
-              return (
-                <AreaSeries
-                  key={index}
-                  {...seriesProps}
-                  fit={getFitOptions(fittingFunction, endValue)}
-                  curve={curve}
-                />
-              );
           }
-        })
-      )}
+        });
+      })}
     </>
   );
 };

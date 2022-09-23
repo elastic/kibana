@@ -20,14 +20,15 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
-import { AddConnectorFlyout, ALLOWED_ACTION_TYPES } from './add_connector_flyout';
+import { AddConnectorFlyout } from './add_connector_flyout';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
-import { ActionTypeId } from './types';
 import { DefaultEmail } from './default_email';
+import { fetchActionTypes } from '../../state/api/alerts';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
@@ -63,6 +64,8 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
+
   useInitApp();
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   };
 
   const options = (data ?? [])
-    .filter((action) => ALLOWED_ACTION_TYPES.includes(action.actionTypeId as ActionTypeId))
+    .filter((action) => (actionTypes ?? []).find((type) => type.id === action.actionTypeId))
     .map((connectorAction) => ({
       value: connectorAction.id,
       label: connectorAction.name,

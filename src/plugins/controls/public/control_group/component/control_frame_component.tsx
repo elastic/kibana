@@ -18,31 +18,43 @@ import {
 } from '@elastic/eui';
 
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput } from '../types';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { TIME_SLIDER_CONTROL } from '../../../common';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
   enableActions?: boolean;
   embeddableId: string;
+  embeddableType: string;
 }
 
-export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: ControlFrameProps) => {
+export const ControlFrame = ({
+  customPrepend,
+  enableActions,
+  embeddableId,
+  embeddableType,
+}: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+  const [hasFatalError, setHasFatalError] = useState(false);
+
   const {
-    useEmbeddableSelector,
+    useEmbeddableSelector: select,
     containerActions: { untilEmbeddableLoaded, removeEmbeddable },
-  } = useReduxContainerContext<ControlGroupInput>();
-  const { controlStyle } = useEmbeddableSelector((state) => state);
+  } = useReduxContainerContext<ControlGroupReduxState>();
+
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   // Controls Services Context
-  const { overlays } = pluginServices.getHooks();
-  const { openConfirm } = overlays.useService();
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
 
-  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
+  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
 
   const [title, setTitle] = useState<string>();
 
@@ -52,9 +64,20 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
     }
-    const subscription = embeddable?.getInput$().subscribe((newInput) => setTitle(newInput.title));
+    const inputSubscription = embeddable
+      ?.getInput$()
+      .subscribe((newInput) => setTitle(newInput.title));
+    const errorSubscription = embeddable?.getOutput$().subscribe({
+      error: (error: Error) => {
+        if (!embeddableRoot.current) return;
+        const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id }, undefined, true);
+        errorEmbeddable.render(embeddableRoot.current);
+        setHasFatalError(true);
+      },
+    });
     return () => {
-      subscription?.unsubscribe();
+      inputSubscription?.unsubscribe();
+      errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
 
@@ -65,9 +88,11 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
-        <EditControlButton embeddableId={embeddableId} />
-      </EuiToolTip>
+      {!hasFatalError && embeddableType !== TIME_SLIDER_CONTROL && (
+        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
+          <EditControlButton embeddableId={embeddableId} />
+        </EuiToolTip>
+      )}
       <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
           data-test-subj={`control-action-${embeddableId}-delete`}
@@ -94,7 +119,22 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
+    'controlFrame--fatalError': hasFatalError,
   });
+
+  function renderEmbeddablePrepend() {
+    if (typeof embeddable?.renderPrepend === 'function') {
+      return embeddable.renderPrepend();
+    }
+
+    return usingTwoLineLayout ? undefined : (
+      <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+        <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+          {title}
+        </EuiFormLabel>
+      </EuiToolTip>
+    );
+  }
 
   const form = (
     <EuiFormControlLayout
@@ -105,13 +145,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}
-          {usingTwoLineLayout ? undefined : (
-            <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-              <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-                {title}
-              </EuiFormLabel>
-            </EuiToolTip>
-          )}
+          {renderEmbeddablePrepend()}
         </>
       }
     >

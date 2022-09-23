@@ -8,7 +8,7 @@
 
 const fn = require('./load_functions');
 
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 
 describe('load_functions.js', () => {
   it('exports a function', () => {

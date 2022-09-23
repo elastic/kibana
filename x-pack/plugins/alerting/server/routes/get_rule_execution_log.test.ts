@@ -11,7 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../rules_client.mock';
-import { IExecutionLogWithErrorsResult } from '../../common';
+import { IExecutionLogResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -24,7 +24,7 @@ beforeEach(() => {
 
 describe('getRuleExecutionLogRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedExecutionLogWithErrors: IExecutionLogWithErrorsResult = {
+  const mockedExecutionLog: IExecutionLogResult = {
     total: 374,
     data: [
       {
@@ -34,6 +34,7 @@ describe('getRuleExecutionLogRoute', () => {
         status: 'success',
         message:
           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+        version: '8.2.0',
         num_active_alerts: 5,
         num_new_alerts: 5,
         num_recovered_alerts: 0,
@@ -45,6 +46,8 @@ describe('getRuleExecutionLogRoute', () => {
         es_search_duration_ms: 0,
         timed_out: false,
         schedule_delay_ms: 3126,
+        rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+        rule_name: 'rule_name',
       },
       {
         id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -53,6 +56,7 @@ describe('getRuleExecutionLogRoute', () => {
         status: 'success',
         message:
           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+        version: '8.2.0',
         num_active_alerts: 5,
         num_new_alerts: 5,
         num_recovered_alerts: 5,
@@ -64,22 +68,8 @@ describe('getRuleExecutionLogRoute', () => {
         es_search_duration_ms: 0,
         timed_out: false,
         schedule_delay_ms: 3008,
-      },
-    ],
-    totalErrors: 2,
-    errors: [
-      {
-        id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
-        timestamp: '2022-03-23T17:37:07.086Z',
-        type: 'actions',
-        message:
-          'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
-      },
-      {
-        id: 'c1c04f04-312e-4e23-8e36-e01eb4332ed6',
-        timestamp: '2022-03-23T17:23:05.249Z',
-        type: 'alerting',
-        message: `rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule' - I am erroring in rule execution!!`,
+        rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+        rule_name: 'rule_name',
       },
     ],
   };
@@ -94,7 +84,7 @@ describe('getRuleExecutionLogRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_execution_log"`);
 
-    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLogWithErrors);
+    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLog);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

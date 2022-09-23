@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IndexPatternsContract } from '@kbn/data-plugin/public';
-import { AppMountParameters } from '@kbn/core/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { IContainer } from '@kbn/embeddable-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import type {
   MapEmbeddableConfig,
@@ -27,9 +28,16 @@ export interface LazyLoadedMapModules {
     initialInput: MapEmbeddableInput,
     parent?: IContainer
   ) => MapEmbeddableType;
-  getIndexPatternService: () => IndexPatternsContract;
+  getIndexPatternService: () => DataViewsContract;
   getMapsCapabilities: () => any;
-  renderApp: (params: AppMountParameters, AppUsageTracker: React.FC) => Promise<() => void>;
+  renderApp: (
+    params: AppMountParameters,
+    deps: {
+      coreStart: CoreStart;
+      AppUsageTracker: React.FC;
+      savedObjectsTagging?: SavedObjectTaggingPluginStart;
+    }
+  ) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string
@@ -51,7 +59,6 @@ export interface LazyLoadedMapModules {
     termsSize,
     colorSchema,
     indexPatternId,
-    indexPatternTitle,
     metricAgg,
     metricFieldName,
   }: CreateRegionMapLayerDescriptorParams) => LayerDescriptor | null;

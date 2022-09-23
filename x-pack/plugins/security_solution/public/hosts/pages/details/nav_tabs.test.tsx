@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TabNavigationItemProps } from '../../../common/components/navigation/tab_navigation/types';
+import type { TabNavigationItemProps } from '../../../common/components/navigation/tab_navigation/types';
 import { HostsTableType } from '../../store/model';
 import { navTabsHostDetails } from './nav_tabs';
 
@@ -52,21 +52,47 @@ describe('navTabsHostDetails', () => {
     expect(tabs).toHaveProperty(HostsTableType.risk);
   });
 
-  test('it should display Beta badge for sessions tab only', () => {
+  test('it should display sessions tab when users are on Enterprise and above license', () => {
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: false,
+      isRiskyHostsEnabled: true,
+      hostName: mockHostName,
+      isEnterprise: true,
+    });
+
+    const sessionsTab = Object.values<TabNavigationItemProps>(tabs).find(
+      (item) => item.id === HostsTableType.sessions
+    );
+
+    expect(sessionsTab).toBeTruthy();
+  });
+
+  test('it should not display sessions tab when users are not on Enterprise and above license', () => {
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: false,
+      isRiskyHostsEnabled: true,
+      hostName: mockHostName,
+      isEnterprise: false,
+    });
+
+    const sessionsTab = Object.values<TabNavigationItemProps>(tabs).find(
+      (item) => item.id === HostsTableType.sessions
+    );
+
+    expect(sessionsTab).not.toBeTruthy();
+  });
+
+  test('it should display Beta badge for risk tab', () => {
     const tabs = navTabsHostDetails({
       hasMlUserPermissions: false,
       isRiskyHostsEnabled: true,
       hostName: mockHostName,
     });
 
-    Object.values(tabs).forEach((item) => {
-      const tab = item as TabNavigationItemProps;
+    const riskTab = Object.values<TabNavigationItemProps>(tabs).find(
+      (item) => item.id === HostsTableType.risk
+    );
 
-      if (tab.id === HostsTableType.sessions) {
-        expect(tab.isBeta).toEqual(true);
-      } else {
-        expect(tab.isBeta).toEqual(undefined);
-      }
-    });
+    expect(riskTab?.isBeta).toEqual(true);
   });
 });

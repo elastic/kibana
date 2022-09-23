@@ -28,9 +28,9 @@ export const HOURS = i18n.translate(
   }
 );
 
-export const INVALID_TIME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.invalidTimeMessageDescription',
+export const DAYS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.daysOptionDescription',
   {
-    defaultMessage: 'A time is required.',
+    defaultMessage: 'Days',
   }
 );

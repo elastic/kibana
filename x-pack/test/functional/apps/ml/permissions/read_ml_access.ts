@@ -9,9 +9,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../services/ml/security_common';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const PageObjects = getPageObjects(['common', 'error']);
 
   const testUsers = [
     { user: USER.ML_VIEWER, discoverAvailable: true },
@@ -48,6 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
             await ml.navigation.assertOverviewTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Notifications" tab');
+            await ml.navigation.assertNotificationsTabEnabled(true);
 
             await ml.testExecution.logTestStep(
               'should display the enabled "Anomaly Detection" section correctly'
@@ -99,6 +103,13 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(false);
+          });
+
+          it('should redirect to the Overview page from the unrecognized routes', async () => {
+            await PageObjects.common.navigateToUrl('ml', 'magic-ai');
+
+            await ml.testExecution.logTestStep('should display a warning banner');
+            await ml.overviewPage.assertPageNotFoundBannerText('magic-ai');
           });
         });
       }
@@ -200,8 +211,20 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionAnomalyExplorerButtonEnabled(adJobId, true);
 
-            await ml.testExecution.logTestStep('should display disabled AD job row action button');
-            await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, false);
+            await ml.testExecution.logTestStep(
+              'should display enabled AD job row view datafeed counts action'
+            );
+            await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionViewDatafeedCountsButtonEnabled(adJobId, true);
+
+            await ml.testExecution.logTestStep(
+              'should display expected disabled AD job row actions'
+            );
+            await ml.jobTable.assertJobActionStartDatafeedButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionResetJobButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionCloneJobButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionEditJobButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionDeleteJobButtonEnabled(adJobId, false);
 
             await ml.testExecution.logTestStep('should select the job');
             await ml.jobTable.selectJobRow(adJobId);

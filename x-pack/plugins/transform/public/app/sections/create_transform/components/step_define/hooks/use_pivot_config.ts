@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { AggName } from '../../../../../../../common/types/aggregations';
-import { dictionaryToArray } from '../../../../../../../common/types/common';
+import { dictionaryToArray, isDefined } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {
@@ -190,6 +190,7 @@ export const usePivotConfig = (
               Object.values(aggList)
                 .map((v) => (isPivotAggConfigWithUiSupport(v) ? v.field : undefined))
                 .flat()
+                .filter(isDefined)
             ),
           ].find((v) => fields.find((x) => x.name === v)?.type === KBN_FIELD_TYPES.DATE);
         }

@@ -17,6 +17,9 @@
     },
     {
       "path": "../expressions/tsconfig.json"
-    }
+    },
+    {
+      "path": "../data/tsconfig.json"
+    },
   ]
 }

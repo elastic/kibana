@@ -8,29 +8,29 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
+import type {
   Columns,
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import {
+import type {
   HostsEdges,
   HostItem,
   HostsSortField,
-  HostsFields,
 } from '../../../../common/search_strategy/security_solution/hosts';
-import { Direction, RiskSeverity } from '../../../../common/search_strategy';
-import { HostEcs, OsEcs } from '../../../../common/ecs/host';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { HostsFields } from '../../../../common/search_strategy/security_solution/hosts';
+import type { Direction, RiskSeverity } from '../../../../common/search_strategy';
+import type { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../common/lib/kibana/hooks';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -132,7 +132,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const dispatchSeverityUpdate = useCallback(
     (s: RiskSeverity) => {
@@ -151,8 +151,8 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const hostsColumns = useMemo(
-    () => getHostsColumns(riskyHostsFeatureEnabled, dispatchSeverityUpdate),
-    [dispatchSeverityUpdate, riskyHostsFeatureEnabled]
+    () => getHostsColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
+    [dispatchSeverityUpdate, isPlatinumOrTrialLicense]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);

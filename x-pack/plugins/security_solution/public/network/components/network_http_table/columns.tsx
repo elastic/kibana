@@ -7,15 +7,15 @@
 
 import React from 'react';
 import numeral from '@elastic/numeral';
-import {
+import type {
   NetworkHttpEdges,
-  NetworkHttpFields,
   NetworkHttpItem,
 } from '../../../../common/search_strategy/security_solution/network';
+import { NetworkHttpFields } from '../../../../common/search_strategy/security_solution/network';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { Columns } from '../../../common/components/paginated_table';
+import type { Columns } from '../../../common/components/paginated_table';
 
 import * as i18n from './translations';
 import {
@@ -42,6 +42,8 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             displayCount: 3,
             idPrefix: escapeDataProviderId(`${tableId}-table-methods-${path}`),
             rowItems: methods,
+            isAggregatable: true,
+            fieldType: 'keyword',
           })
         : getEmptyTagValue();
     },
@@ -55,6 +57,8 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             displayCount: 3,
             idPrefix: escapeDataProviderId(`${tableId}-table-domains-${path}`),
             rowItems: domains,
+            isAggregatable: true,
+            fieldType: 'keyword',
           })
         : getEmptyTagValue(),
   },
@@ -67,6 +71,8 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             attrName: 'url.path',
             idPrefix: escapeDataProviderId(`${tableId}-table-path-${path}`),
             rowItem: path,
+            isAggregatable: true,
+            fieldType: 'keyword',
           })
         : getEmptyTagValue(),
   },
@@ -79,6 +85,8 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             displayCount: 3,
             idPrefix: escapeDataProviderId(`${tableId}-table-statuses-${path}`),
             rowItems: statuses,
+            isAggregatable: true,
+            fieldType: 'keyword',
           })
         : getEmptyTagValue(),
   },
@@ -90,6 +98,8 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             attrName: 'host.name',
             idPrefix: escapeDataProviderId(`${tableId}-table-lastHost-${path}`),
             rowItem: lastHost,
+            isAggregatable: true,
+            fieldType: 'keyword',
           })
         : getEmptyTagValue(),
   },
@@ -102,6 +112,8 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp-${path}`),
             rowItem: lastSourceIp,
             render: () => <NetworkDetailsLink ip={lastSourceIp} />,
+            isAggregatable: true,
+            fieldType: 'keyword',
           })
         : getEmptyTagValue(),
   },

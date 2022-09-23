@@ -16,7 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('reassign agent(s)', () => {
+  describe('fleet_reassign_agent', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
@@ -190,10 +190,56 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(200);
+
         const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
         expect(body.total).to.eql(4);
         body.items.forEach((agent: any) => {
           expect(agent.policy_id).to.eql('policy2');
+        });
+      });
+
+      it('should bulk reassign multiple agents by kuery in batches', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active: true',
+            policy_id: 'policy2',
+            batchSize: 2,
+          })
+          .expect(200);
+
+        const actionId = body.actionId;
+
+        const verifyActionResult = async () => {
+          const { body: result } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+          expect(result.total).to.eql(4);
+          result.items.forEach((agent: any) => {
+            expect(agent.policy_id).to.eql('policy2');
+          });
+        };
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 2) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
         });
       });
 

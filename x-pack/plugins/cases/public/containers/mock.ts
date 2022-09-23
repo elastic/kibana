@@ -12,6 +12,9 @@ import type {
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   AlertComment,
+  CasesMetrics,
+  ExternalReferenceComment,
+  PersistableComment,
 } from '../../common/ui/types';
 import {
   Actions,
@@ -32,11 +35,16 @@ import {
   UserActionWithResponse,
   CommentUserAction,
   CaseSeverity,
+  ExternalReferenceStorageType,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
+import {
+  ExternalReferenceAttachmentType,
+  AttachmentViewObject,
+  PersistableStateAttachmentType,
+} from '../client/attachment_framework/types';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -90,7 +98,26 @@ export const alertComment: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment: () => Comment = () => {
+export const alertCommentWithIndices: AlertComment = {
+  alertId: 'alert-id-1',
+  index: '.alerts-matchme.alerts',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const hostIsolationComment = (overrides?: Record<string, unknown>): Comment => {
   return {
     type: CommentType.actions,
     comment: 'I just isolated the host!',
@@ -112,6 +139,7 @@ export const hostIsolationComment: () => Comment = () => {
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    ...overrides,
   };
 };
 
@@ -138,6 +166,38 @@ export const hostReleaseComment: () => Comment = () => {
     updatedBy: null,
     version: 'WzQ3LDFc',
   };
+};
+
+export const externalReferenceAttachment: ExternalReferenceComment = {
+  type: CommentType.externalReference,
+  id: 'external-reference-comment-id',
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: { test_foo: 'foo' },
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const persistableStateAttachment: PersistableComment = {
+  type: CommentType.persistableState,
+  id: 'persistable-state-comment-id',
+  persistableStateAttachmentState: { test_foo: 'foo' },
+  persistableStateAttachmentTypeId: '.test',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
 };
 
 export const basicCase: Case = {
@@ -169,6 +229,8 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  // damaged_raccoon uid
+  assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
 export const caseWithAlerts = {
@@ -176,6 +238,7 @@ export const caseWithAlerts = {
   totalAlerts: 2,
   id: caseWithAlertsId,
 };
+
 export const caseWithAlertsSyncOff = {
   ...basicCase,
   totalAlerts: 2,
@@ -183,6 +246,12 @@ export const caseWithAlertsSyncOff = {
     syncAlerts: false,
   },
   id: caseWithAlertsSyncOffId,
+};
+
+export const caseWithRegisteredAttachments = {
+  ...basicCase,
+  id: 'case-with-registered-attachment',
+  comments: [externalReferenceAttachment, persistableStateAttachment],
 };
 
 export const basicResolvedCase: ResolvedCase = {
@@ -263,6 +332,7 @@ export const mockCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  assignees: [],
 };
 
 export const basicCasePost: Case = {
@@ -290,6 +360,10 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const casesMetrics: CasesMetrics = {
+  mttr: 12,
 };
 
 export const basicPush = {
@@ -331,6 +405,7 @@ export const cases: Case[] = [
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
   caseWithAlerts,
   caseWithAlertsSyncOff,
+  caseWithRegisteredAttachments,
 ];
 
 export const allCases: Cases = {
@@ -379,6 +454,38 @@ export const basicCommentSnake: CommentResponse = {
   version: 'WzQ3LDFc',
 };
 
+export const externalReferenceAttachmentSnake: CommentResponse = {
+  type: CommentType.externalReference,
+  id: 'external-reference-comment-id',
+  externalReferenceId: 'my-id',
+  externalReferenceMetadata: { test_foo: 'foo' },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  created_at: basicCreatedAt,
+  created_by: elasticUserSnake,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+  version: 'WzQ3LDFc',
+};
+
+export const persistableStateAttachmentSnake: CommentResponse = {
+  type: CommentType.persistableState,
+  id: 'persistable-state-comment-id',
+  persistableStateAttachmentState: { test_foo: 'foo' },
+  persistableStateAttachmentTypeId: '.test',
+  created_at: basicCreatedAt,
+  created_by: elasticUserSnake,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+  version: 'WzQ3LDFc',
+};
+
 export const basicCaseSnake: CaseResponse = {
   ...basicCase,
   status: CaseStatuses.open,
@@ -400,6 +507,7 @@ export const caseWithAlertsSnake = {
   totalAlerts: 2,
   id: caseWithAlertsId,
 };
+
 export const caseWithAlertsSyncOffSnake = {
   ...basicCaseSnake,
   totalAlerts: 2,
@@ -407,6 +515,12 @@ export const caseWithAlertsSyncOffSnake = {
     syncAlerts: false,
   },
   id: caseWithAlertsSyncOffId,
+};
+
+export const caseWithRegisteredAttachmentsSnake = {
+  ...basicCaseSnake,
+  id: 'case-with-registered-attachment',
+  comments: [externalReferenceAttachmentSnake, persistableStateAttachmentSnake],
 };
 
 export const casesStatusSnake: CasesStatusResponse = {
@@ -441,13 +555,6 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
-export const respReporters = [
-  { username: 'alexis', full_name: null, email: null },
-  { username: 'kim', full_name: null, email: null },
-  { username: 'maria', full_name: null, email: null },
-  { username: 'steph', full_name: null, email: null },
-];
 export const casesSnake: CasesResponse = [
   basicCaseSnake,
   { ...pushedCaseSnake, id: '1', totalComment: 0, comments: [] },
@@ -456,6 +563,7 @@ export const casesSnake: CasesResponse = [
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
   caseWithAlertsSnake,
   caseWithAlertsSyncOffSnake,
+  caseWithRegisteredAttachmentsSnake,
 ];
 
 export const allCasesSnake: CasesFindResponse = {
@@ -520,6 +628,7 @@ export const getUserAction = (
           tags: ['a tag'],
           settings: { syncAlerts: true },
           owner: SECURITY_SOLUTION_OWNER,
+          assignees: [],
         },
         ...overrides,
       };
@@ -574,6 +683,19 @@ export const getUserAction = (
         payload: { title: 'a title' },
         ...overrides,
       };
+    case ActionTypes.assignees:
+      return {
+        ...commonProperties,
+        type: ActionTypes.assignees,
+        payload: {
+          assignees: [
+            // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
+            { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
+            { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
+          ],
+        },
+        ...overrides,
+      };
 
     default:
       return {
@@ -597,6 +719,32 @@ export const caseUserActionsSnake: CaseUserActionsResponse = [
   getUserActionSnake('description', Actions.create),
   getUserActionSnake('comment', Actions.create),
   getUserActionSnake('description', Actions.update),
+];
+
+export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsResponse = [
+  getUserActionSnake('description', Actions.create),
+  {
+    created_at: basicCreatedAt,
+    created_by: elasticUserSnake,
+    case_id: 'case-with-registered-attachment',
+    comment_id: null,
+    owner: SECURITY_SOLUTION_OWNER,
+    type: 'comment',
+    action: 'create',
+    action_id: 'create-comment-id',
+    payload: { comment: externalReferenceAttachmentSnake },
+  },
+  {
+    created_at: basicCreatedAt,
+    created_by: elasticUserSnake,
+    case_id: 'case-with-registered-attachment',
+    comment_id: null,
+    owner: SECURITY_SOLUTION_OWNER,
+    type: 'comment',
+    action: 'create',
+    action_id: 'create-comment-id',
+    payload: { comment: persistableStateAttachmentSnake },
+  },
 ];
 
 export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnector => {
@@ -632,9 +780,9 @@ export const getAlertUserAction = (): SnakeToCamelCase<
   },
 });
 
-export const getHostIsolationUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getHostIsolationUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'isolate-action-id',
   type: ActionTypes.comment,
@@ -647,6 +795,7 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const caseUserActions: CaseUserActions[] = [
@@ -655,14 +804,37 @@ export const caseUserActions: CaseUserActions[] = [
   getUserAction('description', Actions.update),
 ];
 
+export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
+  getUserAction('description', Actions.create),
+  {
+    createdAt: basicCreatedAt,
+    createdBy: elasticUser,
+    caseId: 'case-with-registered-attachment',
+    commentId: null,
+    owner: SECURITY_SOLUTION_OWNER,
+    type: 'comment',
+    action: 'create',
+    actionId: 'create-comment-id',
+    payload: { comment: externalReferenceAttachment },
+  },
+  {
+    createdAt: basicCreatedAt,
+    createdBy: elasticUser,
+    caseId: 'case-with-registered-attachment',
+    commentId: null,
+    owner: SECURITY_SOLUTION_OWNER,
+    type: 'comment',
+    action: 'create',
+    actionId: 'create-comment-id',
+    payload: { comment: persistableStateAttachment },
+  },
+];
+
 // components tests
-export const useGetCasesMockState: UseGetCasesState = {
+export const useGetCasesMockState = {
   data: allCases,
-  loading: [],
-  selectedCases: [],
+  isLoading: false,
   isError: false,
-  queryParams: DEFAULT_QUERY_PARAMS,
-  filterOptions: DEFAULT_FILTER_OPTIONS,
 };
 
 export const basicCaseClosed: Case = {
@@ -671,3 +843,65 @@ export const basicCaseClosed: Case = {
   closedBy: elasticUser,
   status: CaseStatuses.closed,
 };
+
+export const getExternalReferenceUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
+  actionId: 'external-reference-action-id',
+  type: ActionTypes.comment,
+  commentId: 'external-reference-comment-id',
+  payload: {
+    comment: {
+      type: CommentType.externalReference,
+      externalReferenceId: 'my-id',
+      externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+      externalReferenceAttachmentTypeId: '.test',
+      externalReferenceMetadata: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
+});
+
+export const getExternalReferenceAttachment = (
+  viewObject: AttachmentViewObject = {}
+): ExternalReferenceAttachmentType => ({
+  id: '.test',
+  icon: 'casesApp',
+  displayName: 'Test',
+  getAttachmentViewObject: () => ({
+    event: 'added a chart',
+    timelineAvatar: 'casesApp',
+    ...viewObject,
+  }),
+});
+
+export const getPersistableStateUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
+  actionId: 'persistable-state-action-id',
+  type: ActionTypes.comment,
+  commentId: 'persistable-state-comment-id',
+  payload: {
+    comment: {
+      type: CommentType.persistableState,
+      persistableStateAttachmentState: { test_foo: 'foo' },
+      persistableStateAttachmentTypeId: '.test',
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
+});
+
+export const getPersistableStateAttachment = (
+  viewObject: AttachmentViewObject = {}
+): PersistableStateAttachmentType => ({
+  id: '.test',
+  icon: 'casesApp',
+  displayName: 'Test',
+  getAttachmentViewObject: () => ({
+    event: 'added an embeddable',
+    timelineAvatar: 'casesApp',
+    ...viewObject,
+  }),
+});

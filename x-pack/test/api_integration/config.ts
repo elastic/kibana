@@ -37,6 +37,8 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.cache.enabled=false',
         '--xpack.uptime.service.password=test',
         '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+        '--xpack.uptime.service.devUrl=mockDevUrl',
+        '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       ],
     },
     esTestCluster: {

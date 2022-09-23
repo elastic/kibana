@@ -8,12 +8,13 @@
 
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import type { PaletteOutput } from '@kbn/coloring';
-import type { Adapters } from '@kbn/inspector-plugin';
-import type { AggGroupNames, AggParam, AggGroupName, Query } from '@kbn/data-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { TimeRange } from '@kbn/data-plugin/common';
+import type { AggGroupNames, AggParam, AggGroupName } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
+import { NavigateToLensContext } from '../../common';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -56,6 +57,7 @@ interface DefaultEditorConfig<TVisParams> {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
+  enableDataViewChange?: boolean;
   defaultSize?: string;
   optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
   optionTabs?: Array<{
@@ -68,74 +70,6 @@ interface DefaultEditorConfig<TVisParams> {
 
 interface CustomEditorConfig {
   editor: string;
-}
-
-interface SplitByFilters {
-  color?: string;
-  filter?: Query;
-  id?: string;
-  label?: string;
-}
-
-interface VisualizeEditorMetricContext {
-  agg: string;
-  fieldName: string;
-  pipelineAggType?: string;
-  params?: Record<string, unknown>;
-  isFullReference: boolean;
-  color?: string;
-  accessor?: string;
-}
-
-export interface VisualizeEditorLayersContext {
-  indexPatternId: string;
-  splitWithDateHistogram?: boolean;
-  timeFieldName?: string;
-  chartType?: string;
-  axisPosition?: string;
-  termsParams?: Record<string, unknown>;
-  splitFields?: string[];
-  splitMode?: string;
-  splitFilters?: SplitByFilters[];
-  palette?: PaletteOutput;
-  metrics: VisualizeEditorMetricContext[];
-  timeInterval?: string;
-  format?: string;
-  label?: string;
-  layerId?: string;
-  dropPartialBuckets?: boolean;
-}
-
-interface AxisExtents {
-  mode: string;
-  lowerBound?: number;
-  upperBound?: number;
-}
-
-export interface NavigateToLensContext {
-  layers: {
-    [key: string]: VisualizeEditorLayersContext;
-  };
-  type: string;
-  configuration: {
-    fill: number | string;
-    legend: {
-      isVisible: boolean;
-      position: string;
-      shouldTruncate: boolean;
-      maxLines: number;
-      showSingleSeries: boolean;
-    };
-    gridLinesVisibility: {
-      x: boolean;
-      yLeft: boolean;
-      yRight: boolean;
-    };
-    extents: {
-      yLeftExtent: AxisExtents;
-      yRightExtent: AxisExtents;
-    };
-  };
 }
 
 /**
@@ -170,7 +104,8 @@ export interface VisTypeDefinition<TVisParams> {
    * in order to be displayed in the Lens editor.
    */
   readonly navigateToLens?: (
-    params?: VisParams
+    params?: VisParams,
+    timeRange?: TimeRange
   ) => Promise<NavigateToLensContext | null> | undefined;
 
   /**
@@ -194,6 +129,14 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly stage?: 'experimental' | 'beta' | 'production';
   /**
+   * It sets the vis type on a deprecated mode when is true
+   */
+  readonly isDeprecated?: boolean;
+  /**
+   * If returns true, no warning toasts will be shown
+   */
+  readonly suppressWarnings?: () => boolean;
+  /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
    * @default 'aggbased'
@@ -211,6 +154,10 @@ export interface VisTypeDefinition<TVisParams> {
    * with the selection of a search source - an index pattern or a saved search.
    */
   readonly requiresSearch?: boolean;
+  /**
+   * In case when the visualization performs an aggregation, this option will be used to display or hide the rows with partial data.
+   */
+  readonly hasPartialRows?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
@@ -220,6 +167,12 @@ export interface VisTypeDefinition<TVisParams> {
    * of this type.
    */
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
+
+  /**
+   * When truthy, it will perform a search and pass the results to the visualization as a `datatable`.
+   * @default false
+   */
+  readonly fetchDatatable?: boolean;
   /**
    * Should be provided to expand base visualization expression with
    * custom exprsesion chain, including render expression.

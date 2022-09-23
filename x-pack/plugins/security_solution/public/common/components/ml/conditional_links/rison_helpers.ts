@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RisonValue, RisonObject, decode } from 'rison-node';
+import type { RisonValue, RisonObject } from 'rison-node';
+import { decode } from 'rison-node';
 import { isObject, isString } from 'lodash/fp';
 
 export const decodeRison = (value: string): RisonValue => {

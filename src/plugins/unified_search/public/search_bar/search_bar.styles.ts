@@ -13,12 +13,16 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
     uniSearchBar: css`
       padding: ${euiTheme.size.s};
+      position: relative;
     `,
     detached: css`
       border-bottom: ${euiTheme.border.thin};
     `,
     inPage: css`
       padding: 0;
+    `,
+    hidden: css`
+      display: none;
     `,
   };
 };

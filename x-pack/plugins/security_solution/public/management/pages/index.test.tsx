@@ -9,7 +9,8 @@ import React from 'react';
 
 import { ManagementContainer } from '.';
 import '../../common/mock/match_media';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { endpointPageHttpMock } from './endpoint_hosts/mocks';
 
@@ -33,7 +34,8 @@ describe('when in the Administration tab', () => {
     expect(await render().findByTestId('noIngestPermissions')).not.toBeNull();
   });
 
-  it('should display the Management view if user has privileges', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/135166
+  it.skip('should display the Management view if user has privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
     });

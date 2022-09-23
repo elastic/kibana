@@ -6,14 +6,12 @@
  */
 
 // @ts-ignore
-import { StringOptions } from '@kbn/config-schema/target_types/types';
-// @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 export function handleResponse(response: ElasticsearchResponse) {
@@ -104,7 +102,7 @@ export function getShardAllocation(
   const dataset = 'shard'; // data_stream.dataset
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     dataset,
@@ -118,7 +116,7 @@ export function getShardAllocation(
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         clusterUuid,
         metric,

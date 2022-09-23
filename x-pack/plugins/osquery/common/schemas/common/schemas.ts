@@ -48,10 +48,34 @@ export type Interval = t.TypeOf<typeof interval>;
 export const intervalOrUndefined = t.union([interval, t.undefined]);
 export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
 
+export const snapshot = t.boolean;
+export type Snapshot = t.TypeOf<typeof snapshot>;
+export const snapshotOrUndefined = t.union([snapshot, t.undefined]);
+export type SnapshotOrUndefined = t.TypeOf<typeof snapshotOrUndefined>;
+
+export const removed = t.boolean;
+export type Removed = t.TypeOf<typeof removed>;
+export const removedOrUndefined = t.union([removed, t.undefined]);
+export type RemovedOrUndefined = t.TypeOf<typeof removedOrUndefined>;
+
 export const savedQueryId = t.string;
 export type SavedQueryId = t.TypeOf<typeof savedQueryId>;
 export const savedQueryIdOrUndefined = t.union([savedQueryId, t.undefined]);
 export type SavedQueryIdOrUndefined = t.TypeOf<typeof savedQueryIdOrUndefined>;
+
+export const packId = t.string;
+export type PackId = t.TypeOf<typeof packId>;
+export const packIdOrUndefined = t.union([packId, t.undefined]);
+export type PackIdOrUndefined = t.TypeOf<typeof packIdOrUndefined>;
+
+export const executionContext = t.type({
+  name: t.union([t.string, t.undefined]),
+  url: t.union([t.string, t.undefined]),
+});
+
+export type ExecutionContext = t.TypeOf<typeof executionContext>;
+export const executionContextOrUndefined = t.union([executionContext, t.undefined]);
+export type ExecutionContextOrUndefined = t.TypeOf<typeof executionContextOrUndefined>;
 
 export const ecsMapping = t.record(
   t.string,
@@ -63,3 +87,33 @@ export const ecsMapping = t.record(
 export type ECSMapping = t.TypeOf<typeof ecsMapping>;
 export const ecsMappingOrUndefined = t.union([ecsMapping, t.undefined]);
 export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;
+
+export const stringArrayOrUndefined = t.union([t.array(t.string), t.undefined]);
+export type StringArrayOrUndefined = t.TypeOf<typeof stringArrayOrUndefined>;
+
+export const arrayQueries = t.array(
+  t.type({
+    id,
+    query,
+    ecs_mapping: ecsMapping,
+    version,
+    platform,
+  })
+);
+export type ArrayQueries = t.TypeOf<typeof arrayQueries>;
+export const objectQueries = t.record(
+  t.string,
+  t.type({
+    query,
+    id,
+    ecs_mapping: ecsMappingOrUndefined,
+    version: versionOrUndefined,
+    platform: platformOrUndefined,
+    saved_query_id: savedQueryIdOrUndefined,
+  })
+);
+export type ObjectQueries = t.TypeOf<typeof objectQueries>;
+export const queries = t.union([arrayQueries, objectQueries]);
+export type Queries = t.TypeOf<typeof queries>;
+export const queriesOrUndefined = t.union([queries, t.undefined]);
+export type QueriesOrUndefined = t.TypeOf<typeof queriesOrUndefined>;

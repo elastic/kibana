@@ -24,19 +24,12 @@ export { getVisSchemas } from './vis_schemas';
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types/vis_groups_enum';
-export type {
-  BaseVisType,
-  VisTypeAlias,
-  VisTypeDefinition,
-  Schema,
-  ISchemas,
-  NavigateToLensContext,
-  VisualizeEditorLayersContext,
-} from './vis_types';
+export type { BaseVisType, VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { VisualizeInput } from './embeddable';
+export type { VisualizeEmbeddable } from './embeddable';
 export type { SchemaConfig } from './vis_schemas';
 export { updateOldState } from './legacy/vis_update_state';
 export type { PersistedState } from './persisted_state';
@@ -56,6 +49,9 @@ export {
   VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
+  LegendSize,
+  LegendSizeToPixels,
+  DEFAULT_LEGEND_SIZE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
 export { prepareLogTable } from '../common';

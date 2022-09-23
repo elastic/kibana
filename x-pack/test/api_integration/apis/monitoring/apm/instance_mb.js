@@ -12,7 +12,10 @@ import { getLifecycleMethods } from '../data_stream';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('instance detail mb', () => {
+  describe('instance detail mb', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     const { setup, tearDown } = getLifecycleMethods(getService);
     const archive = 'x-pack/test/functional/es_archives/monitoring/apm_mb';
     const timeRange = {

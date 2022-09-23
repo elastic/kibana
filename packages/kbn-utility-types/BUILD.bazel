@@ -5,11 +5,26 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 PKG_BASE_NAME = "kbn-utility-types"
 PKG_REQUIRE_NAME = "@kbn/utility-types"
 
-SOURCE_FILES = glob([
-  "src/jest/index.ts",
-  "src/serializable/**",
-  "src/index.ts"
-])
+SOURCE_FILES = glob(
+  [
+    "src/serializable/**",
+    "src/dot.ts",
+    "index.ts"
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
 
 SRCS = SOURCE_FILES
 
@@ -19,9 +34,7 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "jest/package.json",
   "package.json",
-  "README.md",
 ]
 
 RUNTIME_DEPS = [
@@ -30,8 +43,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "@npm//utility-types",
-  "@npm//@types/node",
-  "@npm//@types/jest",
+  "@npm//@types/node"
 ]
 
 jsts_transpiler(
@@ -55,9 +67,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
@@ -65,7 +77,7 @@ js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
-  package_name = "@kbn/utility-types",
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 

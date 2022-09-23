@@ -36,13 +36,6 @@ export const drag = (subject: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-/** Drags the subject being dragged on the specified drop target, but does not drop it  */
-export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
-  cy.wrap(dropTarget).trigger('mousemove', 'center', {
-    button: primaryButton,
-  });
-};
-
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   const targetLocation = dropTarget[0].getBoundingClientRect();
@@ -67,6 +60,48 @@ export const cleanKibana = () => {
   deleteAlertsAndRules();
   deleteCases();
   deleteTimelines();
+};
+
+export const cleanPackages = () => {
+  deletePolicies();
+  deletePackages();
+};
+
+export const deletePolicies = () => {
+  cy.request({
+    method: 'GET',
+    url: 'api/fleet/agent_policies',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    response.body.items.forEach((item: { id: string }) => {
+      cy.request({
+        method: 'POST',
+        url: `api/fleet/agent_policies/delete`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        body: {
+          agentPolicyId: item.id,
+        },
+      });
+    });
+  });
+};
+
+export const deletePackages = () => {
+  cy.request({
+    method: 'GET',
+    url: 'api/fleet/epm/packages',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    response.body.items.forEach((item: { status: string; name: string; version: string }) => {
+      if (item.status === 'installed') {
+        cy.request({
+          method: 'DELETE',
+          url: `api/fleet/epm/packages/${item.name}/${item.version}`,
+          headers: { 'kbn-xsrf': 'cypress-creds' },
+        });
+      }
+    });
+  });
 };
 
 export const deleteAlertsAndRules = () => {
@@ -144,14 +179,32 @@ export const deleteCases = () => {
   });
 };
 
-export const postDataView = (indexPattern: string) => {
+export const deleteSavedQueries = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'query',
+            },
+          },
+        ],
+      },
+    },
+  });
+};
+
+export const postDataView = (dataSource: string) => {
   cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
+        id: dataSource,
         fieldAttrs: '{}',
-        title: indexPattern,
+        title: dataSource,
         timeFieldName: '@timestamp',
         fields: '{}',
       },

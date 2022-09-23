@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/jira/types';
+import type { ExecutorSubActionPushParams } from '@kbn/stack-connectors-plugin/server/connector_types/cases/jira/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;

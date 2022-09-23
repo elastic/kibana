@@ -7,7 +7,10 @@
 
 import { Actions } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { UserActionBuilderArgs } from './types';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
@@ -56,15 +59,20 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const handleDeleteComment = jest.fn();
   const handleManageQuote = jest.fn();
   const handleOutlineComment = jest.fn();
+  const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
   return {
     userAction,
+    userProfiles: userProfilesMap,
+    currentUserProfile: userProfiles[0],
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
     caseData: basicCase,
     comments: basicCase.comments,
     caseServices,
     index: 0,
     alertData,
-    userCanCrud: true,
     commentRefs,
     manageMarkdownEditIds: [],
     selectedOutlineCommentId: '',

@@ -130,20 +130,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with Visualize disabled', () => {
+      const customSpace = 'custom_space';
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/spaces/disabled_features');
         await spacesService.create({
-          id: 'custom_space',
-          name: 'custom_space',
+          id: customSpace,
+          name: customSpace,
           disabledFeatures: ['visualize'],
         });
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: customSpace }
+        );
       });
 
       after(async () => {
-        await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/disabled_features');
+        await spacesService.delete(customSpace);
       });
 
       it('Does not show the "visualize" field button', async () => {
@@ -172,13 +175,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space_no_index_patterns');
       });
 
-      it('Navigates to Kibana Analytics overview  when no data views exist', async () => {
+      it('shows empty prompt when no data views exist', async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space_no_index_patterns',
           ensureCurrentUrl: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('kbnOverviewAddIntegrations', {
+        await testSubjects.existOrFail('noDataViewsPrompt', {
           timeout: config.get('timeouts.waitFor'),
         });
       });

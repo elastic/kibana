@@ -21,7 +21,8 @@
     "alerts",
     "observability",
     "security",
-    "maps"
+    "maps",
+    "lens"
   ],
   "server": false,
   "ui": true,

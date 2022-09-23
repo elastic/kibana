@@ -20,13 +20,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
   RuleAction,
   ActionTypeIndex,
   ActionConnector,
-  ActionType,
   ActionVariables,
   ActionTypeRegistryContract,
 } from '../../../types';
@@ -35,9 +35,8 @@ import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
@@ -56,12 +55,12 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
-  actionTypes?: ActionType[];
+  featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  getDefaultActionParams?: DefaultActionParamsGetter;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 }
 
@@ -77,14 +76,14 @@ export const ActionForm = ({
   setActionGroupIdByIndex,
   setActions,
   setActionParamsProperty,
-  actionTypes,
+  featureId,
   messageVariables,
   actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
-  getDefaultActionParams,
+  recoveryActionGroup,
   isActionGroupDisabledForActionType,
 }: ActionAccordionFormProps) => {
   const {
@@ -112,8 +111,8 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (actionTypes ?? (await loadActionTypes({ http }))).sort(
-          (a, b) => a.name.localeCompare(b.name)
+        const registeredActionTypes = (await loadActionTypes({ http, featureId })).sort((a, b) =>
+          a.name.localeCompare(b.name)
         );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
@@ -232,11 +231,6 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      /**
-       * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-       * If actionTypes are set, hidden connectors are filtered out. Otherwise, they are not.
-       */
-      .filter(({ id }) => actionTypes ?? !DEFAULT_HIDDEN_ACTION_TYPES.includes(id))
       .filter((item) => actionTypesIndex[item.id])
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
@@ -260,8 +254,12 @@ export const ActionForm = ({
           <EuiKeyPadMenuItem
             key={index}
             isDisabled={!checkEnabledResult.isEnabled}
-            data-test-subj={`${item.id}-ActionTypeSelectOption`}
+            data-test-subj={`${item.id}-${featureId}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
+            betaBadgeLabel={item.isExperimental ? betaBadgeProps.label : undefined}
+            betaBadgeTooltipContent={
+              item.isExperimental ? betaBadgeProps.tooltipContent : undefined
+            }
             onClick={() => addActionType(item)}
           >
             <EuiIcon
@@ -362,7 +360,7 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
-              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              recoveryActionGroup={recoveryActionGroup}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {

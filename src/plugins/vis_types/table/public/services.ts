@@ -7,7 +7,7 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export const [getFormatService, setFormatService] =
-  createGetterSetter<DataPublicPluginStart['fieldFormats']>('table data.fieldFormats');
+  createGetterSetter<FieldFormatsStart>('FieldFormats');

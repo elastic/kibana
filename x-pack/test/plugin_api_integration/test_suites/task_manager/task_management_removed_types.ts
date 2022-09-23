@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';

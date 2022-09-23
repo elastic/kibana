@@ -18,7 +18,11 @@ describe('EntSearchLogStream', () => {
 
   describe('renders with default props', () => {
     /** As a result of the theme provider being added, we have to extract the child component to correctly assert */
-    const wrapper = shallow(shallow(<EntSearchLogStream />).prop('children'));
+    const wrapper = shallow(
+      shallow(
+        <EntSearchLogStream logView={{ type: 'log-view-reference', logViewId: 'default' }} />
+      ).prop('children')
+    );
 
     it('renders a LogStream (wrapped in React.Suspense) component', () => {
       expect(wrapper.type()).toEqual(React.Suspense);
@@ -37,19 +41,28 @@ describe('EntSearchLogStream', () => {
   describe('renders custom props', () => {
     it('overrides the default props', () => {
       const wrapper = shallow(
-        shallow(<EntSearchLogStream sourceId="test" startTimestamp={1} endTimestamp={2} />).prop(
-          'children'
-        )
+        shallow(
+          <EntSearchLogStream
+            logView={{ type: 'log-view-reference', logViewId: 'test' }}
+            startTimestamp={1}
+            endTimestamp={2}
+          />
+        ).prop('children')
       );
 
-      expect(wrapper.prop('sourceId')).toEqual('test');
+      expect(wrapper.prop('logView')).toEqual({ type: 'log-view-reference', logViewId: 'test' });
       expect(wrapper.prop('startTimestamp')).toEqual(1);
       expect(wrapper.prop('endTimestamp')).toEqual(2);
     });
 
     it('allows passing a custom hoursAgo that modifies the default start timestamp', () => {
       const wrapper = shallow(
-        shallow(<EntSearchLogStream sourceId={fakeSourceId} hoursAgo={1} />).prop('children')
+        shallow(
+          <EntSearchLogStream
+            logView={{ type: 'log-view-reference', logViewId: fakeSourceId }}
+            hoursAgo={1}
+          />
+        ).prop('children')
       );
 
       expect(wrapper.prop('startTimestamp')).toEqual(156400000);
@@ -60,7 +73,7 @@ describe('EntSearchLogStream', () => {
       const wrapper = shallow(
         shallow(
           <EntSearchLogStream
-            sourceId={fakeSourceId}
+            logView={{ type: 'log-view-reference', logViewId: fakeSourceId }}
             height={500}
             highlight="some-log-id"
             columns={[

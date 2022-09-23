@@ -13,11 +13,12 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiAccordion, EuiTabbedContent, EuiNotificationBadge, EuiCheckbox } from '@elastic/eui';
 
+import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
+
 import { rerender } from '../../../../../test_helpers';
 import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_selectable';
 
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
-import { UrlComboBox } from './url_combo_box';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic

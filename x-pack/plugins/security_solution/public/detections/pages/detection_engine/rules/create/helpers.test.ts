@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { List } from '@kbn/securitysolution-io-ts-list-types';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
   getEndpointListMock,
 } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import {
+import type {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
@@ -40,7 +40,7 @@ import {
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -50,10 +50,10 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 0 });
     });
 
-    test('returns timeObj with unit set to empty string if no expected time type found', () => {
+    test('returns timeObj with unit set to default unit value of "ms" if no expected time type found', () => {
       const result = getTimeTypeValue('5l');
 
-      expect(result).toEqual({ unit: '', value: 5 });
+      expect(result).toEqual({ unit: 'ms', value: 5 });
     });
 
     test('returns timeObj with unit of s and value 5 when time is 5s ', () => {
@@ -80,10 +80,10 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 5 });
     });
 
-    test('returns timeObj with value of 0 and unit of "" if random string passed in', () => {
+    test('returns timeObj with value of 0 and unit of "ms" if random string passed in', () => {
       const result = getTimeTypeValue('random');
 
-      expect(result).toEqual({ unit: '', value: 0 });
+      expect(result).toEqual({ unit: 'ms', value: 0 });
     });
   });
 
@@ -118,31 +118,7 @@ describe('helpers', () => {
         language: 'kuery',
         filters: mockQueryBar.filters,
         query: 'test query',
-        saved_id: 'test123',
         index: ['filebeat-'],
-        type: 'saved_query',
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Titled timeline',
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns formatted object with no saved_id if no savedId provided', () => {
-      const mockStepData: DefineStepRule = {
-        ...mockData,
-        queryBar: {
-          ...mockData.queryBar,
-          saved_id: '',
-        },
-      };
-      const result = formatDefineStepData(mockStepData);
-      const expected: DefineStepRuleJson = {
-        language: 'kuery',
-        filters: mockQueryBar.filters,
-        query: 'test query',
-        index: ['filebeat-'],
-        saved_id: '',
         type: 'query',
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
@@ -151,7 +127,109 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object without timeline_id and timeline_title if timeline.id is null', () => {
+    describe('saved_query and query rule types', () => {
+      test('returns query rule if savedId provided but shouldLoadQueryDynamically != true', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'query',
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBeUndefined();
+        expect(result.type).toBe('query');
+        expect(result.query).toBe('test query');
+      });
+
+      test('returns query rule if shouldLoadQueryDynamically = true and savedId not provided for rule type query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: null,
+          },
+          ruleType: 'query',
+          shouldLoadQueryDynamically: true,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBeUndefined();
+        expect(result.type).toBe('query');
+        expect(result.query).toBe('test query');
+      });
+
+      test('returns query rule if shouldLoadQueryDynamically = true and savedId not provided for rule type saved_query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: null,
+          },
+          ruleType: 'saved_query',
+          shouldLoadQueryDynamically: true,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBeUndefined();
+        expect(result.type).toBe('query');
+        expect(result.query).toBe('test query');
+      });
+
+      test('returns query rule type if savedId provided but shouldLoadQueryDynamically != true and rule type is saved_query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'saved_query',
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBeUndefined();
+        expect(result.type).toBe('query');
+        expect(result.query).toBe('test query');
+      });
+
+      test('returns saved_query rule if shouldLoadQueryDynamically = true and savedId provided for rule type query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'query',
+          shouldLoadQueryDynamically: true,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBe('mock-test-id');
+        expect(result.type).toBe('saved_query');
+        expect(result.query).toBeUndefined();
+      });
+
+      test('returns saved_query rule if shouldLoadQueryDynamically = true and savedId provided for rule type saved_query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'saved_query',
+          shouldLoadQueryDynamically: true,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBe('mock-test-id');
+        expect(result.type).toBe('saved_query');
+        expect(result.query).toBeUndefined();
+      });
+    });
+
+    test('returns undefined timeline_id and timeline_title if timeline.id is undefined', () => {
       const mockStepData: DefineStepRule = {
         ...mockData,
       };
@@ -160,19 +238,11 @@ describe('helpers', () => {
 
       const result = formatDefineStepData(mockStepData);
 
-      const expected: DefineStepRuleJson = {
-        language: 'kuery',
-        filters: mockQueryBar.filters,
-        query: 'test query',
-        index: ['filebeat-'],
-        saved_id: 'test123',
-        type: 'saved_query',
-      };
-
-      expect(result).toEqual(expected);
+      expect(result.timeline_id).toBeUndefined();
+      expect(result.timeline_title).toBeUndefined();
     });
 
-    test('returns formatted object with timeline_id and timeline_title if timeline.id is "', () => {
+    test('returns formatted timeline_id and timeline_title if timeline.id is empty string', () => {
       const mockStepData: DefineStepRule = {
         ...mockData,
         timeline: {
@@ -182,21 +252,11 @@ describe('helpers', () => {
       };
       const result = formatDefineStepData(mockStepData);
 
-      const expected: DefineStepRuleJson = {
-        language: 'kuery',
-        filters: mockQueryBar.filters,
-        query: 'test query',
-        index: ['filebeat-'],
-        saved_id: 'test123',
-        type: 'saved_query',
-        timeline_id: '',
-        timeline_title: 'Titled timeline',
-      };
-
-      expect(result).toEqual(expected);
+      expect(result.timeline_id).toBe('');
+      expect(result.timeline_title).toEqual('Titled timeline');
     });
 
-    test('returns formatted object without timeline_id and timeline_title if timeline.title is null', () => {
+    test('returns undefined timeline_id and timeline_title if timeline.title is undefined', () => {
       const mockStepData: DefineStepRule = {
         ...mockData,
         timeline: {
@@ -208,19 +268,11 @@ describe('helpers', () => {
       delete mockStepData.timeline.title;
       const result = formatDefineStepData(mockStepData);
 
-      const expected: DefineStepRuleJson = {
-        language: 'kuery',
-        filters: mockQueryBar.filters,
-        query: 'test query',
-        index: ['filebeat-'],
-        saved_id: 'test123',
-        type: 'saved_query',
-      };
-
-      expect(result).toEqual(expected);
+      expect(result.timeline_id).toBeUndefined();
+      expect(result.timeline_title).toBeUndefined();
     });
 
-    test('returns formatted object with timeline_id and timeline_title if timeline.title is "', () => {
+    test('returns formatted object with timeline_id and timeline_title if timeline.title is empty string', () => {
       const mockStepData: DefineStepRule = {
         ...mockData,
         timeline: {
@@ -230,18 +282,8 @@ describe('helpers', () => {
       };
       const result = formatDefineStepData(mockStepData);
 
-      const expected: DefineStepRuleJson = {
-        language: 'kuery',
-        filters: mockQueryBar.filters,
-        query: 'test query',
-        index: ['filebeat-'],
-        saved_id: 'test123',
-        type: 'saved_query',
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: '',
-      };
-
-      expect(result).toEqual(expected);
+      expect(result.timeline_id).toBe('86aa74d0-2136-11ea-9864-ebc8cc1cb8c2');
+      expect(result.timeline_title).toEqual('');
     });
 
     test('returns ML fields if type is machine_learning', () => {
@@ -290,6 +332,40 @@ describe('helpers', () => {
       expect(result).toEqual(expect.objectContaining(expected));
     });
 
+    test('returns option fields if specified for eql type', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'eql',
+        queryBar: {
+          ...mockData.queryBar,
+          query: {
+            ...mockData.queryBar.query,
+            language: 'eql',
+            query: 'process where process_name == "explorer.exe"',
+          },
+        },
+        eqlOptions: {
+          timestampField: 'event.created',
+          tiebreakerField: 'process.name',
+          eventCategoryField: 'event.action',
+        },
+      };
+      const result = formatDefineStepData(mockStepData);
+
+      const expected: DefineStepRuleJson = {
+        filters: mockStepData.queryBar.filters,
+        index: mockStepData.index,
+        language: 'eql',
+        query: 'process where process_name == "explorer.exe"',
+        type: 'eql',
+        timestamp_field: 'event.created',
+        tiebreaker_field: 'process.name',
+        event_category_override: 'event.action',
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
+    });
+
     test('returns expected indicator matching rule type if all fields are filled out', () => {
       const threatFilters: DefineStepRule['threatQueryBar']['filters'] = [
         {
@@ -330,6 +406,7 @@ describe('helpers', () => {
         threatQueryBar: {
           query: { language: 'kql', query: 'threat_host: *' },
           filters: threatFilters,
+          saved_id: null,
         },
         threatMapping,
       };
@@ -675,6 +752,34 @@ describe('helpers', () => {
 
       expect(result).toEqual(expected);
     });
+
+    test('returns formatted object with timestamp override', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        timestampOverride: 'event.ingest',
+        timestampOverrideFallbackDisabled: true,
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        timestamp_override: 'event.ingest',
+        timestamp_override_fallback_disabled: true,
+      };
+
+      expect(result).toEqual(expected);
+    });
   });
 
   describe('formatActionsStepData', () => {
@@ -828,8 +933,19 @@ describe('helpers', () => {
       mockActions = mockActionsStepRule();
     });
 
-    test('returns rule with type of saved_query when saved_id exists', () => {
+    test('returns rule with type of query when saved_id exists but shouldLoadQueryDynamically=false', () => {
       const result = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
+
+      expect(result.type).toEqual('query');
+    });
+
+    test('returns rule with type of saved_query when saved_id exists and shouldLoadQueryDynamically=true', () => {
+      const result = formatRule<Rule>(
+        { ...mockDefine, shouldLoadQueryDynamically: true },
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
       expect(result.type).toEqual('saved_query');
     });

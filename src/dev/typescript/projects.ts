@@ -30,7 +30,10 @@ export const PROJECTS = [
   createProject('tsconfig.json'),
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
+  createProject('x-pack/performance/tsconfig.json', { name: 'x-pack/performance' }),
   createProject('src/core/tsconfig.json'),
+  createProject('.buildkite/tsconfig.json'),
+  createProject('kbn_pm/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
@@ -64,9 +67,20 @@ export const PROJECTS = [
   createProject('x-pack/plugins/fleet/cypress/tsconfig.json', {
     name: 'fleet/cypress',
   }),
-
   createProject('x-pack/plugins/synthetics/e2e/tsconfig.json', {
     name: 'uptime/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/ux/e2e/tsconfig.json', {
+    name: 'ux/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/observability/e2e/tsconfig.json', {
+    name: 'observability/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/threat_intelligence/cypress/tsconfig.json', {
+    name: 'threat_intelligence/cypress',
     disableTypeCheck: true,
   }),
 
@@ -76,12 +90,13 @@ export const PROJECTS = [
     'src/plugins/chart_expressions/*/tsconfig.json',
     'src/plugins/vis_types/*/tsconfig.json',
     'x-pack/plugins/*/tsconfig.json',
+    'x-pack/plugins/cloud_integrations/*/tsconfig.json',
     'examples/*/tsconfig.json',
     'x-pack/examples/*/tsconfig.json',
+    'test/analytics/fixtures/plugins/*/tsconfig.json',
     'test/plugin_functional/plugins/*/tsconfig.json',
     'test/interpreter_functional/plugins/*/tsconfig.json',
     'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
-    'packages/kbn-type-summarizer/tests/tsconfig.json',
     ...BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/tsconfig.json`),
   ]),
 ];

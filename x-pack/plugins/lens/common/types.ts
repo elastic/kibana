@@ -10,8 +10,8 @@ import { Position } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -40,15 +40,6 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
-
 export type SortingHint = 'version';
 
 export type CustomPaletteParamsConfig = CustomPaletteParams & {
@@ -72,8 +63,10 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
-  groups: string[];
+  primaryGroups: string[];
+  secondaryGroups?: string[];
   metric?: string;
+  collapseFns?: Record<string, string>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
@@ -83,7 +76,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   truncateLegend?: boolean;
 }
 
@@ -97,7 +90,7 @@ export interface PieVisualizationState {
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
-export interface MetricState {
+export interface LegacyMetricState {
   layerId: string;
   accessor?: string;
   layerType: LayerType;

@@ -7,10 +7,14 @@
 
 import { HttpSetup } from '@kbn/core/public';
 
-import { ActionTypeExecutorResult, snExternalServiceConfig } from '@kbn/actions-plugin/common';
+import {
+  ActionTypeExecutorResult,
+  INTERNAL_BASE_ACTION_API_PATH,
+} from '@kbn/actions-plugin/common';
+import { snExternalServiceConfig } from '@kbn/stack-connectors-plugin/common/servicenow_config';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
-import { AppInfo, RESTApiError } from './types';
+import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { Choice } from './types';
 
@@ -39,30 +43,62 @@ export async function getChoices({
 
 /**
  * The app info url should be the same as at:
- * x-pack/plugins/actions/server/builtin_action_types/servicenow/service.ts
+ * x-pack/plugins/stack_connectors/server/connector_types/cases/servicenow/service.ts
  */
 const getAppInfoUrl = (url: string, scope: string) => `${url}/api/${scope}/elastic_api/health`;
 
 export async function getAppInfo({
+  http,
   signal,
-  apiUrl,
-  username,
-  password,
+  connector,
   actionTypeId,
 }: {
+  http: HttpSetup;
   signal: AbortSignal;
-  apiUrl: string;
-  username: string;
-  password: string;
+  connector: ServiceNowActionConnector;
   actionTypeId: string;
 }): Promise<AppInfo | RESTApiError> {
+  const {
+    secrets: { username, password, clientSecret, privateKey, privateKeyPassword },
+    config: { isOAuth, apiUrl, clientId, userIdentifierValue, jwtKeyId },
+  } = connector;
+
   const urlWithoutTrailingSlash = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+  let authHeader = 'Basic ' + btoa(username + ':' + password);
+
+  if (isOAuth) {
+    const tokenResponse = await http.post<{ accessToken: string }>(
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_access_token`,
+      {
+        body: JSON.stringify({
+          type: 'jwt',
+          options: {
+            tokenUrl: `${urlWithoutTrailingSlash}/oauth_token.do`,
+            config: {
+              clientId,
+              userIdentifierValue,
+              jwtKeyId,
+            },
+            secrets: {
+              clientSecret,
+              privateKey,
+              ...(privateKeyPassword && { privateKeyPassword }),
+            },
+          },
+        }),
+      }
+    );
+
+    const { accessToken } = tokenResponse;
+    authHeader = accessToken;
+  }
+
   const config = snExternalServiceConfig[actionTypeId];
   const response = await fetch(getAppInfoUrl(urlWithoutTrailingSlash, config.appScope ?? ''), {
     method: 'GET',
     signal,
     headers: {
-      Authorization: 'Basic ' + btoa(username + ':' + password),
+      Authorization: authHeader,
     },
   });
 

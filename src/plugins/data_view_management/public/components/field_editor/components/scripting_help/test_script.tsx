@@ -105,7 +105,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     this.setState({
       isLoading: false,
-      previewData: scriptResponse.hits?.hits.map((hit: any) => ({
+      previewData: scriptResponse.hits?.hits.map((hit) => ({
         _id: hit._id,
         ...hit._source,
         ...hit.fields,

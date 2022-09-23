@@ -14,7 +14,7 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
   const SUBJ_SUMMARY_REQUESTS = `${SUBJ_SUMMARY} > requests`;
   const SUBJ_SUMMARY_CONNECTIONS = `${SUBJ_SUMMARY} > connections`;
   const SUBJ_SUMMARY_MAX_RESPONSE_TIME = `${SUBJ_SUMMARY} > maxResponseTime`;
-  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
+  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > status`;
 
   return new (class KibanaSummaryStatus {
     async getContent() {
@@ -24,7 +24,7 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
         requests: await testSubjects.getVisibleText(SUBJ_SUMMARY_REQUESTS),
         connections: await testSubjects.getVisibleText(SUBJ_SUMMARY_CONNECTIONS),
         maxResponseTime: await testSubjects.getVisibleText(SUBJ_SUMMARY_MAX_RESPONSE_TIME),
-        health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
+        health: await testSubjects.getVisibleText(SUBJ_SUMMARY_HEALTH),
       };
     }
   })();

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -20,16 +20,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
   getPolicyIdsFromArtifact,
   isArtifactGlobal,
 } from '../../../../../common/endpoint/service/artifacts';
-import {
-  ARTIFACT_DELETE_ACTION_LABELS,
-  useWithArtifactDeleteItem,
-} from '../hooks/use_with_artifact_delete_item';
-import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
+import type { ARTIFACT_DELETE_ACTION_LABELS } from '../hooks/use_with_artifact_delete_item';
+import { useWithArtifactDeleteItem } from '../hooks/use_with_artifact_delete_item';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_DELETE_LABELS = Object.freeze({
   deleteModalTitle: (itemName: string): string =>

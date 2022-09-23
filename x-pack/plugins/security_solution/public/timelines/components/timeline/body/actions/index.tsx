@@ -30,15 +30,21 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import {
-  TimelineId,
+import type {
   ActionProps,
   OnPinEvent,
-  TimelineTabs,
+  TimelineEventsType,
 } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { ALERTS_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useLicense } from '../../../../../common/hooks/use_license';
+
+export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
+  eventType === 'signal';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -68,6 +74,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { startTransaction } = useStartTransaction();
+
+  const isEnterprisePlus = useLicense().isEnterprise();
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -115,6 +124,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
+    startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
+
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
     if (timelineId === TimelineId.active) {
@@ -127,7 +138,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
         setGlobalFullScreen(true);
       }
     }
-  }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
+  }, [
+    startTransaction,
+    dispatch,
+    timelineId,
+    ecsData._id,
+    setTimelineFullScreen,
+    setGlobalFullScreen,
+  ]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, timestamp } = ecsData;
@@ -152,6 +170,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   const openSessionView = useCallback(() => {
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
+
     if (timelineId === TimelineId.active) {
       if (dataGridIsFullScreen) {
         setTimelineFullScreen(true);
@@ -167,7 +187,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
     if (sessionViewConfig !== null) {
       dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
     }
-  }, [dispatch, timelineId, sessionViewConfig, setGlobalFullScreen, setTimelineFullScreen]);
+  }, [
+    startTransaction,
+    timelineId,
+    sessionViewConfig,
+    setTimelineFullScreen,
+    dispatch,
+    setGlobalFullScreen,
+  ]);
 
   return (
     <ActionsContainer>
@@ -221,6 +248,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+              isAlert={isAlert(eventType)}
               key="pin-event"
               onPinClicked={handlePinClicked}
               noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
@@ -261,7 +289,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         ) : null}
-        {sessionViewConfig !== null ? (
+        {sessionViewConfig !== null &&
+        (isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions) ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>

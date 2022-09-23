@@ -14,15 +14,15 @@ import {
   EuiCodeBlock,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Datatable } from '@kbn/expressions-plugin';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents

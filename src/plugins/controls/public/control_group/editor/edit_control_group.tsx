@@ -26,12 +26,12 @@ export const EditControlGroup = ({
   controlGroupContainer,
   closePopover,
 }: EditControlGroupButtonProps) => {
-  const { overlays } = pluginServices.getServices();
-  const { openConfirm, openFlyout } = overlays;
+  const {
+    overlays: { openConfirm, openFlyout },
+    theme: { theme$ },
+  } = pluginServices.getServices();
 
   const editControlGroup = () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
-
     const onDeleteAll = (ref: OverlayRef) => {
       openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
         confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
@@ -49,15 +49,14 @@ export const EditControlGroup = ({
 
     const flyoutInstance = openFlyout(
       toMountPoint(
-        <PresentationUtilProvider>
-          <ControlGroupEditor
-            initialInput={controlGroupContainer.getInput()}
-            updateInput={(changes) => controlGroupContainer.updateInput(changes)}
-            controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
-            onDeleteAll={() => onDeleteAll(flyoutInstance)}
-            onClose={() => flyoutInstance.close()}
-          />
-        </PresentationUtilProvider>
+        <ControlGroupEditor
+          initialInput={controlGroupContainer.getInput()}
+          updateInput={(changes) => controlGroupContainer.updateInput(changes)}
+          controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
+          onDeleteAll={() => onDeleteAll(flyoutInstance)}
+          onClose={() => flyoutInstance.close()}
+        />,
+        { theme$ }
       ),
       {
         outsideClickCloses: false,

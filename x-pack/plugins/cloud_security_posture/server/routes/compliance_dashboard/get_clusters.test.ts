@@ -11,11 +11,20 @@ const mockClusterBuckets: ClusterBucket[] = [
   {
     key: 'cluster_id',
     doc_count: 10,
-    benchmarks: {
-      buckets: [{ key: 'CIS Kubernetes', doc_count: 10 }],
-    },
-    timestamps: {
-      buckets: [{ key: 123, doc_count: 1 }],
+    latestFindingTopHit: {
+      hits: {
+        hits: [
+          {
+            _id: '123',
+            _index: '123',
+            _source: {
+              cluster: { name: 'cluster_name' },
+              rule: { benchmark: { name: 'CIS Kubernetes', id: 'cis_k8s' } },
+              '@timestamp': '123',
+            },
+          },
+        ],
+      },
     },
     failed_findings: {
       doc_count: 6,
@@ -56,9 +65,11 @@ describe('getClustersFromAggs', () => {
     expect(clusters).toEqual([
       {
         meta: {
-          lastUpdate: 123,
+          lastUpdate: '123',
+          clusterName: 'cluster_name',
           clusterId: 'cluster_id',
           benchmarkName: 'CIS Kubernetes',
+          benchmarkId: 'cis_k8s',
         },
         stats: {
           totalFindings: 12,

@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 
 import { I18nStart } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';

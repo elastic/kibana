@@ -9,31 +9,42 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
   EXPRESSION_HEATMAP_NAME,
   HeatmapExpressionProps,
   FilterEvent,
   BrushEvent,
 } from '../../common';
-import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
+import {
+  getDatatableUtilities,
+  getFormatService,
+  getPaletteService,
+  getUISettings,
+} from '../services';
 import { getTimeZone } from '../utils/get_timezone';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressioHeatmapRendererDependencies {
-  theme: ThemeServiceStart;
+  getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
 }
 
 export const heatmapRenderer: (
   deps: ExpressioHeatmapRendererDependencies
-) => ExpressionRenderDefinition<HeatmapExpressionProps> = ({ theme }) => ({
+) => ExpressionRenderDefinition<HeatmapExpressionProps> = ({ getStartDeps }) => ({
   name: EXPRESSION_HEATMAP_NAME,
   displayName: i18n.translate('expressionHeatmap.visualizationName', {
     defaultMessage: 'Heatmap',
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const { core, plugins } = getStartDeps();
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -44,29 +55,43 @@ export const heatmapRenderer: (
       handlers.event({ name: 'brush', data });
     };
 
+    const renderComplete = () => {
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
+
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_${EXPRESSION_HEATMAP_NAME}`,
+        ]);
+      }
+
+      handlers.done();
+    };
+
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
+
     render(
-      <KibanaThemeProvider theme$={theme.theme$}>
+      <KibanaThemeProvider theme$={core.theme.theme$}>
         <div className="heatmap-container" data-test-subj="heatmapChart">
           <HeatmapComponent
             {...config}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
             timeZone={timeZone}
+            datatableUtilities={getDatatableUtilities()}
             formatFactory={getFormatService().deserialize}
-            chartsThemeService={getThemeService()}
+            chartsThemeService={plugins.charts.theme}
             paletteService={getPaletteService()}
+            renderComplete={renderComplete}
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
           />
         </div>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

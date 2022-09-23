@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { MapEmbeddableInput } from '@kbn/maps-plugin/public';
+import type { MapEmbeddableInput } from '@kbn/maps-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';

@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { Dictionary } from '../../../../../../../common/types/common';
 
@@ -23,6 +23,7 @@ import {
 } from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface ErrorMessage {
   query: string;
@@ -56,6 +57,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
+  const { services } = useMlKibana();
+  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
+    services;
+
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
   const regex = useMemo(
@@ -84,6 +89,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         setIdToSelectedMap({ [filterKeyInEffect]: true });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -120,6 +126,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     } catch (e) {
       setErrorMessage({ query: query.query as string, message: e.message });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.query]);
 
   const searchSubmitHandler = (q: Query, filtering?: boolean) => {
@@ -195,6 +202,8 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               disableAutoFocus={true}
               dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
+              appName={appName}
+              deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
             />
           </EuiFlexItem>
           {filters && filters.options && (

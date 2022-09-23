@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiIcon,
   EuiLink,
@@ -17,7 +17,6 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({
@@ -53,11 +52,6 @@ export const HelpPopover = ({
   isOpen: EuiPopoverProps['isOpen'];
   title?: string;
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      trackUiEvent('open_help_popover');
-    }
-  }, [isOpen]);
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
@@ -93,11 +87,6 @@ export const WrappingHelpPopover = ({
   isOpen: EuiWrappingPopoverProps['isOpen'];
   title?: string;
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      trackUiEvent('open_help_popover');
-    }
-  }, [isOpen]);
   return (
     <EuiWrappingPopover
       anchorPosition={anchorPosition}

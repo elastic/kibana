@@ -15,8 +15,6 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 
-import { ElasticsearchCard } from '../elasticsearch_card';
-import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
@@ -33,10 +31,8 @@ describe('ProductSelector', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector {...props} />);
 
-    expect(wrapper.find(ProductCard)).toHaveLength(2);
+    expect(wrapper.find(ProductCard)).toHaveLength(3);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
-    expect(wrapper.find(LicenseCallout)).toHaveLength(0);
-    expect(wrapper.find(ElasticsearchCard)).toHaveLength(1);
   });
 
   it('renders the trial callout', () => {
@@ -60,15 +56,6 @@ describe('ProductSelector', () => {
       setMockValues({ config: { host: 'localhost' } });
     });
 
-    it('renders the license callout when user has access to a product', () => {
-      setMockValues({ config: { host: 'localhost' } });
-      const wrapper = shallow(
-        <ProductSelector {...props} access={{ hasWorkplaceSearchAccess: true }} />
-      );
-
-      expect(wrapper.find(LicenseCallout)).toHaveLength(1);
-    });
-
     it('does not render the App Search card if the user does not have access to AS', () => {
       const wrapper = shallow(
         <ProductSelector
@@ -77,8 +64,9 @@ describe('ProductSelector', () => {
         />
       );
 
-      expect(wrapper.find(ProductCard)).toHaveLength(1);
-      expect(wrapper.find(ProductCard).prop('product').ID).toEqual('workplaceSearch');
+      expect(wrapper.find(ProductCard)).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="productCard-workplaceSearch"]')).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="productCard-elasticsearch"]')).toHaveLength(1);
     });
 
     it('does not render the Workplace Search card if the user does not have access to WS', () => {
@@ -89,8 +77,9 @@ describe('ProductSelector', () => {
         />
       );
 
-      expect(wrapper.find(ProductCard)).toHaveLength(1);
-      expect(wrapper.find(ProductCard).prop('product').ID).toEqual('appSearch');
+      expect(wrapper.find(ProductCard)).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="productCard-appSearch"]')).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="productCard-elasticsearch"]')).toHaveLength(1);
     });
 
     it('renders empty prompt and no cards or license callout if the user does not have access', () => {
@@ -98,8 +87,6 @@ describe('ProductSelector', () => {
 
       expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
       expect(wrapper.find(ProductCard)).toHaveLength(0);
-      expect(wrapper.find(LicenseCallout)).toHaveLength(0);
-      expect(wrapper.find(ElasticsearchCard)).toHaveLength(0);
     });
   });
 });

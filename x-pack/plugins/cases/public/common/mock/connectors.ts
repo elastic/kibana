@@ -16,6 +16,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'resilient-2',
@@ -26,6 +27,7 @@ export const connectorsMock: ActionConnector[] = [
       orgId: '201',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'jira-1',
@@ -35,6 +37,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance.atlassian.ne',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'servicenow-sir',
@@ -44,6 +47,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'servicenow-uses-table-api',
@@ -54,6 +58,7 @@ export const connectorsMock: ActionConnector[] = [
       usesTableApi: true,
     },
     isPreconfigured: false,
+    isDeprecated: true,
   },
 ];
 
@@ -65,6 +70,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabled: true,
     enabledInConfig: true,
     enabledInLicense: true,
+    supportedFeatureIds: ['alerting'],
   },
   {
     id: '.index',
@@ -73,6 +79,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabled: true,
     enabledInConfig: true,
     enabledInLicense: true,
+    supportedFeatureIds: ['alerting'],
   },
   {
     id: '.servicenow',
@@ -81,6 +88,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabled: false,
     enabledInConfig: true,
     enabledInLicense: true,
+    supportedFeatureIds: ['alerting', 'cases'],
   },
   {
     id: '.jira',
@@ -89,6 +97,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabled: true,
     enabledInConfig: true,
     enabledInLicense: true,
+    supportedFeatureIds: ['alerting', 'cases'],
   },
   {
     id: '.resilient',
@@ -97,6 +106,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabled: false,
     enabledInConfig: true,
     enabledInLicense: true,
+    supportedFeatureIds: ['alerting', 'cases'],
   },
   {
     id: '.servicenow-sir',
@@ -105,5 +115,6 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabled: false,
     enabledInConfig: true,
     enabledInLicense: true,
+    supportedFeatureIds: ['alerting', 'cases'],
   },
 ];

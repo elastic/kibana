@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 import { compact } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 

@@ -1,3 +1,4 @@
+TODO: update with additional extension points (Integration app, add agent flyout etc.)
 # Fleet UI Extensions
 
 Fleet's Kibana UI supports two types of UI extensions:
@@ -37,6 +38,18 @@ export class Plugin {
       view: 'package-detail-custom',
       component: getLazyEndpointPackageCustomExtension(core, plugins),
     });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+      });
   }
   //...
 }

@@ -8,15 +8,15 @@
 // @ts-ignore
 import { ActionResult } from '@kbn/actions-plugin/common';
 import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { handleError } from '../../../../lib/errors';
-import { AlertsFactory } from '../../../../alerts';
-import { LegacyServer, RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
+import { AlertsFactory } from '../../../../alerts';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
-export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependencies) {
+export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',

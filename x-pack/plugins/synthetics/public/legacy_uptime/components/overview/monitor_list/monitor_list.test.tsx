@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
+import moment from 'moment';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import {
-  MonitorSummariesResult,
+  type MonitorSummariesResult,
   CursorDirection,
   SortOrder,
   makePing,
-  Ping,
-  MonitorSummary,
+  type Ping,
+  type MonitorSummary,
 } from '../../../../../common/runtime_types';
 import { MonitorListComponent } from './monitor_list';
-import moment from 'moment';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { NO_DATA_MESSAGE } from './translations';

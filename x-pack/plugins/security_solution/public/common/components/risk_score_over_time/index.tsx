@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import type { TooltipValue } from '@elastic/charts';
 import {
   Chart,
   LineSeries,
@@ -15,7 +16,6 @@ import {
   Position,
   AnnotationDomainType,
   LineAnnotation,
-  TooltipValue,
 } from '@elastic/charts';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
@@ -27,13 +27,14 @@ import { HeaderSection } from '../header_section';
 import { InspectButton, InspectButtonContainer } from '../inspect';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../formatted_date';
-import { RiskScore } from '../../../../common/search_strategy';
+import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
+import { isUserRiskScore } from '../../../../common/search_strategy';
 
 export interface RiskScoreOverTimeProps {
   from: string;
   to: string;
   loading: boolean;
-  riskScore?: RiskScore[];
+  riskScore?: Array<HostRiskScore | UserRiskScore>;
   queryId: string;
   title: string;
   toggleStatus: boolean;
@@ -46,7 +47,7 @@ const DEFAULT_CHART_HEIGHT = 250;
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const LoadingChart = styled(EuiLoadingChart)`
@@ -81,7 +82,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
       riskScore
         ?.map((data) => ({
           x: data['@timestamp'],
-          y: data.risk_stats.risk_score,
+          y: (isUserRiskScore(data) ? data.user : data.host).risk.calculated_score_norm,
         }))
         .reverse() ?? [],
     [riskScore]

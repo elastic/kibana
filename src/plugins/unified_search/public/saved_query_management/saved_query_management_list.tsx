@@ -27,8 +27,10 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { css } from '@emotion/react';
 import { sortBy } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IDataPluginServices, SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
+import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import './saved_query_management_list.scss';
+import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface SavedQueryManagementListProps {
   showSaveQuery?: boolean;
@@ -45,6 +47,10 @@ interface SelectableProps {
   label: string;
   value?: string;
   checked?: 'on' | 'off' | undefined;
+}
+
+interface RenderOptionProps extends SelectableProps {
+  attributes?: SavedQueryAttributes;
 }
 
 interface DurationRange {
@@ -115,7 +121,7 @@ export function SavedQueryManagementList({
   onClose,
   hasFiltersOrQuery,
 }: SavedQueryManagementListProps) {
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
@@ -205,7 +211,7 @@ export function SavedQueryManagementList({
     return savedQueriesReordered.map((savedQuery) => {
       return {
         key: savedQuery.id,
-        label: itemLabel(savedQuery.attributes),
+        label: savedQuery.attributes.title,
         title: itemTitle(savedQuery.attributes, format),
         'data-test-subj': `load-saved-query-${savedQuery.attributes.title}-button`,
         value: savedQuery.id,
@@ -214,6 +220,9 @@ export function SavedQueryManagementList({
           (selectedSavedQuery && savedQuery.id === selectedSavedQuery.id)
             ? 'on'
             : undefined,
+        data: {
+          attributes: savedQuery.attributes,
+        },
         append: !!showSaveQuery && (
           <EuiButtonIcon
             css={css`
@@ -236,6 +245,10 @@ export function SavedQueryManagementList({
         ),
       };
     }) as unknown as SelectableProps[];
+  };
+
+  const renderOption = (option: RenderOptionProps) => {
+    return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;
   };
 
   const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
@@ -266,13 +279,14 @@ export function SavedQueryManagementList({
                 placeholder: i18n.translate(
                   'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
                   {
-                    defaultMessage: 'Find a filter set',
+                    defaultMessage: 'Find a saved query',
                   }
                 ),
               }}
               listProps={{
                 isVirtualized: true,
               }}
+              renderOption={renderOption}
             >
               {(list, search) => (
                 <>
@@ -323,7 +337,7 @@ export function SavedQueryManagementList({
               aria-label={i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Apply filter set',
+                  defaultMessage: 'Apply saved query',
                 }
               )}
               data-test-subj="saved-query-management-apply-changes-button"
@@ -332,13 +346,13 @@ export function SavedQueryManagementList({
                 ? i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
                     {
-                      defaultMessage: 'Replace with selected filter set',
+                      defaultMessage: 'Replace with selected saved query',
                     }
                   )
                 : i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                     {
-                      defaultMessage: 'Apply filter set',
+                      defaultMessage: 'Apply saved query',
                     }
                   )}
             </EuiButton>

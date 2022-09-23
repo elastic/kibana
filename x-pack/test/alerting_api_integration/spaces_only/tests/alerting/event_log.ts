@@ -417,6 +417,28 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
                 // Total search duration should be greater since it includes any network latency
                 expect(totalSearchDuration! - esSearchDuration! > 0).to.be(true);
+
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.claim_to_start_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.total_run_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.prepare_rule_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms! >= 0
+                ).to.be(true);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms! >= 0
+                ).to.be(true);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.process_rule_duration_ms
+                ).to.be.greaterThan(0);
                 break;
               // this will get triggered as we add new event actions
               default:
@@ -727,6 +749,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               category: response.body.rule_type_id,
               license: 'basic',
               ruleset: 'alertsFixture',
+              name: 'abc',
             },
             consumer: 'alertsFixture',
             numActiveAlerts: 0,
@@ -828,27 +851,19 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   if (numActiveAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_active_alerts).to.be(
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.be(
       numActiveAlerts
     );
   }
 
   if (numRecoveredAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_recovered_alerts).to.be(
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.recovered).to.be(
       numRecoveredAlerts
     );
   }
 
   if (numNewAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_new_alerts).to.be(
-      numNewAlerts
-    );
-  }
-
-  if (numActiveAlerts && numRecoveredAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_number_of_alerts).to.be(
-      numActiveAlerts + numRecoveredAlerts
-    );
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(numNewAlerts);
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);

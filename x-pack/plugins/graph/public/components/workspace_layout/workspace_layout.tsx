@@ -18,13 +18,7 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import {
-  ControlType,
-  IndexPatternProvider,
-  IndexPatternSavedObject,
-  TermIntersect,
-  WorkspaceNode,
-} from '../../types';
+import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
@@ -59,7 +53,6 @@ type WorkspaceLayoutProps = Pick<
   renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
-  indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
   sharingSavedObjectProps?: SharingSavedObjectProps;
@@ -78,7 +71,6 @@ export const WorkspaceLayoutComponent = ({
   hasFields,
   overlays,
   workspaceInitialized,
-  indexPatterns,
   indexPatternProvider,
   capabilities,
   coreStart,
@@ -99,7 +91,11 @@ export const WorkspaceLayoutComponent = ({
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
 
-  const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
+  // savedWorkspace.id gets set to null while saving a copy of an existing
+  // workspace, so we need to check for savedWorkspace.isSaving as well
+  const isInitialized = Boolean(
+    workspaceInitialized || savedWorkspace.id || savedWorkspace.isSaving
+  );
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
     selectedNode.current = node;
@@ -222,10 +218,7 @@ export const WorkspaceLayoutComponent = ({
       {getLegacyUrlConflictCallout()}
       {!isInitialized && (
         <div>
-          <GuidancePanelMemoized
-            noIndexPatterns={indexPatterns.length === 0}
-            onOpenFieldPicker={onOpenFieldPicker}
-          />
+          <GuidancePanelMemoized onOpenFieldPicker={onOpenFieldPicker} />
         </div>
       )}
 

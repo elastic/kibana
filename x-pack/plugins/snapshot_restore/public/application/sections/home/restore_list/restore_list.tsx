@@ -8,7 +8,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
   EuiPopover,
   EuiButtonEmpty,
@@ -115,7 +115,7 @@ export const RestoreList: React.FunctionComponent = () => {
           <EuiEmptyPrompt
             iconType="managementApp"
             title={
-              <h1>
+              <h1 data-test-subj="noRestoredSnapshotsHeader">
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
                   defaultMessage="No restored snapshots"

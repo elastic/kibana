@@ -47,7 +47,7 @@ describe('ElasticV3ServerShipper', () => {
       initContext
     );
     // eslint-disable-next-line dot-notation
-    shipper['firstTimeOffline'] = null;
+    shipper['firstTimeOffline'] = null; // The tests think connectivity is OK initially for easier testing.
   });
 
   afterEach(() => {
@@ -57,7 +57,7 @@ describe('ElasticV3ServerShipper', () => {
 
   test('set optIn should update the isOptedIn$ observable', () => {
     // eslint-disable-next-line dot-notation
-    const getInternalOptIn = () => shipper['isOptedIn'];
+    const getInternalOptIn = () => shipper['isOptedIn$'].value;
 
     // Initially undefined
     expect(getInternalOptIn()).toBeUndefined();
@@ -129,7 +129,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -171,7 +171,7 @@ describe('ElasticV3ServerShipper', () => {
       {
         body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
         headers: {
-          'content-type': 'application/x-njson',
+          'content-type': 'application/x-ndjson',
           'x-elastic-cluster-id': 'UNKNOWN',
           'x-elastic-stack-version': '1.2.3',
         },
@@ -208,7 +208,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -241,7 +241,7 @@ describe('ElasticV3ServerShipper', () => {
               )
               .join(''),
             headers: {
-              'content-type': 'application/x-njson',
+              'content-type': 'application/x-ndjson',
               'x-elastic-cluster-id': 'UNKNOWN',
               'x-elastic-stack-version': '1.2.3',
             },
@@ -284,7 +284,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -322,7 +322,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -342,97 +342,242 @@ describe('ElasticV3ServerShipper', () => {
     })
   );
 
-  test(
-    'connectivity check is run after report failure',
-    fakeSchedulers(async (advance) => {
-      fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
-      shipper.reportEvents(events);
-      shipper.optIn(true);
-      const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
-      advance(10 * MINUTES);
-      expect(fetchMock).toHaveBeenNthCalledWith(
-        1,
-        'https://telemetry-staging.elastic.co/v3/send/test-channel',
-        {
-          body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
-          headers: {
-            'content-type': 'application/x-njson',
-            'x-elastic-cluster-id': 'UNKNOWN',
-            'x-elastic-stack-version': '1.2.3',
-          },
-          method: 'POST',
-          query: { debug: true },
-        }
+  describe('Connectivity Checks', () => {
+    describe('connectivity check when connectivity is confirmed (firstTimeOffline === null)', () => {
+      test.each([undefined, false, true])('does not run for opt-in %p', (optInValue) =>
+        fakeSchedulers(async (advance) => {
+          if (optInValue !== undefined) {
+            shipper.optIn(optInValue);
+          }
+
+          // From the start, it doesn't check connectivity because already confirmed
+          expect(fetchMock).not.toHaveBeenCalledWith(
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+
+          // Wait a big time (1 minute should be enough, but for the sake of tests...)
+          advance(10 * MINUTES);
+          await nextTick();
+
+          expect(fetchMock).not.toHaveBeenCalledWith(
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+        })()
       );
-      await expect(counter).resolves.toMatchInlineSnapshot(`
-        Object {
-          "code": "Failed to fetch",
-          "count": 1,
-          "event_type": "test-event-type",
-          "source": "elastic_v3_server",
-          "type": "failed",
-        }
-      `);
-      fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
-      advance(1 * MINUTES);
-      await nextTick();
-      expect(fetchMock).toHaveBeenNthCalledWith(
-        2,
-        'https://telemetry-staging.elastic.co/v3/send/test-channel',
-        { method: 'OPTIONS' }
-      );
-      fetchMock.mockResolvedValueOnce({ ok: false });
-      advance(2 * MINUTES);
-      await nextTick();
-      expect(fetchMock).toHaveBeenNthCalledWith(
-        3,
-        'https://telemetry-staging.elastic.co/v3/send/test-channel',
-        { method: 'OPTIONS' }
+    });
+
+    describe('connectivity check with initial unknown state of the connectivity', () => {
+      beforeEach(() => {
+        // eslint-disable-next-line dot-notation
+        shipper['firstTimeOffline'] = undefined; // Initial unknown state of the connectivity
+      });
+
+      test.each([undefined, false])('does not run for opt-in %p', (optInValue) =>
+        fakeSchedulers(async (advance) => {
+          if (optInValue !== undefined) {
+            shipper.optIn(optInValue);
+          }
+
+          // From the start, it doesn't check connectivity because already confirmed
+          expect(fetchMock).not.toHaveBeenCalledWith(
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+
+          // Wait a big time (1 minute should be enough, but for the sake of tests...)
+          advance(10 * MINUTES);
+          await nextTick();
+
+          expect(fetchMock).not.toHaveBeenCalledWith(
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+        })()
       );
 
-      // let's see the effect of after 24 hours:
-      shipper.reportEvents(events);
-      // eslint-disable-next-line dot-notation
-      expect(shipper['internalQueue'].length).toBe(1);
-      // eslint-disable-next-line dot-notation
-      shipper['firstTimeOffline'] = 100;
+      test('runs as soon as opt-in is set to true', () => {
+        shipper.optIn(true);
 
-      fetchMock.mockResolvedValueOnce({ ok: false });
-      advance(4 * MINUTES);
-      await nextTick();
-      expect(fetchMock).toHaveBeenNthCalledWith(
-        4,
-        'https://telemetry-staging.elastic.co/v3/send/test-channel',
-        { method: 'OPTIONS' }
+        // From the start, it doesn't check connectivity because opt-in is not true
+        expect(fetchMock).toHaveBeenNthCalledWith(
+          1,
+          'https://telemetry-staging.elastic.co/v3/send/test-channel',
+          { method: 'OPTIONS' }
+        );
+      });
+    });
+
+    describe('connectivity check with the connectivity confirmed to be faulty', () => {
+      beforeEach(() => {
+        // eslint-disable-next-line dot-notation
+        shipper['firstTimeOffline'] = 100; // Failed at some point
+      });
+
+      test.each([undefined, false])('does not run for opt-in %p', (optInValue) =>
+        fakeSchedulers(async (advance) => {
+          if (optInValue !== undefined) {
+            shipper.optIn(optInValue);
+          }
+
+          // From the start, it doesn't check connectivity because already confirmed
+          expect(fetchMock).not.toHaveBeenCalledWith(
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+
+          // Wait a big time (1 minute should be enough, but for the sake of tests...)
+          advance(10 * MINUTES);
+          await nextTick();
+
+          expect(fetchMock).not.toHaveBeenCalledWith(
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+        })()
       );
-      // eslint-disable-next-line dot-notation
-      expect(shipper['internalQueue'].length).toBe(0);
 
-      // New events are not added to the queue because it's been offline for 24 hours.
-      shipper.reportEvents(events);
-      // eslint-disable-next-line dot-notation
-      expect(shipper['internalQueue'].length).toBe(0);
+      test('runs as soon as opt-in is set to true', () => {
+        shipper.optIn(true);
 
-      // Regains connection
-      fetchMock.mockResolvedValueOnce({ ok: true });
-      advance(8 * MINUTES);
-      await nextTick();
-      expect(fetchMock).toHaveBeenNthCalledWith(
-        5,
-        'https://telemetry-staging.elastic.co/v3/send/test-channel',
-        { method: 'OPTIONS' }
+        // From the start, it doesn't check connectivity because opt-in is not true
+        expect(fetchMock).toHaveBeenNthCalledWith(
+          1,
+          'https://telemetry-staging.elastic.co/v3/send/test-channel',
+          { method: 'OPTIONS' }
+        );
+      });
+    });
+
+    describe('after report failure', () => {
+      // generate the report failure for each test
+      beforeEach(
+        fakeSchedulers(async (advance) => {
+          fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
+          shipper.reportEvents(events);
+          shipper.optIn(true);
+          const counter = firstValueFrom(shipper.telemetryCounter$);
+          setLastBatchSent(Date.now() - 10 * MINUTES);
+          advance(10 * MINUTES);
+          expect(fetchMock).toHaveBeenNthCalledWith(
+            1,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            {
+              body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
+              headers: {
+                'content-type': 'application/x-ndjson',
+                'x-elastic-cluster-id': 'UNKNOWN',
+                'x-elastic-stack-version': '1.2.3',
+              },
+              method: 'POST',
+              query: { debug: true },
+            }
+          );
+          await expect(counter).resolves.toMatchInlineSnapshot(`
+          Object {
+            "code": "Failed to fetch",
+            "count": 1,
+            "event_type": "test-event-type",
+            "source": "elastic_v3_server",
+            "type": "failed",
+          }
+        `);
+        })
       );
-      // eslint-disable-next-line dot-notation
-      expect(shipper['firstTimeOffline']).toBe(null);
 
-      advance(16 * MINUTES);
-      await nextTick();
-      expect(fetchMock).not.toHaveBeenNthCalledWith(
-        6,
-        'https://telemetry-staging.elastic.co/v3/send/test-channel',
-        { method: 'OPTIONS' }
+      test(
+        'connectivity check runs periodically',
+        fakeSchedulers(async (advance) => {
+          fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
+          advance(1 * MINUTES);
+          await nextTick();
+          expect(fetchMock).toHaveBeenNthCalledWith(
+            2,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+          fetchMock.mockResolvedValueOnce({ ok: false });
+          advance(2 * MINUTES);
+          await nextTick();
+          expect(fetchMock).toHaveBeenNthCalledWith(
+            3,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+        })
       );
-    })
-  );
+    });
+
+    describe('after being offline for longer than 24h', () => {
+      beforeEach(() => {
+        shipper.optIn(true);
+        shipper.reportEvents(events);
+        // eslint-disable-next-line dot-notation
+        expect(shipper['internalQueue'].length).toBe(1);
+        // eslint-disable-next-line dot-notation
+        shipper['firstTimeOffline'] = 100;
+      });
+
+      test(
+        'the following connectivity check clears the queue',
+        fakeSchedulers(async (advance) => {
+          fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
+          advance(1 * MINUTES);
+          await nextTick();
+          expect(fetchMock).toHaveBeenNthCalledWith(
+            1,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+          // eslint-disable-next-line dot-notation
+          expect(shipper['internalQueue'].length).toBe(0);
+        })
+      );
+
+      test(
+        'new events are not added to the queue',
+        fakeSchedulers(async (advance) => {
+          fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
+          advance(1 * MINUTES);
+          await nextTick();
+          expect(fetchMock).toHaveBeenNthCalledWith(
+            1,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+          // eslint-disable-next-line dot-notation
+          expect(shipper['internalQueue'].length).toBe(0);
+
+          shipper.reportEvents(events);
+          // eslint-disable-next-line dot-notation
+          expect(shipper['internalQueue'].length).toBe(0);
+        })
+      );
+
+      test(
+        'regains the connection',
+        fakeSchedulers(async (advance) => {
+          fetchMock.mockResolvedValueOnce({ ok: true });
+          advance(1 * MINUTES);
+          await nextTick();
+          expect(fetchMock).toHaveBeenNthCalledWith(
+            1,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+          // eslint-disable-next-line dot-notation
+          expect(shipper['firstTimeOffline']).toBe(null);
+
+          advance(10 * MINUTES);
+          await nextTick();
+          expect(fetchMock).not.toHaveBeenNthCalledWith(
+            2,
+            'https://telemetry-staging.elastic.co/v3/send/test-channel',
+            { method: 'OPTIONS' }
+          );
+        })
+      );
+    });
+  });
 });

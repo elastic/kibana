@@ -56,6 +56,7 @@
     "GetCategorizerStats",
     "GetCategoryStoppedPartitions",
     "GetAnomalyChartsData",
+    "GetAnomalyRecords",
 
     "Modules",
     "DataRecognizer",
@@ -63,6 +64,10 @@
     "GetModule",
     "SetupModule",
     "CheckExistingModuleJobs",
+
+    "Notifications",
+    "GetNotifications",
+    "GetNotificationCounts",
 
     "Annotations",
     "GetAnnotations",
@@ -172,9 +177,11 @@
     "PutTrainedModel",
     "DeleteTrainedModel",
     "InferTrainedModelDeployment",
-    "IngestPipelineSimulate",
 
     "Alerting",
-    "PreviewAlert"
+    "PreviewAlert",
+
+    "Management",
+    "ManagementList"
   ]
 }

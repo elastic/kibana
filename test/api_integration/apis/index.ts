@@ -28,6 +28,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
     loadTestFile(require.resolve('./ui_counters'));
+    loadTestFile(require.resolve('./unified_field_list'));
     loadTestFile(require.resolve('./telemetry'));
   });
 }

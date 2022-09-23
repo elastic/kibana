@@ -15,8 +15,8 @@
  *  - update can fail due to multiple reasons and also needs to be communicated to the user
  */
 
-import { Immutable } from '../../../common/endpoint/types';
-import { ServerApiError } from '../../common/types';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { ServerApiError } from '../../common/types';
 
 /**
  * Data type to represent uninitialised state of asynchronous resource.

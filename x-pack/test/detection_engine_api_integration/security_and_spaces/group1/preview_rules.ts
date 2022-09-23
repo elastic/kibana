@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_PREVIEW)
             .set('kbn-xsrf', 'true')
-            .send(getSimplePreviewRule('', 3))
+            .send(getSimplePreviewRule('', 0))
             .expect(200);
           const { logs } = getSimpleRulePreviewOutput(undefined, [
             { errors: ['Invalid invocation count'], warnings: [], duration: 0 },

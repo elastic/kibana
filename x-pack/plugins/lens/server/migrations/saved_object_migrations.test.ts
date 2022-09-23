@@ -22,12 +22,16 @@ import {
   VisState810,
   VisState820,
   VisState830,
+  LensDocShape850,
+  XYVisStatePre850,
+  VisState850,
 } from './types';
-import { layerTypes, MetricState } from '../../common';
+import { layerTypes, LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
-  const migrations = getAllMigrations({}, {});
+  const migrations = getAllMigrations({}, {}, {});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -181,7 +185,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.8.0 auto timestamp', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
@@ -533,7 +537,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.11.0 remove suggested priority', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
@@ -618,7 +622,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.12.0 restructure datatable state', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mock-saved-object-id',
@@ -691,7 +695,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.13.0 rename operations for Formula', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -869,7 +873,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.14.0 remove time zone from date histogram', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -961,7 +965,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.15.0 add layer type information', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1143,7 +1147,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.16.0 move reversed default palette to custom palette', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1417,7 +1421,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.1.0 update filter reference schema', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1523,7 +1527,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.1.0 rename records field', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1623,6 +1627,7 @@ describe('Lens migrations', () => {
           }));
         },
       },
+      {},
       {}
     );
 
@@ -1649,6 +1654,61 @@ describe('Lens migrations', () => {
     });
   });
 
+  test('should properly apply a data view migration within a lens visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'A name',
+            },
+          },
+        },
+      },
+    };
+
+    const migrationFunctionsObject = getAllMigrations(
+      {},
+      {
+        [migrationVersion]: (dataView: DataViewSpec) => {
+          return {
+            ...dataView,
+            name: dataView.id,
+          };
+        },
+      },
+      {}
+    );
+
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+              name: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'def',
+            },
+          },
+        },
+      },
+    });
+  });
+
   test('should properly apply a custom visualization migration', () => {
     const migrationVersion = 'some-version';
 
@@ -1666,6 +1726,7 @@ describe('Lens migrations', () => {
     }));
 
     const migrationFunctionsObject = getAllMigrations(
+      {},
       {},
       {
         abc: () => ({
@@ -1709,7 +1770,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.1.0 add parentFormat to terms operation', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1785,7 +1846,7 @@ describe('Lens migrations', () => {
 
   describe('8.2.0', () => {
     describe('last_value columns', () => {
-      const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+      const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
       const example = {
         type: 'lens',
         id: 'mocked-saved-object-id',
@@ -1877,7 +1938,7 @@ describe('Lens migrations', () => {
     });
 
     describe('rename fitRowToContent to new detailed rowHeight and rowHeightLines', () => {
-      const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+      const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
       function getExample(fitToContent: boolean) {
         return {
           type: 'lens',
@@ -1996,7 +2057,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.2.0 include empty rows for date histogram columns', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -2065,8 +2126,9 @@ describe('Lens migrations', () => {
       expect(layer2Columns['4'].params).toHaveProperty('includeEmptyRows', true);
     });
   });
+
   describe('8.3.0 old metric visualization defaults', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -2085,7 +2147,7 @@ describe('Lens migrations', () => {
       const result = migrations['8.3.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const visState = result.attributes.state.visualization as MetricState;
+      const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('center');
       expect(visState.titlePosition).toBe('bottom');
       expect(visState.size).toBe('xl');
@@ -2108,15 +2170,83 @@ describe('Lens migrations', () => {
         },
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
-      const visState = result.attributes.state.visualization as MetricState;
+      const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('right');
       expect(visState.titlePosition).toBe('top');
       expect(visState.size).toBe('s');
     });
   });
 
+  describe('8.3.0 - convert legend sizes to strings', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const migrate = migrations['8.3.0'];
+
+    const autoLegendSize = 'auto';
+    const largeLegendSize = 'large';
+    const largeLegendSizePx = 180;
+
+    it('works for XY visualization and heatmap', () => {
+      const getDoc = (type: string, legendSize: number | undefined) =>
+        ({
+          attributes: {
+            visualizationType: type,
+            state: {
+              visualization: {
+                legend: {
+                  legendSize,
+                },
+              },
+            },
+          },
+        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>);
+
+      expect(
+        migrate(getDoc('lnsXY', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsXY', largeLegendSizePx), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(largeLegendSize);
+
+      expect(
+        migrate(getDoc('lnsHeatmap', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsHeatmap', largeLegendSizePx), context).attributes.state.visualization
+          .legend.legendSize
+      ).toBe(largeLegendSize);
+    });
+
+    it('works for pie visualization', () => {
+      const pieVisDoc = {
+        attributes: {
+          visualizationType: 'lnsPie',
+          state: {
+            visualization: {
+              layers: [
+                {
+                  legendSize: undefined,
+                },
+                {
+                  legendSize: largeLegendSizePx,
+                },
+              ],
+            },
+          },
+        },
+      } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+      expect(migrate(pieVisDoc, context).attributes.state.visualization.layers).toEqual([
+        { legendSize: autoLegendSize },
+        { legendSize: largeLegendSize },
+      ]);
+    });
+  });
+
   describe('8.3.0 valueLabels in XY', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -2128,6 +2258,7 @@ describe('Lens migrations', () => {
         state: {
           visualization: {
             valueLabels: 'inside',
+            legend: {},
           },
         },
       },
@@ -2160,6 +2291,75 @@ describe('Lens migrations', () => {
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as VisState830;
       expect(visState.valueLabels).toBe('hide');
+    });
+  });
+
+  describe('8.5.0 Add Annotation event type and ignore filters flag', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            layers: [
+              { layerType: 'data' },
+              {
+                layerType: 'annotations',
+                annotations: [{ id: 'annotation-id' }],
+              },
+            ],
+          },
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape850<XYVisStatePre850>>;
+
+    it('migrates existing annotation events as manual type', () => {
+      const result = migrations['8.5.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const visState = result.attributes.state.visualization as VisState850;
+      const [dataLayer, annotationLayer] = visState.layers;
+      expect(dataLayer).toEqual({ layerType: 'data' });
+      expect(annotationLayer).toEqual({
+        layerType: 'annotations',
+        annotations: [{ id: 'annotation-id', type: 'manual' }],
+        ignoreGlobalFilters: true,
+      });
+    });
+  });
+
+  describe('8.5.0 migrates metric IDs', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsMetric',
+        state: {},
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('lnsMetric => lnsLegacyMetric', () => {
+      const result = migrations['8.5.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result.attributes.visualizationType).toBe('lnsLegacyMetric');
+    });
+
+    it('lnsMetricNew => lnsMetric', () => {
+      const result = migrations['8.5.0'](
+        { ...example, attributes: { ...example.attributes, visualizationType: 'lnsMetricNew' } },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      expect(result.attributes.visualizationType).toBe('lnsMetric');
     });
   });
 });

@@ -23,9 +23,11 @@
     "dataViewFieldEditor",
     "dataViewEditor",
     "expressionGauge",
+    "expressionMetricVis",
     "expressionHeatmap",
     "eventAnnotation",
-    "unifiedSearch"
+    "unifiedSearch",
+    "unifiedFieldList"
   ],
   "optionalPlugins": [
     "expressionXY",
@@ -36,20 +38,16 @@
     "spaces",
     "discover"
   ],
-  "configPath": [
-    "xpack",
-    "lens"
-  ],
-  "extraPublicDirs": [
-    "common/constants"
-  ],
+  "configPath": ["xpack", "lens"],
+  "extraPublicDirs": ["common/constants"],
   "requiredBundles": [
     "unifiedSearch",
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",
     "embeddable",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "owner": {
     "name": "Vis Editors",

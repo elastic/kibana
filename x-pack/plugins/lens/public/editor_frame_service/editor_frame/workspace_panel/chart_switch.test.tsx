@@ -197,7 +197,7 @@ describe('chart_switch', () => {
     const visualizationMap = mockVisualizationMap();
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
-    (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
+    (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
     const datasourceMap = mockDatasourceMap();
     const datasourceStates = mockDatasourceStates();
     const { instance, lensStore } = await mountWithProvider(
@@ -407,7 +407,7 @@ describe('chart_switch', () => {
     const visualizationMap = mockVisualizationMap();
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
-    (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
+    (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
 
     const { instance } = await mountWithProvider(
       <ChartSwitch
@@ -599,7 +599,8 @@ describe('chart_switch', () => {
 
   it('should not remove layers and initialize with existing state when switching between subtypes without data', async () => {
     const frame = mockFrame(['a']);
-    frame.datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
+    const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+    datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
     const visualizationMap = mockVisualizationMap();
     visualizationMap.visC.getSuggestions = jest.fn().mockReturnValue([]);
     visualizationMap.visC.switchVisualizationType = jest.fn(() => 'switched');

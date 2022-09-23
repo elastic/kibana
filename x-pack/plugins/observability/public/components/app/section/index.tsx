@@ -29,6 +29,7 @@ interface Props {
   title: string;
   hasError: boolean;
   children: React.ReactNode;
+  initialIsOpen?: boolean;
   appLink?: AppLink;
   showExperimentalBadge?: boolean;
 }
@@ -38,15 +39,17 @@ export function SectionContainer({
   appLink,
   children,
   hasError,
+  initialIsOpen = true,
   showExperimentalBadge = false,
 }: Props) {
   const { http } = useKibana<ObservabilityAppServices>().services;
   return (
     <EuiPanel color="subdued">
       <EuiAccordion
-        initialIsOpen
+        initialIsOpen={initialIsOpen}
         id={title}
         buttonContentClassName="accordion-button"
+        data-test-subj={`accordion-${title}`}
         buttonContent={
           <>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

@@ -9,27 +9,28 @@ import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { errors } from '../../common';
-import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
+import {
+  Context,
+  DEFAULT_VIEWPORT,
+  getChromiumDisconnectedError,
+  HeadlessChromiumDriver,
+} from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
-import type { Layout } from '../layouts';
+import type { PdfScreenshotOptions } from '../formats';
+import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
+import { getPdf } from './get_pdf';
 import { getRenderErrors } from './get_render_errors';
-import type { Screenshot } from './get_screenshots';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
+import type { PhaseInstance, PhaseTimeouts, Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-
-type CaptureTimeouts = ConfigType['capture']['timeouts'];
-export interface PhaseTimeouts extends CaptureTimeouts {
-  loadDelay: ConfigType['capture']['loadDelay'];
-}
 
 type Url = string;
 type UrlWithContext = [url: Url, context: Context];
@@ -107,28 +108,42 @@ const getDefaultElementPosition = (
   ];
 };
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
+const getTimeouts = (captureConfig: ConfigType['capture']) => ({
+  openUrl: {
+    timeoutValue: toNumber(captureConfig.timeouts.openUrl),
+    configValue: `xpack.screenshotting.capture.timeouts.openUrl`,
+    label: 'open URL',
+  },
+  waitForElements: {
+    timeoutValue: toNumber(captureConfig.timeouts.waitForElements),
+    configValue: `xpack.screenshotting.capture.timeouts.waitForElements`,
+    label: 'wait for elements',
+  },
+  renderComplete: {
+    timeoutValue: toNumber(captureConfig.timeouts.renderComplete),
+    configValue: `xpack.screenshotting.capture.timeouts.renderComplete`,
+    label: 'render complete',
+  },
 });
 
 export class ScreenshotObservableHandler {
+  private timeouts: PhaseTimeouts;
+
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private readonly config: ConfigType,
+    config: ConfigType,
     private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
-  ) {}
+  ) {
+    this.timeouts = getTimeouts(config.capture);
+  }
 
   /*
    * Decorates a TimeoutError with context of the phase that has timed out.
    */
-  public waitUntil<O>(timeoutValue: number, label: string) {
+  public waitUntil<O>(phase: PhaseInstance) {
+    const { timeoutValue, label, configValue } = phase;
     return (source: Observable<O>) =>
       source.pipe(
         catchError((error) => {
@@ -137,7 +152,11 @@ export class ScreenshotObservableHandler {
         timeoutWith(
           timeoutValue,
           throwError(
-            new Error(`The "${label}" phase took longer than ${timeoutValue / 1000} seconds.`)
+            new Error(
+              `Screenshotting encountered a timeout error: "${label}" took longer than` +
+                ` ${timeoutValue / 1000} seconds. You may need to increase "${configValue}"` +
+                ` in kibana.yml.`
+            )
           )
         )
       );
@@ -157,30 +176,24 @@ export class ScreenshotObservableHandler {
       return openUrl(
         this.driver,
         this.eventLogger,
-        toNumber(this.config.capture.timeouts.openUrl),
+        this.timeouts.openUrl.timeoutValue,
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
         this.options.headers ?? {}
       );
-    }).pipe(this.waitUntil(toNumber(this.config.capture.timeouts.openUrl), 'open URL'));
+    }).pipe(this.waitUntil(this.timeouts.openUrl));
   }
 
   private waitForElements() {
     const driver = this.driver;
-    const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
+    const waitTimeout = this.timeouts.waitForElements.timeoutValue * 1.8; // the waitUntil is needed to catch actually timing out
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
-      mergeMap(async (itemsCount) => {
-        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.eventLogger.kbnLogger);
-        await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
-      }),
-      this.waitUntil(waitTimeout, 'wait for elements')
+      mergeMap((itemsCount) =>
+        waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
+      ),
+      this.waitUntil(this.timeouts.waitForElements)
     );
   }
 
@@ -208,12 +221,7 @@ export class ScreenshotObservableHandler {
         throw error;
       }
 
-      await waitForRenderComplete(
-        driver,
-        eventLogger,
-        toNumber(this.config.capture.loadDelay),
-        layout
-      );
+      await waitForRenderComplete(driver, eventLogger, layout);
     }).pipe(
       mergeMap(() =>
         forkJoin({
@@ -226,7 +234,7 @@ export class ScreenshotObservableHandler {
           renderErrors: getRenderErrors(driver, eventLogger, layout),
         })
       ),
-      this.waitUntil(toNumber(this.config.capture.timeouts.renderComplete), 'render complete')
+      this.waitUntil(this.timeouts.renderComplete)
     );
   }
 
@@ -237,6 +245,23 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  /**
+   * Given a title and time range value look like:
+   *
+   * "[Logs] Web Traffic - Apr 14, 2022 @ 120742.318 to Apr 21, 2022 @ 120742.318"
+   *
+   * Otherwise closest thing to that or a blank string.
+   */
+  private getTitle(timeRange: null | string): string {
+    return `${(this.options as PdfScreenshotOptions).title ?? ''} ${
+      timeRange ? `- ${timeRange}` : ''
+    }`.trim();
+  }
+
+  private shouldCapturePdf(): boolean {
+    return this.layout.id === 'print' && (this.options as PdfScreenshotOptions).format === 'pdf';
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
@@ -244,10 +269,19 @@ export class ScreenshotObservableHandler {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
+            getDefaultElementPosition(this.layout.getViewport());
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
+            screenshots = this.shouldCapturePdf()
+              ? await getPdf(this.driver, this.eventLogger, this.getTitle(data.timeRange), {
+                  logo: (this.options as PdfScreenshotOptions).logo,
+                  error: data.error,
+                })
+              : await getScreenshots(this.driver, this.eventLogger, {
+                  elements,
+                  layout: this.layout,
+                  error: data.error,
+                });
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }

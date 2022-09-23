@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
@@ -19,11 +18,13 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase } from '../../../common/ui/types';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -32,7 +33,6 @@ import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
-import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
@@ -40,8 +40,15 @@ import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
+import { useUpdateCase } from '../../containers/use_update_case';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { useAssignees } from '../../containers/user_profiles/use_assignees';
+import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
+import { CurrentUserProfile } from '../types';
+import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -52,38 +59,65 @@ const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
-`;
-
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
+const AssigneesColumn: React.FC<{
+  assignees: Case['assignees'];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
+}> = ({ assignees, userProfiles, currentUserProfile }) => {
+  const { allAssignees } = useAssignees({
+    caseAssignees: assignees,
+    userProfiles,
+    currentUserProfile,
+  });
+
+  if (allAssignees.length <= 0) {
+    return getEmptyTagValue();
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
+      {allAssignees.map((assignee) => {
+        const dataTestSubjName = getUsernameDataTestSubj(assignee);
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={assignee.uid}
+            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
+          >
+            <UserToolTip userInfo={assignee.profile}>
+              <SmallUserAvatar userInfo={assignee.profile} />
+            </UserToolTip>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+
+AssigneesColumn.displayName = 'AssigneesColumn';
+
 export interface GetCasesColumn {
-  dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   handleIsLoading: (a: boolean) => void;
-  isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
-  userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
 
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
-  dispatchUpdateCaseProperty,
   filterStatus,
+  userProfiles,
+  currentUserProfile,
   handleIsLoading,
-  isLoadingCases,
   refreshCases,
   isSelectorView,
-  userCanCrud,
   connectors = [],
   onRowClick,
   showSolutionColumn,
@@ -98,12 +132,15 @@ export const useCasesColumns = ({
     isLoading: isDeleting,
   } = useDeleteCases();
 
-  const { isAlertsEnabled } = useCasesFeatures();
+  const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+  const { permissions } = useCasesContext();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
     title: '',
   });
+
+  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
@@ -114,15 +151,17 @@ export const useCasesColumns = ({
   );
 
   const handleDispatchUpdate = useCallback(
-    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
-      dispatchUpdateCaseProperty({
-        ...args,
-        refetchCasesStatus: () => {
+    ({ updateKey, updateValue, caseData }: UpdateByKey) => {
+      updateCaseProperty({
+        updateKey,
+        updateValue,
+        caseData,
+        onSuccess: () => {
           if (refreshCases != null) refreshCases();
         },
       });
     },
-    [dispatchUpdateCaseProperty, refreshCases]
+    [refreshCases, updateCaseProperty]
   );
 
   const actions = useMemo(
@@ -143,8 +182,8 @@ export const useCasesColumns = ({
   );
 
   useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
-  }, [handleIsLoading, isDeleting, isLoadingCases]);
+    handleIsLoading(isDeleting || isLoadingUpdateCase);
+  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -179,34 +218,28 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    {
-      field: 'createdBy',
-      name: i18n.REPORTER,
-      render: (createdBy: Case['createdBy']) => {
-        if (createdBy != null) {
-          return (
-            <>
-              <EuiAvatar
-                className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
-                size="s"
+    ...(caseAssignmentAuthorized
+      ? [
+          {
+            field: 'assignees',
+            name: i18n.ASSIGNEES,
+            render: (assignees: Case['assignees']) => (
+              <AssigneesColumn
+                assignees={assignees}
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
               />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
-            </>
-          );
-        }
-        return getEmptyTagValue();
-      },
-    },
+            ),
+          },
+        ]
+      : []),
     {
       field: 'tags',
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -216,7 +249,17 @@ export const useCasesColumns = ({
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -245,7 +288,12 @@ export const useCasesColumns = ({
             render: (caseOwner: CasesOwners) => {
               const ownerInfo = OWNER_INFO[caseOwner];
               return ownerInfo ? (
-                <EuiIcon size="s" type={ownerInfo.iconType} title={ownerInfo.label} />
+                <EuiIcon
+                  size="m"
+                  type={ownerInfo.iconType}
+                  title={ownerInfo.label}
+                  data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
+                />
               ) : (
                 getEmptyTagValue()
               );
@@ -314,13 +362,12 @@ export const useCasesColumns = ({
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}
-                  disabled={!userCanCrud || isLoadingCases.length > 0}
+                  disabled={!permissions.update || isLoadingUpdateCase}
                   onStatusChanged={(status) =>
                     handleDispatchUpdate({
                       updateKey: 'status',
                       updateValue: status,
-                      caseId: theCase.id,
-                      version: theCase.version,
+                      caseData: theCase,
                     })
                   }
                 />
@@ -368,7 +415,7 @@ export const useCasesColumns = ({
           },
         ]
       : []),
-    ...(userCanCrud && !isSelectorView
+    ...(permissions.delete && !isSelectorView
       ? [
           {
             name: (

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
   ExecutorSubActionAddEventParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/actions-plugin/server/builtin_action_types/servicenow/types';
+} from '@kbn/stack-connectors-plugin/server/connector_types/cases/servicenow/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
@@ -33,15 +32,36 @@ export interface ServiceNowITOMActionParams {
   subActionParams: ExecutorSubActionAddEventParams;
 }
 
-export interface ServiceNowConfig {
+// Config
+export interface ServiceNowCommonConfig {
+  isOAuth: boolean;
   apiUrl: string;
   usesTableApi: boolean;
 }
 
-export interface ServiceNowSecrets {
-  username: string;
-  password: string;
+export type ServiceNowBasicAuthConfig = ServiceNowCommonConfig;
+
+export interface ServiceNowOAuthConfig {
+  clientId?: string;
+  userIdentifierValue?: string;
+  jwtKeyId?: string;
 }
+
+export type ServiceNowConfig = ServiceNowBasicAuthConfig & ServiceNowOAuthConfig;
+
+// Secrets
+export interface ServiceNowBasicAuthSecrets {
+  username?: string;
+  password?: string;
+}
+
+export interface ServiceNowOAuthSecrets {
+  clientSecret?: string;
+  privateKey?: string;
+  privateKeyPassword?: string;
+}
+
+export type ServiceNowSecrets = ServiceNowBasicAuthSecrets & ServiceNowOAuthSecrets;
 
 export interface Choice {
   value: string;

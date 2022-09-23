@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 
-import { InspectResponse } from '../../../types';
-import { ChartData } from '../../components/charts/common';
-import { inputsModel } from '../../store';
+import type { InspectResponse } from '../../../types';
+import type { ChartData } from '../../components/charts/common';
+import type { inputsModel } from '../../store';
 
 export interface EqlPreviewRequest {
   to: string;

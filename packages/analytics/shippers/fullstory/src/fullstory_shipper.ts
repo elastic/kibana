@@ -14,9 +14,9 @@ import type {
 } from '@kbn/analytics-client';
 import type { FullStoryApi } from './types';
 import type { FullStorySnippetConfig } from './load_snippet';
-import { getParsedVersion } from './get_parsed_version';
 import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
+import { getParsedVersion } from './get_parsed_version';
 
 /**
  * FullStory shipper configuration.
@@ -55,14 +55,14 @@ export class FullStoryShipper implements IShipper {
   }
 
   /**
-   * {@inheritDoc IShipper.extendContext}
-   * @param newContext {@inheritDoc IShipper.extendContext.newContext}
+   * Calls `fs.identify`, `fs.setUserVars` and `fs.setVars` depending on the fields provided in the newContext.
+   * @param newContext The full new context to set {@link EventContext}
    */
   public extendContext(newContext: EventContext): void {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
     // FullStory requires different APIs for different type of contexts.
-    const { userId, version, cloudId, ...nonUserContext } = newContext;
+    const { userId, isElasticCloudUser, ...nonUserContext } = newContext;
 
     // Call it only when the userId changes
     if (userId && userId !== this.lastUserId) {
@@ -73,14 +73,15 @@ export class FullStoryShipper implements IShipper {
     }
 
     // User-level context
-    if (version || cloudId) {
+    if (typeof isElasticCloudUser === 'boolean') {
       this.initContext.logger.debug(
-        `Calling FS.setUserVars with version ${version} and cloudId ${cloudId}`
+        `Calling FS.setUserVars with isElasticCloudUser ${isElasticCloudUser}`
       );
-      this.fullStoryApi.setUserVars({
-        ...(version ? getParsedVersion(version) : {}),
-        ...(cloudId ? { org_id_str: cloudId } : {}),
-      });
+      this.fullStoryApi.setUserVars(
+        formatPayload({
+          isElasticCloudUser,
+        })
+      );
     }
 
     // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
@@ -88,17 +89,21 @@ export class FullStoryShipper implements IShipper {
       // Keeping these fields for backwards compatibility.
       if (nonUserContext.applicationId) nonUserContext.app_id = nonUserContext.applicationId;
       if (nonUserContext.entityId) nonUserContext.ent_id = nonUserContext.entityId;
+      if (nonUserContext.cloudId) nonUserContext.org_id = nonUserContext.cloudId;
 
       this.initContext.logger.debug(
         `Calling FS.setVars with context ${JSON.stringify(nonUserContext)}`
       );
-      this.fullStoryApi.setVars('page', formatPayload(nonUserContext));
+      this.fullStoryApi.setVars('page', {
+        ...formatPayload(nonUserContext),
+        ...(nonUserContext.version ? getParsedVersion(nonUserContext.version) : {}),
+      });
     }
   }
 
   /**
-   * {@inheritDoc IShipper.optIn}
-   * @param isOptedIn {@inheritDoc IShipper.optIn.isOptedIn}
+   * Stops/restarts the shipping mechanism based on the value of isOptedIn
+   * @param isOptedIn `true` for resume sending events. `false` to stop.
    */
   public optIn(isOptedIn: boolean): void {
     this.initContext.logger.debug(`Setting FS to optIn ${isOptedIn}`);
@@ -116,8 +121,9 @@ export class FullStoryShipper implements IShipper {
   }
 
   /**
-   * {@inheritDoc IShipper.reportEvents}
-   * @param events {@inheritDoc IShipper.reportEvents.events}
+   * Filters the events by the eventTypesAllowlist from the config.
+   * Then it transforms the event into a FS valid format and calls `fs.event`.
+   * @param events batched events {@link Event}
    */
   public reportEvents(events: Event[]): void {
     this.initContext.logger.debug(`Reporting ${events.length} events to FS`);
@@ -129,6 +135,10 @@ export class FullStoryShipper implements IShipper {
       });
   }
 
+  /**
+   * Shuts down the shipper.
+   * It doesn't really do anything inside because this shipper doesn't hold any internal queues.
+   */
   public shutdown() {
     // No need to do anything here for now.
   }

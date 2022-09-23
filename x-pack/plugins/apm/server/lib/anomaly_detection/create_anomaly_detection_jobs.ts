@@ -10,13 +10,13 @@ import { Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid/v4';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import {
   METRICSET_NAME,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../helpers/setup_request';

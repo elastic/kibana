@@ -229,6 +229,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
           ]
         `);
@@ -326,6 +327,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
@@ -383,6 +385,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
@@ -488,6 +491,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",

@@ -197,5 +197,41 @@ export default function (providerContext: FtrProviderContext) {
       const { body } = await supertest.get(`/api/fleet/agents`);
       expect(body.total).to.eql(0);
     });
+
+    it('/agents/bulk_unenroll should allow to unenroll multiple agents by kuery in batches async', async () => {
+      const { body } = await supertest
+        .post(`/api/fleet/agents/bulk_unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: 'active: true',
+          revoke: false,
+          batchSize: 2,
+        })
+        .expect(200);
+
+      const actionId = body.actionId;
+
+      await new Promise((resolve, reject) => {
+        let attempts = 0;
+        const intervalId = setInterval(async () => {
+          if (attempts > 2) {
+            clearInterval(intervalId);
+            reject('action timed out');
+          }
+          ++attempts;
+          const {
+            body: { items: actionStatuses },
+          } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+          const action = actionStatuses?.find((a: any) => a.actionId === actionId);
+          if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+            clearInterval(intervalId);
+            resolve({});
+          }
+        }, 1000);
+      }).catch((e) => {
+        throw e;
+      });
+    });
   });
 }

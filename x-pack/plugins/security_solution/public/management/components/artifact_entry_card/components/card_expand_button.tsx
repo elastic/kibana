@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
+import type { CommonProps, EuiButtonIconPropsForButton } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { COLLAPSE_ACTION, EXPAND_ACTION } from './translations';
 
 export interface CardExpandButtonProps extends Pick<CommonProps, 'data-test-subj'> {

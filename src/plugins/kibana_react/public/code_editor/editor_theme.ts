@@ -76,6 +76,8 @@ export function createTheme(
       { token: 'keyword.json', foreground: euiTheme.euiColorPrimary },
       { token: 'keyword.flow', foreground: euiTheme.euiColorWarning },
       { token: 'keyword.flow.scss', foreground: euiTheme.euiColorPrimary },
+      // Monaco editor supports strikethrough font style only starting from 0.32.0.
+      { token: 'keyword.deprecated', foreground: euiTheme.euiColorAccent },
 
       { token: 'operator.scss', foreground: euiTheme.euiColorDarkShade },
       { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },

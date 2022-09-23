@@ -40,7 +40,7 @@ One common development workflow is:
   ```
 - Start Kibana in another shell
   ```
-  yarn start --xpack.fleet.enabled=true --no-base-path
+  yarn start --no-base-path
   ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
@@ -109,9 +109,9 @@ Once the Fleet Server container is running, you should be able to treat it as if
 2. Click "Add Agent"
 3. Scroll down to the bottom of the flyout that opens to view the enrollment command, copy the contents of the `--enrollment-token` option
 4. Run this docker command:
-    ```
-    docker run -e FLEET_ENROLL=true -e FLEET_INSECURE=true -e FLEET_URL=https://192.168.65.2:8220 -e FLEET_ENROLLMENT_TOKEN=<pasted from step 3> --rm docker.elastic.co/beats/elastic-agent:{VERSION}
-    ```
+   ```
+   docker run -e FLEET_ENROLL=true -e FLEET_INSECURE=true -e FLEET_URL=https://192.168.65.2:8220 -e FLEET_ENROLLMENT_TOKEN=<pasted from step 3> --rm docker.elastic.co/beats/elastic-agent:{VERSION}
+   ```
 
 ### Tests
 
@@ -175,3 +175,14 @@ The set of bundled packages included with Kibana is dictated by a top-level `fle
 
 Until further automation is added, this `fleet_packages.json` file should be updated as part of the release process to ensure the latest compatible version of each bundled package is included with that Kibana version. **This must be done before the final BC for a release is built.**
 Tracking issues should be opened and tracked by the Fleet UI team. See https://github.com/elastic/kibana/issues/129309 as an example.
+
+As part of the bundled package update process, we'll likely also need to update the pinned Docker image that runs in Kibana's test environment. We configure this pinned registry image in
+
+- `x-pack/test/fleet_api_integration/config.ts`
+- `x-pack/plugins/fleet/server/integration_tests/helpers/docker_registry_helper.ts`
+- `x-pack/test/functional/config.base.js`
+- `x-pack/test/functional_synthetics/config.js`
+
+To update this registry image, pull the digest SHA from the package storage Jenkins pipeline at https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/activity and update the files above. The digest value should appear in the "publish Docker image" step as part of the `docker push` command in the logs.
+
+![image](https://user-images.githubusercontent.com/6766512/171409455-64f9ab1d-08fe-4872-9b74-58359ed938dd.png)

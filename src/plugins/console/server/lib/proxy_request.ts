@@ -11,8 +11,7 @@ import https from 'https';
 import net from 'net';
 import stream from 'stream';
 import Boom from '@hapi/boom';
-import { URL, URLSearchParams } from 'url';
-import { trimStart } from 'lodash';
+import { URL } from 'url';
 
 interface Args {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
@@ -31,22 +30,6 @@ interface Args {
 const sanitizeHostname = (hostName: string): string =>
   hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
 
-/**
- * Node URL percent-encodes any invalid characters in the pathname which results a 400 bad request error.
- * We need to decode the percent-encoded pathname, and encode it correctly with encodeURIComponent
- */
-
-const encodePathname = (pathname: string) => {
-  const decodedPath = new URLSearchParams(`path=${pathname}`).get('path') ?? '';
-
-  // Skip if it is valid
-  if (pathname === decodedPath) {
-    return pathname;
-  }
-
-  return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
-};
-
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
@@ -59,9 +42,9 @@ export const proxyRequest = ({
   payload,
   rejectUnauthorized,
 }: Args) => {
-  const { hostname, port, protocol, pathname, search } = uri;
+  const { hostname, port, protocol, search, pathname } = uri;
   const client = uri.protocol === 'https:' ? https : http;
-  const encodedPath = encodePathname(pathname);
+
   let resolved = false;
 
   let resolve: (res: http.IncomingMessage) => void;
@@ -84,7 +67,7 @@ export const proxyRequest = ({
     host: sanitizeHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
-    path: `${encodedPath}${search || ''}`,
+    path: `${pathname}${search || ''}`,
     headers: {
       ...finalUserHeaders,
       'content-type': 'application/json',
@@ -113,7 +96,10 @@ export const proxyRequest = ({
 
   const timeoutPromise = new Promise<any>((timeoutResolve, timeoutReject) => {
     setTimeout(() => {
-      if (!req.aborted && !req.socket) req.abort();
+      // Destroy the stream on timeout and close the connection.
+      if (!req.destroyed) {
+        req.destroy();
+      }
       if (!resolved) {
         timeoutReject(Boom.gatewayTimeout('Client request timeout'));
       } else {

@@ -30,7 +30,13 @@ const args: Args = {
 export const SettingsSection = ({ width, fleetServerHosts }: Args) => {
   return (
     <div style={{ width }}>
-      <Component fleetServerHosts={fleetServerHosts} />
+      <Component
+        settings={{
+          id: 'default-settings',
+          fleet_server_hosts: fleetServerHosts,
+          preconfigured_fields: [],
+        }}
+      />
     </div>
   );
 };

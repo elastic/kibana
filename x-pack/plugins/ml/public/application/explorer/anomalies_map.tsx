@@ -186,6 +186,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     );
 
     setEMSSuggestions(suggestions.filter(isDefined));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...jobIds]);
 
   useEffect(
@@ -194,6 +195,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         getEMSTermSuggestions();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [...jobIds]
   );
 
@@ -227,7 +229,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}
           buttonContent={
-            <EuiTitle className="panel-title">
+            <EuiTitle size={'xs'}>
               <h2>
                 <FormattedMessage
                   id="xpack.ml.explorer.mapTitle"

@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
@@ -19,11 +19,12 @@ import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './badge/sync_badge';
+import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -43,7 +44,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-top: ${({ theme }) => theme.eui.euiSizeS};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
@@ -90,6 +91,7 @@ interface IWaterfallItemProps {
   color: string;
   isSelected: boolean;
   errorCount: number;
+  marginLeftLevel: number;
   onClick: () => unknown;
 }
 
@@ -190,14 +192,29 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
+  marginLeftLevel,
   onClick,
 }: IWaterfallItemProps) {
+  const [widthFactor, setWidthFactor] = useState(1);
+  const waterfallItemRef: React.RefObject<any> = useRef(null);
+  useEffect(() => {
+    if (waterfallItemRef?.current && marginLeftLevel) {
+      setWidthFactor(
+        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth
+      );
+    }
+  }, [marginLeftLevel]);
+
   if (!totalDuration) {
     return null;
   }
 
-  const width = (item.duration / totalDuration) * 100;
-  const left = ((item.offset + item.skew) / totalDuration) * 100;
+  const width = (item.duration / totalDuration) * widthFactor * 100;
+  const left =
+    (((item.offset + item.skew) / totalDuration) * widthFactor -
+      widthFactor +
+      1) *
+    100;
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
@@ -206,6 +223,7 @@ export function WaterfallItem({
 
   return (
     <Container
+      ref={waterfallItemRef}
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
@@ -237,6 +255,11 @@ export function WaterfallItem({
             agentName={item.doc.agent.name}
           />
         )}
+        <SpanLinksBadge
+          linkedParents={item.spanLinksCount.linkedParents}
+          linkedChildren={item.spanLinksCount.linkedChildren}
+          id={item.id}
+        />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
     </Container>
@@ -252,13 +275,22 @@ function RelatedErrors({
 }) {
   const apmRouter = useApmRouter();
   const theme = useTheme();
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/traces/explorer'
+  );
+
+  let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
+  if (item.doc.transaction?.id) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  }
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,
-      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+      serviceGroup: '',
+      kuery,
     },
   });
 

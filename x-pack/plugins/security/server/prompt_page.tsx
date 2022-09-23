@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiProvider } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiProvider,
+} from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
+import createCache from '@emotion/cache';
 import type { ReactNode } from 'react';
 import React from 'react';
 
 import type { IBasePath } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '@kbn/core/server/rendering/views/fonts';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -54,6 +60,12 @@ export function PromptPage({
     `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];
 
+  // Emotion SSR styles will be prepended to the <body> and emit a console log warning about :first-child selectors
+  const emotionCache = createCache({
+    key: 'css',
+    prepend: true,
+  });
+
   return (
     <html lang={i18n.getLocale()}>
       <head>
@@ -73,7 +85,7 @@ export function PromptPage({
       </head>
       <body>
         <I18nProvider>
-          <EuiProvider colorMode="light">
+          <EuiProvider colorMode="light" cache={emotionCache}>
             <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
               <EuiPageBody>
                 <EuiPageContent verticalPosition="center" horizontalPosition="center">

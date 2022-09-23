@@ -6,7 +6,8 @@
  */
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 
@@ -18,19 +19,25 @@ import {
 
 export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
+  coreStart: ReturnType<typeof coreMock['createStart']>;
 };
 
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`${BASE_PATH}/edit_component_template/comp-1`],
-    componentRoutePath: `${BASE_PATH}/edit_component_template/:name`,
-  },
-  doMountAsync: true,
-};
+export const setup = async (
+  httpSetup: HttpSetup,
+  queryParams: string = ''
+): Promise<ComponentTemplateEditTestBed> => {
+  const testBedConfig: AsyncTestBedConfig = {
+    memoryRouter: {
+      initialEntries: [`${BASE_PATH}/edit_component_template/comp-1${queryParams}`],
+      componentRoutePath: `${BASE_PATH}/edit_component_template/:name`,
+    },
+    doMountAsync: true,
+  };
 
-export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateEditTestBed> => {
+  const coreStart = coreMock.createStart();
+
   const initTestBed = registerTestBed(
-    WithAppDependencies(ComponentTemplateEdit, httpSetup),
+    WithAppDependencies(ComponentTemplateEdit, httpSetup, coreStart),
     testBedConfig
   );
   const testBed = await initTestBed();
@@ -38,5 +45,6 @@ export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateEdit
   return {
     ...testBed,
     actions: getFormActions(testBed),
+    coreStart,
   };
 };

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { FormattedEntry, Entry } from './types';
+import type { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
 

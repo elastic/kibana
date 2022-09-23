@@ -6,7 +6,7 @@
  */
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 
 export interface GeoContainmentAlertParams extends RuleTypeParams {
   index: string;

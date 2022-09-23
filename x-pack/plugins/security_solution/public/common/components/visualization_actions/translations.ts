@@ -73,17 +73,3 @@ export const FAIL_CHART_LABEL = i18n.translate(
     defaultMessage: 'Fail',
   }
 );
-
-export const SUCCESS_UNIT_LABEL = i18n.translate(
-  'xpack.securitySolution.visualizationActions.userAuthentications.successUnitLabel',
-  {
-    defaultMessage: 'success',
-  }
-);
-
-export const FAIL_UNIT_LABEL = i18n.translate(
-  'xpack.securitySolution.visualizationActions.userAuthentications.failUnitLabel',
-  {
-    defaultMessage: 'fail',
-  }
-);

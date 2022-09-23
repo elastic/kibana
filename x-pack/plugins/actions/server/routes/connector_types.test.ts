@@ -41,6 +41,7 @@ describe('connectorTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -58,6 +59,9 @@ describe('connectorTypesRoute', () => {
             "id": "1",
             "minimum_license_required": "gold",
             "name": "name",
+            "supported_feature_ids": Array [
+              "alerting",
+            ],
           },
         ],
       }
@@ -71,6 +75,81 @@ describe('connectorTypesRoute', () => {
           enabled: true,
           enabled_in_config: true,
           enabled_in_license: true,
+          supported_feature_ids: ['alerting'],
+          minimum_license_required: 'gold',
+        },
+      ],
+    });
+  });
+
+  it('passes feature_id if provided as query parameter', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    connectorTypesRoute(router, licenseState);
+
+    const [config, handler] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
+
+    const listTypes = [
+      {
+        id: '1',
+        name: 'name',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'gold' as LicenseType,
+      },
+    ];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        query: {
+          feature_id: 'alerting',
+        },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": Array [
+          Object {
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "id": "1",
+            "minimum_license_required": "gold",
+            "name": "name",
+            "supported_feature_ids": Array [
+              "alerting",
+            ],
+          },
+        ],
+      }
+    `);
+
+    expect(actionsClient.listTypes).toHaveBeenCalledTimes(1);
+    expect(actionsClient.listTypes.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alerting",
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        {
+          id: '1',
+          name: 'name',
+          enabled: true,
+          enabled_in_config: true,
+          enabled_in_license: true,
+          supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
         },
       ],
@@ -94,6 +173,7 @@ describe('connectorTypesRoute', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
@@ -135,6 +215,7 @@ describe('connectorTypesRoute', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];

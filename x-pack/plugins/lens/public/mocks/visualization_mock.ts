@@ -11,7 +11,7 @@ import { Visualization, VisualizationMap } from '../types';
 export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualization> {
   return {
     id,
-    clearLayer: jest.fn((state, _layerId) => state),
+    clearLayer: jest.fn((state, _layerId, _indexPatternId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
     getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
@@ -29,6 +29,7 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
     getDescription: jest.fn((_state) => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
     getSuggestions: jest.fn((_options) => []),
+    getRenderEventCounters: jest.fn((_state) => []),
     initialize: jest.fn((_frame, _state?) => ({ newState: 'newState' })),
     getConfiguration: jest.fn((props) => ({
       groups: [

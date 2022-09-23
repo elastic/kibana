@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109904
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-export * from './deprecated';
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
 export { getRequestAbortedSignal } from './lib';
@@ -29,31 +25,17 @@ export const exporters = {
 };
 
 /*
- * Field Formats:
- */
-
-export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
-
-/*
  * Index patterns:
  */
 
-export type { FieldDescriptor, IndexPatternsServiceStart } from './data_views';
-export {
-  IndexPatternsFetcher,
-  shouldReadFieldFromDocValues,
-  getCapabilitiesForRollupIndices,
-} from './data_views';
+export type { FieldDescriptor, DataViewsServerPluginStart } from './data_views';
+export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './data_views';
 
-export type { IndexPatternAttributes } from '../common';
 export {
-  IndexPatternField,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-  IndexPattern,
-  IndexPatternsService,
-  IndexPatternsService as IndexPatternsCommonService,
+  DataViewsService as DataViewsCommonService,
   DataView,
 } from '../common';
 
@@ -107,7 +89,6 @@ export const search = {
  * @public
  */
 
-export type { TimeRange } from '../common';
 export { getTime, parseInterval } from '../common';
 
 /**

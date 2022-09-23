@@ -5,15 +5,28 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
+import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
-import { onPackagePolicyPostCreateCallback } from './fleet_integration';
+import {
+  getBenchmarkInputType,
+  onPackagePolicyPostCreateCallback,
+  removeCspRulesInstancesCallback,
+} from './fleet_integration';
 
 describe('create CSP rules with post package create callback', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectRepositoryMock: jest.Mocked<ISavedObjectsRepository>;
   const ruleAttributes = {
     id: '41308bcdaaf665761478bb6f0d745a5c',
     name: 'Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)',
@@ -29,6 +42,7 @@ describe('create CSP rules with post package create callback', () => {
     benchmark: {
       name: 'CIS Kubernetes V1.20',
       version: 'v1.0.0',
+      id: 'cis_k8s',
     },
     enabled: true,
     rego_rule_id: 'cis_1_2_2',
@@ -84,12 +98,73 @@ describe('create CSP rules with post package create callback', () => {
     expect(mockSoClient.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
   });
 
-  it('should not create rules when the package policy is not csp package', async () => {
-    const mockPackagePolicy = createPackagePolicyMock();
-    mockPackagePolicy.package!.name = 'not_csp_package';
+  it('validate that all rules templates are deleted', async () => {
+    savedObjectRepositoryMock = savedObjectsRepositoryMock.create();
+    const mockDeletePackagePolicy = deletePackagePolicyMock();
+    savedObjectRepositoryMock.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'csp-rule-template',
+          id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+          attributes: { ...ruleAttributes },
+        },
+      ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+    await removeCspRulesInstancesCallback(
+      mockDeletePackagePolicy[0],
+      savedObjectRepositoryMock,
+      logger
+    );
 
-    await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
-    expect(mockSoClient.find).toHaveBeenCalledTimes(0);
-    expect(mockSoClient.bulkCreate).toHaveBeenCalledTimes(0);
+    expect(savedObjectRepositoryMock.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
+  });
+
+  it('get default integration type from inputs with multiple enabled types', () => {
+    const mockPackagePolicy = createPackagePolicyMock();
+
+    // Both enabled falls back to default
+    mockPackagePolicy.inputs = [
+      { type: 'cloudbeat/cis_k8s', enabled: true, streams: [] },
+      { type: 'cloudbeat/cis_eks', enabled: true, streams: [] },
+    ];
+    const type = getBenchmarkInputType(mockPackagePolicy.inputs);
+    expect(type).toMatch('cis_k8s');
+  });
+
+  it('get default integration type from inputs without any enabled types', () => {
+    const mockPackagePolicy = createPackagePolicyMock();
+
+    // None enabled falls back to default
+    mockPackagePolicy.inputs = [
+      { type: 'cloudbeat/cis_k8s', enabled: false, streams: [] },
+      { type: 'cloudbeat/cis_eks', enabled: false, streams: [] },
+    ];
+    const type = getBenchmarkInputType(mockPackagePolicy.inputs);
+    expect(type).toMatch('cis_k8s');
+  });
+
+  it('get EKS integration type', () => {
+    const mockPackagePolicy = createPackagePolicyMock();
+
+    // Single EKS selected
+    mockPackagePolicy.inputs = [
+      { type: 'cloudbeat/cis_eks', enabled: true, streams: [] },
+      { type: 'cloudbeat/cis_k8s', enabled: false, streams: [] },
+    ];
+    const typeEks = getBenchmarkInputType(mockPackagePolicy.inputs);
+    expect(typeEks).toMatch('cis_eks');
+  });
+
+  it('get Vanilla K8S integration type', () => {
+    const mockPackagePolicy = createPackagePolicyMock();
+
+    // Single k8s selected
+    mockPackagePolicy.inputs = [
+      { type: 'cloudbeat/cis_eks', enabled: false, streams: [] },
+      { type: 'cloudbeat/cis_k8s', enabled: true, streams: [] },
+    ];
+    const typeK8s = getBenchmarkInputType(mockPackagePolicy.inputs);
+    expect(typeK8s).toMatch('cis_k8s');
   });
 });

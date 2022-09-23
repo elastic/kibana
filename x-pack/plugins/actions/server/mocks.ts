@@ -16,7 +16,7 @@ import { actionsClientMock } from './actions_client.mock';
 import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
 import { Services } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -24,7 +24,11 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    registerSubActionConnectorType: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
+    getSubActionConnectorClass: jest.fn(),
+    getCaseConnectorClass: jest.fn(),
+    getActionsHealth: jest.fn(),
   };
   return mock;
 };

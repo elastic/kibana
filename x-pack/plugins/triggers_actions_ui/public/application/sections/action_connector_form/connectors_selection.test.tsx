@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
+import { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
 
 describe('connectors_selection', () => {
@@ -55,6 +55,7 @@ describe('connectors_selection', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
     },
   };
 
@@ -76,9 +77,6 @@ describe('connectors_selection', () => {
     id: '.pagerduty',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);

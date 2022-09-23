@@ -28,7 +28,7 @@ const gutterTimeline = '70px'; // seems to be a timeline reference from the orig
 export const ContentWrapper = styled.div`
   ${({ theme }) =>
     `
-      padding: ${theme.eui.paddingSizes.l} 0 ${gutterTimeline} 0;
+      padding: ${theme.eui.euiSizeL} 0 ${gutterTimeline} 0;
     `};
 `;
 

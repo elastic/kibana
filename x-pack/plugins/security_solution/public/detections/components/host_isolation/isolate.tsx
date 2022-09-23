@@ -10,12 +10,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
+import type { EndpointIsolatedFormProps } from '../../../common/components/endpoint/host_isolation';
 import {
-  EndpointIsolatedFormProps,
   EndpointIsolateForm,
   ActionCompletionReturnButton,
 } from '../../../common/components/endpoint/host_isolation';
-import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
+import type { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const IsolateHost = React.memo(
   ({

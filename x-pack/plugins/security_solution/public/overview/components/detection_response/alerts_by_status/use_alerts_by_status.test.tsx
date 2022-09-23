@@ -7,12 +7,10 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';
-import {
-  useAlertsByStatus,
-  UseAlertsByStatus,
-  UseAlertsByStatusProps,
-} from './use_alerts_by_status';
+import type { UseAlertsByStatus, UseAlertsByStatusProps } from './use_alerts_by_status';
+import { useAlertsByStatus } from './use_alerts_by_status';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -75,6 +73,7 @@ describe('useAlertsByStatus', () => {
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: false,
+      queryName: ALERTS_QUERY_NAMES.BY_STATUS,
     });
   });
 
@@ -120,6 +119,7 @@ describe('useAlertsByStatus', () => {
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: true,
+      queryName: ALERTS_QUERY_NAMES.BY_STATUS,
     });
 
     expect(result.current).toEqual({

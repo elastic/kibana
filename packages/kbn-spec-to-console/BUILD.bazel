@@ -28,7 +28,9 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-RUNTIME_DEPS = []
+RUNTIME_DEPS = [
+  "@npm//globby",
+]
 
 js_library(
   name = PKG_BASE_NAME,

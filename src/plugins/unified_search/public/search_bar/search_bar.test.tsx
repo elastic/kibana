@@ -17,7 +17,9 @@ const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
+import { FilterItems } from '../filter_bar';
+import { DataViewPicker } from '..';
 
 const mockTimeHistory = {
   get: () => {
@@ -70,6 +72,10 @@ const kqlQuery = {
   language: 'kuery',
 };
 
+const sqlQuery = {
+  sql: 'SELECT * from test',
+};
+
 function wrapSearchBarInContext(testProps: any) {
   const defaultOptions = {
     appName: 'test',
@@ -105,6 +111,9 @@ function wrapSearchBarInContext(testProps: any) {
             }),
         },
       },
+      dataViews: {
+        getIdsWithTitle: jest.fn(() => []),
+      },
     },
   };
 
@@ -124,6 +133,7 @@ describe('SearchBar', () => {
   const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
+  const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -223,5 +233,54 @@ describe('SearchBar', () => {
     expect(component.find(FILTER_BAR).length).toBeTruthy();
     expect(component.find(QUERY_BAR).length).toBeTruthy();
     expect(component.find(QUERY_INPUT).length).toBeTruthy();
+  });
+
+  it('Should NOT render the input query input, for sql query', () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: sqlQuery,
+      })
+    );
+    expect(component.find(QUERY_INPUT).length).toBeFalsy();
+    expect(component.find(EDITOR).length).toBeTruthy();
+  });
+
+  it('Should render in isDisabled state', () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        isDisabled: true,
+        query: kqlQuery,
+        filters: [],
+        onFiltersUpdated: noop,
+        dataViewPickerComponentProps: {
+          trigger: {
+            label: 'Data View',
+          },
+        },
+      })
+    );
+    const queryInput = component.find(QUERY_INPUT).at(0).getDOMNode();
+    expect(queryInput.querySelector('textarea')).toBeDisabled();
+    expect(queryInput.querySelector('[title="Clear input"]')).toBeNull();
+
+    expect(component.find(EuiSuperDatePicker).prop('isDisabled')).toBe(true);
+    expect(component.find(EuiSuperUpdateButton).prop('isDisabled')).toBe(true);
+    expect(component.find(FilterItems).prop('readOnly')).toBe(true);
+
+    expect(component.find('[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()).toBeDisabled();
+    expect(component.find('[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
+
+    expect(component.find(DataViewPicker).prop('isDisabled')).toBe(true);
+
+    // also run a wildcard, this could help to find missing [disabled] when someone adds a new button
+    Array.from(component.getDOMNode().querySelectorAll('button')).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
   });
 });

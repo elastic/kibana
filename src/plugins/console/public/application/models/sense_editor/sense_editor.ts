@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-
+import { parse } from 'hjson';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import RowParser from '../../../lib/row_parser';
@@ -19,6 +19,8 @@ import { constructUrl } from '../../../lib/es/es';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 import createAutocompleter from '../../../lib/autocomplete/autocomplete';
+import { getStorage, StorageKeys } from '../../../services';
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -93,6 +95,15 @@ export class SenseEditor {
     const parsedReq = await this.getRequest();
 
     if (!parsedReq) {
+      return;
+    }
+
+    if (parsedReq.data.some((doc) => utils.hasComments(doc))) {
+      /**
+       * Comments require different approach for indentation and do not have condensed format
+       * We need to delegate indentation logic to coreEditor since it has access to session and other methods used for formatting and indenting the comments
+       */
+      this.coreEditor.autoIndent(parsedReq.range);
       return;
     }
 
@@ -239,7 +250,7 @@ export class SenseEditor {
 
     request.url = '';
 
-    while (t && t.type && t.type.indexOf('url') === 0) {
+    while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.template')) {
       request.url += t.value;
       t = tokenIter.stepForward();
     }
@@ -247,6 +258,12 @@ export class SenseEditor {
       // if the url row ends with some spaces, skip them.
       t = this.parser.nextNonEmptyToken(tokenIter);
     }
+
+    // If the url row ends with a comment, skip it
+    while (this.parser.isCommentToken(t)) {
+      t = tokenIter.stepForward();
+    }
+
     let bodyStartLineNumber = (t ? 0 : 1) + tokenIter.getCurrentPosition().lineNumber; // artificially increase end of docs.
     let dataEndPos: Position;
     while (
@@ -282,7 +299,6 @@ export class SenseEditor {
     }
 
     const expandedRange = await this.expandRangeToRequestEdges(range);
-
     if (!expandedRange) {
       return [];
     }
@@ -460,7 +476,9 @@ export class SenseEditor {
   }, 25);
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
-    const requests = await this.getRequestsInRange(range, true);
+    const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
+    let requests = await this.getRequestsInRange(range, true);
+    requests = utils.replaceVariables(requests, variables);
     const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
@@ -476,16 +494,30 @@ export class SenseEditor {
 
       // Append 'kbn-xsrf' header to bypass (XSRF/CSRF) protections
       let ret = `curl -X${method.toUpperCase()} "${url}" -H "kbn-xsrf: reporting"`;
-      if (data && data.length) {
-        ret += ` -H "Content-Type: application/json" -d'\n`;
-        const dataAsString = collapseLiteralStrings(data.join('\n'));
 
-        // We escape single quoted strings that that are wrapped in single quoted strings
-        ret += dataAsString.replace(/'/g, "'\\''");
-        if (data.length > 1) {
-          ret += '\n';
-        } // end with a new line
-        ret += "'";
+      if (data && data.length) {
+        const joinedData = data.join('\n');
+        let dataAsString: string;
+
+        try {
+          ret += ` -H "Content-Type: application/json" -d'\n`;
+
+          if (utils.hasComments(joinedData)) {
+            // if there are comments in the data, we need to strip them out
+            const dataWithoutComments = parse(joinedData);
+            dataAsString = collapseLiteralStrings(JSON.stringify(dataWithoutComments, null, 2));
+          } else {
+            dataAsString = collapseLiteralStrings(joinedData);
+          }
+          // We escape single quoted strings that are wrapped in single quoted strings
+          ret += dataAsString.replace(/'/g, "'\\''");
+          if (data.length > 1) {
+            ret += '\n';
+          } // end with a new line
+          ret += "'";
+        } catch (e) {
+          throw new Error(`Error parsing data: ${e.message}`);
+        }
       }
       return ret;
     });

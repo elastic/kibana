@@ -13,6 +13,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -26,26 +27,33 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
   SOURCE_TYPES,
+  STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
+import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
+  SizeDynamicOptions,
+  TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
 import { isMvt } from './is_mvt';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { getIconSize } from './get_icon_size';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
@@ -78,19 +86,47 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   readonly _descriptor: ESGeoGridSourceDescriptor;
 
-  constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESGeoGridSourceDescriptor>) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
+    async function onChange(...sourceChanges: OnSourceChangeArgs[]) {
+      sourceEditorArgs.onChange(...sourceChanges);
+      const resolutionPropChange = sourceChanges.find((sourceChange) => {
+        return sourceChange.propName === 'resolution';
+      });
+      if (resolutionPropChange) {
+        const propertiesDescriptor = (
+          sourceEditorArgs.style as VectorStyle
+        ).getPropertiesDescriptor();
+        if (propertiesDescriptor[VECTOR_STYLES.ICON_SIZE].type === STYLE_TYPE.DYNAMIC) {
+          propertiesDescriptor[VECTOR_STYLES.ICON_SIZE] = {
+            ...propertiesDescriptor[VECTOR_STYLES.ICON_SIZE],
+            options: {
+              ...propertiesDescriptor[VECTOR_STYLES.ICON_SIZE].options,
+              ...getIconSize(resolutionPropChange.value as GRID_RESOLUTION),
+            },
+          } as {
+            type: STYLE_TYPE.DYNAMIC;
+            options: SizeDynamicOptions;
+          };
+          const vectorStyleDescriptor = VectorStyle.createDescriptor(
+            propertiesDescriptor,
+            (sourceEditorArgs.style as VectorStyle).isTimeAware()
+          );
+          sourceEditorArgs.onStyleDescriptorChange(vectorStyleDescriptor);
+        }
+      }
+    }
     return (
       <UpdateSourceEditor
         currentLayerType={sourceEditorArgs.currentLayerType}
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
-        onChange={sourceEditorArgs.onChange}
+        onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
@@ -106,14 +142,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternName = this.getIndexPatternId();
-    try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternName = indexPattern.title;
-    } catch (error) {
-      // ignore error, title will just default to id
-    }
-
     return [
       {
         label: getDataSourceLabel(),
@@ -121,7 +149,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternName,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
@@ -227,6 +255,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bucketsPerGrid,
     isRequestStillActive,
     bufferedExtent,
+    inspectorAdapters,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -237,6 +266,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bucketsPerGrid: number;
     isRequestStillActive: () => boolean;
     bufferedExtent: MapExtent;
+    inspectorAdapters: Adapters;
   }) {
     const gridsPerRequest: number = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs: any = {
@@ -308,6 +338,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         ),
         searchSessionId,
         executionContext: makePublicExecutionContext('es_geo_grid_source:cluster_composite'),
+        requestsAdapter: inspectorAdapters.requests,
       });
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
@@ -333,6 +364,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     registerCancelCallback,
     bufferedExtent,
     tooManyBuckets,
+    inspectorAdapters,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -342,6 +374,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     registerCancelCallback: (callback: () => void) => void;
     bufferedExtent: MapExtent;
     tooManyBuckets: boolean;
+    inspectorAdapters: Adapters;
   }): Promise<Feature[]> {
     const valueAggsDsl = tooManyBuckets
       ? this.getValueAggsDsl(indexPattern, (metric) => {
@@ -379,6 +412,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       }),
       searchSessionId,
       executionContext: makePublicExecutionContext('es_geo_grid_source:cluster'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
@@ -398,7 +432,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     if (!searchFilters.buffer) {
       throw new Error('Cannot get GeoJson without searchFilter.buffer');
@@ -435,6 +470,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             bucketsPerGrid,
             isRequestStillActive,
             bufferedExtent: searchFilters.buffer,
+            inspectorAdapters,
           })
         : await this._nonCompositeAggRequest({
             searchSource,
@@ -445,6 +481,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             registerCancelCallback,
             bufferedExtent: searchFilters.buffer,
             tooManyBuckets,
+            inspectorAdapters,
           });
 
     return {
@@ -462,7 +499,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return 'aggs';
   }
 
-  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
+  async getTileUrl(
+    searchFilters: VectorSourceRequestMeta,
+    refreshToken: string,
+    hasLabels: boolean
+  ): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
@@ -475,6 +516,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
+&hasLabels=${hasLabels}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &renderAs=${this._descriptor.requestType}\
 &token=${refreshToken}`;
@@ -507,6 +549,35 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return (await this._isGeoShape()) ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE] : [];
+  }
+
+  getFeatureActions({
+    addFilters,
+    featureId,
+    geoFieldNames,
+    onClose,
+  }: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    if (geoFieldNames.length === 0 || addFilters === null) {
+      return [];
+    }
+
+    return [
+      {
+        label: i18n.translate('xpack.maps.tooltip.action.filterByClusterLabel', {
+          defaultMessage: 'Filter by cluster',
+        }),
+        id: 'FILTER_BY_CLUSTER_ACTION',
+        onClick: () => {
+          const geoGridFilter = buildGeoGridFilter({
+            geoFieldNames,
+            gridId: featureId, // featureId is grid id for ES_GEO_GRID source
+            isHex: this._descriptor.requestType === RENDER_AS.HEX,
+          });
+          addFilters([geoGridFilter], ACTION_GLOBAL_APPLY_FILTER);
+          onClose();
+        },
+      },
+    ];
   }
 }
 

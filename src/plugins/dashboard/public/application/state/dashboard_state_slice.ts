@@ -8,10 +8,10 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { Filter, Query, TimeRange } from '../../services/data';
-import { ViewMode } from '../../services/embeddable';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',
@@ -100,6 +100,9 @@ export const dashboardStateSlice = createSlice({
     setQuery: (state, action: PayloadAction<Query>) => {
       state.query = action.payload;
     },
+    setTimeslice: (state, action: PayloadAction<[number, number] | undefined>) => {
+      state.timeslice = action.payload;
+    },
   },
 });
 
@@ -124,5 +127,6 @@ export const {
   setPanels,
   setTitle,
   setQuery,
+  setTimeslice,
   setTags,
 } = dashboardStateSlice.actions;

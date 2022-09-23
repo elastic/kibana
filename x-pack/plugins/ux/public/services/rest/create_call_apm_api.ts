@@ -16,7 +16,6 @@ import { formatRequest } from '@kbn/server-route-repository';
 import type {
   APMServerRouteRepository,
   APIEndpoint,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/apm-plugin/server';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { CallApi, callApi } from './call_api';

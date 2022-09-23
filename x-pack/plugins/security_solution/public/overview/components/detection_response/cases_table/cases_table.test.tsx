@@ -76,7 +76,7 @@ describe('CasesTable', () => {
     mockUseCaseItemsReturn({ isLoading: false });
     const { getByText } = renderComponent();
 
-    expect(getByText('Updated now')).toBeInTheDocument();
+    expect(getByText(/Updated/)).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
@@ -85,7 +85,7 @@ describe('CasesTable', () => {
 
     const columnHeaders = getAllByRole('columnheader');
     expect(columnHeaders.at(0)).toHaveTextContent('Name');
-    expect(columnHeaders.at(1)).toHaveTextContent('Note');
+    expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
     expect(columnHeaders.at(2)).toHaveTextContent('Time');
     expect(columnHeaders.at(3)).toHaveTextContent('Created by');
     expect(columnHeaders.at(4)).toHaveTextContent('Status');
@@ -96,7 +96,7 @@ describe('CasesTable', () => {
     const { getByTestId } = renderComponent();
 
     expect(getByTestId('recentlyCreatedCaseName')).toHaveTextContent('sdcsd');
-    expect(getByTestId('recentlyCreatedCaseNote')).toHaveTextContent('klklk');
+    expect(getByTestId('recentlyCreatedCaseAlert')).toHaveTextContent('1');
     expect(getByTestId('recentlyCreatedCaseTime')).toHaveTextContent('April 25, 2022');
     expect(getByTestId('recentlyCreatedCaseCreatedBy')).toHaveTextContent('elastic');
     expect(getByTestId('recentlyCreatedCaseStatus')).toHaveTextContent('Open');

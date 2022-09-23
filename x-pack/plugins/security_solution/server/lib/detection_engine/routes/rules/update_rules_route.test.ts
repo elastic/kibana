@@ -12,7 +12,6 @@ import {
   getRuleMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
-  getRuleExecutionSummarySucceeded,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
@@ -46,9 +45,6 @@ describe('update_rules', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
-      getRuleExecutionSummarySucceeded()
-    );
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));

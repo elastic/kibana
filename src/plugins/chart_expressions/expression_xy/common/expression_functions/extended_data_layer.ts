@@ -7,7 +7,7 @@
  */
 
 import { ExtendedDataLayerFn } from '../types';
-import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
+import { EXTENDED_DATA_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';
 
@@ -19,22 +19,31 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   inputTypes: ['datatable'],
   args: {
     ...commonDataLayerArgs,
-    table: {
-      types: ['datatable'],
-      help: strings.getTableHelp(),
+    xAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getXAccessorHelp(),
+    },
+    splitAccessors: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getSplitAccessorHelp(),
+      multi: true,
+    },
+    accessors: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getAccessorsHelp(),
+      multi: true,
+    },
+    markSizeAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getMarkSizeAccessorHelp(),
     },
     layerId: {
       types: ['string'],
       help: strings.getLayerIdHelp(),
     },
   },
-  fn(input, args) {
-    return {
-      type: EXTENDED_DATA_LAYER,
-      ...args,
-      accessors: args.accessors ?? [],
-      layerType: LayerTypes.DATA,
-      table: args.table ?? input,
-    };
+  async fn(input, args, context) {
+    const { extendedDataLayerFn } = await import('./extended_data_layer_fn');
+    return await extendedDataLayerFn(input, args, context);
   },
 };

@@ -17,7 +17,11 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
+
 import { InstallStatus } from '../../../types';
+import { isVerificationError } from '../services';
+
+import { useConfirmForceInstall } from '.';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -29,7 +33,9 @@ interface PackageInstallItem {
 }
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
+  isReinstall?: boolean;
   fromUpdate?: boolean;
+  force?: boolean;
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
@@ -43,7 +49,7 @@ function usePackageInstall({
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
-
+  const confirmForceInstall = useConfirmForceInstall();
   const setPackageInstallStatus = useCallback(
     ({ name, status, version }: SetPackageInstallStatusProps) => {
       const packageProps: PackageInstallItem = {
@@ -65,21 +71,49 @@ function usePackageInstall({
     [packages]
   );
 
+  const optionallyForceInstall = async (
+    installProps: InstallPackageProps,
+    prevStatus: PackageInstallItem
+  ) => {
+    const forceInstall = await confirmForceInstall(installProps);
+    if (forceInstall) {
+      installPackage({ ...installProps, force: true });
+    } else {
+      setPackageInstallStatus({ ...prevStatus, name: installProps.name });
+    }
+  };
+
   const installPackage = useCallback(
-    async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
-      const currStatus = getPackageInstallStatus(name);
-      const newStatus = { ...currStatus, name, status: InstallStatus.installing };
+    async (props: InstallPackageProps) => {
+      const {
+        name,
+        version,
+        title,
+        fromUpdate = false,
+        isReinstall = false,
+        force = false,
+      } = props;
+      const prevStatus = getPackageInstallStatus(name);
+      const newStatus = {
+        ...prevStatus,
+        name,
+        status: isReinstall ? InstallStatus.reinstalling : InstallStatus.installing,
+      };
       setPackageInstallStatus(newStatus);
 
-      const res = await sendInstallPackage(name, version);
+      const res = await sendInstallPackage(name, version, isReinstall || force);
       if (res.error) {
+        if (isVerificationError(res.error)) {
+          return optionallyForceInstall(props, prevStatus);
+        }
         if (fromUpdate) {
           // if there is an error during update, set it back to the previous version
           // as handling of bad update is not implemented yet
-          setPackageInstallStatus({ ...currStatus, name });
+          setPackageInstallStatus({ ...prevStatus, name });
         } else {
           setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
         }
+
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
@@ -107,33 +141,55 @@ function usePackageInstall({
           history.push(settingsPath);
         }
 
-        notifications.toasts.addSuccess({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallSuccessTitle"
-              defaultMessage="Installed {title}"
-              values={{ title }}
-            />,
-            { theme$ }
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallSuccessDescription"
-              defaultMessage="Successfully installed {title}"
-              values={{ title }}
-            />,
-            { theme$ }
-          ),
-        });
+        if (isReinstall) {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageReinstallSuccessTitle"
+                defaultMessage="Reinstalled {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageReinstallSuccessDescription"
+                defaultMessage="Successfully reinstalled {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+          });
+        } else {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageInstallSuccessTitle"
+                defaultMessage="Installed {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageInstallSuccessDescription"
+                defaultMessage="Successfully installed {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+          });
+        }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       getPackageInstallStatus,
-      notifications.toasts,
       setPackageInstallStatus,
+      notifications.toasts,
+      theme$,
       getPath,
       history,
-      theme$,
     ]
   );
 

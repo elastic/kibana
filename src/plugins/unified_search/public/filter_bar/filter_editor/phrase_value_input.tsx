@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
@@ -15,27 +14,26 @@ import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
 
-interface Props extends PhraseSuggestorProps {
+interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  compressed?: boolean;
+  disabled?: boolean;
+  isInvalid?: boolean;
 }
 
-class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
+class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
   public render() {
     return (
-      <EuiFormRow
-        fullWidth={this.props.fullWidth}
-        label={this.props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
-          defaultMessage: 'Value',
-        })}
-      >
+      <>
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
+            disabled={this.props.disabled}
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.valueInputPlaceholder',
@@ -44,9 +42,10 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}
+            isInvalid={this.props.isInvalid}
           />
         )}
-      </EuiFormRow>
+      </>
     );
   }
 
@@ -58,7 +57,9 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
+        isDisabled={this.props.disabled}
         fullWidth={fullWidth}
+        compressed={this.props.compressed}
         placeholder={intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
           defaultMessage: 'Select a value',

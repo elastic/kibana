@@ -28,10 +28,24 @@ export const THREAT_QUERY_LABEL = i18n.translate(
   }
 );
 
-export const SAVED_ID_LABEL = i18n.translate(
+export const SAVED_QUERY_NAME_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.savedIdLabel',
   {
     defaultMessage: 'Saved query name',
+  }
+);
+
+export const SAVED_QUERY_FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedQueryFiltersLabel',
+  {
+    defaultMessage: 'Saved query filters',
+  }
+);
+
+export const SAVED_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedQueryLabel',
+  {
+    defaultMessage: 'Saved query',
   }
 );
 
@@ -70,6 +84,13 @@ export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription',
+  {
+    defaultMessage: 'New Terms',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
@@ -95,5 +116,26 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription',
   {
     defaultMessage: 'Results aggregated by',
+  }
+);
+
+export const EQL_EVENT_CATEGORY_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel',
+  {
+    defaultMessage: 'Event category field',
+  }
+);
+
+export const EQL_TIEBREAKER_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.eqlTiebreakerFieldLabel',
+  {
+    defaultMessage: 'Tiebreaker field',
+  }
+);
+
+export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.eqlTimestampFieldLabel',
+  {
+    defaultMessage: 'Timestamp field',
   }
 );

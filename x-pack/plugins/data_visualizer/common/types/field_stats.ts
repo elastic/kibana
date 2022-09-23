@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { TimeBucketsInterval } from '../services/time_buckets';
 
 export interface FieldData {
@@ -30,11 +30,6 @@ export interface Field {
 
 export function isValidField(arg: unknown): arg is Field {
   return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
-}
-
-export interface HistogramField {
-  fieldName: string;
-  type: string;
 }
 
 export interface Distribution {
@@ -95,23 +90,20 @@ export interface BooleanFieldStats {
 }
 
 export interface DocumentCountStats {
-  interval: number;
-  buckets: { [key: string]: number };
-  timeRangeEarliest: number;
-  timeRangeLatest: number;
+  interval?: number;
+  buckets?: { [key: string]: number };
+  timeRangeEarliest?: number;
+  timeRangeLatest?: number;
+  totalCount: number;
+  probability?: number | null;
+  took?: number;
+  randomlySampled?: boolean;
 }
 
 export interface FieldExamples {
   fieldName: string;
   examples: unknown[];
 }
-
-export interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 export interface AggHistogram {
   histogram: estypes.AggregationsHistogramAggregation;

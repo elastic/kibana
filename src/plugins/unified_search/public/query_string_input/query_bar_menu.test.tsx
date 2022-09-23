@@ -9,6 +9,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -39,6 +40,30 @@ describe('Querybar Menu component', () => {
     storage.get.mockReturnValue(v);
     return storage;
   };
+
+  const filtersMock = [
+    {
+      meta: {
+        index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: 'category.keyword',
+        params: {
+          query: "Men's Accessories",
+        },
+      },
+      query: {
+        match_phrase: {
+          'category.keyword': "Men's Accessories",
+        },
+      },
+      $state: {
+        store: 'appState',
+      },
+    },
+  ] as Filter[];
 
   const startMock = coreMock.createStart();
   let dataMock = dataPluginMock.createStartContract();
@@ -120,7 +145,7 @@ describe('Querybar Menu component', () => {
     expect(component.find('[data-test-subj="queryBarMenuPanel"]')).toBeTruthy();
   });
 
-  it('should render the saved filter sets panels if the showQueryInput prop is true but disabled', async () => {
+  it('should render the saved saved queries panels if the showQueryInput prop is true but disabled', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
@@ -140,7 +165,7 @@ describe('Querybar Menu component', () => {
     expect(loadFilterSetButton.first().prop('disabled')).toBe(true);
   });
 
-  it('should render the filter sets panels if the showFilterBar is true but disabled', async () => {
+  it('should render the saved queries panels if the showFilterBar is true but disabled', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
@@ -181,29 +206,7 @@ describe('Querybar Menu component', () => {
       ...props,
       openQueryBarMenu: true,
       showFilterBar: true,
-      filters: [
-        {
-          meta: {
-            index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'category.keyword',
-            params: {
-              query: "Men's Accessories",
-            },
-          },
-          query: {
-            match_phrase: {
-              'category.keyword': "Men's Accessories",
-            },
-          },
-          $state: {
-            store: 'appState',
-          },
-        },
-      ] as Filter[],
+      filters: filtersMock,
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
     const applyToAllFiltersButton = component.find(
@@ -229,29 +232,7 @@ describe('Querybar Menu component', () => {
       ...props,
       openQueryBarMenu: true,
       showSaveQuery: true,
-      filters: [
-        {
-          meta: {
-            index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'category.keyword',
-            params: {
-              query: "Men's Accessories",
-            },
-          },
-          query: {
-            match_phrase: {
-              'category.keyword': "Men's Accessories",
-            },
-          },
-          $state: {
-            store: 'appState',
-          },
-        },
-      ] as Filter[],
+      filters: filtersMock,
       savedQuery: {
         id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
         attributes: {
@@ -274,5 +255,92 @@ describe('Querybar Menu component', () => {
       '[data-test-subj="saved-query-management-save-as-new-button"]'
     );
     expect(saveChangesAsNewButton.length).toBeTruthy();
+  });
+
+  it('should render all filter panel options by default', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      filters: filtersMock,
+      hiddenPanelOptions: undefined,
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeTruthy();
+    component.find('[data-test-subj="filter-sets-applyToAllFilters"]').first().simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('[data-test-subj="contextMenuPanelTitleButton"]').length).toBeTruthy();
+    });
+
+    expect(component.find('[data-test-subj="filter-sets-pinAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-unpinAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-invertAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-disableAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-enableAllFilters"]').length).toBeTruthy();
+  });
+
+  it('should hide pinning filter panel options', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      filters: filtersMock,
+      hiddenPanelOptions: ['pinFilter'],
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    component.find('[data-test-subj="filter-sets-applyToAllFilters"]').first().simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('[data-test-subj="contextMenuPanelTitleButton"]').length).toBeTruthy();
+    });
+
+    expect(component.find('[data-test-subj="filter-sets-pinAllFilters"]').length).toBeFalsy();
+    expect(component.find('[data-test-subj="filter-sets-unpinAllFilters"]').length).toBeFalsy();
+
+    expect(component.find('[data-test-subj="filter-sets-invertAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-disableAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-enableAllFilters"]').length).toBeTruthy();
+  });
+
+  it('should hide negating and enabling filter panel options', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      filters: filtersMock,
+      hiddenPanelOptions: ['negateFilter', 'disableFilter'],
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    component.find('[data-test-subj="filter-sets-applyToAllFilters"]').first().simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('[data-test-subj="contextMenuPanelTitleButton"]').length).toBeTruthy();
+    });
+
+    expect(component.find('[data-test-subj="filter-sets-pinAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-unpinAllFilters"]').length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-sets-invertAllFilters"]').length).toBeFalsy();
+    expect(component.find('[data-test-subj="filter-sets-disableAllFilters"]').length).toBeFalsy();
+    expect(component.find('[data-test-subj="filter-sets-enableAllFilters"]').length).toBeFalsy();
+  });
+
+  it('should hide deleting filter panel options', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      filters: filtersMock,
+      hiddenPanelOptions: ['deleteFilter'],
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeFalsy();
   });
 });

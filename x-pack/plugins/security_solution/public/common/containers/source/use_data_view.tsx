@@ -6,25 +6,27 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
-import {
+import type {
   BrowserField,
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
-import { FieldSpec, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourcererDataView } from '../sourcerer/api';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../../common/constants';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -39,7 +41,6 @@ type DangerCastForBrowserFieldsMutation = Record<
 >;
 interface DataViewInfo {
   browserFields: DangerCastForBrowserFieldsMutation;
-  docValueFields: DocValueFields[];
   indexFields: FieldSpec[];
 }
 
@@ -47,7 +48,7 @@ interface DataViewInfo {
  * HOT Code path where the fields can be 16087 in length or larger. This is
  * VERY mutatious on purpose to improve the performance of the transform.
  */
-const getDataViewStateFromIndexFields = memoizeOne(
+export const getDataViewStateFromIndexFields = memoizeOne(
   (_title: string, fields: IndexField[]): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
@@ -68,17 +69,10 @@ const getDataViewStateFromIndexFields = memoizeOne(
           pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
         );
 
-        // mutate docValueFields
-        if (field.readFromDocValues && acc.docValueFields.length < 100) {
-          acc.docValueFields.push({
-            field: field.name,
-          });
-        }
         return acc;
       },
       {
         browserFields: {},
-        docValueFields: [],
         indexFields: [],
       }
     );
@@ -94,6 +88,7 @@ export const useDataView = (): {
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError, addWarning } = useAppToasts();
+  const { startTracking } = useTrackHttpRequest();
 
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
@@ -120,6 +115,9 @@ export const useDataView = (): {
           [dataViewId]: new AbortController(),
         };
         setLoading({ id: dataViewId, loading: true });
+
+        const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
+
         if (needToBeInit) {
           const dataViewToUpdate = await getSourcererDataView(
             dataViewId,
@@ -147,6 +145,8 @@ export const useDataView = (): {
             .subscribe({
               next: async (response) => {
                 if (isCompleteResponse(response)) {
+                  endTracking('success');
+
                   const patternString = response.indicesExist.sort().join();
                   if (needToBeInit && scopeId) {
                     dispatch(
@@ -175,6 +175,7 @@ export const useDataView = (): {
                     })
                   );
                 } else if (isErrorResponse(response)) {
+                  endTracking('invalid');
                   setLoading({ id: dataViewId, loading: false });
                   addWarning(i18n.ERROR_BEAT_FIELDS);
                 }
@@ -182,6 +183,7 @@ export const useDataView = (): {
                 resolve();
               },
               error: (msg) => {
+                endTracking('error');
                 if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
                   // reload app if security solution data view is deleted
                   return location.reload();
@@ -208,7 +210,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading]
+    [addError, addWarning, data.search, dispatch, setLoading, startTracking]
   );
 
   useEffect(() => {

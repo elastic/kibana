@@ -220,7 +220,7 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
       },
     ],
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsexports_moved_packages',
+      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsexports_moved_packages',
     },
   },
 

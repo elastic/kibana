@@ -6,11 +6,9 @@
  */
 
 import { find } from 'lodash';
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from './get_index_patterns';
+import { getIndexPatterns } from './get_index_patterns';
 import { Globals } from '../../static_globals';
 
 /**
@@ -59,7 +57,7 @@ export function getClustersState(req: LegacyRequest, clusters: ElasticsearchModi
     return Promise.resolve(clusters);
   }
 
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     ccs: req.payload.ccs,

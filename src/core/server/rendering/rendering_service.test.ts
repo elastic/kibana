@@ -15,9 +15,9 @@ import {
 
 import { load } from 'cheerio';
 
-import { httpServerMock } from '../http/http_server.mocks';
-import { mockRouter } from '../http/router/router.mock';
-import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   mockRenderingServiceParams,
   mockRenderingPrebootDeps,
@@ -25,7 +25,7 @@ import {
 } from './__mocks__/params';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
-import { AuthStatus } from '../http/auth_state_storage';
+import { AuthStatus } from '@kbn/core-http-server';
 
 const INJECTED_METADATA = {
   version: expect.any(String),

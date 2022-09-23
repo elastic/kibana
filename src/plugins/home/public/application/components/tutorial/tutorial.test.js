@@ -149,7 +149,7 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', asy
   );
   await loadTutorialPromise;
   component.update();
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('custom status check', () => {

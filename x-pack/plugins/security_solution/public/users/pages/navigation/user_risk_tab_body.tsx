@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
 import * as i18n from '../translations';
 
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -16,21 +17,33 @@ import { RiskScoreOverTime } from '../../../common/components/risk_score_over_ti
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { UsersComponentsQueryProps } from './types';
+import type { UserRiskScore } from '../../../../common/search_strategy';
+import { RiskScoreEntity, buildUserNamesFilter } from '../../../../common/search_strategy';
+import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
+
+const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score For Users';
 
 const UserRiskTabBodyComponent: React.FC<
   Pick<UsersComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     userName: string;
   }
 > = ({ userName, startDate, endDate, setQuery, deleteQuery }) => {
+  const { buttonHref } = useDashboardButtonHref({
+    to: endDate,
+    from: startDate,
+    title: RISKY_USERS_DASHBOARD_TITLE,
+  });
+
   const timerange = useMemo(
     () => ({
       from: startDate,
@@ -43,9 +56,12 @@ const UserRiskTabBodyComponent: React.FC<
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
-
-  const [loading, { data, refetch, inspect }] = useUserRiskScore({
-    filterQuery: userName ? buildUserNamesFilter([userName]) : undefined,
+  const filterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
+  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useUserRiskScore({
+    filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,
@@ -74,7 +90,27 @@ const UserRiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  const rules = data && data.length > 0 ? data[data.length - 1].risk_stats.rule_risks : [];
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
+
+  if (isDeprecated) {
+    return (
+      <RiskScoresDeprecated
+        entityType={RiskScoreEntity.user}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
+  }
+
+  if (isModuleEnabled && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+  }
+
+  const lastUsertRiskItem: UserRiskScore | null =
+    data && data.length > 0 ? data[data.length - 1] : null;
+  const rules = lastUsertRiskItem ? lastUsertRiskItem.user.risk.rule_risks : [];
 
   return (
     <>
@@ -104,7 +140,6 @@ const UserRiskTabBodyComponent: React.FC<
       </EuiFlexGroup>
 
       <StyledEuiFlexGroup gutterSize="s">
-        {/* // TODO PENDING ON USER RISK DOCUMENTATION
         <EuiFlexItem grow={false}>
           <EuiButton
             href={buttonHref}
@@ -114,7 +149,7 @@ const UserRiskTabBodyComponent: React.FC<
           >
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>
-        </EuiFlexItem> */}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UserRiskInformationButtonEmpty />
         </EuiFlexItem>

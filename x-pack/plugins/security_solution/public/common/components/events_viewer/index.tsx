@@ -10,28 +10,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
-import { inputsModel, State } from '../../store';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { InputsModelId } from '../../store/inputs/constants';
+import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
+import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
+import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { eventsViewerSelector } from './selectors';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import {
-  useFieldBrowserOptions,
-  FieldEditorActions,
-} from '../../../timelines/components/fields_browser';
+import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
+import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import {
   useSessionViewNavigation,
   useSessionView,
@@ -61,7 +63,6 @@ export interface Props {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
@@ -86,7 +87,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   scopeId,
-  utilityBar,
   additionalFilters,
   hasAlertsCrud = false,
   unit,
@@ -118,7 +118,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     indexPattern,
     runtimeMappings,
     selectedPatterns,
@@ -148,7 +147,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     );
 
     return () => {
-      dispatch(inputsActions.deleteOneQuery({ id, inputId: 'global' }));
+      dispatch(inputsActions.deleteOneQuery({ id, inputId: InputsModelId.global }));
       if (editorActionsRef.current) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         editorActionsRef.current.closeEditor();
@@ -178,7 +177,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
-      dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
+      dispatch(
+        inputsActions.setQuery({ id, inputId: InputsModelId.global, inspect, loading, refetch })
+      );
     },
     [dispatch, id]
   );
@@ -186,14 +187,21 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
-  const onAlertStatusActionSuccess = useCallback(() => {
-    if (id === TimelineId.active) {
-      refetchQuery([timelineQuery]);
-    } else {
-      refetchQuery(globalQueries);
-    }
-  }, [id, timelineQuery, globalQueries]);
-  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
+
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      onAlertStatusActionSuccess: () => {
+        if (id === TimelineId.active) {
+          refetchQuery([timelineQuery]);
+        } else {
+          refetchQuery(globalQueries);
+        }
+      },
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions, globalQueries, id, timelineQuery]
+  );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,
@@ -218,12 +226,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             defaultCellActions,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
             end,
             entityType,
             fieldBrowserOptions,
             filters: globalFilters,
             filterStatus: currentFilter,
+            getRowRenderer,
             globalFullScreen,
             graphEventId,
             graphOverlay,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
-import { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
+import type { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
+import type { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
 
 export const alertsMock: AlertSearchResponse<unknown, unknown> = {
   took: 7,
@@ -922,6 +922,24 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
         },
       ],
     },
+  },
+};
+
+export const alertMockEmptyResults: AlertSearchResponse<unknown, unknown> = {
+  took: 3,
+  timeout: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 1,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 0,
+      relation: 'gte',
+    },
+    hits: [],
   },
 };
 

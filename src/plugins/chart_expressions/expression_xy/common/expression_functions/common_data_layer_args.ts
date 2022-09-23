@@ -6,23 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
+import { ArgumentType } from '@kbn/expressions-plugin/common';
+import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG, XYCurveTypes } from '../constants';
 import { strings } from '../i18n';
-import { DataLayerFn, ExtendedDataLayerFn } from '../types';
+import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
-type CommonDataLayerFn = DataLayerFn | ExtendedDataLayerFn;
+type CommonDataLayerArgs = ExtendedDataLayerArgs | DataLayerArgs;
+type CommonDataLayerFnArgs = {
+  [key in keyof CommonDataLayerArgs]: ArgumentType<CommonDataLayerArgs[key]>;
+};
 
-export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
-  hide: {
+export const commonDataLayerArgs: Omit<
+  CommonDataLayerFnArgs,
+  'accessors' | 'xAccessor' | 'splitAccessor'
+> = {
+  simpleView: {
     types: ['boolean'],
     default: false,
-    help: strings.getHideHelp(),
-  },
-  xAccessor: {
-    types: ['string'],
-    help: strings.getXAccessorHelp(),
+    help: strings.getSimpleView(),
   },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),
@@ -32,7 +36,6 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {
@@ -40,24 +43,46 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
     default: false,
     help: strings.getIsHistogramHelp(),
   },
-  yScaleType: {
-    options: [...Object.values(YScaleTypes)],
-    help: strings.getYScaleTypeHelp(),
-    default: YScaleTypes.LINEAR,
+  isPercentage: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsPercentageHelp(),
+  },
+  isStacked: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsStackedHelp(),
+  },
+  isHorizontal: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsHorizontalHelp(),
+  },
+  curveType: {
+    types: ['string'],
+    options: [...Object.values(XYCurveTypes)],
+    help: strings.getCurveTypeHelp(),
     strict: true,
   },
-  splitAccessor: {
-    types: ['string'],
-    help: strings.getSplitAccessorHelp(),
+  lineWidth: {
+    types: ['number'],
+    help: strings.getLineWidthHelp(),
   },
-  accessors: {
-    types: ['string'],
-    help: strings.getAccessorsHelp(),
-    multi: true,
+  showPoints: {
+    types: ['boolean'],
+    help: strings.getShowPointsHelp(),
   },
-  yConfig: {
-    types: [Y_CONFIG],
-    help: strings.getYConfigHelp(),
+  pointsRadius: {
+    types: ['number'],
+    help: strings.getPointsRadiusHelp(),
+  },
+  showLines: {
+    types: ['boolean'],
+    help: strings.getShowLinesHelp(),
+  },
+  decorations: {
+    types: [DATA_DECORATION_CONFIG],
+    help: strings.getDecorationsHelp(),
     multi: true,
   },
   columnToLabel: {

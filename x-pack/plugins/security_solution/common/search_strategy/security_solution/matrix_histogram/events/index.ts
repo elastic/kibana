@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '../../../common';
+import type { SearchHit } from '../../../common';
 
 interface EventsMatrixHistogramData {
   key_as_string: string;
@@ -19,7 +19,7 @@ export interface EventSource {
 }
 
 export interface EventsActionGroupData {
-  key: number;
+  key: number | string;
   events: {
     bucket: EventsMatrixHistogramData[];
   };

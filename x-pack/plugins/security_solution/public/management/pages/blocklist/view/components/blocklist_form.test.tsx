@@ -8,18 +8,19 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BlocklistConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { BlocklistEntry, BlockListForm } from './blocklist_form';
-import {
+import type { BlocklistEntry } from './blocklist_form';
+import { BlockListForm } from './blocklist_form';
+import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { ERRORS } from '../../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -165,9 +166,10 @@ describe('blocklist form', () => {
     expect(screen.queryByRole('option', { name: 'Mac' })).toBeTruthy();
   });
 
-  it('should correctly edit OS', () => {
+  it('should correctly edit OS', async () => {
     render();
     userEvent.click(screen.getByTestId('blocklist-form-os-select'));
+    await waitForEuiPopoverOpen();
     userEvent.click(screen.getByRole('option', { name: 'Linux' }));
     const expected = createOnChangeArgs({
       item: createItem({
@@ -216,9 +218,10 @@ describe('blocklist form', () => {
     expect(screen.queryByRole('option', { name: /signature/i })).toBeNull();
   });
 
-  it('should correctly edit field', () => {
+  it('should correctly edit field', async () => {
     render();
     userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await waitForEuiPopoverOpen();
     userEvent.click(screen.getByRole('option', { name: /path/i }));
     const expected = createOnChangeArgs({
       item: createItem({

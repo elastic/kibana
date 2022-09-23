@@ -8,7 +8,7 @@
 
 import './filter_item.scss';
 
-import { EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
@@ -20,17 +20,16 @@ import {
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
+
 import { DataView } from '@kbn/data-views-plugin/public';
 import {
   getIndexPatternFromFilter,
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
-import { FilterEditor } from '../filter_editor';
+import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
-import { getIndexPatterns } from '../../services';
-
-type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
+import { FilterPanelOption } from '../../types';
 
 export interface FilterItemProps {
   id: string;
@@ -41,9 +40,9 @@ export interface FilterItemProps {
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
-  hiddenPanelOptions?: PanelOptions[];
+  hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
-  readonly?: boolean;
+  readOnly?: boolean;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -67,33 +66,14 @@ export const FILTER_EDITOR_WIDTH = 800;
 
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
-  const { id, filter, indexPatterns, hiddenPanelOptions } = props;
+  const [renderedComponent, setRenderedComponent] = useState('menu');
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
   useEffect(() => {
-    const index = props.filter.meta.index;
-    let isSubscribed = true;
-    if (index) {
-      getIndexPatterns()
-        .get(index)
-        .then((indexPattern) => {
-          if (isSubscribed) {
-            setIndexPatternExists(!!indexPattern);
-          }
-        })
-        .catch(() => {
-          if (isSubscribed) {
-            setIndexPatternExists(false);
-          }
-        });
-    } else if (isSubscribed) {
-      // Allow filters without an index pattern and don't validate them.
-      setIndexPatternExists(true);
+    if (isPopoverOpen) {
+      setRenderedComponent('menu');
     }
-    return () => {
-      isSubscribed = false;
-    };
-  }, [props.filter.meta.index]);
+  }, [isPopoverOpen]);
 
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
     if (e.shiftKey) {
@@ -153,9 +133,8 @@ export function FilterItem(props: FilterItemProps) {
 
   function getDataTestSubj(labelConfig: LabelOptions) {
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value
-      ? `filter-value-${isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status}`
-      : '';
+    const valueLabel = isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status;
+    const dataTestSubjValue = valueLabel ? `filter-value-${valueLabel}` : '';
     const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
     const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
@@ -195,8 +174,10 @@ export function FilterItem(props: FilterItemProps) {
           defaultMessage: 'Edit filter',
         }),
         icon: 'pencil',
-        panel: 1,
         'data-test-subj': 'editFilter',
+        onClick: () => {
+          setRenderedComponent('editFilter');
+        },
       },
       {
         name: negate
@@ -248,30 +229,13 @@ export function FilterItem(props: FilterItemProps) {
 
     if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
       mainPanelItems = mainPanelItems.filter(
-        (pItem) => !hiddenPanelOptions.includes(pItem['data-test-subj'] as PanelOptions)
+        (pItem) => !hiddenPanelOptions.includes(pItem['data-test-subj'] as FilterPanelOption)
       );
     }
     return [
       {
         id: 0,
         items: mainPanelItems,
-      },
-      {
-        id: 1,
-        width: FILTER_EDITOR_WIDTH,
-        content: (
-          <div>
-            <FilterEditor
-              filter={filter}
-              indexPatterns={indexPatterns}
-              onSubmit={onSubmit}
-              onCancel={() => {
-                setIsPopoverOpen(false);
-              }}
-              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            />
-          </div>
-        ),
       },
     ];
   }
@@ -306,29 +270,14 @@ export function FilterItem(props: FilterItemProps) {
       return label;
     }
 
-    if (indexPatternExists === false) {
-      label.status = FILTER_ITEM_ERROR;
-      label.title = props.intl.formatMessage({
-        id: 'unifiedSearch.filter.filterBar.labelErrorText',
-        defaultMessage: `Error`,
-      });
-      label.message = props.intl.formatMessage(
-        {
-          id: 'unifiedSearch.filter.filterBar.labelErrorInfo',
-          defaultMessage: 'Index pattern {indexPattern} not found',
-        },
-        {
-          indexPattern: filter.meta.index,
-        }
-      );
-    } else if (isFilterApplicable()) {
+    if (isFilterApplicable()) {
       try {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
       } catch (e) {
-        label.status = FILTER_ITEM_ERROR;
+        label.status = FILTER_ITEM_WARNING;
         label.title = props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterBar.labelErrorText',
-          defaultMessage: `Error`,
+          id: 'unifiedSearch.filter.filterBar.labelWarningText',
+          defaultMessage: `Warning`,
         });
         label.message = e.message;
       }
@@ -352,8 +301,6 @@ export function FilterItem(props: FilterItemProps) {
     return label;
   }
 
-  // Don't render until we know if the index pattern is valid
-  if (indexPatternExists === undefined) return null;
   const valueLabelConfig = getValueLabel();
 
   // Disable errored filters and re-render
@@ -365,6 +312,7 @@ export function FilterItem(props: FilterItemProps) {
 
   const filterViewProps = {
     filter,
+    readOnly,
     valueLabel: valueLabelConfig.title,
     fieldLabel: getFieldDisplayValueFromFilter(filter, indexPatterns),
     filterLabelStatus: valueLabelConfig.status,
@@ -373,7 +321,6 @@ export function FilterItem(props: FilterItemProps) {
     iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
     'data-test-subj': getDataTestSubj(valueLabelConfig),
-    readonly: props.readonly,
   };
 
   const popoverProps: FilterPopoverProps = {
@@ -388,21 +335,29 @@ export function FilterItem(props: FilterItemProps) {
     panelPaddingSize: 'none',
   };
 
-  if (props.readonly) {
-    return (
-      <EuiPopover
-        panelClassName="globalFilterItem__readonlyPanel"
-        anchorPosition="upCenter"
-        {...popoverProps}
-      >
-        <FilterView {...filterViewProps} hideAlias />
-      </EuiPopover>
-    );
-  }
-
-  return (
+  return readOnly ? (
+    <FilterView {...filterViewProps} />
+  ) : (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
-      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      {renderedComponent === 'menu' ? (
+        <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      ) : (
+        <EuiContextMenuPanel
+          items={[
+            <div style={{ width: FILTER_EDITOR_WIDTH }}>
+              <FilterEditor
+                filter={filter}
+                indexPatterns={indexPatterns}
+                onSubmit={onSubmit}
+                onCancel={() => {
+                  setIsPopoverOpen(false);
+                }}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              />
+            </div>,
+          ]}
+        />
+      )}
     </EuiPopover>
   );
 }

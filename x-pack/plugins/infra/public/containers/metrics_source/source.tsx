@@ -145,6 +145,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     isUninitialized,
     hasFailedLoadingSource: loadSourceRequest.state === 'rejected',
     loadSource,
+    loadSourceRequest,
     loadSourceFailureMessage:
       loadSourceRequest.state === 'rejected' ? `${loadSourceRequest.value}` : undefined,
     metricIndicesExist,
@@ -156,5 +157,4 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
   };
 };
 
-export const Source = createContainer(useSource);
-export const [SourceProvider, useSourceContext] = Source;
+export const [SourceProvider, useSourceContext] = createContainer(useSource);

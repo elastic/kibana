@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-export { clusterSettingsCheckRoute } from './check/cluster';
-export { internalMonitoringCheckRoute } from './check/internal_monitoring';
-export { nodesSettingsCheckRoute } from './check/nodes';
-export { setCollectionEnabledRoute } from './set/collection_enabled';
-export { setCollectionIntervalRoute } from './set/collection_interval';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
+import { clusterSettingsCheckRoute } from './check/cluster';
+import { internalMonitoringCheckRoute } from './check/internal_monitoring';
+import { nodesSettingsCheckRoute } from './check/nodes';
+import { setCollectionEnabledRoute } from './set/collection_enabled';
+import { setCollectionIntervalRoute } from './set/collection_interval';
+
+export function registerV1ElasticsearchSettingsRoutes(
+  server: MonitoringCore,
+  npRoute: RouteDependencies
+) {
+  clusterSettingsCheckRoute(server);
+  internalMonitoringCheckRoute(server, npRoute);
+  nodesSettingsCheckRoute(server);
+  setCollectionEnabledRoute(server);
+  setCollectionIntervalRoute(server);
+}

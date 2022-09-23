@@ -21,7 +21,9 @@ describe('getRulesTableActions', () => {
   const rule = mockRule(uuid.v4());
   const toasts = useAppToastsMock.create();
   const invalidateRules = jest.fn();
+  const invalidatePrePackagedRulesStatus = jest.fn();
   const setLoadingRules = jest.fn();
+  const startTransaction = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,13 +36,15 @@ describe('getRulesTableActions', () => {
       Promise.resolve({ attributes: { results: { created: [ruleDuplicate] } } })
     );
 
-    const duplicateRulesActionObject = getRulesTableActions(
+    const duplicateRulesActionObject = getRulesTableActions({
       toasts,
       navigateToApp,
       invalidateRules,
-      true,
-      setLoadingRules
-    )[1];
+      invalidatePrePackagedRulesStatus,
+      actionsPrivileges: true,
+      setLoadingRules,
+      startTransaction,
+    })[1];
     const duplicateRulesActionHandler = duplicateRulesActionObject.onClick;
     expect(duplicateRulesActionHandler).toBeDefined();
 
@@ -54,13 +58,15 @@ describe('getRulesTableActions', () => {
   test('delete rule onClick should call refetch after the rule is deleted', async () => {
     const navigateToApp = jest.fn();
 
-    const deleteRulesActionObject = getRulesTableActions(
+    const deleteRulesActionObject = getRulesTableActions({
       toasts,
       navigateToApp,
       invalidateRules,
-      true,
-      setLoadingRules
-    )[3];
+      invalidatePrePackagedRulesStatus,
+      actionsPrivileges: true,
+      setLoadingRules,
+      startTransaction,
+    })[3];
     const deleteRuleActionHandler = deleteRulesActionObject.onClick;
     expect(deleteRuleActionHandler).toBeDefined();
 

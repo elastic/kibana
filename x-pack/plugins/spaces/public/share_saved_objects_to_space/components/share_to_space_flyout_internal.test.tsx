@@ -11,7 +11,7 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import type { SavedObjectReferenceWithContext } from '@kbn/core/public';
+import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 

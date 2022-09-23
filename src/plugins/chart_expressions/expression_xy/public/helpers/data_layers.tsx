@@ -8,6 +8,7 @@
 
 import {
   AreaSeriesProps,
+  AreaSeriesStyle,
   BarSeriesProps,
   ColorVariant,
   LineSeriesProps,
@@ -17,25 +18,28 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  FieldFormat,
-  FieldFormatParams,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { CommonXYDataLayerConfig, XScaleType } from '../../common';
+import { isDataLayer } from '../../common/utils/layer_types_guards';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
+import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
+import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
+import { getFormat } from './format';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 type GetSeriesPropsFn = (config: {
   layer: CommonXYDataLayerConfig;
-  accessor: string;
+  titles?: LayerAccessorsTitles;
+  accessor: string | string[];
   chartHasMoreThanOneBarSeries?: boolean;
   formatFactory: FormatFactory;
   colorAssignments: ColorAssignments;
@@ -47,30 +51,53 @@ type GetSeriesPropsFn = (config: {
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
+  defaultXScaleType: XScaleType;
+  fieldFormats: LayersFieldFormats;
+  uiState?: PersistedState;
+  allYAccessors: Array<string | ExpressionValueVisDimension>;
+  singleTable?: boolean;
+  multipleLayersWithSplits: boolean;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
   data: XYChartSeriesIdentifier,
   config: {
-    layer: CommonXYDataLayerConfig;
-    splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
-    splitFormatter: FieldFormat;
+    splitAccessors: Array<string | ExpressionValueVisDimension>;
+    accessorsCount: number;
+    columns: Datatable['columns'];
+    splitAccessorsFormats: LayerFieldFormats['splitSeriesAccessors'];
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
-  }
+    multipleLayersWithSplits: boolean;
+  },
+  titles: LayerAccessorsTitles
 ) => SeriesName;
 
 type GetColorFn = (
   seriesIdentifier: XYChartSeriesIdentifier,
   config: {
     layer: CommonXYDataLayerConfig;
-    accessor: string;
     colorAssignments: ColorAssignments;
-    columnToLabelMap: Record<string, string>;
     paletteService: PaletteRegistry;
+    getSeriesNameFn: (d: XYChartSeriesIdentifier) => SeriesName;
     syncColors?: boolean;
-  }
+  },
+  uiState?: PersistedState,
+  singleTable?: boolean
 ) => string | null;
+
+type GetPointConfigFn = (config: {
+  xAccessor: string | undefined;
+  markSizeAccessor: string | undefined;
+  emphasizeFitting?: boolean;
+  showPoints?: boolean;
+  pointsRadius?: number;
+}) => Partial<AreaSeriesStyle['point']>;
+
+type GetLineConfigFn = (config: {
+  showLines?: boolean;
+  lineWidth?: number;
+}) => Partial<AreaSeriesStyle['line']>;
 
 export interface DatatableWithFormatInfo {
   table: Datatable;
@@ -88,6 +115,8 @@ export const getFormattedRow = (
   columns: Datatable['columns'],
   columnsFormatters: Record<string, IFieldFormat>,
   xAccessor: string | undefined,
+  splitColumnAccessor: string | undefined,
+  splitRowAccessor: string | undefined,
   xScaleType: XScaleType
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
@@ -96,7 +125,10 @@ export const getFormattedRow = (
       if (
         record != null &&
         // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) || (id === xAccessor && xScaleType === 'ordinal'))
+        (!isPrimitive(record) ||
+          (id === xAccessor && xScaleType === 'ordinal') ||
+          id === splitColumnAccessor ||
+          id === splitRowAccessor)
       ) {
         return {
           row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convert(record) },
@@ -111,36 +143,49 @@ export const getFormattedRow = (
 export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
-  xAccessor: string | undefined,
+  xAccessor: string | ExpressionValueVisDimension | undefined,
+  splitColumnAccessor: string | ExpressionValueVisDimension | undefined,
+  splitRowAccessor: string | ExpressionValueVisDimension | undefined,
+  accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
-    (formatters, { id, meta }) => ({ ...formatters, [id]: formatFactory(meta.params) }),
+    (formatters, { id, meta }) => {
+      const accessor: string | ExpressionValueVisDimension | undefined = accessors.find(
+        (a) => getAccessorByDimension(a, table.columns) === id
+      );
+
+      return {
+        ...formatters,
+        [id]: formatFactory(accessor ? getFormat(table.columns, accessor) : meta.params),
+      };
+    },
     {}
   );
 
-  const formattedTableInfo = table.rows.reduce<{
+  const formattedTableInfo: {
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
-  }>(
-    ({ rows: formattedRows, formattedColumns }, row) => {
-      const formattedRowInfo = getFormattedRow(
-        row,
-        table.columns,
-        columnsFormatters,
-        xAccessor,
-        xScaleType
-      );
-      return {
-        rows: [...formattedRows, formattedRowInfo.row],
-        formattedColumns: { ...formattedColumns, ...formattedRowInfo.formattedColumns },
-      };
-    },
-    {
-      rows: [],
-      formattedColumns: {},
-    }
-  );
+  } = {
+    rows: [],
+    formattedColumns: {},
+  };
+  for (const row of table.rows) {
+    const formattedRowInfo = getFormattedRow(
+      row,
+      table.columns,
+      columnsFormatters,
+      xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
+      splitColumnAccessor ? getAccessorByDimension(splitColumnAccessor, table.columns) : undefined,
+      splitRowAccessor ? getAccessorByDimension(splitRowAccessor, table.columns) : undefined,
+      xScaleType
+    );
+    formattedTableInfo.rows.push(formattedRowInfo.row);
+    formattedTableInfo.formattedColumns = {
+      ...formattedTableInfo.formattedColumns,
+      ...formattedRowInfo.formattedColumns,
+    };
+  }
 
   return {
     table: { ...table, rows: formattedTableInfo.rows },
@@ -150,71 +195,146 @@ export const getFormattedTable = (
 
 export const getFormattedTablesByLayers = (
   layers: CommonXYDataLayerConfig[],
-  formatFactory: FormatFactory
+  formatFactory: FormatFactory,
+  splitColumnAccessor?: string | ExpressionValueVisDimension,
+  splitRowAccessor?: string | ExpressionValueVisDimension
 ): DatatablesWithFormatInfo =>
   layers.reduce(
-    (formattedDatatables, { layerId, table, xAccessor, xScaleType }) => ({
+    (
+      formattedDatatables,
+      { layerId, table, xAccessor, splitAccessors = [], accessors, xScaleType }
+    ) => ({
       ...formattedDatatables,
-      [layerId]: getFormattedTable(table, formatFactory, xAccessor, xScaleType),
+      [layerId]: getFormattedTable(
+        table,
+        formatFactory,
+        xAccessor,
+        splitColumnAccessor,
+        splitRowAccessor,
+        [xAccessor, ...splitAccessors, ...accessors, splitColumnAccessor, splitRowAccessor].filter<
+          string | ExpressionValueVisDimension
+        >((a): a is string | ExpressionValueVisDimension => a !== undefined),
+        xScaleType
+      ),
     }),
     {}
   );
 
-const getSeriesName: GetSeriesNameFn = (
+function getSplitValues(
+  splitAccessorsMap: XYChartSeriesIdentifier['splitAccessors'],
+  splitAccessors: Array<string | ExpressionValueVisDimension>,
+  alreadyFormattedColumns: Record<string, boolean>,
+  columns: Datatable['columns'],
+  splitAccessorsFormats: LayerFieldFormats['splitSeriesAccessors']
+) {
+  if (splitAccessorsMap.size < 0) {
+    return [];
+  }
+
+  return [...splitAccessorsMap].reduce<Array<string | number>>((acc, [splitAccessor, value]) => {
+    const split = splitAccessors.find(
+      (accessor) => getAccessorByDimension(accessor, columns) === splitAccessor
+    );
+    if (split) {
+      const splitColumnId = getAccessorByDimension(split, columns);
+      const splitFormatter = splitAccessorsFormats[splitColumnId].formatter;
+      return [
+        ...acc,
+        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convert(value),
+      ];
+    }
+
+    return acc;
+  }, []);
+}
+
+export const getSeriesName: GetSeriesNameFn = (
   data,
-  { layer, splitHint, splitFormatter, alreadyFormattedColumns, columnToLabelMap }
+  {
+    splitAccessors,
+    accessorsCount,
+    columns,
+    splitAccessorsFormats,
+    alreadyFormattedColumns,
+    columnToLabelMap,
+    multipleLayersWithSplits,
+  },
+  titles
 ) => {
   // For multiple y series, the name of the operation is used on each, either:
   // * Key - Y name
   // * Formatted value - Y name
-  if (layer.splitAccessor && layer.accessors.length > 1) {
-    const formatted = alreadyFormattedColumns[layer.splitAccessor];
-    const result = data.seriesKeys
-      .map((key: string | number, i) => {
-        if (i === 0 && splitHint && layer.splitAccessor && !formatted) {
-          return splitFormatter.convert(key);
-        }
-        return layer.splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? null;
-      })
-      .join(' - ');
-    return result;
+
+  const splitValues = getSplitValues(
+    data.splitAccessors,
+    splitAccessors,
+    alreadyFormattedColumns,
+    columns,
+    splitAccessorsFormats
+  );
+
+  const key = data.seriesKeys[data.seriesKeys.length - 1];
+  const yAccessorTitle = columnToLabelMap[key] ?? titles?.yTitles?.[key] ?? null;
+
+  if (accessorsCount > 1 || multipleLayersWithSplits) {
+    if (splitValues.length === 0) {
+      return yAccessorTitle;
+    }
+    return `${splitValues.join(' - ')}${yAccessorTitle ? ' - ' + yAccessorTitle : ''}`;
   }
 
-  // For formatted split series, format the key
-  // This handles splitting by dates, for example
-  if (splitHint) {
-    if (layer.splitAccessor && alreadyFormattedColumns[layer.splitAccessor]) {
-      return data.seriesKeys[0];
-    }
-    return splitFormatter.convert(data.seriesKeys[0]);
-  }
-  // This handles both split and single-y cases:
-  // * If split series without formatting, show the value literally
-  // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-  return layer.splitAccessor ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
+  return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
 };
 
-const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
-  visible: !xAccessor,
-  radius: xAccessor && !emphasizeFitting ? 5 : 0,
+const getPointConfig: GetPointConfigFn = ({
+  xAccessor,
+  markSizeAccessor,
+  emphasizeFitting,
+  showPoints,
+  pointsRadius,
+}) => ({
+  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
+  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
+  fill: markSizeAccessor ? ColorVariant.Series : undefined,
 });
 
-const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
+const getFitLineConfig = () => ({
+  visible: true,
+  stroke: ColorVariant.Series,
+  opacity: 1,
+  dash: [],
+});
+
+const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
+  strokeWidth: lineWidth,
+  visible: showLines,
+});
 
 const getColor: GetColorFn = (
-  { yAccessor, seriesKeys },
-  { layer, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
+  series,
+  { layer, colorAssignments, paletteService, syncColors, getSeriesNameFn },
+  uiState,
+  singleTable
 ) => {
-  const overwriteColor = getSeriesColor(layer, accessor);
+  const overwriteColor = getSeriesColor(layer, series.yAccessor as string);
   if (overwriteColor !== null) {
     return overwriteColor;
   }
+
+  const name = getSeriesNameFn(series)?.toString() || '';
+
+  const overwriteColors: Record<string, string> = uiState?.get ? uiState.get('vis.colors', {}) : {};
+
+  if (Object.keys(overwriteColors).includes(name)) {
+    return overwriteColors[name];
+  }
   const colorAssignment = colorAssignments[layer.palette.name];
+
   const seriesLayers: SeriesLayer[] = [
     {
-      name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+      name,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(layer, String(seriesKeys[0]), String(yAccessor)),
+      rankAtDepth: colorAssignment.getRank(singleTable ? 'commonLayerId' : layer.layerId, name),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(
@@ -229,8 +349,37 @@ const getColor: GetColorFn = (
   );
 };
 
+const EMPTY_ACCESSOR = '-';
+const SPLIT_CHAR = ':';
+const SPLIT_Y_ACCESSORS = '|';
+
+export const generateSeriesId = (
+  { layerId }: Pick<CommonXYDataLayerConfig, 'layerId'>,
+  splitColumnIds: string[],
+  accessor?: string,
+  xColumnId?: string
+) =>
+  [layerId, xColumnId ?? EMPTY_ACCESSOR, accessor ?? EMPTY_ACCESSOR, ...splitColumnIds].join(
+    SPLIT_CHAR
+  );
+
+export const getMetaFromSeriesId = (seriesId: string) => {
+  const [layerId, xAccessor, yAccessors, ...splitAccessors] = seriesId.split(SPLIT_CHAR);
+  return {
+    layerId,
+    xAccessor: xAccessor === EMPTY_ACCESSOR ? undefined : xAccessor,
+    yAccessors: yAccessors.split(SPLIT_Y_ACCESSORS),
+    splitAccessor: splitAccessors[0] === EMPTY_ACCESSOR ? undefined : splitAccessors,
+  };
+};
+
+export function hasMultipleLayersWithSplits(layers: CommonXYLayerConfig[]) {
+  return layers.filter((l) => isDataLayer(l) && (l.splitAccessors?.length || 0) > 0).length > 1;
+}
+
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
+  titles = {},
   accessor,
   chartHasMoreThanOneBarSeries,
   colorAssignments,
@@ -243,19 +392,45 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
   formattedDatatableInfo,
+  defaultXScaleType,
+  fieldFormats,
+  uiState,
+  allYAccessors,
+  singleTable,
+  multipleLayersWithSplits,
 }): SeriesSpec => {
-  const { table } = layer;
-  const isStacked = layer.seriesType.includes('stacked');
-  const isPercentage = layer.seriesType.includes('percentage');
-  const isBarChart = layer.seriesType.includes('bar');
+  const { table, isStacked, markSizeAccessor } = layer;
+  const isPercentage = layer.isPercentage;
+  let stackMode: StackMode | undefined = isPercentage ? AxisModes.PERCENTAGE : undefined;
+  if (yAxis?.mode) {
+    stackMode = yAxis?.mode === AxisModes.NORMAL ? undefined : yAxis?.mode;
+  }
+  const scaleType = yAxis?.scaleType || ScaleType.Linear;
+  const isBarChart = layer.seriesType === SeriesTypes.BAR;
+  const xColumnId =
+    layer.xAccessor !== undefined
+      ? getAccessorByDimension(layer.xAccessor, table.columns)
+      : undefined;
+  const splitColumnIds =
+    layer.splitAccessors?.map((splitAccessor) => {
+      return getAccessorByDimension(splitAccessor, table.columns);
+    }) || [];
   const enableHistogramMode =
     layer.isHistogram &&
-    (isStacked || !layer.splitAccessor) &&
+    (isStacked || !splitColumnIds.length) &&
     (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
 
-  const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
-  const splitHint = table?.columns.find((col) => col.id === layer.splitAccessor)?.meta?.params;
-  const splitFormatter = formatFactory(splitHint);
+  const formatter = table?.columns.find(
+    (column) => column.id === (Array.isArray(accessor) ? accessor[0] : accessor)
+  )?.meta?.params;
+
+  const markSizeColumnId = markSizeAccessor
+    ? getAccessorByDimension(markSizeAccessor, table.columns)
+    : undefined;
+
+  const markFormatter = formatFactory(
+    markSizeAccessor ? getFormat(table.columns, markSizeAccessor) : undefined
+  );
 
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
@@ -266,67 +441,110 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   // To not display them in the legend, they need to be filtered out.
   let rows = formattedTable.rows.filter(
     (row) =>
-      !(layer.xAccessor && typeof row[layer.xAccessor] === 'undefined') &&
+      !(xColumnId && row[xColumnId] === undefined) &&
       !(
-        layer.splitAccessor &&
-        typeof row[layer.splitAccessor] === 'undefined' &&
-        typeof row[accessor] === 'undefined'
+        splitColumnIds.some((splitColumnId) => row[splitColumnId] === undefined) &&
+        (Array.isArray(accessor)
+          ? accessor.some((a) => row[a] === undefined)
+          : row[accessor] === undefined)
       )
   );
 
-  if (!layer.xAccessor) {
+  const emptyX: Record<string, string> = {
+    unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
+      defaultMessage: '(empty)',
+    }),
+  };
+
+  if (!xColumnId) {
     rows = rows.map((row) => ({
       ...row,
-      unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
-        defaultMessage: '(empty)',
-      }),
+      ...emptyX,
     }));
   }
 
-  return {
-    splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
-    stackAccessors: isStacked ? [layer.xAccessor as string] : [],
-    id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
-    xAccessor: layer.xAccessor || 'unifiedX',
-    yAccessors: [accessor],
-    data: rows,
-    xScaleType: layer.xAccessor ? layer.xScaleType : 'ordinal',
-    yScaleType:
-      formatter?.id === 'bytes' && layer.yScaleType === ScaleType.Linear
-        ? ScaleType.LinearBinary
-        : layer.yScaleType,
-    color: (series) =>
-      getColor(series, {
-        layer,
-        accessor,
-        colorAssignments,
+  const getSeriesNameFn = (d: XYChartSeriesIdentifier) => {
+    return getSeriesName(
+      d,
+      {
+        splitAccessors: layer.splitAccessors || [],
+        accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
+        alreadyFormattedColumns: formattedColumns,
+        columns: formattedTable.columns,
+        splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
         columnToLabelMap,
-        paletteService,
-        syncColors,
-      }),
+        multipleLayersWithSplits,
+      },
+      titles
+    );
+  };
+
+  return {
+    splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
+    stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
+    id: generateSeriesId(
+      layer,
+      splitColumnIds.length ? splitColumnIds : [EMPTY_ACCESSOR],
+      Array.isArray(accessor) ? accessor.join(SPLIT_Y_ACCESSORS) : accessor,
+      xColumnId
+    ),
+    xAccessor: xColumnId || 'unifiedX',
+    yAccessors: Array.isArray(accessor) ? accessor : [accessor],
+    markSizeAccessor: markSizeColumnId,
+    markFormat: (value) => markFormatter.convert(value),
+    data: rows,
+    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
+    yScaleType:
+      formatter?.id === 'bytes' && scaleType === ScaleType.Linear
+        ? ScaleType.LinearBinary
+        : scaleType,
+    color: (series) =>
+      getColor(
+        series,
+        {
+          layer,
+          colorAssignments,
+          paletteService,
+          getSeriesNameFn,
+          syncColors,
+        },
+        uiState,
+        singleTable
+      ),
     groupId: yAxis?.groupId,
     enableHistogramMode,
-    stackMode: isPercentage ? StackMode.Percentage : undefined,
+    stackMode,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(layer.xAccessor, emphasizeFitting),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
-        fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
+        fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
+      }),
+      line: getLineConfig({
+        showLines: layer.showLines,
+        lineWidth: layer.lineWidth,
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(layer.xAccessor, emphasizeFitting),
-      ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
+      ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),
+      line: getLineConfig({ lineWidth: layer.lineWidth, showLines: layer.showLines }),
     },
     name(d) {
-      return getSeriesName(d, {
-        layer,
-        splitHint,
-        splitFormatter,
-        alreadyFormattedColumns: formattedColumns,
-        columnToLabelMap,
-      });
+      return getSeriesNameFn(d);
     },
   };
 };

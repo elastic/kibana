@@ -14,6 +14,13 @@ export const modelIdSchema = schema.object({
   modelId: schema.string(),
 });
 
+export const threadingParamsSchema = schema.maybe(
+  schema.object({
+    number_of_allocations: schema.number(),
+    threads_per_allocation: schema.number(),
+  })
+);
+
 export const optionalModelIdSchema = schema.object({
   /**
    * Model ID
@@ -29,17 +36,6 @@ export const getInferenceQuerySchema = schema.object({
 
 export const putTrainedModelQuerySchema = schema.object({
   defer_definition_decompression: schema.maybe(schema.boolean()),
-});
-
-export const pipelineSchema = schema.object({
-  pipeline: schema.object({
-    description: schema.maybe(schema.string()),
-    processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-    version: schema.maybe(schema.number()),
-    on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
-  }),
-  docs: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-  verbose: schema.maybe(schema.boolean()),
 });
 
 export const inferTrainedModelQuery = schema.object({ timeout: schema.maybe(schema.string()) });

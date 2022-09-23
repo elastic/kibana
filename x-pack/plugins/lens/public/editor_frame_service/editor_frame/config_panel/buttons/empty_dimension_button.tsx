@@ -12,8 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 
-import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
-import { LayerDatasourceDropProps } from '../types';
+import {
+  Datasource,
+  VisualizationDimensionGroupConfig,
+  DropType,
+  DatasourceLayers,
+  isOperation,
+  IndexPatternMap,
+} from '../../../../types';
 import {
   getCustomDropTarget,
   getAdditionalClassesOnDroppable,
@@ -98,31 +104,33 @@ const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) =>
 
 export function EmptyDimensionButton({
   group,
-  groups,
   layerDatasource,
-  layerDatasourceDropProps,
+  state,
   layerId,
   groupIndex,
   layerIndex,
   onClick,
   onDrop,
+  datasourceLayers,
+  indexPatterns,
 }: {
   layerId: string;
   groupIndex: number;
   layerIndex: number;
-  onDrop: (
-    droppedItem: DragDropIdentifier,
-    dropTarget: DragDropIdentifier,
-    dropType?: DropType
-  ) => void;
+  onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
   onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
-  groups: VisualizationDimensionGroupConfig[];
-
-  layerDatasource: Datasource<unknown, unknown>;
-  layerDatasourceDropProps: LayerDatasourceDropProps;
+  layerDatasource?: Datasource<unknown, unknown>;
+  datasourceLayers: DatasourceLayers;
+  state: unknown;
+  indexPatterns: IndexPatternMap;
 }) {
   const { dragging } = useContext(DragContext);
+  const sharedDatasource =
+    !isOperation(dragging) ||
+    datasourceLayers?.[dragging.layerId]?.datasourceId === datasourceLayers?.[layerId]?.datasourceId
+      ? layerDatasource
+      : undefined;
 
   const itemIndex = group.accessors.length;
 
@@ -132,16 +140,20 @@ export function EmptyDimensionButton({
   }, [itemIndex]);
 
   const dropProps = getDropProps(
-    layerDatasource,
     {
-      ...(layerDatasourceDropProps || {}),
-      dragging,
-      columnId: newColumnId,
-      filterOperations: group.filterOperations,
-      groupId: group.groupId,
-      dimensionGroups: groups,
+      state,
+      source: dragging,
+      target: {
+        layerId,
+        columnId: newColumnId,
+        groupId: group.groupId,
+        filterOperations: group.filterOperations,
+        prioritizedOperation: group.prioritizedOperation,
+        isNewColumn: true,
+      },
+      indexPatterns,
     },
-    true
+    sharedDatasource
   );
 
   const dropTypes = dropProps?.dropTypes;
@@ -157,6 +169,7 @@ export function EmptyDimensionButton({
       columnId: newColumnId,
       groupId: group.groupId,
       layerId,
+      filterOperations: group.filterOperations,
       id: newColumnId,
       humanData: {
         label,
@@ -164,13 +177,24 @@ export function EmptyDimensionButton({
         position: itemIndex + 1,
         nextLabel: nextLabel || '',
         canDuplicate,
+        layerNumber: layerIndex + 1,
       },
     }),
-    [newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel, canDuplicate]
+    [
+      newColumnId,
+      group.groupId,
+      layerId,
+      group.groupLabel,
+      group.filterOperations,
+      itemIndex,
+      nextLabel,
+      canDuplicate,
+      layerIndex,
+    ]
   );
 
   const handleOnDrop = React.useCallback(
-    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    (source, selectedDropType) => onDrop(source, value, selectedDropType),
     [value, onDrop]
   );
 

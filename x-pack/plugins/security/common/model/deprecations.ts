@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 
 import type { Role } from './role';

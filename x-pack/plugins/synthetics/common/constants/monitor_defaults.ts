@@ -9,6 +9,7 @@ import {
   BrowserSimpleFields,
   CommonFields,
   DataStream,
+  FormMonitorType,
   HTTPAdvancedFields,
   HTTPMethod,
   HTTPSimpleFields,
@@ -18,6 +19,7 @@ import {
   ResponseBodyIndexPolicy,
   ScheduleUnit,
   ScreenshotOption,
+  SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
   TLSFields,
@@ -30,17 +32,21 @@ export const DEFAULT_NAMESPACE_STRING = 'default';
 
 export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.ENABLED]: true,
   [ConfigKey.SCHEDULE]: {
     number: '3',
     unit: ScheduleUnit.MINUTES,
   },
   [ConfigKey.APM_SERVICE_NAME]: '',
+  [ConfigKey.CONFIG_ID]: '',
   [ConfigKey.TAGS]: [],
   [ConfigKey.TIMEOUT]: '16',
   [ConfigKey.NAME]: '',
   [ConfigKey.LOCATIONS]: [],
   [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
+  [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
+  [ConfigKey.JOURNEY_ID]: '',
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
@@ -58,10 +64,8 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
-  [ConfigKey.SCHEDULE]: {
-    unit: ScheduleUnit.MINUTES,
-    number: '10',
-  },
+  [ConfigKey.PROJECT_ID]: '',
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: '',
   [ConfigKey.METADATA]: {
     script_source: {
       is_generated_script: false,
@@ -70,21 +74,29 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
     is_zip_url_tls_enabled: false,
   },
   [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+  [ConfigKey.PARAMS]: '',
+  [ConfigKey.PORT]: null,
+  [ConfigKey.SCHEDULE]: {
+    unit: ScheduleUnit.MINUTES,
+    number: '10',
+  },
   [ConfigKey.SOURCE_INLINE]: '',
+  [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
   [ConfigKey.SOURCE_ZIP_URL]: '',
   [ConfigKey.SOURCE_ZIP_USERNAME]: '',
   [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKey.SOURCE_ZIP_FOLDER]: '',
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
-  [ConfigKey.PARAMS]: '',
+  [ConfigKey.TEXT_ASSERTION]: '',
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
-  [ConfigKey.URLS]: undefined,
-  [ConfigKey.PORT]: undefined,
+  [ConfigKey.URLS]: '',
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
+  [ConfigKey.TIMEOUT]: null,
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
@@ -95,6 +107,7 @@ export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
   [ConfigKey.URLS]: '',
   [ConfigKey.MAX_REDIRECTS]: '0',
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
 };
 
 export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
@@ -120,6 +133,7 @@ export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {
   [ConfigKey.HOSTS]: '',
   [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
   [ConfigKey.WAIT]: '1',
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
 };
 
 export const DEFAULT_TCP_SIMPLE_FIELDS: TCPSimpleFields = {
@@ -129,6 +143,7 @@ export const DEFAULT_TCP_SIMPLE_FIELDS: TCPSimpleFields = {
   },
   [ConfigKey.HOSTS]: '',
   [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
 };
 
 export const DEFAULT_TCP_ADVANCED_FIELDS: TCPAdvancedFields = {
@@ -158,7 +173,9 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
     ...DEFAULT_TCP_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
   },
-  [DataStream.ICMP]: DEFAULT_ICMP_SIMPLE_FIELDS,
+  [DataStream.ICMP]: {
+    ...DEFAULT_ICMP_SIMPLE_FIELDS,
+  },
   [DataStream.BROWSER]: {
     ...DEFAULT_BROWSER_SIMPLE_FIELDS,
     ...DEFAULT_BROWSER_ADVANCED_FIELDS,

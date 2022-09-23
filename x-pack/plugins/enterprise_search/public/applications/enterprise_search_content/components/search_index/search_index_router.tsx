@@ -5,35 +5,59 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Switch, useParams } from 'react-router-dom';
+
+import { useActions } from 'kea';
 
 import {
-  SEARCH_INDEX_OVERVIEW_PATH,
-  SEARCH_INDEX_DOCUMENTS_PATH,
-  SEARCH_INDEX_SCHEMA_PATH,
-  SEARCH_INDEX_LOGS_PATH,
+  SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
+  SEARCH_INDEX_PATH,
+  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
+  SEARCH_INDEX_TAB_PATH,
 } from '../../routes';
 
-import { SearchIndexDocuments } from './documents';
-import { SearchIndexLogs } from './logs';
-import { SearchIndexOverview } from './overview';
-import { SearchIndexSchema } from './schema';
+import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
+
+import { SelectConnector } from './connector/select_connector/select_connector';
+import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
+import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {
+  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
+
+  const indexNameLogic = IndexNameLogic({ indexName });
+  const { setIndexName } = useActions(indexNameLogic);
+  const { stopFetchIndexPoll } = useActions(IndexViewLogic);
+  useEffect(() => {
+    const unmountName = indexNameLogic.mount();
+    const unmountView = IndexViewLogic.mount();
+    return () => {
+      stopFetchIndexPoll();
+      unmountName();
+      unmountView();
+    };
+  }, []);
+  useEffect(() => {}, []);
+
+  useEffect(() => {
+    setIndexName(indexName);
+  }, [indexName]);
+
   return (
     <Switch>
-      <Route exact path={SEARCH_INDEX_OVERVIEW_PATH}>
-        <SearchIndexOverview />
+      <Route path={SEARCH_INDEX_PATH} exact>
+        <SearchIndex />
       </Route>
-      <Route exact path={SEARCH_INDEX_DOCUMENTS_PATH}>
-        <SearchIndexDocuments />
+      <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH} exact>
+        <CrawlerDomainDetail />
       </Route>
-      <Route exact path={SEARCH_INDEX_SCHEMA_PATH}>
-        <SearchIndexSchema />
+      <Route path={SEARCH_INDEX_SELECT_CONNECTOR_PATH} exact>
+        <SelectConnector />
       </Route>
-      <Route exact path={SEARCH_INDEX_LOGS_PATH}>
-        <SearchIndexLogs />
+      <Route path={SEARCH_INDEX_TAB_PATH}>
+        <SearchIndex />
       </Route>
     </Switch>
   );

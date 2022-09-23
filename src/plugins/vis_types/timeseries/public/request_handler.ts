@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Adapters } from '@kbn/inspector-plugin';
-import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
-import { ROUTES, UI_SETTINGS } from '../common/constants';
+import { ROUTES } from '../common/constants';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';
@@ -37,7 +37,6 @@ export const metricsRequestHandler = async ({
   if (!expressionAbortSignal.aborted) {
     const config = getUISettings();
     const data = getDataStart();
-    const theme = getCoreStart().theme;
     const abortController = new AbortController();
     const expressionAbortHandler = function () {
       abortController.abort();
@@ -84,11 +83,7 @@ export const metricsRequestHandler = async ({
           inspectorAdapters?.requests
             ?.start(query.label ?? key, { searchSessionId })
             .json(query.body)
-            .ok({ time: query.time });
-
-          if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-            handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
-          }
+            .ok({ time: query.time, json: { rawResponse: query.response } });
         });
 
         return visData;

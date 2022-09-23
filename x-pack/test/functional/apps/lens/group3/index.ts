@@ -37,7 +37,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      await log.debug('Starting lens before method');
+      log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       try {
         config.get('esTestCluster.ccs');
@@ -78,7 +78,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./formula'));
     loadTestFile(require.resolve('./heatmap'));
     loadTestFile(require.resolve('./gauge'));
-    loadTestFile(require.resolve('./metrics'));
+    loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('./legacy_metric'));
     loadTestFile(require.resolve('./reference_lines'));
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./inspector'));
@@ -86,7 +87,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./lens_tagging'));
     loadTestFile(require.resolve('./lens_reporting'));
     loadTestFile(require.resolve('./tsvb_open_in_lens'));
-    // has to be last one in the suite because it overrides saved objects
+    // keep these two last in the group in this order because they are messing with the default saved objects
     loadTestFile(require.resolve('./rollup'));
+    loadTestFile(require.resolve('./no_data'));
   });
 };

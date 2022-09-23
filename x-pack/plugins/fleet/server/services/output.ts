@@ -16,7 +16,8 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
+import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';
+import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
 import {
   OutputUnauthorizedError,
   OutputInvalidError,
@@ -368,6 +369,9 @@ class OutputService {
 
     if (data.ssl) {
       updateData.ssl = JSON.stringify(data.ssl);
+    } else if (data.ssl === null) {
+      // Explicitly set to null to allow to delete the field
+      updateData.ssl = null;
     }
 
     // ensure only default output exists

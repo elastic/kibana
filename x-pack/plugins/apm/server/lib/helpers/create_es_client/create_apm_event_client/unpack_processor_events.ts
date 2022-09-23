@@ -6,10 +6,9 @@
  */
 
 import { uniq, defaultsDeep, cloneDeep } from 'lodash';
-import { ESSearchRequest, ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESFilter } from '@kbn/es-types';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../../common/processor_event';
-import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 
 const processorEventIndexMap = {
@@ -17,17 +16,26 @@ const processorEventIndexMap = {
   [ProcessorEvent.span]: 'span',
   [ProcessorEvent.metric]: 'metric',
   [ProcessorEvent.error]: 'error',
-  // TODO: should have its own config setting
-  [ProcessorEvent.profile]: 'transaction',
 } as const;
 
+export function processorEventsToIndex(
+  events: ProcessorEvent[],
+  indices: ApmIndicesConfig
+) {
+  return uniq(events.map((event) => indices[processorEventIndexMap[event]]));
+}
+
 export function unpackProcessorEvents(
-  request: APMEventESSearchRequest | APMEventESTermsEnumRequest,
+  request: {
+    apm: {
+      events: ProcessorEvent[];
+    };
+  },
   indices: ApmIndicesConfig
 ) {
   const { apm, ...params } = request;
   const events = uniq(apm.events);
-  const index = events.map((event) => indices[processorEventIndexMap[event]]);
+  const index = processorEventsToIndex(events, indices);
 
   const withFilterForProcessorEvent: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };

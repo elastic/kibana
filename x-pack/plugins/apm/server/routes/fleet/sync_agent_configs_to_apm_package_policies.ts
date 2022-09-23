@@ -15,7 +15,7 @@ import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { Setup } from '../../lib/helpers/setup_request';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
-import { getApmPackgePolicies } from './get_apm_package_policies';
+import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithAgentConfigurations } from './register_fleet_policy_callbacks';
 
 export async function syncAgentConfigsToApmPackagePolicies({
@@ -41,7 +41,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
     await Promise.all([
       getInternalSavedObjectsClient(core.setup),
       listConfigurations({ setup }),
-      getApmPackgePolicies({
+      getApmPackagePolicies({
         core,
         fleetPluginStart,
       }),

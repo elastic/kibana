@@ -17,10 +17,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange, SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
-import { QueryBarMenuPanels } from './query_bar_menu_panels';
+import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 export interface QueryBarMenuProps {
@@ -36,6 +36,7 @@ export interface QueryBarMenuProps {
   saveAsNewQueryFormComponent?: JSX.Element;
   saveFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
+  hiddenPanelOptions?: QueryBarMenuPanelsProps['hiddenPanelOptions'];
   onFiltersUpdated?: (filters: Filter[]) => void;
   filters?: Filter[];
   query?: Query;
@@ -47,6 +48,7 @@ export interface QueryBarMenuProps {
   timeRangeForSuggestionsOverride?: boolean;
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
+  isDisabled?: boolean;
 }
 
 export function QueryBarMenu({
@@ -60,6 +62,7 @@ export function QueryBarMenu({
   saveAsNewQueryFormComponent,
   saveFormComponent,
   manageFilterSetComponent,
+  hiddenPanelOptions,
   openQueryBarMenu,
   toggleFilterBarMenuPopover,
   onFiltersUpdated,
@@ -73,6 +76,7 @@ export function QueryBarMenu({
   indexPatterns,
   timeRangeForSuggestionsOverride,
   buttonProps,
+  isDisabled,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -94,7 +98,7 @@ export function QueryBarMenu({
   };
 
   const buttonLabel = i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
-    defaultMessage: 'Filter set menu',
+    defaultMessage: 'Saved query menu',
   });
 
   const button = (
@@ -103,6 +107,7 @@ export function QueryBarMenu({
         size="m"
         display="empty"
         onClick={onButtonClick}
+        isDisabled={isDisabled}
         {...buttonProps}
         iconType="filter"
         aria-label={buttonLabel}
@@ -124,6 +129,7 @@ export function QueryBarMenu({
     savedQueryService,
     saveAsNewQueryFormComponent,
     manageFilterSetComponent,
+    hiddenPanelOptions,
     nonKqlMode,
     closePopover,
     onQueryBarSubmit,

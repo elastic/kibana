@@ -4,18 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Filter, isFilters, isFilterPinned } from '@kbn/es-query';
+import { type Filter, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import { DashboardAppLocatorParams, cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import {
-  APPLY_FILTER_TRIGGER,
-  isQuery,
-  isTimeRange,
-  Query,
-  TimeRange,
-  extractTimeRange,
-} from '@kbn/data-plugin/public';
+import { APPLY_FILTER_TRIGGER, isQuery, isTimeRange } from '@kbn/data-plugin/public';
+import { extractTimeRange } from '@kbn/es-query';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
@@ -68,12 +62,11 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       if (isTimeRange(input.timeRange) && config.useCurrentDateRange)
         params.timeRange = input.timeRange;
 
-      // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
+      // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
       // otherwise preserve only pinned
-      if (isFilters(input.filters))
-        params.filters = config.useCurrentFilters
-          ? input.filters
-          : input.filters?.filter((f) => isFilterPinned(f));
+      params.filters = config.useCurrentFilters
+        ? input.filters
+        : input.filters?.filter((f) => isFilterPinned(f));
     }
 
     const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } = extractTimeRange(

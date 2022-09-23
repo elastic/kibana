@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { AwaitedProperties } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 
-import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
 // See: https://github.com/elastic/kibana/issues/117255, the moduleNameMapper creates mocks to avoid memory leaks from kibana core.
 // We cannot import from "../../../../../../actions/server" directly here or we have a really bad memory issue. We cannot add this to the existing mocks we created, this fix must be here.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
@@ -23,7 +23,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -31,8 +31,9 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
-import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
-import { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -105,6 +106,7 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
+  const licensing = licensingMock.createSetup();
 
   return {
     core,
@@ -121,10 +123,25 @@ const createSecuritySolutionRequestContextMock = (
       };
     }),
     getAppClient: jest.fn(() => clients.appClient),
+    getRacClient: jest.fn((req: KibanaRequest) => {
+      throw new Error('Not implemented');
+    }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+    getInternalFleetServices: jest.fn(() => {
+      // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
+    getScopedFleetServices: jest.fn((req: KibanaRequest) => {
+      // TODO: Mock EndpointScopedFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
+    getQueryRuleAdditionalOptions: {
+      licensing,
+      osqueryCreateAction: jest.fn(),
+    },
   };
 };
 

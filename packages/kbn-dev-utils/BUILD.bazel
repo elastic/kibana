@@ -7,10 +7,20 @@ PKG_REQUIRE_NAME = "@kbn/dev-utils"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
-    "**/*.test.*"
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -36,10 +46,12 @@ filegroup(
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
   "README.md",
-  ":certs",
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-dev-cli-runner",
+  "//packages/kbn-dev-cli-errors",
+  "//packages/kbn-dev-proc-runner",
   "//packages/kbn-std",
   "//packages/kbn-utils",
   "//packages/kbn-plugin-discovery",
@@ -47,7 +59,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-stdio-dev-helpers",
   "//packages/kbn-ci-stats-reporter",
   "//packages/kbn-jest-serializers",
-  "//packages/kbn-kibana-json-schema",
+  "//packages/kbn-kibana-manifest-schema",
   "@npm//@babel/core",
   "@npm//axios",
   "@npm//chalk",
@@ -71,6 +83,9 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-dev-cli-runner:npm_module_types",
+  "//packages/kbn-dev-cli-errors:npm_module_types",
+  "//packages/kbn-dev-proc-runner:npm_module_types",
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-plugin-discovery:npm_module_types",
@@ -78,7 +93,7 @@ TYPES_DEPS = [
   "//packages/kbn-stdio-dev-helpers:npm_module_types",
   "//packages/kbn-ci-stats-reporter:npm_module_types",
   "//packages/kbn-jest-serializers:npm_module_types",
-  "//packages/kbn-kibana-json-schema:npm_module_types",
+  "//packages/kbn-kibana-manifest-schema:npm_module_types",
   "@npm//@babel/parser",
   "@npm//@babel/types",
   "@npm//@types/babel__core",
@@ -108,8 +123,12 @@ TYPES_DEPS = [
 
 jsts_transpiler(
   name = "target_node",
-  srcs = SRCS,
+  srcs = SRCS + [":certs"],
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
@@ -127,9 +146,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

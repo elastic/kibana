@@ -14,7 +14,6 @@ import {
   AlertStatusEventEntityIdMap,
   Process,
   ProcessEventsPage,
-  ProcessEvent,
 } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
@@ -41,7 +40,6 @@ export interface ProcessTreeDeps {
   sessionEntityId: string;
 
   data: ProcessEventsPage[];
-  alerts: ProcessEvent[];
 
   jumpToEntityId?: string;
   investigatedAlertId?: string;
@@ -62,6 +60,7 @@ export interface ProcessTreeDeps {
   // a map for alerts with updated status and process.entity_id
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   onShowAlertDetails: (alertUuid: string) => void;
+  onJumpToOutput: (entityId: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;
 }
@@ -69,7 +68,6 @@ export interface ProcessTreeDeps {
 export const ProcessTree = ({
   sessionEntityId,
   data,
-  alerts,
   jumpToEntityId,
   investigatedAlertId,
   isFetching,
@@ -83,6 +81,7 @@ export const ProcessTree = ({
   setSearchResults,
   updatedAlertsStatus,
   onShowAlertDetails,
+  onJumpToOutput,
   showTimestamp = true,
   verboseMode = false,
 }: ProcessTreeDeps) => {
@@ -93,7 +92,6 @@ export const ProcessTree = ({
   const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
-    alerts,
     searchQuery,
     updatedAlertsStatus,
     verboseMode,
@@ -168,6 +166,7 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
+            onJumpToOutput={onJumpToOutput}
             jumpToEntityId={jumpToEntityId}
             investigatedAlertId={investigatedAlertId}
             selectedProcess={selectedProcess}

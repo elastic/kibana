@@ -20,7 +20,9 @@
     "taskManager",
     "triggersActionsUi",
     "usageCollection",
-    "unifiedSearch"
+    "unifiedSearch",
+    "spaces",
+    "bfetch"
   ],
   "server": true,
   "ui": true,

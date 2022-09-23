@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ResolverNode,
   SafeResolverEvent,
   ResolverRelatedEvents,
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
-import { DataAccessLayer } from '../../types';
+import type { DataAccessLayer } from '../../types';
 
 type PausableRequests =
   | 'relatedEvents'

@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
 import { setupEnvironment } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
-import { getDefaultHotPhasePolicy, POLICY_NAME } from '../constants';
+import { getDefaultHotPhasePolicy, POLICY_NAME, POLICY_MANAGED_BY_ES } from '../constants';
 
 describe('<EditPolicy /> edit warning', () => {
   let testBed: TestBed;
@@ -52,6 +52,19 @@ describe('<EditPolicy /> edit warning', () => {
     const { exists, component } = testBed;
     component.update();
     expect(exists('editWarning')).toBe(true);
+  });
+
+  test('an edit warning callout is shown for an existing, managed policy', async () => {
+    httpRequestsMockHelpers.setLoadPolicies([POLICY_MANAGED_BY_ES]);
+
+    await act(async () => {
+      testBed = await initTestBed(httpSetup);
+    });
+    const { exists, component } = testBed;
+    component.update();
+
+    expect(exists('editWarning')).toBe(true);
+    expect(exists('editManagedPolicyCallOut')).toBe(true);
   });
 
   test('no indices link if no indices', async () => {

@@ -15,6 +15,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
@@ -22,9 +23,8 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
-
-  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -51,7 +51,11 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.clearValue();
   }
 
-  public async saveSearch(searchName: string, saveAsNew?: boolean) {
+  public async saveSearch(
+    searchName: string,
+    saveAsNew?: boolean,
+    options: { tags: string[] } = { tags: [] }
+  ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -62,6 +66,14 @@ export class DiscoverPageObject extends FtrService {
         return (await saveButton.getAttribute('disabled')) !== 'true';
       }
     );
+
+    if (options.tags.length) {
+      await this.testSubjects.click('savedObjectTagSelector');
+      for (const tagName of options.tags) {
+        await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      }
+      await this.testSubjects.click('savedObjectTitle');
+    }
 
     if (saveAsNew !== undefined) {
       await this.retry.waitFor(`save as new switch is set`, async () => {
@@ -199,6 +211,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleChartVisibility() {
+    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.exists('discoverChartToggle');
     await this.testSubjects.click('discoverChartToggle');
@@ -283,8 +296,10 @@ export class DiscoverPageObject extends FtrService {
       );
       return await fields[usedCellIdx].getVisibleText();
     }
+    await this.testSubjects.click('dataGridFullScreenButton');
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(row.map(async (cell) => (await cell.getVisibleText()).trim()));
+    await this.testSubjects.click('dataGridFullScreenButton');
     return result[usedCellIdx];
   }
 
@@ -364,6 +379,7 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click(`field-${field}`);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
     await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.fieldEditor.confirmDelete();
   }
 
   public async clickIndexPatternActions() {
@@ -392,6 +408,17 @@ export class DiscoverPageObject extends FtrService {
       }
     );
     await (await this.find.byClassName('indexPatternEditor__form')).click();
+  }
+
+  async createAdHocDataView(name: string, hasTimeField = false) {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+  }
+
+  async clickAddField() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.testSubjects.existOrFail('indexPattern-add-field');
+    await this.testSubjects.click('indexPattern-add-field');
   }
 
   public async hasNoResults() {
@@ -504,6 +531,23 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getIndexPatterns() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher');
+    const li = await indexPatternSwitcher.findAllByTagName('li');
+    const items = await Promise.all(li.map((lis) => lis.getVisibleText()));
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return items;
+  }
+
+  public async selectTextBaseLang(lang: 'SQL') {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.find.clickByCssSelector(
+      `[data-test-subj="text-based-languages-switcher"] [title="${lang}"]`
+    );
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async removeHeaderColumn(name: string) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
@@ -559,7 +603,6 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
-    await this.unifiedSearch.closeTourPopoverByLocalStorage();
   }
 
   public async showAllFilterActions() {
@@ -629,7 +672,7 @@ export class DiscoverPageObject extends FtrService {
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
       await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }

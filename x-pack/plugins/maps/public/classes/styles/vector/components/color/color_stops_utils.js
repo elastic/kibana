@@ -6,11 +6,12 @@
  */
 
 import { isValidHex } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 
-export const DEFAULT_CUSTOM_COLOR = '#FF0000';
-export const DEFAULT_NEXT_COLOR = '#00FF00';
+const DEFAULT_CUSTOM_PALETTE = euiPaletteColorBlind({ rotations: 3 });
+
+export const DEFAULT_CUSTOM_COLOR = DEFAULT_CUSTOM_PALETTE[0];
 
 export function removeRow(colorStops, index) {
   if (colorStops.length === 1) {
@@ -39,15 +40,18 @@ export function addOrdinalRow(colorStops, index) {
 }
 
 export function addCategoricalRow(colorStops, index) {
-  const currentStop = colorStops[index].stop;
-  const nextValue = currentStop === '' ? currentStop + 'a' : '';
-  return addRow(colorStops, index, nextValue);
+  // TODO load value from suggestions
+  return addRow(colorStops, index, '');
 }
 
 function addRow(colorStops, index, nextValue) {
+  const nextColorIndex =
+    colorStops.length < DEFAULT_CUSTOM_PALETTE.length
+      ? colorStops.length
+      : colorStops.length % DEFAULT_CUSTOM_PALETTE.length;
   const newRow = {
     stop: nextValue,
-    color: DEFAULT_CUSTOM_COLOR,
+    color: DEFAULT_CUSTOM_PALETTE[nextColorIndex],
   };
   return [...colorStops.slice(0, index + 1), newRow, ...colorStops.slice(index + 1)];
 }
@@ -77,11 +81,5 @@ export function isOrdinalStopsInvalid(colorStops) {
     }
 
     return isColorInvalid(colorStop.color) || isOrdinalStopInvalid(colorStop.stop) || isDescending;
-  });
-}
-
-export function getOtherCategoryLabel() {
-  return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
-    defaultMessage: 'Other',
   });
 }

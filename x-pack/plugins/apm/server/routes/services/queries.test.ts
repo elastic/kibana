@@ -54,13 +54,17 @@ describe('services queries', () => {
       getServicesItems({
         setup,
         searchAggregatedTransactions: false,
+        searchAggregatedServiceMetrics: false,
         logger: {} as any,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
         end: 50000,
         serviceGroup: null,
-        probability: 1,
+        randomSampler: {
+          probability: 1,
+          seed: 0,
+        },
       })
     );
 

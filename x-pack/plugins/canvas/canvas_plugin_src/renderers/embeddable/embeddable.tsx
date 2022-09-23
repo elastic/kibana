@@ -99,7 +99,13 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddableInput = { ...input, id: uniqueId };
+        const embeddableInput = {
+          ...input,
+          id: uniqueId,
+          executionContext: {
+            type: 'canvas',
+          },
+        };
 
         const embeddablePromise = input.savedObjectId
           ? factory

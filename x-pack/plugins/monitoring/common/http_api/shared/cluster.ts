@@ -8,3 +8,4 @@
 import * as rt from 'io-ts';
 
 export const clusterUuidRT = rt.string;
+export type ClusterUuid = rt.TypeOf<typeof clusterUuidRT>;

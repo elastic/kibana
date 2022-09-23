@@ -9,6 +9,9 @@ import type {
   SavedObjectReferenceWithContext,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
@@ -51,7 +54,7 @@ interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
   auditLogger: AuditLogger;
   baseClient: SavedObjectsClientContract;
-  errors: SavedObjectsClientContract['errors'];
+  errors: typeof SavedObjectsErrorHelpers;
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   getSpacesService(): SpacesService | undefined;
 }
@@ -86,7 +89,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private readonly baseClient: SavedObjectsClientContract;
   private readonly checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   private getSpacesService: () => SpacesService | undefined;
-  public readonly errors: SavedObjectsClientContract['errors'];
+  public readonly errors: typeof SavedObjectsErrorHelpers;
 
   constructor({
     actions,
@@ -222,6 +225,48 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     return await this.baseClient.delete(type, id, options);
+  }
+
+  public async bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse> {
+    try {
+      const args = { objects, options };
+      await this.legacyEnsureAuthorized(
+        this.getUniqueObjectTypes(objects),
+        'bulk_delete',
+        options?.namespace,
+        {
+          args,
+        }
+      );
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.DELETE,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+    const response = await this.baseClient.bulkDelete(objects, options);
+    response?.statuses.forEach(({ id, type, success, error }) => {
+      const auditEventOutcome = success === true ? 'success' : 'failure';
+      const auditEventOutcomeError = error ? (error as unknown as Error) : undefined;
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.DELETE,
+          savedObject: { type, id },
+          outcome: auditEventOutcome,
+          error: auditEventOutcomeError,
+        })
+      );
+    });
+    return response;
   }
 
   public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {

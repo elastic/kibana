@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flow } from 'lodash';
+import { flow, uniqBy, isEmpty } from 'lodash';
 import { ActionsClient } from '@kbn/actions-plugin/server';
+import { UserProfile } from '@kbn/security-plugin/common';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
@@ -26,6 +27,7 @@ import {
   CaseStatuses,
   User,
   CaseAttributes,
+  CaseAssignees,
 } from '../../../common/api';
 import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
@@ -53,7 +55,16 @@ interface CreateIncidentArgs {
   mappings: ConnectorMappingsAttributes[];
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
+  userProfiles?: Map<string, UserProfile>;
 }
+
+export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
+  if (assignees == null) {
+    return;
+  }
+
+  return uniqBy(assignees, 'uid');
+};
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -156,6 +167,7 @@ export const createIncident = async ({
   mappings,
   alerts,
   casesConnectors,
+  userProfiles,
 }: CreateIncidentArgs): Promise<MapIncident> => {
   const {
     comments: caseComments,
@@ -204,6 +216,7 @@ export const createIncident = async ({
     params,
     fields,
     currentIncident,
+    userProfiles,
   });
 
   incident = { ...incident, ...transformedFields, externalId };
@@ -227,7 +240,7 @@ export const createIncident = async ({
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
-      comments = transformComments(commentsToBeUpdated, ['informationAdded']);
+      comments = transformComments(commentsToBeUpdated, ['informationAdded'], userProfiles);
     }
   }
 
@@ -236,16 +249,46 @@ export const createIncident = async ({
   return { incident, comments };
 };
 
-export const getEntity = (entity: EntityInformation): string =>
-  (entity.updatedBy != null
-    ? entity.updatedBy.full_name
-      ? entity.updatedBy.full_name
-      : entity.updatedBy.username
-    : entity.createdBy != null
-    ? entity.createdBy.full_name
-      ? entity.createdBy.full_name
-      : entity.createdBy.username
-    : '') ?? '';
+export const getEntity = (
+  entity: EntityInformation,
+  userProfiles?: Map<string, UserProfile>
+): string => {
+  return (
+    getDisplayName(entity.updatedBy, userProfiles) ??
+    getDisplayName(entity.createdBy, userProfiles) ??
+    ''
+  );
+};
+
+const getDisplayName = (
+  user: User | null | undefined,
+  userProfiles?: Map<string, UserProfile>
+): string | undefined => {
+  if (user == null) {
+    return;
+  }
+
+  if (user.profile_uid != null) {
+    const updatedByProfile = userProfiles?.get(user.profile_uid);
+
+    if (updatedByProfile != null) {
+      return (
+        validOrUndefined(updatedByProfile.user.full_name) ??
+        validOrUndefined(updatedByProfile.user.username)
+      );
+    }
+  }
+
+  return validOrUndefined(user.full_name) ?? validOrUndefined(user.username) ?? '';
+};
+
+const validOrUndefined = (value: string | undefined | null): string | undefined => {
+  if (value == null || isEmpty(value)) {
+    return;
+  }
+
+  return value;
+};
 
 export const FIELD_INFORMATION = (
   mode: string,
@@ -334,6 +377,7 @@ export const transformFields = <
   params,
   fields,
   currentIncident,
+  userProfiles,
 }: TransformFieldsArgs<P, S>): R => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
@@ -342,7 +386,7 @@ export const transformFields = <
       [cur.key]: transform({
         value: cur.value,
         date: params.updatedAt ?? params.createdAt,
-        user: getEntity(params),
+        user: getEntity(params, userProfiles),
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
@@ -351,18 +395,22 @@ export const transformFields = <
 
 export const transformComments = (
   comments: CaseResponse['comments'] = [],
-  pipes: string[]
+  pipes: string[],
+  userProfiles?: Map<string, UserProfile>
 ): ExternalServiceComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
       value: getCommentContent(c),
       date: c.updated_at ?? c.created_at,
-      user: getEntity({
-        createdAt: c.created_at,
-        createdBy: c.created_by,
-        updatedAt: c.updated_at,
-        updatedBy: c.updated_by,
-      }),
+      user: getEntity(
+        {
+          createdAt: c.created_at,
+          createdBy: c.created_by,
+          updatedAt: c.updated_at,
+          updatedBy: c.updated_by,
+        },
+        userProfiles
+      ),
     }).value,
     commentId: c.id,
   }));
@@ -433,6 +481,27 @@ export const getClosedInfoForUpdate = ({
   }
 };
 
+export const getDurationInSeconds = ({
+  closedAt,
+  createdAt,
+}: {
+  closedAt: string;
+  createdAt: CaseAttributes['created_at'];
+}) => {
+  try {
+    if (createdAt != null && closedAt != null) {
+      const createdAtMillis = new Date(createdAt).getTime();
+      const closedAtMillis = new Date(closedAt).getTime();
+
+      if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
+        return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
+      }
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+};
+
 export const getDurationForUpdate = ({
   status,
   closedAt,
@@ -443,22 +512,7 @@ export const getDurationForUpdate = ({
   status?: CaseStatuses;
 }): Pick<CaseAttributes, 'duration'> | undefined => {
   if (status && status === CaseStatuses.closed) {
-    try {
-      if (createdAt != null && closedAt != null) {
-        const createdAtMillis = new Date(createdAt).getTime();
-        const closedAtMillis = new Date(closedAt).getTime();
-
-        if (
-          !isNaN(createdAtMillis) &&
-          !isNaN(closedAtMillis) &&
-          closedAtMillis >= createdAtMillis
-        ) {
-          return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
-        }
-      }
-    } catch (err) {
-      // Silence date errors
-    }
+    return getDurationInSeconds({ createdAt, closedAt });
   }
 
   if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {

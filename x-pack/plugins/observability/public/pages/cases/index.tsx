@@ -14,12 +14,12 @@ import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useHasData } from '../../hooks/use_has_data';
-import { LoadingObservability } from '../overview/loading_observability';
+import { LoadingObservability } from '../overview';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { ObservabilityAppServices } from '../../application/types';
 
 export const CasesPage = React.memo(() => {
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const { docLinks, http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -38,12 +38,13 @@ export const CasesPage = React.memo(() => {
     docsLink: docLinks.links.observability.guide,
   });
 
-  return userPermissions == null || userPermissions?.read ? (
+  return userCasesPermissions.read ? (
     <ObservabilityPageTemplate
+      isPageDataLoaded={isAllRequestsComplete}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
     >
-      <Cases userCanCrud={userPermissions?.crud ?? false} />
+      <Cases permissions={userCasesPermissions} />
     </ObservabilityPageTemplate>
   ) : (
     <CaseFeatureNoPermissions />

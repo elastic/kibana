@@ -125,6 +125,7 @@ export const useIndexData = (
     }
 
     fetchDataGridSampleDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // To be used for data grid column selection
@@ -162,6 +163,7 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   useEffect(() => {
@@ -215,14 +217,17 @@ export const useIndexData = (
       fetchIndexData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     indexPattern.title,
     indexPatternFields,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
   const dataLoader = useMemo(
     () => new DataLoader(indexPattern, toastNotifications),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [indexPattern]
   );
 
@@ -250,9 +255,11 @@ export const useIndexData = (
       fetchColumnChartsData(query);
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 

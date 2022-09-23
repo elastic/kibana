@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { ReactWrapper } from 'enzyme';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
@@ -58,6 +56,12 @@ export const defaultState = {
     activeId: 'testVis',
   },
   datasourceStates: mockDatasourceStates(),
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+    existingFields: {},
+    isFirstExistenceFetch: false,
+  },
 };
 
 export function makeLensStore({
@@ -78,7 +82,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const origDispatch = store.dispatch;
   store.dispatch = jest.fn(dispatch || origDispatch);

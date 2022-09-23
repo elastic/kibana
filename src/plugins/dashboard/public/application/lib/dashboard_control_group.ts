@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
@@ -147,6 +148,19 @@ export const syncDashboardControlGroup = async ({
       })
   );
 
+  subscriptions.add(
+    controlGroup
+      .getOutput$()
+      .pipe(
+        distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
+          _.isEqual(timesliceA, timesliceB)
+        )
+      )
+      .subscribe(({ timeslice }) => {
+        dashboardContainer.updateInput({ timeslice });
+      })
+  );
+
   return {
     onDestroyControlGroup: () => {
       subscriptions.unsubscribe();
@@ -186,22 +200,6 @@ export const deserializeControlGroupFromDashboardSavedObject = (
 export const combineDashboardFiltersWithControlGroupFilters = (
   dashboardFilters: Filter[],
   controlGroup: ControlGroupContainer
-) => {
-  const dashboardFiltersByKey = dashboardFilters.reduce(
-    (acc: { [key: string]: Filter }, current) => {
-      const key = current.meta.key;
-      if (key) acc[key] = current;
-      return acc;
-    },
-    {}
-  );
-  const controlGroupFiltersByKey = controlGroup
-    .getOutput()
-    .filters?.reduce((acc: { [key: string]: Filter }, current) => {
-      const key = current.meta.key;
-      if (key) acc[key] = current;
-      return acc;
-    }, {});
-  const finalFilters = { ...dashboardFiltersByKey, ...(controlGroupFiltersByKey ?? {}) };
-  return Object.values(finalFilters);
+): Filter[] => {
+  return [...dashboardFilters, ...(controlGroup.getOutput().filters ?? [])];
 };

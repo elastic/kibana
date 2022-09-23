@@ -9,8 +9,8 @@
 import fn from './derivative';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('derivative.js', () => {
   let seriesList;

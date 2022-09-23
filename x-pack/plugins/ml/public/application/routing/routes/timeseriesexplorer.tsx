@@ -12,7 +12,9 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { NavigateToPath, useNotifications } from '../../contexts/kibana';
+import { useMlContext } from '../../contexts/ml';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -107,6 +109,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const dataViewsService = useMlContext().dataViewsContract;
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
@@ -137,6 +140,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setBounds(timefilter.getBounds());
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
@@ -152,12 +156,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousSelectedJobIds = usePrevious(selectedJobIds);
   const isJobChange = !isEqual(previousSelectedJobIds, selectedJobIds);
 
-  // Next we get globalState and appState information to pass it on as props later.
-  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
-  // otherwise the page could break.
-  const selectedDetectorIndex = isJobChange
-    ? 0
-    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? 0;
   const selectedEntities = isJobChange
     ? undefined
     : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.entities;
@@ -173,6 +171,15 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
+
+  const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0]?.index ?? 0 : 0;
+
+  // Next we get globalState and appState information to pass it on as props later.
+  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
+  // otherwise the page could break.
+  const selectedDetectorIndex = isJobChange
+    ? viewableDetector
+    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? viewableDetector;
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {
@@ -233,7 +240,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
       setTimeSeriesExplorerUrlState({ mlTimeSeriesExplorer }, isInitUpdate);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(timeSeriesExplorerUrlState?.mlTimeSeriesExplorer),
       setTimeSeriesExplorerUrlState,
     ]
@@ -256,6 +265,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
   const boundsMinMs = bounds?.min?.valueOf();
@@ -306,6 +316,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
@@ -338,6 +349,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
+        dataViewsService,
         toastNotificationService,
         appStateHandler,
         autoZoomDuration,

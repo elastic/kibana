@@ -19,7 +19,9 @@ describe('Connectors', () => {
 
   const clientArgs = {
     logger,
-    userActionService,
+    services: {
+      userActionService,
+    },
     authorization: { getAuthorizationFilter },
   } as unknown as CasesClientArgs;
 

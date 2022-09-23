@@ -13,9 +13,11 @@ There are 2 FTR helpers to allow you to retrieve the generated events:
 
 The API is the same for both of them:
 ```typescript
-// To retrieve the last 2 events of type "my-event-type
-const events = await getService('kibana_ebt_ui').getLastEvents(2, ['my-event-type']);
+// To retrieve 2 events of type "my-event-type"
+const events = await getService('kibana_ebt_ui').getEvents(2, { eventTypes: ['my-event-type'] });
 expect(events).to...
 ```
 
 If you are reusing these helpers in another suite, please remember to make sure to optIn via `await getService('kibana_ebt_ui').setOptIn(true);`
+
+Refer to [`EBTHelpersContract`](./fixtures/plugins/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.

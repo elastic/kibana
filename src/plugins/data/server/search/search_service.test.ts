@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 
@@ -26,7 +26,6 @@ import type {
   ISearchStrategy,
 } from '.';
 import { NoSearchIdInSessionError } from '.';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';

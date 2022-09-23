@@ -9,12 +9,10 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import { PolicyData } from '../../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath, getPolicyEventFiltersPath } from '../../../../../common/routing';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { PolicyArtifactsList } from './policy_artifacts_list';
@@ -22,7 +20,7 @@ import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -37,6 +35,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     sort_order: 'desc',
   },
 });
+
+jest.setTimeout(10000);
 
 describe('Policy details artifacts list', () => {
   let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -69,7 +69,10 @@ describe('Policy details artifacts list', () => {
             getArtifactPath={getEventFiltersListPath}
           />
         );
-        await waitFor(mockedApi.responseProvider.eventFiltersList);
+        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
+        );
       });
       return renderResult;
     };
@@ -101,7 +104,9 @@ describe('Policy details artifacts list', () => {
 
   it('should expand an item when expand is clicked', async () => {
     await render();
-    expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
+    await waitFor(() => {
+      expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
+    });
 
     userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-expandCollapse')

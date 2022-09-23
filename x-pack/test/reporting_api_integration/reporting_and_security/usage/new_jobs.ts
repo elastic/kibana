@@ -74,15 +74,15 @@ export default function ({ getService }: FtrProviderContext) {
       const usage = await usageAPI.getUsageStats();
       reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1);
       reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
-      reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
-      reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 2);
+      reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 1);
+      reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 1);
       reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
       reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
 
       reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 1);
       reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 1);
-      reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
-      reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 2);
+      reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 1);
+      reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 1);
       reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv_searchsource', 0);
       reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 2);
     });

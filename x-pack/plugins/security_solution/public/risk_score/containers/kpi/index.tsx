@@ -13,41 +13,43 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createFilter } from '../../../common/containers/helpers';
 
+import type {
+  KpiRiskScoreRequestOptions,
+  KpiRiskScoreStrategyResponse,
+} from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
   getUserRiskIndex,
-  KpiRiskScoreRequestOptions,
-  KpiRiskScoreStrategyResponse,
   RiskQueries,
-  RiskScoreAggByFields,
   RiskSeverity,
+  RiskScoreEntity,
 } from '../../../../common/search_strategy';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SeverityCount } from '../../../common/components/severity/types';
-import { useSpaceId } from '../common';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { SeverityCount } from '../../../common/components/severity/types';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
-type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {
+type GetHostRiskScoreProps = KpiRiskScoreRequestOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
 
-const getRiskyHosts = ({
+const getRiskScoreKpi = ({
   data,
   defaultIndex,
   signal,
   filterQuery,
-  aggBy,
-}: GetHostsRiskScoreProps): Observable<KpiRiskScoreStrategyResponse> =>
+  entity,
+}: GetHostRiskScoreProps): Observable<KpiRiskScoreStrategyResponse> =>
   data.search.search<KpiRiskScoreRequestOptions, KpiRiskScoreStrategyResponse>(
     {
       defaultIndex,
       factoryQueryType: RiskQueries.kpiRiskScore,
       filterQuery: createFilter(filterQuery),
-      aggBy,
+      entity,
     },
     {
       strategy: 'securitySolutionSearchStrategy',
@@ -55,19 +57,19 @@ const getRiskyHosts = ({
     }
   );
 
-const getRiskyHostsComplete = (
-  props: GetHostsRiskScoreProps
+const getRiskScoreKpiComplete = (
+  props: GetHostRiskScoreProps
 ): Observable<KpiRiskScoreStrategyResponse> => {
-  return getRiskyHosts(props).pipe(
+  return getRiskScoreKpi(props).pipe(
     filter((response) => {
       return isErrorResponse(response) || isCompleteResponse(response);
     })
   );
 };
 
-const getRiskyHostsWithOptionalSignal = withOptionalSignal(getRiskyHostsComplete);
+const getRiskScoreKpiWithOptionalSignal = withOptionalSignal(getRiskScoreKpiComplete);
 
-const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
+const useRiskScoreKpiComplete = () => useObservable(getRiskScoreKpiWithOptionalSignal);
 
 interface RiskScoreKpi {
   error: unknown;
@@ -78,11 +80,11 @@ interface RiskScoreKpi {
 
 type UseHostRiskScoreKpiProps = Omit<
   UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled'
+  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
 >;
 type UseUserRiskScoreKpiProps = Omit<
   UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled'
+  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
 >;
 
 export const useUserRiskScoreKpi = ({
@@ -91,14 +93,14 @@ export const useUserRiskScoreKpi = ({
 }: UseUserRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
-  const usersFeatureEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScoreKpi({
     filterQuery,
     skip,
     defaultIndex,
-    aggBy: 'user.name',
-    featureEnabled: usersFeatureEnabled,
+    entity: RiskScoreEntity.user,
+    featureEnabled: isPlatinumOrTrialLicense,
   });
 };
 
@@ -108,14 +110,14 @@ export const useHostRiskScoreKpi = ({
 }: UseHostRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId) : undefined;
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScoreKpi({
     filterQuery,
     skip,
     defaultIndex,
-    aggBy: 'host.name',
-    featureEnabled: riskyHostsFeatureEnabled,
+    entity: RiskScoreEntity.host,
+    featureEnabled: isPlatinumOrTrialLicense,
   });
 };
 
@@ -123,7 +125,7 @@ interface UseRiskScoreKpiProps {
   filterQuery?: string | ESTermQuery;
   skip?: boolean;
   defaultIndex: string | undefined;
-  aggBy: RiskScoreAggByFields;
+  entity: RiskScoreEntity;
   featureEnabled: boolean;
 }
 
@@ -131,10 +133,10 @@ const useRiskScoreKpi = ({
   filterQuery,
   skip,
   defaultIndex,
-  aggBy,
+  entity,
   featureEnabled,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
-  const { error, result, start, loading } = useRiskyHostsComplete();
+  const { error, result, start, loading } = useRiskScoreKpiComplete();
   const { data } = useKibana().services;
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
@@ -144,10 +146,10 @@ const useRiskScoreKpi = ({
         data,
         filterQuery,
         defaultIndex: [defaultIndex],
-        aggBy,
+        entity,
       });
     }
-  }, [data, defaultIndex, start, filterQuery, skip, aggBy, featureEnabled]);
+  }, [data, defaultIndex, start, filterQuery, skip, entity, featureEnabled]);
 
   const severityCount = useMemo(
     () => ({
@@ -160,5 +162,6 @@ const useRiskScoreKpi = ({
     }),
     [result]
   );
+
   return { error, severityCount, loading, isModuleDisabled };
 };

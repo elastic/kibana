@@ -20,10 +20,8 @@ import {
   getOutputDetailsSample,
   getOutputDetailsSampleWithExceptions,
 } from './export_rules_details_schema.mock';
-import {
-  ExportRulesDetails,
-  exportRulesDetailsWithExceptionsSchema,
-} from './export_rules_details_schema';
+import type { ExportRulesDetails } from './export_rules_details_schema';
+import { exportRulesDetailsWithExceptionsSchema } from './export_rules_details_schema';
 
 describe('exportRulesDetailsWithExceptionsSchema', () => {
   test('it should validate export details response', () => {

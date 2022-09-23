@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
 } from './legacy_types';

@@ -13,7 +13,11 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
   const kibanaServer = getService('kibanaServer');
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+  const config = getService('config');
+  const archive = {
+    local: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default',
+    ccs: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/ccs/default',
+  };
 
   describe('smoke test', function () {
     this.tags('includeFirefox');
@@ -21,7 +25,12 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      await kibanaServer.importExport.load(archive);
+      if (config.get('esTestCluster.ccs')) {
+        await kibanaServer.importExport.load(archive.ccs);
+      } else {
+        await kibanaServer.importExport.load(archive.local);
+      }
+
       await PageObjects.common.navigateToApp('canvas');
     });
 

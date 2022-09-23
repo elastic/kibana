@@ -11,18 +11,14 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../../common/search_strategy';
-import {
-  StatItemsComponent,
-  StatItemsProps,
-  useKpiMatrixStatus,
-  StatItems,
-} from '../../../../common/components/stat_items';
-import { UpdateDateRange } from '../../../../common/components/charts/common';
-import { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
+import type { StatItemsProps, StatItems } from '../../../../common/components/stat_items';
+import { StatItemsComponent, useKpiMatrixStatus } from '../../../../common/components/stat_items';
+import type { UpdateDateRange } from '../../../../common/components/charts/common';
+import type { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
 
 const kpiWidgetHeight = 247;
 
@@ -39,19 +35,19 @@ interface KpiBaseComponentProps {
   id: string;
   from: string;
   to: string;
-  narrowDateRange: UpdateDateRange;
+  updateDateRange: UpdateDateRange;
   setQuerySkip: (skip: boolean) => void;
 }
 
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, setQuerySkip }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, updateDateRange, setQuerySkip }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
       data,
       id,
       from,
       to,
-      narrowDateRange,
+      updateDateRange,
       setQuerySkip,
       loading
     );
@@ -70,7 +66,7 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
     prevProps.loading === nextProps.loading &&
     prevProps.from === nextProps.from &&
     prevProps.to === nextProps.to &&
-    prevProps.narrowDateRange === nextProps.narrowDateRange &&
+    prevProps.updateDateRange === nextProps.updateDateRange &&
     deepEqual(prevProps.data, nextProps.data)
 );
 

@@ -12,9 +12,16 @@ export interface Props {
   onChange: (value: string[]) => void;
   onBlur?: () => void;
   selectedOptions: string[];
+  readOnly?: boolean;
 }
 
-export const ComboBox = ({ onChange, onBlur, selectedOptions, ...props }: Props) => {
+export const ComboBox = ({
+  onChange,
+  onBlur,
+  selectedOptions,
+  readOnly = false,
+  ...props
+}: Props) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(selectedOptions.map((option) => ({ label: option, key: option })));
@@ -68,6 +75,7 @@ export const ComboBox = ({ onChange, onBlur, selectedOptions, ...props }: Props)
       onBlur={() => onBlur?.()}
       onSearchChange={onSearchChange}
       isInvalid={isInvalid}
+      isDisabled={readOnly}
       {...props}
     />
   );

@@ -77,7 +77,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     }),
   ];
   clusterSourceDescriptor.id = documentSource.getId();
-  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
+  return new ESGeoGridSource(clusterSourceDescriptor);
 }
 
 function getClusterStyleDescriptor(
@@ -222,15 +222,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       }
     }
     this._isClustered = isClustered;
-  }
-
-  destroy() {
-    if (this._documentSource) {
-      this._documentSource.destroy();
-    }
-    if (this._clusterSource) {
-      this._clusterSource.destroy();
-    }
   }
 
   async getDisplayName(source?: ISource) {

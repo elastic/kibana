@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { RuleDetailsContextType } from '../rule_details_context';
 import React from 'react';
+import type { RuleDetailsContextType } from '../rule_details_context';
+import { RuleDetailTabs } from '..';
 
 export const useRuleDetailsContextMock = {
   create: (): jest.Mocked<RuleDetailsContextType> => ({
-    executionLogs: {
+    [RuleDetailTabs.executionResults]: {
       state: {
         superDatePicker: {
           recentlyUsedRanges: [],
@@ -49,14 +50,17 @@ export const useRuleDetailsContextMock = {
   }),
 };
 
+// do not delete
 export const useRuleDetailsContext = jest
   .fn<jest.Mocked<RuleDetailsContextType>, []>()
   .mockImplementation(useRuleDetailsContextMock.create);
 
+// do not delete
 export const useRuleDetailsContextOptional = jest
   .fn<jest.Mocked<RuleDetailsContextType>, []>()
   .mockImplementation(useRuleDetailsContextMock.create);
 
+// do not delete
 export const RulesTableContextProvider = jest
   .fn()
   .mockImplementation(({ children }: { children: React.ReactNode }) => <>{children}</>);

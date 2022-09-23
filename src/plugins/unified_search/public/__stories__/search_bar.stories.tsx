@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -167,7 +168,7 @@ setIndexPatterns({
   get: () => Promise.resolve(mockIndexPatterns[0]),
 } as unknown as DataViewsContract);
 
-function wrapSearchBarInContext(testProps: SearchBarProps) {
+function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
   const defaultOptions = {
     appName: 'test',
     timeHistory: mockTimeHistory,
@@ -185,12 +186,12 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
     filters: [],
     onClearSavedQuery: action('onClearSavedQuery'),
     onFiltersUpdated: action('onFiltersUpdated'),
-  } as unknown as SearchBarProps;
+  } as unknown as SearchBarProps<Query>;
 
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+        <SearchBar<Query> {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -427,5 +428,184 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('show only datepicker without submit', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      showFilterBar: false,
+      showAutoRefreshOnly: false,
+      showQueryInput: false,
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('show only query bar and timepicker without submit', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      showFilterBar: false,
+      showAutoRefreshOnly: false,
+      showQueryInput: true,
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('with filter bar on but pinning option is hidden from menus', () =>
+    wrapSearchBarInContext({
+      showDatePicker: false,
+      showFilterBar: true,
+      showQueryInput: true,
+      hiddenFilterPanelOptions: ['pinFilter'],
+      filters: [
+        {
+          meta: {
+            index: '1234',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'category.keyword',
+            params: {
+              query: "Men's Accessories",
+            },
+          },
+          query: {
+            match_phrase: {
+              'category.keyword': "Men's Accessories",
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ],
+    } as unknown as SearchBarProps)
+  )
+  .add('with dataviewPicker with SQL', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+    } as SearchBarProps)
+  )
+  .add('with dataviewPicker with SQL and sql query', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'SQL',
+          title: 'SQL',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+      query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+    } as unknown as SearchBarProps<Query>)
+  )
+  .add('with dataviewPicker with SQL and large sql query', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'SQL',
+          title: 'SQL',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+      query: {
+        sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+      },
+    } as unknown as SearchBarProps<Query>)
+  )
+  .add('with dataviewPicker with SQL and errors in sql query', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'SQL',
+          title: 'SQL',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+      textBasedLanguageModeErrors: [
+        new Error(
+          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+        ),
+      ],
+      query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
+    } as unknown as SearchBarProps<Query>)
+  )
+  .add('in disabled state', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      isDisabled: true,
+    } as SearchBarProps)
+  )
+  .add('no submit button', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('submit button always as icon', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'iconOnly',
+    } as SearchBarProps)
+  )
+  .add('submit button always as a full button', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'full',
     } as SearchBarProps)
   );

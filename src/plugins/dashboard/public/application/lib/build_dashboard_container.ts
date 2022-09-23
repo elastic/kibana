@@ -6,21 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
-import {
-  DashboardBuildContext,
-  DashboardState,
-  DashboardContainerInput,
-  DashboardAppServices,
-} from '../../types';
-import {
-  enableDashboardSearchSessions,
-  getSearchSessionIdFromURL,
-  stateToDashboardContainerInput,
-} from '.';
 import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
@@ -28,10 +14,19 @@ import {
   EmbeddablePackageState,
   ErrorEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
+import { DashboardSavedObject } from '../../saved_dashboards';
+import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
+import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
+import {
+  enableDashboardSearchSessions,
+  getSearchSessionIdFromURL,
+  stateToDashboardContainerInput,
+} from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
@@ -45,27 +40,25 @@ export const buildDashboardContainer = async ({
   getLatestDashboardState,
   initialDashboardState,
   isEmbeddedExternally,
-  dashboardCapabilities,
   incomingEmbeddable,
   savedDashboard,
-  kibanaVersion,
-  embeddable,
   history,
-  data,
   executionContext,
 }: BuildDashboardContainerProps) => {
   const {
-    search: { session },
-  } = data;
+    dashboardCapabilities: { storeSearchSession: canStoreSearchSession },
+    data: {
+      search: { session },
+    },
+    embeddable: { getEmbeddableFactory },
+  } = pluginServices.getServices();
 
   // set up search session
   enableDashboardSearchSessions({
-    data,
-    kibanaVersion,
     savedDashboard,
     initialDashboardState,
     getLatestDashboardState,
-    canStoreSearchSession: dashboardCapabilities.storeSearchSession,
+    canStoreSearchSession,
   });
 
   if (incomingEmbeddable?.searchSessionId) {
@@ -77,7 +70,7 @@ export const buildDashboardContainer = async ({
     session.restore(searchSessionIdFromURL);
   }
 
-  const dashboardFactory = embeddable.getEmbeddableFactory<
+  const dashboardFactory = getEmbeddableFactory<
     DashboardContainerInput,
     ContainerOutput,
     DashboardContainer
@@ -100,9 +93,7 @@ export const buildDashboardContainer = async ({
   const initialInput = stateToDashboardContainerInput({
     isEmbeddedExternally: Boolean(isEmbeddedExternally),
     dashboardState: initialDashboardState,
-    dashboardCapabilities,
     incomingEmbeddable,
-    query: data.query,
     searchSessionId,
     savedDashboard,
     executionContext,

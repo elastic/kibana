@@ -20,8 +20,9 @@
           " implements ",
           "ActionStorage"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -36,8 +37,9 @@
               "Subject",
               "<void>, \"next\">"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -49,8 +51,9 @@
             "signature": [
               "() => Promise<number>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -72,8 +75,9 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -85,8 +89,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -110,8 +115,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -129,8 +135,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -154,8 +161,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -173,8 +181,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -190,8 +199,9 @@
             "signature": [
               "(eventId: string) => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -203,8 +213,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -228,8 +239,9 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -285,8 +297,9 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -295,8 +308,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -305,8 +319,9 @@
             "tags": [],
             "label": "isBeta",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -318,8 +333,9 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -331,8 +347,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -341,8 +358,9 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -369,8 +387,9 @@
               },
               "<FactoryContext>> | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -390,8 +409,9 @@
               },
               "<FactoryContext>> | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -419,8 +439,9 @@
               },
               "<Config, FactoryContext>>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -442,8 +463,9 @@
               },
               "<Config, FactoryContext>>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -457,7 +479,8 @@
                   "P & { children?: React.ReactNode; }"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -470,7 +493,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -484,8 +508,9 @@
             "signature": [
               "(context: FactoryContext) => Config"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -498,8 +523,9 @@
                 "signature": [
                   "FactoryContext"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -513,8 +539,9 @@
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -527,8 +554,9 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -540,8 +568,9 @@
                 "signature": [
                   "FactoryContext"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -569,8 +598,9 @@
                 "text": "GetMigrationFunctionObjectFn"
               }
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -582,8 +612,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -602,8 +633,9 @@
                   },
                   "<Config, ExecutionContext, FactoryContext>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -616,8 +648,9 @@
                 "signature": [
                   "ActionFactoryDeps"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -633,8 +666,9 @@
             "signature": [
               "(context: FactoryContext) => string | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -646,8 +680,9 @@
                 "signature": [
                   "FactoryContext"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -663,8 +698,9 @@
             "signature": [
               "(context: FactoryContext) => string"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -676,8 +712,9 @@
                 "signature": [
                   "FactoryContext"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -693,8 +730,9 @@
             "signature": [
               "(context: FactoryContext) => string"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -706,8 +744,9 @@
                 "signature": [
                   "FactoryContext"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -723,8 +762,9 @@
             "signature": [
               "(context: FactoryContext) => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -736,8 +776,9 @@
                 "signature": [
                   "FactoryContext"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -755,8 +796,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -786,8 +828,9 @@
               },
               "<ExecutionContext>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -807,8 +850,9 @@
                   },
                   "<Config>, \"factoryId\">"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -824,8 +868,9 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -847,8 +892,9 @@
               },
               ", telemetryData: Record<string, string | number | boolean>) => Record<string, any>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -866,8 +912,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -880,8 +927,9 @@
                 "signature": [
                   "Record<string, string | number | boolean>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -915,8 +963,9 @@
               "SavedObjectReference",
               "[]; }"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -934,8 +983,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -968,8 +1018,9 @@
                 "text": "SerializedEvent"
               }
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -987,8 +1038,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1002,8 +1054,9 @@
                   "SavedObjectReference",
                   "[]"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1055,8 +1108,9 @@
           "StartDependencies",
           ">"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1071,8 +1125,9 @@
               "ILicense",
               " | undefined>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1084,8 +1139,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1104,8 +1160,9 @@
                   },
                   "<object>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1138,8 +1195,9 @@
                 "text": "SetupContract"
               }
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1160,8 +1218,9 @@
                   "StartDependencies",
                   ", unknown>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1174,8 +1233,9 @@
                 "signature": [
                   "SetupDependencies"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1208,8 +1268,9 @@
                 "text": "StartContract"
               }
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1227,8 +1288,9 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1241,8 +1303,9 @@
                 "signature": [
                   "StartDependencies"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1258,8 +1321,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1273,8 +1337,9 @@
         "tags": [],
         "label": "DynamicActionManager",
         "description": [],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1283,8 +1348,9 @@
             "tags": [],
             "label": "idPrefixCounter",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1311,8 +1377,9 @@
               "Selectors",
               ">"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1324,8 +1391,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1343,8 +1411,9 @@
                     "text": "DynamicActionManagerParams"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1367,8 +1436,9 @@
                 "text": "SerializedEvent"
               }
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1380,8 +1450,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1399,8 +1470,9 @@
             "signature": [
               "(eventId: string) => string"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1412,8 +1484,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1437,8 +1510,9 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1456,8 +1530,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1481,8 +1556,9 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1500,8 +1576,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1528,8 +1605,9 @@
               "State",
               ", object, {}>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1543,8 +1621,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1560,8 +1639,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1587,8 +1667,9 @@
               "SerializableRecord",
               ">, triggers: string[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1611,8 +1692,9 @@
                   "SerializableRecord",
                   ">"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1627,8 +1709,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1656,8 +1739,9 @@
               "SerializableRecord",
               ">, triggers: string[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1671,8 +1755,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1696,8 +1781,9 @@
                   "SerializableRecord",
                   ">"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1712,8 +1798,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1731,8 +1818,9 @@
             "signature": [
               "(eventId: string) => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1746,8 +1834,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1765,8 +1854,9 @@
             "signature": [
               "(eventIds: string[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1780,8 +1870,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1816,8 +1907,9 @@
             "text": "AbstractActionStorage"
           }
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1829,8 +1921,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1850,8 +1943,9 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1877,8 +1971,9 @@
               "SerializableRecord",
               ">; }[]>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1900,8 +1995,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1919,8 +2015,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1944,8 +2041,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1963,8 +2061,9 @@
                     "text": "SerializedEvent"
                   }
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1980,8 +2079,9 @@
             "signature": [
               "(eventId: string) => Promise<void>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1993,8 +2093,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2015,8 +2116,9 @@
         "signature": [
           "(urlTemplate: string, context: object, doEncode: boolean) => Promise<string>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2028,8 +2130,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2042,8 +2145,9 @@
             "signature": [
               "object"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2056,8 +2160,9 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2081,8 +2186,9 @@
             "text": "UrlDrilldownGlobalScope"
           }
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2094,8 +2200,9 @@
             "signature": [
               "UrlDrilldownGlobalScopeDeps"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2114,8 +2221,9 @@
           "UrlDrilldownCollectConfigProps",
           ">) => JSX.Element"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2129,8 +2237,9 @@
               "UrlDrilldownCollectConfigProps",
               ">"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2147,8 +2256,9 @@
         "signature": [
           "(url: string) => { isValid: boolean; error?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2160,8 +2270,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2186,8 +2297,9 @@
           },
           "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; }>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2199,8 +2311,9 @@
             "signature": [
               "{ format?: \"handlebars_v1\" | undefined; template: string; }"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2220,8 +2333,9 @@
               },
               "<object, object>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2281,8 +2395,9 @@
           },
           ">>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2293,8 +2408,9 @@
             "description": [
               "\nUnique ID of the action factory. This ID is used to identify this action\nfactory in the registry as well as to construct actions of this type and\nidentify this action factory when presenting it to the user in UI."
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2308,8 +2424,9 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2323,8 +2440,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2338,8 +2456,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2369,8 +2488,9 @@
               },
               "<ExecutionContext>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2390,8 +2510,9 @@
                   },
                   "<Config>, \"factoryId\">"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2407,8 +2528,9 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2424,8 +2546,9 @@
         "description": [
           "\nAction factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2437,8 +2560,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2478,8 +2602,9 @@
           },
           ">>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2490,8 +2615,9 @@
             "description": [
               "\nGlobally unique identifier for this drilldown."
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2505,8 +2631,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2520,8 +2647,9 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2535,8 +2663,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2550,8 +2679,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2565,8 +2695,9 @@
             "signature": [
               "(context: FactoryContext) => Config"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2580,7 +2711,8 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2612,8 +2744,9 @@
               },
               "<Config, FactoryContext>>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -2629,8 +2762,9 @@
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2644,7 +2778,8 @@
                   "Config"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2657,9 +2792,44 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DrilldownDefinition.isConfigurable",
+            "type": "Function",
+            "tags": [],
+            "label": "isConfigurable",
+            "description": [
+              "\nCompatibility check during drilldown creation.\nCould be used to filter out a drilldown if it's not compatible with the current context."
+            ],
+            "signature": [
+              "((context: FactoryContext) => boolean) | undefined"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.DrilldownDefinition.isConfigurable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "FactoryContext"
+                ],
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2673,8 +2843,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2683,15 +2854,55 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [
-              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user."
+              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user as the name of drilldown factory when configuring a drilldown."
             ],
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DrilldownDefinition.actionMenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "actionMenuItem",
+            "description": [
+              "\nName of the drilldown instance displayed to the user at the moment of\ndrilldown execution. Should be internationalized."
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.UiComponent",
+                "text": "UiComponent"
+              },
+              "<{ config: Omit<",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "common",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-common.SerializedAction",
+                "text": "SerializedAction"
+              },
+              "<Config>, \"factoryId\">; context: ExecutionContext | ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionContext",
+                "text": "ActionExecutionContext"
+              },
+              "<ExecutionContext>; }> | undefined"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2713,8 +2924,9 @@
               },
               "<ExecutionContext>) => Promise<boolean>) | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2726,8 +2938,9 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2748,8 +2961,9 @@
                   },
                   "<ExecutionContext>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2775,8 +2989,9 @@
               },
               "<ExecutionContext>) => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2790,8 +3005,9 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2814,8 +3030,9 @@
                   },
                   "<ExecutionContext>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2841,8 +3058,9 @@
               },
               "<ExecutionContext>) => Promise<string | undefined>) | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2854,8 +3072,9 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2876,8 +3095,9 @@
                   },
                   "<ExecutionContext>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2895,8 +3115,9 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2912,8 +3133,9 @@
         "description": [
           "\nTemplate for a pre-configured new drilldown, this gives ability to create a\ndrilldown from a template instead of user creating a drilldown from scratch.\nThis is used in \"drilldown cloning\" functionality, where drilldowns can be\ncloned from one dashboard panel to another."
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2924,8 +3146,9 @@
             "description": [
               "\nA string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2939,8 +3162,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2951,8 +3175,9 @@
             "description": [
               "\nA user facing text that provides information about the source of this template."
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2963,8 +3188,9 @@
             "description": [
               "\nDrilldown type, dynamic action factory ID."
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2975,8 +3201,9 @@
             "description": [
               "\nSuggested new name of the cloned drilldown. If a drilldown with such suggested\nname already exists at current place, a suffix like \" (copy 1)\" will be added."
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2990,8 +3217,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3005,8 +3233,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3018,8 +3247,9 @@
         "tags": [],
         "label": "DynamicActionManagerParams",
         "description": [],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3031,8 +3261,9 @@
             "signature": [
               "ActionStorage"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3080,8 +3311,9 @@
               },
               ">; readonly hasActionFactory: (actionFactoryId: string) => boolean; }"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3093,8 +3325,9 @@
             "signature": [
               "<C = unknown>(context: C) => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -3106,8 +3339,9 @@
                 "signature": [
                   "C"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3125,8 +3359,9 @@
         "description": [
           "\nGlobal static variables like, for example, `kibanaUrl`\nSuch variables won’t change depending on a place where url drilldown is used."
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3135,8 +3370,9 @@
             "tags": [],
             "label": "kibanaUrl",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3167,8 +3403,9 @@
             "text": "UrlDrilldownGlobalScope"
           }
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3182,8 +3419,9 @@
             "signature": [
               "ContextScope | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3197,8 +3435,9 @@
             "signature": [
               "EventScope | undefined"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3216,8 +3455,9 @@
         "signature": [
           "SerializableRecord"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3230,8 +3470,9 @@
         "signature": [
           "State"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3252,8 +3493,9 @@
           },
           "[]; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3266,8 +3508,9 @@
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3292,8 +3535,9 @@
           "SerializableRecord",
           ">; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3306,8 +3550,9 @@
         "signature": [
           "{ url: { format?: \"handlebars_v1\" | undefined; template: string; }; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3339,8 +3584,9 @@
         "UiActionsServiceEnhancements",
         ", \"registerDrilldown\">"
       ],
-      "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+      "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3370,10 +3616,11 @@
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
-      "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+      "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
@@ -3387,8 +3634,9 @@
             "PublicDrilldownManagerProps",
             ">"
           ],
-          "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+          "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -3402,7 +3650,8 @@
                 "P & { children?: React.ReactNode; }"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "uiActionsEnhanced",
@@ -3415,7 +3664,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -3459,8 +3709,9 @@
           },
           ", void, SetupDependencies, object>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+        "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3488,8 +3739,9 @@
               },
               ">>"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3501,8 +3753,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3540,8 +3793,9 @@
               },
               ">) => void; }"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -3560,8 +3814,9 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3574,8 +3829,9 @@
                 "signature": [
                   "SetupDependencies"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3591,8 +3847,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3606,8 +3863,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3639,8 +3897,9 @@
               },
               ">) => void"
             ],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+            "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -3667,8 +3926,9 @@
                   },
                   ">"
                 ],
-                "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3705,8 +3965,9 @@
           },
           "<P>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3715,8 +3976,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3746,8 +4008,9 @@
           },
           "<P>>"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3756,8 +4019,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
-            "deprecated": false
+            "path": "src/plugins/ui_actions_enhanced/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3775,8 +4039,9 @@
         "signature": [
           "SerializableRecord"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3797,8 +4062,9 @@
           },
           "[]; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3811,8 +4077,9 @@
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3837,8 +4104,9 @@
           "SerializableRecord",
           ">; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3850,8 +4118,9 @@
       "tags": [],
       "label": "SetupContract",
       "description": [],
-      "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+      "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
@@ -3879,8 +4148,9 @@
             },
             ">) => void"
           ],
-          "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+          "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
@@ -3907,8 +4177,9 @@
                 },
                 ">"
               ],
-              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -3928,8 +4199,9 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+      "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -3950,8 +4222,9 @@
         "signature": [
           "SerializableRecord"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3972,8 +4245,9 @@
           },
           "[]; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3986,8 +4260,9 @@
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4012,8 +4287,9 @@
           "SerializableRecord",
           ">; }"
         ],
-        "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+        "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

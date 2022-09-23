@@ -9,6 +9,7 @@ import {
   isIosAgentName,
   isRumAgentName,
   isJavaAgentName,
+  isAndroidAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
@@ -31,6 +32,7 @@ import darkPhpIcon from './icons/php_dark.svg';
 import darkRumJsIcon from './icons/rumjs_dark.svg';
 import rustIcon from './icons/rust.svg';
 import darkRustIcon from './icons/rust_dark.svg';
+import androidIcon from './icons/android.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
@@ -47,6 +49,7 @@ const agentIcons: { [key: string]: string } = {
   ruby: rubyIcon,
   rum: rumJsIcon,
   rust: rustIcon,
+  android: androidIcon,
 };
 
 const darkAgentIcons: { [key: string]: string } = {
@@ -75,6 +78,10 @@ export function getAgentIconKey(agentName: string) {
 
   if (isIosAgentName(lowercasedAgentName)) {
     return 'ios';
+  }
+
+  if (isAndroidAgentName(lowercasedAgentName)) {
+    return 'android';
   }
 
   // Remove "opentelemetry/" prefix

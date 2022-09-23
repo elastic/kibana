@@ -59,7 +59,7 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async inputControlSubmit() {
-    await this.testSubjects.clickWhenNotDisabled('inputControlSubmitBtn');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('inputControlSubmitBtn');
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
@@ -70,7 +70,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
-    await this.testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
     await this.visChart.waitForRenderingCount(prevRenderingCount + 1);
   }
 
@@ -477,7 +477,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async clickMetricByIndex(index: number) {
     const metrics = await this.find.allByCssSelector(
-      '[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container'
+      '[data-test-subj="visualizationLoader"] .legacyMtrVis .legacyMtrVis__container'
     );
     expect(metrics.length).greaterThan(index);
     await metrics[index].click();

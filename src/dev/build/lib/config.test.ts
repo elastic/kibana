@@ -46,7 +46,7 @@ describe('#getKibanaPkg()', () => {
 describe('#getNodeVersion()', () => {
   it('returns the node version from the kibana package.json', async () => {
     const config = await setup();
-    expect(config.getNodeVersion()).toEqual(kibanaPackageJson.engines.node);
+    expect(config.getNodeVersion()).toEqual(kibanaPackageJson.engines?.node);
   });
 });
 

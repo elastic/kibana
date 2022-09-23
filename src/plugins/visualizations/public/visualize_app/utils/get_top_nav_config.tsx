@@ -9,12 +9,12 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -28,19 +28,15 @@ import {
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeInput,
-  getFullPath,
-  NavigateToLensContext,
-} from '../..';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
 
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VISUALIZE_APP_NAME, VisualizeConstants } from '../../../common/constants';
+import { NavigateToLensContext } from '../../../common';
+import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
@@ -121,23 +117,13 @@ export const getTopNavConfig = (
     i18n: { Context: I18nContext },
     savedObjectsTagging,
     presentationUtil,
-    usageCollection,
     getKibanaVersion,
     savedObjects,
+    theme,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
-
-  const doTelemetryForSaveEvent = (visType: string) => {
-    if (usageCollection) {
-      usageCollection.reportUiCounter(
-        originatingApp ?? VISUALIZE_APP_NAME,
-        METRIC_TYPE.CLICK,
-        `${visType}:save`
-      );
-    }
-  };
 
   /**
    * Called when the user clicks "Save" button.
@@ -150,9 +136,12 @@ export const getTopNavConfig = (
     stateContainer.transitions.setVis({
       title: savedVis.title,
     });
+
+    savedVis.savedSearchId = vis.data.savedSearchId;
     savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = vis.uiState.toString();
+
     setHasUnsavedChanges(false);
 
     try {
@@ -230,7 +219,7 @@ export const getTopNavConfig = (
 
       return { id };
     } catch (error) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.error(error);
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -520,8 +509,6 @@ export const getTopNavConfig = (
                   return { id: true };
                 }
 
-                doTelemetryForSaveEvent(vis.type.name);
-
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
                 const response = await doSave(saveOptions);
@@ -599,11 +586,18 @@ export const getTopNavConfig = (
                 );
               }
 
-              showSaveModal(
-                saveModal,
-                I18nContext,
-                !originatingApp ? presentationUtil.ContextProvider : React.Fragment
-              );
+              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
+                const ContextProvider = !originatingApp
+                  ? presentationUtil.ContextProvider
+                  : React.Fragment;
+                return (
+                  <KibanaThemeProvider theme$={theme.theme$}>
+                    <ContextProvider>{children}</ContextProvider>
+                  </KibanaThemeProvider>
+                );
+              };
+
+              showSaveModal(saveModal, I18nContext, WrapperComponent);
             },
           },
         ]
@@ -639,8 +633,6 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              doTelemetryForSaveEvent(vis.type.name);
-
               if (!savedVis?.id) {
                 return createVisReference();
               }

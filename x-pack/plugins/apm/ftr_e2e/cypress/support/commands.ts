@@ -10,21 +10,23 @@ import 'cypress-axe';
 import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
-Cypress.Commands.add('loginAsReadOnlyUser', () => {
-  cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
+Cypress.Commands.add('loginAsViewerUser', () => {
+  return cy.loginAs({ username: 'viewer', password: 'changeme' });
 });
 
-Cypress.Commands.add('loginAsPowerUser', () => {
-  cy.loginAs({ username: 'apm_power_user', password: 'changeme' });
+Cypress.Commands.add('loginAsEditorUser', () => {
+  return cy.loginAs({ username: 'editor', password: 'changeme' });
 });
 
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Logging in as ${username}`);
+    // cy.session(username, () => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+    cy.visit('/');
     cy.request({
-      log: false,
+      log: true,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {
@@ -36,13 +38,23 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
+      // });
     });
+    cy.visit('/');
   }
 );
 
 Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.contains(value).click();
+});
+
+Cypress.Commands.add('visitKibana', (url: string) => {
+  cy.visit(url);
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('exist');
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('not.exist', {
+    timeout: 50000,
+  });
 });
 
 Cypress.Commands.add(
@@ -80,6 +92,23 @@ Cypress.Commands.add(
       } else {
         expect((interceptions as Interception).request.url).include(value);
       }
+    });
+  }
+);
+
+Cypress.Commands.add(
+  'updateAdvancedSettings',
+  (settings: Record<string, unknown>) => {
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.request({
+      log: false,
+      method: 'POST',
+      url: `${kibanaUrl}/api/kibana/settings`,
+      body: { changes: settings },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
+      auth: { user: 'editor', pass: 'changeme' },
     });
   }
 );

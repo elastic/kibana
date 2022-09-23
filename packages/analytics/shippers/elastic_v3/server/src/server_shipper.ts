@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import {
   filter,
   Subject,
+  ReplaySubject,
   interval,
   concatMap,
   merge,
@@ -19,7 +20,10 @@ import {
   retryWhen,
   tap,
   delayWhen,
-  takeWhile,
+  takeUntil,
+  map,
+  BehaviorSubject,
+  exhaustMap,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -28,9 +32,8 @@ import type {
   IShipper,
   TelemetryCounter,
 } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
-import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
+  type ElasticV3ShipperOptions,
   buildHeaders,
   buildUrl,
   createTelemetryCounterHelper,
@@ -44,8 +47,14 @@ const HOUR = 60 * MINUTE;
 const KIB = 1024;
 const MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE = 1000;
 
+/**
+ * Elastic V3 shipper to use on the server side.
+ */
 export class ElasticV3ServerShipper implements IShipper {
+  /** Shipper's unique name */
   public static shipperName = 'elastic_v3_server';
+
+  /** Observable to emit the stats of the processed events. */
   public readonly telemetryCounter$ = new Subject<TelemetryCounter>();
 
   private readonly reportTelemetryCounters = createTelemetryCounterHelper(
@@ -54,7 +63,8 @@ export class ElasticV3ServerShipper implements IShipper {
   );
 
   private readonly internalQueue: Event[] = [];
-  private readonly shutdown$ = new Subject<void>();
+  private readonly shutdown$ = new ReplaySubject<void>(1);
+  private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   private readonly url: string;
 
@@ -62,7 +72,6 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private clusterUuid: string = 'UNKNOWN';
   private licenseId?: string;
-  private isOptedIn?: boolean;
 
   /**
    * Specifies when it went offline:
@@ -73,6 +82,11 @@ export class ElasticV3ServerShipper implements IShipper {
    */
   private firstTimeOffline?: number | null;
 
+  /**
+   * Creates a new instance of the {@link ElasticV3ServerShipper}.
+   * @param options {@link ElasticV3ShipperOptions}
+   * @param initContext {@link AnalyticsClientInitContext}
+   */
   constructor(
     private readonly options: ElasticV3ShipperOptions,
     private readonly initContext: AnalyticsClientInitContext
@@ -85,6 +99,11 @@ export class ElasticV3ServerShipper implements IShipper {
     this.checkConnectivity();
   }
 
+  /**
+   * Uses the `cluster_uuid` and `license_id` from the context to hold them in memory for the generation of the headers
+   * used later on in the HTTP request.
+   * @param newContext The full new context to set {@link EventContext}
+   */
   public extendContext(newContext: EventContext) {
     if (newContext.cluster_uuid) {
       this.clusterUuid = newContext.cluster_uuid;
@@ -94,17 +113,25 @@ export class ElasticV3ServerShipper implements IShipper {
     }
   }
 
+  /**
+   * When `false`, it flushes the internal queue and stops sending events.
+   * @param isOptedIn `true` for resume sending events. `false` to stop.
+   */
   public optIn(isOptedIn: boolean) {
-    this.isOptedIn = isOptedIn;
+    this.isOptedIn$.next(isOptedIn);
 
     if (isOptedIn === false) {
       this.internalQueue.length = 0;
     }
   }
 
+  /**
+   * Enqueues the events to be sent via the leaky bucket algorithm.
+   * @param events batched events {@link Event}
+   */
   public reportEvents(events: Event[]) {
     if (
-      this.isOptedIn === false ||
+      this.isOptedIn$.value === false ||
       (this.firstTimeOffline && Date.now() - this.firstTimeOffline > 24 * HOUR)
     ) {
       return;
@@ -117,7 +144,7 @@ export class ElasticV3ServerShipper implements IShipper {
       const toDrop = events.length - freeSpace;
       const droppedEvents = events.splice(-toDrop, toDrop);
       this.reportTelemetryCounters(droppedEvents, {
-        type: TelemetryCounterType.dropped,
+        type: 'dropped',
         code: 'queue_full',
       });
     }
@@ -125,8 +152,14 @@ export class ElasticV3ServerShipper implements IShipper {
     this.internalQueue.push(...events);
   }
 
+  /**
+   * Shuts down the shipper.
+   * Triggers a flush of the internal queue to attempt to send any events held in the queue.
+   */
   public shutdown() {
+    this.shutdown$.next();
     this.shutdown$.complete();
+    this.isOptedIn$.complete();
   }
 
   /**
@@ -139,11 +172,17 @@ export class ElasticV3ServerShipper implements IShipper {
    */
   private checkConnectivity() {
     let backoff = 1 * MINUTE;
-    timer(0, 1 * MINUTE)
+    merge(
+      timer(0, 1 * MINUTE),
+      // Also react to opt-in changes to avoid being stalled for 1 minute for the first connectivity check.
+      // More details in: https://github.com/elastic/kibana/issues/135647
+      this.isOptedIn$
+    )
       .pipe(
-        takeWhile(() => this.shutdown$.isStopped === false),
-        filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
-        concatMap(async () => {
+        takeUntil(this.shutdown$),
+        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline !== null),
+        // Using exhaustMap here because one request at a time is enough to check the connectivity.
+        exhaustMap(async () => {
           const { ok } = await fetch(this.url, {
             method: 'OPTIONS',
           });
@@ -157,7 +196,7 @@ export class ElasticV3ServerShipper implements IShipper {
         }),
         retryWhen((errors) =>
           errors.pipe(
-            takeWhile(() => this.shutdown$.isStopped === false),
+            takeUntil(this.shutdown$),
             tap(() => {
               if (!this.firstTimeOffline) {
                 this.firstTimeOffline = Date.now();
@@ -179,13 +218,13 @@ export class ElasticV3ServerShipper implements IShipper {
   private setInternalSubscriber() {
     // Check the status of the queues every 1 second.
     merge(
-      interval(1000),
+      interval(1000).pipe(takeUntil(this.shutdown$)),
       // Using a promise because complete does not emit through the pipe.
       from(firstValueFrom(this.shutdown$, { defaultValue: true }))
     )
       .pipe(
         // Only move ahead if it's opted-in and online.
-        filter(() => this.isOptedIn === true && this.firstTimeOffline === null),
+        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline === null),
 
         // Send the events now if (validations sorted from cheapest to most CPU expensive):
         // - We are shutting down.
@@ -198,19 +237,21 @@ export class ElasticV3ServerShipper implements IShipper {
             (this.internalQueue.length > 0 &&
               (this.shutdown$.isStopped || Date.now() - this.lastBatchSent >= 10 * MINUTE)) ||
             (Date.now() - this.lastBatchSent >= 10 * SECOND &&
-              (this.internalQueue.length === 1000 ||
+              (this.internalQueue.length === MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE ||
                 this.getQueueByteSize(this.internalQueue) >= 10 * KIB))
         ),
 
-        // Send the events
-        concatMap(async () => {
+        // Send the events:
+        // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
+        map(() => {
           this.lastBatchSent = Date.now();
-          const eventsToSend = this.getEventsToSend();
-          await this.sendEvents(eventsToSend);
+          return this.getEventsToSend();
         }),
-
-        // Stop the subscriber if we are shutting down.
-        takeWhile(() => !this.shutdown$.isStopped)
+        // 2. Skip empty buffers
+        filter((events) => events.length > 0),
+        // 3. Actually send the events
+        // Using `concatMap` here because we want to send events whenever the emitter says so. Otherwise, it'd skip sending some events.
+        concatMap(async (eventsToSend) => await this.sendEvents(eventsToSend))
       )
       .subscribe();
   }
@@ -258,17 +299,21 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async sendEvents(events: Event[]) {
+    this.initContext.logger.debug(`Reporting ${events.length} events...`);
     try {
       const code = await this.makeRequest(events);
       this.reportTelemetryCounters(events, { code });
+      this.initContext.logger.debug(`Reported ${events.length} events...`);
     } catch (error) {
+      this.initContext.logger.debug(`Failed to report ${events.length} events...`);
+      this.initContext.logger.debug(error);
       this.reportTelemetryCounters(events, { code: error.code, error });
       this.firstTimeOffline = undefined;
     }
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    const { status, text, ok } = await fetch(this.url, {
+    const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
       headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
@@ -276,15 +321,16 @@ export class ElasticV3ServerShipper implements IShipper {
     });
 
     if (this.options.debug) {
-      this.initContext.logger.debug(
-        `[${ElasticV3ServerShipper.shipperName}]: ${status} - ${await text()}`
+      this.initContext.logger.debug(`${response.status} - ${await response.text()}`);
+    }
+
+    if (!response.ok) {
+      throw new ErrorWithCode(
+        `${response.status} - ${await response.text()}`,
+        `${response.status}`
       );
     }
 
-    if (!ok) {
-      throw new ErrorWithCode(`${status} - ${await text()}`, `${status}`);
-    }
-
-    return `${status}`;
+    return `${response.status}`;
   }
 }

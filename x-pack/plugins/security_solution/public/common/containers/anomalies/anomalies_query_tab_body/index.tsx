@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
-import { AnomaliesQueryTabBodyProps } from './types';
+import type { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
@@ -24,7 +24,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   skip,
   startDate,
   type,
-  narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
   AnomaliesTableComponent,
@@ -71,7 +70,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         endDate={endDate}
         skip={skip}
         type={type}
-        narrowDateRange={narrowDateRange}
         flowTarget={flowTarget}
         ip={ip}
         hostName={hostName}

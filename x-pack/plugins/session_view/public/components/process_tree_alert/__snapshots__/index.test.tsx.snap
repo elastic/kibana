@@ -6,93 +6,171 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiText euiText--small css-vxlbjf-EuiText"
+        css="[object Object]"
         data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
-        data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
       >
-        <button
-          aria-label="expand"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-          data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
-          type="button"
-        >
-          <span
-            aria-hidden="true"
-            class="euiButtonIcon__icon"
-            color="inherit"
-            data-euiicon-type="expand"
-          />
-        </button>
-        <span
-          color="danger"
-          data-euiicon-type="alert"
-        />
         <div
-          class="euiText euiText--small css-lps5t-EuiText"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
         >
-          cmd test alert
-        </div>
-        <span
-          class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
-          style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
-          title="open"
-        >
-          <span
-            class="euiBadge__content"
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              aria-label="expand"
+              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="expand"
+              />
+            </button>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              class="euiBadge__text"
+              color="danger"
+              data-euiicon-type="alert"
+            />
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiText emotion-EuiText"
             >
-              open
+              cmd test alert
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span
+              class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+              style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
+              title="open"
+            >
+              <span
+                class="euiBadge__content"
+              >
+                <span
+                  class="euiBadge__text"
+                >
+                  open
+                </span>
+              </span>
             </span>
-          </span>
-        </span>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span
+              class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+              style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+              title="exec"
+            >
+              <span
+                class="euiBadge__content"
+              >
+                <span
+                  class="euiBadge__text"
+                >
+                  exec
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </body>,
   "container": <div>
     <div
-      class="euiText euiText--small css-vxlbjf-EuiText"
+      css="[object Object]"
       data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
-      data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
     >
-      <button
-        aria-label="expand"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="expand"
-        />
-      </button>
-      <span
-        color="danger"
-        data-euiicon-type="alert"
-      />
       <div
-        class="euiText euiText--small css-lps5t-EuiText"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
       >
-        cmd test alert
-      </div>
-      <span
-        class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
-        style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
-        title="open"
-      >
-        <span
-          class="euiBadge__content"
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            aria-label="expand"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="expand"
+            />
+          </button>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            class="euiBadge__text"
+            color="danger"
+            data-euiicon-type="alert"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiText emotion-EuiText"
           >
-            open
+            cmd test alert
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+            style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
+            title="open"
+          >
+            <span
+              class="euiBadge__content"
+            >
+              <span
+                class="euiBadge__text"
+              >
+                open
+              </span>
+            </span>
           </span>
-        </span>
-      </span>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+            style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+            title="exec"
+          >
+            <span
+              class="euiBadge__content"
+            >
+              <span
+                class="euiBadge__text"
+              >
+                exec
+              </span>
+            </span>
+          </span>
+        </div>
+      </div>
     </div>
   </div>,
   "debug": [Function],

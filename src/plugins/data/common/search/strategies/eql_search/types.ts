@@ -16,6 +16,9 @@ export const EQL_SEARCH_STRATEGY = 'eql';
 export type EqlRequestParams = EqlSearchRequest;
 
 export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
+  /**
+   * @deprecated: use IAsyncSearchOptions.transport instead.
+   */
   options?: TransportRequestOptions;
 }
 

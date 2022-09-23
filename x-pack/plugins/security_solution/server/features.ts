@@ -7,98 +7,97 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { createUICapabilities } from '@kbn/cases-plugin/common';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 
-export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
-  id: CASES_FEATURE_ID,
-  name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
-    defaultMessage: 'Cases',
-  }),
-  order: 1100,
-  category: DEFAULT_APP_CATEGORIES.security,
-  app: [CASES_FEATURE_ID, 'kibana'],
-  catalogue: [APP_ID],
-  cases: [APP_ID],
-  privileges: {
-    all: {
-      app: [CASES_FEATURE_ID, 'kibana'],
-      catalogue: [APP_ID],
-      cases: {
-        all: [APP_ID],
-      },
-      api: [],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['crud_cases', 'read_cases'], // uiCapabilities[CASES_FEATURE_ID].crud_cases or read_cases
-    },
-    read: {
-      app: [CASES_FEATURE_ID, 'kibana'],
-      catalogue: [APP_ID],
-      cases: {
-        read: [APP_ID],
-      },
-      api: [],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['read_cases'], // uiCapabilities[CASES_FEATURE_ID].read_cases
-    },
-  },
-});
+export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
+  const casesCapabilities = createUICapabilities();
 
-export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
-  name: i18n.translate('xpack.securitySolution.featureRegistry.manageAlertsName', {
-    defaultMessage: 'Alerts',
-  }),
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          id: 'alerts_all',
-          name: i18n.translate('xpack.securitySolution.featureRegistry.subfeature.alertsAllName', {
-            defaultMessage: 'All',
-          }),
-          includeIn: 'all' as 'all',
-          alerting: {
-            alert: {
-              all: ruleTypes,
-            },
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['crud_alerts', 'read_alerts'],
+  return {
+    id: CASES_FEATURE_ID,
+    name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
+      defaultMessage: 'Cases',
+    }),
+    order: 1100,
+    category: DEFAULT_APP_CATEGORIES.security,
+    app: [CASES_FEATURE_ID, 'kibana'],
+    catalogue: [APP_ID],
+    cases: [APP_ID],
+    privileges: {
+      all: {
+        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        app: [CASES_FEATURE_ID, 'kibana'],
+        catalogue: [APP_ID],
+        cases: {
+          create: [APP_ID],
+          read: [APP_ID],
+          update: [APP_ID],
+          push: [APP_ID],
         },
-        {
-          id: 'alerts_read',
-          name: i18n.translate('xpack.securitySolution.featureRegistry.subfeature.alertsReadName', {
-            defaultMessage: 'Read',
-          }),
-          includeIn: 'read' as 'read',
-          alerting: {
-            alert: {
-              read: ruleTypes,
-            },
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['read_alerts'],
+        savedObject: {
+          all: [],
+          read: [],
         },
-      ],
+        ui: casesCapabilities.all,
+      },
+      read: {
+        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        app: [CASES_FEATURE_ID, 'kibana'],
+        catalogue: [APP_ID],
+        cases: {
+          read: [APP_ID],
+        },
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: casesCapabilities.read,
+      },
     },
-  ],
-});
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureName', {
+          defaultMessage: 'Delete',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: [],
+                id: 'cases_delete',
+                name: i18n.translate(
+                  'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
+                  {
+                    defaultMessage: 'Delete cases and comments',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  delete: [APP_ID],
+                },
+                ui: casesCapabilities.delete,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+};
+
+// Same as the plugin id defined by Cloud Security Posture
+const CLOUD_POSTURE_APP_ID = 'csp';
+// Same as the saved-object type for rules defined by Cloud Security Posture
+const CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE = 'csp_rule';
 
 export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): KibanaFeatureConfig => ({
   id: SERVER_APP_ID,
@@ -107,7 +106,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   }),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [APP_ID, 'kibana'],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -116,9 +115,17 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   subFeatures: [],
   privileges: {
     all: {
-      app: [APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac'],
+      api: [
+        APP_ID,
+        'lists-all',
+        'lists-read',
+        'lists-summary',
+        'rac',
+        'cloud-security-posture-all',
+        'cloud-security-posture-read',
+      ],
       savedObject: {
         all: [
           'alert',
@@ -126,6 +133,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
           'exception-list-agnostic',
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
+          CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
         ],
         read: [],
       },
@@ -143,9 +151,9 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
       ui: ['show', 'crud'],
     },
     read: {
-      app: [APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-read', 'rac'],
+      api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read'],
       savedObject: {
         all: [],
         read: [
@@ -153,6 +161,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
           'exception-list-agnostic',
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
+          CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
         ],
       },
       alerting: {

@@ -10,6 +10,7 @@ import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  LAYER_TYPE,
   SCALING_TYPES,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -21,10 +22,11 @@ import {
   CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
+  JoinDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../styles/vector/vector_style';
-import { GeoJsonVectorLayer } from '../../vector_layer';
+import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';
 import { EMSFileSource } from '../../../sources/ems_file_source';
 // @ts-ignore
 import { ESSearchSource } from '../../../sources/es_search_source';
@@ -36,16 +38,14 @@ function createChoroplethLayerDescriptor({
   sourceDescriptor,
   leftField,
   rightIndexPatternId,
-  rightIndexPatternTitle,
   rightTermField,
-  setLabelStyle,
+  layerType,
 }: {
   sourceDescriptor: EMSFileSourceDescriptor | ESSearchSourceDescriptor;
   leftField: string;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string;
   rightTermField: string;
-  setLabelStyle: boolean;
+  layerType: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR;
 }) {
   const metricsDescriptor: CountAggDescriptor = { type: AGG_TYPE.COUNT };
   const joinId = uuid();
@@ -75,7 +75,8 @@ function createChoroplethLayerDescriptor({
       },
     },
   };
-  if (setLabelStyle) {
+  // Styling label by join metric with MVT is not supported
+  if (layerType === LAYER_TYPE.GEOJSON_VECTOR) {
     styleProperties[VECTOR_STYLES.LABEL_TEXT] = {
       type: STYLE_TYPE.DYNAMIC,
       options: {
@@ -88,39 +89,44 @@ function createChoroplethLayerDescriptor({
     };
   }
 
-  return GeoJsonVectorLayer.createDescriptor({
-    joins: [
-      {
-        leftField,
-        right: {
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          id: joinId,
-          indexPatternId: rightIndexPatternId,
-          indexPatternTitle: rightIndexPatternTitle,
-          term: rightTermField,
-          metrics: [metricsDescriptor],
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-          applyForceRefresh: true,
-        },
+  const joins = [
+    {
+      leftField,
+      right: {
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
+        id: joinId,
+        indexPatternId: rightIndexPatternId,
+        term: rightTermField,
+        metrics: [metricsDescriptor],
+        applyGlobalQuery: true,
+        applyGlobalTime: true,
+        applyForceRefresh: true,
       },
-    ],
-    sourceDescriptor,
-    style: VectorStyle.createDescriptor(styleProperties),
-  });
+    } as JoinDescriptor,
+  ];
+
+  return layerType === LAYER_TYPE.MVT_VECTOR
+    ? MvtVectorLayer.createDescriptor({
+        joins,
+        sourceDescriptor,
+        style: VectorStyle.createDescriptor(styleProperties),
+      })
+    : GeoJsonVectorLayer.createDescriptor({
+        joins,
+        sourceDescriptor,
+        style: VectorStyle.createDescriptor(styleProperties),
+      });
 }
 
 export function createEmsChoroplethLayerDescriptor({
   leftEmsFileId,
   leftEmsField,
   rightIndexPatternId,
-  rightIndexPatternTitle,
   rightTermField,
 }: {
   leftEmsFileId: string;
   leftEmsField: string;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
@@ -130,9 +136,8 @@ export function createEmsChoroplethLayerDescriptor({
     }),
     leftField: leftEmsField,
     rightIndexPatternId,
-    rightIndexPatternTitle,
     rightTermField,
-    setLabelStyle: true,
+    layerType: LAYER_TYPE.GEOJSON_VECTOR,
   });
 }
 
@@ -141,14 +146,12 @@ export function createEsChoroplethLayerDescriptor({
   leftGeoField,
   leftJoinField,
   rightIndexPatternId,
-  rightIndexPatternTitle,
   rightTermField,
 }: {
   leftIndexPatternId: string;
   leftGeoField: string;
   leftJoinField: string;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string;
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
@@ -163,8 +166,7 @@ export function createEsChoroplethLayerDescriptor({
     }),
     leftField: leftJoinField,
     rightIndexPatternId,
-    rightIndexPatternTitle,
     rightTermField,
-    setLabelStyle: false, // Styling label by join metric with MVT is not supported
+    layerType: LAYER_TYPE.MVT_VECTOR,
   });
 }

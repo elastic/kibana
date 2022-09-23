@@ -11,7 +11,9 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('from the browser', () => {
     // Add tests for UI-instrumented events here:
+    loadTestFile(require.resolve('./click'));
     loadTestFile(require.resolve('./loaded_kibana'));
+    loadTestFile(require.resolve('./loaded_dashboard'));
     loadTestFile(require.resolve('./core_context_providers'));
   });
 }

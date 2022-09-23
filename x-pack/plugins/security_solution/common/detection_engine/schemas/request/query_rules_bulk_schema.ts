@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 
-import { queryRulesSchema, QueryRulesSchemaDecoded } from './query_rules_schema';
+import type { QueryRulesSchemaDecoded } from './query_rules_schema';
+import { queryRulesSchema } from './query_rules_schema';
 
 export const queryRulesBulkSchema = t.array(queryRulesSchema);
 export type QueryRulesBulkSchema = t.TypeOf<typeof queryRulesBulkSchema>;

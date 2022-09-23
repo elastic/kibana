@@ -17,7 +17,7 @@ export class NewsfeedPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
 
   async resetPage() {
-    await this.common.navigateToUrl('home', '', { useActualUrl: true });
+    await this.common.navigateToApp('home', { disableWelcomePrompt: true });
   }
 
   async closeNewsfeedPanel() {

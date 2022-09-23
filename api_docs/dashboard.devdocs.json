@@ -47,6 +47,7 @@
         ],
         "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -59,7 +60,8 @@
               "\"dashboard\""
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -79,7 +81,87 @@
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.getAllDataViews",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllDataViews",
+            "description": [
+              "\nGets all the dataviews that are actively being used in the dashboard"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "An array of dataviews"
+            ]
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.setAllDataViews",
+            "type": "Function",
+            "tags": [],
+            "label": "setAllDataViews",
+            "description": [
+              "\nUse this to set the dataviews that are used in the dashboard when they change/update"
+            ],
+            "signature": [
+              "(newDataViews: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]) => void"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainer.setAllDataViews.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "newDataViews",
+                "description": [
+                  "The new array of dataviews that will overwrite the old dataviews array"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  "[]"
+                ],
+                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "dashboard",
@@ -93,6 +175,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -108,6 +191,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -123,6 +207,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -142,25 +227,12 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "dashboard",
                 "id": "def-public.DashboardContainer.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "services",
-                "description": [],
-                "signature": [
-                  "DashboardContainerServices"
-                ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainer.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -193,11 +265,12 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainer.Unnamed.$4",
+                "id": "def-public.DashboardContainer.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "controlGroup",
@@ -222,6 +295,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -259,14 +333,13 @@
                 "section": "def-public.EmbeddableFactory",
                 "text": "EmbeddableFactory"
               },
-              "<TEmbeddableInput, any, TEmbeddable, ",
-              "SavedObjectAttributes",
-              ">, partial?: Partial<TEmbeddableInput>) => ",
+              "<TEmbeddableInput, any, TEmbeddable, unknown>, partial?: Partial<TEmbeddableInput>) => ",
               "DashboardPanelState",
               "<TEmbeddableInput>"
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -283,12 +356,11 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<TEmbeddableInput, any, TEmbeddable, ",
-                  "SavedObjectAttributes",
-                  ">"
+                  "<TEmbeddableInput, any, TEmbeddable, unknown>"
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -303,6 +375,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -332,6 +405,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -353,6 +427,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -368,6 +443,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -382,6 +458,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -417,6 +494,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -439,6 +517,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -461,6 +540,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -475,6 +555,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -548,6 +629,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -561,6 +643,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -575,6 +658,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -589,6 +673,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -606,6 +691,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -619,6 +705,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -636,6 +723,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -652,6 +740,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -665,6 +754,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -720,12 +810,11 @@
             "section": "def-public.DashboardContainer",
             "text": "DashboardContainer"
           },
-          ", ",
-          "SavedObjectAttributes",
-          ">"
+          ", unknown>"
         ],
         "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -738,7 +827,8 @@
               "true"
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -751,7 +841,8 @@
               "\"dashboard\""
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -782,6 +873,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -795,7 +887,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "dashboard",
@@ -809,7 +902,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -843,6 +937,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -856,7 +951,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -872,26 +968,11 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
                 "id": "def-public.DashboardContainerFactoryDefinition.Unnamed.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "getStartServices",
-                "description": [],
-                "signature": [
-                  "() => Promise<",
-                  "DashboardContainerServices",
-                  ">"
-                ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainerFactoryDefinition.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "persistableStateService",
@@ -907,6 +988,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -924,6 +1006,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -939,6 +1022,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -962,6 +1046,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1025,6 +1110,7 @@
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -1044,6 +1130,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1081,6 +1168,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1103,6 +1191,7 @@
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -1116,6 +1205,7 @@
             ],
             "path": "src/plugins/dashboard/public/locator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1134,6 +1224,7 @@
         ],
         "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -1147,6 +1238,7 @@
             ],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -1161,6 +1253,7 @@
             ],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1196,21 +1289,8 @@
         ],
         "path": "src/plugins/dashboard/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardContainerInput.dashboardCapabilities",
-            "type": "Object",
-            "tags": [],
-            "label": "dashboardCapabilities",
-            "description": [],
-            "signature": [
-              "DashboardAppCapabilities",
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.controlGroupInput",
@@ -1229,7 +1309,8 @@
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1249,7 +1330,8 @@
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1262,7 +1344,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1272,7 +1355,8 @@
             "label": "isFullScreenMode",
             "description": [],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1285,7 +1369,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1298,7 +1383,22 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.timeslice",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice",
+            "description": [],
+            "signature": [
+              "[number, number] | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1308,7 +1408,8 @@
             "label": "timeRestore",
             "description": [],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1321,7 +1422,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1331,7 +1433,8 @@
             "label": "useMargins",
             "description": [],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1344,7 +1447,22 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.syncTooltips",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1363,7 +1481,8 @@
               }
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1377,7 +1496,8 @@
               "[]"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1387,7 +1507,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1400,7 +1521,8 @@
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1423,7 +1545,8 @@
               " & { [k: string]: unknown; }>; }"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1437,7 +1560,8 @@
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1451,6 +1575,7 @@
         "description": [],
         "path": "src/plugins/dashboard/public/plugin.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -1460,7 +1585,8 @@
             "label": "allowByValueEmbeddables",
             "description": [],
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1487,10 +1613,14 @@
             "docId": "kibSavedObjectsPluginApi",
             "section": "def-public.SavedObject",
             "text": "SavedObject"
-          }
+          },
+          "<",
+          "SavedObjectAttributes",
+          ">"
         ],
         "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -1503,7 +1633,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1513,7 +1644,8 @@
             "label": "timeRestore",
             "description": [],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1526,7 +1658,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1539,7 +1672,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1552,7 +1686,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1562,7 +1697,8 @@
             "label": "panelsJSON",
             "description": [],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1575,7 +1711,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1588,7 +1725,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1598,7 +1736,8 @@
             "label": "lastSavedTitle",
             "description": [],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1618,7 +1757,8 @@
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1718,7 +1858,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends keyof ",
+              "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1782,13 +1922,13 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              " | undefined; fetch$: (options?: ",
+              " | undefined; fetch$: <T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -1802,19 +1942,19 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>; onRequestStart: (handler: (searchSource: ",
               {
@@ -1829,8 +1969,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
               {
@@ -1842,10 +1982,19 @@
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
-              "[]; }; }"
+              "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1860,6 +2009,7 @@
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1877,6 +2027,7 @@
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1892,6 +2043,7 @@
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -1905,6 +2057,7 @@
                 ],
                 "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1921,7 +2074,8 @@
               "\"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1934,7 +2088,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1947,7 +2102,8 @@
               "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -1968,7 +2124,8 @@
               ", \"id\"> | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1988,6 +2145,7 @@
         ],
         "path": "src/plugins/dashboard/public/application/embeddable/dashboard_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2017,6 +2175,7 @@
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2030,13 +2189,7 @@
         ],
         "signature": [
           "{ dashboardId?: string | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -2065,12 +2218,21 @@
             "section": "def-common.SavedDashboardPanel730ToLatest",
             "text": "SavedDashboardPanel730ToLatest"
           },
-          "[] | undefined; savedQuery?: string | undefined; options?: ",
+          "[] | undefined; savedQuery?: string | undefined; tags?: string[] | undefined; options?: ",
           "DashboardOptions",
+          " | undefined; controlGroupInput?: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.SerializableControlGroupInput",
+            "text": "SerializableControlGroupInput"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2091,10 +2253,11 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2108,6 +2271,7 @@
         "description": [],
         "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -2117,7 +2281,8 @@
             "label": "LANDING_PAGE_PATH",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2127,7 +2292,8 @@
             "label": "CREATE_NEW_DASHBOARD_URL",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2137,7 +2303,8 @@
             "label": "VIEW_DASHBOARD_URL",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2147,7 +2314,8 @@
             "label": "PRINT_DASHBOARD_URL",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2157,7 +2325,8 @@
             "label": "ADD_EMBEDDABLE_ID",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2167,7 +2336,8 @@
             "label": "ADD_EMBEDDABLE_TYPE",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2177,7 +2347,8 @@
             "label": "DASHBOARDS_ID",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2187,7 +2358,8 @@
             "label": "DASHBOARD_ID",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2197,7 +2369,8 @@
             "label": "SEARCH_SESSION_ID",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2207,7 +2380,8 @@
             "label": "CHANGE_CHECK_DEBOUNCE",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2217,7 +2391,8 @@
             "label": "CHANGE_APPLY_DEBOUNCE",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2232,6 +2407,7 @@
       "description": [],
       "path": "src/plugins/dashboard/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "dashboard",
@@ -2251,7 +2427,8 @@
             " | undefined"
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -2266,6 +2443,7 @@
       "description": [],
       "path": "src/plugins/dashboard/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "dashboard",
@@ -2280,6 +2458,7 @@
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2295,6 +2474,7 @@
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2316,7 +2496,8 @@
             " | undefined"
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "dashboard",
@@ -2335,7 +2516,8 @@
             }
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -2354,19 +2536,14 @@
         "description": [],
         "signature": [
           "(savedObjectClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.ISavedObjectsRepository",
-            "text": "ISavedObjectsRepository"
-          },
+          "ISavedObjectsRepository",
           ", \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
           "Serializable",
           "; }[]>"
         ],
         "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -2377,17 +2554,12 @@
             "description": [],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              },
+              "ISavedObjectsRepository",
               ", \"find\">"
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2402,6 +2574,7 @@
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2422,6 +2595,7 @@
       "description": [],
       "path": "src/plugins/dashboard/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -2435,6 +2609,7 @@
       "description": [],
       "path": "src/plugins/dashboard/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -2505,6 +2680,7 @@
         ],
         "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -2558,6 +2734,7 @@
             ],
             "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2572,6 +2749,7 @@
             ],
             "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2586,6 +2764,7 @@
             ],
             "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2597,6 +2776,7 @@
             "description": [],
             "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dashboard",
@@ -2610,7 +2790,8 @@
                   "SerializableRecord"
                 ],
                 "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2646,6 +2827,7 @@
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -2668,7 +2850,8 @@
               " & { [k: string]: unknown; }>; }"
             ],
             "path": "src/plugins/dashboard/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -2688,7 +2871,8 @@
               " | undefined"
             ],
             "path": "src/plugins/dashboard/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2708,6 +2892,7 @@
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2722,6 +2907,7 @@
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2736,6 +2922,7 @@
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2750,6 +2937,7 @@
         ],
         "path": "src/plugins/dashboard/common/embeddable/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2766,6 +2954,7 @@
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2778,10 +2967,11 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel610",
-          ", \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2794,10 +2984,11 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2810,10 +3001,11 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2830,6 +3022,7 @@
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2848,10 +3041,11 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2864,10 +3058,11 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanelTo60",
-          ", \"title\" | \"columns\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2881,6 +3076,7 @@
         "description": [],
         "path": "src/plugins/dashboard/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dashboard",
@@ -2890,7 +3086,8 @@
             "label": "ENABLE_LABS_UI",
             "description": [],
             "path": "src/plugins/dashboard/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

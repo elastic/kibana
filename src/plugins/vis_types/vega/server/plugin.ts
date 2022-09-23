@@ -7,25 +7,16 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { registerVegaUsageCollector } from './usage_collector';
 import {
-  ConfigObservable,
   VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
-  private readonly config: ConfigObservable;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.legacy.globalConfig$;
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
-    if (usageCollection) {
-      registerVegaUsageCollector(usageCollection, this.config, { home });
-    }
     return {};
   }
 

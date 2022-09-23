@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import type { History as HistoryPackageHistoryInterface } from 'history';
+import { createMemoryHistory } from 'history';
 import { Simulator } from '../../test_utilities/simulator';
 import { pausifyMock } from '../../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../../data_access_layer/mocks/emptify_mock';

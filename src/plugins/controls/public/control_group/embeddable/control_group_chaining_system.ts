@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
-
 import { Subject } from 'rxjs';
+import { memoize } from 'lodash';
+import { Filter } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
 import { EmbeddableContainerSettings, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
 import { ControlEmbeddable } from '../../types';
-import { ChildEmbeddableOrderCache } from './control_group_container';
-import { ControlGroupChainingSystem, ControlGroupInput } from '../../../common/control_group/types';
+import {
+  ControlGroupChainingSystem,
+  ControlGroupInput,
+  ControlsPanels,
+} from '../../../common/control_group/types';
 
 interface GetPrecedingFiltersProps {
   id: string;
@@ -31,9 +36,43 @@ interface ChainingSystem {
   getContainerSettings: (
     initialInput: ControlGroupInput
   ) => EmbeddableContainerSettings | undefined;
-  getPrecedingFilters: (props: GetPrecedingFiltersProps) => Filter[] | undefined;
+  getPrecedingFilters: (
+    props: GetPrecedingFiltersProps
+  ) => { filters: Filter[]; timeslice?: [number, number] } | undefined;
   onChildChange: (props: OnChildChangedProps) => void;
 }
+
+export interface ChildEmbeddableOrderCache {
+  IdsToOrder: { [key: string]: number };
+  idsInOrder: string[];
+  lastChildId: string;
+}
+
+const getOrdersFromPanels = (panels?: ControlsPanels) => {
+  return Object.values(panels ?? {}).map((panel) => ({
+    id: panel.explicitInput.id,
+    order: panel.order,
+  }));
+};
+
+export const controlOrdersAreEqual = (panelsA?: ControlsPanels, panelsB?: ControlsPanels) =>
+  deepEqual(getOrdersFromPanels(panelsA), getOrdersFromPanels(panelsB));
+
+export const cachedChildEmbeddableOrder = memoize(
+  (panels: ControlsPanels) => {
+    const IdsToOrder: { [key: string]: number } = {};
+    const idsInOrder: string[] = [];
+    Object.values(panels)
+      .sort((a, b) => (a.order > b.order ? 1 : -1))
+      .forEach((panel) => {
+        IdsToOrder[panel.explicitInput.id] = panel.order;
+        idsInOrder.push(panel.explicitInput.id);
+      });
+    const lastChildId = idsInOrder[idsInOrder.length - 1];
+    return { IdsToOrder, idsInOrder, lastChildId } as ChildEmbeddableOrderCache;
+  },
+  (panels) => JSON.stringify(getOrdersFromPanels(panels))
+);
 
 export const ControlGroupChainingSystems: {
   [key in ControlGroupChainingSystem]: ChainingSystem;
@@ -47,14 +86,19 @@ export const ControlGroupChainingSystems: {
     }),
     getPrecedingFilters: ({ id, childOrder, getChild }) => {
       let filters: Filter[] = [];
+      let timeslice;
       const order = childOrder.IdsToOrder?.[id];
-      if (!order || order === 0) return filters;
+      if (!order || order === 0) return { filters, timeslice };
       for (let i = 0; i < order; i++) {
         const embeddable = getChild(childOrder.idsInOrder[i]);
-        if (!embeddable || isErrorEmbeddable(embeddable)) return filters;
-        filters = [...filters, ...(embeddable.getOutput().filters ?? [])];
+        if (!embeddable || isErrorEmbeddable(embeddable)) return { filters, timeslice };
+        const embeddableOutput = embeddable.getOutput();
+        if (embeddableOutput.timeslice) {
+          timeslice = embeddableOutput.timeslice;
+        }
+        filters = [...filters, ...(embeddableOutput.filters ?? [])];
       }
-      return filters;
+      return { filters, timeslice };
     },
     onChildChange: ({ childOutputChangedId, childOrder, recalculateFilters$, getChild }) => {
       if (childOutputChangedId === childOrder.lastChildId) {
@@ -63,13 +107,28 @@ export const ControlGroupChainingSystems: {
         return;
       }
 
-      // when output changes on a child which isn't the last - make the next embeddable updateInputFromParent
-      const nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
-      if (nextOrder >= childOrder.idsInOrder.length) return;
-      setTimeout(
-        () => getChild(childOrder.idsInOrder[nextOrder])?.refreshInputFromParent(),
-        1 // run on next tick
-      );
+      // when output changes on a child which isn't the last
+      let nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
+      while (nextOrder < childOrder.idsInOrder.length) {
+        const nextControl = getChild(childOrder.idsInOrder[nextOrder]);
+
+        // make the next chained embeddable updateInputFromParent
+        if (nextControl?.isChained?.()) {
+          setTimeout(
+            () => nextControl.refreshInputFromParent(),
+            1 // run on next tick
+          );
+          return;
+        }
+
+        // recalculate filters when there are no chained controls to the right of the updated control
+        if (nextControl.id === childOrder.lastChildId) {
+          recalculateFilters$.next(null);
+          return;
+        }
+
+        nextOrder += 1;
+      }
     },
   },
   NONE: {

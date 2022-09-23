@@ -14,7 +14,8 @@ import {
 } from './alert_monitor_status';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
-describe('alert monitor status component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/133226
+describe.skip('alert monitor status component', () => {
   jest.setTimeout(10_000);
 
   describe('hasFilters', () => {

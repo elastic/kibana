@@ -10,6 +10,8 @@ import type {
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResponse,
@@ -34,7 +36,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 import type { EncryptedSavedObjectsService } from '../crypto';
@@ -50,7 +52,7 @@ interface EncryptedSavedObjectsClientOptions {
 export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {
   constructor(
     private readonly options: EncryptedSavedObjectsClientOptions,
-    public readonly errors = options.baseClient.errors
+    public readonly errors = SavedObjectsErrorHelpers
   ) {}
 
   public async checkConflicts(
@@ -164,6 +166,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async delete(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return await this.options.baseClient.delete(type, id, options);
+  }
+
+  public async bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options?: SavedObjectsBulkDeleteOptions
+  ) {
+    return await this.options.baseClient.bulkDelete(objects, options);
   }
 
   public async find<T, A>(options: SavedObjectsFindOptions) {

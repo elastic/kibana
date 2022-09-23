@@ -11,11 +11,11 @@ import { isEmpty } from 'lodash/fp';
 import querystring from 'querystring';
 import { generatePath } from 'react-router-dom';
 import { appendSearch } from '../../common/components/link_to/helpers';
-import { ArtifactListPageUrlParams } from '../components/artifact_list_page';
-import { paginationFromUrlParams } from '../components/hooks/use_url_pagination';
-import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
-import { EventFiltersPageLocation } from '../pages/event_filters/types';
-import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
+import type { ArtifactListPageUrlParams } from '../components/artifact_list_page';
+import { paginationFromUrlParams } from '../hooks/use_url_pagination';
+import type { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import type { EventFiltersPageLocation } from '../pages/event_filters/types';
+import type { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
 import { AdministrationSubTab } from '../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -221,24 +221,10 @@ const extractFilter = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'filter') || '';
 };
 
-const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
-  return extractFirstParamValue(query, 'included_policies') || '';
-};
-
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
   filter: extractFilter(query),
-});
-
-export const extractTrustedAppsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
-  ...extractListPaginationParams(query),
-  included_policies: extractIncludedPolicies(query),
-});
-
-export const extractArtifactsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
-  ...extractListPaginationParams(query),
-  included_policies: extractIncludedPolicies(query),
 });
 
 export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
@@ -277,19 +263,6 @@ export const getPolicyDetailsArtifactsListPath = (
   return `${path}${appendSearch(
     querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
-};
-
-export const extractEventFiltersPageLocation = (
-  query: querystring.ParsedUrlQuery
-): EventFiltersPageLocation => {
-  const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
-
-  return {
-    ...extractArtifactsListPaginationParams(query),
-    show:
-      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
-    id: extractFirstParamValue(query, 'id'),
-  };
 };
 
 export const getEventFiltersListPath = (location?: Partial<EventFiltersPageLocation>): string => {

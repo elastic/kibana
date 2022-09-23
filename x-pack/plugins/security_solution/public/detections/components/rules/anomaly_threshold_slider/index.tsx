@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
 
-import { FieldHook } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
 
 interface AnomalyThresholdSliderProps {
   describedByIds: string[];

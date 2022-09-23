@@ -7,16 +7,13 @@
 
 import { useCallback, useRef, useMemo } from 'react';
 import { isString } from 'lodash/fp';
-import {
-  AppError,
-  isAppError,
-  isKibanaError,
-  isSecurityAppError,
-} from '@kbn/securitysolution-t-grid';
+import type { AppError } from '@kbn/securitysolution-t-grid';
+import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import { IEsError, isEsError } from '@kbn/data-plugin/public';
+import type { IEsError } from '@kbn/data-plugin/public';
+import { isEsError } from '@kbn/data-plugin/public';
 
-import { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning' | 'remove'> & {

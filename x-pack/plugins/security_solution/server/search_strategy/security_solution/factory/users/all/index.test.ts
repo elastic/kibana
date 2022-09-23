@@ -10,7 +10,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import * as buildQuery from './query.all_users.dsl';
 import { allUsers } from '.';
 import { mockOptions, mockSearchStrategyResponse } from './__mocks__';
-import { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
+import type { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
 
 describe('allHosts search strategy', () => {
   const buildAllHostsQuery = jest.spyOn(buildQuery, 'buildUsersQuery');

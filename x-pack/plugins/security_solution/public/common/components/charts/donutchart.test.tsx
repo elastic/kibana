@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Partition, Settings } from '@elastic/charts';
 import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
-import { DonutChart, DonutChartProps } from './donutchart';
+import type { DonutChartProps } from './donutchart';
+import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -30,14 +31,9 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-jest.mock('uuid', () => {
-  const actual = jest.requireActual('uuid');
-
-  return {
-    ...actual,
-    v4: jest.fn().mockReturnValue('test-uuid'),
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('test-uuid'),
+}));
 
 jest.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
   return {
@@ -74,7 +70,6 @@ describe('DonutChart', () => {
   const props: DonutChartProps = {
     data: parsedMockAlertsData?.open?.severities,
     label: 'Open',
-    link: null,
     title: <ChartLabel count={parsedMockAlertsData?.open?.total} />,
     fillColor: jest.fn(() => '#ccc'),
     totalCount: parsedMockAlertsData?.open?.total,
@@ -182,5 +177,11 @@ describe('DonutChart', () => {
     };
     const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="legend"]`)).not.toBeInTheDocument();
+  });
+
+  test('should render label within a tooltip', () => {
+    const { container } = render(<DonutChart {...props} />);
+    const tooltip = container.getElementsByClassName('euiToolTipAnchor')[0];
+    expect(tooltip.textContent).toBe(props.label);
   });
 });

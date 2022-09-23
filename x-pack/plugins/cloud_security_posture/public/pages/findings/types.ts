@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Criteria } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import { UseQueryResult } from 'react-query';
+import { CspFinding } from '../../../common/schemas/csp_finding';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
@@ -14,88 +16,19 @@ export interface FindingsBaseURLQuery {
   filters: Filter[];
 }
 
+export interface FindingsBaseProps {
+  dataView: DataView;
+}
+
 export interface FindingsBaseEsQuery {
-  index: string;
   query?: {
     bool: BoolQuery;
   };
 }
 
-export interface FindingsQueryResult<TData = unknown, TError = unknown> {
-  loading: UseQueryResult['isLoading'];
-  error: TError;
-  data: TData;
+export interface CspFindingsQueryData {
+  page: CspFinding[];
+  total: number;
 }
 
-// TODO: this needs to be defined in a versioned schema
-export interface CspFinding {
-  '@timestamp': string;
-  cycle_id: string;
-  result: CspFindingResult;
-  resource: CspFindingResource;
-  rule: CspRule;
-  host: CspFindingHost;
-  agent: CspFindingAgent;
-  ecs: {
-    version: string;
-  };
-}
-
-interface CspRule {
-  benchmark: { name: string; version: string };
-  section: string;
-  audit: string;
-  references: string;
-  profile_applicability: string;
-  description: string;
-  impact: string;
-  default_value: string;
-  rationale: string;
-  name: string;
-  remediation: string;
-  tags: string[];
-}
-
-interface CspFindingResult {
-  evaluation: 'passed' | 'failed';
-  expected?: Record<string, unknown>;
-  evidence: Record<string, unknown>;
-}
-
-interface CspFindingResource {
-  uid: string;
-  filename: string;
-  // gid: string;
-  mode: string;
-  path: string;
-  type: string;
-  [other_keys: string]: unknown;
-}
-
-interface CspFindingHost {
-  id: string;
-  containerized: boolean;
-  ip: string[];
-  mac: string[];
-  name: string;
-  hostname: string;
-  architecture: string;
-  os: {
-    kernel: string;
-    codename: string;
-    type: string;
-    platform: string;
-    version: string;
-    family: string;
-    name: string;
-  };
-  [other_keys: string]: unknown;
-}
-
-interface CspFindingAgent {
-  version: string;
-  // ephemeral_id: string;
-  id: string;
-  name: string;
-  type: string;
-}
+export type Sort<T> = NonNullable<Criteria<T>['sort']>;

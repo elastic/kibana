@@ -24,6 +24,7 @@ export const sessionMock = {
   createValue: (sessionValue: Partial<SessionValue> = {}): SessionValue => ({
     sid: 'some-long-sid',
     username: mockAuthenticatedUser().username,
+    userProfileId: 'uid',
     provider: { type: 'basic', name: 'basic1' },
     idleTimeoutExpiration: null,
     lifespanExpiration: null,

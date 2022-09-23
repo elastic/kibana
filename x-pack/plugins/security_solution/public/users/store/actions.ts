@@ -6,9 +6,9 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { usersModel } from '.';
-import { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
-import { SortUsersField } from '../../../common/search_strategy/security_solution/users/common';
+import type { usersModel } from '.';
+import type { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+import type { SortUsersField } from '../../../common/search_strategy/security_solution/users/common';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/users');
 
@@ -38,3 +38,13 @@ export const updateTableSorting = actionCreator<{
 export const updateUserRiskScoreSeverityFilter = actionCreator<{
   severitySelection: RiskSeverity[];
 }>('UPDATE_USERS_RISK_SEVERITY_FILTER');
+
+export const updateUsersAnomaliesJobIdFilter = actionCreator<{
+  jobIds: string[];
+  usersType: usersModel.UsersType;
+}>('UPDATE_USERS_ANOMALIES_JOB_ID_FILTER');
+
+export const updateUsersAnomaliesInterval = actionCreator<{
+  interval: string;
+  usersType: usersModel.UsersType;
+}>('UPDATE_USERS_ANOMALIES_INTERVAL');

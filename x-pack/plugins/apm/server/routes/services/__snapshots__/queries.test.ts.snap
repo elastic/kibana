@@ -132,6 +132,7 @@ Array [
           },
           "random_sampler": Object {
             "probability": 1,
+            "seed": 0,
           },
         },
       },
@@ -192,6 +193,7 @@ Array [
           },
           "random_sampler": Object {
             "probability": 1,
+            "seed": 0,
           },
         },
       },

@@ -7,15 +7,13 @@
 
 import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiPageTemplateProps, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useNoDataConfig } from '../../../hooks/use_no_data_config';
-import { EmptyStateLoading } from '../../overview/empty_state/empty_state_loading';
-import { EmptyStateError } from '../../overview/empty_state/empty_state_error';
-import { useHasData } from '../../overview/empty_state/use_has_data';
-import { useBreakpoints } from '../../../hooks';
+import { EmptyStateLoading } from '../../monitors_page/overview/empty_state/empty_state_loading';
+import { EmptyStateError } from '../../monitors_page/overview/empty_state/empty_state_error';
+import { useHasData } from '../../monitors_page/overview/empty_state/use_has_data';
 
 interface Props {
   path: string;
@@ -37,8 +35,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
   const {
     services: { observability },
   } = useKibana<ClientPluginsStart>();
-  const { down } = useBreakpoints();
-  const isMobile = down('s');
+  const isMobile = useIsWithinMaxBreakpoint('s');
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
   const StyledPageTemplateComponent = useMemo(() => {
@@ -50,8 +47,6 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
       ${(props) => (props.isMobile ? mobileCenteredHeader : '')}
     `;
   }, [PageTemplateComponent]);
-
-  const noDataConfig = useNoDataConfig();
 
   const { loading, error, data } = useHasData();
   const { inspectorAdapters } = useInspectorContext();
@@ -71,17 +66,12 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
       <StyledPageTemplateComponent
         isMobile={isMobile}
         pageHeader={pageHeader}
-        data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        noDataConfig={!loading ? noDataConfig : undefined}
+        data-test-subj={'synthetics-page-template'}
+        isPageDataLoaded={loading === false}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}
-        <div
-          style={{ visibility: showLoading ? 'hidden' : 'initial' }}
-          data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        >
-          {children}
-        </div>
+        <div style={{ visibility: showLoading ? 'hidden' : 'initial' }}>{children}</div>
       </StyledPageTemplateComponent>
     </>
   );

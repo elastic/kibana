@@ -66,7 +66,7 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
     <div style={{ width: '50%' }}>
       <DiscoverFieldDetails
         field={field}
-        indexPattern={dataView}
+        dataView={dataView}
         details={details}
         onAddFilter={() => {
           alert('On add filter clicked');
@@ -78,7 +78,7 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
     <div style={{ width: '50%' }}>
       <DiscoverFieldDetails
         field={scriptedField}
-        indexPattern={dataView}
+        dataView={dataView}
         details={details}
         onAddFilter={() => {}}
       />
@@ -87,8 +87,8 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
   .add('error', () => (
     <DiscoverFieldDetails
       field={field}
-      indexPattern={dataView}
-      details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2, columns: [] }}
+      dataView={dataView}
+      details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2 }}
       onAddFilter={() => {}}
     />
   ));

@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -87,7 +88,10 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const input = useObservable(embeddableInput);
 
   useEffect(() => {
     onInputChange({
@@ -97,6 +101,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       severity: severity.val,
       entityFields: selectedEntities,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity, selectedEntities]);
 
   const {
@@ -112,6 +117,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     severity.val,
     { onRenderComplete, onError, onLoading }
   );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       if (Math.abs(chartWidth - e.width) > 20) {
@@ -201,6 +207,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
               chartsService={chartsService}
+              timeRange={input?.timeRange}
             />
           )}
         </div>

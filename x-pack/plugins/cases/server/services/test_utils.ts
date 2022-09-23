@@ -126,14 +126,17 @@ export const basicCaseFields: CaseAttributes = {
     syncAlerts: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
+  assignees: [],
 };
 
 export const createCaseSavedObjectResponse = ({
   connector,
   externalService,
+  overrides,
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
+  overrides?: Partial<CaseAttributes>;
 } = {}): SavedObject<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
@@ -168,6 +171,7 @@ export const createCaseSavedObjectResponse = ({
     id: '1',
     attributes: {
       ...basicCaseFields,
+      ...overrides,
       // if connector is null we'll default this to an incomplete jira value because the service
       // should switch it to a none connector when the id can't be found in the references array
       connector: formattedConnector,

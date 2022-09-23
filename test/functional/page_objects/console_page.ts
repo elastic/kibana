@@ -7,6 +7,7 @@
  */
 
 import { Key } from 'selenium-webdriver';
+import { asyncForEach } from '@kbn/std';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -47,6 +48,54 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSettingsButton');
   }
 
+  public async openVariablesModal() {
+    await this.testSubjects.click('consoleVariablesButton');
+  }
+
+  public async closeVariablesModal() {
+    await this.testSubjects.click('variablesCancelButton');
+  }
+
+  public async addNewVariable({ name, value }: { name: string; value: string }) {
+    await this.openVariablesModal();
+
+    // while the variables form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      await this.testSubjects.click('variablesAddButton');
+
+      const variableNameInputs = await this.testSubjects.findAll('variablesNameInput');
+      await variableNameInputs[variableNameInputs.length - 1].type(name);
+
+      const variableValueInputs = await this.testSubjects.findAll('variablesValueInput');
+      await variableValueInputs[variableValueInputs.length - 1].type(value);
+    });
+
+    await this.testSubjects.click('variablesSaveButton');
+  }
+
+  public async removeVariables() {
+    await this.openVariablesModal();
+
+    // while the variables form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const buttons = await this.testSubjects.findAll('variablesRemoveButton');
+      await asyncForEach(buttons, async (button) => {
+        await button.click();
+      });
+    });
+    await this.testSubjects.click('variablesSaveButton');
+  }
+
+  public async getVariables() {
+    await this.openVariablesModal();
+    const inputs = await this.testSubjects.findAll('variablesNameInput');
+    const variables = await Promise.all(
+      inputs.map(async (input) => await input.getAttribute('value'))
+    );
+    await this.closeVariablesModal();
+    return variables;
+  }
+
   public async setFontSizeSetting(newSize: number) {
     await this.openSettings();
 
@@ -72,15 +121,6 @@ export class ConsolePageObject extends FtrService {
 
   public async getEditor() {
     return this.testSubjects.find('console-application');
-  }
-
-  public async dismissTutorial() {
-    try {
-      const closeButton = await this.testSubjects.find('help-close-button');
-      await closeButton.click();
-    } catch (e) {
-      // Ignore because it is probably not there.
-    }
   }
 
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
@@ -119,10 +159,22 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.find('console-textarea');
   }
 
-  public async getVisibleTextAt(lineIndex: number) {
+  public async getAllTextLines() {
     const editor = await this.getEditor();
-    const lines = await editor.findAllByClassName('ace_line_group');
+    return await editor.findAllByClassName('ace_line_group');
+  }
 
+  public async getAllVisibleText() {
+    let textString = '';
+    const textLineElements = await this.getAllTextLines();
+    for (let i = 0; i < textLineElements.length; i++) {
+      textString = textString.concat(await textLineElements[i].getVisibleText());
+    }
+    return textString;
+  }
+
+  public async getVisibleTextAt(lineIndex: number) {
+    const lines = await this.getAllTextLines();
     if (lines.length < lineIndex) {
       throw new Error(`No line with index: ${lineIndex}`);
     }
@@ -149,6 +201,52 @@ export class ConsolePageObject extends FtrService {
       // there should be only one empty line after clearing the textarea
       const text = await lines[lines.length - 1].getVisibleText();
       return lines.length === 1 && text.trim() === '';
+    });
+  }
+
+  public async selectAllRequests() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
+  }
+
+  public async hasSuccessBadge() {
+    return await this.find.existsByCssSelector('.ace_badge--success');
+  }
+
+  public async hasWarningBadge() {
+    return await this.find.existsByCssSelector('.ace_badge--warning');
+  }
+
+  public async hasInvalidSyntax() {
+    return await this.find.existsByCssSelector('.ace_invalid');
+  }
+
+  public async hasErrorMarker() {
+    return await this.find.existsByCssSelector('.ace_error');
+  }
+
+  public async clickFoldWidget() {
+    const widget = await this.find.byCssSelector('.ace_fold-widget');
+    await widget.click();
+  }
+
+  public async hasFolds() {
+    return await this.find.existsByCssSelector('.ace_fold');
+  }
+
+  public async getResponseStatus() {
+    const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
+    const text = await statusBadge.getVisibleText();
+    return text.replace(/[^\d.]+/, '');
+  }
+
+  async closeHelpIfExists() {
+    await this.retry.try(async () => {
+      const helpPanelShown = await this.testSubjects.exists('help-close-button');
+      if (helpPanelShown) {
+        await this.collapseHelp();
+      }
     });
   }
 }

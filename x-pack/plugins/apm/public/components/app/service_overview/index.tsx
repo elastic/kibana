@@ -8,10 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   isRumAgentName,
-  isIosAgentName,
+  isMobileAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
@@ -31,7 +30,6 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { replace } from '../../shared/links/url_helpers';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -40,32 +38,15 @@ import { replace } from '../../shared/links/url_helpers';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const {
-    agentName,
-    serviceName,
-    transactionType,
-    fallbackToTransactions,
-    runtimeName,
-  } = useApmServiceContext();
+  const { agentName, serviceName, fallbackToTransactions, runtimeName } =
+    useApmServiceContext();
+
   const {
     query,
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      transactionType: transactionTypeFromUrl,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const history = useHistory();
-
-  // redirect to first transaction type
-  if (!transactionTypeFromUrl && transactionType) {
-    replace(history, { query: { transactionType } });
-  }
 
   const latencyChartHeight = 200;
 
@@ -78,7 +59,7 @@ export function ServiceOverview() {
     : chartHeight;
   const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
-  const isIosAgent = isIosAgentName(agentName);
+  const isMobileAgent = isMobileAgentName(agentName);
   const isServerless = isServerlessAgent(runtimeName);
   const router = useApmRouter();
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
@@ -184,7 +165,6 @@ export function ServiceOverview() {
                   <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       fixedHeight={true}
-                      isSingleColumn={isSingleColumn}
                       showPerPageOptions={false}
                       link={
                         <EuiLink href={dependenciesLink}>
@@ -200,7 +180,7 @@ export function ServiceOverview() {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!isRumAgent && !isIosAgent && !isServerless && (
+          {!isRumAgent && !isMobileAgent && !isServerless && (
             <EuiFlexItem>
               <EuiFlexGroup
                 direction="column"

@@ -105,7 +105,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  async function discardNewRuleCreation() {
+    await testSubjects.click('cancelSaveRuleButton');
+    await testSubjects.existOrFail('confirmRuleCloseModal');
+    await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+    await testSubjects.missingOrFail('confirmRuleCloseModal');
+  }
+
+  // Failing: See https://github.com/elastic/kibana/issues/126873
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -126,11 +134,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
 
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
@@ -180,11 +188,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlwaysFiringAlert(alertName);
 
       // create Slack connector and attach an action using it
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
@@ -196,7 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).type('some text ');
 
       await testSubjects.click('addAlertActionButton');
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
         await find.byCssSelector(
@@ -267,6 +275,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
+
+      await discardNewRuleCreation();
     });
 
     it('should successfully test valid es_query alert', async () => {
@@ -281,9 +291,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelSaveRuleButton');
-      await testSubjects.existOrFail('confirmRuleCloseModal');
-      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+      await discardNewRuleCreation();
     });
 
     it('should show error when es_query is invalid', async () => {
@@ -299,6 +307,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
+
+      await discardNewRuleCreation();
     });
 
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
@@ -318,6 +328,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '.triggersActionsUI__ruleTypeNodeHeading'
       );
       expect(ruleTypesClearFilter.length).to.above(0);
+
+      await discardNewRuleCreation();
     });
   });
 };

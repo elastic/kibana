@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   useGeneratedHtmlId,
   EuiFlyout,
@@ -18,16 +19,16 @@ import {
   EuiFlyoutFooter,
   EuiButton,
   EuiSpacer,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
 } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
-import { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -57,8 +58,6 @@ const tableItems: TableItem[] = [
   { classification: RiskSeverity.low, range: '20 - 40' },
   { classification: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
-
-export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
 export const UserRiskInformationButtonEmpty = () => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
@@ -102,22 +101,25 @@ const UserRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
           items={tableItems}
           data-test-subj="risk-information-table"
         />
-        {/* TODO PENDING ON USER RISK DOCUMENTATION
         <EuiSpacer size="l" />
         <FormattedMessage
-          id="xpack.securitySolution.hosts.hostRiskInformation.learnMore"
-          defaultMessage="You can learn more about host risk {hostsRiskScoreDocumentationLink}"
+          id="xpack.securitySolution.users.userRiskInformation.learnMore"
+          defaultMessage="You can learn more about user risk {UserRiskScoreDocumentationLink}"
           values={{
-            hostsRiskScoreDocumentationLink: (
-              <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.hosts.hostRiskInformation.link"
-                  defaultMessage="here"
-                />
-              </EuiLink>
+            UserRiskScoreDocumentationLink: (
+              <RiskScoreDocLink
+                external={false}
+                riskScoreEntity={RiskScoreEntity.user}
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.users.userRiskInformation.link"
+                    defaultMessage="here"
+                  />
+                }
+              />
             ),
           }}
-        /> */}
+        />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

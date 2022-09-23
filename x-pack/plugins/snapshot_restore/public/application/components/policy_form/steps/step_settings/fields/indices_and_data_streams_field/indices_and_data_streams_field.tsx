@@ -17,8 +17,8 @@ import {
   EuiLink,
   EuiPanel,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
+  EuiSelectableOption,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
@@ -115,7 +115,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       label={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.allDataStreamsAndIndicesLabel"
-          defaultMessage="All data streams and indices, including system indices"
+          defaultMessage="All data streams and indices"
         />
       }
       checked={isAllIndices}

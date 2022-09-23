@@ -6,39 +6,19 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
+import type {
+  EqlResponseSchema,
+  MachineLearningResponseSchema,
+  QueryResponseSchema,
+  SavedQueryResponseSchema,
+  SharedResponseSchema,
+  ThreatMatchResponseSchema,
+} from '../request';
 import { getListArrayMock } from '../types/lists.mock';
-
-import { RulesSchema } from './rules_schema';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-export const getPartialRulesSchemaMock = (): Partial<RulesSchema> => ({
-  created_by: 'elastic',
-  description: 'Detecting root and admin users',
-  enabled: true,
-  false_positives: [],
-  from: 'now-6m',
-  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-  immutable: false,
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  risk_score: 50,
-  rule_id: 'rule-1',
-  language: 'kuery',
-  max_signals: 100,
-  name: 'Detect Root/Admin Users',
-  output_index: '.siem-signals',
-  query: 'user.name: root or user.name: admin',
-  references: ['http://www.example.com', 'https://ww.example.com'],
-  severity: 'high',
-  updated_by: 'elastic',
-  tags: ['some fake tag 1', 'some fake tag 2'],
-  to: 'now',
-  type: 'query',
-  note: '',
-});
-
-export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => ({
+const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponseSchema => ({
   author: [],
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),
@@ -50,42 +30,85 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   from: 'now-6m',
   immutable: false,
   name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
   references: ['test 1', 'test 2'],
-  severity: 'high',
+  severity: 'high' as const,
   severity_mapping: [],
   updated_by: 'elastic_kibana',
   tags: ['some fake tag 1', 'some fake tag 2'],
   to: 'now',
-  type: 'query',
   threat: [],
   version: 1,
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 55,
   risk_score_mapping: [],
-  language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
   exceptions_list: getListArrayMock(),
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
+  throttle: 'no_actions',
+  actions: [],
+  building_block_type: undefined,
+  note: undefined,
+  license: undefined,
+  outcome: undefined,
+  alias_target_id: undefined,
+  alias_purpose: undefined,
+  timeline_id: undefined,
+  timeline_title: undefined,
+  meta: undefined,
+  rule_name_override: undefined,
+  timestamp_override: undefined,
+  timestamp_override_fallback_disabled: undefined,
+  namespace: undefined,
 });
 
-export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
-  const basePayload = getRulesSchemaMock(anchorDate);
-  const { filters, index, query, language, ...rest } = basePayload;
+export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryResponseSchema => ({
+  ...getResponseBaseParams(anchorDate),
+  query: 'user.name: root or user.name: admin',
+  type: 'query',
+  language: 'kuery',
+  index: undefined,
+  data_view_id: undefined,
+  filters: undefined,
+  saved_id: undefined,
+  response_actions: undefined,
+});
+export const getSavedQuerySchemaMock = (
+  anchorDate: string = ANCHOR_DATE
+): SavedQueryResponseSchema => ({
+  ...getResponseBaseParams(anchorDate),
+  query: 'user.name: root or user.name: admin',
+  type: 'saved_query',
+  saved_id: 'save id 123',
+  language: 'kuery',
+  index: undefined,
+  data_view_id: undefined,
+  filters: undefined,
+  response_actions: undefined,
+});
 
+export const getRulesMlSchemaMock = (
+  anchorDate: string = ANCHOR_DATE
+): MachineLearningResponseSchema => {
   return {
-    ...rest,
+    ...getResponseBaseParams(anchorDate),
     type: 'machine_learning',
     anomaly_threshold: 59,
     machine_learning_job_id: 'some_machine_learning_job_id',
   };
 };
 
-export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+export const getThreatMatchingSchemaMock = (
+  anchorDate: string = ANCHOR_DATE
+): ThreatMatchResponseSchema => {
   return {
-    ...getRulesSchemaMock(anchorDate),
+    ...getResponseBaseParams(anchorDate),
     type: 'threat_match',
+    query: 'user.name: root or user.name: admin',
+    language: 'kuery',
     threat_index: ['index-123'],
     threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
     threat_query: '*:*',
@@ -107,6 +130,14 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
         },
       },
     ],
+    index: undefined,
+    data_view_id: undefined,
+    filters: undefined,
+    saved_id: undefined,
+    threat_indicator_path: undefined,
+    threat_language: undefined,
+    concurrent_searches: undefined,
+    items_per_search: undefined,
   };
 };
 
@@ -114,7 +145,9 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
  * Useful for e2e backend tests where it doesn't have date time and other
  * server side properties attached to it.
  */
-export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<RulesSchema> => {
+export const getThreatMatchingSchemaPartialMock = (
+  enabled = false
+): Partial<ThreatMatchResponseSchema> => {
   return {
     author: [],
     created_by: 'elastic',
@@ -126,12 +159,15 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     interval: '5m',
     index: ['auditbeat-*'],
     rule_id: 'rule-1',
-    output_index: '.siem-signals-default',
+    output_index: '',
     max_signals: 100,
     risk_score: 55,
     risk_score_mapping: [],
     name: 'Query with a rule id',
     references: [],
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     severity: 'high',
     severity_mapping: [],
     updated_by: 'elastic',
@@ -146,7 +182,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     threat_query: '*:*',
-    threat_index: ['list-index'],
+    threat_index: ['auditbeat-*'],
     threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
     threat_mapping: [
       {
@@ -180,11 +216,17 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
   };
 };
 
-export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): EqlResponseSchema => {
   return {
-    ...getRulesSchemaMock(anchorDate),
+    ...getResponseBaseParams(anchorDate),
     language: 'eql',
     type: 'eql',
     query: 'process where true',
+    index: undefined,
+    data_view_id: undefined,
+    filters: undefined,
+    timestamp_field: undefined,
+    event_category_override: undefined,
+    tiebreaker_field: undefined,
   };
 };

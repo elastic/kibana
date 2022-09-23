@@ -12,20 +12,20 @@ import { CommentResponseUserType } from '../../../../common/api';
 import { UserActionTimestamp } from '../timestamp';
 import { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionMarkdown } from '../markdown_form';
-import { UserActionAvatar } from '../avatar';
 import { UserActionContentToolbar } from '../content_toolbar';
-import { UserActionUsername } from '../username';
 import * as i18n from '../translations';
 import { UserActionBuilderArgs, UserActionBuilder } from '../types';
+import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
+import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  | 'userCanCrud'
   | 'handleManageMarkdownEditId'
   | 'handleSaveComment'
   | 'handleManageQuote'
   | 'commentRefs'
   | 'handleDeleteComment'
+  | 'userProfiles'
 > & {
   comment: SnakeToCamelCase<CommentResponseUserType>;
   outlined: boolean;
@@ -35,7 +35,7 @@ type BuilderArgs = Pick<
 
 export const createUserAttachmentUserActionBuilder = ({
   comment,
-  userCanCrud,
+  userProfiles,
   outlined,
   isEdit,
   isLoading,
@@ -49,12 +49,7 @@ export const createUserAttachmentUserActionBuilder = ({
   // eslint-disable-next-line react/display-name
   build: () => [
     {
-      username: (
-        <UserActionUsername
-          username={comment.createdBy.username}
-          fullName={comment.createdBy.fullName}
-        />
-      ),
+      username: <HoverableUsernameResolver user={comment.createdBy} userProfiles={userProfiles} />,
       'data-test-subj': `comment-create-action-${comment.id}`,
       timestamp: (
         <UserActionTimestamp createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
@@ -65,6 +60,7 @@ export const createUserAttachmentUserActionBuilder = ({
       }),
       children: (
         <UserActionMarkdown
+          key={isEdit ? comment.id : undefined}
           ref={(element) => (commentRefs.current[comment.id] = element)}
           id={comment.id}
           content={comment.comment}
@@ -76,11 +72,8 @@ export const createUserAttachmentUserActionBuilder = ({
           })}
         />
       ),
-      timelineIcon: (
-        <UserActionAvatar
-          username={comment.createdBy.username}
-          fullName={comment.createdBy.fullName}
-        />
+      timelineAvatar: (
+        <HoverableAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
       ),
       actions: (
         <UserActionContentToolbar
@@ -94,7 +87,6 @@ export const createUserAttachmentUserActionBuilder = ({
           onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
           onQuote={handleManageQuote.bind(null, comment.comment)}
           onDelete={handleDeleteComment.bind(null, comment.id)}
-          userCanCrud={userCanCrud}
         />
       ),
     },

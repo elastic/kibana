@@ -7,7 +7,7 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { NetworkOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 export const buildOverviewNetworkQuery = ({
   filterQuery,

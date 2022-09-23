@@ -11,13 +11,15 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'reporting', 'timePicker']);
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const security = getService('security');
 
   describe('lens reporting', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/reporting');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
+      );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await security.testUser.setRoles(
         [
@@ -30,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/reporting');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await es.deleteByQuery({
         index: '.reporting-*',

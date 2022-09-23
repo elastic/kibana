@@ -9,9 +9,10 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { exceptionsListAllHttpMocks } from '../../mocks/exceptions_list_http_mocks';
+import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -21,7 +22,8 @@ import { getFirstCard } from '../../../components/artifact_list_page/mocks';
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('When on the host isolation exceptions page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/140888
+describe.skip('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -76,7 +78,8 @@ describe('When on the host isolation exceptions page', () => {
     );
   });
 
-  it('should hide the Create and Edit actions when host isolation authz is not allowed', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/135587
+  it.skip('should hide the Create and Edit actions when host isolation authz is not allowed', async () => {
     // Use case: license downgrade scenario, where user still has entries defined, but no longer
     // able to create or edit them (only Delete them)
     const existingPrivileges = useUserPrivilegesMock();

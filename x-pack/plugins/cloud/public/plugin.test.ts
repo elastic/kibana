@@ -5,13 +5,28 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/crypto-browser';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { CloudPlugin, CloudConfigType } from './plugin';
-import { firstValueFrom } from 'rxjs';
-import { Sha256 } from '@kbn/core/public/utils';
+import { CloudPlugin, type CloudConfigType } from './plugin';
+import { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
+import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+
+const baseConfig = {
+  base_url: 'https://cloud.elastic.co',
+  deployment_url: '/abc123',
+  profile_url: '/user/settings/',
+  organization_url: '/account/',
+  full_story: {
+    enabled: false,
+  },
+  chat: {
+    enabled: false,
+  },
+};
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -22,17 +37,8 @@ describe('Cloud Plugin', () => {
 
       const setupPlugin = async ({ config = {} }: { config?: Partial<CloudConfigType> }) => {
         const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
           id: 'cloudId',
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/profile/alice',
-          organization_url: '/org/myOrg',
-          full_story: {
-            enabled: false,
-          },
-          chat: {
-            enabled: false,
-          },
           ...config,
         });
 
@@ -92,16 +98,7 @@ describe('Cloud Plugin', () => {
         currentUserProps?: Record<string, any> | Error;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/profile/alice',
-          organization_url: '/org/myOrg',
-          full_story: {
-            enabled: false,
-          },
-          chat: {
-            enabled: false,
-          },
+          ...baseConfig,
           ...config,
         });
 
@@ -136,6 +133,7 @@ describe('Cloud Plugin', () => {
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
+          isElasticCloudUser: false,
         });
       });
 
@@ -150,7 +148,7 @@ describe('Cloud Plugin', () => {
             ([{ name }]) => name === 'cloud_user_id'
           )!;
 
-        const hashId1 = await firstValueFrom(context1$);
+        const { userId: hashId1 } = (await firstValueFrom(context1$)) as { userId: string };
         expect(hashId1).not.toEqual(expectedHashedPlainUsername);
 
         const { coreSetup: coreSetup2 } = await setupPlugin({
@@ -163,19 +161,16 @@ describe('Cloud Plugin', () => {
             ([{ name }]) => name === 'cloud_user_id'
           )!;
 
-        const hashId2 = await firstValueFrom(context2$);
+        const { userId: hashId2 } = (await firstValueFrom(context2$)) as { userId: string };
         expect(hashId2).not.toEqual(expectedHashedPlainUsername);
 
         expect(hashId1).not.toEqual(hashId2);
       });
 
-      test('user hash does not include cloudId when authenticated via Cloud SAML', async () => {
+      test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
         const { coreSetup } = await setupPlugin({
           config: { id: 'cloudDeploymentId' },
-          currentUserProps: {
-            username,
-            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
-          },
+          currentUserProps: { username, elastic_cloud_user: true },
         });
 
         expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
@@ -186,6 +181,7 @@ describe('Cloud Plugin', () => {
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: expectedHashedPlainUsername,
+          isElasticCloudUser: true,
         });
       });
 
@@ -203,6 +199,7 @@ describe('Cloud Plugin', () => {
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: expectedHashedPlainUsername,
+          isElasticCloudUser: false,
         });
       });
 
@@ -217,7 +214,10 @@ describe('Cloud Plugin', () => {
           ([{ name }]) => name === 'cloud_user_id'
         )!;
 
-        await expect(firstValueFrom(context$)).resolves.toEqual({ userId: undefined });
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: undefined,
+          isElasticCloudUser: false,
+        });
       });
     });
 
@@ -246,17 +246,8 @@ describe('Cloud Plugin', () => {
         failHttp?: boolean;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
           id: isCloudEnabled ? 'cloud-id' : null,
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/profile/alice',
-          organization_url: '/org/myOrg',
-          full_story: {
-            enabled: false,
-          },
-          chat: {
-            enabled: false,
-          },
           ...config,
         });
 
@@ -319,18 +310,9 @@ describe('Cloud Plugin', () => {
     describe('interface', () => {
       const setupPlugin = () => {
         const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
           id: 'cloudId',
           cname: 'cloud.elastic.co',
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/user/settings/',
-          organization_url: '/account/',
-          chat: {
-            enabled: false,
-          },
-          full_story: {
-            enabled: false,
-          },
         });
         const plugin = new CloudPlugin(initContext);
 
@@ -378,6 +360,50 @@ describe('Cloud Plugin', () => {
       it('exposes cname', () => {
         const { setup } = setupPlugin();
         expect(setup.cname).toBe('cloud.elastic.co');
+      });
+    });
+
+    describe('Set up cloudExperiments', () => {
+      describe('when cloud ID is not provided in the config', () => {
+        let cloudExperiments: jest.Mocked<CloudExperimentsPluginSetup>;
+        beforeEach(() => {
+          const plugin = new CloudPlugin(coreMock.createPluginInitializerContext(baseConfig));
+          cloudExperiments = cloudExperimentsMock.createSetupMock();
+          plugin.setup(coreMock.createSetup(), { cloudExperiments });
+        });
+
+        test('does not call cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when cloud ID is provided in the config', () => {
+        let cloudExperiments: jest.Mocked<CloudExperimentsPluginSetup>;
+        beforeEach(() => {
+          const plugin = new CloudPlugin(
+            coreMock.createPluginInitializerContext({ ...baseConfig, id: 'cloud test' })
+          );
+          cloudExperiments = cloudExperimentsMock.createSetupMock();
+          plugin.setup(coreMock.createSetup(), { cloudExperiments });
+        });
+
+        test('calls cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser).toHaveBeenCalledTimes(1);
+        });
+
+        test('the cloud ID is hashed when calling cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser.mock.calls[0][0]).toEqual(
+            '1acb4a1cc1c3d672a8d826055d897c2623ceb1d4fb07e46d97986751a36b06cf'
+          );
+        });
+
+        test('specifies the Kibana version when calling cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser.mock.calls[0][1]).toEqual(
+            expect.objectContaining({
+              kibanaVersion: 'version',
+            })
+          );
+        });
       });
     });
   });
@@ -431,7 +457,7 @@ describe('Cloud Plugin', () => {
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['superuser'],
+          elastic_cloud_user: true,
         })
       );
 
@@ -443,14 +469,15 @@ describe('Cloud Plugin', () => {
       expect(securityStart.authc.getCurrentUser).not.toHaveBeenCalled();
     });
 
-    it('registers a custom nav link for superusers', async () => {
+    it('registers a custom nav link for cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['superuser'],
+          elastic_cloud_user: true,
         })
       );
       plugin.start(coreStart, { security: securityStart });
@@ -491,14 +518,14 @@ describe('Cloud Plugin', () => {
       `);
     });
 
-    it('does not register a custom nav link for non-superusers', async () => {
+    it('does not register a custom nav link for non-cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['not-a-superuser'],
+          elastic_cloud_user: false,
         })
       );
       plugin.start(coreStart, { security: securityStart });
@@ -508,14 +535,14 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink).not.toHaveBeenCalled();
     });
 
-    it('registers user profile links for superusers', async () => {
+    it('registers user profile links for cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['superuser'],
+          elastic_cloud_user: true,
         })
       );
       plugin.start(coreStart, { security: securityStart });
@@ -529,7 +556,7 @@ describe('Cloud Plugin', () => {
             Object {
               "href": "https://cloud.elastic.co/profile/alice",
               "iconType": "user",
-              "label": "Profile",
+              "label": "Edit profile",
               "order": 100,
               "setAsProfile": true,
             },
@@ -561,7 +588,7 @@ describe('Cloud Plugin', () => {
             Object {
               "href": "https://cloud.elastic.co/profile/alice",
               "iconType": "user",
-              "label": "Profile",
+              "label": "Edit profile",
               "order": 100,
               "setAsProfile": true,
             },
@@ -576,14 +603,14 @@ describe('Cloud Plugin', () => {
       `);
     });
 
-    it('does not register profile links for non-superusers', async () => {
+    it('does not register profile links for non-cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['not-a-superuser'],
+          elastic_cloud_user: false,
         })
       );
       plugin.start(coreStart, { security: securityStart });

@@ -42,6 +42,7 @@ import {
 } from '../test_utils';
 import { ESCaseAttributes } from './types';
 import { AttachmentService } from '../attachments';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 const createUpdateSOResponse = ({
   connector,
@@ -119,7 +120,11 @@ const createCasePatchParams = ({
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const attachmentService = new AttachmentService(mockLogger);
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+  const attachmentService = new AttachmentService(
+    mockLogger,
+    persistableStateAttachmentTypeRegistry
+  );
 
   let service: CasesService;
 
@@ -152,6 +157,7 @@ describe('CasesService', () => {
         } = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Partial<ESCaseAttributes>;
         expect(restUpdateAttributes).toMatchInlineSnapshot(`
           Object {
+            "assignees": Array [],
             "closed_at": null,
             "closed_by": null,
             "created_at": "2019-11-25T21:54:48.952Z",
@@ -476,6 +482,7 @@ describe('CasesService', () => {
         expect(creationAttributes.external_service).not.toHaveProperty('connector_id');
         expect(creationAttributes).toMatchInlineSnapshot(`
           Object {
+            "assignees": Array [],
             "closed_at": null,
             "closed_by": null,
             "connector": Object {
@@ -549,6 +556,7 @@ describe('CasesService', () => {
                 "type": "action",
               },
             ],
+            "refresh": undefined,
           }
         `);
       });

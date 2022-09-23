@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await testSubjects.click('closeFlyoutButton');
-        await testSubjects.find('createIndexPatternButton');
+        await testSubjects.find('createDataViewButton');
       });
     });
 
@@ -114,6 +114,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           return Promise.all(comparedHeaders);
+        });
+      });
+    });
+
+    describe('edit index pattern', () => {
+      it('on edit click', async () => {
+        await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
+            `Logstash Star`
+          );
+        });
+      });
+      it('shows edit confirm message when editing index-pattern', async () => {
+        await PageObjects.settings.editIndexPattern(
+          'logstash-2*',
+          '@timestamp',
+          'Index Star',
+          true
+        );
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
         });
       });
     });

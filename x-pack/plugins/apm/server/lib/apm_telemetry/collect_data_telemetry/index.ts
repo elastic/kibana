@@ -6,15 +6,14 @@
  */
 
 import { merge } from 'lodash';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
+
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 
 type TelemetryTaskExecutor = (params: {
   indices: ApmIndicesConfig;
@@ -37,6 +36,7 @@ type TelemetryTaskExecutor = (params: {
     path: string;
     method: 'get';
   }) => Promise<unknown>;
+  savedObjectsClient: ISavedObjectsClient;
 }) => Promise<APMDataTelemetry>;
 
 export interface TelemetryTask {
@@ -54,6 +54,7 @@ export function collectDataTelemetry({
   logger,
   indicesStats,
   transportRequest,
+  savedObjectsClient,
 }: CollectTelemetryParams) {
   return tasks.reduce((prev, task) => {
     return prev.then(async (data) => {
@@ -65,6 +66,7 @@ export function collectDataTelemetry({
           indices,
           indicesStats,
           transportRequest,
+          savedObjectsClient,
         });
         const took = process.hrtime(time);
 

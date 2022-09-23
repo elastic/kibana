@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   AgentService,
   FleetStartContract,
   PackageService,
   AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { ConfigType } from '../config';
-import { TelemetryEventsSender } from './telemetry/sender';
+import type { ConfigType } from '../../common/config';
+import type { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -35,7 +35,7 @@ export type OsqueryAppContextServiceStartContract = Partial<
 export class OsqueryAppContextService {
   private agentService: AgentService | undefined;
   private packageService: PackageService | undefined;
-  private packagePolicyService: PackagePolicyServiceInterface | undefined;
+  private packagePolicyService: PackagePolicyClient | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
 
   public start(dependencies: OsqueryAppContextServiceStartContract) {
@@ -56,7 +56,7 @@ export class OsqueryAppContextService {
     return this.packageService;
   }
 
-  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
+  public getPackagePolicyService(): PackagePolicyClient | undefined {
     return this.packagePolicyService;
   }
 

@@ -12,6 +12,7 @@ import { useValues } from 'kea';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { DOCS_URL } from '../../routes';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import illustration from '../document_creation/illustration.svg';
@@ -58,14 +59,18 @@ export const EmptyEngineOverview: React.FC = () => {
             })}
           </p>
           <EuiSpacer size="m" />
-          <EuiButton fill href="/app/management/data/index_management/indices">
+          <EuiButtonTo
+            fill
+            to={'/app/management/data/index_management/indices'}
+            shouldNotCreateHref
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.elasticsearchEngine.emptyStateButton',
               {
                 defaultMessage: 'Manage indices',
               }
             )}
-          </EuiButton>
+          </EuiButtonTo>
         </>
       }
     />

@@ -157,14 +157,6 @@ export const INDEX_PATTERNS_DESCRIPTIONS = i18n.translate(
   }
 );
 
-export const DISABLED_INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.indexPatterns.disabled',
-  {
-    defaultMessage:
-      'Disabled index patterns are recommended on this page, but first need to be configured in your Kibana index pattern settings',
-  }
-);
-
 export const DISABLED_SOURCERER = i18n.translate('xpack.securitySolution.sourcerer.disabled', {
   defaultMessage: 'The updates to the Data view require a page reload to take effect.',
 });

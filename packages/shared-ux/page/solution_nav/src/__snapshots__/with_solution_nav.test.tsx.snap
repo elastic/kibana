@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WithSolutionNav renders wrapped component 1`] = `
+<TestComponent
+  pageSideBar={
+    <SolutionNav
+      icon="logoKibana"
+      isOpenOnDesktop={true}
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "name": "Ingest Node Pipelines",
+              },
+              Object {
+                "id": "1.2",
+                "name": "Logstash Pipelines",
+              },
+              Object {
+                "id": "1.3",
+                "name": "Beats Central Management",
+              },
+            ],
+            "name": "Ingest",
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "name": "Index Management",
+              },
+              Object {
+                "id": "2.2",
+                "name": "Index Lifecycle Policies",
+              },
+              Object {
+                "id": "2.3",
+                "name": "Snapshot and Restore",
+              },
+            ],
+            "name": "Data",
+          },
+        ]
+      }
+      name="Kibana"
+      onCollapse={[Function]}
+    />
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnStickyMenu",
+      "css": Object {
+        "map": undefined,
+        "name": "sx7fqw",
+        "next": undefined,
+        "styles": "
+    flex: 0 1 0%;
+    overflow: hidden;
+    @media screen and (prefers-reduced-motion: no-preference) {
+      transition: min-width 150ms cubic-bezier(.694, .0482, .335, 1);
+    }
+  ",
+        "toString": [Function],
+      },
+      "minWidth": undefined,
+      "paddingSize": "none",
+    }
+  }
+/>
+`;
+
+exports[`WithSolutionNav with children 1`] = `
+<TestComponent
+  pageSideBar={
+    <SolutionNav
+      icon="logoKibana"
+      isOpenOnDesktop={true}
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "name": "Ingest Node Pipelines",
+              },
+              Object {
+                "id": "1.2",
+                "name": "Logstash Pipelines",
+              },
+              Object {
+                "id": "1.3",
+                "name": "Beats Central Management",
+              },
+            ],
+            "name": "Ingest",
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "name": "Index Management",
+              },
+              Object {
+                "id": "2.2",
+                "name": "Index Lifecycle Policies",
+              },
+              Object {
+                "id": "2.3",
+                "name": "Snapshot and Restore",
+              },
+            ],
+            "name": "Data",
+          },
+        ]
+      }
+      name="Kibana"
+      onCollapse={[Function]}
+    />
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnStickyMenu",
+      "css": Object {
+        "map": undefined,
+        "name": "sx7fqw",
+        "next": undefined,
+        "styles": "
+    flex: 0 1 0%;
+    overflow: hidden;
+    @media screen and (prefers-reduced-motion: no-preference) {
+      transition: min-width 150ms cubic-bezier(.694, .0482, .335, 1);
+    }
+  ",
+        "toString": [Function],
+      },
+      "minWidth": undefined,
+      "paddingSize": "none",
+    }
+  }
+>
+  <div
+    className="child"
+  >
+    Child component
+  </div>
+</TestComponent>
+`;

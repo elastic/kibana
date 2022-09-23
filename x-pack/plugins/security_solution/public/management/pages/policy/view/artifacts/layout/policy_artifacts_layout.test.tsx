@@ -6,10 +6,8 @@
  */
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import {
   getEventFiltersListPath,
   getPolicyDetailsArtifactsListPath,
@@ -18,13 +16,13 @@ import {
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 
 import { PolicyArtifactsLayout } from './policy_artifacts_layout';
-import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_translations';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 

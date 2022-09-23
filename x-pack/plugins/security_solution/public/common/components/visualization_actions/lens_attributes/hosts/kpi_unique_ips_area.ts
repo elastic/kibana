@@ -6,7 +6,7 @@
  */
 
 import { DESTINATION_CHART_LABEL, SOURCE_CHART_LABEL } from '../../translations';
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiUniqueIpsAreaLensAttributes: LensAttributes = {
   description: '',

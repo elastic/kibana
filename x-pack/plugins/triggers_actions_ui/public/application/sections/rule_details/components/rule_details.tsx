@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
@@ -27,6 +27,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
+import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { RuleActionsPopover } from './rule_actions_popover';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
@@ -40,7 +44,6 @@ import {
   ActionType,
   ActionConnector,
   TriggersActionsUiConfig,
-  RuleTableItem,
 } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -49,7 +52,7 @@ import {
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
-import { routeToRuleDetails } from '../../../constants';
+import { routeToRuleDetails, routeToRules } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -58,7 +61,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
-import { RuleStatusDropdown } from '../../rules_list/components/rule_status_dropdown';
+import { runRule } from '../../../lib/run_rule';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -67,6 +70,10 @@ export type RuleDetailsProps = {
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+
+const ruleDetailStyle = {
+  minWidth: 0,
+};
 
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
@@ -94,10 +101,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
 
+  const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
+
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
 
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
   useEffect(() => {
     (async () => {
@@ -155,6 +165,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const ruleActions = rule.actions;
   const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
+  };
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -207,6 +220,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
   };
 
+  const goToRulesList = () => {
+    history.push(routeToRules);
+  };
+
   const getRuleStatusErrorReasonText = () => {
     if (rule.executionStatus.error && rule.executionStatus.error.reason) {
       return rulesErrorReasonTranslationsMapping[rule.executionStatus.error.reason];
@@ -223,40 +240,71 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
-  const rightPageHeaderButtons = hasEditButton
-    ? [
-        <>
-          <EuiButtonEmpty
-            data-test-subj="openEditRuleFlyoutButton"
-            iconType="pencil"
-            onClick={() => setEditFlyoutVisibility(true)}
-            name="edit"
-            disabled={!ruleType.enabledInLicense}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
-          {editFlyoutVisible && (
-            <RuleEdit
-              initialRule={rule}
-              onClose={() => {
-                setInitialRule(rule);
-                setEditFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleType={ruleType}
-              onSave={setRule}
-            />
-          )}
-        </>,
-      ]
-    : [];
+  const editButton = hasEditButton ? (
+    <>
+      <EuiButtonEmpty
+        data-test-subj="openEditRuleFlyoutButton"
+        iconType="pencil"
+        onClick={() => setEditFlyoutVisibility(true)}
+        name="edit"
+        disabled={!ruleType.enabledInLicense}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+          defaultMessage="Edit"
+        />
+      </EuiButtonEmpty>
+      {editFlyoutVisible && (
+        <RuleEdit
+          initialRule={rule}
+          onClose={() => {
+            setInitialRule(rule);
+            setEditFlyoutVisibility(false);
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+          ruleType={ruleType}
+          onSave={setRule}
+        />
+      )}
+    </>
+  ) : null;
 
   return (
     <>
+      <DeleteModalConfirmation
+        onDeleted={async () => {
+          setRulesToDelete([]);
+          goToRulesList();
+        }}
+        onErrors={async () => {
+          // Refresh the rule from the server, it may have been deleted
+          await requestRefresh();
+          setRulesToDelete([]);
+        }}
+        onCancel={() => {
+          setRulesToDelete([]);
+        }}
+        apiDeleteCall={deleteRules}
+        idsToDelete={rulesToDelete}
+        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
+          defaultMessage: 'rule',
+        })}
+        multipleTitle=""
+        setIsLoadingState={() => {}}
+      />
+      <UpdateApiKeyModalConfirmation
+        onCancel={() => {
+          setRulesToUpdateAPIKey([]);
+        }}
+        idsToUpdate={rulesToUpdateAPIKey}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
+        setIsLoadingState={() => {}}
+        onUpdated={async () => {
+          setRulesToUpdateAPIKey([]);
+          requestRefresh();
+        }}
+      />
       <EuiPageHeader
         data-test-subj="ruleDetailsTitle"
         bottomBorder
@@ -275,34 +323,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.stateTitle"
-                        defaultMessage="State"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <RuleStatusDropdown
-                    disableRule={async () => await disableRule(rule)}
-                    enableRule={async () => await enableRule(rule)}
-                    snoozeRule={async (snoozeEndTime: string | -1) =>
-                      await snoozeRule(rule, snoozeEndTime)
-                    }
-                    unsnoozeRule={async () => await unsnoozeRule(rule)}
-                    rule={rule as RuleTableItem}
-                    onRuleChanged={requestRefresh}
-                    direction="row"
-                    isEditable={hasEditButton}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
                         id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
                         defaultMessage="Type"
                       />
@@ -314,7 +334,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {hasManageApiKeysCapability(capabilities) ? (
+            {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -334,7 +354,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            ) : null}
+            )}
             <EuiFlexItem grow={false}>
               {uniqueActions && uniqueActions.length ? (
                 <EuiFlexGroup responsive={false} gutterSize="xs">
@@ -378,7 +398,26 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </EuiFlexGroup>
         }
         rightSideItems={[
-          <ViewInApp rule={rule} />,
+          <RuleActionsPopover
+            canSaveRule={canSaveRule}
+            rule={rule}
+            onDelete={(ruleId) => {
+              setRulesToDelete([ruleId]);
+            }}
+            onApiKeyUpdate={(ruleId) => {
+              setRulesToUpdateAPIKey([ruleId]);
+            }}
+            onEnableDisable={async (enable) => {
+              if (enable) {
+                await enableRule(rule);
+              } else {
+                await disableRule(rule);
+              }
+              requestRefresh();
+            }}
+            onRunRule={onRunRule}
+          />,
+          editButton,
           <EuiButtonEmpty
             data-test-subj="refreshRulesButton"
             iconType="refresh"
@@ -391,7 +430,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          ...rightPageHeaderButtons,
+          <ViewInApp rule={rule} />,
         ]}
       />
       <EuiSpacer size="l" />
@@ -422,7 +461,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
-
         {rule.enabled && rule.executionStatus.status === 'warning' ? (
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -478,7 +516,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </EuiFlexGroup>
         )}
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem style={ruleDetailStyle}>
             <RuleRouteWithApi
               requestRefresh={requestRefresh}
               refreshToken={refreshToken}

@@ -15,14 +15,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  RuleStep,
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
+import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
@@ -33,7 +36,7 @@ import {
 } from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getSchema } from './schema';
+import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
@@ -41,11 +44,13 @@ import { useManageCaseAction } from './use_manage_case_action';
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
+  ruleType?: Type;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
+  responseActions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
 };
@@ -70,14 +75,16 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   onSubmit,
   setForm,
   actionMessageParams,
+  ruleType,
 }) => {
-  const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
+  const [isLoadingCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
       triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
+  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {
@@ -85,6 +92,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }),
     [application]
   );
+
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
@@ -113,7 +121,19 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
+  const saveClickRef = useRef<{ onSaveClick: () => Promise<boolean> | null }>({
+    onSaveClick: () => null,
+  });
+
   const getData = useCallback(async () => {
+    const isResponseActionsInvalid = await saveClickRef.current.onSaveClick();
+    if (isResponseActionsInvalid) {
+      return {
+        isValid: false,
+        data: getFormData(),
+      };
+    }
+
     const result = await submit();
     return result?.isValid
       ? result
@@ -161,15 +181,26 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             component={RuleActionsField}
             componentProps={{
               messageVariables: actionMessageParams,
-              hasErrorOnCreationCaseAction,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+    [throttle, actionMessageParams]
   );
+  const displayResponseActionsOptions = useMemo(() => {
+    if (isQueryRule(ruleType)) {
+      return (
+        <>
+          <UseArray path="responseActions">
+            {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+          </UseArray>
+        </>
+      );
+    }
+    return null;
+  }, [ruleType]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
@@ -180,6 +211,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           componentProps={throttleFieldComponentProps}
         />
         {displayActionsOptions}
+        {responseActionsEnabled && displayResponseActionsOptions}
+
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
@@ -196,7 +229,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         <UseField path="enabled" component={GhostFormField} />
       </>
     );
-  }, [application.capabilities.actions.show, displayActionsOptions, throttleFieldComponentProps]);
+  }, [
+    application.capabilities.actions.show,
+    displayActionsOptions,
+    displayResponseActionsOptions,
+    responseActionsEnabled,
+    throttleFieldComponentProps,
+  ]);
 
   if (isReadOnlyView) {
     return (

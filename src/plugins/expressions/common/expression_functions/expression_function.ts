@@ -63,6 +63,12 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   inputTypes: string[] | undefined;
 
   disabled: boolean;
+
+  /**
+   * Deprecation flag.
+   */
+  deprecated: boolean;
+
   telemetry: (
     state: ExpressionAstFunction['arguments'],
     telemetryData: Record<string, unknown>
@@ -88,6 +94,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       inputTypes,
       context,
       disabled,
+      deprecated,
       telemetry,
       inject,
       extract,
@@ -103,6 +110,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
     this.disabled = disabled || false;
+    this.deprecated = !!deprecated;
     this.telemetry = telemetry || ((s, c) => c);
     this.inject = inject || identity;
     this.extract = extract || ((s) => ({ state: s, references: [] }));

@@ -40,3 +40,7 @@ export interface ComponentTemplateListItem {
   hasSettings: boolean;
   isManaged: boolean;
 }
+
+export interface ComponentTemplateDatastreams {
+  data_streams: string[];
+}

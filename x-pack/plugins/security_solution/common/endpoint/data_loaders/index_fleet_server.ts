@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { FLEET_SERVER_SERVERS_INDEX } from '@kbn/fleet-plugin/common';
 import { wrapErrorAndRejectPromise } from './utils';
 

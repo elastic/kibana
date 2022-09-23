@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ObservabilityApp } from '../../../typings/common';
-import { UXMetrics } from '../../components/shared/core_web_vitals';
+import type { ObservabilityApp } from '../../../typings/common';
+import type { UXMetrics } from '../../components/shared/core_web_vitals';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {

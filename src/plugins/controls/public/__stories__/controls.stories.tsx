@@ -30,13 +30,12 @@ import {
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
 import { ControlGroupContainer } from '../control_group';
-import { pluginServices, registry } from '../services/storybook';
-import { replaceValueSuggestionMethod } from '../services/storybook/unified_search';
-import { injectStorybookDataView } from '../services/storybook/data_views';
+import { pluginServices, registry } from '../services/plugin_services.story';
+import { injectStorybookDataView } from '../services/data_views/data_views.story';
+import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
 import { populateStorybookControlFactories } from './storybook_control_factories';
-import { OptionsListRequest } from '../services/options_list';
-import { OptionsListResponse } from '../control_types/options_list/types';
-import { replaceOptionsListMethod } from '../services/storybook/options_list';
+import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
+import { OptionsListResponse, OptionsListRequest } from '../../common/options_list/types';
 
 export default {
   title: 'Controls',
@@ -139,7 +138,8 @@ export const ConfiguredControlGroupStory = () => (
       optionsList1: {
         type: OPTIONS_LIST_CONTROL,
         order: 1,
-        width: 'auto',
+        width: 'small',
+        grow: true,
         explicitInput: {
           title: 'Origin City',
           id: 'optionsList1',
@@ -151,7 +151,8 @@ export const ConfiguredControlGroupStory = () => (
       optionsList2: {
         type: OPTIONS_LIST_CONTROL,
         order: 2,
-        width: 'auto',
+        width: 'medium',
+        grow: true,
         explicitInput: {
           title: 'Destination City',
           id: 'optionsList2',
@@ -163,7 +164,8 @@ export const ConfiguredControlGroupStory = () => (
       optionsList3: {
         type: 'TIME_SLIDER',
         order: 3,
-        width: 'auto',
+        width: 'large',
+        grow: true,
         explicitInput: {
           title: 'Carrier',
           id: 'optionsList3',
@@ -174,7 +176,8 @@ export const ConfiguredControlGroupStory = () => (
       rangeSlider1: {
         type: RANGE_SLIDER_CONTROL,
         order: 4,
-        width: 'auto',
+        width: 'medium',
+        grow: true,
         explicitInput: {
           id: 'rangeSlider1',
           title: 'Average ticket price',
@@ -194,7 +197,8 @@ export const RangeSliderControlGroupStory = () => (
       rangeSlider1: {
         type: RANGE_SLIDER_CONTROL,
         order: 1,
-        width: 'auto',
+        width: 'medium',
+        grow: true,
         explicitInput: {
           id: 'rangeSlider1',
           title: 'Average ticket price',
@@ -207,7 +211,8 @@ export const RangeSliderControlGroupStory = () => (
       rangeSlider2: {
         type: RANGE_SLIDER_CONTROL,
         order: 2,
-        width: 'auto',
+        width: 'medium',
+        grow: true,
         explicitInput: {
           id: 'rangeSlider2',
           title: 'Total distance in miles',
@@ -220,7 +225,8 @@ export const RangeSliderControlGroupStory = () => (
       rangeSlider3: {
         type: RANGE_SLIDER_CONTROL,
         order: 3,
-        width: 'auto',
+        width: 'medium',
+        grow: true,
         explicitInput: {
           id: 'rangeSlider3',
           title: 'Flight duration in hour',
