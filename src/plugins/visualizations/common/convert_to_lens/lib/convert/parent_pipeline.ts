@@ -56,7 +56,7 @@ export const convertToOtherParentPipelineAggColumns = (
   }
 
   if (PIPELINE_AGGS.includes(metric.aggType)) {
-    const formula = getFormulaForPipelineAgg(agg, aggs);
+    const formula = getFormulaForPipelineAgg({ agg, aggs, dataView });
     if (!formula) {
       return null;
     }
@@ -125,7 +125,7 @@ export const convertToCumulativeSumAggColumn = (
       subMetric[0],
     ];
   } else {
-    const formula = getFormulaForPipelineAgg(agg, aggs);
+    const formula = getFormulaForPipelineAgg({ agg, aggs, dataView });
     if (!formula) {
       return null;
     }

@@ -173,7 +173,7 @@ export const getCustomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
 export const getMetricFromParentPipelineAgg = (
   agg: SchemaConfig<ParentPipelineMetric | SiblingPipelineMetric>,
   aggs: Array<SchemaConfig<METRIC_TYPES>>
-) => {
+): SchemaConfig<METRIC_TYPES> | null => {
   if (!agg.aggParams) {
     return null;
   }
