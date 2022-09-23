@@ -94,7 +94,7 @@ const state: State = {
     ...mockGlobalState.timeline,
     timelineById: {
       [TimelineId.active]: {
-        ...mockGlobalState.timeline.timelineById.test,
+        ...mockGlobalState.timeline.timelineById['timeline-test'],
         id: TimelineId.active,
         dataProviders: [
           {
@@ -150,7 +150,13 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, tGridReducer, kibanaObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 let testProps = {
   browserFields: mockBrowserFields,
@@ -300,6 +306,7 @@ describe('StatefulTopN', () => {
             {...{
               ...testProps,
               scopeId: TimelineId.active,
+              isInTimeline: true,
             }}
           />
         </TestProviders>

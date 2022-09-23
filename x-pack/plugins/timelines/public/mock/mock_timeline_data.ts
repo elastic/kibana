@@ -1588,4 +1588,6 @@ export const mockTgridModel: TGridModel = {
   title: 'Test rule',
   version: '1',
   timelineType: 'default',
+  kqlMode: 'filter',
+  sessionViewConfig: null,
 };

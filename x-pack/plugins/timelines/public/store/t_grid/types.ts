@@ -38,7 +38,7 @@ export enum TableId {
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   casePage = 'timeline-case',
-  test = 'test-table', // Reserved for testing purposes
+  test = 'table-test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }

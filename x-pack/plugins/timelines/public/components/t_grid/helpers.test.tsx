@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 
-import { DataProviderType, TimelineId } from '../../../common/types/timeline';
+import { DataProviderType } from '../../../common/types/timeline';
 import {
   buildGlobalQuery,
   combineQueries,
@@ -19,6 +19,7 @@ import {
   showGlobalFilters,
 } from './helpers';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
+import { TableId } from '../../types';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -674,15 +675,11 @@ describe('Combined Queries', () => {
       null,
     ];
 
-    const selectableViews: TimelineId[] = [
-      TimelineId.detectionsPage,
-      TimelineId.detectionsRulesDetailsPage,
-    ];
+    const selectableViews: TableId[] = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
 
     const exampleNonSelectableViews: string[] = [
-      TimelineId.casePage,
-      TimelineId.hostsPageEvents,
-      TimelineId.usersPageEvents,
+      TableId.hostsPageEvents,
+      TableId.usersPageEvents,
       'foozle',
       '',
     ];

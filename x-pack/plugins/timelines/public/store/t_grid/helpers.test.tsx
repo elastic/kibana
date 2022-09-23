@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortColumnTimeline } from '../../../common/types';
+import { SortColumnTable } from '../../../common/types';
 import { tGridDefaults } from './defaults';
 import {
   setInitializeTgridSettings,
@@ -17,13 +17,13 @@ import { mockGlobalState } from '../../mock/global_state';
 import { TGridModelSettings } from '.';
 
 const id = 'foo';
-const defaultTimelineById = {
-  ...mockGlobalState.timelineById,
+const defaultTableById = {
+  ...mockGlobalState.tableById,
 };
 
 describe('setInitializeTgridSettings', () => {
   test('it returns the expected sort when tGridSettingsProps has an override', () => {
-    const sort: SortColumnTimeline[] = [
+    const sort: SortColumnTable[] = [
       { columnId: 'foozle', columnType: 'date', esTypes: ['date'], sortDirection: 'asc' },
     ];
 
@@ -33,8 +33,7 @@ describe('setInitializeTgridSettings', () => {
     };
 
     expect(
-      setInitializeTgridSettings({ id, timelineById: defaultTimelineById, tGridSettingsProps })[id]
-        .sort
+      setInitializeTgridSettings({ id, tableById: defaultTableById, tGridSettingsProps })[id].sort
     ).toEqual(sort);
   });
 
@@ -42,8 +41,7 @@ describe('setInitializeTgridSettings', () => {
     const tGridSettingsProps = { footerText: 'test' }; // <-- no `sort` override
 
     expect(
-      setInitializeTgridSettings({ id, timelineById: defaultTimelineById, tGridSettingsProps })[id]
-        .sort
+      setInitializeTgridSettings({ id, tableById: defaultTableById, tGridSettingsProps })[id].sort
     ).toEqual(tGridDefaults.sort);
   });
 
@@ -52,19 +50,23 @@ describe('setInitializeTgridSettings', () => {
 
     const timelineById = {
       [id]: {
-        ...defaultTimelineById.test,
+        ...defaultTableById.test,
         initialized: true,
       },
     };
 
-    const result = setInitializeTgridSettings({ id, timelineById, tGridSettingsProps });
+    const result = setInitializeTgridSettings({
+      id,
+      tableById: defaultTableById,
+      tGridSettingsProps,
+    });
     expect(result).toBe(timelineById);
   });
 });
 
 describe('updateTGridColumnOrder', () => {
   test('it returns the columns in the new expected order', () => {
-    const originalIdOrder = defaultTimelineById.test.columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
+    const originalIdOrder = defaultTableById.test.columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
 
     // the new order swaps the positions of the first and second columns:
     const newIdOrder = [originalIdOrder[1], originalIdOrder[0], ...originalIdOrder.slice(2)]; // ['event.severity', '@timestamp', 'event.category', '...']
@@ -73,23 +75,23 @@ describe('updateTGridColumnOrder', () => {
       updateTGridColumnOrder({
         columnIds: newIdOrder,
         id: 'test',
-        timelineById: defaultTimelineById,
+        tableById: defaultTableById,
       })
     ).toEqual({
-      ...defaultTimelineById,
-      test: {
-        ...defaultTimelineById.test,
+      ...defaultTableById,
+      'table-test': {
+        ...defaultTableById['table-test'],
         columns: [
-          defaultTimelineById.test.columns[1], // event.severity
-          defaultTimelineById.test.columns[0], // @timestamp
-          ...defaultTimelineById.test.columns.slice(2), // all remaining columns
+          defaultTableById['table-test'].columns[1], // event.severity
+          defaultTableById['table-test'].columns[0], // @timestamp
+          ...defaultTableById['table-test'].columns.slice(2), // all remaining columns
         ],
       },
     });
   });
 
   test('it omits unknown column IDs when re-ordering columns', () => {
-    const originalIdOrder = defaultTimelineById.test.columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
+    const originalIdOrder = defaultTableById.test.columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
     const unknownColumId = 'does.not.exist';
     const newIdOrder = [originalIdOrder[0], unknownColumId, ...originalIdOrder.slice(1)]; // ['@timestamp', 'does.not.exist', 'event.severity', 'event.category', '...']
 
@@ -97,12 +99,12 @@ describe('updateTGridColumnOrder', () => {
       updateTGridColumnOrder({
         columnIds: newIdOrder,
         id: 'test',
-        timelineById: defaultTimelineById,
+        tableById: defaultTableById,
       })
     ).toEqual({
-      ...defaultTimelineById,
-      test: {
-        ...defaultTimelineById.test,
+      ...defaultTableById,
+      'table-test': {
+        ...defaultTableById['table-test'],
       },
     });
   });
@@ -114,12 +116,12 @@ describe('updateTGridColumnOrder', () => {
       updateTGridColumnOrder({
         columnIds: newIdOrder,
         id: 'test',
-        timelineById: defaultTimelineById,
+        tableById: defaultTableById,
       })
     ).toEqual({
-      ...defaultTimelineById,
-      test: {
-        ...defaultTimelineById.test,
+      ...defaultTableById,
+      'table-test': {
+        ...defaultTableById['table-test'],
         columns: [], // <-- empty, because none of the new column IDs match the old IDs
       },
     });
@@ -132,7 +134,7 @@ describe('updateTGridColumnWidth', () => {
     const width = 1234;
 
     const expectedUpdatedColumn = {
-      ...defaultTimelineById.test.columns[0], // @timestamp
+      ...defaultTableById['table-test'].columns[0], // @timestamp
       initialWidth: width,
     };
 
@@ -140,14 +142,14 @@ describe('updateTGridColumnWidth', () => {
       updateTGridColumnWidth({
         columnId,
         id: 'test',
-        timelineById: defaultTimelineById,
+        tableById: defaultTableById,
         width,
       })
     ).toEqual({
-      ...defaultTimelineById,
-      test: {
-        ...defaultTimelineById.test,
-        columns: [expectedUpdatedColumn, ...defaultTimelineById.test.columns.slice(1)],
+      ...defaultTableById,
+      'table-test': {
+        ...defaultTableById['table-test'],
+        columns: [expectedUpdatedColumn, ...defaultTableById['table-test'].columns.slice(1)],
       },
     });
   });
@@ -159,13 +161,13 @@ describe('updateTGridColumnWidth', () => {
       updateTGridColumnWidth({
         columnId: unknownColumId,
         id: 'test',
-        timelineById: defaultTimelineById,
+        tableById: defaultTableById,
         width: 90210,
       })
     ).toEqual({
-      ...defaultTimelineById,
-      test: {
-        ...defaultTimelineById.test,
+      ...defaultTableById,
+      'table-test': {
+        ...defaultTableById['table-test'],
       },
     });
   });

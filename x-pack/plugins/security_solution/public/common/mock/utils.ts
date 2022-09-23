@@ -37,7 +37,7 @@ const combineTimelineReducer = reduceReducers<any>(
     ...mockGlobalState.timeline,
     timelineById: {
       ...mockGlobalState.timeline.timelineById,
-      test: {
+      'test-timeline': {
         ...mockGlobalState.timeline.timelineById.test,
         defaultColumns: defaultHeaders,
         loadingText: 'events',

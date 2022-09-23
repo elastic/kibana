@@ -6,7 +6,7 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
-import { ActionProps, HeaderActionProps, TimelineTabs } from '../../../../../common/types';
+import { ActionProps, HeaderActionProps } from '../../../../../common/types';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 import React from 'react';
 
@@ -61,7 +61,7 @@ describe('checkbox control column', () => {
       showEventsSelect: true,
       showSelectAllCheckbox: true,
       sort: [],
-      tabType: TimelineTabs.query,
+      tabType: 'query',
       timelineId: 'test-timelineId',
     };
 

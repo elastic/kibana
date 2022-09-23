@@ -50,6 +50,8 @@ interface CreateTGridParams extends TGridPersistInput {
 
 /** Adds a new `Table` to the provided collection of `TableById` */
 export const createInitTGrid = ({ id, tableById, ...tGridProps }: CreateTGridParams): TableById => {
+  console.log(tableById)
+  console.log(id)
   const dataTable = tableById[id];
   return {
     ...tableById,

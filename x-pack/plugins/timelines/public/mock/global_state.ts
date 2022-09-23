@@ -11,7 +11,7 @@ import { defaultHeaders } from './header';
 
 export const mockGlobalState: TableState = {
   tableById: {
-    test: {
+    'table-test': {
       columns: defaultHeaders,
       dateRange: {
         start: '2020-07-07T08:20:18.966Z',
@@ -58,6 +58,9 @@ export const mockGlobalState: TableState = {
       queryFields: [],
       title: 'Events',
       timelineType: 'default',
+      kqlMode: 'filter',
+      sessionViewConfig: null,
+      selectAll: false,
     },
   },
 };

@@ -10,7 +10,14 @@ import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
-import { mockIndexPattern, TestProviders } from '../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  mockIndexPattern,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
 import type { HostDetailsTabsProps } from './types';
 import { hostDetailsPagePath } from '../types';
@@ -19,6 +26,10 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -67,6 +78,23 @@ jest.mock('../../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
+const myState: State = mockGlobalState;
+const { storage } = createSecuritySolutionStorageMock();
+const myStore = createStore(
+  {
+    ...myState,
+    dataTable: {
+      tableById: {
+        [TableId.hostsPageEvents]: myState.dataTable.tableById['table-test'],
+      },
+    },
+  },
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
+
 describe('body', () => {
   const scenariosMap = {
     [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
@@ -95,7 +123,7 @@ describe('body', () => {
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={myStore}>
           <MemoryRouter initialEntries={[`/hosts/name/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}

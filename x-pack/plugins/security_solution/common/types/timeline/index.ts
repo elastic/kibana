@@ -331,7 +331,7 @@ export enum TableId {
   hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
-  test = 'test-table', // Reserved for testing purposes
+  test = 'table-test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',

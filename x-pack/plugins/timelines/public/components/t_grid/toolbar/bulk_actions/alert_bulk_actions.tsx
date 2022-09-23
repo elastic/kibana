@@ -127,7 +127,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       onUpdateSuccess,
       onUpdateFailure,
       customBulkActions,
-      timelineId: id,
+      scopeId: id,
     });
 
     return (
