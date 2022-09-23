@@ -42,6 +42,14 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
   name: { type: 'keyword' },
+  pipeline: {
+    properties: {
+      extract_binary_content: { type: 'boolean' },
+      name: { type: 'keyword' },
+      reduce_whitespace: { type: 'boolean' },
+      run_ml_inference: { type: 'boolean' },
+    },
+  },
   scheduling: {
     properties: {
       enabled: { type: 'boolean' },
@@ -70,7 +78,7 @@ export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
   default_extract_binary_content: true,
   default_name: 'ent-search-generic-ingestion',
   default_reduce_whitespace: true,
-  default_run_ml_inference: false,
+  default_run_ml_inference: true,
 };
 
 const indices: IndexDefinition[] = [

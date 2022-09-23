@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
 import { InferencePipeline } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
@@ -53,9 +55,9 @@ export const fetchPipelineProcessorInferenceData = async (
       if (trainedModelName)
         pipelineProcessorData[trainedModelName] = {
           isDeployed: false,
-          modelType: 'unknown',
           pipelineName: pipelineProcessorName,
           trainedModelName,
+          types: [],
         };
 
       return pipelineProcessorData;
@@ -64,32 +66,66 @@ export const fetchPipelineProcessorInferenceData = async (
   );
 };
 
-export const fetchAndAddTrainedModelData = async (
-  client: ElasticsearchClient,
-  pipelineProcessorData: Record<string, InferencePipeline>
-): Promise<Record<string, InferencePipeline>> => {
-  const trainedModelNames = Object.keys(pipelineProcessorData);
+export const getMlModelTypesForModelConfig = (trainedModel: MlTrainedModelConfig): string[] => {
+  if (!trainedModel) return [];
 
+  const isBuiltIn = trainedModel.tags?.includes(BUILT_IN_MODEL_TAG);
+
+  return [
+    trainedModel.model_type,
+    ...Object.keys(trainedModel.inference_config || {}),
+    ...(isBuiltIn ? [BUILT_IN_MODEL_TAG] : []),
+  ].filter((type): type is string => type !== undefined);
+};
+
+export const getMlModelConfigsForModelIds = async (
+  client: ElasticsearchClient,
+  trainedModelNames: string[]
+): Promise<Record<string, InferencePipeline>> => {
   const [trainedModels, trainedModelsStats] = await Promise.all([
     client.ml.getTrainedModels({ model_id: trainedModelNames.join() }),
     client.ml.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
   ]);
 
+  const modelConfigs: Record<string, InferencePipeline> = {};
+
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
     const trainedModelName = trainedModelData.model_id;
 
-    if (pipelineProcessorData.hasOwnProperty(trainedModelName)) {
-      pipelineProcessorData[trainedModelName].modelType = trainedModelData.model_type || 'unknown';
+    if (trainedModelNames.includes(trainedModelName)) {
+      modelConfigs[trainedModelName] = {
+        isDeployed: false,
+        pipelineName: '',
+        trainedModelName,
+        types: getMlModelTypesForModelConfig(trainedModelData),
+      };
     }
   });
 
   trainedModelsStats.trained_model_stats.forEach((trainedModelStats) => {
     const trainedModelName = trainedModelStats.model_id;
-    if (pipelineProcessorData.hasOwnProperty(trainedModelName)) {
+    if (modelConfigs.hasOwnProperty(trainedModelName)) {
       const isDeployed = trainedModelStats.deployment_stats?.state === 'started';
-      pipelineProcessorData[trainedModelName].isDeployed = isDeployed;
+      modelConfigs[trainedModelName].isDeployed = isDeployed;
     }
   });
+
+  return modelConfigs;
+};
+
+export const fetchAndAddTrainedModelData = async (
+  client: ElasticsearchClient,
+  pipelineProcessorData: Record<string, InferencePipeline>
+): Promise<Record<string, InferencePipeline>> => {
+  const trainedModelNames = Object.keys(pipelineProcessorData);
+  const modelConfigs = await getMlModelConfigsForModelIds(client, trainedModelNames);
+
+  for (const [modelName, modelData] of Object.entries(modelConfigs)) {
+    if (pipelineProcessorData.hasOwnProperty(modelName)) {
+      pipelineProcessorData[modelName].types = modelData.types;
+      pipelineProcessorData[modelName].isDeployed = modelData.isDeployed;
+    }
+  }
 
   return pipelineProcessorData;
 };

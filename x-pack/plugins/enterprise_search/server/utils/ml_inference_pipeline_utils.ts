@@ -9,4 +9,12 @@ export const getInferencePipelineNameFromIndexName = (indexName: string) =>
   `${indexName}@ml-inference`;
 
 export const getPrefixedInferencePipelineProcessorName = (pipelineName: string) =>
-  pipelineName.startsWith('ml-inference-') ? pipelineName : `ml-inference-${pipelineName}`;
+  pipelineName.startsWith('ml-inference-')
+    ? formatPipelineName(pipelineName)
+    : `ml-inference-${formatPipelineName(pipelineName)}`;
+
+const formatPipelineName = (rawName: string) =>
+  rawName
+    .trim()
+    .replace(/\s+/g, '_') // Convert whitespaces to underscores
+    .toLowerCase();

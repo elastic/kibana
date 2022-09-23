@@ -13,6 +13,8 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+import { i18n } from '@kbn/i18n';
+
 import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
 
@@ -35,7 +37,17 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   indexPattern = INDEX_NAME,
   dataTestSubj,
 }) => {
-  const { data } = useStartServices();
+  const {
+    data,
+    unifiedSearch,
+    storage,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    usageCollection,
+  } = useStartServices();
+
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
   const isQueryValid = useMemo(() => {
@@ -105,6 +117,17 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       submitOnBlur
       isClearable
       autoSubmit
+      appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
+      deps={{
+        unifiedSearch,
+        notifications,
+        http,
+        docLinks,
+        uiSettings,
+        data,
+        storage,
+        usageCollection,
+      }}
       {...(dataTestSubj && { dataTestSubj })}
     />
   );

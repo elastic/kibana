@@ -33,6 +33,18 @@ describe('createMlInferencePipeline util function', () => {
     },
   };
 
+  mockClient.ml.getTrainedModels.mockImplementation(() =>
+    Promise.resolve({
+      trained_model_configs: [
+        {
+          input: {
+            field_names: ['target-field'],
+          },
+        },
+      ],
+    })
+  );
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -40,17 +52,6 @@ describe('createMlInferencePipeline util function', () => {
   it("should create the pipeline if it doesn't exist", async () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-    mockClient.ml.getTrainedModels.mockImplementation(() =>
-      Promise.resolve({
-        trained_model_configs: [
-          {
-            input: {
-              field_names: ['target-field'],
-            },
-          },
-        ],
-      })
-    );
 
     const expectedResult = {
       created: true,
@@ -67,6 +68,22 @@ describe('createMlInferencePipeline util function', () => {
 
     expect(actualResult).toEqual(expectedResult);
     expect(mockClient.ingest.putPipeline).toHaveBeenCalled();
+  });
+
+  it('should convert spaces to underscores in the pipeline name', async () => {
+    await createMlInferencePipeline(
+      'my pipeline with spaces  ',
+      modelId,
+      sourceField,
+      destinationField,
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'ml-inference-my_pipeline_with_spaces',
+      })
+    );
   });
 
   it('should throw an error without creating the pipeline if it already exists', () => {

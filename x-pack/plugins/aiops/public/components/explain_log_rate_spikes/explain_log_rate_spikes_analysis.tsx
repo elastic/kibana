@@ -32,6 +32,7 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
 import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
+import { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
@@ -56,6 +57,7 @@ interface ExplainLogRateSpikesAnalysisProps {
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
+  onSelectedGroup?: (group: GroupTableItem | null) => void;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -67,6 +69,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   onPinnedChangePoint,
   onSelectedChangePoint,
   selectedChangePoint,
+  onSelectedGroup,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -127,7 +130,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(({ group, docCount, pValue }, index) => {
+    const tableItems = data.changePointsGroups.map(({ id, group, docCount, histogram, pValue }) => {
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
@@ -144,11 +147,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       });
 
       return {
-        id: index,
+        id,
         docCount,
         pValue,
         group: dedupedGroup,
         repeatedValues,
+        histogram,
       };
     });
 
@@ -248,6 +252,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
+          onSelectedGroup={onSelectedGroup}
           dataViewId={dataView.id}
         />
       ) : null}
