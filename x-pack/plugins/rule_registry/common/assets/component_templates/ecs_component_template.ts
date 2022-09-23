@@ -14,7 +14,7 @@ export const ecsComponentTemplate: ClusterPutComponentTemplateBody = {
   template: {
     settings: {
       number_of_shards: 1,
-      'index.mapping.total_fields.limit': 2000,
+      'index.mapping.total_fields.limit': 1700,
     },
     mappings: merge(
       {},
