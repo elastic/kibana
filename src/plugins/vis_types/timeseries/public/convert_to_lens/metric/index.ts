@@ -8,6 +8,7 @@
 
 import uuid from 'uuid';
 import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
+import { getIndexPatternIds } from '@kbn/visualizations-plugin/common';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -29,7 +30,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   const visibleSeries = model.series.filter(({ hidden }) => !hidden);
   let currentIndexPattern: DataView | null = null;
   for (const series of visibleSeries) {
-    const { indexPatternId, indexPattern } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -37,6 +38,12 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       series.series_time_field,
       dataViews
     );
+
+    if (!datasourceInfo) {
+      return null;
+    }
+
+    const { indexPatternId, indexPattern } = datasourceInfo;
     indexPatternIds.add(indexPatternId);
     currentIndexPattern = indexPattern;
   }
@@ -116,9 +123,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     return null;
   }
 
+  const layers = Object.values(excludeMetaFromLayers({ 0: extendedLayer }));
   return {
     type: 'lnsMetric',
-    layers: Object.values(excludeMetaFromLayers({ 0: extendedLayer })),
+    layers,
     configuration,
+    indexPatternIds: getIndexPatternIds(layers),
   };
 };
