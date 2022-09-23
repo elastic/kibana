@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('scripted fields', function () {
+  describe('scripted fields 111', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -499,6 +499,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
       });
 
+      // TODO: fix these flaky tests
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
