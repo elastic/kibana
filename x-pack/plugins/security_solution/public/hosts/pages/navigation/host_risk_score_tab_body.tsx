@@ -7,6 +7,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
@@ -19,21 +21,29 @@ import {
   useHostRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
 export const HostRiskScoreQueryTabBody = ({
   deleteQuery,
-  endDate,
   filterQuery,
   skip,
   setQuery,
-  startDate,
   type,
 }: HostsComponentsQueryProps) => {
-  const getHosRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
+  const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
-    getHosRiskScoreSelector(state, hostsModel.HostsType.page)
+    getHostRiskScoreSelector(state, hostsModel.HostsType.page)
+  );
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
   );
 
   const pagination = useMemo(
@@ -49,18 +59,43 @@ export const HostRiskScoreQueryTabBody = ({
   useEffect(() => {
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
+  const { from, to } = useGlobalTime();
 
-  const [loading, { data, totalCount, inspect, isInspected, refetch }] = useHostRiskScore({
+  const [
+    loading,
+    { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
+  ] = useHostRiskScore({
     filterQuery,
     skip: querySkip,
     pagination,
     sort,
+    timerange: { from, to },
   });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
     filterQuery,
     skip: querySkip,
   });
+
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
+
+  if (isDeprecated) {
+    return (
+      <RiskScoresDeprecated
+        refetch={refetch}
+        timerange={timerange}
+        entityType={RiskScoreEntity.host}
+      />
+    );
+  }
+
+  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+  }
 
   return (
     <HostRiskScoreTableManage

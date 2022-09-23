@@ -66,6 +66,7 @@ import {
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
+import { Ecs } from '../../../../common/ecs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
 import { tGridActions, TGridModel, tGridSelectors, TableState } from '../../../store/t_grid';
@@ -94,6 +95,13 @@ interface OwnProps {
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertStatus;
+  getRowRenderer?: ({
+    data,
+    rowRenderers,
+  }: {
+    data: Ecs;
+    rowRenderers: RowRenderer[];
+  }) => RowRenderer | null;
   id: string;
   indexNames: string[];
   isEventViewer?: boolean;
@@ -304,6 +312,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     filterQuery,
     filters,
     filterStatus,
+    getRowRenderer,
     hasAlertsCrud,
     hasAlertsCrudPermissions,
     id,
@@ -895,6 +904,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               appId={appId}
               alertToolbar={alertToolbar}
               events={data}
+              getRowRenderer={getRowRenderer}
               leadingControlColumns={leadingTGridControlColumns ?? []}
               onChangePage={onChangePage}
               onChangeItemsPerPage={onChangeItemsPerPage}
@@ -902,6 +912,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               pageSize={pageSize}
               pageSizeOptions={itemsPerPageOptions}
               rowRenderers={rowRenderers}
+              timelineId={id}
               totalItemCount={totalItems}
             />
           )}

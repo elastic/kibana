@@ -11,8 +11,6 @@ import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
   type InjectedMetadataParams,
-  type InternalInjectedMetadataSetup,
-  type InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
@@ -32,16 +30,12 @@ import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
-import {
-  ApplicationService,
-  type InternalApplicationSetup,
-  type InternalApplicationStart,
-} from '@kbn/core-application-browser-internal';
+import { ApplicationService } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
+import { CoreAppsService } from '@kbn/core-apps-browser-internal';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
-import { CoreSetup, CoreStart } from '.';
-import { PluginsService } from './plugins';
-import { CoreApp } from './core_app';
 
 import {
   LOAD_SETUP_DONE,
@@ -59,16 +53,15 @@ interface Params {
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
 }
 
-/** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
-  application: InternalApplicationSetup;
-  injectedMetadata: InternalInjectedMetadataSetup;
-}
-
-/** @internal */
-export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
-  application: InternalApplicationStart;
-  injectedMetadata: InternalInjectedMetadataStart;
+// Expands the definition of navigator to include experimental features
+interface ExtendedNavigator {
+  connection?: {
+    effectiveType?: string;
+  };
+  // Estimated RAM
+  deviceMemory?: number;
+  // Number of cores
+  hardwareConcurrency?: number;
 }
 
 /**
@@ -95,7 +88,7 @@ export class CoreSystem {
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
-  private readonly coreApp: CoreApp;
+  private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
   private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
@@ -140,7 +133,7 @@ export class CoreSystem {
     this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
-    this.coreApp = new CoreApp(this.coreContext);
+    this.coreApp = new CoreAppsService(this.coreContext);
 
     performance.mark(KBN_LOAD_MARKS, {
       detail: LOAD_CORE_CREATED,
@@ -168,12 +161,24 @@ export class CoreSystem {
     });
 
     const timing = this.getLoadMarksInfo();
+
+    const navigatorExt = navigator as ExtendedNavigator;
+    const navigatorInfo: Record<string, string> = {};
+    if (navigatorExt.deviceMemory) {
+      navigatorInfo.deviceMemory = String(navigatorExt.deviceMemory);
+    }
+    if (navigatorExt.hardwareConcurrency) {
+      navigatorInfo.hardwareConcurrency = String(navigatorExt.hardwareConcurrency);
+    }
+
     reportPerformanceMetricEvent(analytics, {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: this.coreContext.env.packageInfo.version,
         protocol: window.location.protocol,
         ...fetchOptionalMemoryInfo(),
+        // Report some hardware metrics for bucketing
+        ...navigatorInfo,
       },
       duration: timing[LOAD_FIRST_NAV],
       key1: LOAD_START,

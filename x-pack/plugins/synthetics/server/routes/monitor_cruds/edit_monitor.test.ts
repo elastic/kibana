@@ -47,6 +47,11 @@ describe('syncEditedMonitor', () => {
           .fn()
           .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
       },
+      packagePolicyService: {
+        get: jest.fn().mockReturnValue({}),
+        getByIDs: jest.fn().mockReturnValue([]),
+        buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
+      },
     },
   } as unknown as UptimeServerSetup;
 
@@ -75,7 +80,9 @@ describe('syncEditedMonitor', () => {
 
   const previousMonitor = {
     id: 'saved-obj-id',
-    attributes: { name: editedMonitor.name },
+    attributes: { name: editedMonitor.name, locations: [] } as any,
+    type: 'synthetics-monitor',
+    references: [],
   } as SavedObject<EncryptedSyntheticsMonitor>;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -96,12 +103,15 @@ describe('syncEditedMonitor', () => {
       request: {} as unknown as KibanaRequest,
       savedObjectsClient:
         serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      spaceId: 'test-space',
     });
 
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'saved-obj-id',
-      })
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'saved-obj-id',
+        }),
+      ])
     );
 
     expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(

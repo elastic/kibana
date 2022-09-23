@@ -26,17 +26,19 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { combineQueries } from '../../../common/lib/kuery';
 import { tableDefaults } from '../../../timelines/store/timeline/defaults';
-import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
+import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import {
-  alertsDefaultModel,
+  getAlertsDefaultModel,
   buildAlertStatusFilter,
   requiredFieldsForActions,
 } from './default_config';
 import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
+import { useLicense } from '../../../common/hooks/use_license';
+
 interface OwnProps {
   defaultFilters?: Filter[];
   from: string;
@@ -81,7 +83,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
-  const ACTION_BUTTON_COUNT = 5;
+  const license = useLicense();
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -162,7 +166,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useEffect(() => {
     dispatch(
       dataTableActions.initializeTGridSettings({
-        defaultColumns: columns.map((c) =>
+        defaultColumns: getColumns(license).map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
                 ...c,
@@ -171,7 +175,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             : c
         ),
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds as RowRendererId[],
+        excludedRowRendererIds: getAlertsDefaultModel(license)
+          .excludedRowRendererIds as RowRendererId[],
         filterManager,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: tableId,
@@ -181,9 +186,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         showCheckboxes: true,
       })
     );
-  }, [dispatch, filterManager, tGridEnabled, tableId]);
+  }, [dispatch, filterManager, tGridEnabled, tableId, license]);
 
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const leadingControlColumns = useMemo(
+    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
+    [ACTION_BUTTON_COUNT]
+  );
 
   if (loading || isEmpty(selectedPatterns)) {
     return null;
@@ -194,7 +202,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       additionalFilters={additionalFiltersComponent}
       currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
-      defaultModel={alertsDefaultModel}
+      defaultModel={getAlertsDefaultModel(license)}
       end={to}
       entityType="events"
       hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}

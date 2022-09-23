@@ -36,6 +36,7 @@ import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import {
   useSessionViewNavigation,
   useSessionView,
@@ -267,6 +268,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             fieldBrowserOptions,
             filters: globalFilters,
             filterStatus: currentFilter,
+            getRowRenderer,
             globalFullScreen,
             graphEventId,
             graphOverlay,

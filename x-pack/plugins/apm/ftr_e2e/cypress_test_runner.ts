@@ -58,10 +58,9 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     ...cypressCliArgs,
     project: cypressProjectPath,
     config: {
-      baseUrl: kibanaUrl,
-      requestTimeout: 10000,
-      responseTimeout: 60000,
-      defaultCommandTimeout: 15000,
+      e2e: {
+        baseUrl: kibanaUrl,
+      },
     },
     env: {
       KIBANA_URL: kibanaUrl,
@@ -74,7 +73,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   return res;
 }
 
-function getCypressCliArgs() {
+function getCypressCliArgs(): Record<string, unknown> {
   if (!process.env.CYPRESS_CLI_ARGS) {
     return {};
   }
@@ -83,5 +82,11 @@ function getCypressCliArgs() {
     process.env.CYPRESS_CLI_ARGS
   ) as Record<string, unknown>;
 
-  return cypressCliArgs;
+  const spec =
+    typeof cypressCliArgs.spec === 'string' &&
+    !cypressCliArgs.spec.includes('**')
+      ? `**/${cypressCliArgs.spec}*`
+      : cypressCliArgs.spec;
+
+  return { ...cypressCliArgs, spec };
 }

@@ -14,7 +14,7 @@ import type {
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TableId } from '../../../../common/types';
-import { columns } from '../../../detections/configurations/security_solution_detections';
+import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 
@@ -27,7 +27,7 @@ const registerAlertsTableConfiguration = (
   }
   const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.detectionsPage]);
   const columnsFormStorage = dataTableStorage?.[TableId.detectionsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : columns;
+  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
 
   registry.register({
     id: APP_ID,

@@ -23,6 +23,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -35,7 +36,8 @@
               "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; pingTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"full\" | \"certificate\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -48,7 +50,8 @@
               "{ basePathConfigured: boolean; maxPayloadInBytes: number; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; compression: { enabled: boolean; referrerWhitelistConfigured: boolean; }; xsrf: { disableProtection: boolean; allowlistConfigured: boolean; }; requestId: { allowFromAnyIp: boolean; ipAllowlistConfigured: boolean; }; ssl: { certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; cipherSuites: string[]; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; redirectHttpFromPortConfigured: boolean; supportedProtocols: string[]; clientAuthentication: \"optional\" | \"none\" | \"required\"; }; securityResponseHeaders: { strictTransportSecurity: string; xContentTypeOptions: string; referrerPolicy: string; permissionsPolicyConfigured: boolean; disableEmbedding: boolean; }; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -61,7 +64,8 @@
               "{ appendersTypesUsed: string[]; loggersConfiguredCount: number; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -74,7 +78,8 @@
               "{ customIndex: boolean; maxImportPayloadBytes: number; maxImportExportSize: number; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -87,7 +92,8 @@
               "{ set: string[]; unset: string[]; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -103,6 +109,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -115,7 +122,8 @@
               "{ heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -129,6 +137,7 @@
         "description": [],
         "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -140,7 +149,8 @@
               "The name of the counter"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -155,7 +165,8 @@
               "string | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -170,7 +181,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -186,6 +198,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -198,7 +211,8 @@
               "{ indices: { alias: string; docsCount: number; docsDeleted: number; storeSizeBytes: number; primaryStoreSizeBytes: number; savedObjectsDocsCount: number; }[]; legacyUrlAliases: { activeCount: number; inactiveCount: number; disabledCount: number; totalCount: number; }; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -212,6 +226,7 @@
         "description": [],
         "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -243,6 +258,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -261,7 +277,8 @@
               }
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -280,7 +297,8 @@
               }
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -299,7 +317,8 @@
               }
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -317,6 +336,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -340,6 +360,7 @@
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server",
@@ -359,6 +380,7 @@
                 ],
                 "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -380,6 +402,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -401,6 +424,7 @@
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -416,6 +440,7 @@
         "description": [],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -428,7 +453,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -441,7 +467,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -454,7 +481,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -467,7 +495,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -480,7 +509,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -493,7 +523,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -506,7 +537,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -519,7 +551,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -532,7 +565,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -545,7 +579,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -558,7 +593,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -571,7 +607,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -584,7 +621,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -597,7 +635,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -610,7 +649,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -623,7 +663,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -636,7 +677,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -649,7 +691,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -662,7 +705,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -675,7 +719,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -688,7 +733,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -701,7 +747,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -714,7 +761,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -727,7 +775,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -740,7 +789,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -753,7 +803,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -766,7 +817,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -779,7 +831,106 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -792,7 +943,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -805,7 +957,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -818,7 +971,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -831,7 +985,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -844,7 +999,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -857,7 +1013,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -870,7 +1027,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -883,7 +1041,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -896,7 +1055,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -909,7 +1069,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -922,7 +1083,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -935,7 +1097,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -948,7 +1111,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -961,7 +1125,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -974,7 +1139,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -987,7 +1153,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1000,7 +1167,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1013,7 +1181,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1026,7 +1195,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1039,7 +1209,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1052,7 +1223,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1065,7 +1237,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1078,7 +1251,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1091,7 +1265,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1104,7 +1279,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1117,7 +1293,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1130,7 +1307,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1143,7 +1321,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1156,7 +1335,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1169,7 +1349,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1182,7 +1363,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1195,7 +1377,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1208,7 +1391,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1221,7 +1405,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1234,7 +1419,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1247,7 +1433,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1260,7 +1447,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1273,7 +1461,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1286,7 +1475,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1299,7 +1489,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1312,7 +1503,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1325,7 +1517,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1338,7 +1531,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1351,7 +1545,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1364,7 +1559,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1377,7 +1573,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1390,7 +1587,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1403,7 +1601,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1416,7 +1615,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1429,7 +1629,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1442,7 +1643,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1455,7 +1657,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1468,7 +1671,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1481,7 +1685,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1494,7 +1699,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1507,7 +1713,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1520,7 +1727,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1533,7 +1741,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1546,7 +1755,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1559,7 +1769,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1572,7 +1783,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1585,7 +1797,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1598,7 +1811,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1611,7 +1825,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1624,7 +1839,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1637,7 +1853,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1650,7 +1867,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1663,7 +1881,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1676,7 +1895,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1689,7 +1909,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1702,7 +1923,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1715,7 +1937,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1728,7 +1951,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1741,7 +1965,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1754,7 +1979,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1767,7 +1993,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1780,7 +2007,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1793,7 +2021,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1806,7 +2035,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1819,7 +2049,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1832,7 +2063,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1845,7 +2077,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1858,7 +2091,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1871,7 +2105,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1884,7 +2119,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1897,7 +2133,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1910,7 +2147,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1923,7 +2161,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1936,7 +2175,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
@@ -1949,7 +2189,8 @@
               "number | undefined"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1971,6 +2212,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1993,6 +2235,7 @@
         ],
         "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -2012,7 +2255,8 @@
               }
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

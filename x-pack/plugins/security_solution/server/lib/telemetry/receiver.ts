@@ -33,12 +33,12 @@ import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
-import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
   metricsResponseToValueListMetaData,
+  tlog,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -57,6 +57,7 @@ import type {
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
+import { telemetryConfiguration } from './configuration';
 
 export interface ITelemetryReceiver {
   start(
@@ -377,7 +378,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
-      size: TELEMETRY_MAX_BUFFER_SIZE,
+      size: telemetryConfiguration.telemetry_max_buffer_size,
       body: {
         query: {
           range: {
@@ -667,7 +668,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     const response = await this.esClient.search(query, { meta: true });
-    this.logger.debug(`received prebuilt alerts: (${response.body.hits.hits.length})`);
+    tlog(this.logger, `received prebuilt alerts: (${response.body.hits.hits.length})`);
 
     const telemetryEvents: TelemetryEvent[] = response.body.hits.hits.flatMap((h) =>
       h._source != null ? ([h._source] as TelemetryEvent[]) : []
@@ -939,7 +940,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
       return ret.license;
     } catch (err) {
-      this.logger.debug(`failed retrieving license: ${err}`);
+      tlog(this.logger, `failed retrieving license: ${err}`);
       return undefined;
     }
   }

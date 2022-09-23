@@ -52,6 +52,11 @@ const ActionsTableComponent = () => {
     limit: pageSize,
     direction: Direction.desc,
     sortField: '@timestamp',
+    filterQuery: {
+      exists: {
+        field: 'user_id',
+      },
+    },
   });
 
   const onTableChange = useCallback(({ page = {} }) => {

@@ -7,7 +7,7 @@
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX, CONNECTORS_VERSION } from '..';
 
-import { setupConnectorsIndices } from './setup_indices';
+import { defaultConnectorsPipelineMeta, setupConnectorsIndices } from './setup_indices';
 
 describe('Setup Indices', () => {
   const mockClient = {
@@ -29,6 +29,7 @@ describe('Setup Indices', () => {
   const connectorsMappings = {
     _meta: {
       version: CONNECTORS_VERSION,
+      pipeline: defaultConnectorsPipelineMeta,
     },
     properties: {
       api_key_id: {
@@ -45,6 +46,14 @@ describe('Setup Indices', () => {
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
       name: { type: 'keyword' },
+      pipeline: {
+        properties: {
+          extract_binary_content: { type: 'boolean' },
+          name: { type: 'keyword' },
+          reduce_whitespace: { type: 'boolean' },
+          run_ml_inference: { type: 'boolean' },
+        },
+      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },

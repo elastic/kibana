@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
@@ -41,6 +42,7 @@
             ],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -60,6 +62,7 @@
             ],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -79,6 +82,8 @@
                   "]>; incrementSavedObjectsBulkResolve: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
                   "]>; incrementSavedObjectsBulkUpdate: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "]>; incrementSavedObjectsBulkDelete: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
                   "]>; incrementSavedObjectsCreate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
@@ -106,7 +111,8 @@
                   "ICoreUsageStatsClient"
                 ],
                 "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -124,6 +130,7 @@
             ],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -139,6 +146,7 @@
         "description": [],
         "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_stats_client.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
@@ -154,6 +162,7 @@
             ],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_stats_client.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

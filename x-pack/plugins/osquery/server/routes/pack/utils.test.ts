@@ -33,7 +33,6 @@ const getTestQueries = (additionalFields?: Record<string, unknown>, packName = '
 
 const oneLiner = {
   default: {
-    ecs_mapping: {},
     interval: 3600,
     query: `select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !='0' limit 1000;`,
   },
@@ -43,7 +42,7 @@ describe('Pack utils', () => {
   describe('convertSOQueriesToPack', () => {
     test('converts to pack with empty ecs_mapping', () => {
       const convertedQueries = convertSOQueriesToPack(getTestQueries());
-      expect(convertedQueries).toStrictEqual(getTestQueries({ ecs_mapping: {} }));
+      expect(convertedQueries).toStrictEqual(getTestQueries({}));
     });
     test('converts to pack with converting query to single line', () => {
       const convertedQueries = convertSOQueriesToPack(getTestQueries(), { removeMultiLines: true });
@@ -51,7 +50,7 @@ describe('Pack utils', () => {
     });
     test('converts to object with pack names after query.id', () => {
       const convertedQueries = convertSOQueriesToPack(getTestQueries({ id: 'testId' }));
-      expect(convertedQueries).toStrictEqual(getTestQueries({ ecs_mapping: {} }, 'testId'));
+      expect(convertedQueries).toStrictEqual(getTestQueries({}, 'testId'));
     });
   });
 });
