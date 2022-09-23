@@ -1,6 +1,0 @@
-[[machine-learning-api]]
-== Machine learning APIs
-
-preview::[]
-
-include::{kib-repo-dir}/api/generated/ml-apis-passthru.adoc[]

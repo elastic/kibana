@@ -11,4 +11,4 @@ version of the specification is 3.0. For more information, go to https://openapi
 
 --
 
-include::api/machine-learning/ml_apis_v3.asciidoc[]
+include::api-generated/machine-learning/ml-apis.asciidoc[]
