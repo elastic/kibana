@@ -219,12 +219,9 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlLocator, series, timefilter) {
+export async function getExploreSeriesLink(mlLocator, series, timeRange) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
-  const bounds = timefilter.getActiveBounds();
-  const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
-  const to = bounds.max.toISOString();
 
   const zoomFrom = moment(series.plotEarliest).toISOString();
   const zoomTo = moment(series.plotLatest).toISOString();
@@ -251,11 +248,7 @@ export async function getExploreSeriesLink(mlLocator, series, timefilter) {
           pause: true,
           value: 0,
         },
-        timeRange: {
-          from: from,
-          to: to,
-          mode: 'absolute',
-        },
+        timeRange,
         zoom: {
           from: zoomFrom,
           to: zoomTo,
