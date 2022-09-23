@@ -7,6 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { debounce } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -20,6 +21,19 @@ import {
   WarningHandlerCallback,
 } from '../types';
 import { extractWarnings } from './extract_warnings';
+
+const getDebouncedWarning = () => {
+  const addWarning = () => debounce(getNotifications().toasts.addWarning, 10000, { leading: true });
+  const memory: Record<string, ReturnType<typeof addWarning>> = {};
+
+  return (title: string) => {
+    memory[title] = memory[title] || addWarning();
+    return memory[title]({ title });
+  };
+};
+
+const debouncedWarning = getDebouncedWarning();
+const debouncedTimeoutWarning = getDebouncedWarning();
 
 /**
  * @internal
@@ -45,9 +59,7 @@ export function handleWarnings(
   // timeout notification
   const [timeout] = internal.filter((w) => w.type === 'timed_out');
   if (timeout) {
-    getNotifications().toasts.addWarning({
-      title: timeout.message,
-    });
+    debouncedTimeoutWarning(timeout.message);
   }
 
   // shard warning failure notification
@@ -59,6 +71,8 @@ export function handleWarnings(
   const [warning] = shardFailures as SearchResponseShardFailureWarning[];
   const title = warning.message;
 
+  // todo debounce on title, text, response._shards.failures, request, response
+  // ask lukas if it makes sense to debounce on the whole response and request
   // if warning message contains text (warning response), show in ShardFailureOpenModalButton
   if (warning.text) {
     const text = toMountPoint(
@@ -80,7 +94,7 @@ export function handleWarnings(
   }
 
   // timeout warning, or shard warning with no failure reason
-  getNotifications().toasts.addWarning({ title });
+  debouncedWarning(title);
 }
 
 /**

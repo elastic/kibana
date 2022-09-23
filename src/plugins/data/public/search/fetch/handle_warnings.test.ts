@@ -47,11 +47,14 @@ const warnings: SearchResponseWarning[] = [
 
 describe('Filtering and showing warnings', () => {
   const notifications = notificationServiceMock.createStartContract();
+  // jest.useFakeTimers();
+  jest.useFakeTimers('modern');
 
   describe('handleWarnings', () => {
     const request = { body: {} };
     beforeEach(() => {
       jest.resetAllMocks();
+      jest.advanceTimersByTime(10000);
       setNotifications(notifications);
       (notifications.toasts.addWarning as jest.Mock).mockReset();
       (extract.extractWarnings as jest.Mock).mockImplementation(() => warnings);
@@ -60,6 +63,8 @@ describe('Filtering and showing warnings', () => {
     test('should notify if timed out', () => {
       (extract.extractWarnings as jest.Mock).mockImplementation(() => [warnings[0]]);
       const response = { rawResponse: { timed_out: true } } as unknown as estypes.SearchResponse;
+      handleWarnings(request, response, theme);
+      // test debounce, addWarning should only be called once
       handleWarnings(request, response, theme);
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
@@ -71,6 +76,8 @@ describe('Filtering and showing warnings', () => {
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
+      handleWarnings(request, response, theme);
+      // test debounce, addWarning should only be called once
       handleWarnings(request, response, theme);
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
