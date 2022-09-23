@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
 
-  // Failing: See https://github.com/elastic/kibana/issues/140547
-  describe.skip('cases deletion sub privilege', () => {
+  describe('cases deletion sub privilege', () => {
     before(async () => {
       await createUsersAndRoles(getService, users, roles);
       await PageObjects.security.forceLogout();
