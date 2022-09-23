@@ -469,7 +469,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy> {
     const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
@@ -483,18 +483,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
-    // Check that the name does not exist already but exclude the current package policy
-    const existingPoliciesWithName = await this.list(soClient, {
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
-    });
 
-    const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
-
-    if (filtered.length > 0) {
-      throw new FleetError(
-        `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
-      );
+    if (packagePolicy.name !== oldPackagePolicy.name || !options?.skipUniqueNameVerification) {
+      // Check that the name does not exist already but exclude the current package policy
+      const existingPoliciesWithName = await this.list(soClient, {
+        perPage: SO_SEARCH_LIMIT,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
+      });
+      const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
+      if (filtered.length > 0) {
+        throw new FleetError(
+          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+        );
+      }
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -930,12 +931,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
     updatePackagePolicy.elasticsearch = packageInfo.elasticsearch;
 
+    const updateOptions = {
+      skipUniqueNameVerification: true,
+      ...options,
+    };
+
     await this.update(
       soClient,
       esClient,
       id,
       updatePackagePolicy,
-      options,
+      updateOptions,
       packagePolicy.package!.version
     );
 
