@@ -33,7 +33,7 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
