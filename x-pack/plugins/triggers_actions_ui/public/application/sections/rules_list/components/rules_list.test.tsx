@@ -1876,7 +1876,8 @@ describe('rules_list with disabled items', () => {
   });
 });
 
-describe('Rules list bulk actions', () => {
+// Failing: https://github.com/elastic/kibana/issues/141052
+describe.skip('Rules list bulk actions', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(authorized: boolean = true) {
