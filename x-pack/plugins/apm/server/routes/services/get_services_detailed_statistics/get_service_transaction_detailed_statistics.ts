@@ -80,6 +80,7 @@ export async function getServiceTransactionDetailedStats({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

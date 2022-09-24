@@ -77,9 +77,11 @@ Return `Hello World!`:
 emit("Hello World!");
 ----
 
+image:management/images/runtime_field.png[Runtime field with keyword type]
+
 [float]
 [[perform-a-calculation-on-a-single-field]]
-===== Perform a calculation on a single field
+==== Perform a calculation on a single field
 
 Calculate kilobytes from bytes:
 
@@ -90,7 +92,7 @@ emit(doc['bytes'].value / 1024)
 
 [float]
 [[return-substring]]
-===== Return a substring
+==== Return a substring
 
 Return the string that appears after the last slash in the URL:
 
@@ -108,9 +110,24 @@ emit("");
 ----
 
 [float]
-[[replace-nulls-with-blanks]]
-===== Replace nulls with blanks
+[[composite-runtime-field]]
+==== Return multiple fields with a composite runtime field
 
+A single runtime field can also produce multiple subfields when the type `Composite` is selected. The script editor provides default types that can be customized for each subfields.
+
+Return `keyword` and `double` type subfields. Note that the first argument for `emit` is the name of the subfield.
+
+[source,text]
+----
+emit('subfield_a', 'Hello');
+emit('subfield_b', 42);
+----
+
+image:management/images/runtime_field_composite.png[Runtime field with composite type]
+
+[float]
+[[replace-nulls-with-blanks]]
+==== Replace nulls with blanks
 Replace `null` values with `None`:
 
 [source,text]
