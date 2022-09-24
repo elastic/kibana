@@ -3446,53 +3446,6 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddablePanel.componentDidUpdate",
-            "type": "Function",
-            "tags": [],
-            "label": "componentDidUpdate",
-            "description": [],
-            "signature": [
-              "(prevProps: Props, prevState: State) => void"
-            ],
-            "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddablePanel.componentDidUpdate.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "prevProps",
-                "description": [],
-                "signature": [
-                  "Props"
-                ],
-                "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddablePanel.componentDidUpdate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "prevState",
-                "description": [],
-                "signature": [
-                  "State"
-                ],
-                "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePanel.UNSAFE_componentWillMount",
             "type": "Function",
             "tags": [],

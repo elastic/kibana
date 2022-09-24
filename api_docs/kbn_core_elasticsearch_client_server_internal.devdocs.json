@@ -21,11 +21,11 @@
         "signature": [
           "(config: ",
           "ElasticsearchClientConfig",
-          ", { logger, type, scoped, getExecutionContext, agentManager, }: { logger: ",
+          ", { logger, type, scoped, getExecutionContext, agentManager, kibanaVersion, }: { logger: ",
           "Logger",
           "; type: string; scoped?: boolean | undefined; getExecutionContext?: (() => string | undefined) | undefined; agentManager: ",
           "AgentManager",
-          "; }) => ",
+          "; kibanaVersion: string; }) => ",
           "default"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
@@ -52,7 +52,7 @@
             "id": "def-server.configureClient.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentManager,\n  }",
+            "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentManager,\n    kibanaVersion,\n  }",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
             "deprecated": false,
@@ -123,6 +123,17 @@
                 "signature": [
                   "AgentManager"
                 ],
+                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "id": "def-server.configureClient.$2.kibanaVersion",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaVersion",
+                "description": [],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
