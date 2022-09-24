@@ -28,18 +28,20 @@ export enum FrameType {
   JavaScript,
 }
 
+const frameTypeDescriptions = {
+  [FrameType.Unsymbolized]: '<unsymbolized frame>',
+  [FrameType.Python]: 'Python',
+  [FrameType.PHP]: 'PHP',
+  [FrameType.Native]: 'Native',
+  [FrameType.Kernel]: 'Kernel',
+  [FrameType.JVM]: 'JVM/Hotspot',
+  [FrameType.Ruby]: 'Ruby',
+  [FrameType.Perl]: 'Perl',
+  [FrameType.JavaScript]: 'JavaScript',
+};
+
 export function describeFrameType(ft: FrameType): string {
-  return {
-    [FrameType.Unsymbolized]: '<unsymbolized frame>',
-    [FrameType.Python]: 'Python',
-    [FrameType.PHP]: 'PHP',
-    [FrameType.Native]: 'Native',
-    [FrameType.Kernel]: 'Kernel',
-    [FrameType.JVM]: 'JVM/Hotspot',
-    [FrameType.Ruby]: 'Ruby',
-    [FrameType.Perl]: 'Perl',
-    [FrameType.JavaScript]: 'JavaScript',
-  }[ft];
+  return frameTypeDescriptions[ft];
 }
 
 export interface StackTraceEvent {
