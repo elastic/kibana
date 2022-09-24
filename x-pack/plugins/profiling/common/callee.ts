@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import fnv from 'fnv-plus';
+
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
@@ -27,7 +29,7 @@ export interface CalleeTree {
   Size: number;
   Edges: Array<Map<FrameGroupID, NodeID>>;
 
-  FrameGroupID: FrameGroupID[];
+  ID: string[];
   FrameType: number[];
   FrameID: StackFrameID[];
   FileID: FileID[];
@@ -50,7 +52,7 @@ function initCalleeTree(capacity: number): CalleeTree {
   const tree: CalleeTree = {
     Size: 1,
     Edges: new Array(capacity),
-    FrameGroupID: new Array(capacity),
+    ID: new Array(capacity),
     FrameType: new Array(capacity),
     FrameID: new Array(capacity),
     FileID: new Array(capacity),
@@ -61,7 +63,8 @@ function initCalleeTree(capacity: number): CalleeTree {
   };
 
   tree.Edges[0] = new Map<FrameGroupID, NodeID>();
-  tree.FrameGroupID[0] = frameGroupID;
+
+  tree.ID[0] = fnv.fast1a64utf(frameGroupID).toString();
   tree.FrameType[0] = metadata.FrameType;
   tree.FrameID[0] = metadata.FrameID;
   tree.FileID[0] = metadata.FileID;
@@ -84,7 +87,8 @@ function insertNode(
 
   tree.Edges[parent].set(frameGroupID, node);
   tree.Edges[node] = new Map<FrameGroupID, NodeID>();
-  tree.FrameGroupID[node] = frameGroupID;
+
+  tree.ID[node] = fnv.fast1a64utf(`${tree.ID[parent]}${frameGroupID}`).toString();
   tree.FrameType[node] = metadata.FrameType;
   tree.FrameID[node] = metadata.FrameID;
   tree.FileID[node] = metadata.FileID;
@@ -204,6 +208,6 @@ export function sortEdges(tree: CalleeTree, node: NodeID): NodeID[] {
     if (tree.Samples[n1] < tree.Samples[n2]) {
       return 1;
     }
-    return tree.FrameGroupID[n1].localeCompare(tree.FrameGroupID[n2]);
+    return tree.ID[n1].localeCompare(tree.ID[n2]);
   });
 }

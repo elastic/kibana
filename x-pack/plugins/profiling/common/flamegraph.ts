@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import fnv from 'fnv-plus';
+import { ColumnarViewModel } from '@elastic/charts';
 import { CalleeTree, sortEdges } from './callee';
 
 interface ColumnarCallee {
@@ -107,15 +107,15 @@ export function createColumnarCallee(tree: CalleeTree): ColumnarCallee {
     Color: new Array<number>(size * 4),
     CountInclusive: tree.CountInclusive.slice(0, size),
     CountExclusive: tree.CountExclusive.slice(0, size),
-    ID: new Array<string>(size),
+    ID: tree.ID.slice(0, size),
     FrameID: tree.FrameID.slice(0, size),
     ExecutableID: tree.FileID.slice(0, size),
   };
 
-  const queue = [{ x: 0, depth: 1, node: 0, parentID: 'root' }];
+  const queue = [{ x: 0, depth: 1, node: 0 }];
 
   while (queue.length > 0) {
-    const { x, depth, node, parentID } = queue.pop()!;
+    const { x, depth, node } = queue.pop()!;
 
     columnar.X[node] = x;
     columnar.Y[node] = depth;
@@ -126,10 +126,6 @@ export function createColumnarCallee(tree: CalleeTree): ColumnarCallee {
     columnar.Color[j + 1] = green;
     columnar.Color[j + 2] = blue;
     columnar.Color[j + 3] = alpha;
-
-    const id = fnv.fast1a64utf(`${parentID}${tree.FrameGroupID[node]}`).toString();
-
-    columnar.ID[node] = id;
 
     // For a deterministic result we have to walk the callees in a deterministic
     // order. A deterministic result allows deterministic UI views, something
@@ -143,7 +139,7 @@ export function createColumnarCallee(tree: CalleeTree): ColumnarCallee {
 
     for (let i = children.length - 1; i >= 0; i--) {
       delta -= columnar.Value[children[i]];
-      queue.push({ x: x + delta, depth: depth + 1, node: children[i], parentID: id });
+      queue.push({ x: x + delta, depth: depth + 1, node: children[i] });
     }
   }
 
@@ -188,3 +184,5 @@ export function createFlameGraph(columnar: ColumnarCallee): FlameGraph {
 
   return graph;
 }
+
+export function createColumnarViewModel() {}
