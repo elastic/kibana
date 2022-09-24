@@ -233,16 +233,16 @@ export class ProjectMonitorFormatter {
       }
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
-      const { valid: isNormalizedMonitorValid } = this.validateMonitor({
+      const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
         validationResult: validateMonitor(normalizedMonitor as MonitorFields),
         monitorId: monitor.id,
       });
 
-      if (!isNormalizedMonitorValid) {
+      if (!isNormalizedMonitorValid || !decodedMonitor) {
         return null;
       }
 
-      return normalizedMonitor;
+      return decodedMonitor;
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({

@@ -11,7 +11,6 @@ import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
   MonitorManagementListResultCodec,
-  MonitorOverviewItem,
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
