@@ -9,12 +9,6 @@ import { StackFrameMetadata } from './profiling';
 
 export type FrameGroupID = string;
 
-enum FrameGroupName {
-  EMPTY = 'empty',
-  ELF = 'elf',
-  FULL = 'full',
-}
-
 // createFrameGroupID is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
 //
@@ -29,12 +23,12 @@ export function createFrameGroupID(
   functionName: StackFrameMetadata['FunctionName']
 ): FrameGroupID {
   if (functionName === '') {
-    return `${FrameGroupName.EMPTY};${fileID};${addressOrLine}`;
+    return `empty;${fileID};${addressOrLine}`;
   }
 
   if (sourceFilename === '') {
-    return `${FrameGroupName.ELF};${exeFilename};${functionName}`;
+    return `elf;${exeFilename};${functionName}`;
   }
 
-  return `${FrameGroupName.FULL};${exeFilename};${functionName};${sourceFilename}`;
+  return `full;${exeFilename};${functionName};${sourceFilename}`;
 }
