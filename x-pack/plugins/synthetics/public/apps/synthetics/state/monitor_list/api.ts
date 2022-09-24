@@ -55,7 +55,7 @@ export const fetchUpsertMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor | MonitorOverviewItem;
+  monitor: Partial<SyntheticsMonitor> | Partial<EncryptedSyntheticsMonitor>;
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {
