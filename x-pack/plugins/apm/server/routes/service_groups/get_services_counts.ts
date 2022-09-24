@@ -7,10 +7,10 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Setup } from '../../lib/helpers/setup_request';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { SavedServiceGroup } from '../../../common/service_groups';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export async function getServicesCounts({
   setup,
