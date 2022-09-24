@@ -7156,7 +7156,6 @@
     "xpack.apm.serviceGroups.selectServicesForm.preview": "プレビュー",
     "xpack.apm.serviceGroups.selectServicesForm.refresh": "更新",
     "xpack.apm.serviceGroups.selectServicesForm.saveGroup": "グループを保存",
-    "xpack.apm.serviceGroups.selectServicesForm.subtitle": "クエリを使用してこのグループのサービスを選択します。過去24時間以内にこのクエリと一致したサービスはグループに割り当てられます。",
     "xpack.apm.serviceGroups.selectServicesForm.title": "サービスを選択",
     "xpack.apm.serviceGroups.selectServicesList.environmentColumnLabel": "環境",
     "xpack.apm.serviceGroups.selectServicesList.nameColumnLabel": "名前",

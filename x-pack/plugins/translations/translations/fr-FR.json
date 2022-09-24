@@ -7169,7 +7169,6 @@
     "xpack.apm.serviceGroups.selectServicesForm.preview": "Aperçu",
     "xpack.apm.serviceGroups.selectServicesForm.refresh": "Actualiser",
     "xpack.apm.serviceGroups.selectServicesForm.saveGroup": "Enregistrer le groupe",
-    "xpack.apm.serviceGroups.selectServicesForm.subtitle": "Utilisez une requête pour sélectionner les services pour ce groupe. Les services qui correspondent à cette requête dans les dernières 24 heures seront affectés au groupe.",
     "xpack.apm.serviceGroups.selectServicesForm.title": "Sélectionner des services",
     "xpack.apm.serviceGroups.selectServicesList.environmentColumnLabel": "Environnements",
     "xpack.apm.serviceGroups.selectServicesList.nameColumnLabel": "Nom",

@@ -118,7 +118,7 @@ export function SelectServices({
               'xpack.apm.serviceGroups.selectServicesForm.subtitle',
               {
                 defaultMessage:
-                  'Use a query to select services for this group. Services that match this query within the last 24 hours will be assigned to the group.',
+                  'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
               }
             )}
           </EuiText>
