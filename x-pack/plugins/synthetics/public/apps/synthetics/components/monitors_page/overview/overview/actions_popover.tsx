@@ -140,7 +140,8 @@ export function ActionsPopover({
                   name: enableLabel,
                   icon: 'invert',
                   onClick: () => {
-                    if (status !== FETCH_STATUS.LOADING) updateMonitorEnabledState(isEnabled);
+                    if (status !== FETCH_STATUS.LOADING)
+                      updateMonitorEnabledState(!monitor.isEnabled);
                   },
                 },
               ],
