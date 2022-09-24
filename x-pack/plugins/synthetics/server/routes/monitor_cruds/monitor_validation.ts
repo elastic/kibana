@@ -89,8 +89,8 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
 export function validateProjectMonitor(monitorFields: ProjectMonitor): ValidationResult {
   const locationsError =
     monitorFields.locations &&
-      monitorFields.locations.length === 0 &&
-      (monitorFields.privateLocations ?? []).length === 0
+    monitorFields.locations.length === 0 &&
+    (monitorFields.privateLocations ?? []).length === 0
       ? 'Invalid value "[]" supplied to field "locations"'
       : '';
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
