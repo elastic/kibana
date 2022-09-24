@@ -154,7 +154,7 @@ export class ProjectMonitorFormatter {
 
     await this.createMonitorsBulk(normalizedNewMonitors);
 
-    const { updatedCount } = await this.updateMonitors(normalizedUpdateMonitors);
+    const { updatedCount } = await this.updateMonitorsBulk(normalizedUpdateMonitors);
 
     if (normalizedUpdateMonitors.length > 0) {
       let updateMessage = '';
@@ -357,7 +357,7 @@ export class ProjectMonitorFormatter {
     );
   };
 
-  private updateMonitors = async (
+  private updateMonitorsBulk = async (
     monitors: Array<{
       monitor: BrowserFields;
       previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
