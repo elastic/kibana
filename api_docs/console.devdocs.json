@@ -18,19 +18,14 @@
             "text": "ConsoleUIPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<void, void, ",
           "AppSetupUIPluginDependencies",
           ", object>"
         ],
         "path": "src/plugins/console/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
@@ -44,6 +39,7 @@
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "console",
@@ -53,17 +49,12 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -78,13 +69,7 @@
             "description": [],
             "signature": [
               "({ notifications, getStartServices, http }: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, { devTools, home, share, usageCollection }: ",
               "AppSetupUIPluginDependencies",
               ") => ",
@@ -98,6 +83,7 @@
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "console",
@@ -107,17 +93,12 @@
                 "label": "{ notifications, getStartServices, http }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -132,6 +113,7 @@
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -149,6 +131,7 @@
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -167,6 +150,7 @@
         "description": [],
         "path": "src/plugins/console/public/types/plugin_dependencies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
@@ -194,7 +178,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -219,6 +204,7 @@
         ],
         "path": "src/plugins/console/public/types/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
@@ -231,7 +217,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/console/public/types/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -260,6 +247,7 @@
       ],
       "path": "src/plugins/console/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -275,6 +263,7 @@
       ],
       "path": "src/plugins/console/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

@@ -10,8 +10,8 @@ const { inspect } = require('util');
 const Path = require('path');
 const Fsp = require('fs/promises');
 
-/** @typedef {import('./types').ParsedPackageJson} ParsedPackageJson */
 const { readPackageJson } = require('./parse_package_json');
+const { readPackageManifest } = require('./parse_package_manifest');
 
 const BUILD_RULE_NAME = /(^|\s)name\s*=\s*"build"/;
 const BUILD_TYPES_RULE_NAME = /(^|\s)name\s*=\s*"build_types"/;
@@ -20,7 +20,8 @@ const BUILD_TYPES_RULE_NAME = /(^|\s)name\s*=\s*"build_types"/;
  * Representation of a Bazel Package in the Kibana repository
  * @class
  * @property {string} normalizedRepoRelativeDir
- * @property {import('./types').ParsedPackageJson} pkg
+ * @property {import('./types').KibanaPackageManifest} manifest
+ * @property {import('./types').ParsedPackageJson | undefined} pkg
  * @property {string | undefined} buildBazelContent
  */
 class BazelPackage {
@@ -28,10 +29,11 @@ class BazelPackage {
    * Create a BazelPackage object from a package directory. Reads some files from the package and returns
    * a Promise for a BazelPackage instance.
    * @param {string} repoRoot
-   * @param {string} dir
+   * @param {string} path
    */
-  static async fromDir(repoRoot, dir) {
-    const pkg = readPackageJson(Path.resolve(dir, 'package.json'));
+  static async fromManifest(repoRoot, path) {
+    const manifest = readPackageManifest(path);
+    const dir = Path.dirname(path);
 
     let buildBazelContent;
     try {
@@ -40,7 +42,29 @@ class BazelPackage {
       throw new Error(`unable to read BUILD.bazel file in [${dir}]: ${error.message}`);
     }
 
-    return new BazelPackage(Path.relative(repoRoot, dir), pkg, buildBazelContent);
+    return new BazelPackage(
+      Path.relative(repoRoot, dir),
+      manifest,
+      readPackageJson(Path.resolve(dir, 'package.json')),
+      buildBazelContent
+    );
+  }
+
+  /**
+   * Sort a list of bazek packages
+   * @param {BazelPackage[]} pkgs
+   */
+  static sort(pkgs) {
+    return pkgs.slice().sort(BazelPackage.sorter);
+  }
+
+  /**
+   * Sort an array of bazel packages
+   * @param {BazelPackage} a
+   * @param {BazelPackage} b
+   */
+  static sorter(a, b) {
+    return a.normalizedRepoRelativeDir.localeCompare(b.normalizedRepoRelativeDir);
   }
 
   constructor(
@@ -50,8 +74,13 @@ class BazelPackage {
      */
     normalizedRepoRelativeDir,
     /**
+     * Parsed kibana.jsonc manifest from the package
+     * @type {import('./types').KibanaPackageManifest}
+     */
+    manifest,
+    /**
      * Parsed package.json file from the package
-     * @type {import('./types').ParsedPackageJson}
+     * @type {import('./types').ParsedPackageJson | undefined}
      */
     pkg,
     /**
@@ -61,6 +90,7 @@ class BazelPackage {
     buildBazelContent = undefined
   ) {
     this.normalizedRepoRelativeDir = normalizedRepoRelativeDir;
+    this.manifest = manifest;
     this.pkg = pkg;
     this.buildBazelContent = buildBazelContent;
   }
@@ -83,7 +113,7 @@ class BazelPackage {
    * Returns true if the package is not intended to be in the build
    */
   isDevOnly() {
-    return !!this.pkg.kibana?.devOnly;
+    return !!this.manifest.devOnly;
   }
 
   /**

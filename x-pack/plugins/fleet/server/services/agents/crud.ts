@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -20,7 +18,7 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
+import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
@@ -55,7 +53,7 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
         undefined as KueryNode | undefined
       );
   } catch (err) {
-    throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
+    throw new FleetError(`Kuery is malformed: ${err.message}`);
   }
 }
 
@@ -85,9 +83,7 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
       })
     ).agents;
   } else {
-    throw new IngestManagerError(
-      'Either options.agentIds or options.kuery are required to get agents'
-    );
+    throw new FleetError('Either options.agentIds or options.kuery are required to get agents');
   }
 
   return agents;
@@ -252,55 +248,6 @@ export async function getAgentsByKuery(
     page,
     perPage,
   };
-}
-
-export async function processAgentsInBatches(
-  esClient: ElasticsearchClient,
-  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
-    showInactive: boolean;
-    batchSize?: number;
-  },
-  processAgents: (
-    agents: Agent[],
-    includeSuccess: boolean
-  ) => Promise<{ items: BulkActionResult[] }>
-): Promise<{ items: BulkActionResult[] }> {
-  const pitId = await openPointInTime(esClient);
-
-  const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
-
-  const res = await getAgentsByKuery(esClient, {
-    ...options,
-    page: 1,
-    perPage,
-    pitId,
-  });
-
-  let currentAgents = res.agents;
-  // include successful agents if total agents does not exceed 10k
-  const skipSuccess = res.total > SO_SEARCH_LIMIT;
-
-  let results = await processAgents(currentAgents, skipSuccess);
-  let allAgentsProcessed = currentAgents.length;
-
-  while (allAgentsProcessed < res.total) {
-    const lastAgent = currentAgents[currentAgents.length - 1];
-    const nextPage = await getAgentsByKuery(esClient, {
-      ...options,
-      page: 1,
-      perPage,
-      pitId,
-      searchAfter: lastAgent.sort!,
-    });
-    currentAgents = nextPage.agents;
-    const currentResults = await processAgents(currentAgents, skipSuccess);
-    results = { items: results.items.concat(currentResults.items) };
-    allAgentsProcessed += currentAgents.length;
-  }
-
-  await closePointInTime(esClient, pitId);
-
-  return results;
 }
 
 export function errorsToResults(

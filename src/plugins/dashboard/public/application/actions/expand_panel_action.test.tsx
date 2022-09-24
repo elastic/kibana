@@ -10,48 +10,26 @@ import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { isErrorEmbeddable } from '../../services/embeddable';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
-
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-
-const { setup, doStart } = embeddablePluginMock.createInstance();
-
-setup.registerEmbeddableFactory(
   CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
-const start = doStart();
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+
+import { pluginServices } from '../../services/plugin_services';
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
 
+const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(mockEmbeddableFactory);
+
 beforeEach(async () => {
-  const options = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    embeddable: start,
-    inspector: {} as any,
-    notifications: {} as any,
-    overlays: {} as any,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreMock.createStart().http,
-    theme: coreMock.createStart().theme,
-    presentationUtil: getStubPluginServices(),
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
   const input = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -60,7 +38,8 @@ beforeEach(async () => {
       }),
     },
   });
-  container = new DashboardContainer(input, options);
+
+  container = new DashboardContainer(input);
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

@@ -9,9 +9,7 @@
 import _ from 'lodash';
 import uuid from 'uuid';
 
-import { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { SavedObject } from '../../services/saved_objects';
+import { SavedObjectsStart } from '@kbn/core/public';
 import {
   ViewMode,
   PanelState,
@@ -21,13 +19,17 @@ import {
   SavedObjectEmbeddableInput,
   isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { SavedObject } from '@kbn/saved-objects-plugin/public';
+
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
 import { dashboardClonePanelAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -40,7 +42,13 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
 
-  constructor(private core: CoreStart) {}
+  private toastsService;
+
+  constructor(private savedObjects: SavedObjectsStart) {
+    ({
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: ClonePanelActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -108,7 +116,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       });
     } else {
       const perPage = 10;
-      const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
+      const similarSavedObjects = await this.savedObjects.client.find<SavedObject>({
         type: embeddable.type,
         perPage,
         fields: ['title'],
@@ -140,14 +148,14 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     embeddable: IEmbeddable,
     objectIdToClone: string
   ): Promise<string> {
-    const savedObjectToClone = await this.core.savedObjects.client.get<SavedObject>(
+    const savedObjectToClone = await this.savedObjects.client.get<SavedObject>(
       embeddable.type,
       objectIdToClone
     );
 
     // Clone the saved object
     const newTitle = await this.getCloneTitle(embeddable, savedObjectToClone.attributes.title);
-    const clonedSavedObject = await this.core.savedObjects.client.create(
+    const clonedSavedObject = await this.savedObjects.client.create(
       embeddable.type,
       {
         ..._.cloneDeep(savedObjectToClone.attributes),
@@ -191,7 +199,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           clonedSavedObjectId;
       }
     }
-    this.core.notifications.toasts.addSuccess({
+    this.toastsService.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });

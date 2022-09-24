@@ -18,13 +18,7 @@
             "text": "DiscoverEnhancedPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<void, void, ",
           {
             "pluginId": "discoverEnhanced",
@@ -45,6 +39,7 @@
         ],
         "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discoverEnhanced",
@@ -63,7 +58,8 @@
               }
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -77,6 +73,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
@@ -86,17 +83,12 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -111,13 +103,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               {
                 "pluginId": "discoverEnhanced",
@@ -138,6 +124,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
@@ -147,13 +134,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   {
                     "pluginId": "discoverEnhanced",
@@ -166,6 +147,7 @@
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -186,6 +168,7 @@
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -200,13 +183,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: ",
               {
                 "pluginId": "discoverEnhanced",
@@ -219,6 +196,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
@@ -228,16 +206,11 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -258,6 +231,7 @@
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -275,6 +249,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -316,6 +291,7 @@
         ],
         "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discoverEnhanced",
@@ -328,7 +304,8 @@
               "\"ACTION_EXPLORE_DATA_CHART\""
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -341,7 +318,8 @@
               "\"ACTION_EXPLORE_DATA_CHART\""
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -354,7 +332,8 @@
               "200"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -370,6 +349,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
@@ -383,6 +363,7 @@
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -404,6 +385,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
@@ -417,6 +399,7 @@
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -456,6 +439,7 @@
         ],
         "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discoverEnhanced",
@@ -468,7 +452,8 @@
               "\"ACTION_EXPLORE_DATA\""
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -481,7 +466,8 @@
               "\"ACTION_EXPLORE_DATA\""
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -494,7 +480,8 @@
               "200"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -510,6 +497,7 @@
             ],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "discoverEnhanced",
@@ -523,6 +511,7 @@
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -543,6 +532,7 @@
         "description": [],
         "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discoverEnhanced",
@@ -561,7 +551,8 @@
               }
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -580,7 +571,8 @@
               }
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -600,7 +592,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -647,7 +640,8 @@
               ") => void; readonly unregisterAction: (actionId: string) => void; }"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -661,6 +655,7 @@
         "description": [],
         "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discoverEnhanced",
@@ -679,7 +674,8 @@
               }
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -698,7 +694,8 @@
               }
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -718,7 +715,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
@@ -809,7 +807,8 @@
               "; }"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -840,6 +839,7 @@
         "description": [],
         "path": "x-pack/plugins/discover_enhanced/common/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discoverEnhanced",
@@ -852,7 +852,8 @@
               "{ exploreDataInChart: { enabled: boolean; }; exploreDataInContextMenu: { enabled: boolean; }; }"
             ],
             "path": "x-pack/plugins/discover_enhanced/common/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

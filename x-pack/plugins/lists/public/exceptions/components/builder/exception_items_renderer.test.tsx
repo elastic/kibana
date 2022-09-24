@@ -154,7 +154,7 @@ describe('ExceptionBuilderComponent', () => {
     ).toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
   });
 
-  test('it does not display "is in list" operators if "allowLargeValueLists" is false', async () => {
+  test('it still displays "is in list" operators if "allowLargeValueLists" is false', async () => {
     wrapper = mount(
       <EuiThemeProvider>
         <ExceptionBuilderComponent
@@ -188,7 +188,7 @@ describe('ExceptionBuilderComponent', () => {
 
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).prop('options')
-    ).not.toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
+    ).toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
   });
 
   test('it displays "or", "and" and "add nested button" enabled', () => {

@@ -56,7 +56,10 @@ describe('links', () => {
 
   it('it returns all links without filtering when not having isolation permissions but has at least one host isolation exceptions entry', async () => {
     fakeHttpServices.get.mockResolvedValue({ total: 1 });
-    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+    const filteredLinks = await getManagementFilteredLinks(
+      coreMockStarted,
+      getPlugins(['superuser'])
+    );
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     expect(filteredLinks).toEqual(links);
   });

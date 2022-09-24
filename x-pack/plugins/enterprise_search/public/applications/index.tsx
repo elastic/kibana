@@ -54,10 +54,12 @@ export const renderApp = (
   const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
+    capabilities: core.application.capabilities,
     config,
     productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
+    uiSettings: core.uiSettings,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,

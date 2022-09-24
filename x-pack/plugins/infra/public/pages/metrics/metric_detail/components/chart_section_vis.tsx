@@ -17,7 +17,7 @@ import {
   TooltipValue,
   BrushEndListener,
 } from '@elastic/charts';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { SeriesChart } from './series_chart';
 import {

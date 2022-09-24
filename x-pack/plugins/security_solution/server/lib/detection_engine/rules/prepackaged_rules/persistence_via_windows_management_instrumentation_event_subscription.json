@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Persistence via WMI Event Subscription",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n",
+  "query": "process where event.type == \"start\" and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n",
   "required_fields": [
     {
       "ecs": true,
@@ -73,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 101
 }

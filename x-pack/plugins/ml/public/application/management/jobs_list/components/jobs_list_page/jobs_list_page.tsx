@@ -13,7 +13,7 @@ import { CoreStart } from '@kbn/core/public';
 
 import {
   EuiButtonEmpty,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiFlexGroup,

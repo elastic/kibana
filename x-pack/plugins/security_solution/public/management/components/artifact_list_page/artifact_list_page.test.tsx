@@ -16,7 +16,7 @@ import { getDeferred } from '../mocks';
 
 jest.mock('../../../common/components/user_privileges');
 
-// FLAKY: https://github.com/elastic/kibana/issues/129837
+// FLAKY: https://github.com/elastic/kibana/issues/140620
 describe.skip('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
@@ -156,7 +156,8 @@ describe.skip('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-flyout')).toBeTruthy();
       });
 
-      it('should display the Delete modal when delete action is clicked', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/129837
+      it.skip('should display the Delete modal when delete action is clicked', async () => {
         const { getByTestId } = await renderWithListData();
         await clickCardAction('delete');
 
@@ -227,7 +228,8 @@ describe.skip('When using the ArtifactListPage component', () => {
         });
       });
 
-      it('should persist policy filter to the URL params', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/129837
+      it.skip('should persist policy filter to the URL params', async () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
         const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
 

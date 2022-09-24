@@ -27,18 +27,17 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     this.http = http;
   }
 
-  private _request<T = unknown>(url: string, query?: {}): Promise<T | undefined> {
-    return this.http
-      .fetch<T>(url, {
-        query,
-      })
-      .catch((resp) => {
-        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
-          throw new DataViewMissingIndices(resp.body.message);
-        }
+  private _request<T = unknown>(url: string, query?: {}, body?: string): Promise<T | undefined> {
+    const request = body
+      ? this.http.post<T>(url, { query, body })
+      : this.http.fetch<T>(url, { query });
+    return request.catch((resp) => {
+      if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
+        throw new DataViewMissingIndices(resp.body.message);
+      }
 
-        throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
-      });
+      throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+    });
   }
 
   private _getUrl(path: string[]) {
@@ -51,14 +50,17 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   getFieldsForWildcard(options: GetFieldsOptions) {
     const { pattern, metaFields, type, rollupIndex, allowNoIndex, filter } = options;
-    return this._request<FieldsForWildcardResponse>(this._getUrl(['_fields_for_wildcard']), {
-      pattern,
-      meta_fields: metaFields,
-      type,
-      rollup_index: rollupIndex,
-      allow_no_index: allowNoIndex,
-      filter,
-    }).then((response) => {
+    return this._request<FieldsForWildcardResponse>(
+      this._getUrl(['_fields_for_wildcard']),
+      {
+        pattern,
+        meta_fields: metaFields,
+        type,
+        rollup_index: rollupIndex,
+        allow_no_index: allowNoIndex,
+      },
+      filter ? JSON.stringify({ index_filter: filter }) : undefined
+    ).then((response) => {
       return response || { fields: [], indices: [] };
     });
   }

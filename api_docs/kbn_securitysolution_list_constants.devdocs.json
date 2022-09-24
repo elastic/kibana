@@ -34,6 +34,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -48,6 +49,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -62,6 +64,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -78,6 +81,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -94,6 +98,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -110,6 +115,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -124,6 +130,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -138,6 +145,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -152,6 +160,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -168,6 +177,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -184,6 +194,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -200,6 +211,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -216,6 +228,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -232,6 +245,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -248,6 +262,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -264,6 +279,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -280,6 +296,22 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_FILTER",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_FILTER",
+        "description": [],
+        "signature": [
+          "\"/internal/lists/_create_filter\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -294,6 +326,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -308,6 +341,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -324,6 +358,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -340,6 +375,65 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.FIND_LISTS_BY_SIZE",
+        "type": "string",
+        "tags": [],
+        "label": "FIND_LISTS_BY_SIZE",
+        "description": [],
+        "signature": [
+          "\"/internal/lists/_find_lists_by_size\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_EXCEPTION_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_EXCEPTION_LIST_URL",
+        "description": [
+          "\nInternal exception list routes"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_LIST_URL",
+        "description": [
+          "\nInternal value list routes"
+        ],
+        "signature": [
+          "\"/internal/lists\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -351,6 +445,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -362,6 +457,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -373,6 +469,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -389,6 +486,7 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -403,6 +501,37 @@
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE",
+        "description": [],
+        "signature": [
+          "200"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.MAXIMUM_SMALL_VALUE_LIST_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAXIMUM_SMALL_VALUE_LIST_SIZE",
+        "description": [],
+        "signature": [
+          "65536"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
