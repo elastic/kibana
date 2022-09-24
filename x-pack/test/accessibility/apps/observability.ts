@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Observability UI', () => {
+  // https://github.com/elastic/kibana/issues/141724
+  describe.skip('Observability UI', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await PageObjects.common.navigateToApp('observability');
