@@ -43,14 +43,7 @@ export const TLSSensitiveFieldsCodec = t.partial({
   [ConfigKey.TLS_KEY_PASSPHRASE]: t.string,
 });
 
-export const TLSCodec = t.partial({
-  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.string,
-  [ConfigKey.TLS_CERTIFICATE]: t.string,
-  [ConfigKey.TLS_VERIFICATION_MODE]: VerificationModeCodec,
-  [ConfigKey.TLS_VERSION]: t.array(TLSVersionCodec),
-  [ConfigKey.TLS_KEY]: t.string,
-  [ConfigKey.TLS_KEY_PASSPHRASE]: t.string,
-});
+export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
 
 export type TLSFields = t.TypeOf<typeof TLSCodec>;
 
