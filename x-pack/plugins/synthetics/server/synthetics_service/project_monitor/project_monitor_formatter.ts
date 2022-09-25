@@ -19,7 +19,6 @@ import { deleteMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/delete_
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
-  BrowserFields,
   ConfigKey,
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
@@ -124,16 +123,16 @@ export class ProjectMonitorFormatter {
     const existingMonitors = await this.getProjectMonitorsForProject();
     this.staleMonitorsMap = await this.getStaleMonitorsMap(existingMonitors);
 
-    const normalizedNewMonitors: BrowserFields[] = [];
+    const normalizedNewMonitors: SyntheticsMonitor[] = [];
     const normalizedUpdateMonitors: Array<{
       previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
-      monitor: BrowserFields;
+      monitor: SyntheticsMonitor;
     }> = [];
 
     for (const monitor of this.monitors) {
       const previousMonitor = existingMonitors.find(
         (monitorObj) =>
-          (monitorObj.attributes as BrowserFields)[ConfigKey.JOURNEY_ID] === monitor.id
+          (monitorObj.attributes as SyntheticsMonitor)[ConfigKey.JOURNEY_ID] === monitor.id
       );
 
       const normM = await this.validateProjectMonitor({
@@ -264,7 +263,7 @@ export class ProjectMonitorFormatter {
     const staleMonitors: StaleMonitorMap = {};
 
     existingMonitors.forEach((savedObject) => {
-      const journeyId = (savedObject.attributes as BrowserFields)[ConfigKey.JOURNEY_ID];
+      const journeyId = (savedObject.attributes as SyntheticsMonitor)[ConfigKey.JOURNEY_ID];
       if (journeyId) {
         staleMonitors[journeyId] = {
           stale: true,
@@ -296,7 +295,7 @@ export class ProjectMonitorFormatter {
     return hits;
   };
 
-  private createMonitorsBulk = async (monitors: BrowserFields[]) => {
+  private createMonitorsBulk = async (monitors: SyntheticsMonitor[]) => {
     try {
       if (monitors.length > 0) {
         const { newMonitors } = await syncNewMonitorBulk({
@@ -359,7 +358,7 @@ export class ProjectMonitorFormatter {
 
   private updateMonitorsBulk = async (
     monitors: Array<{
-      monitor: BrowserFields;
+      monitor: SyntheticsMonitor;
       previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
     }>
   ): Promise<{

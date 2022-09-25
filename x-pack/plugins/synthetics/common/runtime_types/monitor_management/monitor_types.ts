@@ -43,7 +43,14 @@ export const TLSSensitiveFieldsCodec = t.partial({
   [ConfigKey.TLS_KEY_PASSPHRASE]: t.string,
 });
 
-export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
+export const TLSCodec = t.partial({
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.string,
+  [ConfigKey.TLS_CERTIFICATE]: t.string,
+  [ConfigKey.TLS_VERIFICATION_MODE]: VerificationModeCodec,
+  [ConfigKey.TLS_VERSION]: t.array(TLSVersionCodec),
+  [ConfigKey.TLS_KEY]: t.string,
+  [ConfigKey.TLS_KEY_PASSPHRASE]: t.string,
+});
 
 export type TLSFields = t.TypeOf<typeof TLSCodec>;
 
@@ -241,7 +248,7 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   CommonFieldsCodec,
 ]);
 
-export const BrowserAdvancedFieldsCodec = t.interface({
+export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.SCREENSHOTS]: t.string,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
@@ -263,25 +270,26 @@ export const BrowserSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.SYNTHETICS_ARGS]: t.array(t.string),
 });
 
-export const BrowserAdvancedsCodec = t.intersection([
-  BrowserAdvancedFieldsCodec,
+export const BrowserAdvancedFieldsCodec = t.intersection([
+  EncryptedBrowserAdvancedFieldsCodec,
   BrowserSensitiveAdvancedFieldsCodec,
 ]);
 
 export const EncryptedBrowserFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
-  BrowserAdvancedFieldsCodec,
+  EncryptedBrowserAdvancedFieldsCodec,
+  TLSFieldsCodec,
 ]);
 
 export const BrowserFieldsCodec = t.intersection([
   BrowserSimpleFieldsCodec,
   BrowserAdvancedFieldsCodec,
-  BrowserSensitiveAdvancedFieldsCodec,
+  TLSCodec,
 ]);
 
 export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
-export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedsCodec>;
+export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
 
 // MonitorFields, represents any possible monitor type
 export const MonitorFieldsCodec = t.intersection([
