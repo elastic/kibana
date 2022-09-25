@@ -19,6 +19,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -30,6 +31,7 @@ describe('#toExpression', () => {
     core: coreMock.createStart(),
     storage: {} as IStorageWrapper,
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -560,6 +562,7 @@ describe('#toExpression', () => {
             layerType: layerTypes.ANNOTATIONS,
             annotations: [],
             indexPatternId: 'my-indexPattern',
+            ignoreGlobalFilters: true,
           },
         ],
       },

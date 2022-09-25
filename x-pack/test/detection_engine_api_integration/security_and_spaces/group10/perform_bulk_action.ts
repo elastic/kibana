@@ -1050,6 +1050,10 @@ export default ({ getService }: FtrProviderContext): void => {
             type: BulkActionEditType.set_timeline,
             value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
           },
+          {
+            type: BulkActionEditType.set_schedule,
+            value: { interval: '1m', lookback: '1m' },
+          },
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
@@ -1653,6 +1657,71 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(rule.notify_when).to.eql(expected.notifyWhen);
             });
           });
+        });
+      });
+
+      describe('schedule actions', () => {
+        it('should return bad request error if payload is invalid', async () => {
+          const ruleId = 'ruleId';
+          const intervalMinutes = 0;
+          const interval = `${intervalMinutes}m`;
+          const lookbackMinutes = -1;
+          const lookback = `${lookbackMinutes}m`;
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_schedule,
+                  value: {
+                    interval,
+                    lookback,
+                  },
+                },
+              ],
+            })
+            .expect(400);
+
+          expect(body.statusCode).to.eql(400);
+          expect(body.error).to.eql('Bad Request');
+          expect(body.message).to.contain('Invalid value "0m" supplied to "edit,value,interval"');
+          expect(body.message).to.contain('Invalid value "-1m" supplied to "edit,value,lookback"');
+        });
+
+        it('should update schedule values in rules with a valid payload', async () => {
+          const ruleId = 'ruleId';
+          const intervalMinutes = 15;
+          const interval = `${intervalMinutes}m`;
+          const lookbackMinutes = 10;
+          const lookback = `${lookbackMinutes}m`;
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_schedule,
+                  value: {
+                    interval,
+                    lookback,
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          expect(body.attributes.results.updated[0].interval).to.eql(interval);
+          expect(body.attributes.results.updated[0].meta).to.eql({ from: `${lookbackMinutes}m` });
+          expect(body.attributes.results.updated[0].from).to.eql(
+            `now-${(intervalMinutes + lookbackMinutes) * 60}s`
+          );
         });
       });
     });

@@ -128,7 +128,7 @@ function getTest(
       test = {
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
-        spy: jest.spyOn(epmTransformsInstall, 'installTransform'),
+        spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
         spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
         spyResponse: {
           installedTransforms: [

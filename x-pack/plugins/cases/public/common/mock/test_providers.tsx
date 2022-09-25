@@ -11,17 +11,15 @@ import React from 'react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
-import {
-  createKibanaContextProviderMock,
-  createStartServicesMock,
-} from '../lib/kibana/kibana_react.mock';
+import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
@@ -37,11 +35,11 @@ interface TestProviderProps {
   releasePhase?: ReleasePhase;
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
+  license?: ILicense;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
-const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
@@ -52,6 +50,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
+  license,
 }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -66,9 +65,11 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     },
   });
 
+  const services = createStartServicesMock({ license });
+
   return (
     <I18nProvider>
-      <MockKibanaContextProvider>
+      <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
             <CasesProvider
@@ -84,7 +85,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
             </CasesProvider>
           </QueryClientProvider>
         </ThemeProvider>
-      </MockKibanaContextProvider>
+      </KibanaContextProvider>
     </I18nProvider>
   );
 };
@@ -100,6 +101,7 @@ export interface AppMockRenderer {
   queryClient: QueryClient;
   AppWrapper: React.FC<{ children: React.ReactElement }>;
 }
+
 export const testQueryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -124,8 +126,10 @@ export const createAppMockRenderer = ({
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
+  license,
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
-  const services = createStartServicesMock();
+  const services = createStartServicesMock({ license });
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

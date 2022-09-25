@@ -15,10 +15,12 @@ import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 const chance = new Chance();
 
@@ -31,6 +33,14 @@ describe('<Benchmarks />', () => {
         data: { status: 'indexed' },
       })
     );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
     (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 

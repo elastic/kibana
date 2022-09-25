@@ -103,7 +103,7 @@ export function getSuggestions({
           // used for navigating from Discover to Lens
           dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
             datasourceState,
-            visualizeTriggerFieldContext.indexPatternId,
+            visualizeTriggerFieldContext.dataViewSpec.id!,
             visualizeTriggerFieldContext.fieldName,
             dataViews.indexPatterns
           );
@@ -199,7 +199,7 @@ export function getVisualizeFieldSuggestions({
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === visualizeTriggerFieldContext.type
     );
-    return activeVisualization?.getVisualizationSuggestionFromContext?.({
+    return activeVisualization?.getSuggestionFromConvertToLensContext?.({
       suggestions: allSuggestions,
       context: visualizeTriggerFieldContext,
     });

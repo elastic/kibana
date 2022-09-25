@@ -39,6 +39,13 @@ const MAX_CONTAINER_HEIGHT = 600;
 const MODAL_HEADER_HEIGHT = 122;
 const MODAL_FOOTER_HEIGHT = 80;
 
+const suggestedFieldsWhitelist = [
+  'agent.name',
+  'service.name',
+  'service.language.name',
+  'service.environment',
+];
+
 const Container = styled.div`
   width: 600px;
   height: ${MAX_CONTAINER_HEIGHT}px;
@@ -144,6 +151,21 @@ export function SelectServices({
                     setStagedKuery(value);
                   }}
                   value={kuery}
+                  suggestionFilter={(querySuggestion) => {
+                    if ('field' in querySuggestion) {
+                      const {
+                        field: {
+                          spec: { name: fieldName },
+                        },
+                      } = querySuggestion;
+
+                      return (
+                        fieldName.startsWith('label') ||
+                        suggestedFieldsWhitelist.includes(fieldName)
+                      );
+                    }
+                    return true;
+                  }}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

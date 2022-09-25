@@ -6,7 +6,7 @@
  */
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
@@ -17,7 +17,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type { NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
@@ -72,7 +72,8 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
-  spec?: DataViewSpec;
+  spec: DataViewSpec;
+  isPersisted: boolean;
 }
 
 export type IndexPatternField = FieldSpec & {
@@ -87,8 +88,6 @@ export type IndexPatternField = FieldSpec & {
   meta?: boolean;
   runtime?: boolean;
 };
-
-export type ErrorCallback = (e: { message: string }) => void;
 
 export interface PublicAPIProps<T> {
   state: T;
@@ -218,35 +217,13 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
-interface AxisExtents {
-  mode: string;
-  lowerBound?: number;
-  upperBound?: number;
-}
-
-export interface VisualizeEditorContext {
-  layers: VisualizeEditorLayersContext[];
-  configuration: ChartSettings;
+export type VisualizeEditorContext = {
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-  type: string;
-}
-
-interface ChartSettings {
-  fill?: string;
-  legend?: Record<string, boolean | string>;
-  gridLinesVisibility?: Record<string, boolean>;
-  tickLabelsVisibility?: Record<string, boolean>;
-  axisTitlesVisibility?: Record<string, boolean>;
-  valueLabels?: boolean;
-  extents?: {
-    yLeftExtent: AxisExtents;
-    yRightExtent: AxisExtents;
-  };
-}
+} & NavigateToLensContext;
 
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
@@ -286,6 +263,12 @@ export interface Datasource<T = unknown, P = unknown> {
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
+  cloneLayer: (
+    state: T,
+    layerId: string,
+    newLayerId: string,
+    getNewId: (id: string) => string
+  ) => T;
   getLayers: (state: T) => string[];
   removeColumn: (props: {
     prevState: T;
@@ -331,7 +314,8 @@ export interface Datasource<T = unknown, P = unknown> {
   canCloseDimensionEditor?: (state: T) => boolean;
   getCustomWorkspaceRenderer?: (
     state: T,
-    dragging: DraggingIdentifier
+    dragging: DraggingIdentifier,
+    indexPatterns: Record<string, IndexPattern>
   ) => undefined | (() => JSX.Element);
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -373,7 +357,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeCharts: (
     state: T,
-    context: VisualizeEditorLayersContext[],
+    context: NavigateToLensContext['layers'],
     indexPatterns: IndexPatternMap
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -511,7 +495,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
@@ -565,7 +549,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
@@ -763,17 +747,6 @@ export interface Suggestion {
   keptLayerIds: string[];
 }
 
-interface VisualizationConfigurationFromContextChangeProps<T> {
-  layerId: string;
-  prevState: T;
-  context: VisualizeEditorLayersContext;
-}
-
-interface VisualizationStateFromContextChangeProps {
-  suggestions: Suggestion[];
-  context: VisualizeEditorContext;
-}
-
 /**
  * Object passed to `getSuggestions` of a visualization.
  * It contains a possible table the current datasource could
@@ -897,6 +870,11 @@ export interface VisualizationDisplayOptions {
   noPadding?: boolean;
 }
 
+interface VisualizationStateFromContextChangeProps {
+  suggestions: Suggestion[];
+  context: VisualizeEditorContext;
+}
+
 export interface Visualization<T = unknown, P = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -939,11 +917,23 @@ export interface Visualization<T = unknown, P = unknown> {
   /** Visualizations can have references as well */
   getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Hydrate from persistable state and references to final state */
-  fromPersistableState?: (state: P, references?: SavedObjectReference[]) => T;
+  fromPersistableState?: (
+    state: P,
+    references?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  ) => T;
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
   clearLayer: (state: T, layerId: string, indexPatternId: string) => T;
+  /** Reset button on each layer triggers this */
+  cloneLayer?: (
+    state: T,
+    layerId: string,
+    newLayerId: string,
+    /** @param contains map old -> new id **/
+    clonedIDsMap: Map<string, string>
+  ) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
@@ -1026,19 +1016,7 @@ export interface Visualization<T = unknown, P = unknown> {
     dropType: DropType;
     group?: VisualizationDimensionGroupConfig;
   }) => T;
-  /**
-   * Update the configuration for the visualization. This is used to update the state
-   */
-  updateLayersConfigurationFromContext?: (
-    props: VisualizationConfigurationFromContextChangeProps<T>
-  ) => T;
 
-  /**
-   * Update the visualization state from the context.
-   */
-  getVisualizationSuggestionFromContext?: (
-    props: VisualizationStateFromContextChangeProps
-  ) => Suggestion;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options
@@ -1142,6 +1120,10 @@ export interface Visualization<T = unknown, P = unknown> {
    * Get RenderEventCounters events for telemetry
    */
   getRenderEventCounters?: (state: T) => string[];
+
+  getSuggestionFromConvertToLensContext?: (
+    props: VisualizationStateFromContextChangeProps
+  ) => Suggestion;
 }
 
 // Use same technique as TriggerContext

@@ -38,8 +38,10 @@ export enum RawIndicatorFieldId {
   FileImphash = 'threat.indicator.file.imphash',
   FilePehash = 'threat.indicator.file.pehash',
   FileVhash = 'threat.indicator.file.vhash',
+  FileTelfhash = 'threat.indicator.file.elf.telfhash',
   X509Serial = 'threat.indicator.x509.serial_number',
   WindowsRegistryKey = 'threat.indicator.registry.key',
+  WindowsRegistryPath = 'threat.indicator.registry.path',
   AutonomousSystemNumber = 'threat.indicator.as.number',
   MacAddress = 'threat.indicator.mac',
   TimeStamp = '@timestamp',
@@ -48,6 +50,22 @@ export enum RawIndicatorFieldId {
   Description = 'threat.indicator.description',
   NameOrigin = 'threat.indicator.name_origin',
 }
+
+/**
+ * Threat indicator field map to Enriched Event.
+ * (reverse of https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/cti/constants.ts#L35)
+ */
+export const IndicatorFieldEventEnrichmentMap: { [id: string]: string[] } = {
+  [RawIndicatorFieldId.FileMd5]: ['file.hash.md5'],
+  [RawIndicatorFieldId.FileSha1]: ['file.hash.sha1'],
+  [RawIndicatorFieldId.FileSha256]: ['file.hash.sha256'],
+  [RawIndicatorFieldId.FileImphash]: ['file.pe.imphash'],
+  [RawIndicatorFieldId.FileTelfhash]: ['file.elf.telfhash'],
+  [RawIndicatorFieldId.FileSSDeep]: ['file.hash.ssdeep'],
+  [RawIndicatorFieldId.Ip]: ['source.ip', 'destination.ip'],
+  [RawIndicatorFieldId.UrlFull]: ['url.full'],
+  [RawIndicatorFieldId.WindowsRegistryPath]: ['registry.path'],
+};
 
 /**
  * Threat Intelligence Indicator interface.
@@ -93,7 +111,7 @@ export const generateMockUrlIndicator = (): Indicator => {
   indicator.fields['threat.indicator.url.full'] = ['https://0.0.0.0/test'];
   indicator.fields['threat.indicator.url.original'] = ['https://0.0.0.0/test'];
   indicator.fields['threat.indicator.name'] = ['https://0.0.0.0/test'];
-  indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.url.original'];
+  indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.url.full'];
 
   return indicator;
 };

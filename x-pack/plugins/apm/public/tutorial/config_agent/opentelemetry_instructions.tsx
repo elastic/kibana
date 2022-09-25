@@ -40,7 +40,7 @@ export function OpenTelemetryInstructions({
     {
       setting: 'OTEL_METRICS_EXPORTER',
       value: 'otlp',
-      notes: 'Enable metrics when supported by your OpenTelemtry client.',
+      notes: 'Enable metrics when supported by your OpenTelemetry client.',
     },
     {
       setting: 'OTEL_LOGS_EXPORTER',

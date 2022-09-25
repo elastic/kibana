@@ -26,7 +26,7 @@ import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
@@ -93,6 +93,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   textBasedLanguageModeErrors?: Error[];
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
+  submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
@@ -544,6 +545,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           showSubmitButton={this.props.showSubmitButton}
+          submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
           placeholder={this.props.placeholder}

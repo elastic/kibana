@@ -117,7 +117,7 @@ export const alertCommentWithIndices: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment: () => Comment = () => {
+export const hostIsolationComment = (overrides?: Record<string, unknown>): Comment => {
   return {
     type: CommentType.actions,
     comment: 'I just isolated the host!',
@@ -139,6 +139,7 @@ export const hostIsolationComment: () => Comment = () => {
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    ...overrides,
   };
 };
 
@@ -779,9 +780,9 @@ export const getAlertUserAction = (): SnakeToCamelCase<
   },
 });
 
-export const getHostIsolationUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getHostIsolationUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'isolate-action-id',
   type: ActionTypes.comment,
@@ -794,6 +795,7 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const caseUserActions: CaseUserActions[] = [

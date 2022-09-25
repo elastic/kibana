@@ -18,6 +18,11 @@ import type {
 } from '../types';
 
 import { doesPackageHaveIntegrations } from '.';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+} from './policy_template';
 
 type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
   data_stream: { type: string; dataset: string };
@@ -29,7 +34,7 @@ export const getStreamsForInputType = (
   dataStreamPaths: string[] = []
 ): PackagePolicyStream[] => {
   const streams: PackagePolicyStream[] = [];
-  const dataStreams = packageInfo.data_streams || [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
   const dataStreamsToSearch = dataStreamPaths.length
     ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
     : dataStreams;
@@ -81,11 +86,12 @@ export const packageToPackagePolicyInputs = (
   } = {};
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
-    packagePolicyTemplate.inputs?.forEach((packageInput) => {
+    const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    normalizedInputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
         ...packageInput,
-        ...(packagePolicyTemplate.data_streams
+        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
           ? { data_streams: packagePolicyTemplate.data_streams }
           : {}),
         policy_template: packagePolicyTemplate.name,

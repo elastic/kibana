@@ -14,7 +14,7 @@ import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
 import { Globals } from '../../static_globals';
 
 /**
@@ -43,7 +43,7 @@ export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?:
 function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
-  const indexPattern = getNewIndexPatterns({
+  const indexPattern = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,

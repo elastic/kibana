@@ -16,15 +16,15 @@ import { EuiBadge, EuiHealth, EuiPanel, EuiTitle } from '@elastic/eui';
 import { InferencePipelineCard } from './inference_pipeline_card';
 
 export const DEFAULT_VALUES = {
+  isDeployed: true,
   pipelineName: 'Sample Processor',
   trainedModelName: 'example_trained_model',
-  isDeployed: true,
-  modelType: 'pytorch',
+  types: ['pytorch'],
 };
 
 const mockValues = { ...DEFAULT_VALUES };
 
-describe('InfererencePipelineCard', () => {
+describe('InferencePipelineCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(mockValues);
@@ -37,11 +37,5 @@ describe('InfererencePipelineCard', () => {
 
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Deployed');
-  });
-
-  it('renders an undeployed item', () => {
-    const wrapper = shallow(<InferencePipelineCard {...mockValues} isDeployed={false} />);
-    const health = wrapper.find(EuiHealth);
-    expect(health.prop('children')).toEqual('Not deployed');
   });
 });

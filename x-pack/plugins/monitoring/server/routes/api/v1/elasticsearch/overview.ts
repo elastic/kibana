@@ -13,7 +13,7 @@ import {
 } from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
-import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
@@ -38,7 +38,7 @@ export function esOverviewRoute(server: MonitoringCore) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
 
-      const logsIndexPattern = getNewIndexPatterns({
+      const logsIndexPattern = getIndexPatterns({
         config,
         type: 'logs',
         moduleType: 'elasticsearch',

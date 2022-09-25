@@ -35,7 +35,11 @@ export const bulkCreateFactory =
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
-    maxAlerts?: number
+    maxAlerts?: number,
+    enrichAlerts?: (
+      alerts: Array<Pick<WrappedFieldsLatest<T>, '_id' | '_source'>>,
+      params: { spaceId: string }
+    ) => Promise<Array<Pick<WrappedFieldsLatest<T>, '_id' | '_source'>>>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
@@ -57,7 +61,8 @@ export const bulkCreateFactory =
         _source: doc._source,
       })),
       refreshForBulkCreate,
-      maxAlerts
+      maxAlerts,
+      enrichAlerts
     );
 
     const end = performance.now();

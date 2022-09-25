@@ -7,10 +7,10 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 
-import { EmbeddableStart } from '../services/embeddable';
-import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
-
+import { SavedObjectLoader } from '../services/saved_object_loader';
 import { createSavedDashboardClass } from './saved_dashboard';
 
 interface Services {

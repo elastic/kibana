@@ -10,6 +10,7 @@ import { mount } from 'enzyme';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -41,6 +42,7 @@ const props = {
 
 describe('CasesTableFilters ', () => {
   let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
@@ -85,6 +87,12 @@ describe('CasesTableFilters ', () => {
   });
 
   it('should call onFilterChange when selected assignees change', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    appMockRender = createAppMockRenderer({ license });
+
     const { getByTestId, getByText } = appMockRender.render(<CasesTableFilters {...props} />);
     userEvent.click(getByTestId('options-filter-popover-button-assignees'));
     await waitForEuiPopoverOpen();
@@ -163,6 +171,12 @@ describe('CasesTableFilters ', () => {
         ],
       },
     };
+
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    appMockRender = createAppMockRenderer({ license });
 
     appMockRender.render(<CasesTableFilters {...overrideProps} />);
     userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
@@ -328,6 +342,25 @@ describe('CasesTableFilters ', () => {
       wrapper.update();
       // NOTE: intentionally checking no arguments are passed
       expect(onCreateCasePressed).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('assignees filter', () => {
+    it('should hide the assignees filters on basic license', async () => {
+      const result = appMockRender.render(<CasesTableFilters {...props} />);
+
+      expect(result.queryByTestId('options-filter-popover-button-assignees')).toBeNull();
+    });
+
+    it('should show the assignees filters on platinum license', async () => {
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+
+      appMockRender = createAppMockRenderer({ license });
+      const result = appMockRender.render(<CasesTableFilters {...props} />);
+
+      expect(result.getByTestId('options-filter-popover-button-assignees')).toBeInTheDocument();
     });
   });
 });
