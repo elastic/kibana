@@ -243,6 +243,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
+/kbn_pm/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -753,6 +754,9 @@ packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/ki
 packages/core/injected-metadata/core-injected-metadata-common-internal @elastic/kibana-core
 packages/core/integrations/core-integrations-browser-internal @elastic/kibana-core
 packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser-internal @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
@@ -772,6 +776,9 @@ packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-cor
 packages/core/overlays/core-overlays-browser @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-internal @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-browser @elastic/kibana-core
+packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
+packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server @elastic/kibana-core
 packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
@@ -887,6 +894,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 packages/kbn-monaco @elastic/kibana-app-services
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
+packages/kbn-osquery-io-ts-types @elastic/security-asset-management
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations

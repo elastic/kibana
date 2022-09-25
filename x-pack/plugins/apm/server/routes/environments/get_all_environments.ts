@@ -50,6 +50,7 @@ export async function getAllEnvironments({
       // use timeout + min_doc_count to return as early as possible
       // if filter is not defined to prevent timeouts
       ...(!serviceName ? { timeout: '1ms' } : {}),
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
