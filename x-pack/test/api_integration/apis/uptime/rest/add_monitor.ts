@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.status).eql(400);
     });
 
-    it('cannot create a monitor with unknown keys', async () => {
+    it('omits unknown keys', async () => {
       // Delete a required property to make payload invalid
       const newMonitor = {
         name: 'Sample name',
