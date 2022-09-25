@@ -23,6 +23,7 @@ import {
   apmOperationsTab,
   apmLabsButton,
   enableInfrastructureHostsView,
+  enableServiceMetrics,
   enableAwsLambdaMetrics,
 } from '../common/ui_settings_keys';
 
@@ -153,6 +154,7 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
+    showInLabs: true,
   },
   [enableServiceGroups]: {
     category: [observabilityFeatureId],
@@ -161,7 +163,31 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enable the Service groups feature on APM UI',
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the Service groups feature on APM UI. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink:
+          '<a href="https://ela.st/feedback-service-groups" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('xpack.observability.enableServiceGroups.feedbackLinkText', {
+            defaultMessage: 'Give feedback',
+          }) +
+          '</a>',
+      },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+    showInLabs: true,
+  },
+  [enableServiceMetrics]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
+      defaultMessage: 'Service metrics',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.apmEnableServiceMetricsGroupsDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enables Service metrics. When is enabled, additional configuration in APM Server is required.',
       values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
     }),
     schema: schema.boolean(),
@@ -177,8 +203,19 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name',
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+        values: {
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+          feedbackLink:
+            '<a href="https://ela.st/feedback-apm-page-performance" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate(
+              'xpack.observability.apmServiceInventoryOptimizedSorting.feedbackLinkText',
+              {
+                defaultMessage: 'Give feedback',
+              }
+            ) +
+            '</a>',
+        },
       }
     ),
     schema: schema.boolean(),
@@ -205,8 +242,16 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink:
+          '<a href="https://ela.st/feedback-trace-explorer" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('xpack.observability.apmTraceExplorerTabDescription.feedbackLinkText', {
+            defaultMessage: 'Give feedback',
+          }) +
+          '</a>',
+      },
     }),
     schema: schema.boolean(),
     value: false,
@@ -221,8 +266,16 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink:
+          '<a href="https://ela.st/feedback-operations-breakdown" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('xpack.observability.apmOperationsBreakdownDescription.feedbackLinkText', {
+            defaultMessage: 'Give feedback',
+          }) +
+          '</a>',
+      },
     }),
     schema: schema.boolean(),
     value: false,
@@ -261,8 +314,10 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'AWS Lambda Metrics',
     }),
     description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage: 'Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+      defaultMessage:
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
       values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         feedbackLink:
           '<a href="https://ela.st/feedback-aws-lambda" target="_blank" rel="noopener noreferrer">' +
           i18n.translate('xpack.observability.awsLambdaDescription', {
