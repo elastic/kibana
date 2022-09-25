@@ -6,35 +6,23 @@
  */
 
 import { ColumnarViewModel } from '@elastic/charts';
-import { CalleeTree, sortEdges } from './callee';
 
-interface ColumnarCallee {
-  Label: string[];
-  Value: number[];
-  X: number[];
-  Y: number[];
-  Color: number[];
-  CountInclusive: number[];
-  CountExclusive: number[];
+import { CalleeTree } from './callee';
+
+export interface ElasticFlameGraph {
+  Size: number;
+  Edges: number[][];
+
   ID: string[];
+  FrameType: number[];
   FrameID: string[];
   ExecutableID: string[];
-}
-
-export interface FlameGraph {
   Label: string[];
-  Value: number[];
-  Position: number[];
-  Size: number[];
-  Color: number[];
+
+  Samples: number[];
   CountInclusive: number[];
   CountExclusive: number[];
-  ID: string[];
-  FrameID: string[];
-  ExecutableID: string[];
-}
 
-export interface ElasticFlameGraph extends FlameGraph {
   TotalSeconds: number;
   TotalTraces: number;
   SampledTraces: number;
@@ -93,96 +81,119 @@ function normalize(n: number, lower: number, upper: number): number {
   return (n - lower) / (upper - lower);
 }
 
-// createColumnarCallee flattens the intermediate representation of the tree
-// into a columnar format that is more compact than JSON. This representation
-// will later need to be normalized into the response ultimately consumed by
-// the flamegraph.
-export function createColumnarCallee(tree: CalleeTree): ColumnarCallee {
-  const size = tree.Size;
-  const columnar: ColumnarCallee = {
-    Label: tree.Label.slice(0, size),
-    Value: tree.Samples.slice(0, size),
-    X: new Array<number>(size),
-    Y: new Array<number>(size),
-    Color: new Array<number>(size * 4),
-    CountInclusive: tree.CountInclusive.slice(0, size),
-    CountExclusive: tree.CountExclusive.slice(0, size),
-    ID: tree.ID.slice(0, size),
-    FrameID: tree.FrameID.slice(0, size),
-    ExecutableID: tree.FileID.slice(0, size),
+// createFlameGraph encapsulates the tree representation into a serialized form.
+export function createFlameGraph(
+  tree: CalleeTree,
+  totalSeconds: number,
+  totalTraces: number,
+  sampledTraces: number
+): ElasticFlameGraph {
+  const graph: ElasticFlameGraph = {
+    Size: tree.Size,
+    Edges: new Array<number[]>(tree.Size),
+
+    ID: tree.ID.slice(0, tree.Size),
+    Label: tree.Label.slice(0, tree.Size),
+    FrameID: tree.FrameID.slice(0, tree.Size),
+    FrameType: tree.FrameType.slice(0, tree.Size),
+    ExecutableID: tree.FileID.slice(0, tree.Size),
+
+    Samples: tree.Samples.slice(0, tree.Size),
+    CountInclusive: tree.CountInclusive.slice(0, tree.Size),
+    CountExclusive: tree.CountExclusive.slice(0, tree.Size),
+
+    TotalSeconds: totalSeconds,
+    TotalTraces: totalTraces,
+    SampledTraces: sampledTraces,
   };
+
+  for (let i = 0; i < tree.Size; i++) {
+    let j = 0;
+    const nodes = new Array<number>(tree.Edges[i].size);
+    for (const [, n] of tree.Edges[i]) {
+      nodes[j] = n;
+      j++;
+    }
+    graph.Edges[i] = nodes;
+  }
+
+  return graph;
+}
+
+// createColumnarViewModel normalizes the columnar representation into a form
+// consumed by the flamegraph in the UI.
+export function createColumnarViewModel(
+  flamegraph: ElasticFlameGraph,
+  assignColors: boolean = true
+): ColumnarViewModel {
+  const numNodes = flamegraph.Size;
+  const xs = new Float32Array(numNodes);
+  const ys = new Float32Array(numNodes);
 
   const queue = [{ x: 0, depth: 1, node: 0 }];
 
   while (queue.length > 0) {
     const { x, depth, node } = queue.pop()!;
 
-    columnar.X[node] = x;
-    columnar.Y[node] = depth;
-
-    const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(tree.FrameType[node], x));
-    const j = 4 * node;
-    columnar.Color[j] = red;
-    columnar.Color[j + 1] = green;
-    columnar.Color[j + 2] = blue;
-    columnar.Color[j + 3] = alpha;
+    xs[node] = x;
+    ys[node] = depth;
 
     // For a deterministic result we have to walk the callees in a deterministic
     // order. A deterministic result allows deterministic UI views, something
     // that users expect.
-    const children = sortEdges(tree, node);
+    const children = flamegraph.Edges[node].sort((n1, n2) => {
+      if (flamegraph.Samples[n1] > flamegraph.Samples[n2]) {
+        return -1;
+      }
+      if (flamegraph.Samples[n1] < flamegraph.Samples[n2]) {
+        return 1;
+      }
+      return flamegraph.ID[n1].localeCompare(flamegraph.ID[n2]);
+    });
 
     let delta = 0;
     for (const child of children) {
-      delta += columnar.Value[child];
+      delta += flamegraph.Samples[child];
     }
 
     for (let i = children.length - 1; i >= 0; i--) {
-      delta -= columnar.Value[children[i]];
+      delta -= flamegraph.Samples[children[i]];
       queue.push({ x: x + delta, depth: depth + 1, node: children[i] });
     }
   }
 
-  return columnar;
-}
+  const colors = new Float32Array(numNodes * 4);
 
-// createFlameGraph normalizes the intermediate columnar representation into the
-// response ultimately consumed by the flamegraph in the UI.
-export function createFlameGraph(columnar: ColumnarCallee): FlameGraph {
-  const graph: FlameGraph = {
-    Label: [],
-    Value: [],
-    Position: [],
-    Size: [],
-    Color: [],
-    CountInclusive: [],
-    CountExclusive: [],
-    ID: [],
-    FrameID: [],
-    ExecutableID: [],
-  };
-
-  graph.Label = columnar.Label;
-  graph.Value = columnar.Value;
-  graph.Color = columnar.Color;
-  graph.CountInclusive = columnar.CountInclusive;
-  graph.CountExclusive = columnar.CountExclusive;
-  graph.ID = columnar.ID;
-  graph.FrameID = columnar.FrameID;
-  graph.ExecutableID = columnar.ExecutableID;
-
-  const maxX = columnar.Value[0];
-  const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
-
-  for (let i = 0; i < columnar.X.length; i++) {
-    const x = normalize(columnar.X[i], 0, maxX);
-    const y = normalize(maxY - columnar.Y[i], 0, maxY);
-    graph.Position.push(x, y);
+  if (assignColors) {
+    for (let i = 0; i < numNodes; i++) {
+      const rgba = rgbToRGBA(frameTypeToRGB(flamegraph.FrameType[i], xs[i]));
+      colors.set(rgba, 4 * i);
+    }
   }
 
-  graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
+  const position = new Float32Array(numNodes * 2);
+  const maxX = flamegraph.Samples[0];
+  const maxY = ys.reduce((max, n) => (n > max ? n : max), 0);
 
-  return graph;
+  for (let i = 0; i < numNodes; i++) {
+    const j = 2 * i;
+    position[j] = normalize(xs[i], 0, maxX);
+    position[j + 1] = normalize(maxY - ys[i], 0, maxY);
+  }
+
+  const size = new Float32Array(numNodes);
+
+  for (let i = 0; i < numNodes; i++) {
+    size[i] = normalize(flamegraph.Samples[i], 0, maxX);
+  }
+
+  return {
+    label: flamegraph.Label.slice(0, numNodes),
+    value: Float64Array.from(flamegraph.Samples.slice(0, numNodes)),
+    color: colors,
+    position0: position,
+    position1: position,
+    size0: size,
+    size1: size,
+  } as ColumnarViewModel;
 }
-
-export function createColumnarViewModel() {}

@@ -102,10 +102,8 @@ function insertNode(
   return node;
 }
 
-// createCalleeTree creates a tree in the internal representation from a
-// StackFrameMetadata that identifies the "centered" function and the trace
-// results that provide traces and the number of times that the trace has
-// been seen.
+// createCalleeTree creates a tree from the trace results, the number of
+// times that the trace has been seen, and the respective metadata.
 //
 // The resulting data structure contains all of the data, but is not yet in the
 // form most easily digestible by others.
@@ -126,9 +124,9 @@ export function createCalleeTree(
     return t1.localeCompare(t2);
   });
 
-  // Walk through all traces that contain the root. Increment the count of the
-  // root by the count of that trace. Walk "down" the trace (through the callees)
-  // and add the count of the trace to each callee.
+  // Walk through all traces. Increment the count of the root by the count of
+  // that trace. Walk "down" the trace (through the callees) and add the count
+  // of the trace to each callee.
 
   for (const stackTraceID of sortedStackTraceIDs) {
     // The slice of frames is ordered so that the leaf function is at the
@@ -192,22 +190,4 @@ export function createCalleeTree(
   tree.CountInclusive[0] = tree.Samples[0];
 
   return tree;
-}
-
-export function sortEdges(tree: CalleeTree, node: NodeID): NodeID[] {
-  const sortedNodes = new Array<NodeID>(tree.Edges[node].size);
-  let i = 0;
-  for (const [_, n] of tree.Edges[node]) {
-    sortedNodes[i] = n;
-    i++;
-  }
-  return sortedNodes.sort((n1, n2) => {
-    if (tree.Samples[n1] > tree.Samples[n2]) {
-      return -1;
-    }
-    if (tree.Samples[n1] < tree.Samples[n2]) {
-      return 1;
-    }
-    return tree.ID[n1].localeCompare(tree.ID[n2]);
-  });
 }

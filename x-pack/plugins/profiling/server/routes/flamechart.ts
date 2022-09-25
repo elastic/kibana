@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
-import { createColumnarCallee, createFlameGraph, ElasticFlameGraph } from '../../common/flamegraph';
+import { createFlameGraph } from '../../common/flamegraph';
 import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -68,37 +68,31 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           );
           logger.info(`creating callee tree took ${Date.now() - t0} ms`);
 
-          const t1 = Date.now();
-          const columnar = createColumnarCallee(tree);
-          logger.info(`creating columnar callee table took ${Date.now() - t1} ms`);
+          // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.
+          // N=0: full events table (sampleRate is 1)
+          // N=1: downsampled by 5 (sampleRate is 0.2)
+          // ...
 
-          const t2 = Date.now();
-          const fg = createFlameGraph(columnar);
-          logger.info(`creating flamegraph took ${Date.now() - t2} ms`);
+          // totalCount is the sum(Count) of all events in the filter range in the
+          // downsampled index we were looking at.
+          // To estimate how many events we have in the full events index: totalCount / sampleRate.
+          // Do the same for single entries in the events array.
+
+          const t1 = Date.now();
+          const fg = createFlameGraph(
+            tree,
+            totalSeconds,
+            Math.floor(totalCount / eventsIndex.sampleRate),
+            totalCount
+          );
+          logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
 
           return fg;
         });
 
-        // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.
-        // N=0: full events table (sampleRate is 1)
-        // N=1: downsampled by 5 (sampleRate is 0.2)
-        // ...
-
-        // totalCount is the sum(Count) of all events in the filter range in the
-        // downsampled index we were looking at.
-        // To estimate how many events we have in the full events index: totalCount / sampleRate.
-        // Do the same for single entries in the events array.
-
-        const body: ElasticFlameGraph = {
-          ...flamegraph,
-          TotalSeconds: totalSeconds,
-          TotalTraces: Math.floor(totalCount / eventsIndex.sampleRate),
-          SampledTraces: totalCount,
-        };
-
         logger.info('returning payload response to client');
 
-        return response.ok({ body });
+        return response.ok({ body: flamegraph });
       } catch (e) {
         logger.error(e);
         return response.customError({
