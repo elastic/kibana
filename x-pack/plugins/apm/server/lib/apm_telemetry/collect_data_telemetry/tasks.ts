@@ -6,6 +6,7 @@
  */
 import { fromKueryExpression } from '@kbn/es-query';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
+import { createHash } from 'crypto';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -1247,11 +1248,15 @@ export const tasks: TelemetryTask[] = [
       });
       const envBuckets = response.aggregations?.environments.buckets ?? [];
       const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
-        const env = envBucket.key;
+        const envHash = createHash('sha256')
+          .update(envBucket.key as string)
+          .digest('hex');
         const serviceBuckets = envBucket.service_names?.buckets ?? [];
         return serviceBuckets.map((serviceBucket) => {
-          const name = serviceBucket.key;
-          const fullServiceName = `${env}~${name}`;
+          const nameHash = createHash('sha256')
+            .update(serviceBucket.key as string)
+            .digest('hex');
+          const fullServiceName = `${nameHash}~${envHash}`;
           return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
