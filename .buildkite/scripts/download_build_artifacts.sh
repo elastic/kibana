@@ -20,8 +20,8 @@ if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
   # Testing against an example plugin distribution is not supported,
   # mostly due to snapshot failures when testing UI element lists
   if is_pr_with_label "ci:build-example-plugins"; then
-    rm -rf plugins
-    mkdir plugins
+    rm -rf "$KIBANA_BUILD_LOCATION/plugins"
+    mkdir "$KIBANA_BUILD_LOCATION/plugins"
   fi
 
   tar -xzf ../kibana-default-plugins.tar.gz
