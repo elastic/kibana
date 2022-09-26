@@ -70,7 +70,7 @@ const OsqueryEditorComponent = ({
             {
               query: data.query,
               label: data.label,
-              ecs_mapping: convertECSMappingToObject(data.ecs_mapping),
+              ecs_mapping: data.ecs_mapping,
             },
             (value) => !isEmpty(value)
           )
