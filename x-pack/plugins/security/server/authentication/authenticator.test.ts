@@ -1289,7 +1289,7 @@ describe('Authenticator', () => {
         AuthenticationResult.failed(failureReason)
       );
 
-      const [authenticationResult] = await authenticator.authenticate(request);
+      const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
@@ -1305,10 +1305,9 @@ describe('Authenticator', () => {
         AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
       );
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } }),
-        null,
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
+      );
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
@@ -1324,7 +1323,7 @@ describe('Authenticator', () => {
       );
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([AuthenticationResult.succeeded(user, { state: { authorization } })])
+        AuthenticationResult.succeeded(user, { state: { authorization } })
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
@@ -1349,7 +1348,7 @@ describe('Authenticator', () => {
       );
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([AuthenticationResult.succeeded(user, { state: { authorization } })])
+        AuthenticationResult.succeeded(user, { state: { authorization } })
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
@@ -1379,9 +1378,7 @@ describe('Authenticator', () => {
       );
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([
-          AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } }),
-        ])
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
@@ -1407,10 +1404,9 @@ describe('Authenticator', () => {
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.succeeded(user),
-        expect.objectContaining({ sid: mockSessVal.sid }),
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user)
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1431,7 +1427,7 @@ describe('Authenticator', () => {
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([AuthenticationResult.succeeded(user)])
+        AuthenticationResult.succeeded(user)
       );
 
       expect(mockOptions.session.extend).toHaveBeenCalledTimes(1);
@@ -1453,10 +1449,9 @@ describe('Authenticator', () => {
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.failed(failureReason),
-        null,
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1476,10 +1471,9 @@ describe('Authenticator', () => {
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.failed(failureReason),
-        null,
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1501,7 +1495,7 @@ describe('Authenticator', () => {
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([AuthenticationResult.succeeded(user, { state: newState })])
+        AuthenticationResult.succeeded(user, { state: newState })
       );
 
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
@@ -1529,7 +1523,7 @@ describe('Authenticator', () => {
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([AuthenticationResult.succeeded(user, { state: newState })])
+        AuthenticationResult.succeeded(user, { state: newState })
       );
 
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
@@ -1566,9 +1560,7 @@ describe('Authenticator', () => {
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        expect.arrayContaining([
-          AuthenticationResult.succeeded(user, { userProfileGrant, state: newState }),
-        ])
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: newState })
       );
 
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
@@ -1598,10 +1590,9 @@ describe('Authenticator', () => {
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.failed(failureReason),
-        null,
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1624,10 +1615,9 @@ describe('Authenticator', () => {
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.failed(failureReason),
-        null,
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1645,10 +1635,9 @@ describe('Authenticator', () => {
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.redirectTo('some-url', { state: null }),
-        null,
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.redirectTo('some-url', { state: null })
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1665,10 +1654,9 @@ describe('Authenticator', () => {
 
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.notHandled(),
-        expect.objectContaining({ sid: mockSessVal.sid }),
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1684,10 +1672,9 @@ describe('Authenticator', () => {
 
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual([
-        AuthenticationResult.notHandled(),
-        expect.objectContaining({ sid: mockSessVal.sid }),
-      ]);
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -1710,10 +1697,9 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue(mockSessVal);
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.notHandled(),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.notHandled()
+        );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1722,7 +1708,7 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([AuthenticationResult.notHandled()])
+          AuthenticationResult.notHandled()
         );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1734,7 +1720,7 @@ describe('Authenticator', () => {
         });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([AuthenticationResult.notHandled()])
+          AuthenticationResult.notHandled()
         );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1746,7 +1732,7 @@ describe('Authenticator', () => {
 
         const request = httpServerMock.createKibanaRequest();
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([AuthenticationResult.notHandled()])
+          AuthenticationResult.notHandled()
         );
         expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1755,21 +1741,18 @@ describe('Authenticator', () => {
       it('redirects to the Login Selector when needed.', async () => {
         const request = httpServerMock.createKibanaRequest();
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([
-            AuthenticationResult.redirectTo(
-              '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
-            ),
-          ])
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
+          )
         );
 
         // Unauthenticated session should be treated as non-existent one.
         mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1781,21 +1764,18 @@ describe('Authenticator', () => {
 
         // Includes hint if there is no active session.
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([
-            AuthenticationResult.redirectTo(
-              '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
-            ),
-          ])
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
         );
 
         // Includes hint if session is unauthenticated.
         mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
 
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1825,10 +1805,9 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue(null);
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.succeeded(mockUser),
-          null,
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -1837,7 +1816,7 @@ describe('Authenticator', () => {
         mockOptions.session.get.mockResolvedValue(mockSessVal);
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([AuthenticationResult.succeeded(mockUser)])
+          AuthenticationResult.succeeded(mockUser)
         );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1850,10 +1829,9 @@ describe('Authenticator', () => {
           AuthenticationResult.notHandled()
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.notHandled(),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.notHandled()
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -1866,10 +1844,9 @@ describe('Authenticator', () => {
           AuthenticationResult.failed(failureReason)
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.failed(failureReason),
-          null,
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.failed(failureReason)
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -1882,7 +1859,7 @@ describe('Authenticator', () => {
         );
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([AuthenticationResult.redirectTo('/some-url')])
+          AuthenticationResult.redirectTo('/some-url')
         );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1895,7 +1872,7 @@ describe('Authenticator', () => {
         });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
-          expect.arrayContaining([AuthenticationResult.succeeded(mockUser)])
+          AuthenticationResult.succeeded(mockUser)
         );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
@@ -1903,41 +1880,35 @@ describe('Authenticator', () => {
       it('does not redirect to Access Agreement its own requests', async () => {
         const request = httpServerMock.createKibanaRequest({ path: '/security/access_agreement' });
         mockOptions.session.get.mockResolvedValue(mockSessVal);
-        mockOptions.session.extend.mockResolvedValue(mockSessVal);
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.succeeded(mockUser),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Access Agreement if it is not configured', async () => {
         mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
         mockOptions.session.get.mockResolvedValue(mockSessVal);
-        mockOptions.session.extend.mockResolvedValue(mockSessVal);
         authenticator = new Authenticator(mockOptions);
 
         const request = httpServerMock.createKibanaRequest();
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.succeeded(mockUser),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Access Agreement if license doesnt allow it.', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue(mockSessVal);
-        mockOptions.session.extend.mockResolvedValue(mockSessVal);
         mockOptions.license.getFeatures.mockReturnValue({
           allowAccessAgreement: false,
         } as SecurityLicenseFeatures);
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.succeeded(mockUser),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -1952,13 +1923,12 @@ describe('Authenticator', () => {
         );
 
         const request = httpServerMock.createKibanaRequest();
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/security/access_agreement?next=%2Fmock-server-basepath%2Fpath',
             { user: mockUser, authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' } }
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -1986,13 +1956,12 @@ describe('Authenticator', () => {
         );
 
         const request = httpServerMock.createKibanaRequest();
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/security/access_agreement?next=%2Fmock-server-basepath%2Fpath',
             { user: mockUser, authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' } }
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
     });
@@ -2026,10 +1995,9 @@ describe('Authenticator', () => {
           AuthenticationResult.succeeded(mockUser)
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
-          AuthenticationResult.succeeded(mockUser),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
         expectAuditEvents(
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }
@@ -2047,13 +2015,12 @@ describe('Authenticator', () => {
           })
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
             state: 'some-state',
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
-          }),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          })
+        );
         expectAuditEvents(
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }
@@ -2071,13 +2038,12 @@ describe('Authenticator', () => {
           })
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
             state: 'some-state',
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
-          }),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          })
+        );
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -2092,7 +2058,7 @@ describe('Authenticator', () => {
           })
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/security/overwritten_session?next=%2Fmock-server-basepath%2Fpath',
             {
@@ -2100,9 +2066,8 @@ describe('Authenticator', () => {
               state: 'some-state',
               authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
             }
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
         expectAuditEvents(
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }
@@ -2123,7 +2088,7 @@ describe('Authenticator', () => {
           })
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/security/overwritten_session?next=%2Fmock-server-basepath%2Fpath',
             {
@@ -2131,9 +2096,8 @@ describe('Authenticator', () => {
               state: 'some-state',
               authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
             }
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
         expectAuditEvents(
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }
@@ -2152,7 +2116,7 @@ describe('Authenticator', () => {
           })
         );
 
-        await expect(authenticator.authenticate(request)).resolves.toEqual([
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/security/overwritten_session?next=%2Fsome-url',
             {
@@ -2160,9 +2124,8 @@ describe('Authenticator', () => {
               state: 'some-state',
               authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
             }
-          ),
-          expect.objectContaining({ sid: mockSessVal.sid }),
-        ]);
+          )
+        );
         expectAuditEvents(
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }

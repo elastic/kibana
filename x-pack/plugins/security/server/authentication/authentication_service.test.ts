@@ -47,7 +47,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
-import type { Session, SessionValue } from '../session_management';
+import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 import { AuthenticationResult } from './authentication_result';
@@ -178,10 +178,7 @@ describe('AuthenticationService', () => {
 
     describe('authentication handler', () => {
       let authHandler: AuthenticationHandler;
-      let authenticate: jest.SpyInstance<
-        Promise<[AuthenticationResult, Readonly<SessionValue> | null]>,
-        [KibanaRequest]
-      >;
+      let authenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
       let mockAuthToolkit: jest.Mocked<AuthToolkit>;
       beforeEach(() => {
         mockAuthToolkit = httpServiceMock.createAuthToolkit();
@@ -230,12 +227,10 @@ describe('AuthenticationService', () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
         const mockUser = mockAuthenticatedUser();
         const mockAuthHeaders = { authorization: 'Basic xxx' };
-        const mockSessionValue = sessionMock.createValue();
 
-        authenticate.mockResolvedValue([
-          AuthenticationResult.succeeded(mockUser, { authHeaders: mockAuthHeaders }),
-          mockSessionValue,
-        ]);
+        authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockUser, { authHeaders: mockAuthHeaders })
+        );
 
         await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
@@ -256,15 +251,13 @@ describe('AuthenticationService', () => {
         const mockUser = mockAuthenticatedUser();
         const mockAuthHeaders = { authorization: 'Basic xxx' };
         const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
-        const mockSessionValue = sessionMock.createValue();
 
-        authenticate.mockResolvedValue([
+        authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
             authHeaders: mockAuthHeaders,
             authResponseHeaders: mockAuthResponseHeaders,
-          }),
-          mockSessionValue,
-        ]);
+          })
+        );
 
         await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
@@ -286,15 +279,16 @@ describe('AuthenticationService', () => {
         const mockUser = mockAuthenticatedUser();
         const mockAuthHeaders = { authorization: 'Basic xxx' };
         const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
-        const mockSessionValue = sessionMock.createValue({ userProfileId: 'USER_PROFILE_ID' });
 
-        authenticate.mockResolvedValue([
-          AuthenticationResult.succeeded(mockUser, {
-            authHeaders: mockAuthHeaders,
-            authResponseHeaders: mockAuthResponseHeaders,
-          }),
-          mockSessionValue,
-        ]);
+        authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(
+            { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+            {
+              authHeaders: mockAuthHeaders,
+              authResponseHeaders: mockAuthResponseHeaders,
+            }
+          )
+        );
 
         await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
@@ -308,12 +302,11 @@ describe('AuthenticationService', () => {
 
       it('redirects user if redirection is requested by the authenticator preserving authentication response headers if any', async () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
-        authenticate.mockResolvedValue([
+        authenticate.mockResolvedValue(
           AuthenticationResult.redirectTo('/some/url', {
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
-          }),
-          null,
-        ]);
+          })
+        );
 
         await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
@@ -343,7 +336,7 @@ describe('AuthenticationService', () => {
         const esError = new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 400, body: 'some message' })
         );
-        authenticate.mockResolvedValue([AuthenticationResult.failed(esError), null]);
+        authenticate.mockResolvedValue(AuthenticationResult.failed(esError));
 
         await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
@@ -370,12 +363,11 @@ describe('AuthenticationService', () => {
             },
           })
         );
-        authenticate.mockResolvedValue([
+        authenticate.mockResolvedValue(
           AuthenticationResult.failed(originalError, {
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
-          }),
-          null,
-        ]);
+          })
+        );
 
         await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
@@ -390,7 +382,7 @@ describe('AuthenticationService', () => {
 
       it('returns `notHandled` when authentication can not be handled', async () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
-        authenticate.mockResolvedValue([AuthenticationResult.notHandled(), null]);
+        authenticate.mockResolvedValue(AuthenticationResult.notHandled());
 
         await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
