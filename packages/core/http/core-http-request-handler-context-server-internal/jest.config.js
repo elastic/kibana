@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/http/core-http-request-handler-context-internal'],
+  roots: ['<rootDir>/packages/core/http/core-http-request-handler-context-server-internal'],
 };

@@ -2954,11 +2954,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-internal":
+"@kbn/core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context@link:bazel-bin/packages/core/http/core-http-request-handler-context":
+"@kbn/core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server":
   version "0.0.0"
   uid ""
 
@@ -7067,11 +7067,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-http-request-handler-context-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-internal/npm_module_types":
+"@types/kbn__core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-http-request-handler-context@link:bazel-bin/packages/core/http/core-http-request-handler-context/npm_module_types":
+"@types/kbn__core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server/npm_module_types":
   version "0.0.0"
   uid ""
 

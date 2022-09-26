@@ -7,7 +7,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context';
+import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
   CoreElasticsearchRouteHandlerContext,
   type InternalElasticsearchServiceStart,

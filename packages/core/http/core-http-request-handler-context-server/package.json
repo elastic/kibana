@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/core-http-request-handler-context-internal",
+  "name": "@kbn/core-http-request-handler-context-server",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

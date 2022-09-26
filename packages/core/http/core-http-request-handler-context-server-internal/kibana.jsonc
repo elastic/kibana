@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/core-http-request-handler-context",
+  "id": "@kbn/core-http-request-handler-context-server-internal",
   "owner": "@elastic/kibana-core",
   "runtimeDeps": [],
   "typeDeps": [],
