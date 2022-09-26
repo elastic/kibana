@@ -19,7 +19,7 @@ import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
 } from '../../../constants';
-import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
+import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 

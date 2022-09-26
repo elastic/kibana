@@ -7,17 +7,17 @@
 
 import React, { ComponentProps } from 'react';
 import { Meta } from '@storybook/react';
-import { RuleEventLogListWithApi, RuleEventLogListProps } from './rule_event_log_list';
+import { RuleEventLogList, RuleEventLogListProps } from './rule_event_log_list';
 import { mockRule, mockRuleType } from './test_helpers';
 
-type Args = ComponentProps<typeof RuleEventLogListWithApi>;
+type Args = ComponentProps<typeof RuleEventLogList>;
 
 const rule = mockRule({ ruleTypeId: 'test-rule-type-id' });
 const ruleType = mockRuleType();
 
 export default {
   title: 'app/RuleEventLogList',
-  component: RuleEventLogListWithApi,
+  component: RuleEventLogList,
   argTypes: {
     rule: {
       control: {
@@ -72,7 +72,7 @@ export default {
 } as Meta<Args>;
 
 const Template = (args: RuleEventLogListProps) => {
-  return <RuleEventLogListWithApi {...args} />;
+  return <RuleEventLogList {...args} />;
 };
 
 export const Empty = Template.bind({});

@@ -97,6 +97,18 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
           <KibanaContextProvider
             services={{
               notifications,
+              uiSettings: {
+                get: () => {
+                  if (context.componentId === 'app-ruleslist') {
+                    return 'format:number:defaultPattern';
+                  }
+                },
+                get$: () => {
+                  if (context.componentId === 'app-ruleslist') {
+                    return of('format:number:defaultPattern');
+                  }
+                },
+              },
               application,
               http: getHttp(context),
               actionTypeRegistry: getActionTypeRegistry(),
