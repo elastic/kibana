@@ -91,13 +91,7 @@ describe('createMlInferencePipeline util function', () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
 
-    const indexName = 'my-index';
-    const pipelineName = 'my-pipeline';
-    const modelId = 'my-model-id';
-    const sourceField = 'my-source-field';
-
-    await createAndReferenceMlInferencePipeline(
-      indexName,
+    await createMlInferencePipeline(
       pipelineName,
       modelId,
       sourceField,
