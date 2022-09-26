@@ -161,6 +161,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           docCount,
         }))
       );
+      setCategories(null);
       setTotalCount(documentStats.totalCount);
     }
   }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
