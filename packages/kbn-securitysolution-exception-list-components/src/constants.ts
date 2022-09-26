@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-// declare module '*.svg' {
-//   import * as React from 'react';
-
-//   export const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
-
-//   export const src: string;
-// }
+export const illustrationImageURL =
+  '../assets/images/illustration_product_no_results_magnifying_glass.svg';

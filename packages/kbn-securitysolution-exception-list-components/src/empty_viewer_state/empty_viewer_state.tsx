@@ -22,6 +22,7 @@ import type { EuiFacetGroupLayout } from '@elastic/eui/src/components/facet/face
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ListTypeText, ViewerStatus } from '../types';
 import * as i18n from '../translations';
+import { illustrationImageURL } from '../constants';
 
 interface EmptyViewerStateProps {
   title?: string;
@@ -91,13 +92,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
           layout: 'horizontal' as EuiFacetGroupLayout,
           hasBorder: true,
           hasShadow: false,
-          icon: (
-            <EuiImage
-              size="fullWidth"
-              alt=""
-              url="../assets/images/illustration_product_no_results_magnifying_glass.svg"
-            />
-          ),
+          icon: <EuiImage size="fullWidth" alt="" url={illustrationImageURL} />,
           title: (
             <h3 data-test-subj="emptySearchTitle">
               {title || i18n.EMPTY_VIEWER_STATE_EMPTY_SEARCH_TITLE}
