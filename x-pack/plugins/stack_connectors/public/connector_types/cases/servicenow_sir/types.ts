@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export {
-  getServiceNowITSMConnectorType,
-  getServiceNowSIRConnectorType,
-  getServiceNowITOMConnectorType,
-} from './servicenow';
+import type { ExecutorSubActionPushParamsSIR } from '../../../../server/connector_types/cases/servicenow/types';
+
+export interface ServiceNowSIRActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionPushParamsSIR;
+}

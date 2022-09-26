@@ -6,31 +6,11 @@
  */
 
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type {
-  ExecutorSubActionPushParamsITSM,
-  ExecutorSubActionPushParamsSIR,
-  ExecutorSubActionAddEventParams,
-} from '../../../../server/connector_types/cases/servicenow/types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
   ServiceNowSecrets
 >;
-
-export interface ServiceNowITSMActionParams {
-  subAction: string;
-  subActionParams: ExecutorSubActionPushParamsITSM;
-}
-
-export interface ServiceNowSIRActionParams {
-  subAction: string;
-  subActionParams: ExecutorSubActionPushParamsSIR;
-}
-
-export interface ServiceNowITOMActionParams {
-  subAction: string;
-  subActionParams: ExecutorSubActionAddEventParams;
-}
 
 // Config
 export interface ServiceNowCommonConfig {

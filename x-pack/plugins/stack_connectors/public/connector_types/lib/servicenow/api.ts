@@ -15,10 +15,7 @@ import {
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
-import {
-  ConnectorExecutorResult,
-  rewriteResponseToCamelCase,
-} from '../../lib/rewrite_response_body';
+import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { Choice } from './types';
 
 export async function getChoices({

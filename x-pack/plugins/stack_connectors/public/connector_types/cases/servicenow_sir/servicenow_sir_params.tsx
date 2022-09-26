@@ -23,11 +23,12 @@ import {
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import * as i18n from './translations';
-import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice } from './types';
-import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
-import { DeprecatedCallout } from './deprecated_callout';
+import * as i18n from '../../lib/servicenow/translations';
+import { useGetChoices } from '../../lib/servicenow/use_get_choices';
+import { ServiceNowSIRActionParams } from './types';
+import { Fields, Choice } from '../../lib/servicenow/types';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../../lib/servicenow/helpers';
+import { DeprecatedCallout } from '../../lib/servicenow/deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {

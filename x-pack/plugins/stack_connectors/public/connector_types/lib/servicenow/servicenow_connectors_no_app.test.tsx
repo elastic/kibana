@@ -8,11 +8,7 @@
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import {
-  AppMockRenderer,
-  ConnectorFormTestProvider,
-  createAppMockRenderer,
-} from '../../lib/test_utils';
+import { AppMockRenderer, ConnectorFormTestProvider, createAppMockRenderer } from '../test_utils';
 import ServiceNowConnectorFieldsNoApp from './servicenow_connectors_no_app';
 
 describe('ServiceNowActionConnectorFields renders', () => {

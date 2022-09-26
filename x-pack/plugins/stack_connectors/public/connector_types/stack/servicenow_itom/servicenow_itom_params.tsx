@@ -14,10 +14,10 @@ import {
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import * as i18n from './translations';
-import { useChoices } from './use_choices';
+import * as i18n from '../../lib/servicenow/translations';
+import { useChoices } from '../../lib/servicenow/use_choices';
 import { ServiceNowITOMActionParams } from './types';
-import { choicesToEuiOptions, isFieldInvalid } from './helpers';
+import { choicesToEuiOptions, isFieldInvalid } from '../../lib/servicenow/helpers';
 
 const choicesFields = ['severity'];
 

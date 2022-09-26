@@ -22,11 +22,12 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ServiceNowITSMActionParams, Choice, Fields } from './types';
-import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
+import { Choice, Fields } from '../../lib/servicenow/types';
+import { ServiceNowITSMActionParams } from './types';
+import { useGetChoices } from '../../lib/servicenow/use_get_choices';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../../lib/servicenow/helpers';
 
-import * as i18n from './translations';
+import * as i18n from '../../lib/servicenow/translations';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {

@@ -9,10 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useChoices } from './use_choices';
+import { useChoices } from '../../lib/servicenow/use_choices';
 import ServiceNowITOMParamsFields from './servicenow_itom_params';
 
-jest.mock('./use_choices');
+jest.mock('../../lib/servicenow/use_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 const useChoicesMock = useChoices as jest.Mock;

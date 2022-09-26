@@ -15,7 +15,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
 import ServiceNowConnectorFields from './servicenow_connectors';
 import { getAppInfo } from './api';
-import { ConnectorFormTestProvider } from '../../lib/test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 import { mount } from 'enzyme';
 import userEvent from '@testing-library/user-event';
 
