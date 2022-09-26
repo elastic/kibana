@@ -144,6 +144,10 @@ interface CombineQueries {
   kqlMode: string;
 }
 
+export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
+  return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
+};
+
 export const combineQueries = ({
   config,
   dataProviders,
@@ -154,37 +158,9 @@ export const combineQueries = ({
   kqlMode,
 }: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
+  if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-
-    return {
-      filterQuery,
-      kqlError,
-    };
-  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query})`;
-
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-
-    return {
-      filterQuery,
-      kqlError,
-    };
-  } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
-
+  } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
@@ -197,11 +173,20 @@ export const combineQueries = ({
       kqlError,
     };
   }
+
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
-  const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
-    kqlQuery.query as string
-  )})`;
+
+  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
+
+  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+
+  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
+
+  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
+
+  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
+
+  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
