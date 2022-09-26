@@ -73,18 +73,10 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
   return (
     <>
       <GraphOverlay
-        componentInstanceID={timelineId}
+        scopeId={timelineId}
         isInTimeline={false}
         Navigation={Navigation}
         SessionView={SessionView}
-        graphEventId={graphEventId}
-        sessionViewConfig={sessionViewConfig}
-        updateTimelineGraphEventId={(timelineGraphEventId) =>
-          timelineActions.updateTimelineGraphEventId({
-            id: timelineId,
-            graphEventId: timelineGraphEventId,
-          })
-        }
       />
       {shouldShowDetailsPanel && (
         <>

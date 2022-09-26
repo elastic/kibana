@@ -192,23 +192,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
       <GraphOverlay
-        componentInstanceID={tableId}
+        scopeId={tableId}
         isInTimeline={false}
         SessionView={SessionView}
         Navigation={Navigation}
-        graphEventId={graphEventId}
-        sessionViewConfig={null}
-        updateTimelineGraphEventId={(timelineGraphEventId) =>
-          dispatch(
-            dataTableActions.updateTableGraphEventId({
-              graphEventId: timelineGraphEventId,
-              id: tableId,
-            })
-          )
-        }
       />
     ) : null;
-  }, [dispatch, graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(

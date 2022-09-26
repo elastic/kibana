@@ -16,6 +16,8 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { isInTableScope, isTimelineScope } from '../../../common/components/event_details/helpers';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
   useGlobalFullScreen,
@@ -25,7 +27,9 @@ import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
-import type { SessionViewConfig } from '../timeline/session_tab_content/use_session_view';
+import { timelineActions, timelineSelectors } from '../../store/timeline';
+import { tableDefaults, timelineDefaults } from '../../store/timeline/defaults';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
@@ -67,27 +71,35 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 interface GraphOverlayProps {
-  componentInstanceID: string;
+  scopeId: string;
   isInTimeline: boolean;
   SessionView: JSX.Element | null;
   Navigation: JSX.Element | null;
-  graphEventId: string | undefined;
-  sessionViewConfig: SessionViewConfig | null;
-  updateTimelineGraphEventId: (graphEventId: string) => void;
 }
 
 const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   SessionView,
   Navigation,
-  graphEventId,
-  sessionViewConfig,
-  updateTimelineGraphEventId,
-  componentInstanceID,
+  scopeId,
   isInTimeline,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
+
+  const getScope = useMemo(() => {
+    if (isInTableScope(scopeId)) {
+      return dataTableSelectors.getTableByIdSelector();
+    } else if (isTimelineScope(scopeId)) {
+      return timelineSelectors.getTimelineByIdSelector();
+    }
+  }, [scopeId]);
+
+  const defaults = isInTableScope(scopeId) ? tableDefaults : timelineDefaults;
+
+  const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
+    (state) => (getScope && getScope(state, scopeId)) ?? defaults
+  );
 
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, isInTimeline, timelineFullScreen }),
@@ -96,14 +108,18 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
 
   useEffect(() => {
     return () => {
-      updateTimelineGraphEventId('');
+      if (isInTableScope(scopeId)) {
+        dispatch(dataTableActions.updateTableGraphEventId({ id: scopeId, graphEventId: '' }));
+      } else if (isTimelineScope(scopeId)) {
+        dispatch(timelineActions.updateTimelineGraphEventId({ id: scopeId, graphEventId: '' }));
+      }
       if (isInTimeline) {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
-  }, [dispatch, updateTimelineGraphEventId, isInTimeline]);
+  }, [dispatch, isInTimeline, scopeId]);
 
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(isInTimeline);
 
@@ -142,7 +158,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={componentInstanceID}
+            resolverComponentInstanceID={scopeId}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
@@ -165,7 +181,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={componentInstanceID}
+            resolverComponentInstanceID={scopeId}
             indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}

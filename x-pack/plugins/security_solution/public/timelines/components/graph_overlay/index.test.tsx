@@ -21,7 +21,7 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
@@ -69,6 +69,13 @@ jest.mock('react-redux', () => {
 
 describe('GraphOverlay', () => {
   const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(
+    mockGlobalState,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,15 +92,12 @@ describe('GraphOverlay', () => {
   describe('when used in an events viewer (i.e. in the Detections view, or the Host > Events view)', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
             Navigation={<div />}
-            componentInstanceID={''}
+            scopeId={TableId.test}
             isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
           />
         </TestProviders>
       );
@@ -113,15 +117,12 @@ describe('GraphOverlay', () => {
       });
 
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
             Navigation={<div />}
-            componentInstanceID={''}
             isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
+            scopeId={TableId.test}
           />
         </TestProviders>
       );
@@ -139,8 +140,8 @@ describe('GraphOverlay', () => {
               timeline: {
                 ...mockGlobalState.timeline,
                 timelineById: {
-                  test: {
-                    ...mockGlobalState.timeline.timelineById.test,
+                  'timeline-test': {
+                    ...mockGlobalState.timeline.timelineById['timeline-test'],
                     graphEventId: 'definitely-not-null',
                   },
                 },
@@ -153,13 +154,10 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            sessionViewConfig={null}
-            isInTimeline={true}
-            graphEventId={'test'}
-            updateTimelineGraphEventId={() => {}}
-            componentInstanceID={'test'}
+            isInTimeline={false}
             SessionView={<div />}
             Navigation={<div />}
+            scopeId={TableId.test}
           />
         </TestProviders>
       );
@@ -178,15 +176,12 @@ describe('GraphOverlay', () => {
 
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
             Navigation={<div />}
-            componentInstanceID={''}
-            isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
+            isInTimeline={true}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
@@ -206,15 +201,12 @@ describe('GraphOverlay', () => {
       });
 
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={store}>
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
             Navigation={<div />}
-            componentInstanceID={''}
-            isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
+            isInTimeline={true}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
@@ -256,13 +248,10 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
             Navigation={<div />}
-            componentInstanceID={''}
-            isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
+            isInTimeline={true}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
@@ -304,13 +293,10 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
-            Navigation={<div />}
-            componentInstanceID={''}
-            isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
+            Navigation={<div>{'Close Session'}</div>}
+            isInTimeline={true}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
@@ -350,13 +336,10 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            graphEventId=""
             SessionView={<div />}
             Navigation={<div />}
-            componentInstanceID={''}
-            isInTimeline={false}
-            sessionViewConfig={null}
-            updateTimelineGraphEventId={(graphEventId: string) => {}}
+            isInTimeline={true}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
