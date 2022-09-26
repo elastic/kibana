@@ -17,7 +17,7 @@ import {
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
 import { aggTermsFnName } from './terms_fn';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../..';
 
@@ -33,11 +33,9 @@ const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
   defaultMessage: 'Terms',
 });
 
-export interface AggParamsTerms extends BaseAggParams {
+export interface CommonAggParamsTerms extends BaseAggParams {
   field: string;
   orderBy: string;
-  orderAgg?: AggConfigSerialized;
-  order?: 'asc' | 'desc';
   size?: number;
   shardSize?: number;
   missingBucket?: boolean;
@@ -45,10 +43,23 @@ export interface AggParamsTerms extends BaseAggParams {
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string[] | number[];
-  include?: string[] | number[];
+  exclude?: string[] | string | number[];
+  include?: string[] | string | number[];
   includeIsRegex?: boolean;
   excludeIsRegex?: boolean;
+}
+
+export interface AggParamsTermsSerialized extends CommonAggParamsTerms {
+  orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
+}
+
+export interface AggParamsTerms extends CommonAggParamsTerms {
+  orderAgg?: IAggConfig;
+  order?: {
+    value: 'asc' | 'desc';
+    text: string;
+  };
 }
 
 export const getTermsBucketAgg = () =>
