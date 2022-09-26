@@ -59,6 +59,7 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
               label={badgeOptions.text}
               tooltipContent={badgeOptions.tooltip}
               tooltipPosition="bottom"
+              size={badgeOptions.size}
             />
           ) : (
             <EuiBadge color={badgeOptions.color || 'hollow'} title="">

@@ -68,10 +68,10 @@ import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { StatusServiceSetup } from '@kbn/core-status-server';
+import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 
 import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
 
@@ -338,6 +338,9 @@ export type {
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
   SavedObjectsPitParams,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObjectsServiceSetup,
@@ -397,16 +400,18 @@ export type {
 } from '@kbn/core-saved-objects-import-export-server-internal';
 
 export type {
-  IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
   UiSettingsType,
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
   UserProvidedValues,
   DeprecationSettings,
+} from '@kbn/core-ui-settings-common';
+export type {
+  IUiSettingsClient,
+  UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   UiSettingsRequestHandlerContext,
-} from './ui_settings';
+} from '@kbn/core-ui-settings-server';
 
 export type {
   OpsMetrics,

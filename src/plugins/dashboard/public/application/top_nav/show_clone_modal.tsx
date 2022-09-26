@@ -8,11 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
 import { DashboardCloneModal } from './clone_modal';
-import { KibanaThemeProvider } from '../../services/kibana_react';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface ShowCloneModalProps {
   onClone: (
@@ -21,10 +23,13 @@ export interface ShowCloneModalProps {
     onTitleDuplicate: () => void
   ) => Promise<{ id?: string } | { error: Error }>;
   title: string;
-  theme$: CoreStart['theme']['theme$'];
 }
 
-export function showCloneModal({ onClone, title, theme$ }: ShowCloneModalProps) {
+export function showCloneModal({ onClone, title }: ShowCloneModalProps) {
+  const {
+    settings: { theme },
+  } = pluginServices.getServices();
+
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
@@ -49,7 +54,7 @@ export function showCloneModal({ onClone, title, theme$ }: ShowCloneModalProps) 
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme$={theme.theme$}>
         <DashboardCloneModal
           onClone={onCloneConfirmed}
           onClose={closeModal}

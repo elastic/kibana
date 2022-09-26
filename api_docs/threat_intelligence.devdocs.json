@@ -211,7 +211,7 @@
             "tags": [],
             "label": "sourcererDataView",
             "description": [
-              "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView"
+              "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView."
             ],
             "signature": [
               "SourcererDataView"
@@ -219,6 +219,61 @@
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getSecuritySolutionStore",
+            "type": "Object",
+            "tags": [],
+            "label": "getSecuritySolutionStore",
+            "description": [
+              "\nSecurity Solution store"
+            ],
+            "signature": [
+              "Store",
+              "<any, ",
+              "AnyAction",
+              ">"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getUseInvestigateInTimeline",
+            "type": "Function",
+            "tags": [],
+            "label": "getUseInvestigateInTimeline",
+            "description": [
+              "\nPass UseInvestigateInTimeline functionality to TI plugin"
+            ],
+            "signature": [
+              "({ dataProviders, from, to, }: ",
+              "UseInvestigateInTimelineProps",
+              ") => () => Promise<void>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.getUseInvestigateInTimeline.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    dataProviders,\n    from,\n    to,\n  }",
+                "description": [],
+                "signature": [
+                  "UseInvestigateInTimelineProps"
+                ],
+                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

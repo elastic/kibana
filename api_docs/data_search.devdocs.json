@@ -9723,16 +9723,16 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -23757,7 +23757,9 @@
             "parentPluginId": "data",
             "id": "def-common.EqlSearchStrategyRequest.options",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "options",
             "description": [],
             "signature": [
@@ -23765,8 +23767,14 @@
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/hooks/eql/api.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -25322,6 +25330,24 @@
                 "text": "DataView"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+            ],
+            "signature": [
+              "Omit<",
+              "TransportRequestOptions",
+              ", \"signal\"> | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
@@ -27953,7 +27979,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
+          "{ schema?: string | undefined; type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -27963,7 +27989,7 @@
           },
           "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -28815,7 +28841,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ type: string | ",
+          "{ schema?: string | undefined; type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -28825,7 +28851,7 @@
           },
           "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
         "deprecated": false,

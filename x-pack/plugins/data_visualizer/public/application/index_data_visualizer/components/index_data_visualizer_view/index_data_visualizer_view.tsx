@@ -419,13 +419,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               dataView={currentDataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={onAddFilter}
+              totalDocuments={overallStats.totalCount}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, searchQueryLanguage, searchString, onAddFilter]
+    [currentDataView, searchQueryLanguage, searchString, onAddFilter, overallStats.totalCount]
   );
 
   // Some actions open up fly-out or popup

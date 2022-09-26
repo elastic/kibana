@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Unusual Parent Process for cmd.exe",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"cmd.exe\" and\n  process.parent.name : (\"lsass.exe\",\n                         \"csrss.exe\",\n                         \"epad.exe\",\n                         \"regsvr32.exe\",\n                         \"dllhost.exe\",\n                         \"LogonUI.exe\",\n                         \"wermgr.exe\",\n                         \"spoolsv.exe\",\n                         \"jucheck.exe\",\n                         \"jusched.exe\",\n                         \"ctfmon.exe\",\n                         \"taskhostw.exe\",\n                         \"GoogleUpdate.exe\",\n                         \"sppsvc.exe\",\n                         \"sihost.exe\",\n                         \"slui.exe\",\n                         \"SIHClient.exe\",\n                         \"SearchIndexer.exe\",\n                         \"SearchProtocolHost.exe\",\n                         \"FlashPlayerUpdateService.exe\",\n                         \"WerFault.exe\",\n                         \"WUDFHost.exe\",\n                         \"unsecapp.exe\",\n                         \"wlanext.exe\" )\n",
+  "query": "process where event.type == \"start\" and\n  process.name : \"cmd.exe\" and\n  process.parent.name : (\"lsass.exe\",\n                         \"csrss.exe\",\n                         \"epad.exe\",\n                         \"regsvr32.exe\",\n                         \"dllhost.exe\",\n                         \"LogonUI.exe\",\n                         \"wermgr.exe\",\n                         \"spoolsv.exe\",\n                         \"jucheck.exe\",\n                         \"jusched.exe\",\n                         \"ctfmon.exe\",\n                         \"taskhostw.exe\",\n                         \"GoogleUpdate.exe\",\n                         \"sppsvc.exe\",\n                         \"sihost.exe\",\n                         \"slui.exe\",\n                         \"SIHClient.exe\",\n                         \"SearchIndexer.exe\",\n                         \"SearchProtocolHost.exe\",\n                         \"FlashPlayerUpdateService.exe\",\n                         \"WerFault.exe\",\n                         \"WUDFHost.exe\",\n                         \"unsecapp.exe\",\n                         \"wlanext.exe\" )\n",
   "required_fields": [
     {
       "ecs": true,
@@ -61,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 101
 }

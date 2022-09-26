@@ -11,7 +11,7 @@ import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-th
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../common/types/indicator';
-import { IndicatorField } from '../indicator_field/indicator_field';
+import { IndicatorFieldValue } from '../indicator_field_value/indicator_field_value';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
 
@@ -29,7 +29,7 @@ export const cellRendererFactory = (from: number) => {
 
     const darkMode = uiSettings.get('theme:darkMode');
 
-    const { indicators, expanded, fieldTypesMap } = indicatorsTableContext;
+    const { indicators, expanded } = indicatorsTableContext;
 
     const indicator: Indicator | undefined = indicators[rowIndex - from];
 
@@ -53,6 +53,6 @@ export const cellRendererFactory = (from: number) => {
       return <ActionsRowCell indicator={indicator} />;
     }
 
-    return <IndicatorField indicator={indicator} field={columnId} fieldTypesMap={fieldTypesMap} />;
+    return <IndicatorFieldValue indicator={indicator} field={columnId} />;
   };
 };

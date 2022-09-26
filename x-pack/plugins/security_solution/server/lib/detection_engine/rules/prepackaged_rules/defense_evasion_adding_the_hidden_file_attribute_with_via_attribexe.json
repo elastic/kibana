@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Adding Hidden File Attribute via Attrib",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"attrib.exe\" and process.args : \"+h\"\n",
+  "query": "process where event.type == \"start\" and\n  process.name : \"attrib.exe\" and process.args : \"+h\"\n",
   "required_fields": [
     {
       "ecs": true,
@@ -79,5 +79,5 @@
   "timeline_title": "Comprehensive Process Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 15
+  "version": 101
 }

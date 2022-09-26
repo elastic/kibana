@@ -11,7 +11,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ApplicationStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import {
+  ApplicationStart,
+  Capabilities,
+  ChromeBreadcrumb,
+  ScopedHistory,
+  IUiSettingsClient,
+} from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
@@ -26,6 +32,7 @@ interface KibanaLogicProps {
   config: { host?: string };
   productAccess: ProductAccess;
   // Kibana core
+  capabilities: Capabilities;
   history: ScopedHistory;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
@@ -35,6 +42,7 @@ interface KibanaLogicProps {
   // Required plugins
   charts: ChartsPluginStart;
   security: SecurityPluginStart;
+  uiSettings: IUiSettingsClient;
   // Optional plugins
   cloud?: CloudSetup;
 }
@@ -47,6 +55,7 @@ export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
+    capabilities: [props.capabilities || {}, {}],
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
@@ -65,6 +74,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
+    uiSettings: [props.uiSettings, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

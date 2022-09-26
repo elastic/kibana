@@ -61,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 100
 }

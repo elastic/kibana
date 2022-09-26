@@ -45,6 +45,7 @@ import {
   isDetectionAlert,
   getField,
   addToSearchAfterReturn,
+  getUnprocessedExceptionsWarnings,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1661,6 +1662,22 @@ describe('utils', () => {
       const doc = sampleAlertDocAADNoSortIdWithTimestamp();
       const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
       expect(value).toEqual('Descriptive description');
+    });
+  });
+
+  describe('logUnprocessedExceptionsWarnings', () => {
+    test('does not log anything when the array is empty', () => {
+      const result = getUnprocessedExceptionsWarnings([]);
+      expect(result).toBeUndefined();
+    });
+
+    test('logs the exception names when there are unprocessed exceptions', () => {
+      const result = getUnprocessedExceptionsWarnings([getExceptionListItemSchemaMock()]);
+      expect(result).toEqual(
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`
+      );
     });
   });
 });

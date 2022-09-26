@@ -127,6 +127,7 @@ export function DependencyOperationDetailTraceList() {
         { defaultMessage: 'Trace' }
       ),
       field: 'traceId',
+      truncateText: true,
       render: (
         _,
         {
@@ -158,6 +159,7 @@ export function DependencyOperationDetailTraceList() {
         { defaultMessage: 'Originating service' }
       ),
       field: 'serviceName',
+      truncateText: true,
       render: (_, { serviceName, agentName }) => {
         const serviceLinkQuery = {
           comparisonEnabled,
@@ -187,6 +189,7 @@ export function DependencyOperationDetailTraceList() {
         { defaultMessage: 'Transaction name' }
       ),
       field: 'transactionName',
+      truncateText: true,
       render: (
         _,
         {
@@ -227,6 +230,7 @@ export function DependencyOperationDetailTraceList() {
         { defaultMessage: 'Timestamp' }
       ),
       field: '@timestamp',
+      truncateText: true,
       render: (_, { '@timestamp': timestamp }) => {
         return <TimestampTooltip time={timestamp} />;
       },
@@ -286,7 +290,6 @@ export function DependencyOperationDetailTraceList() {
             status === FETCH_STATUS.LOADING ||
             status === FETCH_STATUS.NOT_INITIATED
           }
-          tableLayout="auto"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
