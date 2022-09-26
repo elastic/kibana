@@ -24,12 +24,12 @@ import styled from 'styled-components';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OsqueryNotAvailablePrompt } from './not_available_prompt';
 import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
-import { convertECSMappingToObject } from './utils';
 
 const StyledEuiButton = styled(EuiButton)`
   > span > img {
@@ -83,6 +83,8 @@ const OsqueryEditorComponent = ({
     [onSave]
   );
 
+  const isAvailable = useMemo(() => osquery?.isOsqueryAvailable(), [osquery]);
+
   const OsqueryActionForm = useMemo(() => {
     if (osquery?.LiveQueryField) {
       const { LiveQueryField } = osquery;
@@ -97,6 +99,10 @@ const OsqueryEditorComponent = ({
     }
     return null;
   }, [formMethods, osquery]);
+
+  if (!isAvailable) {
+    return <OsqueryNotAvailablePrompt />;
+  }
 
   return (
     <>
