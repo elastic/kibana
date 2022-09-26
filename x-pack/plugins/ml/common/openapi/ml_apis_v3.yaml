@@ -46,7 +46,7 @@ components:
   simulateParam:
     in: query
     name: simulate
-    description: When true, simulates the synchronization by returning only the list actions that would be performed.
+    description: When true, simulates the synchronization by returning only the list of actions that would be performed.
     required: false
     schema:
       type: boolean
