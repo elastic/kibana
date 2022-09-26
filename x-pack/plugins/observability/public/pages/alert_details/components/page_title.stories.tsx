@@ -6,35 +6,37 @@
  */
 
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
-import { Alert } from '../types';
 
-import { PageTitle as Component } from './page_title';
+import { PageTitle as Component, PageTitleProps } from './page_title';
 
 export default {
   component: Component,
   title: 'app/AlertDetails/PageTitle',
+  argTypes: {
+    title: { control: 'text' },
+    active: { control: 'boolean' },
+  },
 };
 
-const alert: Alert = {
-  alertId: 'alertId',
-  ruleId: 'ruleId',
-  name: 'Avg latency is 84% above the threshold',
-  updatedAt: '2022-09-06',
-  updatedBy: 'Elastic',
-  createdAt: '2022-09-06',
-  createdBy: 'Elastic',
-  tags: ['kibana', 'region:na', 'kibana'],
+const Template: ComponentStory<typeof Component> = (props: PageTitleProps) => (
+  <Component {...props} />
+);
+
+const TemplateWithPageTemplate: ComponentStory<typeof Component> = (props: PageTitleProps) => (
+  <EuiPageTemplate>
+    <EuiPageTemplate.Header pageTitle={<Component {...props} />} bottomBorder={false} />
+  </EuiPageTemplate>
+);
+
+const defaultProps = {
+  title: 'host.cpu.usage is 0.2024 in the last 1 min for all hosts. Alert when > 0.02.',
+  active: true,
 };
 
-export const PageTitle = () => {
-  return <Component alert={alert} />;
-};
+export const PageTitle = Template.bind({});
+PageTitle.args = defaultProps;
 
-export const PageTitleUsedInObservabilityPageTemplate = () => {
-  return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle={<Component alert={alert} />} bottomBorder={false} />
-    </EuiPageTemplate>
-  );
-};
+export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
+PageTitleUsedWithinPageTemplate.args = defaultProps;

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-const APP_BASE = '/app/observability';
-export const ALERT_PAGE_LINK = `${APP_BASE}/alerts`;
+export const ALERT_PAGE_LINK = '/app/observability/alerts';
 export const RULES_PAGE_LINK = `${ALERT_PAGE_LINK}/rules`;
-export const CASES_PAGE_LINK = `${APP_BASE}/cases`;
-export const CASES_CREATE_NEW_PAGE_LINK = `${CASES_PAGE_LINK}/create`;
 
 export const paths = {
   observability: {
