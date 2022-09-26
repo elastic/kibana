@@ -25194,6 +25194,7 @@
     "xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescriptionInstalledVersionTooltip": "Non-correspondance de version ; veuillez résoudre le problème ! La version installée est \"{installedVersion}\" alors que la version exigée est \"{requiredVersion}\"",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.popoverTitle": "[{integrationsCount}] {integrationsCount, plural, =1 {Intégration associée disponible} other {Intégrations associées disponibles}}",
     "xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription": "Une entrée est incorrecte dans {countError, plural, one {cet onglet} other {ces onglets}} : {tabHasError}",
+    "xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle": "Actions",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription": "Créé par : {by} le {date}",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip": "Durée de l'écart dans l'exécution de la règle (hh:mm:ss:SSS). Ajustez l'historique des règles ou {seeDocs} pour réduire les écarts.",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchLimitExceededLabel": "Plus de {totalItems} exceptions de règle correspondent aux filtres fournis. Affichage des {maxItems} premières en fonction du \"@timestamp\" le plus récent. Utilisez d'autres contraintes de filtres pour afficher des événements d'exécution supplémentaires.",
