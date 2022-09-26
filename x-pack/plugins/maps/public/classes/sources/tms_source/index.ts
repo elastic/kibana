@@ -6,8 +6,15 @@
  */
 
 import { DataFilters } from '../../../../common/descriptor_types';
+import { DataRequest } from '../../util/data_request';
 import { ISource } from '../source';
-
+import { DataRequestMeta} from '../../../../common/descriptor_types';
+import { RasterTileSource } from '@kbn/mapbox-gl';
+export interface RasterTileSourceData {
+  url: string;
+}
 export interface ITMSSource extends ISource {
   getUrlTemplate(dataFilters: DataFilters): Promise<string>;
+  canSkipSourceUpdate(dataRequest:DataRequest,nextRequestMeta:DataRequestMeta): Promise<boolean>;
+  isSourceStale(mbSource:RasterTileSource,sourceDataRequest:object):boolean;
 }
