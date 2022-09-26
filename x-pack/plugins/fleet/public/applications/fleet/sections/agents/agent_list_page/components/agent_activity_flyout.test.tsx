@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { act, render, fireEvent } from '@testing-library/react';
-import { IntlProvider } from '@kbn/i18n-react';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { IntlProvider } from 'react-intl';
 
 import { useActionStatus } from '../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
