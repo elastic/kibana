@@ -386,7 +386,7 @@ describe('Execution', () => {
     });
 
     test('result is undefined until execution completes', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       const execution = createExecution('sleep 10');
       expect(execution.state.get().result).toBe(undefined);
       execution.start(null).subscribe(jest.fn());
@@ -560,7 +560,7 @@ describe('Execution', () => {
     });
 
     test('execution state is "pending" while execution is in progress', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       const execution = createExecution('sleep 20');
       execution.start(null);
       jest.advanceTimersByTime(5);

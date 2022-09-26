@@ -40,8 +40,10 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
-jest.useFakeTimers();
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+
+jest.useFakeTimers('legacy');
 
 const timeTravel = async (msToRun = 0) => {
   await flushPromises();
@@ -1529,7 +1531,7 @@ describe('SearchInterceptor', () => {
         await flushPromises();
       });
 
-      test('Immediately aborts if passed an aborted abort signal', async (done) => {
+      test('Immediately aborts if passed an aborted abort signal', async () => {
         const abort = new AbortController();
         const mockRequest: IEsSearchRequest = {
           params: {},
@@ -1540,7 +1542,6 @@ describe('SearchInterceptor', () => {
         error.mockImplementation((e) => {
           expect(e).toBeInstanceOf(AbortError);
           expect(fetchMock).not.toBeCalled();
-          done();
         });
 
         response.subscribe({ error });

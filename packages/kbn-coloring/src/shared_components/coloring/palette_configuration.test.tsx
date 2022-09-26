@@ -61,7 +61,7 @@ describe('palette panel', () => {
         dataBounds: { min: 0, max: 100 },
       };
 
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
     });
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {

@@ -51,8 +51,8 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@types/classnames",
   "@npm//@types/jest",
-  "@npm//@types/prop-types",
   "@npm//@types/node",
+  "@npm//@types/prop-types",
   "@npm//@types/react",
 ]
 

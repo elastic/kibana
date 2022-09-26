@@ -552,7 +552,7 @@ test('`startPlugins` only starts plugins that were setup', async () => {
 
 describe('setup', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
   afterAll(() => {
     jest.useRealTimers();
@@ -589,7 +589,7 @@ describe('setup', () => {
 
 describe('start', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
   afterAll(() => {
     jest.useRealTimers();
@@ -748,7 +748,7 @@ describe('asynchronous plugins', () => {
 
 describe('stop', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

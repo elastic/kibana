@@ -405,7 +405,7 @@ describe('UserProfileService', () => {
     });
 
     it('retries activation if initially fails with 409 error', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
@@ -449,7 +449,7 @@ describe('UserProfileService', () => {
     });
 
     it('fails if activation max retries exceeded', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'some message' })

@@ -315,7 +315,7 @@ describe('IndicesLogic', () => {
       expect(IndicesLogic.actions.closeDeleteModal).toHaveBeenCalled();
     });
     it('calls makeRequest on fetchIndices', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       IndicesLogic.actions.makeRequest = jest.fn();
       IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
       jest.advanceTimersByTime(150);
@@ -326,7 +326,7 @@ describe('IndicesLogic', () => {
       });
     });
     it('calls makeRequest once on two fetchIndices calls within 150ms', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       IndicesLogic.actions.makeRequest = jest.fn();
       IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
       jest.advanceTimersByTime(130);
@@ -341,7 +341,7 @@ describe('IndicesLogic', () => {
       expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledTimes(1);
     });
     it('calls makeRequest twice on two fetchIndices calls outside 150ms', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       IndicesLogic.actions.makeRequest = jest.fn();
       IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
       jest.advanceTimersByTime(150);

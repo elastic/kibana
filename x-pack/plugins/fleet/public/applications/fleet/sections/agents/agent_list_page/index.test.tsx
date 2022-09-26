@@ -110,7 +110,7 @@ describe('agent_list_page', () => {
           totalInactive: 0,
         },
       });
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterEach(() => {

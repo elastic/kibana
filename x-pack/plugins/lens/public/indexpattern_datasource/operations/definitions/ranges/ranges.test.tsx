@@ -187,7 +187,7 @@ describe('ranges', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   beforeEach(() => {

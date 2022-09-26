@@ -226,7 +226,7 @@ describe('Completed inactivity', () => {
 describe('tour steps', () => {
   describe('loading state', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
     });
 
     afterAll(() => {

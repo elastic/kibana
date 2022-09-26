@@ -57,7 +57,7 @@ describe('deleteAnalyticsCollectionLogic', () => {
     it('calls makeRequest on deleteAnalyticsCollections', async () => {
       const collectionName = 'name';
 
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       DeleteAnalyticsCollectionLogic.actions.makeRequest = jest.fn();
       DeleteAnalyticsCollectionLogic.actions.deleteAnalyticsCollection(collectionName);
       jest.advanceTimersByTime(150);

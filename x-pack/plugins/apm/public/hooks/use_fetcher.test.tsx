@@ -36,7 +36,7 @@ describe('useFetcher', () => {
     >;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       async function fn() {
         await delay(500);
         return 'response from hook';
@@ -86,7 +86,7 @@ describe('useFetcher', () => {
     >;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       async function fn(): Promise<string> {
         await delay(500);
         throw new Error('Something went wrong');
@@ -129,7 +129,7 @@ describe('useFetcher', () => {
 
   describe('when a hook already has data', () => {
     it('should show "first response" while loading "second response"', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
 
       const hook = renderHook(
         /* eslint-disable-next-line react-hooks/exhaustive-deps */
