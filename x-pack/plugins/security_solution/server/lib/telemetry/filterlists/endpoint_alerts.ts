@@ -36,7 +36,7 @@ const baseAllowlistFields: AllowlistFields = {
       security_attributes: true,
     },
     effective_parent: true,
-    device : true,
+    device: true,
     relative_file_creation_time: true,
     relative_file_name_modify_time: true,
   },
