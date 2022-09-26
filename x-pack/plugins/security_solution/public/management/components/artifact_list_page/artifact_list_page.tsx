@@ -221,7 +221,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
-      if (isMounted) {
+      if (isMounted.current) {
         setSelectedItemForDelete(undefined);
         refetchListData();
       }

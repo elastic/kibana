@@ -131,7 +131,7 @@ export const useConsoleActionSubmitter = <
 
   // Create the action request if not yet done
   useEffect(() => {
-    if (!actionRequestSent && actionRequestBody && isMounted) {
+    if (!actionRequestSent && actionRequestBody && isMounted.current) {
       const updatedRequestState: Required<
         CommandResponseActionApiState<TActionOutputContent>
       >['actionApiState']['request'] = {
@@ -160,7 +160,7 @@ export const useConsoleActionSubmitter = <
         })
         .finally(() => {
           // If the component is mounted, then set the store with the updated data (causes a rerender)
-          if (isMounted) {
+          if (isMounted.current) {
             setStore((prevState) => {
               return {
                 ...prevState,

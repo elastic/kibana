@@ -98,7 +98,7 @@ export const useWithArtifactListData = (
   // Once we know if data exists, update the page initializing state.
   // This should only ever happen at most once;
   useEffect(() => {
-    if (isMounted) {
+    if (isMounted.current) {
       if (isPageInitializing && !isLoadingDataExists) {
         setIsPageInitializing(false);
       }
@@ -107,7 +107,7 @@ export const useWithArtifactListData = (
 
   // Update the uiPagination once the query succeeds
   useEffect(() => {
-    if (isMounted && listData && !isLoadingListData && isSuccessListData) {
+    if (isMounted.current && listData && !isLoadingListData && isSuccessListData) {
       setUiPagination((prevState) => {
         return {
           ...prevState,
@@ -134,7 +134,7 @@ export const useWithArtifactListData = (
   //  >> Check if data exists again (which should return true
   useEffect(() => {
     if (
-      isMounted &&
+      isMounted.current &&
       !isLoadingListData &&
       !isLoadingDataExists &&
       !listDataError &&

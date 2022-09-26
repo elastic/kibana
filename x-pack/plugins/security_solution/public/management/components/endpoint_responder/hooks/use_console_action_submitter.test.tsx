@@ -177,12 +177,14 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
 
     expect(renderArgs.store.actionApiState?.request.sent).toBe(true);
 
-    // const requestState = renderArgs.store.actionApiState?.request;
+    const requestState = renderArgs.store.actionApiState?.request;
     releaseSuccessActionRequestApiResponse();
 
     await waitFor(() => {
-      // FIXME: Browser test this since its not working here
-      // expect(renderArgs.store.actionApiState?.request === requestState).toBe(true);
+      // this check just ensure that we mutated the state when the api returned success instead of
+      // dispatching a `setStore()`.
+      expect(renderArgs.store.actionApiState?.request === requestState).toBe(true);
+
       expect(renderArgs.store.actionApiState?.request.actionId).toEqual('123');
     });
   });

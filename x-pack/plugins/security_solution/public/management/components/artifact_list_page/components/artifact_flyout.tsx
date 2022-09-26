@@ -271,7 +271,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {
-        if (isMounted) {
+        if (isMounted.current) {
           setFormState({
             item: updatedItem,
             isValid,
@@ -289,7 +289,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             : labels.flyoutCreateSubmitSuccess(result)
         );
 
-        if (isMounted) {
+        if (isMounted.current) {
           // Close the flyout
           // `undefined` will cause params to be dropped from url
           setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
@@ -307,12 +307,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         submitHandler(formState.item, formMode)
           .then(handleSuccess)
           .catch((submitHandlerError) => {
-            if (isMounted) {
+            if (isMounted.current) {
               setExternalSubmitHandlerError(submitHandlerError);
             }
           })
           .finally(() => {
-            if (isMounted) {
+            if (isMounted.current) {
               setExternalIsSubmittingData(false);
             }
           });
@@ -326,7 +326,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     useEffect(() => {
       if (isEditFlow && !hasItemDataForEdit && !error && isInitializing && !isLoadingItemForEdit) {
         fetchItemForEdit().then(({ data: editItemData }) => {
-          if (editItemData && isMounted) {
+          if (editItemData && isMounted.current) {
             setFormState(createFormInitialState(apiClient.listId, editItemData));
           }
         });

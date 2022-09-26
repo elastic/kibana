@@ -246,7 +246,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted.current) {
         setOpenedOnPathName((prevState) => {
           if (isHidden) {
             return null;
@@ -270,7 +270,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     // If `hideOnUrlPathNameChange` is true, then determine if the pathname changed and if so, call `onHide()`
     useEffect(() => {
       if (
-        isMounted &&
+        isMounted.current &&
         onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
@@ -283,7 +283,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted.current) {
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();
