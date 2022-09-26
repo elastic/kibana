@@ -16,12 +16,24 @@
 
       img.screenshot {
         cursor: pointer;
-        height: 200px;
         margin: 5px 0;
       }
+      .screenshotContainer:not(.expanded) img.screenshot {
+        height: 200px;
+      }
 
-      img.screenshot.expanded {
-        height: auto;
+      .screenshotContainer:not(.fs) img.screenshot.fs,
+      .screenshotContainer:not(.fs) button.toggleFs.off,
+      .screenshotContainer.fs img.screenshot:not(.fs),
+      .screenshotContainer.fs button.toggleFs.on {
+        display: none;
+      }
+
+      .screenshotContainer .toggleFs {
+        background: none;
+        border: none;
+        margin: 0 0 0 5px;
+        vertical-align: top;
       }
     </style>
     <title>$TITLE</title>
@@ -31,11 +43,46 @@
       <main>$MAIN</main>
     </div>
     <script type="text/javascript">
-      for (const img of document.getElementsByTagName('img')) {
-        img.addEventListener('click', () => {
-          img.classList.toggle('expanded');
-        });
+      /**
+       * @param {HTMLElement} el
+       * @param {(el: HTMLElement) => boolean} className
+       */
+      function findParent(el, test) {
+        while (el) {
+          if (test(el)) {
+            return el
+          }
+
+          // stop if we iterate all the way up to the document body
+          if (el.parentElement === document.body) {
+            break
+          }
+
+          el = el.parentElement
+        }
+
+        return null
       }
+
+      function isContainer(el) {
+        return el.classList.contains('screenshotContainer')
+      }
+
+      function isButtonOrImg(el) {
+        return el instanceof HTMLImageElement || el instanceof HTMLButtonElement
+      }
+
+      document.addEventListener('click', (event) => {
+        const el = findParent(event.target, isButtonOrImg)
+
+        if (el instanceof HTMLImageElement && el.classList.contains('screenshot')) {
+          findParent(el, isContainer)?.classList.toggle('expanded')
+        }
+
+        if (el instanceof HTMLButtonElement && el.classList.contains('toggleFs')) {
+          findParent(el, isContainer)?.classList.toggle('fs')
+        }
+      })
     </script>
   </body>
 </html>
