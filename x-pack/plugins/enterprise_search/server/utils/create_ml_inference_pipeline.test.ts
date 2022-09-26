@@ -87,7 +87,7 @@ describe('createMlInferencePipeline util function', () => {
     );
   });
 
-  it("should default the destination field to the pipeline name", async () => {
+  it('should default the destination field to the pipeline name', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
 
@@ -106,15 +106,17 @@ describe('createMlInferencePipeline util function', () => {
     );
 
     // Verify the object passed to pipeline creation contains the default target field name
-    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(expect.objectContaining({
-      processors: expect.arrayContaining([
-        expect.objectContaining({
-          inference: expect.objectContaining({
-            target_field: `ml.inference.${pipelineName}`
-          })
-        })
-      ])
-    }));
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processors: expect.arrayContaining([
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              target_field: `ml.inference.${pipelineName}`,
+            }),
+          }),
+        ]),
+      })
+    );
   });
 
   it('should throw an error without creating the pipeline if it already exists', () => {
