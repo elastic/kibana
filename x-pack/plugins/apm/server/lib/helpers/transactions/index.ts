@@ -35,6 +35,8 @@ export async function getHasAggregatedTransactions({
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: 1,
+        terminate_after: 1,
         size: 1,
         query: {
           bool: {
@@ -46,7 +48,6 @@ export async function getHasAggregatedTransactions({
           },
         },
       },
-      terminate_after: 1,
     }
   );
 
