@@ -12,10 +12,10 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { LegendSize } from '../../constants';
 import {
-  CategoryDisplay,
+  CategoryDisplayTypes,
   PartitionChartTypes,
-  NumberDisplay,
-  LegendDisplay,
+  NumberDisplayTypes,
+  LegendDisplayTypes,
   FillTypes,
   SeriesTypes,
   YAxisModes,
@@ -28,9 +28,9 @@ export type SeriesType = $Values<typeof SeriesTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type XYCurveType = $Values<typeof XYCurveTypes>;
 export type PartitionChartType = $Values<typeof PartitionChartTypes>;
-export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
-export type NumberDisplayType = $Values<typeof NumberDisplay>;
-export type LegendDisplayType = $Values<typeof LegendDisplay>;
+export type CategoryDisplayType = $Values<typeof CategoryDisplayTypes>;
+export type NumberDisplayType = $Values<typeof NumberDisplayTypes>;
+export type LegendDisplayType = $Values<typeof LegendDisplayTypes>;
 export type LayerType = $Values<typeof LayerTypes>;
 
 export interface AxisExtentConfig {
