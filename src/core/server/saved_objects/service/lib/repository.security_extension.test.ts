@@ -104,7 +104,6 @@ describe('SavedObjectsRepository Security Extension', () => {
   beforeEach(() => {
     pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
-    // clientOpts = createSecureSavedObjectsClientWrapperOptions();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);

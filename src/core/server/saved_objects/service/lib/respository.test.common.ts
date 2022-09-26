@@ -847,11 +847,6 @@ export const getSuccess = async (
 };
 
 export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
-  // console.log(
-  //   `*** setA: ${JSON.stringify(Array.from(setA.entries()))}, setB: ${JSON.stringify(
-  //     Array.from(setB.entries())
-  //   )}`
-  // );
   return isEqual(Array(setA).sort(), Array(setB).sort());
 }
 

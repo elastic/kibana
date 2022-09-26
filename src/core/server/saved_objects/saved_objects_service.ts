@@ -114,10 +114,19 @@ export interface SavedObjectsServiceSetup {
     factory: SavedObjectsClientWrapperFactory
   ) => void;
 
+  /**
+   * Add a {@link SavedObjectsEncryptionExtensionFactory encryption extension factory}.
+   */
   addEncryptionExtension: (factory: SavedObjectsEncryptionExtensionFactory) => void;
 
+  /**
+   * Add a {@link SavedObjectsSecurityExtensionFactory security extension factory}.
+   */
   addSecurityExtension: (factory: SavedObjectsSecurityExtensionFactory) => void;
 
+  /**
+   * Add a {@link SavedObjectsSpacesExtensionFactory spaces extension factory}.
+   */
   addSpacesExtension: (factory: SavedObjectsSpacesExtensionFactory) => void;
 
   /**

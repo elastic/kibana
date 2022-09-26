@@ -51,16 +51,28 @@ export type SavedObjectsClientFactory = (params: {
   includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
+/**
+ * Describes the factory used to create instances of the Saved Objects Encryption Extension.
+ * @public
+ */
 export type SavedObjectsEncryptionExtensionFactory = (params: {
   typeRegistry: ISavedObjectTypeRegistry;
   request: KibanaRequest;
 }) => ISavedObjectsEncryptionExtension;
 
+/**
+ * Describes the factory used to create instances of the Saved Objects Security Extension.
+ * @public
+ */
 export type SavedObjectsSecurityExtensionFactory = (params: {
   typeRegistry: ISavedObjectTypeRegistry;
   request: KibanaRequest;
 }) => ISavedObjectsSecurityExtension | undefined; // May be undefined if RBAC is disabled
 
+/**
+ * Describes the factory used to create instances of the Saved Objects Spaces Extension.
+ * @public
+ */
 export type SavedObjectsSpacesExtensionFactory = (params: {
   typeRegistry: ISavedObjectTypeRegistry;
   request: KibanaRequest;

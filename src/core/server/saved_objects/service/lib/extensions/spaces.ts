@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * The ISavedObjectsSpacesExtension interface defines the functions of a saved objects repository spaces extension.
+ * It contains functions for getting the current namespace & getting and array of searchable spaces.
+ */
 export interface ISavedObjectsSpacesExtension {
   /**
    * Retrieves the active namespace ID. This is *not* the same as a namespace string. See also: `namespaceIdToString` and

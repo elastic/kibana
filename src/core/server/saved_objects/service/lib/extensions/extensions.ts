@@ -10,6 +10,12 @@ import type { ISavedObjectsEncryptionExtension } from './encryption';
 import type { ISavedObjectsSecurityExtension } from './security';
 import { ISavedObjectsSpacesExtension } from './spaces';
 
+/**
+ * The SavedObjectsExtensions interface contains the intefaces for three
+ * extensions to the saved objects repository. These extensions augment
+ * the funtionality of the saved objects repository to provide encryption,
+ * security, and spaces features.
+ */
 export interface SavedObjectsExtensions {
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
