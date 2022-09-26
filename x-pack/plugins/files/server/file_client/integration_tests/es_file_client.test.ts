@@ -11,11 +11,7 @@ import { createEsFileClient } from '../create_es_file_client';
 import { FileClient } from '../types';
 import { FileMetadata } from '../../../common';
 
-/**
- * This file client is using Elasticsearch interfaces directly to manage files.
- */
-// FLAKY: https://github.com/elastic/kibana/issues/139565
-describe.skip('ES-index-backed file client', () => {
+describe.only('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
   let testHarness: TestEnvironmentUtils;
