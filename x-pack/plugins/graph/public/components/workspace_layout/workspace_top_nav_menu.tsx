@@ -162,6 +162,9 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
           ownFocus: true,
           className: 'gphSettingsFlyout',
           maxWidth: 520,
+          'aria-label': i18n.translate('xpack.graph.settings.ariaLabel', {
+            defaultMessage: 'Settings flyout',
+          }),
         }
       );
     },

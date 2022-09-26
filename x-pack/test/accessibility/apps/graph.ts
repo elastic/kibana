@@ -85,8 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ESCAPE);
     });
 
-    // https://github.com/elastic/kibana/issues/134693
-    it.skip('Graph settings drilldown tab - add new drilldown', async function () {
+    it('Graph settings drilldown tab - add new drilldown', async function () {
       await testSubjects.click('graphAddNewTemplate');
       await a11y.testAppSnapshot();
       await testSubjects.click('graphRemoveUrlTemplate');
