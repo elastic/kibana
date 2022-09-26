@@ -21,7 +21,6 @@ import type {
 } from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
-import { FleetError } from '../errors';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
@@ -283,7 +282,7 @@ export async function ensureFleetDirectories() {
   const registryUrl = getRegistryUrl();
 
   if (!bundledPackageLocation) {
-    throw new FleetError('xpack.fleet.developer.bundledPackageLocation is not configured');
+    logger.warn('xpack.fleet.developer.bundledPackageLocation is not configured');
   }
 
   try {
