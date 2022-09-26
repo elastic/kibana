@@ -69,7 +69,7 @@ export async function reassignBatch(
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
-    throw new AgentReassignmentError('No agents to reassign');
+    throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
   await bulkUpdateAgents(
