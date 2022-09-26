@@ -486,7 +486,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickFieldListItemVisualize(fieldName: string) {
     const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
-    const isActive = await field.elementHasClass('dscSidebarItem--active');
+    const isActive = await field.elementHasClass('kbnFieldButton-isActive');
 
     if (!isActive) {
       // expand the field to show the "Visualize" button
@@ -494,6 +494,7 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async expectFieldListItemVisualize(field: string) {
