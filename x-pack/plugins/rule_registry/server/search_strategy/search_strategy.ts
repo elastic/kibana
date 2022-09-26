@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { map, mergeMap, catchError } from 'rxjs/operators';
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
