@@ -240,6 +240,10 @@ export const termsOperation: OperationDefinition<
         otherBucket: (columnParams?.otherBucket ?? true) && !indexPattern.hasRestrictions,
         missingBucket: columnParams?.missingBucket ?? false,
         parentFormat: columnParams?.parentFormat ?? { id: 'terms' },
+        include: columnParams?.include ?? [],
+        exclude: columnParams?.exclude ?? [],
+        includeIsRegex: columnParams?.includeIsRegex ?? false,
+        excludeIsRegex: columnParams?.excludeIsRegex ?? false,
         secondaryFields: columnParams?.secondaryFields,
       },
     };
