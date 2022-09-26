@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -16,21 +16,17 @@ import { existsOperator, isOneOfOperator } from '../filter_bar/filter_editor';
 
 const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
   return (
-    <EuiFlexItem grow={false}>
-      <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}>{value}</EuiTextColor>
-    </EuiFlexItem>
+    <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}> {value}</EuiTextColor>
   );
 };
 
 const Prefix = ({ prefix }: { prefix?: boolean }) =>
   prefix ? (
-    <EuiFlexItem grow={false}>
-      <EuiTextColor color="danger">
-        {i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
-          defaultMessage: 'NOT ',
-        })}
-      </EuiTextColor>
-    </EuiFlexItem>
+    <EuiTextColor color="danger">
+      {i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
+        defaultMessage: 'NOT ',
+      })}
+    </EuiTextColor>
   ) : null;
 
 export const FilterContent = ({ filter, label }: { filter: Filter; label: LabelOptions }) => {
@@ -39,7 +35,7 @@ export const FilterContent = ({ filter, label }: { filter: Filter; label: LabelO
       return (
         <>
           <Prefix prefix={filter.meta.negate} />
-          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          {filter.meta.key}:
           <FilterBadgeExpressionValue value={`${existsOperator.message}`} />
         </>
       );
@@ -47,7 +43,7 @@ export const FilterContent = ({ filter, label }: { filter: Filter; label: LabelO
       return (
         <>
           <Prefix prefix={filter.meta.negate} />
-          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          {filter.meta.key}:
           <FilterBadgeExpressionValue value={`${isOneOfOperator.message} ${label.title}`} />
         </>
       );
@@ -62,7 +58,7 @@ export const FilterContent = ({ filter, label }: { filter: Filter; label: LabelO
       return (
         <>
           <Prefix prefix={filter.meta.negate} />
-          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          {filter.meta.key}:
           <FilterBadgeExpressionValue value={label.title} />
         </>
       );

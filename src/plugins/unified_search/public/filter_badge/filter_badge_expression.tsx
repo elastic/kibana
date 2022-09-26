@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
+import { EuiTextColor, useEuiTheme } from '@elastic/eui';
+import classNames from 'classnames';
+import { css } from '@emotion/css';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { LabelOptions } from './filter_badge_utils';
 import { FILTER_ITEM_OK, getValueLabel } from './filter_badge_utils';
@@ -23,7 +25,23 @@ export interface FilterBadgeExpressionProps {
 }
 
 export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressionProps) {
+  const { euiTheme } = useEuiTheme();
   const conditionalOperationType = getConditionalOperationType(filter);
+
+  const paddingLeft = useMemo(
+    () => css`
+      padding-left: ${euiTheme.size.xxs};
+    `,
+    [euiTheme.size.xxs]
+  );
+
+  const paddingRight = useMemo(
+    () => css`
+      padding-right: ${euiTheme.size.xxs};
+    `,
+    [euiTheme.size.xxs]
+  );
+
   let label: LabelOptions = {
     title: '',
     message: '',
@@ -34,29 +52,23 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
     label = getValueLabel(filter, dataView);
   }
 
-  return (
+  return conditionalOperationType ? (
     <>
-      {conditionalOperationType ? (
-        <>
-          <EuiFlexItem>
-            <EuiTextColor color="rgb(0, 113, 194)">(</EuiTextColor>
-          </EuiFlexItem>
-          <FilterBadgeGroup
-            filters={Array.isArray(filter) ? filter : filter.meta?.params}
-            dataView={dataView}
-            conditionType={conditionalOperationType}
-          />
-          <EuiFlexItem>
-            <EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>
-          </EuiFlexItem>
-        </>
-      ) : (
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs">
-            <FilterContent filter={filter} label={label} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+      <span className={paddingLeft}>
+        <EuiTextColor color="rgb(0, 113, 194)"> ( </EuiTextColor>
+      </span>
+      <FilterBadgeGroup
+        filters={Array.isArray(filter) ? filter : filter.meta?.params}
+        dataView={dataView}
+        conditionType={conditionalOperationType}
+      />
+      <span className={paddingRight}>
+        <EuiTextColor color="rgb(0, 113, 194)"> ) </EuiTextColor>
+      </span>
     </>
+  ) : (
+    <span className={classNames(paddingLeft, paddingRight)}>
+      <FilterContent filter={filter} label={label} />
+    </span>
   );
 }
