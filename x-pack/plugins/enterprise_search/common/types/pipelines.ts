@@ -6,8 +6,7 @@
  */
 
 export interface InferencePipeline {
-  pipelineName: string;
-  trainedModelName: string;
   isDeployed: boolean;
-  modelType: string;
+  pipelineName: string;
+  types: string[];
 }

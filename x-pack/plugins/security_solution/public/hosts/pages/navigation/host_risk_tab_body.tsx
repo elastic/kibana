@@ -69,7 +69,6 @@ const HostRiskTabBodyComponent: React.FC<
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
-
   const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useHostRiskScore({
     filterQuery,
     onlyLatest: false,
@@ -106,7 +105,7 @@ const HostRiskTabBodyComponent: React.FC<
     return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !loading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.host}
@@ -117,7 +116,7 @@ const HostRiskTabBodyComponent: React.FC<
   }
 
   if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refetch} />;
   }
 
   return (

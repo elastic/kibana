@@ -12,7 +12,8 @@ import { PhaseWithDownsample } from '../../../../common/types';
 import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
-describe('<EditPolicy /> downsample interval validation', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141160
+describe.skip('<EditPolicy /> downsample interval validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

@@ -42,6 +42,7 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
+  'observability:apmEnableServiceMetrics': boolean;
   'observability:enableInfrastructureHostsView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -141,6 +142,7 @@ export interface UsageStats {
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:apmOperationsTab': boolean;
   'observability:apmLabsButton': boolean;
+  'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
@@ -148,6 +150,5 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
-  'enterpriseSearch:enableIndexTransformsTab': boolean;
   'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }

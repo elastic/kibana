@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getSLOTransformId } from '../../assets/constants';
+import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
@@ -30,7 +30,6 @@ describe('DeleteSLO', () => {
   describe('happy path', () => {
     it('removes the transform, the roll up data and the SLO from the repository', async () => {
       const slo = createSLO(createAPMTransactionErrorRateIndicator());
-      mockRepository.findById.mockResolvedValueOnce(slo);
 
       await deleteSLO.execute(slo.id);
 
@@ -38,6 +37,7 @@ describe('DeleteSLO', () => {
       expect(mockTransformManager.uninstall).toHaveBeenCalledWith(getSLOTransformId(slo.id));
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
+          index: `${SLO_INDEX_TEMPLATE_NAME}*`,
           query: {
             match: {
               'slo.id': slo.id,

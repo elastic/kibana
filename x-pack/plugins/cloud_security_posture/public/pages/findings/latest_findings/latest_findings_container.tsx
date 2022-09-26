@@ -104,10 +104,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         loading={findingsGroupByNone.isFetching}
       />
       <EuiFlexGroup>
-        <EuiFlexItem grow={8}>
+        <EuiFlexItem>
           <LatestFindingsPageTitle />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>{!error && <FindingsGroupBySelector type="default" />}</EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
+          {!error && <FindingsGroupBySelector type="default" />}
+        </EuiFlexItem>
       </EuiFlexGroup>
       {error && <ErrorCallout error={error} />}
       {!error && (
