@@ -56,6 +56,8 @@ const allowlistBaseEventFields: AllowlistFields = {
     pe: true,
     Ext: {
       device: true,
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
     },
   },
   dns: true,
