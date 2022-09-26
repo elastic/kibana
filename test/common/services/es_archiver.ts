@@ -20,6 +20,7 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
   const esArchives: string[] = config.get('testData.esArchives');
 
   const esArchiver = new EsArchiver({
+    baseDir: config.get('esArchiver.baseDirectory'),
     client,
     log,
     kbnClient: kibanaServer,
