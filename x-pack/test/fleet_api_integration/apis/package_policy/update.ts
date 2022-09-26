@@ -209,6 +209,25 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
+    it('should work if a policy is only updating package version', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: managedAgentPolicyId,
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '1.0.0',
+          },
+        })
+        .expect(200);
+    });
+
     it('should return a 400 if there is another package policy with the same name', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId2}`)
