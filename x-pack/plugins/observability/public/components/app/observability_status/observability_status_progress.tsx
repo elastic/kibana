@@ -7,7 +7,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiPanel,
-  EuiProgress,
   EuiTitle,
   EuiButtonEmpty,
   EuiButton,
