@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface DeferredInterface<T = void> {
+export interface DeferredInterface<T = void> {
   promise: Promise<T>;
   resolve: (data: T) => void;
   reject: (e: Error) => void;
