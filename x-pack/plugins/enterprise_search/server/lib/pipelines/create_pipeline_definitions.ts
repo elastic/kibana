@@ -151,29 +151,6 @@ export const createIndexPipelineDefinitions = (
         },
       },
       {
-        remove: {
-          field: [
-            '_attachment',
-            '_attachment_indexed_chars',
-            '_extracted_attachment',
-            '_extract_binary_content',
-          ],
-          if: 'ctx?._extract_binary_content == true',
-          ignore_missing: true,
-          on_failure: [
-            {
-              append: {
-                field: '_ingestion_errors',
-                value: [
-                  "Processor 'remove' with tag 'remove_attachment_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
-                ],
-              },
-            },
-          ],
-          tag: 'remove_attachment_fields',
-        },
-      },
-      {
         gsub: {
           field: 'body',
           if: 'ctx?._reduce_whitespace == true',
@@ -212,20 +189,26 @@ export const createIndexPipelineDefinitions = (
       },
       {
         remove: {
-          field: ['_reduce_whitespace'],
-          if: 'ctx?._reduce_whitespace == true',
+          field: [
+            '_attachment',
+            '_attachment_indexed_chars',
+            '_extracted_attachment',
+            '_extract_binary_content',
+            '_reduce_whitespace',
+            '_run_ml_inference',
+          ],
           ignore_missing: true,
           on_failure: [
             {
               append: {
                 field: '_ingestion_errors',
                 value: [
-                  "Processor 'remove' with tag 'remove_whitespace_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
+                  "Processor 'remove' with tag 'remove_meta_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
                 ],
               },
             },
           ],
-          tag: 'remove_whitespace_fields',
+          tag: 'remove_meta_fields',
         },
       },
     ],
@@ -245,6 +228,7 @@ export const createIndexPipelineDefinitions = (
  * @param esClient the Elasticsearch Client to use when retrieving model details.
  */
 export const formatMlPipelineBody = async (
+  pipelineName: string,
   modelId: string,
   sourceField: string,
   destinationField: string,
@@ -281,8 +265,8 @@ export const formatMlPipelineBody = async (
           field: '_source._ingest.processors',
           value: [
             {
-              model_id: modelId,
               model_version: modelVersion,
+              pipeline: pipelineName,
               processed_timestamp: '{{{ _ingest.timestamp }}}',
               types: modelTypes,
             },

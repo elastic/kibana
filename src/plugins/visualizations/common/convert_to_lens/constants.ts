@@ -35,3 +35,8 @@ export const OperationsWithReferences = {
 } as const;
 
 export const Operations = { ...OperationsWithSourceField, ...OperationsWithReferences } as const;
+
+export const RANGE_MODES = {
+  Range: 'range',
+  Histogram: 'histogram',
+} as const;
