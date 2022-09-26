@@ -42,14 +42,11 @@ export const loadGlobalExecutionKPIAggregations = ({
 }: LoadGlobalExecutionKPIAggregationsProps & { http: HttpSetup }) => {
   const filter = getFilter({ outcomeFilter, message });
 
-  return http.get<IExecutionKPIResult>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_global_execution_kpi`,
-    {
-      query: {
-        filter: filter.length ? filter.join(' and ') : undefined,
-        date_start: dateStart,
-        date_end: dateEnd,
-      },
-    }
-  );
+  return http.get<IExecutionKPIResult>(`${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_kpi`, {
+    query: {
+      filter: filter.length ? filter.join(' and ') : undefined,
+      date_start: dateStart,
+      date_end: dateEnd,
+    },
+  });
 };
