@@ -42,8 +42,6 @@ import {
   HeartbeatConfig,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
-import { hydrateSavedObjects } from './hydrate_saved_object';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 
 import { normalizeSecrets } from './utils/secrets';
 
@@ -434,17 +432,36 @@ export class SyntheticsService {
 
     const start = performance.now();
 
-    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = await Promise.all(
-      encryptedMonitors.map((monitor) =>
-        encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-          syntheticsMonitor.name,
-          monitor.id,
-          {
-            namespace: monitor.namespaces?.[0],
-          }
+    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = (
+      await Promise.all(
+        encryptedMonitors.map(
+          (monitor) =>
+            new Promise((resolve) => {
+              encryptedClient
+                .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+                  syntheticsMonitor.name,
+                  monitor.id,
+                  {
+                    namespace: monitor.namespaces?.[0],
+                  }
+                )
+                .then((decryptedMonitor) => resolve(decryptedMonitor))
+                .catch((e) => {
+                  this.logger.error(e);
+                  sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+                    reason: 'Failed to decrypt monitor',
+                    message: e?.message,
+                    type: 'runTaskError',
+                    code: e?.code,
+                    status: e.status,
+                    kibanaVersion: this.server.kibanaVersion,
+                  });
+                  resolve(null);
+                });
+            })
         )
       )
-    );
+    ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
 
     const end = performance.now();
     const duration = end - start;
@@ -455,14 +472,6 @@ export class SyntheticsService {
       },
       monitors: monitors.length,
     });
-
-    if (this.indexTemplateExists) {
-      // without mapping, querying won't make sense
-      hydrateSavedObjects({
-        monitors: monitors as unknown as DecryptedSyntheticsMonitorSavedObject[],
-        server: this.server,
-      });
-    }
 
     return (monitors ?? []).map((monitor) => {
       const attributes = monitor.attributes as unknown as MonitorFields;

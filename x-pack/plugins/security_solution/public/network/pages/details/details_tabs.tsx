@@ -41,13 +41,12 @@ interface NetworkDetailTabsProps {
   indexNames: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
-  narrowDateRange: (score: unknown, interval: unknown) => void;
   indexPattern: DataViewBase;
   flowTarget: FlowTargetSourceDest;
 }
 
 export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
-  ({ narrowDateRange, indexPattern, flowTarget, ...rest }) => {
+  ({ indexPattern, flowTarget, ...rest }) => {
     const type = networkModel.NetworkType.details;
 
     const commonProps = { ...rest, type };
@@ -111,7 +110,6 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
             {...commonPropsWithFlowTarget}
             hideHistogramIfEmpty={true}
             AnomaliesTableComponent={AnomaliesNetworkTable}
-            narrowDateRange={narrowDateRange}
           />
         </Route>
         <Route

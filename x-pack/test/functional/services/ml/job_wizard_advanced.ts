@@ -314,12 +314,12 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async confirmAddDetectorModal() {
-      await testSubjects.clickWhenNotDisabled('mlCreateDetectorModalSaveButton');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlCreateDetectorModalSaveButton');
       await testSubjects.missingOrFail('mlCreateDetectorModal');
     },
 
     async cancelAddDetectorModal() {
-      await testSubjects.clickWhenNotDisabled('mlCreateDetectorModalCancelButton');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlCreateDetectorModalCancelButton');
       await testSubjects.missingOrFail('mlCreateDetectorModal');
     },
 
@@ -359,7 +359,7 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async createJob() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlStartDatafeedModal', { timeout: 10 * 1000 });
     },
   };

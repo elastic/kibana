@@ -483,8 +483,8 @@ export function MachineLearningTestResourcesProvider(
         SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
       );
       for (const id of savedObjectIds) {
-        if (id === 'lang_ident_model_1') {
-          log.debug('> Skipping internal lang_ident_model_1');
+        if (mlApi.isInternalModelId(id)) {
+          log.debug(`> Skipping internal ${id}`);
           continue;
         }
         await this.deleteSavedObjectById(

@@ -395,9 +395,6 @@ export class DataView implements DataViewBase {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody(): DataViewAttributes {
-    const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
-      ? undefined
-      : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
 
@@ -407,7 +404,7 @@ export class DataView implements DataViewBase {
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
-      fieldFormatMap,
+      fieldFormatMap: this.fieldFormatMap ? JSON.stringify(this.fieldFormatMap) : undefined,
       type: this.type!,
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,

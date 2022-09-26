@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../contexts/kibana';
-import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
+import { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_anomaly_charts_to_dashboard_controls';
 
@@ -68,8 +68,8 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   return (
     <>
-      {menuItems.length > 0 && chartsCount > 0 && (
-        <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+      {menuItems.length > 0 && chartsCount > 0 ? (
+        <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
               <EuiButtonIcon
@@ -92,16 +92,16 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             <EuiContextMenuPanel items={menuItems} />
           </EuiPopover>
         </EuiFlexItem>
-      )}
+      ) : null}
       {isAddDashboardsActive && selectedJobs ? (
         <AddAnomalyChartsToDashboardControl
           onClose={async () => {
             setIsAddDashboardActive(false);
           }}
+          jobIds={jobIds}
           selectedCells={selectedCells}
           bounds={bounds}
           interval={interval}
-          jobIds={jobIds}
         />
       ) : null}
     </>

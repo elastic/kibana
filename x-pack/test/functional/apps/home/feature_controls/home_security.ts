@@ -35,8 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    // https://github.com/elastic/kibana/issues/132628
-    describe.skip('global all privileges', () => {
+    describe('global all privileges', () => {
       before(async () => {
         await security.role.create('global_all_role', {
           elasticsearch: {},

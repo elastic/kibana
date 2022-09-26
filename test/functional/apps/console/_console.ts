@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('multiple requests output', () => {
+    describe('multiple requests output', function () {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
           await PageObjects.console.enterRequest(request);

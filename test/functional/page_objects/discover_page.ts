@@ -649,7 +649,7 @@ export class DiscoverPageObject extends FtrService {
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
       await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }

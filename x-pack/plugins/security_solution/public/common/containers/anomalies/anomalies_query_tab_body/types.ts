@@ -6,8 +6,6 @@
  */
 
 import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { NarrowDateRange } from '../../../components/ml/types';
-import type { UpdateDateRange } from '../../../components/charts/common';
 import type { GlobalTimeArgs } from '../../use_global_time';
 import type { HostsType } from '../../../../hosts/store/model';
 import type { NetworkType } from '../../../../network/store/model';
@@ -27,11 +25,9 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   endDate: GlobalTimeArgs['to'];
   flowTarget?: FlowTargetSourceDest;
   indexNames: string[];
-  narrowDateRange: NarrowDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   skip: boolean;
-  updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
   hostName?: string;

@@ -23,7 +23,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   return (
     <EuiFlexGroup
-      style={{ width: '100%' }}
+      style={{ width: '100%', overflow: 'auto' }}
       direction="column"
       gutterSize="xs"
       responsive={false}

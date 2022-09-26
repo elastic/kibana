@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -55,6 +55,7 @@ export interface AlertsTableStateProps {
   flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
+  refreshNow?: number;
   showExpandToDetails: boolean;
 }
 
@@ -101,6 +102,7 @@ const AlertsTableState = ({
   flyoutSize,
   query,
   pageSize,
+  refreshNow,
   showExpandToDetails,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
@@ -268,6 +270,13 @@ const AlertsTableState = ({
 
   const CasesContext = cases?.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
+
+  useEffect(() => {
+    if (!isLoading && refreshNow) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshNow]);
 
   return hasAlertsTableConfiguration ? (
     <>

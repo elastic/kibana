@@ -96,7 +96,7 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartSeriesData[];
   from: string;
   id: string;
-  narrowDateRange: UpdateDateRange;
+  updateDateRange: UpdateDateRange;
   to: string;
   showInspectButton?: boolean;
   loading: boolean;
@@ -193,7 +193,7 @@ export const useKpiMatrixStatus = (
   id: string,
   from: string,
   to: string,
-  narrowDateRange: UpdateDateRange,
+  updateDateRange: UpdateDateRange,
   setQuerySkip: (skip: boolean) => void,
   loading: boolean
 ): StatItemsProps[] =>
@@ -207,7 +207,7 @@ export const useKpiMatrixStatus = (
     statKey: `${stat.key}`,
     from,
     to,
-    narrowDateRange,
+    updateDateRange,
     setQuerySkip,
     loading,
   }));
@@ -228,7 +228,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     loading = false,
     showInspectButton = true,
     index,
-    narrowDateRange,
+    updateDateRange,
     statKey = 'item',
     to,
     barChartLensAttributes,
@@ -373,7 +373,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                         areaChart={areaChart}
                         configs={areachartConfigs({
                           xTickFormatter: histogramDateTimeFormatter([from, to]),
-                          onBrushEnd: narrowDateRange,
+                          onBrushEnd: updateDateRange,
                         })}
                         visualizationActionsOptions={{
                           lensAttributes: areaChartLensAttributes,
@@ -403,7 +403,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     prevProps.setQuerySkip === nextProps.setQuerySkip &&
     prevProps.id === nextProps.id &&
     prevProps.index === nextProps.index &&
-    prevProps.narrowDateRange === nextProps.narrowDateRange &&
+    prevProps.updateDateRange === nextProps.updateDateRange &&
     prevProps.statKey === nextProps.statKey &&
     prevProps.to === nextProps.to &&
     deepEqual(prevProps.areaChart, nextProps.areaChart) &&

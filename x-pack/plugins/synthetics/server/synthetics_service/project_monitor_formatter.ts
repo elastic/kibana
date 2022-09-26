@@ -266,24 +266,24 @@ export class ProjectMonitorFormatter {
       attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
     } = normalizeSecrets(decryptedPreviousMonitor);
     const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
-    const monitorWithRevision = formatSecrets({
-      ...normalizedPreviousMonitorAttributes, // ensures monitor AAD remains consistent in the event of field name changes
-      ...normalizedMonitor,
-      revision: hasMonitorBeenEdited
-        ? (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1
-        : previousMonitor.attributes[ConfigKey.REVISION],
-    });
-    const editedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
-      await this.savedObjectsClient.update<MonitorFields>(
-        syntheticsMonitorType,
-        previousMonitor.id,
-        {
-          ...monitorWithRevision,
-          urls: '',
-        }
-      );
 
     if (hasMonitorBeenEdited) {
+      const monitorWithRevision = formatSecrets({
+        ...normalizedPreviousMonitorAttributes,
+        ...normalizedMonitor,
+        revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+      });
+
+      const editedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
+        await this.savedObjectsClient.update<MonitorFields>(
+          syntheticsMonitorType,
+          previousMonitor.id,
+          {
+            ...monitorWithRevision,
+            urls: '',
+          }
+        );
+
       await syncEditedMonitor({
         editedMonitor: normalizedMonitor,
         editedMonitorSavedObject: editedMonitor,
@@ -294,9 +294,11 @@ export class ProjectMonitorFormatter {
         savedObjectsClient: this.savedObjectsClient,
         request: this.request,
       });
+
+      return { editedMonitor, errors: [] };
     }
 
-    return { editedMonitor, errors: [] };
+    return { editedMonitor: previousMonitor, errors: [] };
   };
 
   private handleStaleMonitors = async () => {

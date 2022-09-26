@@ -10,6 +10,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
+  AlertConsumers,
   getEsQueryConfig,
   getSafeSortIds,
   isValidFeatureId,
@@ -671,7 +672,9 @@ export class AlertsClient {
         if (index == null) {
           throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
-        return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
+        return (
+          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '*') ?? ''
+        );
       });
 
       return toReturn;

@@ -55,7 +55,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
@@ -81,7 +81,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
+      updateDateRange={updateDateRange}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}

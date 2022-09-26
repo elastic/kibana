@@ -747,9 +747,12 @@ export class Embeddable
   }
 
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
+    if (!this.savedVis || !this.activeDataInfo.activeData) {
+      return false;
+    }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange) {
+    if (!mergedSearchContext.timeRange) {
       return false;
     }
 

@@ -4,9 +4,9 @@
 
 The *Rules* UI provides a cross-app view of alerting. Different {kib} apps like {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting, *Maps*>> and <<xpack-ml, *Machine Learning*>> can offer their own rules. The *Rules* UI provides a central place to:
 
-* <<create-edit-rules, Create and edit>> rules
-* <<controlling-rules, Manage rules>> including enabling/disabling, muting/unmuting, and deleting
-* Drill-down to <<rule-details, rule details>>
+* <<create-edit-rules,Create and edit>> rules
+* <<controlling-rules,Manage rules>> including enabling/disabling, muting/unmuting, and deleting
+* Drill down to <<rule-details,rule details>>
 
 [role="screenshot"]
 image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
@@ -66,7 +66,7 @@ image::images/rule-flyout-general-details.png[alt='All rules have name, tags, ch
 [[defining-rules-type-conditions]]
 ==== Rule type and conditions
 
-Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will pre-select the type of rule for you.
+Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.
 
 [role="screenshot"]
 image::images/rule-flyout-rule-type-selection.png[Choosing the type of rule to create]
@@ -188,7 +188,7 @@ image::images/rules-imported-banner.png[Rules import banner, width=50%]
 
 [float]
 [[rule-details]]
-=== Drilldown to rule details
+=== Drill down to rule details
 
 Select a rule name from the rule listing to access the *Rule details* page, which tells you about the state of the rule and provides granular control over the actions it is taking. 
 

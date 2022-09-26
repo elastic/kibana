@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.4.x releases.
 
+* <<release-notes-8.4.2>>
+* <<release-notes-8.4.1>>
 * <<release-notes-8.4.0>>
 //* <<release-notes-8.3.3>>
 //* <<release-notes-8.3.2>>
@@ -33,6 +35,101 @@ Review important information about the {kib} 8.4.x releases.
 
 --
 
+[[release-notes-8.4.2]]
+== {kib} 8.4.2
+
+Review the following information about the {kib} 8.4.2 release.
+
+[float]
+[[breaking-changes-8.4.2]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.4.2.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.4.2]]
+=== Enhancements
+Security::
+Logs a hash of the Saved Objects encryption key (`xpack.encryptedSavedObjects.encryptionKey`) when {kib} starts to make it easier to spot mismatched encryption keys {kibana-pull}139874[#139874]
+
+[float]
+[[fixes-v8.4.2]]
+=== Bug Fixes
+Connectors::
+The connectors table now uses "compatibility" rather than "availability" {kibana-pull}139024[#139024]
+
+Discover::
+Fixes saved search embeddable rendering {kibana-pull}140264[#140264]
+
+Elastic Security::
+For the Elastic Security 8.4.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Applies fixes for package policy upgrade API with multiple ids {kibana-pull}140069[#140069]
+* Improves performance for many integration policies {kibana-pull}139648[#139648]
+
+Lens & Visualizations::
+* Fixes "Collapse by" for table and XY visualizations with multiple metrics in *Lens* {kibana-pull}140381[#140381]
+* Fixes action menu in *Lens* {kibana-pull}139588[#139588]
+
+Machine Learning::
+* Explain Log Rate Spikes: Histogram fixes {kibana-pull}139933[#139933]
+* Explain Log Rate Spikes: Improve streaming headers for certain proxy configs {kibana-pull}139637[#139637]
+* Fixes navigation for the Basic licence {kibana-pull}139469[#139469]
+* Corrects file.path field name in v3_windows_anomalous_script job {kibana-pull}139109[#139109]
+
+Management::
+Bfetch` response headers now include `X-Accel-Buffering: no` {kibana-pull}139534[#139534]
+
+Maps::
+* Fixes issue where percentile aggregation was not working with vector tiles {kibana-pull}140318[#140318]
+* Fixes Map app crashing on file upload request timeout {kibana-pull}139760[#139760]
+
+Monitoring::
+* Ensures GlobalState class has it's destroy() method called on unmount {kibana-pull}139908[#139908]
+* Adds KibanaThemeProvider to Stack Monitoring UI {kibana-pull}139839[#139839]
+
+Uptime::
+Fixes an issue where decryption errors caused the entire suite of monitors to fail syncing {kibana-pull}140549[#140549]
+
+[[release-notes-8.4.1]]
+== {kib} 8.4.1
+
+Review the following information about the {kib} 8.4.1 release.
+
+[float]
+[[breaking-changes-8.4.1]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+There are no breaking changes in {kib} 8.4.1.
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[fixes-v8.4.1]]
+=== Bug fixes
+
+Alerting::
+* Fixes alert tab crash on rule details page {kibana-pull}139372[#139372]
+* Fixes issue where some 8.3.x clusters failed to upgrade with a saved object migration failure {kibana-pull}139427[#139427]
+
+Lens & Visualizations::
+* Fixes table pagination in *Lens* and *Aggregation-based* visualization editors {kibana-pull}139160[#139160]
+
 [[release-notes-8.4.0]]
 == {kib} 8.4.0
 
@@ -42,13 +139,15 @@ Review the following information about the {kib} 8.4.0 release.
 [[known-issue-8.4.0]]
 === Known issues
 
-If you have alerting rules that have been snoozed, do not upgrade {kib} to 8.4.0.
+If you have alerting rules that have been snoozed, do not upgrade {kib} to 8.4.0. Upgrade to 8.4.1 instead.
 
-To determine if you have snoozed alerting rules, open the main menu, then click **Stack Management** -> **Rules and Connectors**.
-Filter the rule list by selecting **View** -> **Snoozed**.
-For each space, cancel the snooze for all affected rules before you upgrade.
+To determine if you have snoozed alerting rules, open the main menu, then click
+**{stack-manage-app}** -> **{rules-ui}**. Filter the rule list by selecting
+**View** -> **Snoozed**. If you must upgrade to 8.4.0, for each space, cancel
+the snooze for all affected rules before you upgrade.
 
-To identify snoozed rules in all Spaces using **Dev Tools**, run the following query:
+To identify snoozed rules in all Spaces using **Dev Tools**, run the following
+query:
 
 [source,console]
 ----
@@ -62,14 +161,15 @@ GET /.kibana/_search
 }
 ----
 
-When you upgrade {kib} to 8.4.0, and you have alerting rules configured to snooze notifications, you will receive the following error message:
+If you upgraded {kib} to 8.4.0 and you have alerting rules configured to
+snooze notifications, you will receive the following error message:
 
 [source,text]
 ----
 FATAL  Error: Unable to complete saved object migrations for the [.kibana] index.
 ----
 
-Before you retry the upgrade, restore your previous version, then cancel any alerting rules with snooze notifications.
+To fix that problem, restore your previous version, then upgrade to 8.4.1 instead.
 
 [float]
 [[breaking-changes-8.4.0]]
@@ -77,8 +177,6 @@ Before you retry the upgrade, restore your previous version, then cancel any ale
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-135669]]
@@ -107,8 +205,8 @@ For more information, refer to {kibana-pull}134336[#134336].
 *Impact* +
 In 8.4.0 and later, you are unable to configure the *Timelion* legacy charts library advanced setting. For information about visualization Advanced Settings, check link:https://www.elastic.co/guide/en/kibana/8.4/advanced-options.html#kibana-visualization-settings[Visualization].
 ====
-      
-// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
 [float]
 [[deprecations-8.4.0]]
