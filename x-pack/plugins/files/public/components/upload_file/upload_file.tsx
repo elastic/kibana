@@ -117,6 +117,8 @@ export const UploadFile = <Kind extends string = string>({
     return () => subs.forEach((sub) => sub.unsubscribe());
   }, [uploadState, onDone, onError]);
 
+  useEffect(() => uploadState.dispose, [uploadState]);
+
   return (
     <context.Provider value={uploadState}>
       <Component
