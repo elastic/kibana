@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  // Failing: See https://github.com/elastic/kibana/issues/141002
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
@@ -674,6 +673,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.enabled).to.eql(true);
         expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
           Date.parse(scheduledTask.scheduledAt)
+        );
+        expect(Date.parse(task.runAt)).to.be.greaterThan(
+          Date.parse(scheduledTask.runAt)
         );
       });
     });
