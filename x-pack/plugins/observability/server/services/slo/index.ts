@@ -10,3 +10,4 @@ export * from './slo_repository';
 export * from './transform_manager';
 export * from './create_slo';
 export * from './delete_slo';
+export * from './get_slo';

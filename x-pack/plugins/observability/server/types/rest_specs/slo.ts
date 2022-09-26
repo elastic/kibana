@@ -8,17 +8,8 @@
 import * as t from 'io-ts';
 import { commonSLOSchema } from '../schema';
 
-const createSLOBodySchema = t.intersection([
-  commonSLOSchema,
-  t.partial({
-    settings: t.partial({
-      destination_index: t.string,
-    }),
-  }),
-]);
-
 const createSLOParamsSchema = t.type({
-  body: createSLOBodySchema,
+  body: commonSLOSchema,
 });
 
 const createSLOResponseSchema = t.type({
@@ -31,8 +22,17 @@ const deleteSLOParamsSchema = t.type({
   }),
 });
 
-type CreateSLOParams = t.TypeOf<typeof createSLOBodySchema>;
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+const getSLOParamsSchema = t.type({
+  path: t.type({
+    id: t.string,
+  }),
+});
 
-export { createSLOParamsSchema, deleteSLOParamsSchema };
-export type { CreateSLOParams, CreateSLOResponse };
+const getSLOResponseSchema = t.intersection([t.type({ id: t.string }), commonSLOSchema]);
+
+type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
+type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+type GetSLOResponse = t.TypeOf<typeof getSLOResponseSchema>;
+
+export { createSLOParamsSchema, deleteSLOParamsSchema, getSLOParamsSchema };
+export type { CreateSLOParams, CreateSLOResponse, GetSLOResponse };
