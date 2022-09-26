@@ -33,7 +33,7 @@ export const getGlobalExecutionKPIRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_global_execution_kpi`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_kpi`,
       validate: {
         query: querySchema,
       },

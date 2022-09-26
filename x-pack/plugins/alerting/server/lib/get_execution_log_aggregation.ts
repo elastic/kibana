@@ -116,7 +116,6 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_active_alerts: 'ruleExecution>numActiveAlerts',
   num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
   num_new_alerts: 'ruleExecution>numNewAlerts',
-  num_errored_actions: 'numErroredActions>_count',
 };
 
 export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['filter']) => {
@@ -140,14 +139,14 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
           filter: {
             bool: {
               ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('alerting', 'execute')],
+              must: [getProviderAndActionFilter('actions', 'execute')],
             },
           },
           aggs: {
             actionOutcomes: {
               terms: {
                 field: 'event.outcome',
-                size: 3,
+                size: 2,
               },
             },
           },
@@ -163,32 +162,37 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
             numTriggeredActions: {
               sum: {
                 field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                missing: 0,
               },
             },
             numGeneratedActions: {
               sum: {
                 field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                missing: 0,
               },
             },
             numActiveAlerts: {
               sum: {
                 field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                missing: 0,
               },
             },
             numRecoveredAlerts: {
               sum: {
                 field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                missing: 0,
               },
             },
             numNewAlerts: {
               sum: {
                 field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                missing: 0,
               },
             },
             ruleExecutionOutcomes: {
               terms: {
                 field: 'event.outcome',
-                size: 3,
+                size: 2,
               },
             },
           },
