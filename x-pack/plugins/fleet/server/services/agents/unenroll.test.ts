@@ -223,21 +223,7 @@ describe('unenrollAgents (plural)', () => {
       agentIds: idsToUnenroll,
       revoke: true,
     });
-
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: false,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDfined();
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
