@@ -156,7 +156,7 @@ export const useEndpointActionItems = (
                 href: getAppUrl({ path: endpointActionsPath }),
                 children: (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.actions.actionsLog"
+                    id="xpack.securitySolution.endpoint.actions.responseActionsLog"
                     defaultMessage="View response actions history"
                   />
                 ),

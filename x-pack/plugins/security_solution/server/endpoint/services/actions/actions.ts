@@ -107,8 +107,8 @@ const getActivityLog = async ({
     throw error;
   }
   if (actionsResult?.statusCode !== 200) {
-    logger.error(`Error fetching response actions history for agent_id ${elasticAgentId}`);
-    throw new Error(`Error fetching response actions history for agent_id ${elasticAgentId}`);
+    logger.error(`Error fetching actions log for agent_id ${elasticAgentId}`);
+    throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
   // label record as `action`, `fleetAction`
