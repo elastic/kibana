@@ -18,7 +18,7 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
   const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border, colors, size } = euiTheme;
+    const { border, size } = euiTheme;
 
     // 118px = Session View Toolbar height + Close Session button height + spacing margin at the bottom
     const sessionView: CSSObject = {
@@ -55,17 +55,12 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       },
     };
 
-    const betaBadge: CSSObject = {
-      backgroundColor: `${colors.emptyShade}`,
-    };
-
     return {
       processTree,
       detailPanel,
       nonGrowGroup,
       resizeHandle,
       sessionViewerComponent,
-      betaBadge,
     };
   }, [euiTheme, isFullScreen, height, euiVars]);
 

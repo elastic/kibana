@@ -8,17 +8,18 @@
 // import { omit, uniq } from 'lodash';
 
 import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import type { ItemsetResult } from './fetch_frequent_items';
 
 function getValueCounts(df: ItemsetResult[], field: string) {
-  return df.reduce((p, c) => {
+  return df.reduce<Record<string, number>>((p, c) => {
     if (c.set[field] === undefined) {
       return p;
     }
     p[c.set[field]] = p[c.set[field]] ? p[c.set[field]] + 1 : 1;
     return p;
-  }, {} as Record<string, number>);
+  }, {});
 }
 
 function getValuesDescending(df: ItemsetResult[], field: string): string[] {
@@ -34,6 +35,7 @@ interface NewNode {
   name: string;
   set: FieldValuePair[];
   docCount: number;
+  pValue: number | null;
   children: NewNode[];
   icon: string;
   iconStyle: string;
@@ -51,6 +53,7 @@ function NewNodeFactory(name: string): NewNode {
     name,
     set: [],
     docCount: 0,
+    pValue: 0,
     children,
     icon: 'default',
     iconStyle: 'default',
@@ -87,8 +90,8 @@ function dfDepthFirstSearch(
   displayOther: boolean
 ) {
   const filteredItemSets = iss.filter((is) => {
-    for (const [key, values] of Object.entries(is.set)) {
-      if (key === field && values.includes(value)) {
+    for (const [key, setValue] of Object.entries(is.set)) {
+      if (key === field && setValue === value) {
         return true;
       }
     }
@@ -100,6 +103,7 @@ function dfDepthFirstSearch(
   }
 
   const docCount = Math.max(...filteredItemSets.map((fis) => fis.doc_count));
+  const pValue = Math.max(...filteredItemSets.map((fis) => fis.maxPValue));
   const totalDocCount = Math.max(...filteredItemSets.map((fis) => fis.total_doc_count));
 
   let label = `${parentLabel} ${value}`;
@@ -110,6 +114,7 @@ function dfDepthFirstSearch(
     displayParent.name += ` ${value}`;
     displayParent.set.push({ fieldName: field, fieldValue: value });
     displayParent.docCount = docCount;
+    displayParent.pValue = pValue;
     displayNode = displayParent;
   } else {
     displayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
@@ -117,6 +122,7 @@ function dfDepthFirstSearch(
     displayNode.set = [...displayParent.set];
     displayNode.set.push({ fieldName: field, fieldValue: value });
     displayNode.docCount = docCount;
+    displayNode.pValue = pValue;
     displayParent.addNode(displayNode);
   }
 
@@ -144,6 +150,7 @@ function dfDepthFirstSearch(
         nextDisplayNode.iconStyle = 'warning';
         nextDisplayNode.set = displayNode.set;
         nextDisplayNode.docCount = docCount;
+        nextDisplayNode.pValue = pValue;
         displayNode.addNode(nextDisplayNode);
         displayNode = nextDisplayNode;
       }
@@ -224,9 +231,13 @@ export function getSimpleHierarchicalTreeLeaves(
   leaves: ChangePointGroup[],
   level = 1
 ) {
-  // console.log(`${'-'.repeat(level)} ${tree.name} ${tree.children.length}`);
   if (tree.children.length === 0) {
-    leaves.push({ group: tree.set, docCount: tree.docCount });
+    leaves.push({
+      id: `${stringHash(JSON.stringify(tree.set))}`,
+      group: tree.set,
+      docCount: tree.docCount,
+      pValue: tree.pValue,
+    });
   } else {
     for (const child of tree.children) {
       const newLeaves = getSimpleHierarchicalTreeLeaves(child, [], level + 1);
@@ -236,29 +247,43 @@ export function getSimpleHierarchicalTreeLeaves(
     }
   }
 
+  if (leaves.length === 1 && leaves[0].group.length === 0 && leaves[0].docCount === 0) {
+    return [];
+  }
+
   return leaves;
+}
+
+type FieldValuePairCounts = Record<string, Record<string, number>>;
+/**
+ * Get a nested record of field/value pairs with counts
+ */
+export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePairCounts {
+  return cpgs.reduce<FieldValuePairCounts>((p, { group }) => {
+    group.forEach(({ fieldName, fieldValue }) => {
+      if (p[fieldName] === undefined) {
+        p[fieldName] = {};
+      }
+      p[fieldName][fieldValue] = p[fieldName][fieldValue] ? p[fieldName][fieldValue] + 1 : 1;
+    });
+    return p;
+  }, {});
 }
 
 /**
  * Analyse duplicate field/value pairs in change point groups.
  */
-export function markDuplicates(cpgs: ChangePointGroup[]): ChangePointGroup[] {
-  const fieldValuePairCounts: Record<string, number> = {};
-  cpgs.forEach((cpg) => {
-    cpg.group.forEach((g) => {
-      const str = `${g.fieldName}$$$$${g.fieldValue}`;
-      fieldValuePairCounts[str] = fieldValuePairCounts[str] ? fieldValuePairCounts[str] + 1 : 1;
-    });
-  });
-
+export function markDuplicates(
+  cpgs: ChangePointGroup[],
+  fieldValuePairCounts: FieldValuePairCounts
+): ChangePointGroup[] {
   return cpgs.map((cpg) => {
     return {
       ...cpg,
       group: cpg.group.map((g) => {
-        const str = `${g.fieldName}$$$$${g.fieldValue}`;
         return {
           ...g,
-          duplicate: fieldValuePairCounts[str] > 1,
+          duplicate: fieldValuePairCounts[g.fieldName][g.fieldValue] > 1,
         };
       }),
     };

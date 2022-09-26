@@ -191,7 +191,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
-  describe('DELETE /internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}', () => {
+  describe('DELETE /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}', () => {
     const indexName = 'my-index';
     const pipelineName = 'my-pipeline';
 
@@ -203,7 +203,7 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter = new MockRouter({
         context,
         method: 'delete',
-        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
       });
 
       registerIndexRoutes({
@@ -267,7 +267,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/_simulate', () => {
+  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate', () => {
     const pipelineBody = {
       description: 'Some pipeline',
       processors: [
@@ -299,7 +299,7 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter = new MockRouter({
         context,
         method: 'post',
-        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/_simulate',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate',
       });
 
       registerIndexRoutes({
@@ -376,7 +376,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
-  describe('PUT /internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}', () => {
+  describe('PUT /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}', () => {
     const pipelineName = 'some-pipeline';
     const indexName = 'some-index';
     const pipelineBody = {
@@ -399,7 +399,7 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter = new MockRouter({
         context,
         method: 'put',
-        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
       });
 
       registerIndexRoutes({

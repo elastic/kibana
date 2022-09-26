@@ -20,7 +20,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -35,24 +34,22 @@ import { PipelinesLogic } from './pipelines_logic';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
-  trainedModelName,
   isDeployed,
-  modelType,
+  types,
 }) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { deleteMlPipeline } = useActions(PipelinesLogic);
+  const showConfirmDeleteModal = () => {
+    setShowConfirmDelete(true);
+    setIsPopOverOpen(false);
+  };
 
   const deployedText = i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.isDeployed', {
     defaultMessage: 'Deployed',
   });
-
-  const notDeployedText = i18n.translate(
-    'xpack.enterpriseSearch.inferencePipelineCard.isNotDeployed',
-    { defaultMessage: 'Not deployed' }
-  );
 
   const actionButton = (
     <EuiButtonEmpty
@@ -114,7 +111,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
                         flush="both"
                         iconType="trash"
                         color="text"
-                        onClick={() => setShowConfirmDelete(true)}
+                        onClick={showConfirmDeleteModal}
                       >
                         {i18n.translate(
                           'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
@@ -131,22 +128,21 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiTextColor color="subdued">{trainedModelName}</EuiTextColor>
-            </EuiFlexItem>
-            <EuiFlexItem>
               <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color={isDeployed ? 'success' : 'accent'}>
-                    {isDeployed ? deployedText : notDeployedText}
-                  </EuiHealth>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiBadge color="hollow">{modelType}</EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+                {isDeployed && (
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth color="success">{deployedText}</EuiHealth>
+                  </EuiFlexItem>
+                )}
+                {types.map((type) => (
+                  <EuiFlexItem grow={false} key={type}>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <EuiBadge color="hollow">{type}</EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

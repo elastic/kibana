@@ -17,9 +17,15 @@ jest.mock('../../hooks/use_request', () => {
   const module = jest.requireActual('../../hooks/use_request');
   return {
     ...module,
-    useGetSettings: jest.fn(),
-    sendGetOneAgentPolicy: jest.fn(),
-    useGetAgents: jest.fn(),
+    useGetSettings: jest.fn().mockReturnValue({
+      data: { item: { fleet_server_hosts: ['test'] } },
+    }),
+    sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
+      data: { item: { package_policies: [] } },
+    }),
+    useGetAgents: jest.fn().mockReturnValue({
+      data: { items: [{ policy_id: 'fleet-server-policy' }] },
+    }),
     useGetAgentPolicies: jest.fn(),
   };
 });

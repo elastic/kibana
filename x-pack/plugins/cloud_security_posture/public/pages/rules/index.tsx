@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiPageHeader,
   EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -28,8 +29,8 @@ import { useCspIntegrationInfo } from './use_csp_integration';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
-import { CloudPostureIntegrations, cloudPostureIntegrations } from '../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
+import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 
 const getRulesBreadcrumbs = (
   name?: string,
@@ -51,43 +52,35 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
-const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
-  typeof name === 'string' && name in cloudPostureIntegrations;
-
 const getRulesSharedValues = (
   packageInfo?: PackagePolicy
 ): NonNullable<EuiDescriptionListProps['listItems']> => {
-  const enabledInput = packageInfo?.inputs.find((input) => input.enabled);
-  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return [];
+  const enabledIntegration = getEnabledCspIntegrationDetails(packageInfo);
+  const values = [];
 
-  const integration = cloudPostureIntegrations[enabledInput.policy_template];
-  const enabledIntegrationOption = integration.options.find(
-    (option) => option.type === enabledInput.type
-  );
-
-  const values = [
-    {
+  if (enabledIntegration?.integration?.shortName) {
+    values.push({
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
         defaultMessage: 'Integration',
       }),
-      description: integration.shortName,
-    },
-  ];
+      description: enabledIntegration?.integration.shortName,
+    });
+  }
 
-  if (!enabledIntegrationOption) return values;
+  if (!enabledIntegration?.enabledIntegrationOption) return values;
 
   values.push(
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
         defaultMessage: 'Deployment Type',
       }),
-      description: enabledIntegrationOption.name,
+      description: enabledIntegration?.enabledIntegrationOption.name,
     },
     {
       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
         defaultMessage: 'Benchmark',
       }),
-      description: enabledIntegrationOption.benchmark,
+      description: enabledIntegration?.enabledIntegrationOption.benchmark,
     }
   );
 
@@ -115,6 +108,38 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
     <CloudPosturePage query={integrationInfo}>
       <EuiPageHeader
         alignItems={'bottom'}
+        bottomBorder
+        pageTitle={
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem style={{ width: 'fit-content' }}>
+              <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
+                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                  <FormattedMessage
+                    id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
+                    defaultMessage="Benchmark Integrations"
+                  />
+                </EuiButtonEmpty>
+              </Link>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CloudPosturePageTitle
+                title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+                  defaultMessage: 'Rules - {integrationName}',
+                  values: {
+                    integrationName: packageInfo?.name,
+                  },
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        description={
+          sharedValues.length && (
+            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
+              <CspInlineDescriptionList listItems={sharedValues} />
+            </div>
+          )
+        }
         rightSideItems={[
           <EuiButtonEmpty
             iconType="gear"
@@ -127,34 +152,6 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             />
           </EuiButtonEmpty>,
         ]}
-        pageTitle={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-              <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
-                <FormattedMessage
-                  id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
-                  defaultMessage="Benchmark Integrations"
-                />
-              </EuiButtonEmpty>
-            </Link>
-            <CloudPosturePageTitle
-              title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                defaultMessage: 'Rules - {integrationName}',
-                values: {
-                  integrationName: packageInfo?.name,
-                },
-              })}
-            />
-          </EuiFlexGroup>
-        }
-        description={
-          sharedValues.length && (
-            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
-              <CspInlineDescriptionList listItems={sharedValues} />
-            </div>
-          )
-        }
-        bottomBorder
       />
       <EuiSpacer />
       <RulesContainer />

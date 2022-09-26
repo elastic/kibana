@@ -50,9 +50,7 @@ function getIndexPatterns(
   const indexPatternIds = [];
   if (initialContext) {
     if ('isVisualizeAction' in initialContext) {
-      for (const { indexPatternId } of initialContext.layers) {
-        indexPatternIds.push(indexPatternId);
-      }
+      indexPatternIds.push(...initialContext.indexPatternIds);
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
@@ -209,6 +207,7 @@ export async function initializeSources(
       visualizationMap,
       visualizationState,
       references,
+      initialContext,
     }),
   };
 }
@@ -217,16 +216,19 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
+  initialContext,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) {
   if (visualizationState?.activeId) {
     return (
       visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
         visualizationState.state,
-        references
+        references,
+        initialContext
       ) ?? visualizationState.state
     );
   }

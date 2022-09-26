@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
@@ -103,22 +103,28 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByResource.isFetching}
       />
-      <PageTitle>
-        <PageTitleText
-          title={
-            <CloudPosturePageTitle
-              title={i18n.translate(
-                'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
-                { defaultMessage: 'Findings' }
-              )}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PageTitle>
+            <PageTitleText
+              title={
+                <CloudPosturePageTitle
+                  title={i18n.translate(
+                    'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
+                    { defaultMessage: 'Findings' }
+                  )}
+                />
+              }
             />
-          }
-        />
-      </PageTitle>
+          </PageTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
+          {!error && <FindingsGroupBySelector type="resource" />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
-          <FindingsGroupBySelector type="resource" />
           {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
             <FindingsDistributionBar
               {...{

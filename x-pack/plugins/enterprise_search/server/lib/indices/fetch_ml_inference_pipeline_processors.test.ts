@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
 import { InferencePipeline } from '../../../common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
+  getMlModelTypesForModelConfig,
+  getMlModelConfigsForModelIds,
   fetchMlInferencePipelineProcessorNames,
   fetchMlInferencePipelineProcessors,
   fetchPipelineProcessorInferenceData,
+  InferencePipelineData,
 } from './fetch_ml_inference_pipeline_processors';
 
 const mockGetPipeline = {
@@ -42,8 +47,8 @@ const mockGetPipeline2 = {
       },
       {
         inference: {
-          model_id: 'trained-model-id-1',
           inference_config: { regression: {} },
+          model_id: 'trained-model-id-1',
         },
       },
     ],
@@ -53,8 +58,8 @@ const mockGetPipeline2 = {
     processors: [
       {
         inference: {
-          model_id: 'trained-model-id-2',
           inference_config: { regression: {} },
+          model_id: 'trained-model-id-2',
         },
       },
     ],
@@ -71,16 +76,98 @@ const mockGetPipeline2 = {
   },
 };
 
+const mockMultiPipeline = {
+  'my-index@ml-inference': {
+    id: 'my-index@ml-inference',
+    processors: [
+      {
+        pipeline: {
+          name: 'ml-inference-pipeline-1',
+        },
+      },
+      {
+        pipeline: {
+          name: 'ml-inference-pipeline-3',
+        },
+      },
+    ],
+  },
+};
+
+const mockGetPipeline3 = {
+  'ml-inference-pipeline-1': {
+    id: 'ml-inference-pipeline-1',
+    processors: [
+      {
+        set: {
+          description: 'just a set processor for fun',
+          field: 'bar-field',
+          value: 'bar',
+        },
+      },
+      {
+        inference: {
+          inference_config: { regression: {} },
+          model_id: 'trained-model-id-1',
+        },
+      },
+    ],
+  },
+  'ml-inference-pipeline-2': {
+    id: 'ml-inference-pipeline-2',
+    processors: [
+      {
+        inference: {
+          inference_config: { regression: {} },
+          model_id: 'trained-model-id-2',
+        },
+      },
+    ],
+  },
+  'non-ml-inference-pipeline': {
+    id: 'non-ml-inference-pipeline',
+    processors: [
+      {
+        pipeline: {
+          name: 'different-pipeline',
+        },
+      },
+    ],
+  },
+  'ml-inference-pipeline-3': {
+    id: 'ml-inference-pipeline-3',
+    processors: [
+      {
+        set: {
+          description: 'just a set processor for fun',
+          field: 'foo-field',
+          value: 'foo',
+        },
+      },
+      {
+        inference: {
+          inference_config: { regression: {} },
+          model_id: 'trained-model-id-1',
+        },
+      },
+    ],
+  },
+};
+
 const mockGetTrainedModelsData = {
   count: 1,
   trained_model_configs: [
     {
+      inference_config: { ner: {} },
       model_id: 'trained-model-id-1',
       model_type: 'lang_ident',
+      tags: [],
     },
     {
+      inference_config: { ner: {} },
       model_id: 'trained-model-id-2',
       model_type: 'pytorch',
+      tags: [],
     },
   ],
 };
@@ -92,26 +179,24 @@ const mockGetTrainedModelStats = {
       model_id: 'trained-model-id-1',
     },
     {
-      model_id: 'trained-model-id-2',
       deployment_stats: {
         state: 'started',
       },
+      model_id: 'trained-model-id-2',
     },
   ],
 };
 
-const something = {
+const trainedModelDataObject = {
   'trained-model-id-1': {
     isDeployed: false,
-    modelType: 'lang_ident',
     pipelineName: 'ml-inference-pipeline-1',
-    trainedModelName: 'trained-model-id-1',
+    types: ['lang_ident', 'ner'],
   },
   'trained-model-id-2': {
     isDeployed: true,
-    modelType: 'pytorch',
     pipelineName: 'ml-inference-pipeline-2',
-    trainedModelName: 'trained-model-id-2',
+    types: ['pytorch', 'ner'],
   },
 };
 
@@ -169,20 +254,20 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
   it('should return the inference processor data for the pipelines', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockGetPipeline2));
 
-    const expected = {
-      'trained-model-id-1': {
+    const expected = [
+      {
         isDeployed: false,
-        modelType: 'unknown',
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
+        types: [],
       },
-      'trained-model-id-2': {
+      {
         isDeployed: false,
-        modelType: 'unknown',
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
+        types: [],
       },
-    };
+    ];
 
     const response = await fetchPipelineProcessorInferenceData(
       mockClient as unknown as ElasticsearchClient,
@@ -191,6 +276,95 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
 
     expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
       id: 'ml-inference-pipeline-1,ml-inference-pipeline-2,non-ml-inference-pipeline',
+    });
+    expect(response).toEqual(expected);
+  });
+});
+
+describe('getMlModelTypesForModelConfig lib function', () => {
+  const mockModel: MlTrainedModelConfig = {
+    inference_config: {
+      ner: {},
+    },
+    input: {
+      field_names: [],
+    },
+    model_id: 'test_id',
+    model_type: 'pytorch',
+    tags: ['test_tag'],
+  };
+  const builtInMockModel: MlTrainedModelConfig = {
+    inference_config: {
+      text_classification: {},
+    },
+    input: {
+      field_names: [],
+    },
+    model_id: 'test_id',
+    model_type: 'lang_ident',
+    tags: [BUILT_IN_MODEL_TAG],
+  };
+
+  it('should return the model type and inference config type', () => {
+    const expected = ['pytorch', 'ner'];
+    const response = getMlModelTypesForModelConfig(mockModel);
+    expect(response.sort()).toEqual(expected.sort());
+  });
+
+  it('should include the built in type', () => {
+    const expected = ['lang_ident', 'text_classification', BUILT_IN_MODEL_TAG];
+    const response = getMlModelTypesForModelConfig(builtInMockModel);
+    expect(response.sort()).toEqual(expected.sort());
+  });
+});
+
+describe('getMlModelConfigsForModelIds lib function', () => {
+  const mockClient = {
+    ml: {
+      getTrainedModels: jest.fn(),
+      getTrainedModelsStats: jest.fn(),
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should fetch the models that we ask for', async () => {
+    mockClient.ml.getTrainedModels.mockImplementation(() =>
+      Promise.resolve(mockGetTrainedModelsData)
+    );
+    mockClient.ml.getTrainedModelsStats.mockImplementation(() =>
+      Promise.resolve(mockGetTrainedModelStats)
+    );
+
+    const input = {
+      'trained-model-id-1': {
+        isDeployed: true,
+        pipelineName: '',
+        trainedModelName: 'trained-model-id-1',
+        types: ['pytorch', 'ner'],
+      },
+      'trained-model-id-2': {
+        isDeployed: true,
+        pipelineName: '',
+        trainedModelName: 'trained-model-id-2',
+        types: ['pytorch', 'ner'],
+      },
+    } as Record<string, InferencePipeline>;
+
+    const expected = {
+      'trained-model-id-2': input['trained-model-id-2'],
+    };
+    const response = await getMlModelConfigsForModelIds(
+      mockClient as unknown as ElasticsearchClient,
+      ['trained-model-id-2']
+    );
+    expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
+      model_id: 'trained-model-id-2',
+    });
+    expect(mockClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+      model_id: 'trained-model-id-2',
     });
     expect(response).toEqual(expected);
   });
@@ -216,26 +390,39 @@ describe('fetchAndAddTrainedModelData lib function', () => {
       Promise.resolve(mockGetTrainedModelStats)
     );
 
-    const input = {
-      'trained-model-id-1': {
+    const pipelines: InferencePipelineData[] = [
+      {
         isDeployed: false,
-        modelType: 'unknown',
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
+        types: [],
       },
-      'trained-model-id-2': {
+      {
         isDeployed: false,
-        modelType: 'unknown',
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
+        types: [],
       },
-    } as Record<string, InferencePipeline>;
+    ];
 
-    const expected = something as Record<string, InferencePipeline>;
+    const expected: InferencePipelineData[] = [
+      {
+        isDeployed: false,
+        pipelineName: 'ml-inference-pipeline-1',
+        trainedModelName: 'trained-model-id-1',
+        types: ['lang_ident', 'ner'],
+      },
+      {
+        isDeployed: true,
+        pipelineName: 'ml-inference-pipeline-2',
+        trainedModelName: 'trained-model-id-2',
+        types: ['pytorch', 'ner'],
+      },
+    ];
 
     const response = await fetchAndAddTrainedModelData(
       mockClient as unknown as ElasticsearchClient,
-      input
+      pipelines
     );
 
     expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
@@ -311,7 +498,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
   });
 
   describe('when using an index that has an ml-inference pipeline', () => {
-    it('should return an empty array', async () => {
+    it('should return pipeline processor data for that pipeline', async () => {
       mockClient.ingest.getPipeline.mockImplementationOnce(() => Promise.resolve(mockGetPipeline));
       mockClient.ingest.getPipeline.mockImplementationOnce(() =>
         Promise.resolve({ 'ml-inference-pipeline-1': mockGetPipeline2['ml-inference-pipeline-1'] })
@@ -323,7 +510,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
         Promise.resolve(mockGetTrainedModelStats)
       );
 
-      const expected = [something['trained-model-id-1']];
+      const expected = [trainedModelDataObject['trained-model-id-1']] as InferencePipeline[];
 
       const response = await fetchMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,
@@ -335,6 +522,52 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
       });
       expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
         id: 'ml-inference-pipeline-1',
+      });
+      expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
+        model_id: 'trained-model-id-1',
+      });
+      expect(mockClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: 'trained-model-id-1',
+      });
+
+      expect(response).toEqual(expected);
+    });
+    it('should return pipeline processors that use same model data for that pipeline', async () => {
+      mockClient.ingest.getPipeline.mockImplementationOnce(() =>
+        Promise.resolve(mockMultiPipeline)
+      );
+      mockClient.ingest.getPipeline.mockImplementationOnce(() =>
+        Promise.resolve({
+          'ml-inference-pipeline-1': mockGetPipeline3['ml-inference-pipeline-1'],
+          'ml-inference-pipeline-3': mockGetPipeline3['ml-inference-pipeline-3'],
+        })
+      );
+      mockClient.ml.getTrainedModels.mockImplementation(() =>
+        Promise.resolve(mockGetTrainedModelsData)
+      );
+      mockClient.ml.getTrainedModelsStats.mockImplementation(() =>
+        Promise.resolve(mockGetTrainedModelStats)
+      );
+
+      const expected: InferencePipeline[] = [
+        trainedModelDataObject['trained-model-id-1'],
+        {
+          isDeployed: false,
+          pipelineName: 'ml-inference-pipeline-3',
+          types: ['lang_ident', 'ner'],
+        },
+      ];
+
+      const response = await fetchMlInferencePipelineProcessors(
+        mockClient as unknown as ElasticsearchClient,
+        'my-index'
+      );
+
+      expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
+        id: 'my-index@ml-inference',
+      });
+      expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
+        id: 'ml-inference-pipeline-1,ml-inference-pipeline-3',
       });
       expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
         model_id: 'trained-model-id-1',

@@ -79,6 +79,15 @@ const PackagePolicyInputsSchema = {
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
+const ExperimentalDataStreamFeatures = schema.arrayOf(
+  schema.object({
+    data_stream: schema.string(),
+    features: schema.object({
+      synthetic_source: schema.boolean(),
+    }),
+  })
+);
+
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
@@ -90,16 +99,7 @@ const PackagePolicyBaseSchema = {
       name: schema.string(),
       title: schema.string(),
       version: schema.string(),
-      experimental_data_stream_features: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            data_stream: schema.string(),
-            features: schema.object({
-              synthetic_source: schema.boolean(),
-            }),
-          })
-        )
-      ),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
     })
   ),
   // Deprecated TODO create remove issue
@@ -172,6 +172,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
   package: schema.object({
     name: schema.string(),
     version: schema.string(),
+    experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
   }),
   force: schema.maybe(schema.boolean()),
   vars: schema.maybe(SimplifiedVarsSchema),

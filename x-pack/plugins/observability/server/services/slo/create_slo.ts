@@ -11,7 +11,7 @@ import { SLO } from '../../types/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { CreateSLOParams, CreateSLOResponse } from '../../types/schema';
+import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
 
 export class CreateSLO {
   constructor(
@@ -52,9 +52,6 @@ export class CreateSLO {
     return {
       ...sloParams,
       id: uuid.v1(),
-      settings: {
-        destination_index: sloParams.settings?.destination_index,
-      },
     };
   }
 

@@ -9,6 +9,7 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
+import { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { LegendSize } from '../../constants';
 
 export const XYCurveTypes = {
@@ -90,7 +91,33 @@ export interface XYReferenceLineLayerConfig {
   layerType: 'referenceLine';
 }
 
-export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+export interface EventAnnotationConfig {
+  id: string;
+  filter: KibanaQueryOutput;
+  timeField?: string;
+  extraFields?: string[];
+  label: string;
+  color?: string;
+  isHidden?: boolean;
+  icon?: string;
+  type: 'query';
+  key: {
+    type: 'point_in_time';
+  };
+}
+
+export interface XYAnnotationsLayerConfig {
+  layerId: string;
+  annotations: EventAnnotationConfig[];
+  ignoreGlobalFilters: boolean;
+  layerType: 'annotations';
+  indexPatternId: string;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationsLayerConfig;
 
 export interface AxesSettingsConfig {
   x: boolean;
@@ -143,4 +170,33 @@ export interface XYConfiguration {
   valuesInLegend?: boolean;
 }
 
-export type Configuration = XYConfiguration;
+export interface SortingState {
+  columnId: string | undefined;
+  direction: 'asc' | 'desc' | 'none';
+}
+
+export interface PagingState {
+  size: number;
+  enabled: boolean;
+}
+
+export interface ColumnState {
+  columnId: string;
+  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  alignment?: 'left' | 'right' | 'center';
+  collapseFn?: string;
+}
+
+export interface TableVisConfiguration {
+  columns: ColumnState[];
+  layerId: string;
+  layerType: 'data';
+  sorting?: SortingState;
+  rowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeightLines?: number;
+  headerRowHeightLines?: number;
+  paging?: PagingState;
+}
+
+export type Configuration = XYConfiguration | TableVisConfiguration;
