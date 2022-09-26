@@ -88,6 +88,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.SOURCE_ZIP_FOLDER]: '',
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
   [ConfigKey.TEXT_ASSERTION]: '',
+  [ConfigKey.TIMEOUT]: '900',
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
