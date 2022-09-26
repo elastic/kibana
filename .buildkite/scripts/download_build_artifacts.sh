@@ -17,5 +17,11 @@ if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
 
   cd "$KIBANA_DIR"
 
+  # Testing against an example plugin distribution is not supported,
+  # mostly due to snapshot failures when testing UI element lists
+  if is_pr_with_label "ci:build-example-plugins"; then
+    rm -rf 'plugins/*'
+  fi
+
   tar -xzf ../kibana-default-plugins.tar.gz
 fi
