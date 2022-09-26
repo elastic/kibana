@@ -198,6 +198,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should allow you to snooze a disabled rule', async () => {
+        const actionsDropdown = await testSubjects.find('statusDropdown');
+
+        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
+        await snoozeIndefinite.click();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+        });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
+        await snoozeCancel.click();
+      });
+
       it('should reenable a disabled the rule', async () => {
         const actionsDropdown = await testSubjects.find('statusDropdown');
 
