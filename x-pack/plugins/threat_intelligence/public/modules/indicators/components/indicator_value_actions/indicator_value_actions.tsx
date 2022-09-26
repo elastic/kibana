@@ -12,7 +12,7 @@ import { Indicator } from '../../../../../common/types/indicator';
 import { FilterIn } from '../../../query_bar/components/filter_in';
 import { FilterOut } from '../../../query_bar/components/filter_out';
 import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../lib/field_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../utils/field_value';
 
 export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
 export const FILTER_IN_BUTTON_TEST_ID = 'FilterInButton';

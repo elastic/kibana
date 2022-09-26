@@ -28,7 +28,7 @@ import { Pagination } from '../../hooks/use_indicators';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
 import { ColumnSettingsValue } from './hooks/use_column_settings';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { getFieldSchema } from '../../lib/get_field_schema';
+import { getFieldSchema } from '../../utils/get_field_schema';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];

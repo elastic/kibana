@@ -23,8 +23,8 @@ import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from './use_sourcerer_data_view';
-import { getRuntimeMappings } from '../lib/get_runtime_mappings';
-import { getIndicatorsQuery } from '../lib/get_indicators_query';
+import { getRuntimeMappings } from '../utils/get_runtime_mappings';
+import { getIndicatorsQuery } from '../utils/get_indicators_query';
 
 export interface UseAggregatedIndicatorsParam {
   /**
