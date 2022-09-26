@@ -35,6 +35,8 @@ const baseAllowlistFields: AllowlistFields = {
       integrity_level_name: true,
       security_attributes: true,
     },
+    effective_parent: true,
+    device : true,
   },
   thread: true,
   working_directory: true,
@@ -50,6 +52,9 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     malware_signature: true,
     pe: true,
+    Ext: {
+      device: true,
+    },
   },
   dns: true,
   event: true,
@@ -103,6 +108,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     id: true,
   },
   Persistence: true,
+  Effective_process: true,
 };
 
 // Allow list for the data we include in the events. True means that it is deep-cloned
