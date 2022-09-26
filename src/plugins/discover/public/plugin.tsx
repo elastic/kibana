@@ -16,6 +16,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsStart,
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -28,7 +29,6 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { EuiLoadingContent } from '@elastic/eui';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';

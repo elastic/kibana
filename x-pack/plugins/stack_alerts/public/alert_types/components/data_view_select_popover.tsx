@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { useTriggersAndActionsUiDeps } from '../es_query/util';
+import { useDiscoverAlertServices } from '../es_query/util';
 
 export interface DataViewSelectPopoverProps {
   onSelectDataView: (newDataViewId: string) => void;
@@ -36,7 +36,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   dataViewName,
   dataViewId,
 }) => {
-  const { data, dataViewEditor } = useTriggersAndActionsUiDeps();
+  const { data, dataViewEditor } = useDiscoverAlertServices();
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>();
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
@@ -51,7 +51,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const createDataView = useMemo(
     () =>
-      dataViewEditor?.userPermissions.editDataView()
+      dataViewEditor.userPermissions.editDataView()
         ? () => {
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (createdDataView) => {

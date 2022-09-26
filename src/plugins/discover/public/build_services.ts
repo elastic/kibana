@@ -20,6 +20,7 @@ import {
   HttpStart,
   NotificationsStart,
   ApplicationStart,
+  SavedObjectsStart,
 } from '@kbn/core/public';
 import {
   FilterManager,
@@ -90,6 +91,7 @@ export interface DiscoverServices {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export const buildServices = memoize(function (
@@ -139,5 +141,6 @@ export const buildServices = memoize(function (
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
     unifiedSearch: plugins.unifiedSearch,
+    savedObjects: plugins.savedObjects,
   };
 });

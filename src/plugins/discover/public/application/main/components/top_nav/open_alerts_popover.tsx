@@ -13,9 +13,19 @@ import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { pick } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
 import { updateSearchSource } from '../../utils/update_search_source';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+
+/**
+ * Unified search services needed, since SearchBar component is used internally
+ */
+export interface DiscoverAlertServices extends IUnifiedSearchPluginServices {
+  dataViewEditor: DataViewEditorStart;
+}
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -153,6 +163,22 @@ export function openAlertsPopover({
   services: DiscoverServices;
   savedQueryId?: string;
 }) {
+  const discoverAlertServices: DiscoverAlertServices = {
+    ...pick(services, [
+      'unifiedSearch',
+      'uiSettings',
+      'notifications',
+      'savedObjects',
+      'application',
+      'http',
+      'storage',
+      'docLinks',
+      'data',
+      'dataViewEditor',
+    ]),
+    appName: 's',
+  };
+
   if (isOpen) {
     closeAlertsPopover();
     return;
@@ -163,7 +189,7 @@ export function openAlertsPopover({
 
   const element = (
     <I18nContext>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={discoverAlertServices}>
         <AlertsPopover
           onClose={closeAlertsPopover}
           anchorElement={anchorElement}

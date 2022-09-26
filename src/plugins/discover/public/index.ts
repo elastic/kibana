@@ -20,6 +20,7 @@ export { loadSharingDataHelpers } from './utils';
 
 export { DISCOVER_APP_LOCATOR } from './locator';
 export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
+export type { DiscoverAlertServices } from './application/main/components/top_nav/open_alerts_popover';
 
 // re-export types and static functions to give other plugins time to migrate away
 export {

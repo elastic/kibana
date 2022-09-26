@@ -12,7 +12,7 @@ import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
-import { useTriggersAndActionsUiDeps } from '../util';
+import { useDiscoverAlertServices } from '../util';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
 
@@ -36,7 +36,7 @@ export const SearchSourceExpression = ({
     searchConfiguration,
     excludeHitsFromPreviousRun,
   } = ruleParams;
-  const { data } = useTriggersAndActionsUiDeps();
+  const { data } = useDiscoverAlertServices();
 
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
