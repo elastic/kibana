@@ -54,7 +54,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
                 Object {
                   "insert": [Function],
                   "inserted": Object {
-                    "4rqdyn-euiScreenReaderOnly": true,
+                    "hus3oj-euiScreenReaderOnly": true,
                   },
                   "key": "css",
                   "nonce": undefined,
@@ -69,7 +69,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
                         data-s=""
                       >
                         
-                        .emotion-euiScreenReaderOnly{position:absolute;top:auto;left:-10000px;width:1px;height:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                       </style>
                       <style
                         data-styled="active"
@@ -92,7 +92,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
                         data-s=""
                       >
                         
-                        .emotion-euiScreenReaderOnly{position:absolute;top:auto;left:-10000px;width:1px;height:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                       </style>,
                     ],
                   },
@@ -102,18 +102,20 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
               serialized={
                 Object {
                   "map": undefined,
-                  "name": "4rqdyn-euiScreenReaderOnly",
+                  "name": "hus3oj-euiScreenReaderOnly",
                   "next": undefined,
                   "styles": ";
   // Take the element out of the layout
   position: absolute;
   // Keep it vertically inline
-  top: auto;
+  inset-block-start: auto;
   // Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text
-  left: -10000px;
+  inset-inline-start: -10000px;
   // The element must have a size (for some screen readers)
-  width: 1px;
-  height: 1px;
+  
+    inline-size: 1px;
+    block-size: 1px;
+  
   // But reduce the visible size to nothing
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
@@ -255,7 +257,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
                 Object {
                   "insert": [Function],
                   "inserted": Object {
-                    "4rqdyn-euiScreenReaderOnly": true,
+                    "hus3oj-euiScreenReaderOnly": true,
                   },
                   "key": "css",
                   "nonce": undefined,
@@ -270,7 +272,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
                         data-s=""
                       >
                         
-                        .emotion-euiScreenReaderOnly{position:absolute;top:auto;left:-10000px;width:1px;height:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                       </style>
                       <style
                         data-styled="active"
@@ -289,7 +291,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
                         data-s=""
                       >
                         
-                        .emotion-euiScreenReaderOnly{position:absolute;top:auto;left:-10000px;width:1px;height:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                       </style>,
                     ],
                   },
@@ -299,18 +301,20 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
               serialized={
                 Object {
                   "map": undefined,
-                  "name": "4rqdyn-euiScreenReaderOnly",
+                  "name": "hus3oj-euiScreenReaderOnly",
                   "next": undefined,
                   "styles": ";
   // Take the element out of the layout
   position: absolute;
   // Keep it vertically inline
-  top: auto;
+  inset-block-start: auto;
   // Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text
-  left: -10000px;
+  inset-inline-start: -10000px;
   // The element must have a size (for some screen readers)
-  width: 1px;
-  height: 1px;
+  
+    inline-size: 1px;
+    block-size: 1px;
+  
   // But reduce the visible size to nothing
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
