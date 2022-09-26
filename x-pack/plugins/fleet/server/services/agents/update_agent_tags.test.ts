@@ -8,6 +8,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { createClientMock } from './action.mock';
 import { updateAgentTags } from './update_agent_tags';
 
 jest.mock('./filter_hosted_agents', () => ({
@@ -105,6 +106,31 @@ describe('update_agent_tags', () => {
     await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], []);
 
     expectTagsInEsBulk(['one', 'two', 'three', 'newName']);
+
+    const actionResults = esClient.bulk.mock.calls[1][0] as any;
+    const resultIds = actionResults?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(resultIds).toEqual(['agent1']);
+
+    const action = esClient.create.mock.calls[0][0] as any;
+    expect(action.body.type).toEqual('UPDATE_TAGS');
+  });
+
+  it('should write error action results for hosted agent', async () => {
+    const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
+
+    await updateAgentTags(
+      soClient,
+      esClientMock,
+      { agentIds: [agentInHostedDoc._id] },
+      ['newName'],
+      []
+    );
+
+    const errorResults = esClientMock.bulk.mock.calls[1][0] as any;
+    const errorIds = errorResults?.body?.filter((i: any) => i.agent_id).map((i: any) => i.agent_id);
+    expect(errorIds).toEqual([agentInHostedDoc._id]);
   });
 
   it('should add tag at the end when tagsToRemove not in existing tags', async () => {
