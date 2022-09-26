@@ -67,7 +67,7 @@ export function useDiscoverState({
     [history, savedSearch, services]
   );
 
-  const { appStateContainer, setAppState } = stateContainer;
+  const { appStateContainer, replaceUrlAppState } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
 
@@ -203,13 +203,13 @@ export function useDiscoverState({
 
         // If the requested data view is not found, don't try to load it,
         // and instead reset the app state to the fallback data view
-        if (nextDataViewData.stateValFound) {
-          savedSearch.searchSource.setField('index', nextDataView);
-          reset();
-        } else {
-          setAppState({ index: nextDataView.id });
+        if (!nextDataViewData.stateValFound) {
+          replaceUrlAppState({ index: nextDataView.id });
           return;
         }
+
+        savedSearch.searchSource.setField('index', nextDataView);
+        reset();
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
@@ -226,7 +226,7 @@ export function useDiscoverState({
     data$,
     reset,
     savedSearch.searchSource,
-    setAppState,
+    replaceUrlAppState,
   ]);
 
   /**
