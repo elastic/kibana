@@ -283,6 +283,7 @@ export async function ensureFleetDirectories() {
 
   if (!bundledPackageLocation) {
     logger.warn('xpack.fleet.developer.bundledPackageLocation is not configured');
+    return;
   }
 
   try {
