@@ -120,7 +120,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const overallSeriesNameWithSplit = i18n.translate(
     'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
     {
-      defaultMessage: 'other document count',
+      defaultMessage: 'Other document count',
     }
   );
 
