@@ -8,9 +8,88 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
-import { TestProviders } from '../../../mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../mock';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
-import { TableId } from '../../../../../common/types';
+import type { State } from '../../../store';
+import { createStore } from '../../../store';
+import { TimelineId } from '../../../../../common/types';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+
+const state: State = {
+  ...mockGlobalState,
+  timeline: {
+    ...mockGlobalState.timeline,
+    timelineById: {
+      [TimelineId.casePage]: {
+        ...mockGlobalState.timeline.timelineById['timeline-test'],
+        id: TimelineId.casePage,
+        dataProviders: [
+          {
+            id: 'draggable-badge-default-draggable-netflow-renderer-timeline-1-_qpBe3EBD7k-aQQL7v7--_qpBe3EBD7k-aQQL7v7--network_transport-tcp',
+            name: 'tcp',
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: 'network.transport',
+              value: 'tcp',
+              operator: ':',
+            },
+            and: [],
+          },
+        ],
+        eventType: 'all',
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              key: 'source.port',
+              negate: false,
+              params: {
+                query: '30045',
+              },
+              type: 'phrase',
+            },
+            query: {
+              match_phrase: {
+                'source.port': {
+                  query: '30045',
+                },
+              },
+            },
+          },
+        ],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              kind: 'kuery',
+              expression: 'host.name : *',
+            },
+            serializedQuery:
+              '{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}',
+          },
+        },
+      },
+    },
+  },
+};
+
+const { storage } = createSecuritySolutionStorageMock();
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 const props = {
   title: 'Severity',
@@ -19,7 +98,7 @@ const props = {
     contextId: 'timeline-case',
     eventId: 'testid',
     fieldType: 'string',
-    timelineId: 'timeline-case',
+    // scopeId: 'timeline-case',
     data: {
       field: 'kibana.alert.rule.severity',
       format: 'string',
@@ -45,7 +124,7 @@ const props = {
       example: '',
       fields: {},
     },
-    scopeId: TableId.test,
+    scopeId: 'timeline-case',
   },
 };
 
@@ -54,7 +133,7 @@ jest.mock('../../../lib/kibana');
 describe('OverviewCardWithActions', () => {
   test('it renders correctly', () => {
     const { getByText } = render(
-      <TestProviders>
+      <TestProviders store={store}>
         <OverviewCardWithActions {...props}>
           <SeverityBadge value="medium" />
         </OverviewCardWithActions>
