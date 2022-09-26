@@ -6,47 +6,51 @@
  */
 
 import * as t from 'io-ts';
-
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   indicatorSchema,
   indicatorTypesSchema,
-  rollingTimeWindowSchema,
+  commonSLOSchema,
 } from '../schema';
 
-const baseSLOSchema = t.type({
-  id: t.string,
-  name: t.string,
-  description: t.string,
-  time_window: rollingTimeWindowSchema,
-  indicator: indicatorSchema,
-  budgeting_method: t.literal('occurrences'),
-  objective: t.type({
-    target: t.number,
+const sloSchema = t.intersection([
+  commonSLOSchema,
+  t.type({
+    id: t.string,
   }),
-});
+]);
 
-export const apmTransactionErrorRateSLOSchema = t.intersection([
-  baseSLOSchema,
+const apmTransactionErrorRateSLOSchema = t.intersection([
+  sloSchema,
   t.type({ indicator: apmTransactionErrorRateIndicatorSchema }),
 ]);
 
-export const apmTransactionDurationSLOSchema = t.intersection([
-  baseSLOSchema,
+const apmTransactionDurationSLOSchema = t.intersection([
+  sloSchema,
   t.type({ indicator: apmTransactionDurationIndicatorSchema }),
 ]);
 
 const storedSLOSchema = t.intersection([
-  baseSLOSchema,
+  sloSchema,
   t.type({ created_at: t.string, updated_at: t.string }),
 ]);
 
-export type SLO = t.TypeOf<typeof baseSLOSchema>;
-export type APMTransactionErrorRateSLO = t.TypeOf<typeof apmTransactionErrorRateSLOSchema>;
-export type APMTransactionDurationSLO = t.TypeOf<typeof apmTransactionDurationSLOSchema>;
+type SLO = t.TypeOf<typeof sloSchema>;
+type APMTransactionErrorRateSLO = t.TypeOf<typeof apmTransactionErrorRateSLOSchema>;
+type APMTransactionDurationSLO = t.TypeOf<typeof apmTransactionDurationSLOSchema>;
 
-export type SLI = t.TypeOf<typeof indicatorSchema>;
-export type SLITypes = t.TypeOf<typeof indicatorTypesSchema>;
+type SLI = t.TypeOf<typeof indicatorSchema>;
+type SLITypes = t.TypeOf<typeof indicatorTypesSchema>;
 
-export type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
+type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
+
+export { apmTransactionDurationSLOSchema, apmTransactionErrorRateSLOSchema };
+export type {
+  SLO,
+  APMTransactionErrorRateSLO,
+  APMTransactionDurationSLO,
+  SLI,
+  SLITypes,
+  StoredSLO,
+};
