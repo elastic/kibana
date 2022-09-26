@@ -20,8 +20,10 @@ import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_ca
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
+import { getFiltersForDSLQuery } from '../../../components/anomalies_table/get_filters_for_datafeed_query';
 
 export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
+  console.log('getNewCustomUrlDefaults -- job', job);
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
   const kibanaSettings = {
@@ -50,6 +52,11 @@ export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
     const indicesName = datafeedConfig.indices.join();
     const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
     kibanaSettings.discoverIndexPatternId = defaultDataViewId;
+    kibanaSettings.filters = getFiltersForDSLQuery(
+      job.datafeed_config.query,
+      defaultDataViewId,
+      job.job_id
+    );
   }
 
   return {
@@ -109,6 +116,7 @@ export function isValidCustomUrlSettings(settings, savedCustomUrls) {
 }
 
 export function buildCustomUrlFromSettings(settings) {
+  console.log('settings', settings);
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
@@ -133,16 +141,18 @@ async function buildDashboardUrlFromSettings(settings) {
 
   const response = await savedObjectsClient.get('dashboard', dashboardId);
 
-  // Use the filters from the saved dashboard if there are any.
-  let filters = [];
+  // Query from the datafeed config will be saved as custom filters
+  // Use them if there are set.
+  let filters = settings.kibanaSettings.filters;
 
   // Use the query from the dashboard only if no job entities are selected.
   let query = undefined;
 
+  // Override with filters and queries from saved dashboard if they are available.
   const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
   if (searchSourceJSON !== undefined) {
     const searchSourceData = JSON.parse(searchSourceJSON);
-    if (searchSourceData.filter !== undefined) {
+    if (Array.isArray(searchSourceData.filter) && searchSourceData.filter.length > 0) {
       filters = searchSourceData.filter;
     }
     query = searchSourceData.query;
@@ -196,7 +206,7 @@ async function buildDashboardUrlFromSettings(settings) {
 }
 
 function buildDiscoverUrlFromSettings(settings) {
-  const { discoverIndexPatternId, queryFieldNames } = settings.kibanaSettings;
+  const { discoverIndexPatternId, queryFieldNames, filters } = settings.kibanaSettings;
 
   // Add time settings to the global state URL parameter with $earliest$ and
   // $latest$ tokens which get substituted for times around the time of the
@@ -212,6 +222,7 @@ function buildDiscoverUrlFromSettings(settings) {
   // Add the index pattern and query to the appState part of the URL.
   const appState = {
     index: discoverIndexPatternId,
+    filters,
   };
 
   // If partitioning field entities have been configured add tokens
