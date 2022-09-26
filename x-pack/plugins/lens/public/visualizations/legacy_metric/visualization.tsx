@@ -57,7 +57,6 @@ const toExpression = (
 
   const [datasource] = Object.values(datasourceLayers);
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
-  const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
   const stops = state.palette?.params?.stops || [];
@@ -159,7 +158,7 @@ const toExpression = (
           showLabels: [!attributes?.mode || attributes?.mode === 'full'],
           colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
           autoScale: [true],
-          colorFullBackground: [!isTextBasedLanguage],
+          colorFullBackground: [true],
           palette:
             state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
