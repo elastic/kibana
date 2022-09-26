@@ -29,8 +29,7 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
   const { uiSettings } = useValues(KibanaLogic);
 
-  const analyticsSectionEnabled =
-    uiSettings?.get<boolean>(enableBehavioralAnalyticsSection) ?? false;
+  const analyticsSectionEnabled = uiSettings?.get<boolean>(enableBehavioralAnalyticsSection, false);
 
   if (!analyticsSectionEnabled) {
     return <AnalyticsFeatureDisabledError />;
