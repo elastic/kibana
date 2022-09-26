@@ -113,7 +113,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     }, [onChange, newPolicy]);
 
     useEffect(() => {
-      // Skip trigerring this onChange on the initial render
+      // Skip triggering this onChange on the initial render
       if (initialRender.current) {
         initialRender.current = false;
       } else {

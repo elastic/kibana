@@ -30,13 +30,13 @@ export const EDR_COMPLETE = i18n.translate(
 export const ENDPOINT = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
   {
-    defaultMessage: 'Endpoint',
+    defaultMessage: 'Traditional Endpoints (desktops, laptops, virtual machines)',
   }
 );
 export const CLOUD_SECURITY = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudDropdownOption',
   {
-    defaultMessage: 'Cloud Workload Protection',
+    defaultMessage: 'Cloud Workloads (Linux servers or Kubernetes environments)',
   }
 );
 export const INTERACTIVE_ONLY = i18n.translate(
