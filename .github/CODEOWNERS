@@ -895,6 +895,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 packages/kbn-monaco @elastic/kibana-app-services
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
+packages/kbn-osquery-io-ts-types @elastic/security-asset-management
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
