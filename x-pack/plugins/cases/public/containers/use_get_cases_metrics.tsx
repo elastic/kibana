@@ -13,7 +13,7 @@ import { getCasesMetrics } from '../api';
 import { CasesMetrics } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { ServerError } from '../types';
-import { CASE_VIEW_CACHE_KEY, CASE_METRICS } from './constants';
+import { casesQueriesKeys } from './constants';
 
 export const useGetCasesMetrics = () => {
   const http = useHttp();
@@ -21,7 +21,7 @@ export const useGetCasesMetrics = () => {
   const { showErrorToast } = useCasesToast();
 
   return useQuery<CasesMetrics, ServerError>(
-    [CASE_VIEW_CACHE_KEY, CASE_METRICS],
+    casesQueriesKeys.casesMetrics(),
     () => {
       const abortCtrlRef = new AbortController();
       return getCasesMetrics({

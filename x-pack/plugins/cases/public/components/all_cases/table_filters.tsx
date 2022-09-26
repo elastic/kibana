@@ -19,7 +19,7 @@ import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
-import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
+import { casesQueriesKeys } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import { CurrentUserProfile } from '../types';
@@ -71,7 +71,7 @@ const CasesTableFiltersComponent = ({
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
-  const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
+  const { data: tags = [], refetch: fetchTags } = useGetTags(casesQueriesKeys.casesTags());
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
   const refetch = useCallback(() => {

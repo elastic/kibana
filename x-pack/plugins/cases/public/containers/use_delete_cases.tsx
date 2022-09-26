@@ -9,12 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as i18n from './translations';
 import { deleteCases } from './api';
 import { ServerError } from '../types';
-import {
-  CASE_LIST_CACHE_KEY,
-  DELETE_CASES_CACHE_KEY,
-  USER_PROFILES_BULK_GET_CACHE_KEY,
-  USER_PROFILES_CACHE_KEY,
-} from './constants';
+import { casesQueriesKeys, casesMutationsKeys } from './constants';
 import { useCasesToast } from '../common/use_cases_toast';
 
 export const useDeleteCases = () => {
@@ -27,10 +22,10 @@ export const useDeleteCases = () => {
       return deleteCases(caseIds, abortCtrlRef.signal);
     },
     {
-      mutationKey: [DELETE_CASES_CACHE_KEY],
+      mutationKey: casesMutationsKeys.deleteCases,
       onSuccess: (_, caseIds) => {
-        queryClient.invalidateQueries([CASE_LIST_CACHE_KEY]);
-        queryClient.invalidateQueries([USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY]);
+        queryClient.invalidateQueries(casesQueriesKeys.casesList());
+        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
         // TODO fix title
         showSuccessToast(i18n.DELETE_CASE(caseIds.length));
       },

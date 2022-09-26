@@ -11,12 +11,7 @@ import { updateCases } from './api';
 import { CaseUpdateRequest } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { ServerError } from '../types';
-import {
-  UPDATE_CASES_CACHE_KEY,
-  CASE_LIST_CACHE_KEY,
-  USER_PROFILES_CACHE_KEY,
-  USER_PROFILES_BULK_GET_CACHE_KEY,
-} from './constants';
+import { casesQueriesKeys, casesMutationsKeys } from './constants';
 
 interface MutationArgs {
   cases: CaseUpdateRequest[];
@@ -33,10 +28,10 @@ export const useUpdateCases = () => {
       return updateCases(cases, abortCtrlRef.signal);
     },
     {
-      mutationKey: [UPDATE_CASES_CACHE_KEY],
+      mutationKey: casesMutationsKeys.updateCases,
       onSuccess: (_, { successToasterTitle }) => {
-        queryClient.invalidateQueries([CASE_LIST_CACHE_KEY]);
-        queryClient.invalidateQueries([USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY]);
+        queryClient.invalidateQueries(casesQueriesKeys.casesList());
+        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
         showSuccessToast(successToasterTitle);
       },

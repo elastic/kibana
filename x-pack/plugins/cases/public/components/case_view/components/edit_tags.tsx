@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
+import { casesQueriesKeys } from '../../../containers/constants';
 import * as i18n from '../../tags/translations';
 import {
   Form,
@@ -86,7 +87,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onSubmit, submit]);
 
-  const { data: tagOptions = [] } = useGetTags();
+  const { data: tagOptions = [] } = useGetTags(casesQueriesKeys.caseTags());
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,

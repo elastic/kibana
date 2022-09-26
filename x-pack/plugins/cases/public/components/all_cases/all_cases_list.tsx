@@ -38,15 +38,7 @@ import {
 } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import {
-  CASE_METRICS,
-  CASE_STATUSES,
-  CASE_VIEW_CACHE_KEY,
-  DELETE_CASES_CACHE_KEY,
-  UPDATE_CASES_CACHE_KEY,
-  USER_PROFILES_BULK_GET_CACHE_KEY,
-  USER_PROFILES_CACHE_KEY,
-} from '../../containers/constants';
+import { casesQueriesKeys, casesMutationsKeys } from '../../containers/constants';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 
 const ProgressLoader = styled(EuiProgress)`
@@ -75,8 +67,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
     const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
-    const isDeletingCases = useIsMutating([DELETE_CASES_CACHE_KEY]);
-    const isUpdatingCases = useIsMutating([UPDATE_CASES_CACHE_KEY]);
+    const isDeletingCases = useIsMutating(casesMutationsKeys.deleteCases);
+    const isUpdatingCases = useIsMutating(casesMutationsKeys.updateCases);
     const isLoading = Boolean(isDeletingCases) || Boolean(isUpdatingCases);
 
     const hasOwner = !!owner.length;
@@ -152,9 +144,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         deselectCases();
         if (dataRefresh) {
           refetchCases();
-          queryClient.refetchQueries([USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY]);
-          queryClient.refetchQueries([CASE_VIEW_CACHE_KEY, CASE_STATUSES]);
-          queryClient.refetchQueries([CASE_VIEW_CACHE_KEY, CASE_METRICS]);
+          queryClient.refetchQueries(casesQueriesKeys.userProfiles());
+          queryClient.refetchQueries(casesQueriesKeys.casesStatuses());
+          queryClient.refetchQueries(casesQueriesKeys.casesMetrics());
         }
 
         if (filterRefetch.current != null) {
