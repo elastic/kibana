@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
@@ -28,6 +29,9 @@ type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 const MediumShadeText = styled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
+
+const INSTALL_JOBS_DOC =
+  'https://www.elastic.co/guide/en/machine-learning/current/ml-ad-run-jobs.html';
 
 export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
   const columns: AnomaliesColumns = useMemo(
@@ -73,6 +77,14 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
               return <EnableJobLink jobId={jobId} />;
             }
 
+            if (status === AnomalyJobStatus.uninstalled) {
+              return (
+                <EuiLink external target={'_blank'} href={INSTALL_JOBS_DOC}>
+                  {i18n.JOB_STATUS_UNINSTALLED}
+                </EuiLink>
+              );
+            }
+
             return <MediumShadeText>{I18N_JOB_STATUS[status]}</MediumShadeText>;
           }
         },
@@ -86,7 +98,6 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
 const I18N_JOB_STATUS = {
   [AnomalyJobStatus.disabled]: i18n.JOB_STATUS_DISABLED,
   [AnomalyJobStatus.failed]: i18n.JOB_STATUS_FAILED,
-  [AnomalyJobStatus.uninstalled]: i18n.JOB_STATUS_UNINSTALLED,
 };
 
 const EnableJobLink = ({ jobId }: { jobId: string }) => {

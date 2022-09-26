@@ -5,77 +5,35 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
 import { useEffect, useMemo } from 'react';
-import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { createFilter } from '../../../common/containers/helpers';
 
-import type {
-  KpiRiskScoreRequestOptions,
-  KpiRiskScoreStrategyResponse,
-} from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
   getUserRiskIndex,
   RiskQueries,
   RiskSeverity,
   RiskScoreEntity,
+  EMPTY_SEVERITY_COUNT,
 } from '../../../../common/search_strategy';
-
-import { useKibana } from '../../../common/lib/kibana';
+import * as i18n from './translations';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { ESTermQuery } from '../../../../common/typed_json';
 import type { SeverityCount } from '../../../common/components/severity/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-
-type GetHostRiskScoreProps = KpiRiskScoreRequestOptions & {
-  data: DataPublicPluginStart;
-  signal: AbortSignal;
-};
-
-const getRiskScoreKpi = ({
-  data,
-  defaultIndex,
-  signal,
-  filterQuery,
-  entity,
-}: GetHostRiskScoreProps): Observable<KpiRiskScoreStrategyResponse> =>
-  data.search.search<KpiRiskScoreRequestOptions, KpiRiskScoreStrategyResponse>(
-    {
-      defaultIndex,
-      factoryQueryType: RiskQueries.kpiRiskScore,
-      filterQuery: createFilter(filterQuery),
-      entity,
-    },
-    {
-      strategy: 'securitySolutionSearchStrategy',
-      abortSignal: signal,
-    }
-  );
-
-const getRiskScoreKpiComplete = (
-  props: GetHostRiskScoreProps
-): Observable<KpiRiskScoreStrategyResponse> => {
-  return getRiskScoreKpi(props).pipe(
-    filter((response) => {
-      return isErrorResponse(response) || isCompleteResponse(response);
-    })
-  );
-};
-
-const getRiskScoreKpiWithOptionalSignal = withOptionalSignal(getRiskScoreKpiComplete);
-
-const useRiskScoreKpiComplete = () => useObservable(getRiskScoreKpiWithOptionalSignal);
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import type { InspectResponse } from '../../../types';
+import type { inputsModel } from '../../../common/store';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 interface RiskScoreKpi {
   error: unknown;
   isModuleDisabled: boolean;
-  severityCount: SeverityCount;
+  severityCount?: SeverityCount;
   loading: boolean;
+  refetch: inputsModel.Refetch;
+  inspect: InspectResponse;
+  timerange?: { to: string; from: string };
 }
 
 type UseHostRiskScoreKpiProps = Omit<
@@ -90,6 +48,7 @@ type UseUserRiskScoreKpiProps = Omit<
 export const useUserRiskScoreKpi = ({
   filterQuery,
   skip,
+  timerange,
 }: UseUserRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
@@ -101,12 +60,14 @@ export const useUserRiskScoreKpi = ({
     defaultIndex,
     entity: RiskScoreEntity.user,
     featureEnabled: isPlatinumOrTrialLicense,
+    timerange,
   });
 };
 
 export const useHostRiskScoreKpi = ({
   filterQuery,
   skip,
+  timerange,
 }: UseHostRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId) : undefined;
@@ -118,6 +79,7 @@ export const useHostRiskScoreKpi = ({
     defaultIndex,
     entity: RiskScoreEntity.host,
     featureEnabled: isPlatinumOrTrialLicense,
+    timerange,
   });
 };
 
@@ -127,6 +89,7 @@ interface UseRiskScoreKpiProps {
   defaultIndex: string | undefined;
   entity: RiskScoreEntity;
   featureEnabled: boolean;
+  timerange?: { to: string; from: string };
 }
 
 const useRiskScoreKpi = ({
@@ -135,33 +98,59 @@ const useRiskScoreKpi = ({
   defaultIndex,
   entity,
   featureEnabled,
+  timerange,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
-  const { error, result, start, loading } = useRiskScoreKpiComplete();
-  const { data } = useKibana().services;
+  const { addError } = useAppToasts();
+
+  const { loading, result, search, refetch, inspect, error } =
+    useSearchStrategy<RiskQueries.kpiRiskScore>({
+      factoryQueryType: RiskQueries.kpiRiskScore,
+      initialResult: {
+        kpiRiskScore: EMPTY_SEVERITY_COUNT,
+      },
+      abort: skip,
+      showErrorToast: false,
+    });
+
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
   useEffect(() => {
     if (!skip && defaultIndex && featureEnabled) {
-      start({
-        data,
+      search({
         filterQuery,
         defaultIndex: [defaultIndex],
         entity,
       });
     }
-  }, [data, defaultIndex, start, filterQuery, skip, entity, featureEnabled]);
+  }, [defaultIndex, search, filterQuery, skip, entity, featureEnabled]);
 
-  const severityCount = useMemo(
-    () => ({
-      [RiskSeverity.unknown]: 0,
-      [RiskSeverity.low]: 0,
-      [RiskSeverity.moderate]: 0,
-      [RiskSeverity.high]: 0,
-      [RiskSeverity.critical]: 0,
-      ...(result?.kpiRiskScore ?? {}),
-    }),
-    [result]
-  );
+  // since query does not take timerange arg, we need to manually refetch when time range updates
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerange?.to, timerange?.from]);
 
-  return { error, severityCount, loading, isModuleDisabled };
+  useEffect(() => {
+    if (error) {
+      if (!isIndexNotFoundError(error)) {
+        addError(error, { title: i18n.FAIL_RISK_SCORE });
+      }
+    }
+  }, [addError, error]);
+
+  const severityCount = useMemo(() => {
+    if (loading || error) {
+      return undefined;
+    }
+
+    return {
+      [RiskSeverity.unknown]: result.kpiRiskScore[RiskSeverity.unknown] ?? 0,
+      [RiskSeverity.low]: result.kpiRiskScore[RiskSeverity.low] ?? 0,
+      [RiskSeverity.moderate]: result.kpiRiskScore[RiskSeverity.moderate] ?? 0,
+      [RiskSeverity.high]: result.kpiRiskScore[RiskSeverity.high] ?? 0,
+      [RiskSeverity.critical]: result.kpiRiskScore[RiskSeverity.critical] ?? 0,
+    };
+  }, [result, loading, error]);
+
+  return { error, severityCount, loading, isModuleDisabled, refetch, inspect };
 };

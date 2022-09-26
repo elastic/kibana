@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 import { HeaderSection } from '../../header_section';
 import * as i18n from './translations';
 import { RiskScoreHeaderTitle } from './risk_score_header_title';
+import { RiskScoreRestartButton } from './risk_score_restart_button';
+import type { inputsModel } from '../../../store';
 
-const RiskScoresNoDataDetectedComponent = ({ entityType }: { entityType: RiskScoreEntity }) => {
+const RiskScoresNoDataDetectedComponent = ({
+  entityType,
+  refetch,
+}: {
+  entityType: RiskScoreEntity;
+  refetch: inputsModel.Refetch;
+}) => {
   const translations = useMemo(
     () => ({
       title:
@@ -26,7 +34,15 @@ const RiskScoresNoDataDetectedComponent = ({ entityType }: { entityType: RiskSco
   return (
     <EuiPanel data-test-subj={`${entityType}-risk-score-no-data-detected`} hasBorder>
       <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
-      <EuiEmptyPrompt title={<h2>{translations.title}</h2>} body={translations.body} />
+      <EuiEmptyPrompt
+        title={<h2>{translations.title}</h2>}
+        body={translations.body}
+        actions={
+          <EuiToolTip content={i18n.RESTART_TOOLTIP}>
+            <RiskScoreRestartButton refetch={refetch} riskScoreEntity={entityType} />
+          </EuiToolTip>
+        }
+      />
     </EuiPanel>
   );
 };

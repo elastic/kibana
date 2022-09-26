@@ -37,7 +37,7 @@ describe(`risk score feature status`, () => {
     isDeprecated: true,
     isLicenseValid: true,
     isEnabled: true,
-    isLoading: false,
+    isLoading: true,
   };
 
   test('does not search if license is not valid, and initial isDeprecated state is false', () => {

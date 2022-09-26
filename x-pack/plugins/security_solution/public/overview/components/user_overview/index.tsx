@@ -85,10 +85,18 @@ export const UserOverview = React.memo<UserSummaryProps>(
 
     const { from, to } = useGlobalTime();
 
+    const timerange = useMemo(
+      () => ({
+        from,
+        to,
+      }),
+      [from, to]
+    );
+
     const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
       filterQuery,
       skip: userName == null,
-      timerange: { to, from },
+      timerange,
     });
 
     const getDefaultRenderer = useCallback(

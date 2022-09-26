@@ -23,7 +23,7 @@ import {
   useUserRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
@@ -84,7 +84,7 @@ export const UserRiskScoreQueryTabBody = ({
     return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !loading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.user}
@@ -95,7 +95,7 @@ export const UserRiskScoreQueryTabBody = ({
   }
 
   if (isModuleEnabled && userSeveritySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refetch} />;
   }
 
   return (
@@ -110,7 +110,7 @@ export const UserRiskScoreQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      severityCount={severityCount}
+      severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
       totalCount={totalCount}
       type={type}
     />

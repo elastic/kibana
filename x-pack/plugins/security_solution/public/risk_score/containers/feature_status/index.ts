@@ -27,7 +27,7 @@ export const useRiskScoreFeatureStatus = (
   factoryQueryType: RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore,
   defaultIndex?: string
 ): RiskScoresFeatureStatus => {
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
   const entity = useMemo(
     () =>
       factoryQueryType === RiskQueries.hostsRiskScore ? RiskScoreEntity.host : RiskScoreEntity.user,
@@ -66,7 +66,7 @@ export const useRiskScoreFeatureStatus = (
 
   return {
     error,
-    isLoading,
+    isLoading: isLoading || !capabilitiesFetched || defaultIndex == null,
     refetch: searchIndexStatus,
     isLicenseValid: isPlatinumOrTrialLicense,
     ...response,
