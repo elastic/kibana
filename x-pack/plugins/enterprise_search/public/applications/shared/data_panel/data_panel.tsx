@@ -66,7 +66,12 @@ export const DataPanel: React.FC<Props> = ({
       <EuiSplitPanel.Inner>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              className="eui-textNoWrap"
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+            >
               {iconType && (
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={iconType} />

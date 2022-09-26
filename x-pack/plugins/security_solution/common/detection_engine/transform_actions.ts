@@ -37,8 +37,20 @@ export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,
   params,
 }: ResponseAction): RuleResponseAction => {
+  const {
+    saved_query_id: savedQueryId,
+    ecs_mapping: ecsMapping,
+    pack_id: packId,
+    ...rest
+  } = params;
+
   return {
-    params,
+    params: {
+      ...rest,
+      savedQueryId,
+      ecsMapping,
+      packId,
+    },
     actionTypeId,
   };
 };
@@ -47,8 +59,14 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): ResponseAction => {
+  const { savedQueryId, ecsMapping, packId, ...rest } = params;
   return {
-    params,
+    params: {
+      ...rest,
+      saved_query_id: savedQueryId,
+      ecs_mapping: ecsMapping,
+      pack_id: packId,
+    },
     action_type_id: actionTypeId,
   };
 };
