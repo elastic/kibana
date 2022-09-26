@@ -11,12 +11,12 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from '@kbn/security-solution-plugin/server/lib/timeline/saved_object_mappings';
-import { TimelineWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline';
-import { NoteWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/note';
+import {TimelineWithoutExternalRefs} from '@kbn/security-solution-plugin/common/types/timeline';
+import {NoteWithoutExternalRefs} from '@kbn/security-solution-plugin/common/types/timeline/note';
 
-import { PinnedEventWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/pinned_event';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getSavedObjectFromES } from './utils';
+import {PinnedEventWithoutExternalRefs} from '@kbn/security-solution-plugin/common/types/timeline/pinned_event';
+import {FtrProviderContext} from '../../ftr_provider_context';
+import {getSavedObjectFromES} from './utils';
 
 interface TimelineWithoutSavedQueryId {
   [timelineSavedObjectType]: TimelineWithoutExternalRefs;
@@ -30,12 +30,14 @@ interface PinnedEventWithoutTimelineId {
   [pinnedEventSavedObjectType]: PinnedEventWithoutExternalRefs;
 }
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({getService}: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Timeline migrations', () => {
+  describe.only('Timeline migrations', () => {
     const esArchiver = getService('esArchiver');
     const es = getService('es');
+    const kibanaServer = getService('kibanaServer');
+    const spacesService = getService('spaces');
 
     describe('8.0 id migration', () => {
       const resolveWithSpaceApi = '/s/awesome-space/api/timeline/resolve';
@@ -44,19 +46,18 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
         );
-      });
-
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space', {space: 'awesome-space'}
         );
       });
+
+      after(async () => await spacesService.delete('awesome-space'));
 
       describe('resolve', () => {
         it('should return an aliasMatch outcome', async () => {
           const resp = await supertest
             .get(resolveWithSpaceApi)
-            .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+            .query({id: '1e2e9850-25f8-11ec-a981-b77847c6ef30'});
 
           expect(resp.body.data.outcome).to.be('aliasMatch');
           expect(resp.body.data.alias_target_id).to.not.be(undefined);
@@ -67,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('should return the notes with the correct eventId', async () => {
             const resp = await supertest
               .get(resolveWithSpaceApi)
-              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+              .query({id: '1e2e9850-25f8-11ec-a981-b77847c6ef30'});
 
             expect(resp.body.data.timeline.notes[0].eventId).to.be('StU_UXwBAowmaxx6YdiS');
           });
@@ -75,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('should return notes with the timelineId matching the resolved timeline id', async () => {
             const resp = await supertest
               .get(resolveWithSpaceApi)
-              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+              .query({id: '1e2e9850-25f8-11ec-a981-b77847c6ef30'});
 
             expect(resp.body.data.timeline.notes[0].timelineId).to.be(
               resp.body.data.timeline.savedObjectId
@@ -90,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('should pinned events with eventId', async () => {
             const resp = await supertest
               .get(resolveWithSpaceApi)
-              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+              .query({id: '1e2e9850-25f8-11ec-a981-b77847c6ef30'});
 
             expect(resp.body.data.timeline.pinnedEventsSaveObject[0].eventId).to.be(
               'StU_UXwBAowmaxx6YdiS'
@@ -100,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('should return pinned events with the timelineId matching request id', async () => {
             const resp = await supertest
               .get(resolveWithSpaceApi)
-              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+              .query({id: '1e2e9850-25f8-11ec-a981-b77847c6ef30'});
 
             expect(resp.body.data.timeline.pinnedEventsSaveObject[0].timelineId).to.be(
               resp.body.data.timeline.savedObjectId
@@ -149,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('preserves the eventId in the saved object after migration', async () => {
           const resp = await supertest
             .get('/api/timeline')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+            .query({id: '6484cc90-126e-11ec-83d2-db1096c73738'});
 
           expect(resp.body.data.getOneTimeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
         });
@@ -157,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns the timelineId in the response', async () => {
           const resp = await supertest
             .get('/api/timeline')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+            .query({id: '6484cc90-126e-11ec-83d2-db1096c73738'});
 
           expect(resp.body.data.getOneTimeline.notes[0].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'
@@ -174,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
             es,
             timelineSavedObjectType,
             {
-              ids: { values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7'] },
+              ids: {values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7']},
             }
           );
 
@@ -186,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('preserves the title in the saved object after migration', async () => {
           const resp = await supertest
             .get('/api/timeline')
-            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+            .query({id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7'});
 
           expect(resp.body.data.getOneTimeline.title).to.be('Awesome Timeline');
         });
@@ -194,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns the savedQueryId in the response', async () => {
           const resp = await supertest
             .get('/api/timeline')
-            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+            .query({id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7'});
 
           expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
         });
@@ -226,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('preserves the eventId in the saved object after migration', async () => {
           const resp = await supertest
             .get('/api/timeline')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+            .query({id: '6484cc90-126e-11ec-83d2-db1096c73738'});
 
           expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[0].eventId).to.be(
             'DNo00XsBEVtyvU-8LGNe'
@@ -239,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns the timelineId in the response', async () => {
           const resp = await supertest
             .get('/api/timeline')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+            .query({id: '6484cc90-126e-11ec-83d2-db1096c73738'});
 
           expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[0].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'
