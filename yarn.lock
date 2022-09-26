@@ -1455,9 +1455,9 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@https://gitpkg.now.sh/nickofthyme/elastic-charts/packages/charts?tooltip-actions":
+"@elastic/charts@https://gitpkg.now.sh/nickofthyme/elastic-charts/packages/charts?tooltip-actions-dist":
   version "47.2.0"
-  resolved "https://gitpkg.now.sh/nickofthyme/elastic-charts/packages/charts?tooltip-actions#2855b96afc75b031b0ea0cdeb85564f28824230a"
+  resolved "https://gitpkg.now.sh/nickofthyme/elastic-charts/packages/charts?tooltip-actions-dist#2855b96afc75b031b0ea0cdeb85564f28824230a"
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
