@@ -26,6 +26,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 const supportedTypes = new Set([
   'string',
@@ -185,6 +186,13 @@ export const cardinalityOperation: OperationDefinition<
       timeShift: column.filter ? undefined : column.timeShift,
       emptyAsNull: column.params?.emptyAsNull,
     }).toAst();
+  },
+  getGroupByKey: (agg) => {
+    return getGroupByKey(
+      agg,
+      ['aggCardinality'],
+      [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+    );
   },
   onFieldChange: (oldColumn, field) => {
     return {

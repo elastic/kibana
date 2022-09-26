@@ -49,7 +49,6 @@ import {
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
-  computeOrderForMultiplePercentiles,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -266,7 +265,7 @@ export const termsOperation: OperationDefinition<
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
-    let orderBy: string = '_key';
+    let orderBy = '_key';
 
     if (column.params?.orderBy.type === 'column') {
       const orderColumn = layer.columns[column.params.orderBy.columnId];
@@ -275,14 +274,6 @@ export const termsOperation: OperationDefinition<
       if (!isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
-
-      const orderByMultiplePercentiles = computeOrderForMultiplePercentiles(
-        orderColumn,
-        layer,
-        orderedColumnIds
-      );
-
-      orderBy = orderByMultiplePercentiles ?? orderBy;
     }
 
     // To get more accurate results, we set shard_size to a minimum of 1000

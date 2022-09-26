@@ -13,6 +13,7 @@ import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpressionBuilder,
+  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
 import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
@@ -195,6 +196,12 @@ export const percentileOperation: OperationDefinition<
       }
     });
 
+    const termsFuncs = aggs
+      .map((agg) => agg.functions[0])
+      .filter((func) => func.name === 'aggTerms') as Array<
+      ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
+    >;
+
     // collapse them into a single esAggs expression builder
     Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
@@ -224,6 +231,7 @@ export const percentileOperation: OperationDefinition<
       const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
       for (const builder of expressionBuilders) {
         const percentile = builder.functions[0].getArgument('percentile')![0] as number;
+
         if (percentile in percentileToBuilder) {
           // found a duplicate percentile so let's optimize
 
@@ -248,6 +256,13 @@ export const percentileOperation: OperationDefinition<
           percentileToBuilder[percentile] = builder;
           aggPercentilesConfig.percents!.push(percentile);
         }
+
+        // update any terms order-bys
+        termsFuncs.forEach((func) => {
+          if (func.getArgument('orderBy')?.[0] === builder.functions[0].getArgument('id')?.[0]) {
+            func.replaceArgument('orderBy', [`${esAggsColumnId}.${percentile}`]);
+          }
+        });
       }
 
       const multiPercentilesAst = buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>(
