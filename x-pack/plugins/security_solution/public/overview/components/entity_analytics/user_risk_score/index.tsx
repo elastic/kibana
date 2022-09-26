@@ -194,11 +194,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <RiskScoreDonutChart
-                severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-                onClick={goToUserRiskTab}
-                href={userRiskTabUrl}
-              />
+              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
               <BasicTableWithoutBorderBottom
