@@ -29,7 +29,13 @@ import {
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+  TableId,
+  TimelineId,
+} from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
@@ -300,14 +306,14 @@ export const mockGlobalState: State = {
       newTimelineModel: null,
     },
     timelineById: {
-      'timeline-test': {
+      [TimelineId.test]: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
         documentType: '',
         queryFields: [],
-        id: 'test',
+        id: TimelineId.test,
         savedObjectId: null,
         columns: defaultHeaders,
         defaultColumns: defaultHeaders,
@@ -364,7 +370,7 @@ export const mockGlobalState: State = {
   },
   dataTable: {
     tableById: {
-      'table-test': {
+      [TableId.test]: {
         columns: defaultHeaders,
         defaultColumns: defaultHeaders,
         dataViewId: 'security-solution-default',
@@ -401,7 +407,7 @@ export const mockGlobalState: State = {
         sessionViewConfig: null,
         footerText: 'events',
         selectAll: false,
-        id: 'hosts-page-events',
+        id: TableId.test,
         title: '',
         initialized: true,
         updated: 1663882629000,

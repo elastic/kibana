@@ -35,6 +35,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
@@ -285,7 +286,13 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(
+        state,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
 
       const Proxy = (proxyProps: Props) => (
         <TestProviders store={store}>

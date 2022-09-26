@@ -33,130 +33,122 @@ import {
   updateSort,
 } from './actions';
 import { DefaultCellRenderer } from '../../components/timeline/cell_rendering/default_cell_renderer';
-import type { Props as QueryTabContentComponentProps } from '../../components/timeline/query_tab_content';
-import { QueryTabContentComponent } from '../../components/timeline/query_tab_content';
+import type { Props as StatefulEventsViewerProps } from '../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../components/timeline/body/renderers';
-import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
-import type { Sort } from '../../components/timeline/body/sort';
 
-import { addTimelineInStorage } from '../../containers/local_storage';
-import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import { addTableInStorage } from '../../containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { StatefulEventsViewer } from '../../../common/components/events_viewer';
+import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { EntityType } from '@kbn/timelines-plugin/common';
+import { getDefaultControlColumn } from '../../components/timeline/body/control_columns';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../containers/local_storage');
 
-const addTimelineInStorageMock = addTimelineInStorage as jest.Mock;
+const addTableInStorageMock = addTableInStorage as jest.Mock;
 
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
-  let props = {} as QueryTabContentComponentProps;
-  const sort: Sort[] = [
-    {
-      columnId: '@timestamp',
-      columnType: 'date',
-      esTypes: ['date'],
-      sortDirection: Direction.desc,
-    },
-  ];
-  const startDate = '2018-03-23T18:49:23.132Z';
-  const endDate = '2018-03-24T03:33:52.253Z';
+  let testProps = {} as StatefulEventsViewerProps;
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-    props = {
-      columns: defaultHeaders,
-      dataProviders: mockDataProviders,
-      end: endDate,
-      expandedDetail: {},
-      filters: [],
-      isLive: false,
-      itemsPerPage: 5,
-      itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
-      kqlQueryExpression: '',
-      onEventClosed: jest.fn(),
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
+    const from = '2019-08-27T22:10:56.794Z';
+    const to = '2019-08-26T22:10:56.791Z';
+    const ACTION_BUTTON_COUNT = 4;
+
+    testProps = {
+      defaultCellActions,
+      defaultModel: eventsDefaultModel,
+      end: to,
+      entityType: EntityType.ALERTS,
+      tableId: TableId.test,
+      leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      showCallOutUnauthorizedMsg: false,
-      showExpandedDetails: false,
-      start: startDate,
-      status: TimelineStatus.active,
-      sort,
-      timelineId: 'foo',
-      timerangeKind: 'absolute',
-      activeTab: TimelineTabs.query,
-      show: true,
+      scopeId: SourcererScopeName.default,
+      start: from,
     };
-  });
-
-  it('filters correctly page timelines', () => {
-    expect(isPageTimeline(TimelineId.active)).toBe(false);
-    expect(isPageTimeline('hosts-page-alerts')).toBe(true);
   });
 
   it('persist adding / reordering of a column correctly', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
-    store.dispatch(upsertColumn({ id: 'test', index: 1, column: defaultHeaders[0] }));
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    store.dispatch(upsertColumn({ id: TableId.test, index: 1, column: defaultHeaders[0] }));
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persist timeline when removing a column ', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
-    store.dispatch(removeColumn({ id: 'test', columnId: '@timestamp' }));
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    store.dispatch(removeColumn({ id: TableId.test, columnId: '@timestamp' }));
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persists resizing of a column', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
     store.dispatch(applyDeltaToColumnWidth({ id: 'test', columnId: '@timestamp', delta: 80 }));
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persist the resetting of the fields', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
-    store.dispatch(updateColumns({ id: 'test', columns: defaultHeaders }));
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    store.dispatch(updateColumns({ id: TableId.test, columns: defaultHeaders }));
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persist items per page', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
-    store.dispatch(updateItemsPerPage({ id: 'test', itemsPerPage: 50 }));
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    store.dispatch(updateItemsPerPage({ id: TableId.test, itemsPerPage: 50 }));
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persist the sorting of a column', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
     store.dispatch(
       updateSort({
-        id: 'test',
+        id: TableId.test,
         sort: [
           {
             columnId: 'event.severity',
@@ -167,37 +159,37 @@ describe('epicLocalStorage', () => {
         ],
       })
     );
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persists updates to the column order to local storage', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
     store.dispatch(
       updateColumnOrder({
         columnIds: ['event.severity', '@timestamp', 'event.category'],
-        id: 'test',
+        id: TableId.test,
       })
     );
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 
   it('persists updates to the column width to local storage', async () => {
     shallow(
       <TestProviders store={store}>
-        <QueryTabContentComponent {...props} />
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
     store.dispatch(
       updateColumnWidth({
         columnId: 'event.severity',
-        id: 'test',
+        id: TableId.test,
         width: 123,
       })
     );
-    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 });

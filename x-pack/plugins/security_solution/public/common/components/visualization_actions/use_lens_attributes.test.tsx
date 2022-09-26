@@ -21,6 +21,7 @@ import { useLensAttributes } from './use_lens_attributes';
 import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
 import type { State } from '../../store';
 import { createStore } from '../../store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -66,7 +67,13 @@ describe('useLensAttributes', () => {
       },
     },
   ];
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
@@ -78,7 +85,13 @@ describe('useLensAttributes', () => {
         filters: filterFromSearchBar,
       },
     };
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   it('should add query', () => {

@@ -254,6 +254,7 @@ export const updateTGridColumnWidth = ({
   tableById: TableById;
   width: number;
 }): TableById => {
+  console.log(tableById);
   const dataTable = tableById[id];
 
   const columns = dataTable.columns.map((x) => ({

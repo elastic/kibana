@@ -23,6 +23,7 @@ import { upsertQuery } from '../../store/inputs/helpers';
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('./modal', () => ({
   ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
@@ -41,13 +42,25 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   describe('Render', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
@@ -153,7 +166,13 @@ describe('Inspect Button', () => {
       const myQuery = cloneDeep(newQuery);
       myQuery.inspect = null;
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -170,7 +189,13 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -187,7 +212,13 @@ describe('Inspect Button', () => {
         response: [],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -206,7 +237,13 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(
@@ -251,7 +288,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -270,7 +313,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = false;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -289,7 +338,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -308,7 +363,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
