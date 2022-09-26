@@ -5,111 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiButtonIcon,
-  EuiIcon,
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
-  EuiButtonEmpty,
+  DragDropContextProps,
 } from '@elastic/eui';
-
-export const NewBucketButton = ({
-  label,
-  onClick,
-  ['data-test-subj']: dataTestSubj,
-  isDisabled,
-  className,
-}: {
-  label: string;
-  onClick: () => void;
-  'data-test-subj'?: string;
-  isDisabled?: boolean;
-  className?: string;
-}) => (
-  <EuiButtonEmpty
-    data-test-subj={dataTestSubj ?? 'lns-newBucket-add'}
-    size="xs"
-    iconType="plusInCircle"
-    onClick={onClick}
-    isDisabled={isDisabled}
-    flush="left"
-    className={className}
-  >
-    {label}
-  </EuiButtonEmpty>
-);
-
-interface BucketContainerProps {
-  isInvalid?: boolean;
-  invalidMessage: string;
-  onRemoveClick: () => void;
-  removeTitle: string;
-  isNotRemovable?: boolean;
-  children: React.ReactNode;
-  dataTestSubj?: string;
-}
-
-const BucketContainer = ({
-  isInvalid,
-  invalidMessage,
-  onRemoveClick,
-  removeTitle,
-  children,
-  dataTestSubj,
-  isNotRemovable,
-}: BucketContainerProps) => {
-  return (
-    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasShadow={false} hasBorder>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            size="s"
-            color={isInvalid ? 'danger' : 'subdued'}
-            type={isInvalid ? 'alert' : 'grab'}
-            title={
-              isInvalid
-                ? invalidMessage
-                : i18n.translate('xpack.lens.customBucketContainer.dragToReorder', {
-                    defaultMessage: 'Drag to reorder',
-                  })
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>{children}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconSize="s"
-            iconType="cross"
-            color="danger"
-            data-test-subj="lns-customBucketContainer-remove"
-            onClick={onRemoveClick}
-            aria-label={removeTitle}
-            title={removeTitle}
-            disabled={isNotRemovable}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
+import { DefaultBucketContainer } from './default_bucket_container';
+import type { BucketContainerProps } from './types';
 
 export const DraggableBucketContainer = ({
   id,
   idx,
   children,
+  Container = DefaultBucketContainer,
   ...bucketContainerProps
 }: {
   id: string;
   idx: number;
   children: React.ReactNode;
+  Container?: React.FunctionComponent<BucketContainerProps>;
 } & BucketContainerProps) => {
   return (
     <EuiDraggable
@@ -119,17 +36,12 @@ export const DraggableBucketContainer = ({
       draggableId={id}
       disableInteractiveElementBlocking
     >
-      {(provided) => <BucketContainer {...bucketContainerProps}>{children}</BucketContainer>}
+      {(provided) => <Container {...bucketContainerProps}>{children}</Container>}
     </EuiDraggable>
   );
 };
 
-interface DraggableLocation {
-  droppableId: string;
-  index: number;
-}
-
-export const DragDropBuckets = ({
+export function DragDropBuckets<T = unknown>({
   items,
   onDragStart,
   onDragEnd,
@@ -137,25 +49,23 @@ export const DragDropBuckets = ({
   children,
   className,
 }: {
-  items: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  items: T[];
   onDragStart: () => void;
-  onDragEnd: (items: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  onDragEnd: (items: T[]) => void;
   droppableId: string;
   children: React.ReactElement[];
   className?: string;
-}) => {
-  const handleDragEnd = ({
-    source,
-    destination,
-  }: {
-    source?: DraggableLocation;
-    destination?: DraggableLocation;
-  }) => {
-    if (source && destination) {
-      const newItems = euiDragDropReorder(items, source.index, destination.index);
-      onDragEnd(newItems);
-    }
-  };
+}) {
+  const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const newItems = euiDragDropReorder(items, source.index, destination.index);
+        onDragEnd(newItems);
+      }
+    },
+    [items, onDragEnd]
+  );
+
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
       <EuiDroppable droppableId={droppableId} spacing="none" className={className}>
@@ -163,4 +73,4 @@ export const DragDropBuckets = ({
       </EuiDroppable>
     </EuiDragDropContext>
   );
-};
+}
