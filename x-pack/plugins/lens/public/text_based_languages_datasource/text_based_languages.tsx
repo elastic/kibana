@@ -116,12 +116,27 @@ export function getTextBasedLanguagesDatasource({
       });
       return errors;
     },
-    initialize(state?: TextBasedLanguagesPersistedState) {
+    initialize(
+      state?: TextBasedLanguagesPersistedState,
+      savedObjectReferences?,
+      context?,
+      indexPatternRefs?,
+      indexPatterns?
+    ) {
+      const patterns = indexPatterns ? Object.values(indexPatterns) : [];
+      const refs = patterns.map((p) => {
+        return {
+          id: p.id,
+          title: p.title,
+          timeField: p.timeFieldName,
+        };
+      });
+
       const initState = state || { layers: {} };
       return {
         ...initState,
         fieldList: [],
-        indexPatternRefs: [],
+        indexPatternRefs: refs,
       };
     },
     onRefreshIndexPattern() {},
@@ -240,8 +255,8 @@ export function getTextBasedLanguagesDatasource({
       };
     },
 
-    toExpression: (state, layerId, indexPatterns, timeRange) => {
-      return toExpression(state, layerId, timeRange);
+    toExpression: (state, layerId, indexPatterns) => {
+      return toExpression(state, layerId);
     },
 
     renderDataPanel(

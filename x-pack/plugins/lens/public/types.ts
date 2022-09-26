@@ -348,8 +348,7 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (
     state: T,
     layerId: string,
-    indexPatterns: IndexPatternMap,
-    timeRange?: TimeRange
+    indexPatterns: IndexPatternMap
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
