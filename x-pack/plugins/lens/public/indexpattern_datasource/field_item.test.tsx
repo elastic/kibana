@@ -21,7 +21,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
 import { FieldStats } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
@@ -193,7 +193,11 @@ describe('IndexPattern Field Item', () => {
     await wrapper.update();
     const popoverContent = wrapper.find(EuiPopover).prop('children');
     act(() => {
-      mountWithIntl(popoverContent as ReactElement)
+      mountWithIntl(
+        <KibanaContextProvider services={mockedServices}>
+          {popoverContent as ReactElement}
+        </KibanaContextProvider>
+      )
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .first()
         .simulate('click');
@@ -215,10 +219,43 @@ describe('IndexPattern Field Item', () => {
     await wrapper.update();
     const popoverContent = wrapper.find(EuiPopover).prop('children');
     expect(
-      mountWithIntl(popoverContent as ReactElement)
+      mountWithIntl(
+        <KibanaContextProvider services={mockedServices}>
+          {popoverContent as ReactElement}
+        </KibanaContextProvider>
+      )
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .exists()
     ).toBeFalsy();
+  });
+
+  it('should pass add filter callback and pass result to filter manager', async () => {
+    const field = {
+      name: 'test',
+      displayName: 'testLabel',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      filterable: true,
+    };
+
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItemWrapper {...defaultProps} field={field} editField={editFieldSpy} />
+    );
+    await clickField(wrapper, field.name);
+    await wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    const instance = mountWithIntl(
+      <KibanaContextProvider services={mockedServices}>
+        {popoverContent as ReactElement}
+      </KibanaContextProvider>
+    );
+    const onAddFilter = instance.find(FieldStats).prop('onAddFilter');
+    onAddFilter!(field as DataViewField, 'abc', '+');
+    expect(mockedServices.data.query.filterManager.addFilters).toHaveBeenCalledWith([
+      expect.objectContaining({ query: { match_phrase: { test: 'abc' } } }),
+    ]);
   });
 
   it('should request field stats every time the button is clicked', async () => {
