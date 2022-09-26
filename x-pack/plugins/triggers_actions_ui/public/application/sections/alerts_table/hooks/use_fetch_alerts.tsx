@@ -172,8 +172,8 @@ const useFetchAlerts = ({
       const asyncSearch = async () => {
         prevAlertRequest.current = request;
         abortCtrl.current = new AbortController();
-        dispatch({ type: 'loading', loading: true });
         if (data && data.search) {
+          dispatch({ type: 'loading', loading: true });
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
               { ...request, featureIds, fields: undefined, query },
