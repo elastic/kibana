@@ -13,15 +13,13 @@ import { shallow } from 'enzyme';
 
 import { EuiBadge, EuiPanel, EuiTitle } from '@elastic/eui';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { TrainedModelHealth } from './ml_model_health';
 
 export const DEFAULT_VALUES: InferencePipeline = {
-  isAllocated: true,
-  isDeployed: true,
-  modelState: 'started',
+  modelState: TrainedModelState.Started,
   pipelineName: 'Sample Processor',
   types: ['pytorch'],
 };

@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiHealth } from '@elastic/eui';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { TrainedModelHealth } from './ml_model_health';
 
@@ -24,17 +24,14 @@ describe('TrainedModelHealth', () => {
   });
 
   const commonModelData: InferencePipeline = {
-    isAllocated: false,
-    isDeployed: false,
+    modelState: TrainedModelState.NotDeployed,
     pipelineName: 'Sample Processor',
     types: ['pytorch'],
   };
   it('renders model started', () => {
     const pipeline: InferencePipeline = {
       ...commonModelData,
-      isAllocated: true,
-      isDeployed: true,
-      modelState: 'started',
+      modelState: TrainedModelState.Started,
     };
     const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
     const health = wrapper.find(EuiHealth);
@@ -53,7 +50,7 @@ describe('TrainedModelHealth', () => {
   it('renders model stopping', () => {
     const pipeline: InferencePipeline = {
       ...commonModelData,
-      modelState: 'stopping',
+      modelState: TrainedModelState.Stopping,
     };
     const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
     const health = wrapper.find(EuiHealth);
@@ -63,7 +60,7 @@ describe('TrainedModelHealth', () => {
   it('renders model starting', () => {
     const pipeline: InferencePipeline = {
       ...commonModelData,
-      modelState: 'starting',
+      modelState: TrainedModelState.Starting,
     };
     const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
     const health = wrapper.find(EuiHealth);
@@ -73,7 +70,7 @@ describe('TrainedModelHealth', () => {
   it('renders model failed', () => {
     const pipeline: InferencePipeline = {
       ...commonModelData,
-      modelState: 'failed',
+      modelState: TrainedModelState.Failed,
       modelStateReason: 'Model start boom.',
     };
     const wrapper = shallow(<TrainedModelHealth {...pipeline} />);

@@ -9,7 +9,7 @@ import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBo
 import { ElasticsearchClient } from '@kbn/core/server';
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 
-import { InferencePipeline } from '../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 export type InferencePipelineData = InferencePipeline & {
@@ -58,8 +58,7 @@ export const fetchPipelineProcessorInferenceData = async (
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
         pipelineProcessorData.push({
-          isAllocated: false,
-          isDeployed: false,
+          modelState: TrainedModelState.NotDeployed,
           pipelineName: pipelineProcessorName,
           trainedModelName,
           types: [],
@@ -99,8 +98,7 @@ export const getMlModelConfigsForModelIds = async (
 
     if (trainedModelNames.includes(trainedModelName)) {
       modelConfigs[trainedModelName] = {
-        isAllocated: false,
-        isDeployed: false,
+        modelState: TrainedModelState.NotDeployed,
         pipelineName: '',
         trainedModelName,
         types: getMlModelTypesForModelConfig(trainedModelData),
@@ -111,12 +109,26 @@ export const getMlModelConfigsForModelIds = async (
   trainedModelsStats.trained_model_stats.forEach((trainedModelStats) => {
     const trainedModelName = trainedModelStats.model_id;
     if (modelConfigs.hasOwnProperty(trainedModelName)) {
-      const isDeployed = trainedModelStats.deployment_stats?.state === 'started';
-      const isAllocated =
-        (trainedModelStats.deployment_stats?.allocation_status?.allocation_count ?? 0) > 0;
-      modelConfigs[trainedModelName].isDeployed = isDeployed;
-      modelConfigs[trainedModelName].isAllocated = isAllocated;
-      modelConfigs[trainedModelName].modelState = trainedModelStats.deployment_stats?.state;
+      let modelState: TrainedModelState;
+      switch (trainedModelStats.deployment_stats?.state) {
+        case 'started':
+          modelState = TrainedModelState.Started;
+          break;
+        case 'starting':
+          modelState = TrainedModelState.Starting;
+          break;
+        case 'stopping':
+          modelState = TrainedModelState.Stopping;
+          break;
+        // @ts-ignore: type is wrong, "failed" is a possible state
+        case 'failed':
+          modelState = TrainedModelState.Failed;
+          break;
+        default:
+          modelState = TrainedModelState.NotDeployed;
+          break;
+      }
+      modelConfigs[trainedModelName].modelState = modelState;
       modelConfigs[trainedModelName].modelStateReason = trainedModelStats.deployment_stats?.reason;
     }
   });
@@ -138,12 +150,10 @@ export const fetchAndAddTrainedModelData = async (
     if (!model) {
       return data;
     }
-    const { types, isDeployed, isAllocated, modelState, modelStateReason } = model;
+    const { types, modelState, modelStateReason } = model;
     return {
       ...data,
       types,
-      isDeployed,
-      isAllocated,
       modelState,
       modelStateReason,
     };

@@ -26,7 +26,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
@@ -128,7 +128,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                 <EuiFlexItem grow={false}>
                   <TrainedModelHealth {...pipeline} />
                 </EuiFlexItem>
-                {pipeline.modelState === undefined && (
+                {pipeline.modelState === TrainedModelState.NotDeployed && (
                   <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>
                     <EuiToolTip
                       position="top"

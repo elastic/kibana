@@ -12,7 +12,7 @@ import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 const modelStartedText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.started',
@@ -80,34 +80,30 @@ export const TrainedModelHealth: React.FC<InferencePipeline> = ({
     healthColor: string;
     healthText: React.ReactNode;
     tooltipText: React.ReactNode;
-  } = {
-    healthColor: 'danger',
-    healthText: modelNotDeployedText,
-    tooltipText: modelNotDeployedTooltip,
   };
   switch (modelState) {
-    case 'started':
+    case TrainedModelState.Started:
       modelHealth = {
         healthColor: 'success',
         healthText: modelStartedText,
         tooltipText: modelStartedTooltip,
       };
       break;
-    case 'stopping':
+    case TrainedModelState.Stopping:
       modelHealth = {
         healthColor: 'warning',
         healthText: modelStoppingText,
         tooltipText: modelStoppingTooltip,
       };
       break;
-    case 'starting':
+    case TrainedModelState.Starting:
       modelHealth = {
         healthColor: 'warning',
         healthText: modelStartingText,
         tooltipText: modelStartingTooltip,
       };
       break;
-    case 'failed':
+    case TrainedModelState.Failed:
       modelHealth = {
         healthColor: 'danger',
         healthText: modelDeploymentFailedText,
@@ -130,6 +126,13 @@ export const TrainedModelHealth: React.FC<InferencePipeline> = ({
             }}
           />
         ),
+      };
+      break;
+    case TrainedModelState.NotDeployed:
+      modelHealth = {
+        healthColor: 'danger',
+        healthText: modelNotDeployedText,
+        tooltipText: modelNotDeployedTooltip,
       };
       break;
   }
