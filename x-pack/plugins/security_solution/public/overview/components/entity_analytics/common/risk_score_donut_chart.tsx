@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MouseEventHandler } from 'react';
 import React from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
@@ -38,11 +37,9 @@ const StyledLegendItems = styled(EuiFlexItem)`
 
 interface RiskScoreDonutChartProps {
   severityCount: SeverityCount;
-  onClick: MouseEventHandler<Element>;
-  href: string;
 }
 
-export const RiskScoreDonutChart = ({ severityCount, onClick, href }: RiskScoreDonutChartProps) => {
+export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps) => {
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
 
   return (
