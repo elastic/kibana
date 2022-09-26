@@ -148,5 +148,6 @@ image::user/ml/images/ml-explain-log-rate.png[Log rate spike explained]
 preview::[]
 
 
+
 [role="screenshot"]
 image::user/ml/images/ml-log-pattern-analysis.png[Log pattern analysis UI]
