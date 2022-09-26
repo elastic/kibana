@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../shared/doc_links';
 
@@ -47,21 +49,28 @@ export const SearchIndexIndexMappings: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
-            <EuiTitle>
+            <EuiTitle size="s">
               <h3>
                 {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.title', {
                   defaultMessage: 'About index mappings',
                 })}
               </h3>
             </EuiTitle>
-            <EuiText>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
               <p>
-                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.description', {
-                  defaultMessage:
-                    'Your documents are made up of a set of fields. Index mappings give each field a type (such as `keyword`, `number`, or `date`) and additional subfields. These index mappings determine the functions available in your relevance tuning and search experience.',
-                })}
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.searchIndex.mappings.description"
+                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. These index mappings determine the functions available in your relevance tuning and search experience."
+                  values={{
+                    keyword: <EuiCode>keyword</EuiCode>,
+                    number: <EuiCode>number</EuiCode>,
+                    date: <EuiCode>date</EuiCode>,
+                  }}
+                />
               </p>
             </EuiText>
+            <EuiSpacer size="s" />
             <EuiLink href={docLinks.elasticsearchMapping} target="_blank" external>
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
                 defaultMessage: 'Learn more',
