@@ -52,6 +52,7 @@ export class ApmSynthtraceKibanaClient {
       return kibanaUrl;
     });
   }
+
   async fetchLatestApmPackageVersion(
     kibanaUrl: string,
     version: string,
@@ -61,12 +62,7 @@ export class ApmSynthtraceKibanaClient {
     const url = `${kibanaUrl}/api/fleet/epm/packages/apm`;
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'kbn-xsrf': 'kibana',
-      },
+      headers: kibanaHeaders(username, password),
     });
     const json = (await response.json()) as { item: { latestVersion: string } };
     const { latestVersion } = json.item;
@@ -82,12 +78,7 @@ export class ApmSynthtraceKibanaClient {
     );
     const response = await fetch(`${kibanaUrl}/api/fleet/epm/packages/apm/${packageVersion}`, {
       method: 'POST',
-      headers: {
-        Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'kbn-xsrf': 'kibana',
-      },
+      headers: kibanaHeaders(username, password),
       body: '{"force":true}',
     });
 
@@ -102,4 +93,13 @@ export class ApmSynthtraceKibanaClient {
       this.logger.info(`Installed apm package ${packageVersion}`);
     } else this.logger.error(responseJson);
   }
+}
+
+function kibanaHeaders(username: string, password: string) {
+  return {
+    Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'kbn-xsrf': 'kibana',
+  };
 }
