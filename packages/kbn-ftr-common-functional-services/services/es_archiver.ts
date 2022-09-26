@@ -18,6 +18,7 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
   const retry = getService('retry');
 
   const esArchiver = new EsArchiver({
+    baseDir: config.get('esArchiver.baseDirectory'),
     client,
     log,
     kbnClient: kibanaServer,
