@@ -183,7 +183,7 @@ export const TakeActionDropdown = React.memo(
     });
 
     const osqueryAvailable = osquery?.isOsqueryAvailable({
-      agentId
+      agentId,
     });
 
     const handleOnOsqueryClick = useCallback(() => {
