@@ -42,11 +42,13 @@ const MetricsFlexGroup = styled.div`
 
 export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
   const {
-    countOpenCases,
-    countInProgressCases,
-    countClosedCases,
+    data: { countOpenCases, countInProgressCases, countClosedCases } = {
+      countOpenCases: 0,
+      countInProgressCases: 0,
+      countClosedCases: 0,
+    },
     isLoading: isCasesStatusLoading,
-    fetchCasesStatus,
+    refetch: fetchCasesStatus,
   } = useGetCasesStatus();
 
   const { mttr, isLoading: isCasesMetricsLoading, fetchCasesMetrics } = useGetCasesMetrics();
