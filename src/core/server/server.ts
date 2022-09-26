@@ -58,8 +58,8 @@ import {
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
 import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
-import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-internal';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context';
+import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
 import { CoreApp } from './core_app';
 import { HttpResourcesService } from './http_resources';

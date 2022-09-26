@@ -68,7 +68,7 @@ import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-dat
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { StatusServiceSetup } from '@kbn/core-status-server';
 import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -464,7 +464,7 @@ export type {
   RequestHandlerContext,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
-} from '@kbn/core-http-request-handler-context';
+} from '@kbn/core-http-request-handler-context-server';
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.
