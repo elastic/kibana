@@ -12,7 +12,11 @@ import type { AgentPolicy, FleetServerAgent, NewPackagePolicy } from '@kbn/fleet
 import { useKibana } from '../../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
-export const useIsOsqueryAvailableSimple = (agentId?: string) => {
+interface IProps {
+  agentId: string;
+}
+
+export const useIsOsqueryAvailableSimple = ({ agentId }: IProps) => {
   const { http } = useKibana().services;
   const [isAvailable, setIsAvailable] = useState(false);
   useEffect(() => {

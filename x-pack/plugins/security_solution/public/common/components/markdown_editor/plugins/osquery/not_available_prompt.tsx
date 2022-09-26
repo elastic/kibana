@@ -5,15 +5,35 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { SHORT_EMPTY_TITLE, NOT_AVAILABLE } from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { i18n } from '@kbn/i18n';
+
+export const PERMISSION_DENIED = i18n.translate(
+  'xpack.securitySolution.markdown.osquery.permissionDenied',
+  {
+    defaultMessage: 'Permission denied',
+  }
+);
 
 export const OsqueryNotAvailablePrompt = () => (
   <EuiEmptyPrompt
     iconType="logoOsquery"
-    title={<h2>{SHORT_EMPTY_TITLE}</h2>}
+    title={<h2>{PERMISSION_DENIED}</h2>}
     titleSize="xs"
-    body={<p>{NOT_AVAILABLE}</p>}
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.securitySolution.markdown.osquery.missingPrivilleges"
+          defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
+          values={{
+            // eslint-disable-next-line react/jsx-no-literals
+            osquery: <EuiCode>osquery</EuiCode>,
+          }}
+        />
+      </p>
+    }
   />
 );

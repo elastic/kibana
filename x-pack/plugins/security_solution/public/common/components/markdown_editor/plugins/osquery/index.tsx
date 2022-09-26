@@ -24,12 +24,12 @@ import styled from 'styled-components';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OsqueryNotAvailablePrompt } from './not_available_prompt';
 import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
+import { OsqueryNotAvailablePrompt } from './not_available_prompt';
 
 const StyledEuiButton = styled(EuiButton)`
   > span > img {
@@ -49,7 +49,12 @@ const OsqueryEditorComponent = ({
   };
 }>) => {
   const isEditMode = node != null;
-  const { osquery } = useKibana().services;
+  const {
+    osquery,
+    application: {
+      capabilities: { osquery: osqueryPermissions },
+    },
+  } = useKibana().services;
   const formMethods = useForm<{
     label: string;
     query: string;
@@ -83,7 +88,16 @@ const OsqueryEditorComponent = ({
     [onSave]
   );
 
-  const isAvailable = useMemo(() => osquery?.isOsqueryAvailable(), [osquery]);
+  const noOsqueryPermissions = useMemo(
+    () =>
+      (!osqueryPermissions.runSavedQueries || !osqueryPermissions.readSavedQueries) &&
+      !osqueryPermissions.writeLiveQueries,
+    [
+      osqueryPermissions.readSavedQueries,
+      osqueryPermissions.runSavedQueries,
+      osqueryPermissions.writeLiveQueries,
+    ]
+  );
 
   const OsqueryActionForm = useMemo(() => {
     if (osquery?.LiveQueryField) {
@@ -100,7 +114,7 @@ const OsqueryEditorComponent = ({
     return null;
   }, [formMethods, osquery]);
 
-  if (!isAvailable) {
+  if (noOsqueryPermissions) {
     return <OsqueryNotAvailablePrompt />;
   }
 
@@ -248,6 +262,7 @@ const RunOsqueryButtonRenderer = ({
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { agentId } = useContext(BasicAlertDataContext);
+  console.log({ agentId });
 
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 

@@ -182,7 +182,7 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
-    const osqueryAvailable = osquery?.isOsqueryAvailable(agentId);
+    const osqueryAvailable = osquery?.isOsqueryAvailable({ agentId });
 
     const handleOnOsqueryClick = useCallback(() => {
       onOsqueryClick(agentId);

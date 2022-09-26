@@ -32,7 +32,7 @@ export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
-  isOsqueryAvailable: (agentId?: string) => boolean;
+  isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
   OsqueryResponseActionTypeForm: ReturnType<typeof getLazyOsqueryResponseActionTypeForm>;
 }
