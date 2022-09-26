@@ -29,7 +29,7 @@ import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
   makeFloatString,
-  logUnprocessedExceptionsWarnings,
+  getUnprocessedExceptionsWarnings,
 } from '../utils';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
@@ -93,8 +93,10 @@ export const eqlExecutor = async ({
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
-    logUnprocessedExceptionsWarnings(unprocessedExceptions, ruleExecutionLogger);
-
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+    if (exceptionsWarning) {
+      result.warningMessages.push(exceptionsWarning);
+    }
     const eqlSignalSearchStart = performance.now();
 
     const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
