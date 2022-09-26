@@ -15,6 +15,7 @@ import type {
   EqlBuildingBlockFields840,
   EqlShellFields840,
   NewTermsFields840,
+  ThrottledFields860,
 } from './8.4.0';
 
 // When new Alert schemas are created for new Kibana versions, add the DetectionAlert type from the new version
@@ -29,4 +30,5 @@ export type {
   EqlBuildingBlockFields840 as EqlBuildingBlockFieldsLatest,
   EqlShellFields840 as EqlShellFieldsLatest,
   NewTermsFields840 as NewTermsFieldsLatest,
+  ThrottledFields860 as ThrottledFieldsLatest,
 };

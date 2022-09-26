@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -17,23 +17,20 @@ interface GetEventsByGroupArgs {
   baseQuery: estypes.SearchRequest;
   groupByFields: string[];
   maxSignals: number;
-  sort: estypes.Sort;
+  aggregatableTimestampField: string;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
 }
 
 export const getEventsByGroup = async ({
   baseQuery,
   groupByFields,
-  services,
   maxSignals,
-  sort,
+  aggregatableTimestampField,
+  services,
 }: GetEventsByGroupArgs) => {
   return services.scopedClusterClient.asCurrentUser.search({
     ...baseQuery,
-    body: {
-      ...baseQuery.body,
-      track_total_hits: true,
-      aggs: buildGroupByFieldAggregation({ groupByFields, maxSignals, sort }),
-    },
+    track_total_hits: true,
+    aggs: buildGroupByFieldAggregation({ groupByFields, maxSignals, aggregatableTimestampField }),
   });
 };

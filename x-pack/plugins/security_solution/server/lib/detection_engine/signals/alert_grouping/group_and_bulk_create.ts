@@ -10,7 +10,7 @@
 import { identity } from 'lodash';
 import moment from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../build_events_query';
@@ -18,12 +18,58 @@ import type {
   EventGroupingMultiBucketAggregationResult,
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
-  SignalSource,
 } from '../types';
 import { createSearchAfterReturnType, mergeReturns } from '../utils';
 import { getEventsByGroup } from './get_events_by_group';
 import type { QueryRuleParams } from '../../schemas/rule_schemas';
 import { sendAlertTelemetryEvents } from '../send_telemetry_events';
+import type { ThrottleBuckets } from '../../rule_types/factories/utils/wrap_throttled_alerts';
+import { wrapThrottledAlerts } from '../../rule_types/factories/utils/wrap_throttled_alerts';
+import { ConfigType } from '../../../../config';
+
+export interface ThrottleGroup {
+  field: string;
+  value: string | number;
+}
+
+export interface BucketHistory {
+  keyValuePairs: ThrottleGroup[];
+  endDate: Date;
+}
+
+export const buildBucketHistoryFilter = ({
+  buckets,
+  primaryTimestamp,
+  secondaryTimestamp,
+  from,
+}: {
+  buckets: BucketHistory[];
+  primaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
+  from: moment.Moment;
+}): estypes.QueryDslQueryContainer => {
+  return {
+    bool: {
+      must_not: buckets.map((bucket) => ({
+        bool: {
+          must: [
+            ...bucket.keyValuePairs.map((kvp) => ({
+              term: {
+                [kvp.field]: kvp.value,
+              },
+            })),
+            buildTimeRangeFilter({
+              to: bucket.endDate.toISOString(),
+              from: from.toISOString(),
+              primaryTimestamp,
+              secondaryTimestamp,
+            }),
+          ],
+        },
+      })),
+    },
+  };
+};
 
 // search_after through grouped documents and re-index using bulk endpoint.
 export const groupAndBulkCreate = async ({
@@ -46,37 +92,20 @@ export const groupAndBulkCreate = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
-}: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  bucketHistory,
+  aggregatableTimestampField,
+  spaceId,
+  mergeStrategy,
+}: SearchAfterAndBulkCreateParams & {
+  bucketHistory?: BucketHistory[];
+  aggregatableTimestampField: string;
+  spaceId: string;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+}): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
 
-    if (tuple == null || tuple.to == null || tuple.from == null) {
-      ruleExecutionLogger.error(`[-] malformed date tuple`);
-      return createSearchAfterReturnType({
-        success: false,
-        errors: ['malformed date tuple'],
-      });
-    }
-
-    const _sortOrder = sortOrder ?? 'asc';
-
     try {
-      const sort: estypes.Sort = [];
-      sort.push({
-        [primaryTimestamp]: {
-          order: _sortOrder,
-          unmapped_type: 'date',
-        },
-      });
-      if (secondaryTimestamp) {
-        sort.push({
-          [secondaryTimestamp]: {
-            order: _sortOrder,
-            unmapped_type: 'date',
-          },
-        });
-      }
-
       // TODO: Determine field(s) to group by
       // Current thoughts...
       // - analyze query for fields/wildcards
@@ -99,175 +128,112 @@ export const groupAndBulkCreate = async ({
         });
       }
 
-      // alertsCreatedCount keeps track of how many signals we have created,
-      // to ensure we don't exceed maxSignals
-      let alertsCreatedCount = 0;
+      const rangeFilter = buildTimeRangeFilter({
+        to: tuple.to.toISOString(),
+        from: tuple.from.toISOString(),
+        primaryTimestamp,
+        secondaryTimestamp,
+      });
 
-      const bucketHistory: Record<string, moment.Moment> = {};
+      const filterWithTime: estypes.QueryDslQueryContainer[] = [filter, rangeFilter];
 
-      do {
-        const rangeFilter = buildTimeRangeFilter({
-          to: tuple.to.toISOString(),
-          from: tuple.from.toISOString(),
-          primaryTimestamp,
-          secondaryTimestamp,
-        });
+      if (bucketHistory != null) {
+        filterWithTime.push(
+          buildBucketHistoryFilter({
+            buckets: bucketHistory,
+            primaryTimestamp,
+            secondaryTimestamp,
+            from: tuple.from,
+          })
+        );
+      }
 
-        const bucketTimeFilters = {
+      const baseQuery: estypes.SearchRequest = {
+        allow_no_indices: true,
+        index: inputIndexPattern,
+        ignore_unavailable: true,
+        track_total_hits: trackTotalHits,
+        runtime_mappings: runtimeMappings,
+        query: {
           bool: {
-            should: [
-              ...Object.keys(bucketHistory).map((key) => ({
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        [groupByFields[0]]: key,
-                      },
-                    },
-                    {
-                      // TODO: secondaryTimestamp?
-                      range: {
-                        [primaryTimestamp]: {
-                          ...(_sortOrder === 'asc'
-                            ? { gt: bucketHistory[key].toISOString() }
-                            : { lt: bucketHistory[key].toISOString() }),
-                        },
-                      },
-                    },
-                  ],
-                },
-              })),
-            ],
+            filter: filterWithTime,
           },
-        };
+        },
+      };
 
-        const filterWithTime: estypes.QueryDslQueryContainer[] = [
-          filter,
-          rangeFilter,
-          bucketTimeFilters,
-        ];
+      // Get aggregated results
+      const eventsByGroupResponse = await getEventsByGroup({
+        baseQuery,
+        groupByFields,
+        services,
+        maxSignals: tuple.maxSignals,
+        aggregatableTimestampField,
+      });
 
-        const baseQuery: estypes.SearchRequest & {
-          runtime_mappings: estypes.MappingRuntimeFields | undefined;
-        } = {
-          allow_no_indices: true,
-          runtime_mappings: runtimeMappings,
-          index: inputIndexPattern,
-          ignore_unavailable: true,
-          track_total_hits: trackTotalHits,
-          body: {
-            query: {
-              bool: {
-                filter: filterWithTime,
-              },
-            },
-          },
-        };
+      const eventsByGroupResponseWithAggs =
+        eventsByGroupResponse as EventGroupingMultiBucketAggregationResult;
+      if (!eventsByGroupResponseWithAggs.aggregations) {
+        throw new Error('expected to find aggregations on search result');
+      }
 
-        // Get aggregated results
-        const eventsByGroupResponse = await getEventsByGroup({
-          baseQuery,
-          groupByFields,
-          services,
-          maxSignals: tuple.maxSignals,
-          sort,
-        });
+      const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
-        const eventsByGroupResponseWithAggs =
-          eventsByGroupResponse as EventGroupingMultiBucketAggregationResult;
-        if (!eventsByGroupResponseWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on search result');
-        }
+      if (buckets.length === 0) {
+        return toReturn;
+      }
 
-        const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+      const throttleBuckets: ThrottleBuckets[] = buckets.map((bucket) => ({
+        event: bucket.topHits.hits.hits[0],
+        count: bucket.doc_count,
+        start: bucket.min_timestamp.value_as_string
+          ? new Date(bucket.min_timestamp.value_as_string)
+          : tuple.from.toDate(),
+        end: bucket.max_timestamp.value_as_string
+          ? new Date(bucket.max_timestamp.value_as_string)
+          : tuple.to.toDate(),
+        values: Object.values(bucket.key),
+      }));
 
-        // Reverse so we can pop() instead of shift() for efficiency
-        for (const bucket of buckets) {
-          bucket.topHits.hits.hits.reverse();
-        }
+      const wrappedAlerts = wrapThrottledAlerts({
+        throttleBuckets,
+        spaceId,
+        completeRule,
+        mergeStrategy,
+        indicesToQuery: inputIndexPattern,
+        buildReasonMessage,
+      });
 
-        // Index
-        const toIndex: Array<estypes.SearchHit<SignalSource>> = [];
+      // const enrichedEvents = await enrichment(wrappedAlerts);
+      //const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-        let indexedThisPass = [];
-        let indexedLastPass = [];
-        for (let i = 0; ; i = (i + 1) % buckets.length) {
-          if (i === 0) {
-            if (!indexedThisPass.length && indexedLastPass.length) {
-              break;
-            }
-            // spread to copy the array
-            indexedLastPass = [...indexedThisPass];
-            indexedThisPass = [];
-          }
+      const {
+        bulkCreateDuration: bulkDuration,
+        createdItemsCount: createdCount,
+        createdItems,
+        success: bulkSuccess,
+        errors: bulkErrors,
+      } = await bulkCreate(wrappedAlerts);
 
-          const event = buckets[i].topHits.hits.hits.pop();
-          const key = buckets[i].key;
-
-          if (event != null) {
-            toIndex.push(event);
-            indexedThisPass.push(key);
-
-            // TODO: secondaryTimestamp?
-            const currentTimestamp =
-              bucketHistory[key] ?? _sortOrder === 'asc' ? tuple.from : tuple.to;
-            const eventTimestamp = moment(event._source[primaryTimestamp] as string);
-
-            if (_sortOrder === 'asc') {
-              if (eventTimestamp > currentTimestamp) {
-                bucketHistory[key] = eventTimestamp;
-              }
-            } else if (_sortOrder === 'desc') {
-              if (eventTimestamp < currentTimestamp) {
-                bucketHistory[key] = eventTimestamp;
-              }
-            }
-          }
-
-          if (toIndex.length >= tuple.maxSignals) {
-            break;
-          }
-        }
-
-        const enrichedEvents = await enrichment(toIndex);
-        const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
-
-        if (wrappedDocs.length === 0) {
-          break;
-        }
-
-        const {
-          bulkCreateDuration: bulkDuration,
-          createdItemsCount: createdCount,
-          createdItems,
+      toReturn = mergeReturns([
+        toReturn,
+        createSearchAfterReturnType({
           success: bulkSuccess,
+          createdSignalsCount: createdCount,
+          createdSignals: createdItems,
+          bulkCreateTimes: [bulkDuration],
           errors: bulkErrors,
-        } = await bulkCreate(wrappedDocs);
+        }),
+      ]);
 
-        toReturn = mergeReturns([
-          toReturn,
-          createSearchAfterReturnType({
-            success: bulkSuccess,
-            createdSignalsCount: createdCount,
-            createdSignals: createdItems,
-            bulkCreateTimes: [bulkDuration],
-            errors: bulkErrors,
-          }),
-        ]);
+      ruleExecutionLogger.debug(`created ${createdCount} signals`);
 
-        alertsCreatedCount += createdCount;
-
-        ruleExecutionLogger.debug(`created ${createdCount} signals`);
-        ruleExecutionLogger.debug(`alertsCreatedCount: ${alertsCreatedCount}`);
-        ruleExecutionLogger.debug(`enrichedEvents.hits.hits: ${enrichedEvents.length}`);
-
-        sendAlertTelemetryEvents(
+      // TODO: telemetry?
+      /* sendAlertTelemetryEvents(
           enrichedEvents,
           createdItems,
           eventsTelemetry,
           ruleExecutionLogger
-        );
-      } while (alertsCreatedCount < tuple.maxSignals);
+        );*/
     } catch (exc: unknown) {
       return createSearchAfterReturnType({
         success: false,

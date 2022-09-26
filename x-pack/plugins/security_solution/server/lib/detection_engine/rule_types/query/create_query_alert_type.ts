@@ -11,12 +11,19 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryRuleParams } from '../../schemas/rule_schemas';
+import { BucketHistory } from '../../signals/alert_grouping/group_and_bulk_create';
 import { queryExecutor } from '../../signals/executors/query';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
+
+export interface QueryRuleState {
+  throttleGroupHistory?: BucketHistory[];
+  [key: string]: unknown;
+}
+
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<QueryRuleParams, QueryRuleState, {}, 'default'> => {
   const { eventsTelemetry, experimentalFeatures, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
@@ -75,8 +82,11 @@ export const createQueryAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          aggregatableTimestampField,
+          mergeStrategy,
         },
         services,
+        spaceId,
         state,
       } = execOptions;
 
@@ -97,6 +107,10 @@ export const createQueryAlertType = (
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        aggregatableTimestampField,
+        spaceId,
+        mergeStrategy,
+        bucketHistory: state.throttleGroupHistory,
       });
       return { ...result, state };
     },

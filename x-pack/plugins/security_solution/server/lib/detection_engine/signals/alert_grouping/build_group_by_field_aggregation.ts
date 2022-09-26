@@ -5,30 +5,42 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-
 interface GetGroupByFieldAggregationArgs {
   groupByFields: string[];
   maxSignals: number;
-  sort: estypes.Sort;
+  aggregatableTimestampField: string;
 }
 
 export const buildGroupByFieldAggregation = ({
   groupByFields,
   maxSignals,
-  sort,
+  aggregatableTimestampField,
 }: GetGroupByFieldAggregationArgs) => ({
   eventGroups: {
-    terms: {
-      field: groupByFields[0],
+    composite: {
+      sources: groupByFields.map((field) => ({
+        [field]: {
+          terms: {
+            field,
+          },
+        },
+      })),
       size: maxSignals,
-      min_doc_count: 1,
     },
     aggs: {
       topHits: {
         top_hits: {
-          sort,
           size: maxSignals,
+        },
+      },
+      max_timestamp: {
+        max: {
+          field: aggregatableTimestampField,
+        },
+      },
+      min_timestamp: {
+        min: {
+          field: aggregatableTimestampField,
         },
       },
     },

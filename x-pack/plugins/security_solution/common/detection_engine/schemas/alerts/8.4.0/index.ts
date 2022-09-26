@@ -8,10 +8,14 @@
 import type { ALERT_BUILDING_BLOCK_TYPE, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
+  ALERT_ENTITY_VALUES,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
+  ALERT_THROTTLE_COUNT,
+  ALERT_THROTTLE_END,
+  ALERT_THROTTLE_START,
 } from '../../../../field_maps/field_names';
 import type {
   Ancestor800,
@@ -57,6 +61,14 @@ export interface NewTermsFields840 extends BaseFields840 {
 }
 
 export type NewTermsAlert840 = AlertWithCommonFields800<NewTermsFields840>;
+
+// TODO: move to new folder for 8.6.0
+export interface ThrottledFields860 extends BaseFields840 {
+  [ALERT_ENTITY_VALUES]: Array<string | number | null>;
+  [ALERT_THROTTLE_START]: Date;
+  [ALERT_THROTTLE_END]: Date;
+  [ALERT_THROTTLE_COUNT]: number;
+}
 
 // This is the type of the final generated alert including base fields, common fields
 // added by the alertWithPersistence function, and arbitrary fields copied from source documents

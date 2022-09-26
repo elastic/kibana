@@ -15,7 +15,7 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getFilter } from '../get_filter';
-import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
+import { BucketHistory, groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
@@ -28,6 +28,7 @@ import type { ExperimentalFeatures } from '../../../../../common/experimental_fe
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { ConfigType } from '../../../../config';
 
 export const queryExecutor = async ({
   inputIndex,
@@ -46,6 +47,10 @@ export const queryExecutor = async ({
   wrapHits,
   primaryTimestamp,
   secondaryTimestamp,
+  aggregatableTimestampField,
+  spaceId,
+  mergeStrategy,
+  bucketHistory,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -63,6 +68,10 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
+  spaceId: string;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  bucketHistory?: BucketHistory[];
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -95,6 +104,10 @@ export const queryExecutor = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
+      aggregatableTimestampField,
+      spaceId,
+      mergeStrategy,
+      bucketHistory,
     };
 
     if (experimentalFeatures.alertGroupingEnabled) {
