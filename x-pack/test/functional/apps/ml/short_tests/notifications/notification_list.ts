@@ -7,10 +7,10 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common']);
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const spacesService = getService('spaces');
   const browser = getService('browser');
 
   describe('Notifications list', function () {
@@ -19,54 +19,47 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
-      for (const { jobId, spaceId } of [
-        { spaceId: undefined, jobId: 'fq_01' },
-        // { spaceId: 'ml_02', jobId: 'fq_02' },
-      ]) {
-        if (spaceId) {
-          await spacesService.create({
-            id: spaceId,
-            name: spaceId,
-            disabledFeatures: [],
-          });
-        }
+      const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig('fg_001');
 
-        const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(jobId);
+      // Set small frequency to fail faster
+      datafeedConfig.frequency = '5s';
 
-        // Set small frequency to fail faster
-        datafeedConfig.frequency = '5s';
-
-        await ml.api.createAnomalyDetectionJob(ml.commonConfig.getADFqSingleMetricJobConfig(jobId));
-        await ml.api.openAnomalyDetectionJob(jobId);
-        await ml.api.createDatafeed(datafeedConfig);
-        await ml.api.startDatafeed(datafeedConfig.datafeed_id);
-      }
+      await ml.api.createAnomalyDetectionJob(
+        ml.commonConfig.getADFqSingleMetricJobConfig('fg_001')
+      );
+      await ml.api.openAnomalyDetectionJob('fg_001');
+      await ml.api.createDatafeed(datafeedConfig);
+      await ml.api.startDatafeed(datafeedConfig.datafeed_id);
 
       await ml.securityUI.loginAsMlPowerUser();
       await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToNotifications();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+    });
+
+    it('displays a generic notification indicator', async () => {
+      await ml.notifications.assertNotificationIndicatorExist();
     });
 
     it('opens the Notifications page', async () => {
+      await ml.navigation.navigateToNotifications();
+
       await ml.notifications.table.waitForTableToLoad();
       await ml.notifications.table.assertRowsNumberPerPage(25);
     });
 
     it('does not show notifications from another space', async () => {});
 
-    it('displays a generic notification indicator', async () => {
-      await ml.notifications.assertNotificationIndicatorExist();
-    });
-
     it('display a number of errors in the notification indicator', async () => {
+      await ml.navigation.navigateToOverview();
       // triggers an error
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      // refresh the page to avoid 1m wait
+      await PageObjects.common.sleep(6000);
       await browser.refresh();
+      // refresh the page to avoid 1m wait
       await ml.notifications.assertNotificationErrorsCount(1);
     });
   });
