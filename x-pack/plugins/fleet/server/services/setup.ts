@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import fs from 'fs/promises';
+
 import { compact } from 'lodash';
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
@@ -31,7 +33,7 @@ import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
-import { settingsService } from '.';
+import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
@@ -63,6 +65,8 @@ async function createSetupSideEffects(
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
+
+  await ensureFleetDirectories();
 
   const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};
@@ -265,4 +269,28 @@ export function formatNonFatalErrors(
       });
     }
   });
+}
+
+/**
+ * Confirm existence of various directories used by Fleet and warn if they don't exist
+ */
+export async function ensureFleetDirectories() {
+  const logger = appContextService.getLogger();
+  const config = appContextService.getConfig();
+
+  const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  const registryUrl = getRegistryUrl();
+
+  if (!bundledPackageLocation) {
+    logger.warn('xpack.fleet.developer.bundledPackageLocation is not configured');
+    return;
+  }
+
+  try {
+    await fs.stat(bundledPackageLocation);
+  } catch (error) {
+    logger.warn(
+      `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
+    );
+  }
 }
