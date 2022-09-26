@@ -88,11 +88,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
       await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
       );
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
+
+      await testSubjects.click('euiFlyoutCloseButton');
 
       await pageObjects.triggersActionsUI.searchConnectors(updatedConnectorName);
 
@@ -130,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-cancel-btn"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-close-btn"]:not(disabled)'
       );
     });
 
@@ -158,7 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-cancel-btn"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-close-btn"]:not(disabled)'
       );
     });
 
@@ -174,9 +176,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       await testSubjects.setValue('nameInput', 'some test name to cancel');
-      await testSubjects.click('edit-connector-flyout-cancel-btn');
+      await testSubjects.click('edit-connector-flyout-close-btn');
+      await testSubjects.click('confirmModalConfirmButton');
 
-      await find.waitForDeletedByCssSelector('[data-test-subj="edit-connector-flyout-cancel-btn"]');
+      await find.waitForDeletedByCssSelector('[data-test-subj="edit-connector-flyout-close-btn"]');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -265,7 +268,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
-      expect(await testSubjects.exists('edit-connector-flyout-save-close-btn')).to.be(false);
+      expect(await testSubjects.exists('edit-connector-flyout-save-btn')).to.be(false);
     });
   });
 

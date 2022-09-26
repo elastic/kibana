@@ -311,15 +311,18 @@ export const MetricVis = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
+  const {
+    metric: { minHeight },
+  } = getThemeService().useChartsBaseTheme();
+
   useEffect(() => {
-    const minTileHeight = 64; // TODO - magic number from the @elastic/charts side. would be nice to deduplicate
-    const minimumRequiredVerticalSpace = minTileHeight * grid.length;
+    const minimumRequiredVerticalSpace = minHeight * grid.length;
     setScrollChildHeight(
       (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
         ? '100%'
         : `${minimumRequiredVerticalSpace}px`
     );
-  }, [grid.length, scrollDimensions.height]);
+  }, [grid.length, minHeight, scrollDimensions.height]);
 
   return (
     <div

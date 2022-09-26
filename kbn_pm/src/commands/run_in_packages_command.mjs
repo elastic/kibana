@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '../lib/paths.mjs';
-import { spawnSync, spawnStreaming } from '../lib/spawn.mjs';
+import { run, spawnStreaming } from '../lib/spawn.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -59,7 +59,7 @@ export const command = {
       const cwd = Path.resolve(REPO_ROOT, normalizedRepoRelativeDir);
 
       if (args.getBooleanValue('quiet')) {
-        spawnSync('yarn', ['run', scriptName, ...scriptArgs], {
+        await run('yarn', ['run', scriptName, ...scriptArgs], {
           cwd,
           description: `${scriptName} in ${pkg.name}`,
         });
