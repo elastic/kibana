@@ -12,7 +12,8 @@ import { getGeneratedPolicies } from '../constants';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 // FLAKY: https://github.com/elastic/kibana/issues/141645
-describe.skip('<EditPolicy /> policy name validation', () => {
+// eslint-disable-next-line jest/no-focused-tests,ban/ban
+describe.only('<EditPolicy /> policy name validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

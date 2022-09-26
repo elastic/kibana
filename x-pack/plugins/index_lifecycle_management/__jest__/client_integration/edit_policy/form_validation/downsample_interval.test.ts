@@ -13,7 +13,8 @@ import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 // FLAKY: https://github.com/elastic/kibana/issues/141160
-describe.skip('<EditPolicy /> downsample interval validation', () => {
+// eslint-disable-next-line jest/no-focused-tests,ban/ban
+describe.only('<EditPolicy /> downsample interval validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

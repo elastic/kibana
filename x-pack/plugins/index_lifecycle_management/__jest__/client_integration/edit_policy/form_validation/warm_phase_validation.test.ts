@@ -11,7 +11,8 @@ import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 // FLAKY: https://github.com/elastic/kibana/issues/141645
-describe.skip('<EditPolicy /> warm phase validation', () => {
+// eslint-disable-next-line jest/no-focused-tests,ban/ban
+describe.only('<EditPolicy /> warm phase validation', () => {
   let testBed: ValidationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
