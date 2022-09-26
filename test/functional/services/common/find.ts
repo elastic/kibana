@@ -90,6 +90,26 @@ export class FindService extends FtrService {
     });
   }
 
+  public async setValueByClass(selector: string, text: string, topOffset?: number): Promise<void> {
+    this.log.debug(`Find.setValueByClass('${selector}', '${text}')`);
+    return await this.retry.try(async () => {
+      const element = await this.byClassName(selector);
+      await element.click(topOffset);
+
+      // in case the input element is actually a child of the testSubject, we
+      // call clearValue() and type() on the element that is focused after
+      // clicking on the testSubject
+      const input = await this.activeElement();
+      if (input) {
+        await input.clearValue();
+        await input.type(text);
+      } else {
+        await element.clearValue();
+        await element.type(text);
+      }
+    });
+  }
+
   public async selectValue(selector: string, value: string): Promise<void> {
     this.log.debug(`Find.selectValue('${selector}', option[value="${value}"]')`);
     const combobox = await this.byCssSelector(selector);

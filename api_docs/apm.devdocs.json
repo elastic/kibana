@@ -445,23 +445,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              "{ setup: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>; start: () => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
-              ">; }"
+              "APMCore"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false,
@@ -5579,7 +5563,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { dataView: ",
+          ", { created: boolean; dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -5587,7 +5571,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined; }, ",
+          "; } | { created: boolean; reason?: string | undefined; }, ",
           "APMRouteCreateOptions",
           ">; }"
         ],

@@ -43,6 +43,7 @@ export const getTTYQueryPredicates = async (
             { term: { [EVENT_ACTION]: 'fork' } },
             { term: { [EVENT_ACTION]: 'exec' } },
             { term: { [EVENT_ACTION]: 'end' } },
+            { term: { [EVENT_ACTION]: 'text_output' } },
           ],
           must: [{ term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } }],
         },
@@ -56,12 +57,9 @@ export const getTTYQueryPredicates = async (
 
   if (lastEventHits.length > 0) {
     const lastEvent: ProcessEvent = lastEventHits[0]._source as ProcessEvent;
-    const sessionEnded = lastEvent.event?.action === EventAction.end && lastEvent['@timestamp'];
     const lastEventTime = lastEvent['@timestamp'];
     const rangeEnd =
-      sessionEnded && lastEventTime
-        ? parse(lastEventTime)?.add(30, 'second').toISOString()
-        : new Date().toISOString();
+      (lastEventTime && parse(lastEventTime)?.toISOString()) || new Date().toISOString();
     const range = [lastEvent?.process?.entry_leader?.start, rangeEnd];
     const tty = lastEvent?.process?.entry_leader?.tty;
     const hostId = lastEvent?.host?.id;
