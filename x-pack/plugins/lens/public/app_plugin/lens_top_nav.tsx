@@ -15,6 +15,7 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import {
   LensAppServices,
   LensTopNavActions,
@@ -733,7 +734,21 @@ export const LensTopNavMenu = ({
     [canEditDataView, dataViewEditor, dispatchChangeIndexPattern]
   );
 
-  const dataViewPickerProps = {
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const dataView = await dataViewsService.create({
+        title: pattern,
+      });
+      if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
+      }
+      dispatchChangeIndexPattern(dataView);
+      setCurrentIndexPattern(dataView);
+    },
+    [dataViewsService, dispatchChangeIndexPattern]
+  );
+
+  const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: currentIndexPattern?.getName?.() || '',
       'data-test-subj': 'lns-dataView-switch-link',
@@ -742,6 +757,7 @@ export const LensTopNavMenu = ({
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
+    onCreateDefaultAdHocDataView,
     adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
     onChangeDataView: (newIndexPatternId: string) => {
       const currentDataView = indexPatterns.find(

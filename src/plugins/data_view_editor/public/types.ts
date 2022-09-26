@@ -65,6 +65,7 @@ export interface PluginSetup {}
 export interface PluginStart {
   openEditor(options: DataViewEditorProps): () => void;
   IndexPatternEditorComponent: FC<DataViewEditorProps>;
+  getIndices: (pattern: string) => Promise<MatchedItem[]>;
   userPermissions: {
     editDataView: () => boolean;
   };
