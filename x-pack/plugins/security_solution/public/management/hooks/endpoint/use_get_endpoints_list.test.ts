@@ -12,6 +12,7 @@ import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants'
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
 import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -157,5 +158,44 @@ describe('useGetEndpointsList hook', () => {
     expect(
       res.data?.map((host) => host.name.split('-')[2]).filter((name) => name === 'inactive').length
     ).toEqual(3);
+  });
+
+  it('should only list 50 agents when more than 50 in the metadata list API', async () => {
+    const getApiResponse = apiMocks.responseProvider.metadataList.getMockImplementation();
+
+    apiMocks.responseProvider.metadataList.mockImplementation(() => {
+      if (getApiResponse) {
+        const generator = new EndpointDocGenerator('seed');
+        const total = 60;
+        const data = Array.from({ length: total }, () => {
+          const endpoint = {
+            metadata: generator.generateHostMetadata(),
+            host_status: HostStatus.UNHEALTHY,
+          };
+
+          generator.updateCommonInfo();
+
+          return endpoint;
+        });
+
+        return {
+          ...getApiResponse(),
+          data,
+          page: 0,
+          // this page size is not used by the hook (it uses the default of 50)
+          // this is only for the test
+          pageSize: 80,
+          total,
+        };
+      }
+      throw new Error('some error');
+    });
+
+    // verify metadata list does indeed show that it has more than 50 agents
+    expect(apiMocks.responseProvider.metadataList().data?.length).toEqual(60);
+
+    // verify useGetEndpointsList hook returns all 50 agents in the list
+    const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: '' }));
+    expect(res.data?.length).toEqual(50);
   });
 });
