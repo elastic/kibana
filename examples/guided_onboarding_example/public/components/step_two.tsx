@@ -30,7 +30,7 @@ export const StepTwo = (props: StepTwoProps) => {
 
   useEffect(() => {
     const subscription = guidedOnboardingApi
-      ?.isGuideStepActive$('search', 'search_experience')
+      ?.isGuideStepActive$('search', 'browse_docs')
       .subscribe((isStepActive) => {
         setIsTourStepOpen(isStepActive);
       });
