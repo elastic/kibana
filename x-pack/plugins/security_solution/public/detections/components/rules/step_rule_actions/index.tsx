@@ -13,10 +13,12 @@ import {
   EuiButton,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -40,6 +42,7 @@ import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
+import { THROTTLE_FIELD_HELP_TEXT, THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY } from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -64,6 +67,22 @@ const getThrottleOptions = (throttle?: string | null) => {
   }
 
   return THROTTLE_OPTIONS;
+};
+
+const DisplayActionsHeader = () => {
+  return (
+    <>
+      <EuiTitle size="s">
+        <h4>
+          <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+    </>
+  );
 };
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
@@ -164,11 +183,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       isLoading: isLoadingCaseAction,
       dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
       hasNoInitialSelection: false,
+      helpText: isQueryRule(ruleType)
+        ? THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY
+        : THROTTLE_FIELD_HELP_TEXT,
       euiFieldProps: {
         options: throttleOptions,
       },
     }),
-    [isLoading, isLoadingCaseAction, throttleOptions]
+    [isLoading, isLoadingCaseAction, ruleType, throttleOptions]
   );
 
   const displayActionsOptions = useMemo(
@@ -192,11 +214,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const displayResponseActionsOptions = useMemo(() => {
     if (isQueryRule(ruleType)) {
       return (
-        <>
-          <UseArray path="responseActions">
-            {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
-          </UseArray>
-        </>
+        <UseArray path="responseActions" initialNumberOfItems={0}>
+          {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+        </UseArray>
       );
     }
     return null;
@@ -205,6 +225,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
       <>
+        <DisplayActionsHeader />
         <UseField
           path="throttle"
           component={ThrottleSelectField}
