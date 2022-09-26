@@ -17,3 +17,7 @@ export type {
   GuidedOnboardingPluginStart,
   GuidedOnboardingState,
 } from './types';
+
+export type { UseCase } from '../common/types';
+
+export { guidesConfig } from '../common/guides_config';

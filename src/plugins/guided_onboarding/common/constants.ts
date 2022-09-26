@@ -25,17 +25,20 @@ export const getDefaultStepsStatus = (guide: UseCase) => {
   });
 };
 
-export const guidedSetupDefaultState = {
-  search: {
+export const guidedSetupDefaultState = [
+  {
+    guideId: 'search',
     status: 'inactive',
     steps: getDefaultStepsStatus('search'),
   },
-  observability: {
+  {
+    guideId: 'observability',
     status: 'inactive',
     steps: getDefaultStepsStatus('observability'),
   },
-  security: {
+  {
+    guideId: 'security',
     status: 'inactive',
     steps: getDefaultStepsStatus('security'),
   },
-};
+];

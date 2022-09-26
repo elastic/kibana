@@ -22,7 +22,7 @@ export interface AppPluginStartDependencies {
 }
 
 export interface GuideState {
-  id: UseCase;
+  guideId: UseCase;
   status: GuideStatus;
   activeStep?: string;
   steps: Array<{

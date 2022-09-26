@@ -19,62 +19,28 @@ export const guidedSetupSavedObjects: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      search: {
-        type: 'object',
+      guideId: {
+        type: 'keyword',
+      },
+      status: {
+        type: 'keyword',
+      },
+      isActive: {
+        type: 'boolean',
+      },
+      steps: {
+        type: 'nested',
         properties: {
-          status: {
+          id: {
             type: 'keyword',
           },
-          steps: {
-            type: 'nested',
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-              status: {
-                type: 'keyword',
-              },
-            },
+          status: {
+            type: 'keyword',
           },
         },
       },
-      observability: {
-        type: 'object',
-        properties: {
-          status: {
-            type: 'keyword',
-          },
-          steps: {
-            type: 'nested',
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-              status: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-      security: {
-        type: 'object',
-        properties: {
-          status: {
-            type: 'keyword',
-          },
-          steps: {
-            type: 'nested',
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-              status: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
+      skippedDate: {
+        type: 'date',
       },
     },
   },

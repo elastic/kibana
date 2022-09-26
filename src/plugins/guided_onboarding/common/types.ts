@@ -15,7 +15,7 @@ export type UseCase = 'observability' | 'security' | 'search';
  * Ready to complete: Steps have been completed, but "Continue using Elastic" has not been clicked
  * Complete: Steps and guide have been completed
  */
-export type GuideStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_complete' | 'complete';
+export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
 
 /**
  * Inactive: Step has not started
@@ -48,3 +48,17 @@ export interface GuideConfig {
 export type GuidesConfig = {
   [key in UseCase]: GuideConfig;
 };
+
+export type ObservabilitySteps = 'add_data' | 'view_dashboard' | 'tour_observability';
+export type SecuritySteps = 'add_data' | 'rules' | 'alerts' | 'cases';
+export type SearchSteps = 'add_data' | 'browse_docs' | 'search_experience';
+
+export interface GuideSavedObject {
+  guideId: UseCase;
+  status: GuideStatus;
+  isActive?: boolean;
+  steps: Array<{
+    id: ObservabilitySteps | SecuritySteps | SearchSteps;
+    status: StepStatus;
+  }>;
+}
