@@ -116,6 +116,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     aiopsListState,
     setGlobalState,
     undefined,
+    undefined,
     BAR_TARGET
   );
 
