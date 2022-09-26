@@ -55,7 +55,7 @@ import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getInfraMetricIndices } from '../../lib/helpers/get_infra_metric_indices';
+
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
@@ -274,7 +274,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     import('./get_service_metadata_details').ServiceMetadataDetails
   > => {
     const setup = await setupRequest(resources);
-    const { params, context, plugins } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
@@ -295,19 +295,10 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     });
 
     if (serviceMetadataDetails?.container?.ids) {
-      const {
-        savedObjects: { client: savedObjectsClient },
-        elasticsearch: { client: esClient },
-      } = await context.core;
-
-      const indexName = await getInfraMetricIndices({
-        infraPlugin: plugins.infra,
-        savedObjectsClient,
-      });
+      const { infraMetricsClient } = setup;
 
       const containerMetadata = await getServiceOverviewContainerMetadata({
-        esClient: esClient.asCurrentUser,
-        indexName,
+        infraMetricsClient,
         containerIds: serviceMetadataDetails.container.ids,
         start,
         end,
@@ -911,7 +902,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       | undefined;
   }> => {
     const setup = await setupRequest(resources);
-    const { params, context, plugins } = resources;
+    const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
 
@@ -925,19 +916,9 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       });
 
     if (serviceInstanceMetadataDetails?.container?.id) {
-      const {
-        savedObjects: { client: savedObjectsClient },
-        elasticsearch: { client: esClient },
-      } = await context.core;
-
-      const indexName = await getInfraMetricIndices({
-        infraPlugin: plugins.infra,
-        savedObjectsClient,
-      });
-
+      const { infraMetricsClient } = setup;
       const containerMetadata = await getServiceInstanceContainerMetadata({
-        esClient: esClient.asCurrentUser,
-        indexName,
+        infraMetricsClient,
         containerId: serviceInstanceMetadataDetails.container.id,
         start,
         end,

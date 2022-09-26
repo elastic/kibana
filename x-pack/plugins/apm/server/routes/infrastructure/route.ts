@@ -30,11 +30,7 @@ const infrastructureRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
 
-    const {
-      context,
-      params,
-      plugins: { infra },
-    } = resources;
+    const { params } = resources;
 
     const {
       path: { serviceName },
@@ -54,8 +50,7 @@ const infrastructureRoute = createApmServerRoute({
     // due some limitations on the data we get from apm-metrics indices, if we have a service running in a container we want to query, to get the host.name, filtering by container.id
     const containerHostNames = await getContainerHostNames({
       containerIds,
-      context,
-      infra,
+      setup,
       start,
       end,
     });

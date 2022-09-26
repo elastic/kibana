@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER,
@@ -19,6 +18,7 @@ import {
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 type ServiceOverviewContainerMetadataDetails =
   | {
@@ -40,19 +40,17 @@ interface ResponseAggregations {
 }
 
 export const getServiceOverviewContainerMetadata = async ({
-  esClient,
-  indexName,
+  infraMetricsClient,
   containerIds,
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
-  indexName?: string;
+  infraMetricsClient: InfraClient;
   containerIds: string[];
   start: number;
   end: number;
 }): Promise<ServiceOverviewContainerMetadataDetails> => {
-  if (!indexName) {
+  if (!infraMetricsClient) {
     return undefined;
   }
 
@@ -67,8 +65,10 @@ export const getServiceOverviewContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await esClient.search<unknown, ResponseAggregations>({
-    index: [indexName],
+  const response = await infraMetricsClient.search<
+    unknown,
+    ResponseAggregations
+  >({
     _source: [KUBERNETES, CONTAINER],
     size: 0,
     query: {

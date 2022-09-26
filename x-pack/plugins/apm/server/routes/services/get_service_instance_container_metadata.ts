@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER,
@@ -21,6 +20,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
+import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 type ServiceInstanceContainerMetadataDetails =
   | {
@@ -29,19 +29,17 @@ type ServiceInstanceContainerMetadataDetails =
   | undefined;
 
 export const getServiceInstanceContainerMetadata = async ({
-  esClient,
-  indexName,
+  infraMetricsClient,
   containerId,
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
-  indexName?: string;
+  infraMetricsClient: InfraClient;
   containerId: string;
   start: number;
   end: number;
 }): Promise<ServiceInstanceContainerMetadataDetails> => {
-  if (!indexName) {
+  if (!infraMetricsClient) {
     return undefined;
   }
 
@@ -56,8 +54,7 @@ export const getServiceInstanceContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await esClient.search<unknown>({
-    index: [indexName],
+  const response = await infraMetricsClient.search<unknown>({
     _source: [KUBERNETES, CONTAINER],
     size: 1,
     query: {

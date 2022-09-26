@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CONTAINER_ID,
   HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { getInfraMetricIndices } from '../../lib/helpers/get_infra_metric_indices';
+import { Setup } from '../../lib/helpers/setup_request';
+import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: Array<{
@@ -23,26 +21,21 @@ interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   }>;
 }
 
-interface InfraPlugin {
-  setup: InfraPluginSetup;
-  start: () => Promise<InfraPluginStart>;
-}
-
 const getHostNames = async ({
-  esClient,
+  infraMetricsClient,
   containerIds,
-  index,
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
+  infraMetricsClient: InfraClient;
   containerIds: string[];
-  index: string;
   start: number;
   end: number;
 }) => {
-  const response = await esClient.search<unknown, { hostNames: Aggs }>({
-    index: [index],
+  const response = await infraMetricsClient.search<
+    unknown,
+    { hostNames: Aggs }
+  >({
     body: {
       size: 0,
       query: {
@@ -78,29 +71,21 @@ const getHostNames = async ({
 
 export const getContainerHostNames = async ({
   containerIds,
-  context,
-  infra,
+  setup,
   start,
   end,
 }: {
   containerIds: string[];
-  context: ApmPluginRequestHandlerContext;
-  infra: InfraPlugin;
+  setup: Setup;
   start: number;
   end: number;
 }): Promise<string[]> => {
   if (containerIds.length) {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const metricIndices = await getInfraMetricIndices({
-      infraPlugin: infra,
-      savedObjectsClient,
-    });
+    const { infraMetricsClient } = setup;
 
     const containerHostNames = await getHostNames({
-      esClient,
+      infraMetricsClient,
       containerIds,
-      index: metricIndices,
       start,
       end,
     });
