@@ -49,7 +49,7 @@ const failureMessage = i18n.translate(
 
 const deleteConfirmPlural = (total: number) =>
   i18n.translate('xpack.triggersActionsUI.sections.rulesList.bulkUnsnoozeConfirmationPlural', {
-    defaultMessage: 'Unsnooze all {total, plural, one {# rule} other {# rules}}? ',
+    defaultMessage: 'Unsnooze {total, plural, one {# rule} other {# rules}}? ',
     values: { total },
   });
 
