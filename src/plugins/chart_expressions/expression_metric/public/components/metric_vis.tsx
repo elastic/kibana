@@ -18,13 +18,14 @@ import {
   isMetricElementEvent,
   RenderChangeListener,
   Settings,
+  MetricWTrend,
+  MetricWNumber,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
-  DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
@@ -222,17 +223,9 @@ export const MetricVis = ({
       .getConverterFor('text');
   }
 
-  let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
-
   const maxColId = config.dimensions.max
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
     : undefined;
-  if (maxColId) {
-    getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
-      domainMax: _row[maxColId],
-      progressBarDirection: config.metric.progressDirection,
-    });
-  }
 
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
@@ -242,17 +235,16 @@ export const MetricVis = ({
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
-    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
-    return {
+    const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
       title,
       subtitle,
       extra: (
         <span>
-          {secondaryPrefix}
+          {config.metric.secondaryPrefix}
           {secondaryMetricColumn
-            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+            ? `${config.metric.secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
                 row[secondaryMetricColumn.id]
               )}`
             : undefined}
@@ -272,8 +264,30 @@ export const MetricVis = ({
               rowIdx
             ) ?? defaultColor
           : config.metric.color ?? defaultColor,
-      ...getProgressBarConfig(row),
     };
+
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : 'default';
+    if (config.metric.trends && config.metric.trends[trendId]) {
+      const metricWTrend: MetricWTrend = {
+        ...baseMetric,
+        trend: config.metric.trends[trendId],
+        trendShape: 'area',
+      };
+
+      return metricWTrend;
+    }
+
+    if (maxColId && config.metric.progressDirection) {
+      const metricWProgress: MetricWProgress = {
+        ...baseMetric,
+        domainMax: row[maxColId],
+        progressBarDirection: config.metric.progressDirection,
+      };
+
+      return metricWProgress;
+    }
+
+    return baseMetric;
   });
 
   if (config.metric.minTiles) {
