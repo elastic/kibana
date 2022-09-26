@@ -51,7 +51,11 @@ export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
     refetch: fetchCasesStatus,
   } = useGetCasesStatus();
 
-  const { mttr, isLoading: isCasesMetricsLoading, fetchCasesMetrics } = useGetCasesMetrics();
+  const {
+    data: { mttr } = { mttr: 0 },
+    isLoading: isCasesMetricsLoading,
+    refetch: fetchCasesMetrics,
+  } = useGetCasesMetrics();
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),

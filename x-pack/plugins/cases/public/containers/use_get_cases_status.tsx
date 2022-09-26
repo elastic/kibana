@@ -13,7 +13,7 @@ import { useHttp } from '../common/lib/kibana';
 import { getCasesStatus } from '../api';
 import { useCasesToast } from '../common/use_cases_toast';
 import { ServerError } from '../types';
-import { CASE_METRICS, CASE_VIEW_CACHE_KEY } from './constants';
+import { CASE_STATUSES, CASE_VIEW_CACHE_KEY } from './constants';
 
 export const useGetCasesStatus = () => {
   const http = useHttp();
@@ -21,7 +21,7 @@ export const useGetCasesStatus = () => {
   const { showErrorToast } = useCasesToast();
 
   return useQuery<CasesStatus, ServerError>(
-    [CASE_VIEW_CACHE_KEY, CASE_METRICS],
+    [CASE_VIEW_CACHE_KEY, CASE_STATUSES],
     () => {
       const abortCtrlRef = new AbortController();
       return getCasesStatus({
