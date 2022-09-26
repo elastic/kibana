@@ -2429,13 +2429,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
@@ -2540,6 +2534,26 @@
                 "docId": "kibVisualizationsPluginApi",
                 "section": "def-public.PersistedState",
                 "text": "PersistedState"
+              }
+            ],
+            "path": "src/plugins/visualizations/public/visualize_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.EditorRenderProps.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
               }
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
