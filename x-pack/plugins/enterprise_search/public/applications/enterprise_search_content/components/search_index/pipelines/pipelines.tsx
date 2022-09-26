@@ -14,6 +14,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
+import { docLinks } from '../../../../shared/doc_links';
 
 import { IngestPipelinesCard } from './ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
@@ -34,7 +35,7 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href="" external color="subdued">
+              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
