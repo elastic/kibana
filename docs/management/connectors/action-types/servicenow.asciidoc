@@ -8,23 +8,6 @@ The {sn-itsm} connector uses the https://developer.servicenow.com/dev.do#!/refer
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]
-==== Prerequisites
-After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn-itsm} connector or <<servicenow-itsm-connector-update, updating an existing one>>:
-
-* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] from the {sn} Store.
-* Create a {sn} integration user and assign it the appropriate roles.
-* Create a Cross-Origin Resource Sharing (CORS) rule.
-
-If you use open authorization (OAuth), you must also:
-
-* Create an RSA keypair and add an X.509 Certificate.
-* Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map.
-The {sn-itsm} connector uses the
-https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[import set API]
-to create {sn} incidents.
-
-[float]
-[[servicenow-itsm-connector-prerequisites]]
 === Prerequisites
 
 After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or
