@@ -695,7 +695,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // disable the task
       await bulkDisable([scheduledTask.id]);
-      let runAt;
+      let runAt: string;
       await retry.try(async () => {
         const task = await currentTask(scheduledTask.id);
         runAt = task.runAt;
