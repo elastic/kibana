@@ -366,7 +366,7 @@
               },
               " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
               "OnSaveTextLanguageQueryProps",
-              ") => void) | undefined; showSubmitButton?: boolean | undefined; suggestionsSize?: ",
+              ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
               " | undefined; isScreenshotMode?: boolean | undefined; onFiltersUpdated?: ((filters: ",
               "Filter",
@@ -891,13 +891,7 @@
             "text": "IUnifiedSearchPluginServices"
           },
           " extends Partial<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">"
         ],
         "path": "src/plugins/unified_search/public/types.ts",
@@ -1025,6 +1019,20 @@
                 "text": "IStorageWrapper"
               },
               "<any, void>"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              "DocLinksStart"
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -1465,6 +1473,31 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.appName",
+            "type": "string",
+            "tags": [],
+            "label": "appName",
+            "description": [],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.deps",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "QueryStringInputDependencies"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,

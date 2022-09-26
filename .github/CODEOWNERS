@@ -84,10 +84,12 @@
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
-/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
 x-pack/plugins/files @elastic/kibana-app-services
 x-pack/examples/files_example @elastic/kibana-app-services
+/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
+/test/plugin_functional/test_suites/panel_actions @elastic/kibana-app-services
+/test/plugin_functional/test_suites/data_plugin @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -243,6 +245,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
+/kbn_pm/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -418,6 +421,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/network @elastic/security-threat-hunting-explore
@@ -752,6 +756,9 @@ packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/ki
 packages/core/injected-metadata/core-injected-metadata-common-internal @elastic/kibana-core
 packages/core/integrations/core-integrations-browser-internal @elastic/kibana-core
 packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser-internal @elastic/kibana-core
+packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
@@ -771,6 +778,9 @@ packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-cor
 packages/core/overlays/core-overlays-browser @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-internal @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-browser @elastic/kibana-core
+packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
+packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server @elastic/kibana-core
 packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
@@ -860,9 +870,12 @@ packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-expect @elastic/kibana-operations
+packages/kbn-failed-test-reporter-cli @elastic/kibana-operations
 packages/kbn-field-types @elastic/kibana-app-services
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-flot-charts @elastic/kibana-operations
+packages/kbn-ftr-common-functional-services @elastic/kibana-operations
+packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-handlebars @elastic/kibana-security
@@ -873,6 +886,7 @@ packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-interpreter @elastic/kibana-app-services
 packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
+packages/kbn-journeys @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
@@ -882,6 +896,7 @@ packages/kbn-mapbox-gl @elastic/kibana-gis
 packages/kbn-monaco @elastic/kibana-app-services
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
+packages/kbn-osquery-io-ts-types @elastic/security-asset-management
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
@@ -937,6 +952,7 @@ packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/shared-ux/avatar/solution @elastic/shared-ux
+packages/shared-ux/avatar/user_profile/impl @elastic/shared-ux
 packages/shared-ux/button_toolbar @elastic/shared-ux
 packages/shared-ux/button/exit_full_screen/impl @elastic/shared-ux
 packages/shared-ux/button/exit_full_screen/mocks @elastic/shared-ux
@@ -966,6 +982,9 @@ packages/shared-ux/page/solution_nav @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/impl @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/mocks @elastic/shared-ux
 packages/shared-ux/prompt/no_data_views/types @elastic/shared-ux
+packages/shared-ux/router/impl @elastic/shared-ux
+packages/shared-ux/router/mocks @elastic/shared-ux
+packages/shared-ux/router/types @elastic/shared-ux
 packages/shared-ux/storybook/config @elastic/shared-ux
 packages/shared-ux/storybook/mock @elastic/shared-ux
 x-pack/packages/ml/agg_utils @elastic/ml-ui
