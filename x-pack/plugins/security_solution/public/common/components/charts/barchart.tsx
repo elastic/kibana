@@ -190,7 +190,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
             ),
-            id: scopeId,
+            scopeId,
             field: stackByField,
             value: d.key,
           }))

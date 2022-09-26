@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
 import { TestProviders } from '../../../mock';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { TableId } from '../../../../../common/types';
 
 const props = {
   title: 'Severity',
@@ -44,6 +45,7 @@ const props = {
       example: '',
       fields: {},
     },
+    scopeId: TableId.test,
   },
 };
 
