@@ -262,7 +262,6 @@ const RunOsqueryButtonRenderer = ({
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { agentId } = useContext(BasicAlertDataContext);
-  console.log({ agentId });
 
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 
