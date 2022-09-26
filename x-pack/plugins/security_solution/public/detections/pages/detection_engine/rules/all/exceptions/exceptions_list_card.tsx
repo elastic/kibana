@@ -10,11 +10,13 @@ import styled from 'styled-components';
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextColor,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -162,16 +164,18 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                               title={'hello world'}
                             />
                           </EuiFlexItem>
-                          <EuiFlexItem>
+                          <EuiFlexItem grow={false}>
                             <EuiFlexGroup direction="column">
-                              <EuiFlexItem>
-                                <EuiText>{`${exceptionsList.name}`}</EuiText>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  flush={'left'}
+                                >{`${exceptionsList.name}`}</EuiButtonEmpty>
                               </EuiFlexItem>
                               <EuiFlexItem grow={false}>
-                                <EuiText>
-                                  <p className="siemSubtitle__item siemSubtitle__item--text">
+                                <EuiText size="xs">
+                                  <EuiTextColor color="subdued">
                                     {exceptionsList.description}
-                                  </p>
+                                  </EuiTextColor>
                                 </EuiText>
                               </EuiFlexItem>
                             </EuiFlexGroup>
