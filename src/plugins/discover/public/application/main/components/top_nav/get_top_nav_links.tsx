@@ -34,6 +34,8 @@ export const getTopNavLinks = ({
   onOpenSavedSearch,
   isPlainRecord,
   persistDataView,
+  addAdHocDataView,
+  adHocDataViews,
   updateAdHocDataViewId,
 }: {
   dataView: DataView;
@@ -45,6 +47,8 @@ export const getTopNavLinks = ({
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
+  adHocDataViews: DataView[];
+  addAdHocDataView: (dataView: DataView) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
@@ -80,6 +84,8 @@ export const getTopNavLinks = ({
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
+        adHocDataViews,
+        addAdHocDataView,
         savedQueryId: state.appStateContainer.getState().savedQuery,
       });
     },

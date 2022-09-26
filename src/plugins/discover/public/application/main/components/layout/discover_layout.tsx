@@ -71,6 +71,7 @@ export function DiscoverLayout({
   stateContainer,
   persistDataView,
   updateAdHocDataViewId,
+  onAddAdHocDataView,
   adHocDataViewList,
 }: DiscoverLayoutProps) {
   const {
@@ -229,6 +230,7 @@ export function DiscoverLayout({
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         adHocDataViewList={adHocDataViewList}
+        addAdHocDataView={onAddAdHocDataView}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

@@ -15,7 +15,8 @@
     "kibanaReact",
     "savedObjects",
     "data",
-    "kibanaUtils"
+    "kibanaUtils",
+    "discover"
   ],
   "configPath": ["xpack", "stack_alerts"],
   "requiredBundles": ["esUiShared"],

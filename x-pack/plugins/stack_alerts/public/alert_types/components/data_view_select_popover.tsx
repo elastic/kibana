@@ -22,7 +22,8 @@ import {
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
+import { useDiscoverAlertContext } from '@kbn/discover-plugin/public';
 import { useDiscoverAlertServices } from '../es_query/util';
 
 export interface DataViewSelectPopoverProps {
@@ -37,15 +38,34 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   dataViewId,
 }) => {
   const { data, dataViewEditor } = useDiscoverAlertServices();
-  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>();
+  const discoverContext = useDiscoverAlertContext();
+  const [adHocDataViews, setAdHocDataViews] = useState<DataViewListItem[]>(
+    discoverContext.initialAdHocDataViewList
+  );
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const loadDataViews = useCallback(async () => {
+  const loadPersistedDataViews = useCallback(async () => {
     const fetchedDataViewItems = await data.dataViews.getIdsWithTitle();
     setDataViewsItems(fetchedDataViewItems);
-  }, [setDataViewsItems, data.dataViews]);
+  }, [data.dataViews]);
+
+  const onAdHocDataView = useCallback(
+    (adHocDataView: DataView) => {
+      // sync discover state
+      discoverContext.addAdHocDataView?.(adHocDataView);
+
+      const adHocDataViewItem = {
+        id: adHocDataView.id!,
+        title: adHocDataView.title,
+        name: adHocDataView.name,
+      };
+      setAdHocDataViews((prev) => [...prev, adHocDataViewItem]);
+    },
+    [discoverContext]
+  );
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
 
@@ -56,14 +76,19 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (createdDataView) => {
                 if (createdDataView.id) {
+                  if (!createdDataView.isPersisted()) {
+                    onAdHocDataView(createdDataView);
+                  }
+
+                  await loadPersistedDataViews();
                   await onSelectDataView(createdDataView.id);
-                  await loadDataViews();
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
-    [dataViewEditor, onSelectDataView, loadDataViews]
+    [dataViewEditor, loadPersistedDataViews, onSelectDataView, onAdHocDataView]
   );
 
   useEffect(() => {
@@ -76,12 +101,17 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   }, []);
 
   useEffect(() => {
-    loadDataViews();
-  }, [loadDataViews]);
+    loadPersistedDataViews();
+  }, [loadPersistedDataViews]);
 
   const createDataViewButtonPadding = useEuiPaddingCSS('left');
 
-  if (!dataViewItems) {
+  const allDataViewItems = useMemo(
+    () => [...dataViewItems, ...adHocDataViews],
+    [adHocDataViews, dataViewItems]
+  );
+
+  if (!allDataViewItems) {
     return null;
   }
 
@@ -146,7 +176,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           `}
         >
           <DataViewsList
-            dataViewsList={dataViewItems}
+            dataViewsList={allDataViewItems}
             onChangeDataView={(newId) => {
               onSelectDataView(newId);
               closeDataViewPopover();

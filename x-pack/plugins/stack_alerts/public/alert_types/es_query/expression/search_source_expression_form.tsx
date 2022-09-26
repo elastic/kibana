@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
+import { type DataView, type Query, type ISearchSource, getTime } from '@kbn/data-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
