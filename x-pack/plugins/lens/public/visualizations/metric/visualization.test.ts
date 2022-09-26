@@ -39,7 +39,24 @@ describe('metric visualization', () => {
     },
   };
 
-  const fullState: Required<MetricVisualizationState> = {
+  const trendlineProps = {
+    trendlineLayerId: 'second',
+    trendlineLayerType: 'metricTrendline',
+    trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineTimeAccessor: 'trendline-time-col-id',
+    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
+  } as const;
+
+  const fullState: Required<
+    Omit<
+      MetricVisualizationState,
+      | 'trendlineLayerId'
+      | 'trendlineLayerType'
+      | 'trendlineMetricAccessor'
+      | 'trendlineTimeAccessor'
+      | 'trendlineBreakdownByAccessor'
+    >
+  > = {
     layerId: 'first',
     layerType: 'data',
     metricAccessor: 'metric-col-id',
@@ -53,6 +70,11 @@ describe('metric visualization', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+  };
+
+  const fullStateWTrend: Required<MetricVisualizationState> = {
+    ...fullState,
+    ...trendlineProps,
   };
 
   const mockFrameApi = createMockFramePublicAPI();
@@ -71,149 +93,163 @@ describe('metric visualization', () => {
   });
 
   describe('dimension groups configuration', () => {
-    test('generates configuration', () => {
-      expect(
-        visualization.getConfiguration({
-          state: fullState,
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        })
-      ).toMatchSnapshot();
-    });
-
-    test('color-by-value', () => {
-      expect(
-        visualization.getConfiguration({
-          state: fullState,
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        }).groups[0].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "metric-col-id",
-            "palette": Array [],
-            "triggerIcon": "colorBy",
-          },
-        ]
-      `);
-
-      expect(
-        visualization.getConfiguration({
-          state: { ...fullState, palette: undefined, color: undefined },
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        }).groups[0].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "#0077cc",
-            "columnId": "metric-col-id",
-            "triggerIcon": "color",
-          },
-        ]
-      `);
-    });
-
-    test('static coloring', () => {
-      expect(
-        visualization.getConfiguration({
-          state: { ...fullState, palette: undefined },
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        }).groups[0].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "static-color",
-            "columnId": "metric-col-id",
-            "triggerIcon": "color",
-          },
-        ]
-      `);
-
-      expect(
-        visualization.getConfiguration({
-          state: { ...fullState, color: undefined },
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        }).groups[0].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "metric-col-id",
-            "palette": Array [],
-            "triggerIcon": "colorBy",
-          },
-        ]
-      `);
-    });
-
-    test('collapse function', () => {
-      expect(
-        visualization.getConfiguration({
-          state: fullState,
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        }).groups[3].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "breakdown-col-id",
-            "triggerIcon": "aggregate",
-          },
-        ]
-      `);
-
-      expect(
-        visualization.getConfiguration({
-          state: { ...fullState, collapseFn: undefined },
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        }).groups[3].accessors
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "breakdown-col-id",
-            "triggerIcon": undefined,
-          },
-        ]
-      `);
-    });
-
-    describe('operation filtering', () => {
-      const unsupportedDataType = 'string';
-
-      const operations: OperationMetadata[] = [
-        {
-          isBucketed: true,
-          dataType: 'number',
-        },
-        {
-          isBucketed: true,
-          dataType: unsupportedDataType,
-        },
-        {
-          isBucketed: false,
-          dataType: 'number',
-        },
-        {
-          isBucketed: false,
-          dataType: unsupportedDataType,
-        },
-      ];
-
-      const testConfig = visualization
-        .getConfiguration({
-          state: fullState,
-          layerId: fullState.layerId,
-          frame: mockFrameApi,
-        })
-        .groups.map(({ groupId, filterOperations }) => [groupId, filterOperations]);
-
-      it.each(testConfig)('%s supports correct operations', (_, filterFn) => {
+    describe('primary layer', () => {
+      test('generates configuration', () => {
         expect(
-          operations.filter(filterFn as (operation: OperationMetadata) => boolean)
+          visualization.getConfiguration({
+            state: fullState,
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          })
+        ).toMatchSnapshot();
+      });
+
+      test('color-by-value', () => {
+        expect(
+          visualization.getConfiguration({
+            state: fullState,
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          }).groups[0].accessors
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "columnId": "metric-col-id",
+              "palette": Array [],
+              "triggerIcon": "colorBy",
+            },
+          ]
+        `);
+
+        expect(
+          visualization.getConfiguration({
+            state: { ...fullState, palette: undefined, color: undefined },
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          }).groups[0].accessors
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "color": "#0077cc",
+              "columnId": "metric-col-id",
+              "triggerIcon": "color",
+            },
+          ]
+        `);
+      });
+
+      test('static coloring', () => {
+        expect(
+          visualization.getConfiguration({
+            state: { ...fullState, palette: undefined },
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          }).groups[0].accessors
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "color": "static-color",
+              "columnId": "metric-col-id",
+              "triggerIcon": "color",
+            },
+          ]
+        `);
+
+        expect(
+          visualization.getConfiguration({
+            state: { ...fullState, color: undefined },
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          }).groups[0].accessors
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "columnId": "metric-col-id",
+              "palette": Array [],
+              "triggerIcon": "colorBy",
+            },
+          ]
+        `);
+      });
+
+      test('collapse function', () => {
+        expect(
+          visualization.getConfiguration({
+            state: fullState,
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          }).groups[3].accessors
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "columnId": "breakdown-col-id",
+              "triggerIcon": "aggregate",
+            },
+          ]
+        `);
+
+        expect(
+          visualization.getConfiguration({
+            state: { ...fullState, collapseFn: undefined },
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          }).groups[3].accessors
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "columnId": "breakdown-col-id",
+              "triggerIcon": undefined,
+            },
+          ]
+        `);
+      });
+
+      describe('operation filtering', () => {
+        const unsupportedDataType = 'string';
+
+        const operations: OperationMetadata[] = [
+          {
+            isBucketed: true,
+            dataType: 'number',
+          },
+          {
+            isBucketed: true,
+            dataType: unsupportedDataType,
+          },
+          {
+            isBucketed: false,
+            dataType: 'number',
+          },
+          {
+            isBucketed: false,
+            dataType: unsupportedDataType,
+          },
+        ];
+
+        const testConfig = visualization
+          .getConfiguration({
+            state: fullState,
+            layerId: fullState.layerId,
+            frame: mockFrameApi,
+          })
+          .groups.map(({ groupId, filterOperations }) => [groupId, filterOperations]);
+
+        it.each(testConfig)('%s supports correct operations', (_, filterFn) => {
+          expect(
+            operations.filter(filterFn as (operation: OperationMetadata) => boolean)
+          ).toMatchSnapshot();
+        });
+      });
+    });
+
+    describe('trendline layer', () => {
+      test('generates configuration', () => {
+        expect(
+          visualization.getConfiguration({
+            state: fullStateWTrend,
+            layerId: fullStateWTrend.trendlineLayerId,
+            frame: mockFrameApi,
+          })
         ).toMatchSnapshot();
       });
     });
@@ -301,6 +337,7 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
+                "trendline": Array [],
               },
               "function": "metricVis",
               "type": "function",
@@ -364,6 +401,7 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
+                "trendline": Array [],
               },
               "function": "metricVis",
               "type": "function",
@@ -372,6 +410,76 @@ describe('metric visualization', () => {
           "type": "expression",
         }
       `);
+    });
+
+    describe('trendline expression', () => {
+      const getTrendlineExpression = (state: MetricVisualizationState) =>
+        (visualization.toExpression(state, datasourceLayers) as ExpressionAstExpression).chain![1]
+          .arguments.trendline[0];
+
+      it('adds trendline if prerequisites are present', () => {
+        expect(getTrendlineExpression(fullStateWTrend)).toMatchInlineSnapshot(`
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "breakdownBy": Array [
+                    "trendline-breakdown-col-id",
+                  ],
+                  "metric": Array [
+                    "trendline-metric-col-id",
+                  ],
+                  "timeField": Array [
+                    "trendline-time-col-id",
+                  ],
+                },
+                "function": "metricTrendline",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          }
+        `);
+
+        expect(
+          getTrendlineExpression({ ...fullStateWTrend, trendlineBreakdownByAccessor: undefined })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "breakdownBy": Array [],
+                  "metric": Array [
+                    "trendline-metric-col-id",
+                  ],
+                  "timeField": Array [
+                    "trendline-time-col-id",
+                  ],
+                },
+                "function": "metricTrendline",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          }
+        `);
+      });
+
+      it('no trendline if no trendline layer', () => {
+        expect(
+          getTrendlineExpression({ ...fullStateWTrend, trendlineLayerId: undefined })
+        ).toBeUndefined();
+      });
+
+      it('no trendline if either metric or timefield are missing', () => {
+        expect(
+          getTrendlineExpression({ ...fullStateWTrend, trendlineMetricAccessor: undefined })
+        ).toBeUndefined();
+
+        expect(
+          getTrendlineExpression({ ...fullStateWTrend, trendlineTimeAccessor: undefined })
+        ).toBeUndefined();
+      });
     });
 
     describe('with collapse function', () => {
@@ -523,8 +631,28 @@ describe('metric visualization', () => {
     `);
   });
 
-  test('getLayerIds returns the single layer ID', () => {
+  it('appends a trendline layer', () => {
+    const newLayerId = 'new-layer-id';
+    const chk = visualization.appendLayer!(fullState, newLayerId, 'metricTrendline', '');
+    expect(chk.trendlineLayerId).toBe(newLayerId);
+    expect(chk.trendlineLayerType).toBe('metricTrendline');
+  });
+
+  it('removes trendline layer', () => {
+    const chk = visualization.removeLayer!(fullStateWTrend, fullStateWTrend.trendlineLayerId);
+    expect(chk.trendlineLayerId).toBeUndefined();
+    expect(chk.trendlineLayerType).toBeUndefined();
+    expect(chk.trendlineMetricAccessor).toBeUndefined();
+    expect(chk.trendlineTimeAccessor).toBeUndefined();
+    expect(chk.trendlineBreakdownByAccessor).toBeUndefined();
+  });
+
+  test('getLayerIds', () => {
     expect(visualization.getLayerIds(fullState)).toEqual([fullState.layerId]);
+    expect(visualization.getLayerIds(fullStateWTrend)).toEqual([
+      fullStateWTrend.layerId,
+      fullStateWTrend.trendlineLayerId,
+    ]);
   });
 
   it('gives a description', () => {
@@ -540,14 +668,24 @@ describe('metric visualization', () => {
     it('works without state', () => {
       const supportedLayers = visualization.getSupportedLayers();
       expect(supportedLayers[0].initialDimensions).toBeUndefined();
-      expect(supportedLayers).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "initialDimensions": undefined,
-            "label": "Visualization",
-            "type": "data",
-          },
-        ]
+      expect(supportedLayers[0]).toMatchInlineSnapshot(`
+        Object {
+          "disabled": true,
+          "hideFromMenu": true,
+          "initialDimensions": undefined,
+          "label": "Visualization",
+          "type": "data",
+        }
+      `);
+
+      expect({ ...supportedLayers[1], initialDimensions: undefined }).toMatchInlineSnapshot(`
+        Object {
+          "disabled": false,
+          "hideFromMenu": true,
+          "initialDimensions": undefined,
+          "label": "Trendline",
+          "type": "metricTrendline",
+        }
       `);
     });
 
@@ -563,52 +701,35 @@ describe('metric visualization', () => {
     });
   });
 
-  it('sets dimensions', () => {
+  describe('setting dimensions', () => {
     const state = {} as MetricVisualizationState;
     const columnId = 'col-id';
-    expect(
-      visualization.setDimension({
-        prevState: state,
-        columnId,
-        groupId: GROUP_ID.METRIC,
-        layerId: 'some-id',
-        frame: mockFrameApi,
-      })
-    ).toEqual({
-      metricAccessor: columnId,
-    });
-    expect(
-      visualization.setDimension({
-        prevState: state,
-        columnId,
-        groupId: GROUP_ID.SECONDARY_METRIC,
-        layerId: 'some-id',
-        frame: mockFrameApi,
-      })
-    ).toEqual({
-      secondaryMetricAccessor: columnId,
-    });
-    expect(
-      visualization.setDimension({
-        prevState: state,
-        columnId,
-        groupId: GROUP_ID.MAX,
-        layerId: 'some-id',
-        frame: mockFrameApi,
-      })
-    ).toEqual({
-      maxAccessor: columnId,
-    });
-    expect(
-      visualization.setDimension({
-        prevState: state,
-        columnId,
-        groupId: GROUP_ID.BREAKDOWN_BY,
-        layerId: 'some-id',
-        frame: mockFrameApi,
-      })
-    ).toEqual({
-      breakdownByAccessor: columnId,
+
+    const cases: Array<{
+      groupId: typeof GROUP_ID[keyof typeof GROUP_ID];
+      accessor: keyof MetricVisualizationState;
+    }> = [
+      { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },
+      { groupId: GROUP_ID.SECONDARY_METRIC, accessor: 'secondaryMetricAccessor' },
+      { groupId: GROUP_ID.MAX, accessor: 'maxAccessor' },
+      { groupId: GROUP_ID.BREAKDOWN_BY, accessor: 'breakdownByAccessor' },
+      { groupId: GROUP_ID.TREND_METRIC, accessor: 'trendlineMetricAccessor' },
+      { groupId: GROUP_ID.TREND_TIME, accessor: 'trendlineTimeAccessor' },
+      { groupId: GROUP_ID.TREND_BREAKDOWN_BY, accessor: 'trendlineBreakdownByAccessor' },
+    ];
+
+    it.each(cases)('sets %s', ({ groupId, accessor }) => {
+      expect(
+        visualization.setDimension({
+          prevState: state,
+          columnId,
+          groupId,
+          layerId: 'some-id',
+          frame: mockFrameApi,
+        })
+      ).toEqual({
+        [accessor]: columnId,
+      });
     });
   });
 
@@ -619,7 +740,7 @@ describe('metric visualization', () => {
       layerId: 'some-id',
       columnId: '',
       frame: mockFrameApi,
-      prevState: fullState,
+      prevState: fullStateWTrend,
     };
 
     it('removes metric dimension', () => {
@@ -659,6 +780,30 @@ describe('metric visualization', () => {
       expect(removed).not.toHaveProperty('breakdownByAccessor');
       expect(removed).not.toHaveProperty('collapseFn');
       expect(removed).not.toHaveProperty('maxCols');
+    });
+    it('removes trend time dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullStateWTrend.trendlineTimeAccessor,
+      });
+
+      expect(removed).not.toHaveProperty('trendlineTimeAccessor');
+    });
+    it('removes trend metric dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullStateWTrend.trendlineMetricAccessor,
+      });
+
+      expect(removed).not.toHaveProperty('trendlineMetricAccessor');
+    });
+    it('removes trend breakdown-by dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullStateWTrend.trendlineBreakdownByAccessor,
+      });
+
+      expect(removed).not.toHaveProperty('trendlineBreakdownByAccessor');
     });
   });
 

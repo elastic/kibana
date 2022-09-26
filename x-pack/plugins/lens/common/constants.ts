@@ -46,6 +46,7 @@ export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
+  METRIC_TRENDLINE: 'metricTrendline',
 } as const;
 
 // might collide with user-supplied field names, try to make as unique as possible

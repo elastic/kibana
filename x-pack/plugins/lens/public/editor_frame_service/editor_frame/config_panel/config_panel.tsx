@@ -12,6 +12,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
+import { LayerType } from '../../../../common';
 import { changeIndexPattern } from '../../../state_management/lens_slice';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -23,7 +24,7 @@ import {
   useLensDispatch,
   removeOrClearLayer,
   cloneLayer,
-  addLayer,
+  addLayer as addLayerAction,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -185,6 +186,12 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews, props.indexPatternService]
   );
 
+  const addLayer = (layerType: LayerType) => {
+    const layerId = generateId();
+    dispatchLens(addLayerAction({ layerId, layerType }));
+    setNextFocusedLayerId(layerId);
+  };
+
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => (
@@ -201,6 +208,7 @@ export function LayerPanels(
           updateDatasourceAsync={updateDatasourceAsync}
           onChangeIndexPattern={onChangeIndexPattern}
           updateAll={updateAll}
+          addLayer={addLayer}
           isOnlyLayer={
             getRemoveOperation(
               activeVisualization,
@@ -268,11 +276,7 @@ export function LayerPanels(
         visualization={activeVisualization}
         visualizationState={visualization.state}
         layersMeta={props.framePublicAPI}
-        onAddLayerClick={(layerType) => {
-          const layerId = generateId();
-          dispatchLens(addLayer({ layerId, layerType }));
-          setNextFocusedLayerId(layerId);
-        }}
+        onAddLayerClick={(layerType) => addLayer(layerType)}
       />
     </EuiForm>
   );

@@ -677,6 +677,8 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   groupId: string;
   accessor: string;
   setState(newState: T | ((currState: T) => T)): void;
+  addLayer: (layerType: LayerType) => void;
+  removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -955,6 +957,7 @@ export interface Visualization<T = unknown, P = unknown> {
       groupId: string;
       staticValue?: unknown;
     }>;
+    hideFromMenu?: boolean;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */

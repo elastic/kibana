@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`metric visualization dimension groups configuration generates configuration 1`] = `
+exports[`metric visualization dimension groups configuration primary layer generates configuration 1`] = `
 Object {
   "groups": Array [
     Object {
@@ -20,7 +20,6 @@ Object {
       },
       "groupId": "metric",
       "groupLabel": "Primary metric",
-      "layerId": "first",
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -42,7 +41,6 @@ Object {
       },
       "groupId": "secondaryMetric",
       "groupLabel": "Secondary metric",
-      "layerId": "first",
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -65,7 +63,6 @@ Object {
       "groupId": "max",
       "groupLabel": "Maximum value",
       "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
-      "layerId": "first",
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -90,7 +87,6 @@ Object {
       },
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
-      "layerId": "first",
       "required": false,
       "supportsMoreColumns": false,
     },
@@ -98,7 +94,7 @@ Object {
 }
 `;
 
-exports[`metric visualization dimension groups configuration operation filtering breakdownBy supports correct operations 1`] = `
+exports[`metric visualization dimension groups configuration primary layer operation filtering breakdownBy supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -111,7 +107,7 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration operation filtering max supports correct operations 1`] = `
+exports[`metric visualization dimension groups configuration primary layer operation filtering max supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -120,7 +116,7 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration operation filtering metric supports correct operations 1`] = `
+exports[`metric visualization dimension groups configuration primary layer operation filtering metric supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
@@ -129,11 +125,73 @@ Array [
 ]
 `;
 
-exports[`metric visualization dimension groups configuration operation filtering secondaryMetric supports correct operations 1`] = `
+exports[`metric visualization dimension groups configuration primary layer operation filtering secondaryMetric supports correct operations 1`] = `
 Array [
   Object {
     "dataType": "number",
     "isBucketed": false,
   },
 ]
+`;
+
+exports[`metric visualization dimension groups configuration trendline layer generates configuration 1`] = `
+Object {
+  "groups": Array [
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-metric-col-id",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "trendMetric",
+      "groupLabel": "Primary metric",
+      "hideGrouping": true,
+      "nestingOrder": 2,
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "required": true,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-time-col-id",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "trendTime",
+      "groupLabel": "Time field",
+      "groupTooltip": "This is the time axis for the trend line",
+      "hideGrouping": true,
+      "nestingOrder": 1,
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "required": true,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-breakdown-col-id",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "trendBreakdownBy",
+      "groupLabel": "Break down by",
+      "hideGrouping": true,
+      "nestingOrder": 0,
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "required": false,
+      "supportsMoreColumns": false,
+    },
+  ],
+}
 `;

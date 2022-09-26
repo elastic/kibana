@@ -99,6 +99,7 @@ describe('LayerPanel', () => {
       updateAll: jest.fn(),
       framePublicAPI: frame,
       isOnlyLayer: true,
+      addLayer: jest.fn(),
       onRemoveLayer: jest.fn(),
       onCloneLayer: jest.fn(),
       dispatch: jest.fn(),

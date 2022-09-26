@@ -17,6 +17,7 @@ import {
   EuiColorPicker,
   euiPaletteColorBlind,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -301,6 +302,33 @@ function PrimaryMetricEditor(props: SubProps) {
 
   return (
     <>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
+          defaultMessage: 'Enable trendline',
+        })}
+        css={css`
+          align-items: center;
+        `}
+      >
+        {/* // TODO - find a way to disable this if the dataview doesn't have a time field! */}
+        <EuiSwitch
+          label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
+            defaultMessage: 'Enable trendline',
+          })}
+          showLabel={false}
+          compressed
+          checked={Boolean(state.trendlineLayerId)}
+          onChange={() => {
+            if (!state.trendlineLayerId) {
+              props.addLayer('metricTrendline');
+            } else {
+              props.removeLayer(state.trendlineLayerId);
+            }
+          }}
+        />
+      </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
         fullWidth

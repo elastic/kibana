@@ -18,6 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LayerType } from '../../../../common';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
@@ -54,6 +55,7 @@ export function LayerPanel(
     layerId: string;
     layerIndex: number;
     isOnlyLayer: boolean;
+    addLayer: (layerType: LayerType) => void;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string | undefined, newState: unknown) => void;
     updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
@@ -334,6 +336,7 @@ export function LayerPanel(
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
+                  // TODO - figure out the layerType types
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                   onRemoveLayer={onRemoveLayer}
                   onCloneLayer={onCloneLayer}
@@ -658,6 +661,8 @@ export function LayerPanel(
                         groupId: activeGroup.groupId,
                         accessor: activeId,
                         setState: props.updateVisualization,
+                        addLayer: props.addLayer,
+                        removeLayer: props.onRemoveLayer,
                         panelRef,
                       }}
                     />
@@ -670,6 +675,8 @@ export function LayerPanel(
                         groupId: activeGroup.groupId,
                         accessor: activeId,
                         setState: props.updateVisualization,
+                        addLayer: props.addLayer,
+                        removeLayer: props.onRemoveLayer,
                         panelRef,
                       }}
                     />
