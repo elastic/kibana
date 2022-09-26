@@ -46,7 +46,7 @@ export function GeneralSettings() {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
         return settingsEditableConfig[key].requiresPageReload;
       });
-      await saveAll();
+      await saveAll({ trackMetricName: 'general_settings_save' });
       if (reloadPage) {
         window.location.reload();
       }

@@ -9,7 +9,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
 import { IndexThresholdAlertParams } from './types';
 
-const INDEX_THRESHOLD_DATA_API_ROOT = '/api/triggers_actions_ui/data';
+const INDEX_THRESHOLD_DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 
 export interface GetThresholdAlertVisualizationDataParams {
   model: IndexThresholdAlertParams;
