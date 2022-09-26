@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { sum } from 'lodash/fp';
+import { sumBy } from 'lodash/fp';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -134,7 +134,13 @@ export const EntityAnalyticsHeader = () => {
     inspect: inspectHostRiskScore,
   });
 
-  const totalAnomalies = useMemo(() => sum(data.map(({ count }) => count)) || '-', [data]);
+  // Anomalies are enabled if at least one job is installed
+  const areJobsEnabled = useMemo(() => data.some(({ jobId }) => !!jobId), [data]);
+
+  const totalAnomalies = useMemo(
+    () => (areJobsEnabled ? sumBy('count', data) : '-'),
+    [data, areJobsEnabled]
+  );
 
   const jobsUrl = useMlHref(ml, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
