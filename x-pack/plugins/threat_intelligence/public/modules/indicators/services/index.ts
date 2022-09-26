@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './indicators_barchart';
+export * from './fetch_aggregated_indicators';
+export * from './fetch_indicators';
