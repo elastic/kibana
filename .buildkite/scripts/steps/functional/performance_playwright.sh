@@ -46,7 +46,9 @@ unset ELASTIC_APM_SERVER_URL
 unset ELASTIC_APM_SECRET_TOKEN
 unset ELASTIC_APM_GLOBAL_LABELS
 
-for journey in x-pack/performance/journeys/*; do
+journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover" "data_stress_test_lens")
+
+for journey in "${journeys[@]}"; do
   set +e
 
   phases=("WARMUP" "TEST")
@@ -55,7 +57,7 @@ for journey in x-pack/performance/journeys/*; do
 
     export TEST_PERFORMANCE_PHASE="$phase"
     node scripts/functional_tests \
-      --config "$journey" \
+      --config "x-pack/performance/journeys/$journey.ts" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
