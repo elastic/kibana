@@ -8,7 +8,6 @@
 
 import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiProgress, EuiButtonIcon } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -140,6 +139,9 @@ async function getComponent({
       <DiscoverField {...props} />
     </KibanaContextProvider>
   );
+  // wait for lazy modules
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await comp.update();
   return { comp, props };
 }
 
@@ -233,13 +235,8 @@ describe('discover sidebar field', function () {
       aggregatable: true,
       searchable: true,
     });
-    let comp: ReactWrapper;
 
-    await act(async () => {
-      const result = await getComponent({ showFieldStats: true, field, onAddFilterExists: true });
-      comp = result.comp;
-      await comp.update();
-    });
+    const { comp } = await getComponent({ showFieldStats: true, field, onAddFilterExists: true });
 
     await act(async () => {
       const fieldItem = findTestSubject(comp, 'field-machine.os.raw-showDetails');
@@ -247,15 +244,15 @@ describe('discover sidebar field', function () {
       await comp.update();
     });
 
-    await comp!.update();
+    await comp.update();
 
-    expect(comp!.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(findTestSubject(comp!, 'dscFieldStats-title').text()).toBe('Top values');
-    expect(findTestSubject(comp!, 'dscFieldStats-topValues-bucket')).toHaveLength(2);
+    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(findTestSubject(comp, 'dscFieldStats-title').text()).toBe('Top values');
+    expect(findTestSubject(comp, 'dscFieldStats-topValues-bucket')).toHaveLength(2);
     expect(
-      findTestSubject(comp!, 'dscFieldStats-topValues-formattedFieldValue').first().text()
+      findTestSubject(comp, 'dscFieldStats-topValues-formattedFieldValue').first().text()
     ).toBe('osx');
-    expect(comp!.find(EuiProgress)).toHaveLength(2);
-    expect(findTestSubject(comp!, 'dscFieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
+    expect(comp.find(EuiProgress)).toHaveLength(2);
+    expect(findTestSubject(comp, 'dscFieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
   });
 });

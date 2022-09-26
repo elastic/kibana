@@ -67,6 +67,9 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
     defaultMessage: 'Delete data view field',
   });
 
+  // TODO: should we double check edit/delete access here too?
+  // const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+
   return (
     <EuiPopoverTitle>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -78,7 +81,7 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
           </EuiTitle>
         </EuiFlexItem>
         {onAddFieldToWorkspace && (
-          <EuiFlexItem grow={false} data-test-subj="unifiedFieldList_fieldPopoverTitle_useField">
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_useField">
             <EuiToolTip content={addFieldToWorkspace}>
               <EuiButtonIcon
                 onClick={() => {
@@ -93,12 +96,10 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
           </EuiFlexItem>
         )}
         {onAddFilter &&
-          field.filterable && // TODO: check that it's disabled for meta fields
+          field.filterable &&
+          // !dataView.metaFields.includes(field.name) && // TODO: disable for meta fields?
           !field.scripted && (
-            <EuiFlexItem
-              grow={false}
-              data-test-subj="unifiedFieldList_fieldPopoverTitle_addExistsFilter"
-            >
+            <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addExistsFilter">
               <EuiToolTip content={addExistsFilterTooltip}>
                 <EuiButtonIcon
                   onClick={() => {
@@ -114,7 +115,7 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
           )}
         {onEditField &&
           (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
-            <EuiFlexItem grow={false} data-test-subj="unifiedFieldList_fieldPopoverTitle_editField">
+            <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_editField">
               <EuiToolTip content={editFieldTooltip}>
                 <EuiButtonIcon
                   onClick={() => {
@@ -129,7 +130,7 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
             </EuiFlexItem>
           )}
         {onDeleteField && field.isRuntimeField && (
-          <EuiFlexItem grow={false} data-test-subj="unifiedFieldList_fieldPopoverTitle_deleteField">
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_deleteField">
             <EuiToolTip content={deleteFieldTooltip}>
               <EuiButtonIcon
                 onClick={() => {

@@ -9,24 +9,13 @@
 import './discover_field.scss';
 
 import React, { useState, useCallback, memo, useMemo } from 'react';
-import {
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiTitle,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiTitle, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
-import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
+import { FieldStats, FieldPopover } from '@kbn/unified-field-list-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
@@ -348,85 +337,6 @@ function DiscoverFieldComponent({
     );
   }
 
-  const { canEdit, canDelete } = getFieldCapabilities(dataView, field);
-  const canEditField = onEditField && canEdit;
-  const canDeleteField = onDeleteField && canDelete;
-
-  const addExistFilterTooltip = i18n.translate(
-    'discover.fieldChooser.discoverField.addExistFieldLabel',
-    {
-      defaultMessage: 'Filter for field present',
-    }
-  );
-
-  const editFieldTooltip = i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
-    defaultMessage: 'Edit data view field',
-  });
-
-  const deleteFieldTooltip = i18n.translate(
-    'discover.fieldChooser.discoverField.deleteFieldLabel',
-    {
-      defaultMessage: 'Delete data view field',
-    }
-  );
-
-  const popoverTitle = (
-    <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem grow={true}>
-          <h5>{field.displayName}</h5>
-        </EuiFlexItem>
-        {onAddFilter && !dataView.metaFields.includes(field.name) && !field.scripted && (
-          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelAddExistFilterItem">
-            <EuiToolTip content={addExistFilterTooltip}>
-              <EuiButtonIcon
-                onClick={() => {
-                  setOpen(false);
-                  onAddFilter('_exists_', field.name, '+');
-                }}
-                iconType="filter"
-                data-test-subj={`discoverFieldListPanelAddExistFilter-${field.name}`}
-                aria-label={addExistFilterTooltip}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {canEditField && (
-          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelEditItem">
-            <EuiToolTip content={editFieldTooltip}>
-              <EuiButtonIcon
-                onClick={() => {
-                  if (onEditField) {
-                    togglePopover();
-                    onEditField(field.name);
-                  }
-                }}
-                iconType="pencil"
-                data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
-                aria-label={editFieldTooltip}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {canDeleteField && (
-          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelDeleteItem">
-            <EuiToolTip content={deleteFieldTooltip}>
-              <EuiButtonIcon
-                onClick={() => {
-                  onDeleteField?.(field.name);
-                }}
-                iconType="trash"
-                data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
-                color="danger"
-                aria-label={deleteFieldTooltip}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPopoverTitle>
-  );
-
   const button = (
     <FieldButton
       size="s"
@@ -447,6 +357,7 @@ function DiscoverFieldComponent({
       fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
     />
   );
+
   if (!isDocumentRecord) {
     return button;
   }
@@ -522,19 +433,21 @@ function DiscoverFieldComponent({
       </>
     );
   };
+
   return (
-    <EuiPopover
-      display="block"
-      button={button}
+    <FieldPopover
       isOpen={infoIsOpen}
+      field={field}
+      button={button}
       closePopover={() => setOpen(false)}
       data-test-subj="discoverFieldListPanelPopover"
-      anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
+      onAddFilter={onAddFilter}
+      onEditField={onEditField}
+      onDeleteField={onDeleteField}
     >
-      {popoverTitle}
       {infoIsOpen && renderPopover()}
-    </EuiPopover>
+    </FieldPopover>
   );
 }
 

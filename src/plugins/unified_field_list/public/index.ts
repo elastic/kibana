@@ -16,6 +16,7 @@ export type {
 } from '../common/types';
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
+export { FieldPopover, type FieldPopoverProps } from './components/field_popover';
 export { loadFieldStats } from './services/field_stats';
 export { loadFieldExisting } from './services/field_existing';
 

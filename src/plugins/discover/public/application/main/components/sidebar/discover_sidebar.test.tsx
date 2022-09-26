@@ -85,7 +85,7 @@ describe('discover sidebar', function () {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     props = getCompProps();
     mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
       .fn()
@@ -95,11 +95,14 @@ describe('discover sidebar', function () {
       return { ...dataView, isPersisted: () => true };
     });
 
-    comp = mountWithIntl(
+    comp = await mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
         <DiscoverSidebar {...props} />
       </KibanaContextProvider>
     );
+    // wait for lazy modules
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -128,7 +131,7 @@ describe('discover sidebar', function () {
 
   it('should render "Edit field" button', () => {
     findTestSubject(comp, 'field-bytes').simulate('click');
-    const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
+    const editFieldButton = findTestSubject(comp, 'fieldPopoverTitle_editField-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');
     expect(props.editField).toHaveBeenCalledWith('bytes');

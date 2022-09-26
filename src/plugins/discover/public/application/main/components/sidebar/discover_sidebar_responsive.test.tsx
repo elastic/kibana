@@ -190,7 +190,9 @@ describe('discover responsive sidebar', function () {
           <DiscoverSidebarResponsive {...props} />
         </KibanaContextProvider>
       );
-      comp.update();
+      // wait for lazy modules
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await comp.update();
     });
   });
 
@@ -230,7 +232,7 @@ describe('discover responsive sidebar', function () {
     });
 
     await comp.update();
-    findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
+    findTestSubject(comp, 'fieldPopoverTitle_addExistsFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
