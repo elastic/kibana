@@ -18,6 +18,8 @@ cd target
 
 download "kibana-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
+download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-ubi8-$FULL_VERSION-docker-image.tar.gz"
 
 download "kibana-$FULL_VERSION-arm64.deb"
