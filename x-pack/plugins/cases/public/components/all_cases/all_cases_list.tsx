@@ -39,6 +39,9 @@ import {
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import {
+  CASE_METRICS,
+  CASE_STATUSES,
+  CASE_VIEW_CACHE_KEY,
   DELETE_CASES_CACHE_KEY,
   USER_PROFILES_BULK_GET_CACHE_KEY,
   USER_PROFILES_CACHE_KEY,
@@ -65,14 +68,12 @@ export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case) => void;
-  doRefresh?: () => void;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
-  ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
+  ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
     const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
-    const [refresh, setRefresh] = useState(0);
     const isMutatingCases = useIsMutating([DELETE_CASES_CACHE_KEY]);
     const isLoading = Boolean(isMutatingCases);
 
@@ -150,17 +151,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         if (dataRefresh) {
           refetchCases();
           queryClient.refetchQueries([USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY]);
+          queryClient.refetchQueries([CASE_VIEW_CACHE_KEY, CASE_STATUSES]);
+          queryClient.refetchQueries([CASE_VIEW_CACHE_KEY, CASE_METRICS]);
+        }
 
-          setRefresh((currRefresh: number) => currRefresh + 1);
-        }
-        if (doRefresh) {
-          doRefresh();
-        }
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
       },
-      [deselectCases, doRefresh, queryClient, refetchCases]
+      [deselectCases, queryClient, refetchCases]
     );
 
     const tableOnChangeCallback = useCallback(
@@ -287,7 +286,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           className="essentialAnimation"
           $isShow={isLoading || isLoadingCases}
         />
-        {!isSelectorView ? <CasesMetrics refresh={refresh} /> : null}
+        {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}

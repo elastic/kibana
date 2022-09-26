@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -22,9 +22,6 @@ import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
-interface CountProps {
-  refresh?: number;
-}
 const MetricsFlexGroup = styled.div`
   ${({ theme }) => css`
     .euiFlexGroup {
@@ -40,7 +37,7 @@ const MetricsFlexGroup = styled.div`
   `}
 `;
 
-export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
+export const CasesMetrics: React.FC = () => {
   const {
     data: { countOpenCases, countInProgressCases, countClosedCases } = {
       countOpenCases: 0,
@@ -48,26 +45,14 @@ export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
       countClosedCases: 0,
     },
     isLoading: isCasesStatusLoading,
-    refetch: fetchCasesStatus,
   } = useGetCasesStatus();
 
-  const {
-    data: { mttr } = { mttr: 0 },
-    isLoading: isCasesMetricsLoading,
-    refetch: fetchCasesMetrics,
-  } = useGetCasesMetrics();
+  const { data: { mttr } = { mttr: 0 }, isLoading: isCasesMetricsLoading } = useGetCasesMetrics();
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),
     [mttr]
   );
-
-  useEffect(() => {
-    if (refresh != null) {
-      fetchCasesStatus();
-      fetchCasesMetrics();
-    }
-  }, [fetchCasesMetrics, fetchCasesStatus, refresh]);
 
   return (
     <MetricsFlexGroup>
