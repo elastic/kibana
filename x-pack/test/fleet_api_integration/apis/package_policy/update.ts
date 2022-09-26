@@ -209,14 +209,15 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
-    it('should work if a policy is only updating package version', async function () {
+    it('should work if a policy is updating package version', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .send({
+          name: 'filetest-1',
           description: '',
           namespace: 'updated_namespace',
-          policy_id: managedAgentPolicyId,
+          policy_id: agentPolicyId,
           enabled: true,
           inputs: [],
           package: {
