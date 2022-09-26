@@ -68,15 +68,13 @@ export function ObservabilityStatusProgress({
   return !isGuidedSetupProgressDismissed ? (
     <>
       <EuiPanel color="primary" data-test-subj="status-progress">
-        <EuiProgress color="primary" value={progress} max={100} size="m" />
-        <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xxs">
               <h2>
                 <FormattedMessage
                   id="xpack.observability.status.progressBarTitle"
-                  defaultMessage="Guided setup for Observability"
+                  defaultMessage="Data assistant for Observability"
                 />
               </h2>
             </EuiTitle>
