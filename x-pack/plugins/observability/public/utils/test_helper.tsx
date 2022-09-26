@@ -27,13 +27,13 @@ export const data = dataPluginMock.createStartContract();
 
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
-const config = {
+const defaultConfig = {
   unsafe: {
     alertDetails: { enabled: false },
   },
 } as ConfigSchema;
 
-export const render = (component: React.ReactNode) => {
+export const render = (component: React.ReactNode, config: ConfigSchema = defaultConfig) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider services={{ ...core, data }}>
