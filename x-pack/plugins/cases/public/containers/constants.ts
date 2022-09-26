@@ -17,6 +17,7 @@ export const CASE_CONNECTORS_CACHE_KEY = 'case-connectors';
 export const CASE_LICENSE_CACHE_KEY = 'case-license-action';
 export const CASE_TAGS_CACHE_KEY = 'case-tags';
 export const DELETE_CASES_CACHE_KEY = 'delete-cases';
+export const UPDATE_CASES_CACHE_KEY = 'update-cases';
 
 /**
  * User profiles

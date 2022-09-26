@@ -38,7 +38,7 @@ describe('useUpdateCases', () => {
   });
 
   it('calls patchCase with correct arguments', async () => {
-    const spyOnPatchCases = jest.spyOn(api, 'patchCasesStatus');
+    const spyOnPatchCases = jest.spyOn(api, 'updateCases');
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
@@ -107,7 +107,7 @@ describe('useUpdateCases', () => {
   });
 
   it('unhappy path', async () => {
-    const spyOnPatchCases = jest.spyOn(api, 'patchCasesStatus');
+    const spyOnPatchCases = jest.spyOn(api, 'updateCases');
     spyOnPatchCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });

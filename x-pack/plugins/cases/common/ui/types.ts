@@ -82,6 +82,7 @@ export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
+export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 
 export interface ResolvedCase {
   case: Case;

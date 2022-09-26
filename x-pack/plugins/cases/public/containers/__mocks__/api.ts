@@ -99,7 +99,7 @@ export const patchCase = async (
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve([basicCase]);
 
-export const patchCasesStatus = async (
+export const updateCases = async (
   cases: BulkUpdateStatus[],
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve(allCases.cases);

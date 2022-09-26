@@ -7,6 +7,7 @@
 
 import React, { FunctionComponent, useCallback, useState } from 'react';
 import { EuiContextMenuPanel } from '@elastic/eui';
+import { CaseStatuses } from '../../../common';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -31,6 +32,21 @@ interface OwnProps {
 
 type Props = OwnProps;
 
+export const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
+  const totalCases = cases.length;
+  const caseTitle = totalCases === 1 ? cases[0].title : '';
+
+  if (status === CaseStatuses.open) {
+    return i18n.REOPENED_CASES({ totalCases, caseTitle });
+  } else if (status === CaseStatuses['in-progress']) {
+    return i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle });
+  } else if (status === CaseStatuses.closed) {
+    return i18n.CLOSED_CASES({ totalCases, caseTitle });
+  }
+
+  return '';
+};
+
 export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   data,
   enableBulkActions = false,
@@ -45,17 +61,26 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   const { mutate: deleteCases } = useDeleteCases();
 
   // Update case
-  const { updateBulkStatus } = useUpdateCases();
+  const { mutate: updateCases } = useUpdateCases();
 
   const toggleBulkDeleteModal = useCallback((cases: Case[]) => {
     setIsModalVisible(true);
   }, []);
 
   const handleUpdateCaseStatus = useCallback(
-    (status: string) => {
-      updateBulkStatus(selectedCases, status);
+    (status: CaseStatuses) => {
+      const casesToUpdate = selectedCases.map((theCase) => ({
+        status,
+        id: theCase.id,
+        version: theCase.version,
+      }));
+
+      updateCases({
+        cases: casesToUpdate,
+        successToasterTitle: getStatusToasterMessage(status, selectedCases),
+      });
     },
-    [selectedCases, updateBulkStatus]
+    [selectedCases, updateCases]
   );
 
   const getBulkItemsPopoverContent = useCallback(
