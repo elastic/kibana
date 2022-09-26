@@ -112,7 +112,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-describe('Action history page', () => {
+describe('Response actions history page', () => {
   const testPrefix = 'response-actions-list';
 
   let render: () => ReturnType<AppContextTestRender['render']>;

@@ -257,7 +257,7 @@ Object {
           "href": "securitySolutionUI/action_history",
           "id": "action_history",
           "isSelected": false,
-          "name": "Action history",
+          "name": "Response actions history",
           "onClick": [Function],
         },
         Object {
