@@ -130,6 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
       const tm4 = await ml.api.getTrainedModelsES();
       log.info(JSON.stringify(tm4, null, 2));
+      throw new Error('debug');
     });
 
     testJobConfigs.forEach((testConfig) => {
