@@ -33,6 +33,7 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
+import { useKibana } from '../../common/lib/kibana';
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -147,6 +148,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   addToCase,
   showResultsHeader,
 }) => {
+  const { timelines, appName } = useKibana().services;
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const renderIDColumn = useCallback(
     (id: string) => (
@@ -274,7 +277,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         },
         {
           render: (item: { action_id: string }) =>
-            addToTimeline && addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
+            addToTimeline &&
+            timelines &&
+            appName === SECURITY_APP_NAME &&
+            addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
         },
         {
           render: (item: { action_id: string }) =>
@@ -290,7 +296,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       return resultActions.map((action) => action.render(row));
     },
-    [actionId, addToCase, addToTimeline, renderDiscoverResultsAction, renderLensResultsAction]
+    [
+      actionId,
+      addToCase,
+      addToTimeline,
+      appName,
+      renderDiscoverResultsAction,
+      renderLensResultsAction,
+      timelines,
+    ]
   );
   const columns = useMemo(
     () => [
