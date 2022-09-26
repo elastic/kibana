@@ -157,7 +157,7 @@ export const useEndpointActionItems = (
                 children: (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.actions.actionsLog"
-                    defaultMessage="View actions log"
+                    defaultMessage="View response actions history"
                   />
                 ),
               },

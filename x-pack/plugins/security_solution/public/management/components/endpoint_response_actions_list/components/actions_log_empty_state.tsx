@@ -27,7 +27,7 @@ export const ActionsLogEmptyState = memo(
           title={
             <h2>
               {i18n.translate('xpack.securitySolution.actions_log.empty.title', {
-                defaultMessage: 'Actions history is empty',
+                defaultMessage: 'Response actions history is empty',
               })}
             </h2>
           }

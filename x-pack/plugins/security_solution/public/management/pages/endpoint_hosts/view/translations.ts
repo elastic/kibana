@@ -13,7 +13,7 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 
 export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.activityLog', {
-    defaultMessage: 'Actions Log',
+    defaultMessage: 'Response actions history',
   }),
   LogEntry: {
     endOfLog: i18n.translate(

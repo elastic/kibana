@@ -649,7 +649,7 @@ export const ResponseActionsLog = memo<
                 <h2>
                   <FormattedMessage
                     id="xpack.securitySolution.responseActionsList.empty.title"
-                    defaultMessage="No response actions log"
+                    defaultMessage="No results with these filters"
                   />
                 </h2>
               }

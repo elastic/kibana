@@ -363,7 +363,7 @@ describe('Action Log API', () => {
       try {
         await getActivityLog({ agent_id: mockAgentID });
       } catch (error) {
-        expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockAgentID}`);
+        expect(error.message).toEqual(`Error fetching response actions history for agent_id ${mockAgentID}`);
       }
     });
 

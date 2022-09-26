@@ -121,7 +121,7 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
 });
 
 export const ACTION_HISTORY = i18n.translate('xpack.securitySolution.navigation.actionHistory', {
-  defaultMessage: 'Action history',
+  defaultMessage: 'Response actions history',
 });
 
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
