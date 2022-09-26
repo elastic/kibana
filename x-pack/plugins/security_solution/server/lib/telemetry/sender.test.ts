@@ -134,7 +134,24 @@ describe('TelemetryEventsSender', () => {
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
             Ext: {
-              protection: 'PsProtectedSignerAntimalware-Light',
+              protection: 'PsProtectedSignerAntimalware-Light', 
+              relative_file_creation_time: 35588490.2737149, 
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual', 
+                volume_device_type: 'CD-ROM File System', 
+                dos_name: 'D:', 
+                product_id: 'Virtual DVD-ROM', 
+                vendor_id: 'Msft', 
+                nt_name: 'CdRom0', 
+                file_system_type: 'CDFS'
+              },
+              effective_parent: {
+                name: 'file.exe', 
+                pid: 6792, 
+                entity_id: 'some_entity_id', 
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
             },
           },
           Responses: '{ "result": 0 }', // >= 7.15
@@ -255,9 +272,26 @@ describe('TelemetryEventsSender', () => {
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
-            entity_id: 'some_entity_id',
+            entity_id: 'some_entity_id', 
             Ext: {
-              protection: 'PsProtectedSignerAntimalware-Light',
+              protection: 'PsProtectedSignerAntimalware-Light', 
+              relative_file_creation_time: 35588490.2737149, 
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual', 
+                volume_device_type: 'CD-ROM File System', 
+                dos_name: 'D:', 
+                product_id: 'Virtual DVD-ROM', 
+                vendor_id: 'Msft', 
+                nt_name: 'CdRom0', 
+                file_system_type: 'CDFS'
+              },
+              effective_parent: {
+                name: 'file.exe', 
+                pid: 6792, 
+                entity_id: 'some_entity_id', 
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
             },
           },
           Responses: '{ "result": 0 }',
@@ -274,6 +308,21 @@ describe('TelemetryEventsSender', () => {
             path: '/foo/bar',
             runatload: true,
             args: ['foo', 'bar'],
+          },
+          dll: {
+            Ext: {
+              relative_file_creation_time: 35588490.2737149, 
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual', 
+                volume_device_type: 'CD-ROM File System', 
+                dos_name: 'D:', 
+                product_id: 'Virtual DVD-ROM', 
+                vendor_id: 'Msft', 
+                nt_name: 'CdRom0', 
+                file_system_type: 'CDFS'
+              },
+            },
           },
         },
       ]);
