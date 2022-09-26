@@ -394,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(2);
-        expect(messages[0]).eql('1 monitor updated successfully.');
+        expect(messages[0]).eql(' 1 monitor found with no changes.');
         expect(messages[1].createdMonitors).eql([]);
         expect(messages[1].failedMonitors).eql([]);
         expect(messages[1].updatedMonitors).eql(
@@ -458,10 +458,10 @@ export default function ({ getService }: FtrProviderContext) {
           })),
         };
 
-        await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(editedMonitors);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(editedMonitors)
+        );
 
         const updatedMonitorsResponse = await Promise.all(
           projectMonitors.monitors.map((monitor) => {
@@ -476,6 +476,7 @@ export default function ({ getService }: FtrProviderContext) {
         updatedMonitorsResponse.forEach((response) => {
           expect(response.body.monitors[0].attributes.revision).eql(2);
         });
+        expect(messages[0]).eql('1 monitor updated successfully. ');
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
@@ -504,7 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(2);
-        expect(messages[0]).eql('1 monitor updated successfully.');
+        expect(messages[0]).eql(' 1 monitor found with no changes.');
         expect(messages[1].createdMonitors).eql([]);
         expect(messages[1].failedMonitors).eql([]);
         expect(messages[1].deletedMonitors).eql([]);
@@ -566,6 +567,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { monitors } = getResponse.body;
         expect(monitors[0]).eql(undefined);
+        expect(messages[0]).eql(` 1 monitor found with no changes.`);
         expect(messages[1]).eql(`Monitor ${secondMonitor.id} deleted successfully`);
         expect(messages[2].createdMonitors).eql([]);
         expect(messages[2].failedMonitors).eql([]);
@@ -922,7 +924,7 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(projectMonitors)
         );
         expect(messages).to.have.length(2);
-        expect(messages[0]).eql('1 monitor updated successfully.');
+        expect(messages[0]).eql('1 monitor updated successfully. ');
         expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
 
         // ensure that monitor can still be decrypted

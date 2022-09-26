@@ -8,9 +8,11 @@
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+
+import { useKibana } from '../../../common/lib/kibana';
 
 import type { AddToTimelinePayload } from '../../../timelines/get_add_to_timeline';
-import type { ECSMapping } from '../../../../common/schemas/common';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 

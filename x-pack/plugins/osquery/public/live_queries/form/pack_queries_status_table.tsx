@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import type { ECSMapping } from '../../../common/schemas/common';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { SECURITY_APP_NAME } from '../../timelines/get_add_to_timeline';
 import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';

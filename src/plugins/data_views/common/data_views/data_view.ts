@@ -15,7 +15,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import _, { cloneDeep, each, reject } from 'lodash';
+import { cloneDeep, each, reject } from 'lodash';
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
@@ -407,9 +407,6 @@ export class DataView implements DataViewBase {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody(): DataViewAttributes {
-    const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
-      ? undefined
-      : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
 
@@ -419,7 +416,7 @@ export class DataView implements DataViewBase {
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
-      fieldFormatMap,
+      fieldFormatMap: this.fieldFormatMap ? JSON.stringify(this.fieldFormatMap) : undefined,
       type: this.type!,
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,

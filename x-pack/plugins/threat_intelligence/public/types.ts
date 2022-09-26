@@ -20,6 +20,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -45,6 +46,7 @@ export type Services = {
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
   securityLayout: any;
+  inspector: InspectorPluginStart;
 } & CoreStart;
 
 export interface LicenseAware {

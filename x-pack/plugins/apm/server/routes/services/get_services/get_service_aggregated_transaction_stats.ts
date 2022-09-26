@@ -59,6 +59,7 @@ export async function getServiceAggregatedTransactionStats({
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -91,11 +92,6 @@ export async function getServiceAggregatedTransactionStats({
                           field: TRANSACTION_DURATION_SUMMARY,
                         },
                       },
-                      total_doc: {
-                        value_count: {
-                          field: TRANSACTION_DURATION_SUMMARY,
-                        },
-                      },
                       failure_count: {
                         sum: {
                           field: TRANSACTION_FAILURE_COUNT,
@@ -117,17 +113,6 @@ export async function getServiceAggregatedTransactionStats({
                           sort: {
                             '@timestamp': 'desc' as const,
                           },
-                        },
-                      },
-                      bucket_sort: {
-                        bucket_sort: {
-                          sort: [
-                            {
-                              total_doc: {
-                                order: 'desc',
-                              },
-                            },
-                          ],
                         },
                       },
                     },
@@ -166,7 +151,7 @@ export async function getServiceAggregatedTransactionStats({
         throughput: calculateThroughputWithRange({
           start,
           end,
-          value: topTransactionTypeBucket.total_doc.value,
+          value: topTransactionTypeBucket.doc_count,
         }),
       };
     }) ?? []

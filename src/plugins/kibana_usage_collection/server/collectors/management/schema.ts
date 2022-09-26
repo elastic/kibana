@@ -438,6 +438,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableServiceMetrics': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -555,10 +559,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'enterpriseSearch:enableIndexTransformsTab': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
