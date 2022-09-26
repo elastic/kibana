@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export * from './resource_installer';
-export * from './slo_repository';
-export * from './transform_manager';
-export * from './create_slo';
-export * from './delete_slo';
-export * from './get_slo';
+import { i18n } from '@kbn/i18n';
+
+export const FAIL_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.kpi.failSearchDescription',
+  {
+    defaultMessage: `Failed to run search on risk score`,
+  }
+);
