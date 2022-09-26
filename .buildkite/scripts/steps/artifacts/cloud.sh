@@ -17,7 +17,7 @@ TAG="$FULL_VERSION-$GIT_COMMIT"
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"
 KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
 
-# docker.elastic.co/kibana-ci/kibana-cloud:8.6.0-SNAPSHOT -> :8.6.0-SNAPSHOT-$GIT_COMMIT
+# docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION -> :$FULL_VERSION-$GIT_COMMIT
 docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
