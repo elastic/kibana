@@ -275,6 +275,24 @@ export function MachineLearningTestResourcesProvider(
       );
     },
 
+    async createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndLucene,
+        indexPatternTitle
+      );
+    },
+
+    async createSavedSearchFarequoteFilterTwoAndKueryIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndKuery,
+        indexPatternTitle
+      );
+    },
+
     async deleteSavedObjectById(id: string, objectType: SavedObjectType, force: boolean = false) {
       log.debug(`Deleting ${objectType} with id '${id}'...`);
 
@@ -483,8 +501,8 @@ export function MachineLearningTestResourcesProvider(
         SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
       );
       for (const id of savedObjectIds) {
-        if (id === 'lang_ident_model_1') {
-          log.debug('> Skipping internal lang_ident_model_1');
+        if (mlApi.isInternalModelId(id)) {
+          log.debug(`> Skipping internal ${id}`);
           continue;
         }
         await this.deleteSavedObjectById(

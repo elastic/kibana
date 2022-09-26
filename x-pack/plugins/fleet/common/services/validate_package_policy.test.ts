@@ -163,7 +163,6 @@ describe('Fleet - validatePackagePolicy()', () => {
       namespace: 'default',
       policy_id: 'test-policy',
       enabled: true,
-      output_id: 'test-output',
       inputs: [
         {
           type: 'foo',
@@ -651,7 +650,6 @@ describe('Fleet - validatePackagePolicy()', () => {
             ],
             name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
             namespace: 'default',
-            output_id: '',
             package: {
               name: 'linux',
               title: 'Linux Metrics',

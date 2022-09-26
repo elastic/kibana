@@ -49,7 +49,6 @@ import {
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
-import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
@@ -92,12 +91,12 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
-} from './lib/is_conector_deprecated';
+} from './lib/is_connector_deprecated';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
@@ -121,6 +120,7 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
 }
 
 export interface PluginStartContract {
@@ -274,13 +274,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
-    registerBuiltInActionTypes({
-      logger: this.logger,
-      actionTypeRegistry,
-      actionsConfigUtils,
-      publicBaseUrl: core.http.basePath.publicBaseUrl,
-    });
-
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
       registerActionsUsageCollector(
@@ -375,6 +368,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getSubActionConnectorClass: () => SubActionConnector,
       getCaseConnectorClass: () => CaseConnector,
+      getActionsHealth: () => {
+        return {
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
+        };
+      },
     };
   }
 

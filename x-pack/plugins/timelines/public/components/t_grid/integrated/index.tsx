@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -39,8 +40,14 @@ import type {
 
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import {
+  ALERTS_TABLE_VIEW_SELECTION_KEY,
+  getCombinedFilterQuery,
+  getDefaultViewSelection,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { Ecs } from '../../../../common/ecs';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
@@ -48,6 +55,8 @@ import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
+
+const storage = new Storage(localStorage);
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -109,6 +118,13 @@ export interface TGridIntegratedProps {
   fieldBrowserOptions?: FieldBrowserOptions;
   filters: Filter[];
   filterStatus?: AlertStatus;
+  getRowRenderer?: ({
+    data,
+    rowRenderers,
+  }: {
+    data: Ecs;
+    rowRenderers: RowRenderer[];
+  }) => RowRenderer | null;
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId?: string;
@@ -154,6 +170,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   fieldBrowserOptions,
   filters,
   filterStatus,
+  getRowRenderer,
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
@@ -181,17 +198,15 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-  const [isQueryLoading, setIsQueryLoading] = useState(true);
 
-  const [tableView, setTableView] = useState<ViewSelection>('gridView');
+  const [tableView, setTableView] = useState<ViewSelection>(
+    getDefaultViewSelection({ timelineId: id, value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY) })
+  );
+
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
-
-  useEffect(() => {
-    dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
-  }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
   const esQueryConfig = getEsQueryConfig(uiSettings);
@@ -257,6 +272,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       startDate: start,
     });
 
+  useEffect(() => {
+    dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
+  }, [dispatch, id, loading]);
+
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
@@ -264,23 +283,19 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const hasAlerts = totalCountMinusDeleted > 0;
 
+  // Only show the table-spanning loading indicator when the query is loading and we
+  // don't have data (e.g. for the initial fetch).
+  // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
+  // top of the table and the table will display the current page until the next page
+  // is fetched. This prevents a flicker when paginating.
+  const showFullLoading = loading && !hasAlerts;
+
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
 
-  useEffect(() => {
-    setIsQueryLoading(loading);
-  }, [loading]);
-
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-
-  const isFirstUpdate = useRef(true);
-  useEffect(() => {
-    if (isFirstUpdate.current && !loading) {
-      isFirstUpdate.current = false;
-    }
-  }, [loading]);
 
   useEffect(() => {
     setQuery(inspect, loading, refetch);
@@ -307,7 +322,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         data-test-subj="events-viewer-panel"
         $isFullScreen={globalFullScreen}
       >
-        {isFirstUpdate.current && <TGridLoading height="short" />}
+        {showFullLoading && <TGridLoading height="short" />}
 
         {graphOverlay}
 
@@ -357,6 +372,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         filterQuery={filterQuery}
                         filters={filters}
                         filterStatus={filterStatus}
+                        getRowRenderer={getRowRenderer}
                         hasAlertsCrud={hasAlertsCrud}
                         id={id}
                         indexNames={indexNames}

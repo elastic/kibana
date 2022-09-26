@@ -93,7 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
           },
           inputs: [],
           namespace: 'default',
-          output_id: '',
           policy_id: hostedPolicy.id,
           name: 'TEST',
           description: '123',

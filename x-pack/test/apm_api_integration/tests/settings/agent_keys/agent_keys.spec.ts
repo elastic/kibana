@@ -17,11 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const esClient = getService('es');
 
   const agentKeyName = 'test';
-  const allApplicationPrivileges = [
-    PrivilegeType.AGENT_CONFIG,
-    PrivilegeType.EVENT,
-    PrivilegeType.SOURCEMAP,
-  ];
+  const allApplicationPrivileges = [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT];
 
   async function createAgentKey(apiClient: ApmApiSupertest, privileges = allApplicationPrivileges) {
     return await apiClient({

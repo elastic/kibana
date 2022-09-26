@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import glob from 'glob';
+import globby from 'globby';
 import path from 'path';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
@@ -16,14 +16,14 @@ function getGlobPattern() {
     return '**/*.spec.ts';
   }
 
-  return envGrepFiles.includes('.spec.ts') ? envGrepFiles : `**/*${envGrepFiles}*.spec.ts`;
+  return envGrepFiles.includes('**') ? envGrepFiles : `**/*${envGrepFiles}*`;
 }
 
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
 
   describe('APM API tests', function () {
-    const tests = glob.sync(getGlobPattern(), { cwd });
+    const tests = globby.sync(getGlobPattern(), { cwd });
 
     if (envGrepFiles) {
       // eslint-disable-next-line no-console

@@ -9,4 +9,4 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './config';
-export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+export { STACK_ALERTS_FEATURE_ID } from './constants';

@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -64,6 +66,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -83,6 +86,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -101,6 +105,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -114,6 +119,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -132,6 +138,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -145,6 +152,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -163,6 +171,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -176,6 +185,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -196,6 +206,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -209,6 +220,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -227,6 +239,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -240,6 +253,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -258,6 +272,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -271,6 +286,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -290,6 +306,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -299,7 +316,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -309,7 +327,8 @@
             "label": "id",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -322,7 +341,8 @@
               "Dependency[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -335,7 +355,8 @@
               "string[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -348,7 +369,8 @@
               "unknown[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -364,6 +386,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -373,7 +396,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -383,7 +407,8 @@
             "label": "id",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -396,7 +421,8 @@
               "unknown[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -408,7 +434,8 @@
               "The ID of the module in the DLL manifest"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -424,6 +451,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -433,7 +461,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -443,7 +472,8 @@
             "label": "id",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -455,7 +485,8 @@
               "JS used to get instance of External"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -467,7 +498,8 @@
               "module name that is handled by externals"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -483,6 +515,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -492,7 +525,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -504,7 +538,8 @@
               "unique string to identify this module with (starts with `ignored`)"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -516,7 +551,8 @@
               "human readable identifier"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -532,6 +568,7 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -541,7 +578,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -553,7 +591,8 @@
               "absolute path to file on disk"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -566,7 +605,8 @@
               "{ cacheable: boolean; fileDependencies: Set<string>; }"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -579,7 +619,8 @@
               "Dependency[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -593,6 +634,7 @@
         "description": [],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -604,7 +646,8 @@
               "compilation context"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -616,7 +659,8 @@
               "full request (with loaders)"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -629,7 +673,8 @@
               "[{ module: unknown; weak: boolean; optional: boolean; loc: unknown; request: string; userRequest: string; }]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -641,7 +686,8 @@
               "absolute path, but probably includes loaders in some cases"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -653,7 +699,8 @@
               "string from source code"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -666,7 +713,8 @@
               "unknown"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -678,7 +726,8 @@
               "absolute path to file, but probablt includes loaders in some cases"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -690,7 +739,8 @@
               "module type"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
@@ -703,7 +753,8 @@
               "{ context: { issuer: string; }; path: string; }"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

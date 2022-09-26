@@ -18,6 +18,7 @@ import type {
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiLoadingContent } from '@elastic/eui';
+import { MlStorageContextProvider } from '../contexts/storage';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -88,6 +89,7 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
     if (location.hash.startsWith('#/')) {
       history.push(location.hash.replace('#', ''));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.hash]);
 
   return <>{children}</>;
@@ -103,9 +105,11 @@ export const MlRouter: FC<{
 }> = ({ pageDeps }) => (
   <Router history={pageDeps.history}>
     <LegacyHashUrlRedirect>
-      <UrlStateProvider>
-        <MlPage pageDeps={pageDeps} />
-      </UrlStateProvider>
+      <MlStorageContextProvider>
+        <UrlStateProvider>
+          <MlPage pageDeps={pageDeps} />
+        </UrlStateProvider>
+      </MlStorageContextProvider>
     </LegacyHashUrlRedirect>
   </Router>
 );

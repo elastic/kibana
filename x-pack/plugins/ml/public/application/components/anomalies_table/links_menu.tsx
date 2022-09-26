@@ -8,7 +8,6 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
-import { escapeKuery } from '@kbn/es-query';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -25,19 +24,23 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
-import { getInitialAnomaliesLayers } from '../../../maps/util';
+import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import {
   formatHumanReadableDateTimeSeconds,
   timeFormatter,
 } from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
-import { replaceStringTokens } from '../../util/string_utils';
+import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
-import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
+import {
+  escapeDoubleQuotes,
+  getDateFormatTz,
+  SourceIndicesWithGeoFields,
+} from '../../explorer/explorer_utils';
 import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import type {
@@ -49,7 +52,7 @@ import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
-
+import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
@@ -59,6 +62,7 @@ interface LinksMenuProps {
   interval: 'day' | 'hour' | 'second';
   showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
   onItemClick: () => void;
+  sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
@@ -74,9 +78,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     services: { data, share, application },
   } = kibana;
 
-  const getMapsLink = async (anomaly: AnomaliesTableRecord) => {
+  const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span, 'seconds')
@@ -96,7 +100,55 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         ? {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
-              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}`,
+              query: escapeKueryForFieldValuePair(anomaly.entityName, anomaly.entityValue),
+            },
+          }
+        : {}),
+    });
+    return location;
+  };
+
+  const getAnomalySourceMapsLink = async (
+    anomaly: AnomaliesTableRecord,
+    sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
+  ) => {
+    // Create a layer for each of the geoFields
+    const initialLayers = getInitialSourceIndexFieldLayers(
+      sourceIndicesWithGeoFields[anomaly.jobId]
+    );
+    // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStart = anomalyBucketStartMoment
+      .subtract(anomaly.source.bucket_span, 'seconds')
+      .toISOString();
+    const anomalyBucketEnd = anomalyBucketStartMoment
+      .add(anomaly.source.bucket_span * 3, 'seconds')
+      .subtract(1, 'ms')
+      .toISOString();
+    const timeRange = data.query.timefilter.timefilter.getTime();
+
+    // Set 'from' in timeRange to start bucket time for the specific anomaly
+    timeRange.from = anomalyBucketStart;
+    timeRange.to = anomalyBucketEnd;
+
+    // Create query string for influencers
+    const influencersQueryString = getQueryStringForInfluencers(
+      anomaly.influencers,
+      anomaly.entityName
+    );
+
+    const locator = share.url.locators.get(MAPS_APP_LOCATOR);
+    const location = await locator?.getLocation({
+      initialLayers,
+      timeRange,
+      filters: data.query.filterManager.getFilters(),
+      ...(anomaly.entityName && anomaly.entityValue
+        ? {
+            query: {
+              language: SEARCH_QUERY_LANGUAGE.KUERY,
+              query: `${escapeKueryForFieldValuePair(anomaly.entityName, anomaly.entityValue)}${
+                influencersQueryString !== '' ? ` and (${influencersQueryString})` : ''
+              }`,
             },
           }
         : {}),
@@ -211,6 +263,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return () => {
       unmounted = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
   const openCustomUrl = (customUrl: KibanaUrlConfig) => {
@@ -595,7 +648,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         </EuiContextMenuItem>
       );
     }
-
     if (showViewSeriesLink === true) {
       if (anomaly.isTimeSeriesViewRecord) {
         items.push(
@@ -615,14 +667,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           </EuiContextMenuItem>
         );
       }
-
+    }
+    if (application.capabilities.maps?.show) {
       if (anomaly.isGeoRecord === true) {
         items.push(
           <EuiContextMenuItem
             key="view_in_maps"
             icon="gisApp"
             onClick={async () => {
-              const mapsLink = await getMapsLink(anomaly);
+              const mapsLink = await getAnomaliesMapsLink(anomaly);
               await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
             }}
             data-test-subj="mlAnomaliesListRowActionViewInMapsButton"
@@ -630,6 +683,29 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             <FormattedMessage
               id="xpack.ml.anomaliesTable.linksMenu.viewInMapsLabel"
               defaultMessage="View in Maps"
+            />
+          </EuiContextMenuItem>
+        );
+      } else if (
+        props.sourceIndicesWithGeoFields &&
+        props.sourceIndicesWithGeoFields[anomaly.jobId]
+      ) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_in_maps"
+            icon="gisApp"
+            onClick={async () => {
+              const mapsLink = await getAnomalySourceMapsLink(
+                anomaly,
+                props.sourceIndicesWithGeoFields
+              );
+              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
+              defaultMessage="View source index in Maps"
             />
           </EuiContextMenuItem>
         );
@@ -684,6 +760,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
     return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     openInDiscoverUrl,
     discoverUrlError,

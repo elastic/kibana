@@ -17,8 +17,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
   kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
-  riskyHostsEnabled: false,
-  riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
@@ -43,7 +41,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the insights module for related alerts by process ancestry
    */
-  insightsRelatedAlertsByProcessAncestry: false,
+  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
@@ -53,6 +51,21 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the SOC trends timerange and stats on D&R page
+   */
+  socTrendsEnabled: false,
+
+  /**
+   * Enables the detection response actions in rule + alerts
+   */
+  responseActionsEnabled: true,
+
+  /**
+   * Enables endpoint package level rbac
+   */
+  endpointRbacEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

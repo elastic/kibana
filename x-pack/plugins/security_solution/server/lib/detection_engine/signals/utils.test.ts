@@ -44,6 +44,8 @@ import {
   getTotalHitsValue,
   isDetectionAlert,
   getField,
+  addToSearchAfterReturn,
+  getUnprocessedExceptionsWarnings,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -62,6 +64,8 @@ import {
 } from './__mocks__/es_results';
 import type { ShardError } from '../../types';
 import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -1442,6 +1446,55 @@ describe('utils', () => {
     });
   });
 
+  describe('addToSearchAfterReturn', () => {
+    test('merges the values from bulk create response into search after return type', () => {
+      const current = createSearchAfterReturnType();
+      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+        success: false,
+        bulkCreateDuration: '100',
+        createdItemsCount: 1,
+        createdItems: [],
+        errors: ['new error'],
+        alertsWereTruncated: false,
+      };
+      addToSearchAfterReturn({ current, next });
+      expect(current.success).toEqual(false);
+      expect(current.bulkCreateTimes).toEqual(['100']);
+      expect(current.createdSignalsCount).toEqual(1);
+      expect(current.errors).toEqual(['new error']);
+    });
+
+    test('does not duplicate error messages', () => {
+      const current = createSearchAfterReturnType({ errors: ['error 1'] });
+      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+        success: true,
+        bulkCreateDuration: '0',
+        createdItemsCount: 0,
+        createdItems: [],
+        errors: ['error 1'],
+        alertsWereTruncated: false,
+      };
+      addToSearchAfterReturn({ current, next });
+
+      expect(current.errors).toEqual(['error 1']);
+    });
+
+    test('adds new error messages', () => {
+      const current = createSearchAfterReturnType({ errors: ['error 1'] });
+      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+        success: true,
+        bulkCreateDuration: '0',
+        createdItemsCount: 0,
+        createdItems: [],
+        errors: ['error 2'],
+        alertsWereTruncated: false,
+      };
+      addToSearchAfterReturn({ current, next });
+
+      expect(current.errors).toEqual(['error 1', 'error 2']);
+    });
+  });
+
   describe('calculateThresholdSignalUuid', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');
@@ -1609,6 +1662,22 @@ describe('utils', () => {
       const doc = sampleAlertDocAADNoSortIdWithTimestamp();
       const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
       expect(value).toEqual('Descriptive description');
+    });
+  });
+
+  describe('logUnprocessedExceptionsWarnings', () => {
+    test('does not log anything when the array is empty', () => {
+      const result = getUnprocessedExceptionsWarnings([]);
+      expect(result).toBeUndefined();
+    });
+
+    test('logs the exception names when there are unprocessed exceptions', () => {
+      const result = getUnprocessedExceptionsWarnings([getExceptionListItemSchemaMock()]);
+      expect(result).toEqual(
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`
+      );
     });
   });
 });

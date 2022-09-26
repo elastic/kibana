@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiButton,
   EuiSpacer,
   EuiTextColor,
@@ -79,11 +79,11 @@ import {
   selectChangesApplied,
   VisualizationState,
   DatasourceStates,
+  DataViewsState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField } from '../../../utils';
+import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -179,7 +179,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization: VisualizationState;
     visualizationMap: VisualizationMap;
     datasourceLayers: DatasourceLayers;
+    dataViews: DataViewsState;
   }>();
+
+  const { dataViews } = framePublicAPI;
 
   renderDeps.current = {
     datasourceMap,
@@ -187,9 +190,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization,
     visualizationMap,
     datasourceLayers,
+    dataViews,
   };
 
-  const { dataViews } = framePublicAPI;
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -208,8 +211,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             renderDeps.current.visualization.activeId
           ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
       }
+      const events = ['vis_editor', ...datasourceEvents, ...visualizationEvents];
 
-      trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
+      const adHocDataViews = Object.values(renderDeps.current.dataViews.indexPatterns || {}).filter(
+        (indexPattern) => !indexPattern.isPersisted
+      );
+      adHocDataViews.forEach(() => {
+        events.push('ad_hoc_data_view');
+      });
+
+      trackUiCounterEvents(events);
     }
   }, []);
 
@@ -218,22 +229,34 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
 
+        const requestWarnings: string[] = [];
+        const datasource = Object.values(renderDeps.current?.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current?.datasourceStates)[0].state;
+        if (adapters?.requests) {
+          plugins.data.search.showWarnings(adapters.requests, (warning) => {
+            const warningMessage = datasource.getSearchWarningMessages?.(datasourceState, warning);
+
+            requestWarnings.push(...(warningMessage || []));
+            if (warningMessage && warningMessage.length) return true;
+          });
+        }
         if (adapters && adapters.tables) {
           dispatchLens(
-            onActiveDataChange(
-              Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+            onActiveDataChange({
+              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
                 (acc, [key, value], index, tables) => ({
                   ...acc,
                   [tables.length === 1 ? defaultLayerId : key]: value,
                 }),
                 {}
-              )
-            )
+              ),
+              requestWarnings,
+            })
           );
         }
       }
     },
-    [dispatchLens]
+    [dispatchLens, plugins.data.search]
   );
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
@@ -563,7 +586,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       dragDropContext.dragging
         ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
-            dragDropContext.dragging
+            dragDropContext.dragging,
+            dataViews.indexPatterns
           )
         : undefined;
 
@@ -607,6 +631,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
+      lensInspector={lensInspector}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>
@@ -657,6 +682,7 @@ export const VisualizationWrapper = ({
         to: context.dateRange.toDate,
       },
       filters: context.filters,
+      disableShardWarnings: true,
     }),
     [context]
   );

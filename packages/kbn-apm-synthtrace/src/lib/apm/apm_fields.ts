@@ -18,6 +18,10 @@ export type ApmApplicationMetricFields = Partial<{
   'jvm.memory.heap.used': number;
   'jvm.memory.non_heap.used': number;
   'jvm.thread.count': number;
+  'faas.billed_duration': number;
+  'faas.timeout': number;
+  'faas.coldstart_duration': number;
+  'faas.duration': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{
@@ -32,6 +36,7 @@ export interface ApmException {
   message: string;
 }
 export interface Observer {
+  type: string;
   version: string;
   version_major: number;
 }
@@ -42,6 +47,8 @@ export type ApmFields = Fields &
     'agent.name': string;
     'agent.version': string;
     'container.id': string;
+    'destination.address': string;
+    'destination.port': number;
     'ecs.version': string;
     'event.outcome': string;
     'event.ingested': number;
@@ -75,6 +82,8 @@ export type ApmFields = Fields &
     'service.runtime.name': string;
     'service.runtime.version': string;
     'service.framework.name': string;
+    'service.target.name': string;
+    'service.target.type': string;
     'span.id': string;
     'span.name': string;
     'span.type': string;
@@ -99,6 +108,7 @@ export type ApmFields = Fields &
     'cloud.region': string;
     'host.os.platform': string;
     'faas.id': string;
+    'faas.name': string;
     'faas.coldstart': boolean;
     'faas.execution': string;
     'faas.trigger.type': string;

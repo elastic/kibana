@@ -320,6 +320,9 @@ the minimum and maximum values of a numeric field or a map of a geo field.
 [[discover:showMultiFields]]`discover:showMultiFields`::
 Controls the display of multi-fields in the expanded document view.
 
+[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
+To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.
+
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based data views.
 
@@ -528,7 +531,7 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported as of 8.0.**
+**This setting is deprecated and will not be supported in a future version.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
@@ -547,6 +550,10 @@ Disable this option if you prefer to use the new heatmap charts with improved pe
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
+
+[[lens-sampling]]`lens:useFieldExistenceSampling`::
+**This setting is deprecated and will not be supported as of 8.6.**
+If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.
 
 [float]
 [[kibana-telemetry-settings]]

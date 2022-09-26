@@ -57,8 +57,38 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('one agent', () => {
+      const fleetServerVersion = '7.16.0';
+
+      beforeEach(async () => {
+        await supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'kibana').send({
+          name: 'Fleet Server policy 1',
+          id: 'fleet-server-policy',
+          namespace: 'default',
+          has_fleet_server: true,
+        });
+
+        await kibanaServer.savedObjects.create({
+          id: `package-policy-test`,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          overwrite: true,
+          attributes: {
+            policy_id: 'fleet-server-policy',
+            name: 'Fleet Server',
+            package: {
+              name: 'fleet_server',
+            },
+          },
+        });
+        await generateAgent(
+          providerContext,
+          'healthy',
+          'agentWithFS',
+          'fleet-server-policy',
+          fleetServerVersion
+        );
+      });
+
       it('should respond 200 to upgrade agent and update the agent SO', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -73,23 +103,39 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
           })
           .expect(200);
 
         const res = await supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx');
         expect(typeof res.body.item.upgrade_started_at).to.be('string');
       });
-      it('should respond 400 if upgrading agent with version the same as snapshot version', async () => {
+
+      it('should allow to upgrade a Fleet server agent to a version > fleet server version', async () => {
         const kibanaVersion = await kibanaServer.version.get();
-        const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
+        await supertest
+          .post(`/api/fleet/agents/agentWithFS/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+          })
+          .expect(200);
+
+        const res = await supertest.get(`/api/fleet/agents/agentWithFS`).set('kbn-xsrf', 'xxx');
+        expect(typeof res.body.item.upgrade_started_at).to.be('string');
+      });
+
+      it('should respond 400 if upgrading agent with version the same as snapshot version', async () => {
+        const fleetServerVersionSnapshot = makeSnapshotVersion(fleetServerVersion);
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
           body: {
             doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+              local_metadata: {
+                elastic: { agent: { upgradeable: true, version: fleetServerVersion } },
+              },
             },
           },
         });
@@ -97,20 +143,21 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersionSnapshot,
+            version: fleetServerVersionSnapshot,
           })
           .expect(400);
       });
       it('should respond 200 if upgrading agent with version the same as snapshot version and force flag is passed', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
+        const fleetServerVersionSnapshot = makeSnapshotVersion(fleetServerVersion);
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
           body: {
             doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+              local_metadata: {
+                elastic: { agent: { upgradeable: true, version: fleetServerVersion } },
+              },
             },
           },
         });
@@ -118,14 +165,13 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersionSnapshot,
+            version: fleetServerVersionSnapshot,
             force: true,
           })
           .expect(200);
       });
       it('should respond 200 if upgrading agent with version less than kibana snapshot version', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
+        const fleetServerVersionSnapshot = makeSnapshotVersion(fleetServerVersion);
 
         await es.update({
           id: 'agent1',
@@ -141,12 +187,11 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersionSnapshot,
+            version: fleetServerVersionSnapshot,
           })
           .expect(200);
       });
       it('should respond 200 if trying to upgrade with source_uri set', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -161,7 +206,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
             source_uri: 'http://path/to/download',
           })
           .expect(200);
@@ -205,7 +250,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
           revoke: true,
         });
@@ -213,12 +257,11 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
           })
           .expect(400);
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolled', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -233,18 +276,17 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
           })
           .expect(400);
       });
 
       it('should respond 400 if trying to upgrade an agent that is not upgradeable', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         const res = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
           })
           .expect(400);
         expect(res.body.message).to.equal('agent agent1 is not upgradeable');
@@ -258,7 +300,6 @@ export default function (providerContext: FtrProviderContext) {
           is_managed: true,
         });
 
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -273,7 +314,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body } = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
-          .send({ version: kibanaVersion })
+          .send({ version: fleetServerVersion })
           .expect(400);
         expect(body.message).to.contain(
           'Cannot upgrade agent agent1 in hosted agent policy policy1'
@@ -284,7 +325,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should respond 403 if user lacks fleet all permissions', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -300,7 +340,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
           })
           .expect(403);
       });
@@ -312,7 +352,7 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'kibana').send({
           name: 'Fleet Server policy 1',
-          policy_id: 'fleet-server-policy',
+          id: 'fleet-server-policy',
           namespace: 'default',
           has_fleet_server: true,
         });
@@ -324,7 +364,6 @@ export default function (providerContext: FtrProviderContext) {
           attributes: {
             policy_id: 'fleet-server-policy',
             name: 'Fleet Server',
-            output_id: 'default',
             package: {
               name: 'fleet_server',
             },
@@ -541,7 +580,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       });
 
-      it('should bulk upgrade multiple agents by kuery in batches', async () => {
+      it('should bulk upgrade multiple agents by kuery in batches async', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -558,17 +597,12 @@ export default function (providerContext: FtrProviderContext) {
           index: AGENTS_INDEX,
           body: {
             doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: false, version: '0.0.0' },
-                },
-              },
-              upgrade_started_at: undefined,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
             },
           },
         });
 
-        const { body: unenrolledBody } = await supertest
+        const { body } = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -578,12 +612,38 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({
-          agent4: { success: false, error: 'agent4 is not upgradeable' },
-          agent3: { success: false, error: 'agent3 is not upgradeable' },
-          agent2: { success: false, error: 'agent2 is not upgradeable' },
-          agent1: { success: true },
-          agentWithFS: { success: false, error: 'agentWithFS is not upgradeable' },
+        const actionId = body.actionId;
+
+        const verifyActionResult = async () => {
+          const [agent1data, agent2data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
+          expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+        };
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 2) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            // 2 upgradeable
+            if (action && action.nbAgentsActionCreated === 2) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
         });
       });
 

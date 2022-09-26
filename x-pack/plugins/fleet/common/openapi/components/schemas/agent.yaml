@@ -33,6 +33,10 @@ properties:
     $ref: ./agent_status.yaml
   default_api_key:
     type: string
+  components:
+    type: array
+    items:
+      $ref: ./agent_component.yaml
 required:
   - type
   - active
