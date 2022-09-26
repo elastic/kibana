@@ -162,7 +162,6 @@ export class UploadState {
     }
 
     let uploadTarget: undefined | FileJSON;
-    let erroredOrAborted = false;
 
     file$.setState({ status: 'uploading', error: undefined });
 
@@ -190,6 +189,7 @@ export class UploadState {
             id: uploadTarget.id,
             kind: this.fileKind.id,
             abortSignal,
+            selfDestructOnAbort: true,
             contentType: mime,
           })
         );
@@ -198,15 +198,9 @@ export class UploadState {
         file$.setState({ status: 'uploaded', id: uploadTarget?.id });
       }),
       catchError((e) => {
-        erroredOrAborted = true;
         const isAbortError = e.message === 'Abort!';
         file$.setState({ status: 'upload_failed', error: isAbortError ? undefined : e });
         return of(isAbortError ? undefined : e);
-      }),
-      finalize(() => {
-        if (erroredOrAborted && uploadTarget) {
-          this.client.delete({ id: uploadTarget.id, kind: this.fileKind.id });
-        }
       })
     );
   };
@@ -219,9 +213,7 @@ export class UploadState {
     const sub = this.abort$.subscribe(abort$);
     const upload$ = this.files$$.pipe(
       take(1),
-      switchMap((files$) => {
-        return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)));
-      }),
+      switchMap((files$) => forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)))),
       map(() => undefined),
       finalize(() => {
         if (this.opts.allowRepeatedUploads) this.clear();
@@ -230,7 +222,7 @@ export class UploadState {
       shareReplay()
     );
 
-    upload$.subscribe();
+    upload$.subscribe(); // Kick off the upload
 
     return upload$;
   };
