@@ -27,12 +27,6 @@ export const UPDATED_CASES = i18n.translate('xpack.cases.containers.updatedCases
   defaultMessage: 'Updated cases',
 });
 
-export const DELETED_CASES = (totalCases: number, caseTitle?: string) =>
-  i18n.translate('xpack.cases.containers.deletedCases', {
-    values: { caseTitle, totalCases },
-    defaultMessage: 'Deleted {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
-  });
-
 export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
   i18n.translate('xpack.cases.containers.pushToExternalService', {
     values: { serviceName },

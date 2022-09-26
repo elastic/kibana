@@ -119,7 +119,6 @@ export const useCasesColumns = ({
   onRowClick,
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
-  // Delete case
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { mutate: deleteCases } = useDeleteCases();
   const refreshCases = useRefreshCases();
@@ -143,7 +142,10 @@ export const useCasesColumns = ({
 
   const onConfirmDeletion = useCallback(() => {
     setIsModalVisible(false);
-    deleteCases([deleteThisCase.id]);
+    deleteCases({
+      caseIds: [deleteThisCase.id],
+      successToasterTitle: i18n.DELETED_CASES(1),
+    });
   }, [deleteCases, deleteThisCase.id]);
 
   const handleDispatchUpdate = useCallback(
@@ -408,7 +410,7 @@ export const useCasesColumns = ({
                 {i18n.ACTIONS}
                 {isModalVisible ? (
                   <ConfirmDeleteCaseModal
-                    caseTitle={deleteThisCase.title}
+                    totalCasesToBeDeleted={1}
                     onCancel={closeModal}
                     onConfirm={onConfirmDeletion}
                   />

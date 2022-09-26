@@ -98,7 +98,10 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
 
   const onConfirmDeletion = useCallback(() => {
     setIsModalVisible(false);
-    deleteCases(selectedCases.map(({ id }) => id));
+    deleteCases({
+      caseIds: selectedCases.map(({ id }) => id),
+      successToasterTitle: i18n.DELETED_CASES(selectedCases.length),
+    });
   }, [deleteCases, selectedCases]);
 
   return (
@@ -138,8 +141,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
       </UtilityBarSection>
       {isModalVisible ? (
         <ConfirmDeleteCaseModal
-          caseTitle={selectedCases[0]?.title ?? ''}
-          caseQuantity={selectedCases.length}
+          totalCasesToBeDeleted={selectedCases.length}
           onCancel={onCloseModal}
           onConfirm={onConfirmDeletion}
         />

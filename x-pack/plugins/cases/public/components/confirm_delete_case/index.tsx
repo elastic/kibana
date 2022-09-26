@@ -10,15 +10,13 @@ import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface ConfirmDeleteCaseModalProps {
-  caseTitle: string;
-  caseQuantity?: number;
+  totalCasesToBeDeleted: number;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
-  caseTitle,
-  caseQuantity = 1,
+  totalCasesToBeDeleted,
   onCancel,
   onConfirm,
 }) => {
@@ -26,14 +24,14 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
     <EuiConfirmModal
       buttonColor="danger"
       cancelButtonText={i18n.CANCEL}
-      confirmButtonText={i18n.DELETE_CASE(caseQuantity)}
+      confirmButtonText={i18n.DELETE_CASE(totalCasesToBeDeleted)}
       data-test-subj="confirm-delete-case-modal"
       defaultFocusedButton="confirm"
       onCancel={onCancel}
       onConfirm={onConfirm}
-      title={i18n.DELETE_SELECTED_CASES(caseQuantity, caseTitle)}
+      title={i18n.DELETE_CASE(totalCasesToBeDeleted)}
     >
-      {i18n.CONFIRM_QUESTION(caseQuantity)}
+      {i18n.CONFIRM_QUESTION(totalCasesToBeDeleted)}
     </EuiConfirmModal>
   );
 };

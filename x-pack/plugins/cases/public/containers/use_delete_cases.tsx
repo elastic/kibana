@@ -12,23 +12,28 @@ import { ServerError } from '../types';
 import { casesQueriesKeys, casesMutationsKeys } from './constants';
 import { useCasesToast } from '../common/use_cases_toast';
 
+interface MutationArgs {
+  caseIds: string[];
+  successToasterTitle: string;
+}
+
 export const useDeleteCases = () => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
   return useMutation(
-    (caseIds: string[]) => {
+    ({ caseIds }: MutationArgs) => {
       const abortCtrlRef = new AbortController();
       return deleteCases(caseIds, abortCtrlRef.signal);
     },
     {
       mutationKey: casesMutationsKeys.deleteCases,
-      onSuccess: (_, caseIds) => {
+      onSuccess: (_, { successToasterTitle }) => {
         queryClient.invalidateQueries(casesQueriesKeys.casesList());
         queryClient.invalidateQueries(casesQueriesKeys.tags());
         queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
-        // TODO fix title
-        showSuccessToast(i18n.DELETE_CASE(caseIds.length));
+
+        showSuccessToast(successToasterTitle);
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_DELETING });
