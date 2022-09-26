@@ -26,6 +26,7 @@ import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
@@ -146,11 +147,20 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
         >
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            sessionViewConfig={null}
+            isInTimeline={true}
+            graphEventId={'test'}
+            updateTimelineGraphEventId={() => {}}
+            componentInstanceID={'test'}
+            SessionView={<div />}
+            Navigation={<div />}
+          />
         </TestProviders>
       );
 
@@ -240,6 +250,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -287,6 +298,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -332,6 +344,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}

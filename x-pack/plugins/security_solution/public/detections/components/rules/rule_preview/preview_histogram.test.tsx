@@ -13,11 +13,20 @@ import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { TestProviders } from '../../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../../common/mock';
 import { usePreviewHistogram } from './use_preview_histogram';
 
 import { PreviewHistogram } from './preview_histogram';
 import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/translation';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { State } from '../../../../common/store';
+import { createStore } from '../../../../common/store';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
@@ -36,6 +45,16 @@ const getLastMonthTimeframe = () => ({
   interval: '5m',
   lookback: '1m',
 });
+
+const myState: State = mockGlobalState;
+const { storage } = createSecuritySolutionStorageMock();
+const myStore = createStore(
+  myState,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
@@ -67,7 +86,7 @@ describe('PreviewHistogram', () => {
 
     test('it renders an empty histogram and table', async () => {
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={myStore}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
             timeframeOptions={getLastMonthTimeframe()}
@@ -98,7 +117,7 @@ describe('PreviewHistogram', () => {
       ]);
 
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={myStore}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
             timeframeOptions={getLastMonthTimeframe()}
@@ -150,7 +169,7 @@ describe('PreviewHistogram', () => {
       );
 
       const wrapper = render(
-        <TestProviders>
+        <TestProviders store={myStore}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
             previewId={'test-preview-id'}
