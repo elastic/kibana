@@ -263,7 +263,7 @@ export const SourceField = ({
                 link: (
                   <EuiLink target="_blank" href="" external>
                     <FormattedMessage
-                      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.zipUrl.deprecation..link"
                       defaultMessage="read the documentation"
                     />
                   </EuiLink>
