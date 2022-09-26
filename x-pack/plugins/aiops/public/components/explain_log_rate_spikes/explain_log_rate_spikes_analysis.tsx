@@ -23,7 +23,6 @@ import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -32,6 +31,7 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
 import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
+import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
@@ -53,9 +53,6 @@ interface ExplainLogRateSpikesAnalysisProps {
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
   searchQuery: Query['query'];
-  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  selectedChangePoint?: ChangePoint;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -64,12 +61,11 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   latest,
   windowParameters,
   searchQuery,
-  onPinnedChangePoint,
-  onSelectedChangePoint,
-  selectedChangePoint,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
+
+  const { clearAllRowState } = useSpikeAnalysisTableRowContext();
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
@@ -78,6 +74,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
+
+    // When toggling the group switch, clear all row selections
+    clearAllRowState();
   };
 
   const {
@@ -106,15 +105,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
   function startHandler() {
-    // Reset grouping to false when restarting the analysis.
+    // Reset grouping to false and clear all row selections when restarting the analysis.
     setGroupResults(false);
-
-    if (onPinnedChangePoint) {
-      onPinnedChangePoint(null);
-    }
-    if (onSelectedChangePoint) {
-      onSelectedChangePoint(null);
-    }
+    clearAllRowState();
 
     setCurrentAnalysisWindowParameters(windowParameters);
     start();
@@ -127,7 +120,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    const tableItems = data.changePointsGroups.map(({ group, docCount, pValue }, index) => {
+    const tableItems = data.changePointsGroups.map(({ id, group, docCount, histogram, pValue }) => {
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
@@ -144,11 +137,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       });
 
       return {
-        id: index,
+        id,
         docCount,
         pValue,
         group: dedupedGroup,
         repeatedValues,
+        histogram,
       };
     });
 
@@ -245,9 +239,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           changePoints={data.changePoints}
           groupTableItems={groupTableItems}
           loading={isRunning}
-          onPinnedChangePoint={onPinnedChangePoint}
-          onSelectedChangePoint={onSelectedChangePoint}
-          selectedChangePoint={selectedChangePoint}
           dataViewId={dataView.id}
         />
       ) : null}
@@ -255,9 +246,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         <SpikeAnalysisTable
           changePoints={data.changePoints}
           loading={isRunning}
-          onPinnedChangePoint={onPinnedChangePoint}
-          onSelectedChangePoint={onSelectedChangePoint}
-          selectedChangePoint={selectedChangePoint}
           dataViewId={dataView.id}
         />
       ) : null}

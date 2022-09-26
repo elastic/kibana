@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiProvider, EuiProviderProps } from '@elastic/eui';
+import type { EuiProviderProps } from '@elastic/eui';
+import { EuiProvider } from '@elastic/eui';
 import createCache from '@emotion/cache';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';

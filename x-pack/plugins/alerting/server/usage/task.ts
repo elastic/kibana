@@ -161,6 +161,8 @@ export function telemetryTaskRunner(
                     dailyExecutionCounts.countFailedExecutionsByReason,
                   count_rules_executions_failured_by_reason_by_type_per_day:
                     dailyExecutionCounts.countFailedExecutionsByReasonByType,
+                  count_rules_by_execution_status_per_day:
+                    dailyExecutionCounts.countRulesByExecutionStatus,
                   count_rules_executions_timeouts_per_day:
                     dailyExecutionTimeoutCounts.countExecutionTimeouts,
                   count_rules_executions_timeouts_by_type_per_day:

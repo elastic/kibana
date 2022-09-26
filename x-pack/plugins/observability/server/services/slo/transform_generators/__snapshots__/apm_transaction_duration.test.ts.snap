@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM Transaction Duration Transform Generator does not include the query filter when params are 'ALL' 1`] = `
+exports[`APM Transaction Duration Transform Generator does not include the query filter when params are '*' 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -21,7 +21,7 @@ Object {
   },
   "dest": Object {
     "index": "slo-observability.sli-v1-my-namespace",
-    "pipeline": "observability-slo-monthly-index",
+    "pipeline": "slo-observability.sli.monthly-my-namespace",
   },
   "frequency": "1m",
   "pivot": Object {

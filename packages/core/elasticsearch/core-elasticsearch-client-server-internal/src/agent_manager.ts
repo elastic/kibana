@@ -13,7 +13,7 @@ import { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 const HTTPS = 'https:';
 const DEFAULT_CONFIG: HttpAgentOptions = {
   keepAlive: true,
-  keepAliveMsecs: 50000,
+  keepAliveMsecs: 1000,
   maxSockets: 256,
   maxFreeSockets: 256,
   scheduling: 'lifo',

@@ -45,6 +45,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
@@ -88,6 +89,7 @@ export interface DiscoverServices {
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export const buildServices = memoize(function (
@@ -136,5 +138,6 @@ export const buildServices = memoize(function (
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
+    unifiedSearch: plugins.unifiedSearch,
   };
 });

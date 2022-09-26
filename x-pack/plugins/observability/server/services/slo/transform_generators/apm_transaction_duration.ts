@@ -10,10 +10,11 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE } from '../../../types/schema';
 import {
   getSLODestinationIndexName,
+  getSLOIngestPipelineName,
   getSLOTransformId,
-  SLO_INGEST_PIPELINE_NAME,
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import {
@@ -21,7 +22,6 @@ import {
   apmTransactionDurationSLOSchema,
   APMTransactionDurationSLO,
 } from '../../../types/models';
-import { ALL_VALUE } from '../../../types/schema';
 import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
@@ -106,7 +106,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
 
   private buildDestination(slo: APMTransactionDurationSLO, spaceId: string) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOIngestPipelineName(spaceId),
       index: getSLODestinationIndexName(spaceId),
     };
   }

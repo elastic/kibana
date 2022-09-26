@@ -5,18 +5,34 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import { sourcererActions } from '../../../../common/store/sourcerer';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { sourcererActions } from '../../../../common/store/sourcerer';
+import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 import type { DataProvider } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
+import { sourcererSelectors } from '../../../../common/store';
+
+export interface Filter {
+  field: string;
+  value: string;
+}
 
 export const useNavigateToTimeline = () => {
   const dispatch = useDispatch();
+
+  const getDataViewsSelector = useMemo(
+    () => sourcererSelectors.getSourcererDataViewsSelector(),
+    []
+  );
+  const { defaultDataView, signalIndexName } = useDeepEqualSelector((state) =>
+    getDataViewsSelector(state)
+  );
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -33,16 +49,31 @@ export const useNavigateToTimeline = () => {
         providers: [dataProvider],
       })
     );
-    // Only show detection alerts
-    // (This is required so the timeline event count matches the prevalence count)
+
     dispatch(
       sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
-        selectedDataViewId: 'security-solution-default',
-        selectedPatterns: ['.alerts-security.alerts-default'],
+        selectedDataViewId: defaultDataView.id,
+        selectedPatterns: [signalIndexName || ''],
       })
     );
   };
+
+  const openEntityInTimeline = (entityFilters: [Filter, ...Filter[]]) => {
+    const mainFilter = entityFilters.shift();
+
+    if (mainFilter) {
+      const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+
+      for (const filter of entityFilters) {
+        dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+      }
+
+      navigateToTimeline(dataProvider);
+    }
+  };
+
+  // TODO: Replace the usage of functions with openEntityInTimeline
 
   const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
     const dataProvider = getDataProvider('host.name', '', hostName);
@@ -70,6 +101,7 @@ export const useNavigateToTimeline = () => {
   };
 
   return {
+    openEntityInTimeline,
     openHostInTimeline,
     openRuleInTimeline,
     openUserInTimeline,
