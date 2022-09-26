@@ -452,9 +452,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
     'securitySolution.ruleCreationPage.defineStep.newFeaturesTour.v8.4',
 };
 
-export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.4';
-
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
 
