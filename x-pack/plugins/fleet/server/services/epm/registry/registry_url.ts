@@ -20,8 +20,8 @@ const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 // const SNAPSHOT_REGISTRY_URL_NO_CDN = 'https://epr-snapshot.ea-web.elastic.dev';
 
 const getDefaultRegistryUrl = (): string => {
-  const branch = appContextService.getKibanaBranch();
-  if (branch === 'main') {
+  const isProduction = appContextService.getIsProductionMode();
+  if (!isProduction) {
     return SNAPSHOT_REGISTRY_URL_CDN;
   } else if (appContextService.getKibanaVersion().includes('-SNAPSHOT')) {
     return STAGING_REGISTRY_URL_CDN;
