@@ -79,7 +79,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           onClick={onClickTitleHandler}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >
-          {title}
+          <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
+                {title}
+              </EuiHighlight>
         </EuiLink>
       </RedirectAppLinks>
     );
@@ -90,6 +92,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     onClickTitle,
     onClickTitleHandler,
     redirectAppLinksCoreStart,
+    searchTerm,
     title,
   ]);
 
@@ -100,7 +103,11 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       <EuiTitle size="xs">{renderTitle()}</EuiTitle>
       {Boolean(description) && (
         <EuiText size="s">
-          <p>{description!}</p>
+          <p>
+            <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
+              {description!}
+            </EuiHighlight>
+          </p>
         </EuiText>
       )}
       {hasTags && (
