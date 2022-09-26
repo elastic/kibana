@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Notifications list', function () {
     before(async () => {
@@ -37,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
@@ -51,13 +53,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.table.assertRowsNumberPerPage(25);
     });
 
-    it('does not show notifications from another space', async () => {});
+    it('does not show notifications from another space', async () => {
+      await ml.notifications.table.filterWithSearchString('Job created', 1);
+    });
 
     it('display a number of errors in the notification indicator', async () => {
       await ml.navigation.navigateToOverview();
       // triggers an error
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await PageObjects.common.sleep(6000);
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esDeleteAllIndices('ft_farequote');
+      await PageObjects.common.sleep(10000);
       await browser.refresh();
       // refresh the page to avoid 1m wait
       await ml.notifications.assertNotificationErrorsCount(1);

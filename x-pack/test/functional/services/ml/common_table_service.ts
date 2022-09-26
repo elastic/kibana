@@ -13,6 +13,7 @@ export type MlTableService = ReturnType<typeof MlTableServiceProvider>;
 
 export function MlTableServiceProvider({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const commonPage = getPageObject('common');
 
   const TableService = class {
     constructor(
@@ -31,11 +32,11 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
     }
 
     public async parseTable() {
-      const table = await testSubjects.find(this.tableTestSubj);
+      const table = await testSubjects.find(`~${this.tableTestSubj}`);
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects(this.tableRowSubj).toArray()) {
+      for (const tr of $.findTestSubjects(`~${this.tableRowSubj}`).toArray()) {
         const $tr = $(tr);
 
         const rowObject = this.columns.reduce((acc, curr) => {
@@ -60,6 +61,11 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       expect(textContent).to.be(`Rows per page: ${rowsNumber}`);
     }
 
+    public async waitForTableToStartLoading() {
+      await testSubjects.existOrFail(`~${this.tableTestSubj}`, { timeout: 60 * 1000 });
+      await testSubjects.existOrFail(`${this.tableTestSubj} loading`, { timeout: 30 * 1000 });
+    }
+
     public async waitForTableToLoad() {
       await testSubjects.existOrFail(`~${this.tableTestSubj}`, { timeout: 60 * 1000 });
       await testSubjects.existOrFail(`${this.tableTestSubj} loaded`, { timeout: 30 * 1000 });
@@ -78,18 +84,21 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       );
     }
 
-    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+    public async filterWithSearchString(queryString: string, expectedRowCount: number = 1) {
       await this.waitForTableToLoad();
       const searchBarInput = await this.getSearchInput();
       await searchBarInput.clearValueWithKeyboard();
-      await searchBarInput.type(filter);
-      await this.assertSearchInputValue(filter);
+      await searchBarInput.type(queryString);
+      await commonPage.pressEnterKey();
+      await this.assertSearchInputValue(queryString);
+      await this.waitForTableToStartLoading();
+      await this.waitForTableToLoad();
 
       const rows = await this.parseTable();
-      const filteredRows = rows.filter((row) => row.id === filter);
-      expect(filteredRows).to.have.length(
+
+      expect(rows).to.have.length(
         expectedRowCount,
-        `Filtered table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+        `Filtered table should have ${expectedRowCount} row(s) for filter '${queryString}' (got ${rows.length} matching  items)`
       );
     }
   };
