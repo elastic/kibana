@@ -11,7 +11,6 @@ import {
   CONTAINER_ID,
   HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
 import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
@@ -71,18 +70,16 @@ const getHostNames = async ({
 
 export const getContainerHostNames = async ({
   containerIds,
-  setup,
+  infraMetricsClient,
   start,
   end,
 }: {
   containerIds: string[];
-  setup: Setup;
+  infraMetricsClient: InfraClient;
   start: number;
   end: number;
 }): Promise<string[]> => {
   if (containerIds.length) {
-    const { infraMetricsClient } = setup;
-
     const containerHostNames = await getHostNames({
       infraMetricsClient,
       containerIds,

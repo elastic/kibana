@@ -25,7 +25,9 @@ export async function createInfraMetricsClient({
   context: ApmPluginRequestHandlerContext;
 }) {
   return {
-    search: async (opts: ESSearchRequest) => {
+    search: async <TParams extends Omit<ESSearchRequest, 'index'>>(
+      opts: TParams
+    ) => {
       const {
         savedObjects: { client: savedObjectsClient },
         elasticsearch: { client: esClient },

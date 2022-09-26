@@ -55,6 +55,7 @@ import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { setupInfraMetricsRequest } from '../../lib/helpers/setup_infra_metrics_request';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -274,6 +275,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     import('./get_service_metadata_details').ServiceMetadataDetails
   > => {
     const setup = await setupRequest(resources);
+    const infraMetricsSetup = await setupInfraMetricsRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -295,7 +297,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     });
 
     if (serviceMetadataDetails?.container?.ids) {
-      const { infraMetricsClient } = setup;
+      const { infraMetricsClient } = infraMetricsSetup;
 
       const containerMetadata = await getServiceOverviewContainerMetadata({
         infraMetricsClient,
@@ -902,6 +904,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       | undefined;
   }> => {
     const setup = await setupRequest(resources);
+    const infraMetricsSetup = await setupInfraMetricsRequest(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
@@ -916,7 +919,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       });
 
     if (serviceInstanceMetadataDetails?.container?.id) {
-      const { infraMetricsClient } = setup;
+      const { infraMetricsClient } = infraMetricsSetup;
       const containerMetadata = await getServiceInstanceContainerMetadata({
         infraMetricsClient,
         containerId: serviceInstanceMetadataDetails.container.id,

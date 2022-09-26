@@ -20,10 +20,6 @@ import {
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import {
-  createInfraMetricsClient,
-  InfraClient,
-} from './create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -31,7 +27,6 @@ import {
 export interface Setup {
   apmEventClient: APMEventClient;
   internalClient: APMInternalClient;
-  infraMetricsClient: InfraClient;
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
@@ -75,10 +70,6 @@ export async function setupRequest({
         context,
         request,
         debug: query._inspect,
-      }),
-      infraMetricsClient: await createInfraMetricsClient({
-        infraPlugin: plugins.infra,
-        context,
       }),
       ml:
         plugins.ml && isActivePlatinumLicense(licensingContext.license)

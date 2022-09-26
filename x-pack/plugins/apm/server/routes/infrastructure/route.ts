@@ -10,6 +10,7 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getInfrastructureData } from './get_infrastructure_data';
 import { getContainerHostNames } from './get_host_names';
+import { setupInfraMetricsRequest } from '../../lib/helpers/setup_infra_metrics_request';
 
 const infrastructureRoute = createApmServerRoute({
   endpoint:
@@ -29,6 +30,7 @@ const infrastructureRoute = createApmServerRoute({
     podNames: string[];
   }> => {
     const setup = await setupRequest(resources);
+    const setupInfraMetrics = await setupInfraMetricsRequest(resources);
 
     const { params } = resources;
 
@@ -47,10 +49,11 @@ const infrastructureRoute = createApmServerRoute({
     });
 
     const containerIds = infrastructureData.containerIds;
+    const { infraMetricsClient } = setupInfraMetrics;
     // due some limitations on the data we get from apm-metrics indices, if we have a service running in a container we want to query, to get the host.name, filtering by container.id
     const containerHostNames = await getContainerHostNames({
       containerIds,
-      setup,
+      infraMetricsClient,
       start,
       end,
     });
