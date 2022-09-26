@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable no-dupe-keys */
-
-// eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const enum RiskScoreEntity {
   host = 'host',
