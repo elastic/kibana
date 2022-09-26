@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType, EuiButtonIconColor } from '@elastic/eui';
+import type { IconType, EuiButtonIconProps } from '@elastic/eui';
 
 /** @internal **/
 export interface LayerAction {
   displayName: string;
   execute: () => void | Promise<void>;
   icon: IconType;
-  color?: EuiButtonIconColor;
+  color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
