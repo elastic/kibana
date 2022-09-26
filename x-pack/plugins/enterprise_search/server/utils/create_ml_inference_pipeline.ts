@@ -15,6 +15,7 @@ import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitio
 import {
   getInferencePipelineNameFromIndexName,
   getPrefixedInferencePipelineProcessorName,
+  formatPipelineName,
 } from './ml_inference_pipeline_utils';
 
 /**
@@ -99,7 +100,7 @@ export const createMlInferencePipeline = async (
     inferencePipelineGeneratedName,
     modelId,
     sourceField,
-    destinationField || inferencePipelineGeneratedName,
+    destinationField || formatPipelineName(pipelineName),
     esClient
   );
 
