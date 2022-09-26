@@ -12,8 +12,8 @@ import type { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-i
 import type { Pagination } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core/public';
+import type { RuleReferences } from '@kbn/securitysolution-exception-list-components';
 import { useToasts, useKibana } from '../../../../../common/lib/kibana';
-import type { RuleReferences } from '../../../components/list_common';
 
 interface ExceptionListDetailsContextProps {
   exceptionListReferences: RuleReferences;

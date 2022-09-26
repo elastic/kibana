@@ -51,6 +51,7 @@ describe('ExceptionItemCard', () => {
         dataTestSubj="item"
         onDeleteException={jest.fn()}
         onEditException={jest.fn()}
+        securityLinkAnchorComponent={() => null}
       />
     );
 
@@ -71,6 +72,7 @@ describe('ExceptionItemCard', () => {
         ruleReferences={ruleReferences}
         onDeleteException={jest.fn()}
         onEditException={jest.fn()}
+        securityLinkAnchorComponent={() => null}
       />
     );
 
@@ -92,6 +94,7 @@ describe('ExceptionItemCard', () => {
         dataTestSubj="item"
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={ruleReferences}
+        securityLinkAnchorComponent={() => null}
       />
     );
     expect(wrapper.queryByTestId('itemActionButton')).not.toBeInTheDocument();
@@ -109,6 +112,7 @@ describe('ExceptionItemCard', () => {
         ruleReferences={ruleReferences}
         onDeleteException={jest.fn()}
         onEditException={mockOnEditException}
+        securityLinkAnchorComponent={() => null}
       />
     );
 
@@ -129,6 +133,7 @@ describe('ExceptionItemCard', () => {
         ruleReferences={ruleReferences}
         onEditException={jest.fn()}
         onDeleteException={mockOnDeleteException}
+        securityLinkAnchorComponent={() => null}
       />
     );
     fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionButton'));

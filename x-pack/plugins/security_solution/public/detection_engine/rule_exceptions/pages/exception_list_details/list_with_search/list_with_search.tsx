@@ -23,6 +23,7 @@ import {
 import * as i18n from '../translations';
 
 import { useListWithSearchComponent } from './use_list_with_search';
+import { ListDetailsLinkAnchor } from '../link_anchor/link_anchor';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListSchema;
@@ -77,6 +78,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
           emptyViewerBody={emptyViewerBody}
           pagination={pagination}
           lastUpdated={lastUpdated}
+          securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onPaginationChange={onPaginationChange}
           onEditExceptionItem={onEditExceptionItem}
           onDeleteException={onDeleteException}

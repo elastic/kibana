@@ -46,6 +46,7 @@ interface ExceptionItemsProps {
   listType: ExceptionListTypeEnum;
   ruleReferences: RuleReferences;
   pagination: PaginationType;
+  securityLinkAnchorComponent: React.ElementType;
   onCreateExceptionListItem?: () => void;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
@@ -59,14 +60,12 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   exceptions,
   listType,
   ruleReferences,
-
   emptyViewerTitle,
   emptyViewerBody,
   emptyViewerButtonText,
-
   pagination,
+  securityLinkAnchorComponent,
   onPaginationChange,
-
   onDeleteException,
   onEditExceptionItem,
   onCreateExceptionListItem,
@@ -105,6 +104,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
                   onDeleteException={onDeleteException}
                   onEditException={onEditExceptionItem}
                   dataTestSubj="exceptionItemsViewerItem"
+                  securityLinkAnchorComponent={securityLinkAnchorComponent}
                 />
               </EuiFlexItem>
             ))}
@@ -112,7 +112,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <Pagination
-        dataTestSubj="listWithSearchPagination"
+        dataTestSubj="listWithSearch{Pagination"
         pagination={pagination}
         onPaginationChange={onPaginationChange}
       />

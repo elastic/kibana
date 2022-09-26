@@ -40,7 +40,7 @@ describe('ExceptionItemCardHeader', () => {
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemHeader-title')).toHaveTextContent('some name');
+    expect(wrapper.getByTestId('exceptionItemHeaderTitle')).toHaveTextContent('some name');
   });
 
   it('it displays actions', () => {
@@ -53,11 +53,11 @@ describe('ExceptionItemCardHeader', () => {
     );
 
     // click on popover
-    fireEvent.click(wrapper.getByTestId('exceptionItemHeader-actionButton'));
-    fireEvent.click(wrapper.getByTestId('exceptionItemHeader-actionItem-edit'));
+    fireEvent.click(wrapper.getByTestId('exceptionItemHeaderActionButton'));
+    fireEvent.click(wrapper.getByTestId('exceptionItemHeaderActionItemedit'));
     expect(handleEdit).toHaveBeenCalled();
 
-    fireEvent.click(wrapper.getByTestId('exceptionItemHeader-actionItem-delete'));
+    fireEvent.click(wrapper.getByTestId('exceptionItemHeaderActionItemdelete'));
     expect(handleDelete).toHaveBeenCalled();
   });
 
@@ -71,6 +71,6 @@ describe('ExceptionItemCardHeader', () => {
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemHeader-actionButton')).toBeDisabled();
+    expect(wrapper.getByTestId('exceptionItemHeaderActionButton')).toBeDisabled();
   });
 });

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import type { Pagination } from '@elastic/eui';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-// import type { RuleReferenceSchema } from '../../../../../x-pack/plugins/security_solution/common/detection_engine/schemas/response';
 
 export interface GetExceptionItemProps {
   pagination?: Pagination;
@@ -41,11 +42,8 @@ export interface ExceptionListSummaryProps {
 export type ViewerFlyoutName = 'addException' | 'editException' | null;
 
 export interface RuleReferences {
-  [key: string]: any[];
+  [key: string]: any[]; // TODO fix
 }
-// export type ReturnUseFindExceptionListReferences = [boolean, RuleReferences | null];
-
-// export type { RuleReferenceSchema };
 
 export interface ExceptionListItemIdentifiers {
   id: string;
@@ -57,4 +55,11 @@ export enum ListTypeText {
   ENDPOINT = 'endpoint',
   DETECTION = 'empty',
   RULE_DEFAULT = 'empty_search',
+}
+
+export interface RuleReference {
+  name: string;
+  id: string;
+  ruleId: string;
+  exceptionLists: ExceptionListSchema[];
 }

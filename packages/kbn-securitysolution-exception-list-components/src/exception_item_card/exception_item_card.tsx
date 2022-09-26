@@ -8,7 +8,7 @@
 
 // import type { EuiCommentProps } from '@elastic/eui';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, FC } from 'react';
 import type {
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
@@ -33,11 +33,12 @@ export interface ExceptionItemProps {
   ruleReferences: any[]; // rulereferences
   editActionLabel?: string;
   deleteActionLabel?: string;
+  securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
 }
 
-const ExceptionItemCardComponent = ({
+const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   disableActions = false,
   exceptionItem,
   listType,
@@ -45,9 +46,10 @@ const ExceptionItemCardComponent = ({
   dataTestSubj,
   editActionLabel,
   deleteActionLabel,
+  securityLinkAnchorComponent,
   onDeleteException,
   onEditException,
-}: ExceptionItemProps): JSX.Element => {
+}) => {
   const handleDelete = useCallback((): void => {
     onDeleteException({
       id: exceptionItem.id,
@@ -102,6 +104,7 @@ const ExceptionItemCardComponent = ({
             item={exceptionItem}
             references={ruleReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
+            securityLinkAnchorComponent={securityLinkAnchorComponent}
           />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="exceptionItemCardCondition">

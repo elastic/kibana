@@ -51,6 +51,7 @@ describe('ExceptionsViewerItems', () => {
           onDeleteException={onDeleteException}
           onEditExceptionItem={onEditExceptionItem}
           onPaginationChange={onPaginationChange}
+          securityLinkAnchorComponent={() => null}
         />
       );
       // expect(wrapper).toMatchSnapshot();
@@ -74,6 +75,7 @@ describe('ExceptionsViewerItems', () => {
           onDeleteException={onDeleteException}
           onEditExceptionItem={onEditExceptionItem}
           onPaginationChange={onPaginationChange}
+          securityLinkAnchorComponent={() => null}
         />
         //   </ThemeProvider>
         // </TestProviders>
@@ -99,6 +101,7 @@ describe('ExceptionsViewerItems', () => {
           onDeleteException={onDeleteException}
           onEditExceptionItem={onEditExceptionItem}
           onPaginationChange={onPaginationChange}
+          securityLinkAnchorComponent={() => null}
         />
         //   </ThemeProvider>
         // </TestProviders>
