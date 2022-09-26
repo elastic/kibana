@@ -11,8 +11,6 @@ import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { PaginatedTable } from '../paginated_table';
 
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-
 import * as i18n from './translations';
 import {
   getHostDetailsAuthenticationColumns,
@@ -21,7 +19,7 @@ import {
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryInspector } from '../page/manage_query';
-import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
+import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { hostsActions, hostsModel, hostsSelectors } from '../../../hosts/store';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -32,7 +30,6 @@ const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 const tableType = hostsModel.HostsTableType.authentications;
 
 const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -42,7 +39,6 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
   setQuery,
   deleteQuery,
 }) => {
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   const dispatch = useDispatch();
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -59,7 +55,6 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
     loading,
     { authentications, totalCount, pageInfo, loadPage, inspect, isInspected, refetch },
   ] = useAuthentications({
-    docValueFields,
     endDate,
     filterQuery,
     indexNames,
@@ -72,8 +67,8 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
 
   const columns =
     type === hostsModel.HostsType.details
-      ? getHostDetailsAuthenticationColumns(usersEnabled)
-      : getHostsPageAuthenticationColumns(usersEnabled);
+      ? getHostDetailsAuthenticationColumns()
+      : getHostsPageAuthenticationColumns();
 
   const updateLimitPagination = useCallback(
     (newLimit) =>

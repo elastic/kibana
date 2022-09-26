@@ -11,9 +11,10 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import { set } from '@kbn/safer-lodash-set';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { Capabilities, NavigateToAppOptions } from '@kbn/core/public';
+import type { CasesPermissions } from '@kbn/cases-plugin/common/ui';
 import {
   APP_UI_ID,
   CASES_FEATURE_ID,
@@ -21,7 +22,7 @@ import {
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
@@ -146,29 +147,40 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
-export interface UseGetUserCasesPermissions {
-  crud: boolean;
-  read: boolean;
-}
-
 export const useGetUserCasesPermissions = () => {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
+  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
+    all: false,
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+    push: false,
+  });
   const uiCapabilities = useKibana().services.application.capabilities;
+  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
+    uiCapabilities[CASES_FEATURE_ID]
+  );
 
   useEffect(() => {
     setCasesPermissions({
-      crud: !!uiCapabilities[CASES_FEATURE_ID]?.crud_cases,
-      read: !!uiCapabilities[CASES_FEATURE_ID]?.read_cases,
+      all: casesCapabilities.all,
+      create: casesCapabilities.create,
+      read: casesCapabilities.read,
+      update: casesCapabilities.update,
+      delete: casesCapabilities.delete,
+      push: casesCapabilities.push,
     });
-  }, [uiCapabilities]);
+  }, [
+    casesCapabilities.all,
+    casesCapabilities.create,
+    casesCapabilities.read,
+    casesCapabilities.update,
+    casesCapabilities.delete,
+    casesCapabilities.push,
+  ]);
 
   return casesPermissions;
 };
-
-/**
- * Returns a full URL to the provided page path by using
- * kibana's `getUrlForApp()`
- */
 
 export type GetAppUrl = (param: {
   appId?: string;
@@ -176,7 +188,10 @@ export type GetAppUrl = (param: {
   path?: string;
   absolute?: boolean;
 }) => string;
-
+/**
+ * The `getAppUrl` function returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
 export const useAppUrl = () => {
   const { getUrlForApp } = useKibana().services.application;
 
@@ -187,18 +202,16 @@ export const useAppUrl = () => {
   return { getAppUrl };
 };
 
-/**
- * Navigate to any app using kibana's `navigateToApp()`
- * or by url using `navigateToUrl()`
- */
-
 export type NavigateTo = (
   param: {
     url?: string;
     appId?: string;
   } & NavigateToAppOptions
 ) => void;
-
+/**
+ * The `navigateTo` function navigates to any app using kibana's `navigateToApp()`.
+ * When the `{ url: string }` parameter is passed it will navigate using `navigateToUrl()`.
+ */
 export const useNavigateTo = () => {
   const { navigateToApp, navigateToUrl } = useKibana().services.application;
 
@@ -216,11 +229,27 @@ export const useNavigateTo = () => {
 };
 
 /**
- * Returns navigateTo and getAppUrl navigation hooks
- *
+ * Returns `navigateTo` and `getAppUrl` navigation hooks
  */
 export const useNavigation = () => {
   const { navigateTo } = useNavigateTo();
   const { getAppUrl } = useAppUrl();
   return { navigateTo, getAppUrl };
+};
+
+// Get the type for any feature capability
+export type FeatureCapability = Capabilities[string];
+interface UseCapabilities {
+  (): Capabilities;
+  <T extends FeatureCapability = FeatureCapability>(featureId: string): T;
+}
+/**
+ * Returns the feature capability when the `featureId` parameter is defined,
+ * or the entire kibana `Capabilities` object when the parameter is omitted.
+ */
+export const useCapabilities: UseCapabilities = <T extends FeatureCapability = FeatureCapability>(
+  featureId?: string
+) => {
+  const { capabilities } = useKibana().services.application;
+  return featureId ? (capabilities[featureId] as T) : capabilities;
 };

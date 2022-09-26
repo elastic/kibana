@@ -6,34 +6,29 @@
  */
 import React from 'react';
 import {
-  EuiBasicTableColumn,
+  EuiBadge,
+  EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
+  EuiTableFieldDataColumnType,
   EuiTitle,
   EuiToolTip,
   PropsOf,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { Serializable } from '@kbn/utility-types';
+import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
-import * as TEXT from '../translations';
-import { CspFinding } from '../types';
+import {
+  FINDINGS_TABLE_CELL_ADD_FILTER,
+  FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
+} from '../test_subjects';
 
-export const PageWrapper: React.FC = ({ children }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      css={css`
-        padding: ${euiTheme.size.l};
-      `}
-    >
-      {children}
-    </div>
-  );
-};
+export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
@@ -65,33 +60,36 @@ export const getExpandColumn = <T extends unknown>({
   ],
 });
 
-export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => [
+const baseColumns = [
   {
-    field: 'resource_id',
+    field: 'resource.id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.RESOURCE_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
+          { defaultMessage: 'Resource ID' }
+        )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnTooltipLabel',
-          {
-            defaultMessage: 'Custom Elastic Resource ID',
-          }
+          { defaultMessage: 'Custom Elastic Resource ID' }
         )}
       />
     ),
     truncateText: true,
-    width: '15%',
+    width: '150px',
     sortable: true,
     render: (filename: string) => (
-      <EuiToolTip position="top" content={filename}>
+      <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
         <span>{filename}</span>
       </EuiToolTip>
     ),
   },
   {
     field: 'result.evaluation',
-    name: TEXT.RESULT,
-    width: '100px',
+    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
+      defaultMessage: 'Result',
+    }),
+    width: '120px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
@@ -99,52 +97,189 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
   },
   {
     field: 'resource.sub_type',
-    name: TEXT.RESOURCE_TYPE,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
+      { defaultMessage: 'Resource Type' }
+    ),
     sortable: true,
-    width: '150px',
+    truncateText: true,
+    width: '10%',
   },
   {
     field: 'resource.name',
-    name: TEXT.RESOURCE_NAME,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
+      { defaultMessage: 'Resource Name' }
+    ),
     sortable: true,
+    truncateText: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.name',
-    name: TEXT.RULE,
+    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.ruleColumnLabel', {
+      defaultMessage: 'Rule',
+    }),
     sortable: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'rule.benchmark.name',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+      { defaultMessage: 'Benchmark' }
+    ),
+    width: '10%',
+    sortable: true,
+    truncateText: true,
   },
   {
     field: 'rule.section',
-    name: TEXT.CIS_SECTION,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
+      { defaultMessage: 'CIS Section' }
+    ),
+    width: '7%',
     sortable: true,
     truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'rule.tags',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
+      { defaultMessage: 'Rule Tags' }
+    ),
+    width: '15%',
+    sortable: false,
+    truncateText: true,
+    render: (tags: string[]) => {
+      const primaryTags = getPrimaryRuleTags(tags);
+      return primaryTags.map((tag) => <EuiBadge key={tag}>{tag}</EuiBadge>);
+    },
   },
   {
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.CLUSTER_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+          { defaultMessage: 'Cluster ID' }
+        )}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
-          {
-            defaultMessage: 'Kube-System Namespace ID',
-          }
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
+          { defaultMessage: 'Kube-System Namespace ID' }
         )}
       />
     ),
-    truncateText: true,
-    sortable: true,
-  },
-  {
-    field: '@timestamp',
     width: '150px',
-    name: TEXT.LAST_CHECKED,
-    truncateText: true,
     sortable: true,
-    render: (timestamp: number) => (
-      <EuiToolTip position="top" content={timestamp}>
-        <span>{moment(timestamp).fromNow()}</span>
+    truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
       </EuiToolTip>
     ),
   },
-];
+  {
+    field: '@timestamp',
+    width: '10%',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
+      { defaultMessage: 'Last Checked' }
+    ),
+    truncateText: true,
+    sortable: true,
+    render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
+  },
+] as const;
+
+export const baseFindingsColumns = Object.fromEntries(
+  baseColumns.map((column) => [column.field, column])
+) as Record<typeof baseColumns[number]['field'], typeof baseColumns[number]>;
+
+export const createColumnWithFilters = <T extends unknown>(
+  column: EuiTableFieldDataColumnType<T>,
+  { onAddFilter }: { onAddFilter: OnAddFilter }
+): EuiTableFieldDataColumnType<T> => ({
+  ...column,
+  render: (cellValue: Serializable, item: T) => (
+    <FilterableCell
+      onAddFilter={() => onAddFilter(column.field as string, cellValue, false)}
+      onAddNegateFilter={() => onAddFilter(column.field as string, cellValue, true)}
+      field={column.field as string}
+    >
+      {column.render?.(cellValue, item) || getCellValue(cellValue)}
+    </FilterableCell>
+  ),
+});
+
+const getCellValue = (value: unknown) => {
+  if (!value) return;
+  if (typeof value === 'string' || typeof value === 'number') return value;
+};
+
+const FilterableCell: React.FC<{
+  onAddFilter(): void;
+  onAddNegateFilter(): void;
+  field: string;
+}> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
+  <div
+    css={css`
+      position: relative;
+      width: 100%;
+
+      &:hover {
+        > .__filter_buttons {
+          opacity: 1;
+        }
+        > .__filter_value {
+          max-width: calc(100% - calc(${euiThemeVars.euiSizeL} * 2));
+        }
+      }
+    `}
+  >
+    <div className="__filter_value eui-textTruncate">{children}</div>
+    <div
+      className="__filter_buttons"
+      css={css`
+        opacity: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        display: flex;
+      `}
+    >
+      <EuiButtonIcon
+        iconType="plusInCircleFilled"
+        onClick={onAddFilter}
+        data-test-subj={FINDINGS_TABLE_CELL_ADD_FILTER}
+        aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButton', {
+          defaultMessage: 'Add {field} filter',
+          values: { field },
+        })}
+      />
+      <EuiButtonIcon
+        iconType="minusInCircleFilled"
+        onClick={onAddNegateFilter}
+        data-test-subj={FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER}
+        aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addNegateFilterButton', {
+          defaultMessage: 'Add {field} negated filter',
+          values: { field },
+        })}
+      />
+    </div>
+  </div>
+);

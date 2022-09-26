@@ -56,13 +56,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.waitForMissingDataViewWarning();
         await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
         await PageObjects.lens.closeDimensionEditor();
-        await PageObjects.lens.dragDimensionToDimension(
-          'lnsXY_yDimensionPanel > lns-dimensionTrigger',
-          'lnsXY_yDimensionPanel > lns-empty-dimension'
-        );
+        await PageObjects.lens.dragDimensionToDimension({
+          from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+          to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        });
         await PageObjects.lens.switchFirstLayerIndexPattern('log*');
         await PageObjects.lens.waitForMissingDataViewWarningDisappear();
         await PageObjects.lens.waitForEmptyWorkspace();
+      });
+
+      it('works fine when the dataViews is missing for referenceLines and annotations', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.searchForItemWithName(
+          'lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView'
+        );
+        await PageObjects.lens.clickVisualizeListItemTitle(
+          'lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView'
+        );
+        await PageObjects.lens.waitForMissingDataViewWarning();
       });
     });
   });

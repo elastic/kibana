@@ -9,7 +9,7 @@ import type {
   AggregationsAggregationContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { RULE_EXECUTION_LOG_PROVIDER } from '../../../lib/detection_engine/rule_execution_log/event_log/constants';
+import { RULE_EXECUTION_LOG_PROVIDER } from '../../../lib/detection_engine/rule_monitoring';
 
 /**
  * Given an aggregation of "aggs" this will return a search for rules that are NOT elastic

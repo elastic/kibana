@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
@@ -13,7 +13,7 @@ import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import { MonitorFields, ServiceLocations, ServiceLocationErrors } from '../../common/runtime_types';
+import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../common/config';
 
@@ -32,15 +32,15 @@ export interface ServiceData {
 export class ServiceAPIClient {
   private readonly username?: string;
   private readonly authorization: string;
-  public locations: ServiceLocations;
+  public locations: PublicLocations;
   private logger: Logger;
-  private readonly config: ServiceConfig;
+  private readonly config?: ServiceConfig;
   private readonly kibanaVersion: string;
   private readonly server: UptimeServerSetup;
 
   constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
-    const { username, password } = config;
+    const { username, password } = config ?? {};
     this.username = username;
     this.kibanaVersion = server.kibanaVersion;
 
@@ -55,12 +55,19 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  getHttpsAgent() {
-    const config = this.config;
+  getHttpsAgent(targetUrl: string) {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
+    const config = this.config ?? {};
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) return baseHttpsAgent;
+
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
-
-      const rejectUnauthorized = process.env.NODE_ENV === 'production';
 
       return new https.Agent({
         rejectUnauthorized,
@@ -68,10 +75,12 @@ export class ServiceAPIClient {
         key: tlsConfig.key,
       });
     }
+
+    return baseHttpsAgent;
   }
 
   async post(data: ServiceData) {
-    return this.callAPI('POST', data);
+    return this.callAPI('PUT', data);
   }
 
   async put(data: ServiceData) {
@@ -86,35 +95,40 @@ export class ServiceAPIClient {
     return this.callAPI('POST', { ...data, runOnce: true });
   }
 
+  addVersionHeader(req: AxiosRequestConfig) {
+    req.headers = { ...req.headers, 'x-kibana-version': this.kibanaVersion };
+    return req;
+  }
+
   async checkAccountAccessStatus() {
     if (this.authorization) {
       // in case username/password is provided, we assume it's always allowed
       return { allowed: true, signupUrl: null };
     }
 
-    const httpsAgent = this.getHttpsAgent();
-
-    if (this.locations.length > 0 && httpsAgent) {
+    if (this.locations.length > 0) {
       // get a url from a random location
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
-      try {
-        const { data } = await axios({
-          method: 'GET',
-          url: url + '/allowed',
-          headers:
-            process.env.NODE_ENV !== 'production' && this.authorization
-              ? {
-                  Authorization: this.authorization,
-                }
-              : undefined,
-          httpsAgent,
-        });
+      /* url is required for service locations, but omitted for private locations.
+      /* this.locations is only service locations */
+      const httpsAgent = this.getHttpsAgent(url);
 
-        const { allowed, signupUrl } = data;
-        return { allowed, signupUrl };
-      } catch (e) {
-        this.logger.error(e);
+      if (httpsAgent) {
+        try {
+          const { data } = await axios(
+            this.addVersionHeader({
+              method: 'GET',
+              url: url + '/allowed',
+              httpsAgent,
+            })
+          );
+
+          const { allowed, signupUrl } = data;
+          return { allowed, signupUrl };
+        } catch (e) {
+          this.logger.error(e);
+        }
       }
     }
 
@@ -136,23 +150,25 @@ export class ServiceAPIClient {
         convertToDataStreamFormat(rest)
       );
 
-      return axios({
-        method,
-        url: url + (runOnce ? '/run' : '/monitors'),
-        data: {
-          monitors: monitorsStreams,
-          output,
-          stack_version: this.kibanaVersion,
-          is_edit: isEdit,
-        },
-        headers:
-          process.env.NODE_ENV !== 'production' && this.authorization
-            ? {
-                Authorization: this.authorization,
-              }
-            : undefined,
-        httpsAgent: this.getHttpsAgent(),
-      });
+      return axios(
+        this.addVersionHeader({
+          method,
+          url: url + (runOnce ? '/run' : '/monitors'),
+          data: {
+            monitors: monitorsStreams,
+            output,
+            stack_version: this.kibanaVersion,
+            is_edit: isEdit,
+          },
+          headers:
+            process.env.NODE_ENV !== 'production' && this.authorization
+              ? {
+                  Authorization: this.authorization,
+                }
+              : undefined,
+          httpsAgent: this.getHttpsAgent(url),
+        })
+      );
     };
 
     const pushErrors: ServiceLocationErrors = [];
@@ -160,9 +176,8 @@ export class ServiceAPIClient {
     const promises: Array<Observable<unknown>> = [];
 
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = allMonitors.filter(
-        ({ locations }) =>
-          !locations || locations.length === 0 || locations?.find((loc) => loc.id === id)
+      const locMonitors = allMonitors.filter(({ locations }) =>
+        locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
         promises.push(
@@ -183,6 +198,7 @@ export class ServiceAPIClient {
                 code: err.code,
                 status: err.response?.data?.status,
                 url,
+                kibanaVersion: this.server.kibanaVersion,
               });
               if (err.response?.data?.reason) {
                 this.logger.error(err.response?.data?.reason);

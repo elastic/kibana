@@ -12,7 +12,7 @@ import type { Headers, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../../authentication';

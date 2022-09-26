@@ -5,20 +5,38 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { FlyoutProps } from './types';
-import { translations } from '../../../../config';
+import { translations, paths } from '../../../../config';
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: boolean }) {
+  const { config } = usePluginContext();
   const { services } = useKibana();
   const { http } = services;
   const prepend = http?.basePath.prepend;
+  const getAlertDetailsButton = () => {
+    if (!config.unsafe.alertDetails.enabled || !alert) return <></>;
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          href={
+            prepend && prepend(paths.observability.alertDetails(alert.fields['kibana.alert.uuid']))
+          }
+          data-test-subj="alertsFlyoutAlertDetailsButton"
+          fill
+        >
+          {translations.alertsFlyout.alertDetailsButtonText}
+        </EuiButton>
+      </EuiFlexItem>
+    );
+  };
 
-  if (!alert.link || isInApp) return <></>;
-  return (
-    <EuiFlexGroup justifyContent="flexEnd">
+  const getViewInAppUrlButton = () => {
+    if (!alert.link || isInApp) return <></>;
+    return (
       <EuiFlexItem grow={false}>
         <EuiButton
           href={prepend && prepend(alert.link)}
@@ -28,6 +46,15 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
           {translations.alertsFlyout.viewInAppButtonText}
         </EuiButton>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    );
+  };
+
+  return (
+    <EuiFlyoutFooter>
+      <EuiFlexGroup justifyContent="flexEnd">
+        {getViewInAppUrlButton()}
+        {getAlertDetailsButton()}
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
   );
 }

@@ -6,10 +6,10 @@
  */
 
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
-import { Capabilities } from '@kbn/core/types';
+import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { AppLinkItems } from './types';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { AppLinkItems } from './types';
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
   useAppLinks,
@@ -17,8 +17,10 @@ import {
   getLinkInfo,
   needsUrlState,
   updateAppLinks,
-  excludeAppLink,
+  useLinkExists,
+  hasCapabilities,
 } from './links';
+import { createCapabilities } from './test_utils';
 
 const defaultAppLinks: AppLinkItems = [
   {
@@ -27,9 +29,9 @@ const defaultAppLinks: AppLinkItems = [
     path: '/hosts',
     links: [
       {
-        id: SecurityPageName.hostsAuthentications,
-        title: 'Authentications',
-        path: `/hosts/authentications`,
+        id: SecurityPageName.hostsAnomalies,
+        title: 'Anomalies',
+        path: `/hosts/anomalies`,
       },
       {
         id: SecurityPageName.hostsEvents,
@@ -48,6 +50,25 @@ const mockCapabilities = {
   [SERVER_APP_ID]: { show: true },
 } as unknown as Capabilities;
 
+const fakePageId = 'fakePage';
+const testFeatureflag = 'detectionResponseEnabled';
+
+jest.mock('./app_links', () => {
+  const actual = jest.requireActual('./app_links');
+  const fakeLink = {
+    id: fakePageId,
+    title: 'test fake menu item',
+    path: 'test fake path',
+    hideWhenExperimentalKey: testFeatureflag,
+  };
+
+  return {
+    ...actual,
+    getAppLinks: () => [...actual.appLinks, fakeLink],
+    appLinks: [...actual.appLinks, fakeLink],
+  };
+});
+
 const licenseBasicMock = jest.fn().mockImplementation((arg: LicenseType) => arg === 'basic');
 const licensePremiumMock = jest.fn().mockReturnValue(true);
 const mockLicense = {
@@ -56,6 +77,10 @@ const mockLicense = {
 
 const renderUseAppLinks = () =>
   renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
+const renderUseLinkExists = (id: SecurityPageName) =>
+  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+    wrapper: TestProviders,
+  });
 
 describe('Security app links', () => {
   beforeEach(() => {
@@ -94,13 +119,6 @@ describe('Security app links', () => {
               ...networkLinkItem,
               // all its links should be filtered for all different criteria
               links: [
-                {
-                  id: SecurityPageName.networkExternalAlerts,
-                  title: 'external alerts',
-                  path: '/external_alerts',
-                  experimentalKey:
-                    'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
-                },
                 {
                   id: SecurityPageName.networkDns,
                   title: 'dns',
@@ -159,27 +177,68 @@ describe('Security app links', () => {
     });
   });
 
-  describe('excludeAppLink', () => {
-    it('should exclude link from app links', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+  describe('useLinkExists', () => {
+    it('should return true if the link exists', () => {
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      expect(result.current).toBe(true);
+    });
+
+    it('should return false if the link does not exists', () => {
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
+      expect(result.current).toBe(false);
+    });
+
+    it('should update if the links are removed', async () => {
+      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      expect(result.current).toBe(true);
       await act(async () => {
-        excludeAppLink(SecurityPageName.hostsEvents);
-        await waitForNextUpdate();
-      });
-      expect(result.current).toStrictEqual([
-        {
-          id: SecurityPageName.hosts,
-          title: 'Hosts',
-          path: '/hosts',
-          links: [
+        updateAppLinks(
+          [
             {
-              id: SecurityPageName.hostsAuthentications,
-              title: 'Authentications',
-              path: `/hosts/authentications`,
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
             },
           ],
-        },
-      ]);
+          {
+            capabilities: mockCapabilities,
+            experimentalFeatures: mockExperimentalDefaults,
+            license: mockLicense,
+          }
+        );
+        await waitForNextUpdate();
+      });
+      expect(result.current).toBe(false);
+    });
+
+    it('should update if the links are added', async () => {
+      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.rules);
+      expect(result.current).toBe(false);
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+              links: [
+                {
+                  id: SecurityPageName.rules,
+                  title: 'Rules',
+                  path: '/rules',
+                },
+              ],
+            },
+          ],
+          {
+            capabilities: mockCapabilities,
+            experimentalFeatures: mockExperimentalDefaults,
+            license: mockLicense,
+          }
+        );
+        await waitForNextUpdate();
+      });
+      expect(result.current).toBe(true);
     });
   });
 
@@ -222,6 +281,120 @@ describe('Security app links', () => {
         skipUrlState: true,
         title: 'Events',
       });
+    });
+  });
+
+  describe('hasCapabilities', () => {
+    const siemShow = 'siem.show';
+    const createCases = 'securitySolutionCases.create_cases';
+    const readCases = 'securitySolutionCases.read_cases';
+    const pushCases = 'securitySolutionCases.push_cases';
+
+    it('returns false when capabilities is an empty array', () => {
+      expect(hasCapabilities([], createCapabilities())).toBeFalsy();
+    });
+
+    it('returns true when the capability requested is specified as a single value', () => {
+      expect(hasCapabilities(siemShow, createCapabilities({ siem: { show: true } }))).toBeTruthy();
+    });
+
+    it('returns true when the capability requested is a single entry in an array', () => {
+      expect(
+        hasCapabilities([siemShow], createCapabilities({ siem: { show: true } }))
+      ).toBeTruthy();
+    });
+
+    it("returns true when the capability requested is a single entry in an AND'd array format", () => {
+      expect(
+        hasCapabilities([[siemShow]], createCapabilities({ siem: { show: true } }))
+      ).toBeTruthy();
+    });
+
+    it('returns true when only one requested capability is found in an OR situation', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, createCases],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { create_cases: false },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns true when only the create_cases requested capability is found in an OR situation', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, createCases],
+          createCapabilities({
+            siem: { show: false },
+            securitySolutionCases: { create_cases: true },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns false when none of the requested capabilities are found in an OR situation', () => {
+      expect(
+        hasCapabilities(
+          [readCases, createCases],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { create_cases: false },
+          })
+        )
+      ).toBeFalsy();
+    });
+
+    it('returns true when all of the requested capabilities are found in an AND situation', () => {
+      expect(
+        hasCapabilities(
+          [[readCases, createCases]],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: true, create_cases: true },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns false when neither the single OR capability is found nor all of the AND capabilities', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, [readCases, createCases]],
+          createCapabilities({
+            siem: { show: false },
+            securitySolutionCases: { read_cases: false, create_cases: true },
+          })
+        )
+      ).toBeFalsy();
+    });
+
+    it('returns true when the single OR capability is found when using an OR with an AND format', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, [readCases, createCases]],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: false, create_cases: true },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it("returns false when the AND'd expressions are not satisfied", () => {
+      expect(
+        hasCapabilities(
+          [
+            [siemShow, pushCases],
+            [readCases, createCases],
+          ],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: false, create_cases: true, push_cases: false },
+          })
+        )
+      ).toBeFalsy();
     });
   });
 });

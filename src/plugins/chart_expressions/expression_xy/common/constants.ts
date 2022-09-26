@@ -8,22 +8,20 @@
 
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
-export const Y_CONFIG = 'yConfig';
-export const REFERENCE_LINE_Y_CONFIG = 'referenceLineYConfig';
-export const EXTENDED_Y_CONFIG = 'extendedYConfig';
+export const DATA_DECORATION_CONFIG = 'dataDecorationConfig';
+export const REFERENCE_LINE_DECORATION_CONFIG = 'referenceLineDecorationConfig';
+export const EXTENDED_REFERENCE_LINE_DECORATION_CONFIG = 'extendedReferenceLineDecorationConfig';
+export const X_AXIS_CONFIG = 'xAxisConfig';
+export const Y_AXIS_CONFIG = 'yAxisConfig';
 export const DATA_LAYER = 'dataLayer';
 export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
 export const LEGEND_CONFIG = 'legendConfig';
 export const XY_VIS_RENDERER = 'xyVis';
-export const GRID_LINES_CONFIG = 'gridlinesConfig';
 export const ANNOTATION_LAYER = 'annotationLayer';
 export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
-export const TICK_LABELS_CONFIG = 'tickLabelsConfig';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
 export const REFERENCE_LINE = 'referenceLine';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
-export const LABELS_ORIENTATION_CONFIG = 'labelsOrientationConfig';
-export const AXIS_TITLES_VISIBILITY_CONFIG = 'axisTitlesVisibilityConfig';
 
 export const LayerTypes = {
   DATA: 'data',
@@ -37,6 +35,8 @@ export const FittingFunctions = {
   LINEAR: 'Linear',
   CARRY: 'Carry',
   LOOKAHEAD: 'Lookahead',
+  AVERAGE: 'Average',
+  NEAREST: 'Nearest',
 } as const;
 
 export const EndValues = {
@@ -62,6 +62,7 @@ export const LineStyles = {
   SOLID: 'solid',
   DASHED: 'dashed',
   DOTTED: 'dotted',
+  DOT_DASHED: 'dot-dashed',
 } as const;
 
 export const FillStyles = {
@@ -82,13 +83,6 @@ export const SeriesTypes = {
   BAR: 'bar',
   LINE: 'line',
   AREA: 'area',
-  BAR_STACKED: 'bar_stacked',
-  AREA_STACKED: 'area_stacked',
-  BAR_HORIZONTAL: 'bar_horizontal',
-  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
-  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
-  AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
-  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
 export const YScaleTypes = {
@@ -107,6 +101,7 @@ export const XScaleTypes = {
 export const XYCurveTypes = {
   LINEAR: 'LINEAR',
   CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
+  CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
 } as const;
 
 export const ValueLabelModes = {
@@ -128,6 +123,14 @@ export const AvailableReferenceLineIcons = {
   MAP_MARKER: 'mapMarker',
   PIN_FILLED: 'pinFilled',
   STAR_EMPTY: 'starEmpty',
+  STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
+} as const;
+
+export const AxisModes = {
+  NORMAL: 'normal',
+  PERCENTAGE: 'percentage',
+  WIGGLE: 'wiggle',
+  SILHOUETTE: 'silhouette',
 } as const;

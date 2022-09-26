@@ -7,6 +7,7 @@
 
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { getCreateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { BaseDataGenerator } from './base_data_generator';
 

@@ -18,7 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { TimelineResultNote } from '../types';
+import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -107,7 +107,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                   getEmptyValue()
                 ),
                 children: <EuiText size="s">{timeline.description}</EuiText>,
-                timelineIcon: (
+                timelineAvatar: (
                   <EuiAvatar
                     data-test-subj="avatar"
                     name={timeline.updatedBy != null ? timeline.updatedBy : '?'}
@@ -152,7 +152,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
               eventId && timelineId ? (
                 <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
               ) : null,
-            timelineIcon: (
+            timelineAvatar: (
               <EuiAvatar
                 data-test-subj="avatar"
                 name={note.updatedBy != null ? note.updatedBy : '?'}

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -18,11 +18,13 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { Cancelable, debounce } from 'lodash';
-import {
+import type { Cancelable } from 'lodash';
+import { debounce } from 'lodash';
+import type {
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,

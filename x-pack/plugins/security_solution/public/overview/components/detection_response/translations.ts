@@ -60,6 +60,13 @@ export const ALERTS = (totalAlerts: number) =>
 export const ALERTS_TEXT = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
   defaultMessage: 'Alerts',
 });
+export const ALERTS_BY_STATUS_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus',
+  {
+    defaultMessage: 'Alerts by Status',
+  }
+);
+
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
@@ -153,10 +160,22 @@ export const OPEN_RULE_DETAIL_TOOLTIP = i18n.translate(
     defaultMessage: 'Open rule detail',
   }
 );
-export const OPEN_RULE_ALERTS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionResponse.openRuleAlertsTooltip',
+export const OPEN_CASE_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openCaseDetailTooltip',
   {
-    defaultMessage: 'Open rule alerts',
+    defaultMessage: 'Open case detail',
+  }
+);
+export const OPEN_HOST_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openHostDetailTooltip',
+  {
+    defaultMessage: 'Open host detail',
+  }
+);
+export const OPEN_USER_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openUserDetailTooltip',
+  {
+    defaultMessage: 'Open user detail',
   }
 );
 
@@ -167,24 +186,10 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   }
 );
 
-export const VIEW_ALL_USER_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewAllUserAlerts',
-  {
-    defaultMessage: 'View all users',
-  }
-);
-
 export const VIEW_RECENT_CASES = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewRecentCases',
   {
     defaultMessage: 'View recent cases',
-  }
-);
-
-export const VIEW_ALL_HOST_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
-  {
-    defaultMessage: 'View all hosts',
   }
 );
 

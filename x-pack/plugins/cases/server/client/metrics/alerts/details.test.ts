@@ -37,7 +37,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     expect(await handler.compute()).toEqual({});
   });
@@ -50,7 +50,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     handler.setupFeature('alerts.hosts');
 
@@ -65,7 +65,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for hosts when the count aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.hosts');
@@ -81,7 +81,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for users when the count aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.users');
@@ -97,7 +97,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for hosts when the top hits aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.hosts');
@@ -113,7 +113,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for users when the top hits aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.users');
@@ -136,7 +136,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     expect(await handler.compute()).toEqual({});
   });
@@ -149,7 +149,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     expect(await handler.compute()).toEqual({});
     expect(await handler.compute()).toEqual({});
@@ -222,7 +222,9 @@ function createMockClientArgs() {
 
   const clientArgs = {
     logger,
-    alertsService,
+    services: {
+      alertsService,
+    },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

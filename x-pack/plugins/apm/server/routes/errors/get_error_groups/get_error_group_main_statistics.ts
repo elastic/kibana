@@ -6,7 +6,12 @@
  */
 
 import { AggregationsTermsAggregationOrder } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -15,8 +20,9 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -30,6 +36,9 @@ export async function getErrorGroupMainStatistics({
   sortDirection = 'desc',
   start,
   end,
+  maxNumberOfErrorGroups = 500,
+  transactionName,
+  transactionType,
 }: {
   kuery: string;
   serviceName: string;
@@ -39,6 +48,9 @@ export async function getErrorGroupMainStatistics({
   sortDirection?: 'asc' | 'desc';
   start: number;
   end: number;
+  maxNumberOfErrorGroups?: number;
+  transactionName?: string;
+  transactionType?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -58,11 +70,14 @@ export async function getErrorGroupMainStatistics({
         events: [ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
             filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              ...termQuery(TRANSACTION_TYPE, transactionType),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -73,7 +88,7 @@ export async function getErrorGroupMainStatistics({
           error_groups: {
             terms: {
               field: ERROR_GROUP_ID,
-              size: 500,
+              size: maxNumberOfErrorGroups,
               order,
             },
             aggs: {

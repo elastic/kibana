@@ -79,6 +79,12 @@ export class FetcherTask {
     if (this.isSending) {
       return;
     }
+
+    // Skip this run if Kibana is not in a healthy state to fetch telemetry.
+    if (!(await this.telemetryCollectionManager?.shouldGetTelemetry())) {
+      return;
+    }
+
     let telemetryConfig: TelemetryConfig | undefined;
 
     try {

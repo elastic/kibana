@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { getFormatByAccessor, getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 

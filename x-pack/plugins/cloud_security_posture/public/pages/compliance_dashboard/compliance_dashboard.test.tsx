@@ -6,19 +6,27 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
-import { ComplianceDashboard } from '..';
+import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NO_DATA_CONFIG_TEXT } from './translations';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
-import * as TEXT from './translations';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
+import { DASHBOARD_CONTAINER } from './test_subjects';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
+import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { expectIdsInDoc } from '../../test/utils';
 
 jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/api/use_cis_kubernetes_integration');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
+jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 const mockDashboardData = {
   stats: {
@@ -167,11 +175,19 @@ const mockDashboardData = {
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { item: { status: 'installed' } },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
   });
 
   const renderComplianceDashboardPage = () => {
@@ -196,29 +212,71 @@ describe('<ComplianceDashboard />', () => {
     );
   };
 
-  it('shows noDataConfig when latestFindingsIndexStatus is inapplicable', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      data: { latestFindingsIndexStatus: 'inapplicable' },
-    }));
-    (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
-      data: undefined,
-    }));
+  it('no findings state: not-deployed - shows NotDeployed instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'not-deployed' },
+      })
+    );
+    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderComplianceDashboardPage();
 
-    Object.values(NO_DATA_CONFIG_TEXT).forEach((text) =>
-      expect(screen.getAllByText(text)[0]).toBeInTheDocument()
-    );
-    expect(screen.queryByText(TEXT.CLOUD_POSTURE_SCORE)).not.toBeInTheDocument();
+    expectIdsInDoc({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+      ],
+    });
   });
 
-  it('shows dashboard when latestFindingsIndexStatus is applicable', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      isLoading: false,
-      isSuccess: true,
-      data: { latestFindingsIndexStatus: 'applicable' },
-    }));
+  it('no findings state: indexing - shows Indexing instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexing' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+      ],
+    });
+  });
+
+  it('no findings state: index-timeout - shows IndexTimeout instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'index-timeout' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+      ],
+    });
+  });
+
+  it('shows dashboard when there are findings in latest findings index', () => {
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
@@ -227,9 +285,13 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    [NO_DATA_CONFIG_TEXT.BUTTON_TITLE, NO_DATA_CONFIG_TEXT.DESCRIPTION].forEach((text) =>
-      expect(screen.queryByText(text)).not.toBeInTheDocument()
-    );
-    expect(screen.getByText(TEXT.CLOUD_POSTURE_SCORE)).toBeInTheDocument();
+    expectIdsInDoc({
+      be: [DASHBOARD_CONTAINER],
+      notToBe: [
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+      ],
+    });
   });
 });

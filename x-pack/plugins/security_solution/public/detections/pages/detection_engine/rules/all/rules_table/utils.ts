@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { Rule, SortingOptions } from '../../../../../containers/detection_engine/rules/types';
+import type { Rule, SortingOptions } from '../../../../../containers/detection_engine/rules/types';
 
 /**
  * Returns a comparator function to be used with .sort()

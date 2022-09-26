@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildThresholdTermsQuery, buildThresholdCardinalityQuery, BaseQuery } from './helpers';
+import type { BaseQuery } from './helpers';
+import { buildThresholdTermsQuery, buildThresholdCardinalityQuery } from './helpers';
 
 const BASE_QUERY: BaseQuery = {
   eventActionGroup: {

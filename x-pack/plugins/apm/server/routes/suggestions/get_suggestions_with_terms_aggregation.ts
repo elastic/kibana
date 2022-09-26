@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -42,6 +42,7 @@ export async function getSuggestionsWithTermsAggregation({
         ],
       },
       body: {
+        track_total_hits: false,
         timeout: '1500ms',
         size: 0,
         query: {

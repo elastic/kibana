@@ -6,9 +6,10 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
-import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
+import type { Rule } from '../../../../../containers/detection_engine/rules';
+import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import { DataSourceType } from '../../types';
+import type { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
 import { getThreatMock } from '../../../../../../../common/detection_engine/schemas/types/threat.mock';
 
@@ -158,8 +159,11 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
+  timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
 });
 
 // TODO: update types mapping
@@ -193,6 +197,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   anomalyThreshold: 50,
   machineLearningJobId: [],
   index: ['filebeat-'],
+  dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
   requiredFields: [],
@@ -212,6 +217,10 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     },
   },
   eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({
@@ -219,13 +228,3 @@ export const mockScheduleStepRule = (): ScheduleStepRule => ({
   from: '6m',
   to: 'now',
 });
-
-export const mockRuleError = (id: string): RuleError => ({
-  rule_id: id,
-  error: { status_code: 404, message: `id: "${id}" not found` },
-});
-
-export const mockRules: Rule[] = [
-  mockRule('abe6c564-050d-45a5-aaf0-386c37dd1f61'),
-  mockRule('63f06f34-c181-4b2d-af35-f2ace572a1ee'),
-];

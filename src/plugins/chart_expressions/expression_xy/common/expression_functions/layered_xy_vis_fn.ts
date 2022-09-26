@@ -8,22 +8,33 @@
 
 import { XY_VIS_RENDERER } from '../constants';
 import { LayeredXyVisFn } from '../types';
-import { logDatatables } from '../utils';
+import { logDatatables, logDatatable } from '../utils';
 import {
   validateMarkSizeRatioLimits,
   validateAddTimeMarker,
   validateMinTimeBarInterval,
   hasBarLayer,
   errors,
+  validateAxes,
 } from './validate';
 import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
-
-  logDatatables(layers, handlers);
-
   const dataLayers = getDataLayers(layers);
+
+  if (args.singleTable) {
+    logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
+  } else {
+    logDatatables(
+      layers,
+      handlers,
+      args.splitColumnAccessor,
+      args.splitRowAccessor,
+      args.annotations
+    );
+  }
+
   const hasBar = hasBarLayer(dataLayers);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMarkSizeRatioLimits(args.markSizeRatio);
@@ -34,6 +45,8 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
   if (!hasMarkSizeAccessors && args.markSizeRatio !== undefined) {
     throw new Error(errors.markSizeRatioWithoutAccessor());
   }
+
+  validateAxes(dataLayers, args.yAxisConfigs);
 
   return {
     type: 'render',

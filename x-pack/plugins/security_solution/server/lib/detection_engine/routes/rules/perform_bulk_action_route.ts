@@ -8,31 +8,31 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { RuleAlertType } from '../../rules/types';
+import type { RuleAlertType } from '../../rules/types';
 
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { SetupPlugins } from '../../../../plugin';
+import {
+  performBulkActionSchema,
+  performBulkActionQuerySchema,
+  BulkAction,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
-import {
-  initPromisePool,
-  PromisePoolError,
-  PromisePoolOutcome,
-} from '../../../../utils/promise_pool';
+import type { PromisePoolError, PromisePoolOutcome } from '../../../../utils/promise_pool';
+import { initPromisePool } from '../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwAuthzError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
@@ -42,7 +42,14 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { DryRunError } from '../../rules/bulk_actions/dry_run';
+import {
+  validateBulkEnableRule,
+  validateBulkDisableRule,
+  validateBulkDuplicateRule,
+  dryRunValidateBulkEditRule,
+} from '../../rules/bulk_actions/validations';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -55,6 +62,7 @@ interface RuleDetailsInError {
 interface NormalizedRuleError {
   message: string;
   status_code: number;
+  err_code?: BulkActionsDryRunErrCode;
   rules: RuleDetailsInError[];
 }
 
@@ -66,8 +74,8 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
   errors.forEach((errorObj) => {
     let message: string;
     let statusCode: number = 500;
+    let errorCode: BulkActionsDryRunErrCode | undefined;
     let rule: RuleDetailsInError;
-
     // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
     // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
@@ -80,6 +88,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
           ? transformError(error)
           : { message: String(error), statusCode: 500 };
 
+      errorCode = (error as DryRunError)?.errorCode;
       message = transformedError.message;
       statusCode = transformedError.statusCode;
       // The promise pool item is either a rule ID string or a rule object. We have
@@ -94,6 +103,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
       errorsMap.set(message, {
         message: truncate(message, { length: MAX_ERROR_MESSAGE_LENGTH }),
         status_code: statusCode,
+        err_code: errorCode,
         rules: [rule],
       });
     }
@@ -105,11 +115,13 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
+    isDryRun = false,
     errors = [],
     updated = [],
     created = [],
     deleted = [],
   }: {
+    isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
@@ -124,11 +136,19 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed,
   };
 
-  const results = {
-    updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
-    created: created.map((rule) => internalRuleToAPIResponse(rule)),
-    deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
-  };
+  // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
+  // thus, it's impossible to return reliably updated/duplicated/deleted rules
+  const results = isDryRun
+    ? {
+        updated: [],
+        created: [],
+        deleted: [],
+      }
+    : {
+        updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
+        created: created.map((rule) => internalRuleToAPIResponse(rule)),
+        deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+      };
 
   if (numFailed > 0) {
     return response.custom({
@@ -248,6 +268,9 @@ export const performBulkActionRoute = (
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       validate: {
         body: buildRouteValidation<typeof performBulkActionSchema>(performBulkActionSchema),
+        query: buildRouteValidation<typeof performBulkActionQuerySchema>(
+          performBulkActionQuerySchema
+        ),
       },
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
@@ -270,6 +293,16 @@ export const performBulkActionRoute = (
       if (body?.ids && body.query !== undefined) {
         return siemResponse.error({
           body: `Both query and ids are sent. Define either ids or query in request payload.`,
+          statusCode: 400,
+        });
+      }
+
+      const isDryRun = request.query.dry_run === 'true';
+
+      // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
+      if (isDryRun && body.action === BulkAction.export) {
+        return siemResponse.error({
+          body: `Export action doesn't support dry_run mode`,
           statusCode: 400,
         });
       }
@@ -304,7 +337,7 @@ export const performBulkActionRoute = (
 
         // handling this action before switch statement as bulkEditRules fetch rules within
         // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
-        if (body.action === BulkAction.edit) {
+        if (body.action === BulkAction.edit && !isDryRun) {
           const { rules, errors } = await bulkEditRules({
             rulesClient,
             filter: query,
@@ -359,6 +392,13 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                await validateBulkEnableRule({ mlAuthz, rule });
+
+                // during dry run only validation is getting performed and rule is not saved in ES, thus return early
+                if (isDryRun) {
+                  return rule;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -366,7 +406,6 @@ export const performBulkActionRoute = (
                 });
 
                 if (!migratedRule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
                   await rulesClient.enable({ id: migratedRule.id });
                 }
 
@@ -386,6 +425,13 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                await validateBulkDisableRule({ mlAuthz, rule });
+
+                // during dry run only validation is getting performed and rule is not saved in ES, thus return early
+                if (isDryRun) {
+                  return rule;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -393,7 +439,6 @@ export const performBulkActionRoute = (
                 });
 
                 if (migratedRule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
                   await rulesClient.disable({ id: migratedRule.id });
                 }
 
@@ -408,11 +453,17 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
+
           case BulkAction.delete:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                // during dry run return early for delete, as no validations needed for this action
+                if (isDryRun) {
+                  return null;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -433,18 +484,24 @@ export const performBulkActionRoute = (
               .map(({ item }) => item)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
+
           case BulkAction.duplicate:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                await validateBulkDuplicateRule({ mlAuthz, rule });
+
+                // during dry run only validation is getting performed and rule is not saved in ES, thus return early
+                if (isDryRun) {
+                  return rule;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
-                throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
 
                 const createdRule = await rulesClient.create({
                   data: duplicateRule(migratedRule),
@@ -458,6 +515,7 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
+
           case BulkAction.export:
             const exported = await getExportByObjectIds(
               rulesClient,
@@ -476,6 +534,23 @@ export const performBulkActionRoute = (
               },
               body: responseBody,
             });
+
+          // will be processed only when isDryRun === true
+          // during dry run only validation is getting performed and rule is not saved in ES
+          case BulkAction.edit:
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                await dryRunValidateBulkEditRule({ mlAuthz, rule, edit: body.edit });
+
+                return rule;
+              },
+              abortSignal: abortController.signal,
+            });
+            updated = bulkActionOutcome.results
+              .map(({ result }) => result)
+              .filter((rule): rule is RuleAlertType => rule !== null);
         }
 
         if (abortController.signal.aborted === true) {
@@ -487,6 +562,7 @@ export const performBulkActionRoute = (
           deleted,
           created,
           errors: [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors],
+          isDryRun,
         });
       } catch (err) {
         const error = transformError(err);

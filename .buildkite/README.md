@@ -3,6 +3,7 @@
 ## Directory Structure
 
 - `hooks` - special directory used by Buildkite agents for [hooks](https://buildkite.com/docs/agent/v3/hooks)
+- `pipeline-utils` - Shared TypeScript utils for use in pipeline scripts
 - `pipelines` - contains pipeline definitions
 - `scripts/common` - scripts that get `source`d by other scripts to set environment variables or import shared functions
 - `scripts/lifecycle` - general scripts for tasks that run before or after individual steps or the entire build

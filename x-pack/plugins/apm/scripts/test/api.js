@@ -34,9 +34,13 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .option('grep', {
     alias: 'spec',
-    default: false,
     type: 'string',
-    description: 'Specify the spec files to run',
+    description: 'Specify the specs to run',
+  })
+  .option('grep-files', {
+    alias: 'files',
+    type: 'string',
+    description: 'Specify the files to run',
   })
   .option('inspect', {
     default: false,
@@ -62,7 +66,16 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { basic, trial, server, runner, grep, inspect, updateSnapshots } = argv;
+const {
+  basic,
+  trial,
+  server,
+  runner,
+  grep,
+  grepFiles,
+  inspect,
+  updateSnapshots,
+} = argv;
 
 if (trial === false && basic === false) {
   throw new Error('Please specify either --trial or --basic');
@@ -82,7 +95,7 @@ if (server) {
 const cmd = [
   'node',
   ...(inspect ? ['--inspect-brk'] : []),
-  `../../../../scripts/${ftrScript}`,
+  `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   `--config ../../../../test/apm_api_integration/${license}/config.ts`,
@@ -91,7 +104,11 @@ const cmd = [
 console.log(`Running: "${cmd}"`);
 
 function runTests() {
-  childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });
+  childProcess.execSync(cmd, {
+    cwd: path.join(__dirname),
+    stdio: 'inherit',
+    env: { ...process.env, APM_TEST_GREP_FILES: grepFiles },
+  });
 }
 
 if (argv.times) {

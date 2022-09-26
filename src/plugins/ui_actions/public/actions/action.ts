@@ -98,6 +98,12 @@ export interface Action<Context extends object = object>
    * false by default.
    */
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
+
+  /**
+   * action is disabled or not
+   *
+   */
+  disabled?: boolean;
 }
 
 /**
@@ -139,6 +145,12 @@ export interface ActionDefinition<Context extends object = object>
    * right-clicks and selects "Open in new tab".
    */
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
+
+  /**
+   * action is disabled or not
+   *
+   */
+  disabled?: boolean;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

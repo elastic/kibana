@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { createContext, Context } from 'react';
+import type { Context } from 'react';
+import { createContext } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { SideEffectors } from '../types';
+import type { SideEffectors } from '../types';
 
 /**
  * React context that provides 'side-effectors' which we need to mock during testing.

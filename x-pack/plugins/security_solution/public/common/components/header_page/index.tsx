@@ -9,12 +9,14 @@ import { EuiProgress, EuiPageHeader, EuiPageHeaderSection, EuiSpacer } from '@el
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-import { LinkIcon, LinkIconProps } from '../link_icon';
-import { Subtitle, SubtitleProps } from '../subtitle';
+import type { LinkIconProps } from '../link_icon';
+import { LinkIcon } from '../link_icon';
+import type { SubtitleProps } from '../subtitle';
+import { Subtitle } from '../subtitle';
 import { Title } from './title';
-import { DraggableArguments, BadgeOptions, TitleProp } from './types';
+import type { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
-import { SecurityPageName } from '../../../app/types';
+import type { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../lib/kibana';
 interface HeaderProps {
   border?: boolean;

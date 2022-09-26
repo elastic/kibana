@@ -9,6 +9,7 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
+  BarSeries,
   Chart,
   CurveType,
   LegendItemListener,
@@ -16,6 +17,8 @@ import {
   LineSeries,
   niceTimeFormatter,
   Position,
+  RectAnnotation,
+  RectAnnotationStyle,
   ScaleType,
   SeriesIdentifier,
   Settings,
@@ -23,7 +26,7 @@ import {
   XYChartSeriesIdentifier,
   YDomainRange,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -70,6 +73,12 @@ interface Props {
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
 }
+
+const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
+  defaultMessage:
+    'The selected time range does not include this entire bucket. It might contain partial data.',
+});
+
 export function TimeseriesChart({
   id,
   height = unit * 16,
@@ -86,19 +95,16 @@ export function TimeseriesChart({
   const history = useHistory();
   const { core } = useApmPluginContext();
   const { annotations } = useAnnotationsContext();
-  const { setPointerEvent, chartRef } = useChartPointerEventContext();
+  const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
   const {
     query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
-
-  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
-
-  const timeZone = getTimeZone(core.uiSettings);
-
-  const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
 
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
@@ -106,7 +112,6 @@ export function TimeseriesChart({
     anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
 
-  const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
 
@@ -114,23 +119,70 @@ export function TimeseriesChart({
     comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
     ...timeseries,
-    ...(isComparingExpectedBounds && anomalyChartTimeseries?.boundaries
-      ? anomalyChartTimeseries?.boundaries
+    ...(isComparingExpectedBounds
+      ? anomalyChartTimeseries?.boundaries ?? []
       : []),
     ...(anomalyChartTimeseries?.scores ?? []),
-  ];
+  ]
+    // Sorting series so that area type series are before line series
+    // This is a workaround so that the legendSort works correctly
+    // Can be removed when https://github.com/elastic/elastic-charts/issues/1685 is resolved
+    .sort(
+      isComparingExpectedBounds
+        ? (prev, curr) => prev.type.localeCompare(curr.type)
+        : undefined
+    );
+
+  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+
+  const xValuesExpectedBounds =
+    anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
+      data.map(({ x }) => x)
+    ) ?? [];
+
+  const timeZone = getTimeZone(core.uiSettings);
+
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues, ...xValuesExpectedBounds);
+  const xFormatter = niceTimeFormatter([min, max]);
+
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
-  const legendSort = (a: SeriesIdentifier, b: SeriesIdentifier) => {
-    // Using custom legendSort here when comparing expected bounds
-    // because by default elastic-charts will show legends for expected bounds first
-    // but for consistency, we are making `Expected bounds` last
-    if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
-      return -1;
-    if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
-      return -1;
-    return 1;
+  // Using custom legendSort here when comparing expected bounds
+  // because by default elastic-charts will show legends for expected bounds first
+  // but for consistency, we are making `Expected bounds` last
+  // See https://github.com/elastic/elastic-charts/issues/1685
+  const legendSort = isComparingExpectedBounds
+    ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
+        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        return 1;
+      }
+    : undefined;
+
+  const endZoneColor = theme.darkMode
+    ? theme.eui.euiColorLightShade
+    : theme.eui.euiColorDarkShade;
+  const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
+    stroke: endZoneColor,
+    fill: endZoneColor,
+    strokeWidth: 0,
+    opacity: theme.darkMode ? 0.6 : 0.2,
   };
+
+  function getChartType(type: string) {
+    switch (type) {
+      case 'area':
+        return AreaSeries;
+      case 'bar':
+        return BarSeries;
+      default:
+        return LineSeries;
+    }
+  }
+
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -140,7 +192,33 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
-          tooltip={{ stickTo: 'top', showNullValues: false }}
+          tooltip={{
+            stickTo: 'top',
+            showNullValues: false,
+            headerFormatter: ({ value }) => {
+              const formattedValue = xFormatter(value);
+              if (max === value) {
+                return (
+                  <>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      responsive={false}
+                      gutterSize="xs"
+                      style={{ fontWeight: 'normal' }}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="iInCircle" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="xs" />
+                    {formattedValue}
+                  </>
+                );
+              }
+              return formattedValue;
+            },
+          }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -153,12 +231,12 @@ export function TimeseriesChart({
             },
             ...chartTheme,
           ]}
-          onPointerUpdate={setPointerEvent}
+          onPointerUpdate={updatePointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true },
           }}
           showLegend
-          legendSort={isComparingExpectedBounds ? legendSort : undefined}
+          legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {
@@ -202,8 +280,20 @@ export function TimeseriesChart({
           />
         )}
 
+        <RectAnnotation
+          id="__endzones__"
+          zIndex={2}
+          dataValues={[
+            {
+              coordinates: { x0: xValues[xValues.length - 2] },
+              details: END_ZONE_LABEL,
+            },
+          ]}
+          style={endZoneRectAnnotationStyle}
+        />
+
         {allSeries.map((serie) => {
-          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
+          const Series = getChartType(serie.type);
 
           return (
             <Series

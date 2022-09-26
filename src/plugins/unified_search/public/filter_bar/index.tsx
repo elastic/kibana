@@ -8,6 +8,8 @@
 
 import React from 'react';
 
+export type { FilterItemsProps } from './filter_item/filter_items';
+
 const Fallback = () => <div />;
 
 const LazyFilterBar = React.lazy(() => import('./filter_bar'));
@@ -18,13 +20,19 @@ export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => 
 );
 
 const LazyFilterItems = React.lazy(() => import('./filter_item/filter_items'));
+/**
+ * Renders a group of filter pills
+ */
 export const FilterItems = (props: React.ComponentProps<typeof LazyFilterItems>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterItems {...props} />
   </React.Suspense>
 );
 
-const LazyFilterLabel = React.lazy(() => import('./filter_editor/lib/filter_label'));
+const LazyFilterLabel = React.lazy(() => import('./filter_label/filter_label'));
+/**
+ * Renders the label for a single filter pill
+ */
 export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterLabel {...props} />
@@ -32,6 +40,9 @@ export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>)
 );
 
 const LazyFilterItem = React.lazy(() => import('./filter_item/filter_item'));
+/**
+ * Renders a single filter pill
+ */
 export const FilterItem = (props: React.ComponentProps<typeof LazyFilterItem>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterItem {...props} />

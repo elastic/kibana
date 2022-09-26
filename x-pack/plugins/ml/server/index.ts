@@ -16,12 +16,18 @@ export type {
   Job as MlJob,
   MlSummaryJob,
   SummaryJobState as MlSummaryJobState,
+  AlertingService as MlAlertingService,
+  AnomalyDetectors as MlAnomalyDetectors,
+  JobService as MlJobService,
+  MlSystem as MlMlSystem,
+  Modules as MlModules,
+  ResultsService as MlResultsService,
+  TrainedModels as MlTrainedModels,
 } from './shared';
 export {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
-  getHistogramsForFields,
 } from './shared';
 
 export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);

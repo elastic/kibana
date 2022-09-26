@@ -8,21 +8,22 @@
 import * as t from 'io-ts';
 
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
-import { queryFilter, fields, sort_field, sort_order, PerPage, Page } from '../common/schemas';
+import type { PerPage, Page } from '../common';
+import { queryFilter, fields, SortField, SortOrder } from '../common';
 
 export const findRulesSchema = t.exact(
   t.partial({
     fields,
     filter: queryFilter,
-    per_page: DefaultPerPage, // defaults to "20" if not sent in during decode
-    page: DefaultPage, // defaults to "1" if not sent in during decode
-    sort_field,
-    sort_order,
+    sort_field: SortField,
+    sort_order: SortOrder,
+    page: DefaultPage, // defaults to 1
+    per_page: DefaultPerPage, // defaults to 20
   })
 );
 
 export type FindRulesSchema = t.TypeOf<typeof findRulesSchema>;
 export type FindRulesSchemaDecoded = Omit<FindRulesSchema, 'per_page'> & {
-  per_page: PerPage;
   page: Page;
+  per_page: PerPage;
 };

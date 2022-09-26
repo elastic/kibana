@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CasesStatus } from '@kbn/cases-plugin/common/ui';
-import { useState, useEffect } from 'react';
+import type { CasesStatus } from '@kbn/cases-plugin/common/ui';
+import { useState, useEffect, useMemo } from 'react';
+import uuid from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -28,8 +29,9 @@ export const useCasesByStatus = ({ skip = false }) => {
   const {
     services: { cases },
   } = useKibana();
-  const { to, from } = useGlobalTime();
-
+  const { to, from, setQuery, deleteQuery } = useGlobalTime();
+  // create a unique, but stable (across re-renders) query id
+  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid.v4()}`, []);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
   const [casesCounts, setCasesCounts] = useState<CasesStatus | null>(null);
@@ -64,6 +66,12 @@ export const useCasesByStatus = ({ skip = false }) => {
 
     if (!skip) {
       fetchCases();
+      setQuery({
+        id: uniqueQueryId,
+        inspect: null,
+        loading: false,
+        refetch: fetchCases,
+      });
     }
 
     if (skip) {
@@ -75,8 +83,9 @@ export const useCasesByStatus = ({ skip = false }) => {
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
+      deleteQuery({ id: uniqueQueryId });
     };
-  }, [cases.api.cases, from, skip, to]);
+  }, [cases.api.cases, from, skip, to, setQuery, deleteQuery, uniqueQueryId]);
 
   return {
     closed: casesCounts?.countClosedCases ?? 0,

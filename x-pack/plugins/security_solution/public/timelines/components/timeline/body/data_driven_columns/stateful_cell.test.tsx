@@ -10,12 +10,12 @@ import { cloneDeep } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import {
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 
 import { StatefulCell } from './stateful_cell';
 import { useGetMappedNonEcsValue } from '.';

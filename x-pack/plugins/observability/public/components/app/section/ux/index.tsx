@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityPublicPluginsStart } from '../../../..';
 import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
 import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
@@ -29,13 +31,15 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { core, plugins } = usePluginContext();
+  const { services } = useKibana<ObservabilityPublicPluginsStart>();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
-  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core, plugins);
+  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(
+    services as ObservabilityPublicPluginsStart & CoreStart
+  );
 
   const seriesList: AllSeries = [
     {
@@ -50,6 +54,7 @@ export function UXSection({ bucketSize }: Props) {
       breakdown: SERVICE_NAME,
       dataType: 'ux' as AppDataType,
       selectedMetricField: TRANSACTION_DURATION,
+      showPercentileAnnotations: false,
     },
   ];
 

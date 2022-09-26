@@ -6,18 +6,21 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { DraggableId } from 'react-beautiful-dnd';
+import React, { useCallback, useMemo } from 'react';
+import type { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
+import { useDispatch } from 'react-redux';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
+import { addProvider } from '../../../timelines/store/timeline/actions';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -78,6 +81,7 @@ export const useHoverActionItems = ({
   values,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
+  const dispatch = useDispatch();
   const { timelines, uiSettings } = kibana.services;
   // Common actions used by the alert table and alert flyout
   const {
@@ -103,6 +107,29 @@ export const useHoverActionItems = ({
         : filterManagerBackup,
     [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
   );
+
+  /*
+   *   Add to Timeline button, adds data to dataprovider but does not persists the Timeline
+   *   to the server because of following reasons.
+   *
+   *   1. Add to Timeline button performs actions in `timelines` plugin
+   *   2. `timelines` plugin does not have information on how to create/update the timelines in the server
+   *       as it is owned by Security Solution
+   * */
+  const OnAddToTimeline = useCallback(() => {
+    if (!dataProvider || isEmpty(dataProvider)) return;
+    dispatch(
+      addProvider({
+        id: TimelineId.active,
+        providers: dataProvider instanceof Array ? dataProvider : [dataProvider],
+      })
+    );
+  }, [dataProvider, dispatch]);
+
+  const onAddToTimelineClicked = useCallback(() => {
+    if (handleHoverActionClicked) handleHoverActionClicked();
+    OnAddToTimeline();
+  }, [handleHoverActionClicked, OnAddToTimeline]);
 
   /*
    * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
@@ -199,7 +226,7 @@ export const useHoverActionItems = ({
               field,
               keyboardEvent: stKeyboardEvent,
               ownFocus,
-              onClick: handleHoverActionClicked,
+              onClick: onAddToTimelineClicked,
               showTooltip: enableOverflowButton ? false : true,
               value: values,
             })}
@@ -246,6 +273,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      onAddToTimelineClicked,
       hideAddToTimeline,
       hideTopN,
       isObjectArray,

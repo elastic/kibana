@@ -69,6 +69,7 @@ export default function ({ getService }) {
                 metadata_field: false,
               },
             ],
+            indices: ['logs-2017.01.01', 'logs-2017.01.02'],
           });
         }));
   });

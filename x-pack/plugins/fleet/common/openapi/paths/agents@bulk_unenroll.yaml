@@ -8,6 +8,10 @@ post:
           application/json:
             schema:
               type: object
+              properties:
+                actionId: 
+                  type: string
+                  description: action id when running in async mode (>10k agents)
               additionalProperties:
                 type: object
                 properties:
@@ -28,13 +32,21 @@ post:
           properties:
             revoke:
               type: boolean
+              description: Revokes API keys of agents
             force:
               type: boolean
+              description: Unenroll hosted agents too
             agents:
               oneOf:
                 - type: string
+                  description: KQL query string, leave empty to action all agents
                 - type: array
                   items:
                     type: string
+                  description: list of agent IDs
           required:
             - agents
+        example:
+          revoke: true
+          force: false
+          agents: [agent1, agent2]

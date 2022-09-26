@@ -9,7 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewSpec, DataViewsService } from '../../common';
+import { DataViewsService } from '../../common/data_views';
+import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';

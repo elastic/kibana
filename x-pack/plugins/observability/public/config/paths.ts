@@ -12,7 +12,9 @@ export const paths = {
   observability: {
     alerts: ALERT_PAGE_LINK,
     rules: RULES_PAGE_LINK,
-    ruleDetails: (ruleId: string) => `${RULES_PAGE_LINK}/${encodeURI(ruleId)}`,
+    ruleDetails: (ruleId?: string | null) =>
+      ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
+    alertDetails: (alertId: string) => `${ALERT_PAGE_LINK}/${encodeURI(alertId)}`,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',

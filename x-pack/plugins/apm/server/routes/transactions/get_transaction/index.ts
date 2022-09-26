@@ -6,12 +6,12 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 
 export async function getTransaction({
@@ -34,6 +34,7 @@ export async function getTransaction({
       events: [ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: false,
       size: 1,
       query: {
         bool: {

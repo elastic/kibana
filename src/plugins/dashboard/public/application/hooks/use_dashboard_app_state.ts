@@ -11,14 +11,14 @@ import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+
 import { DashboardConstants } from '../..';
-import { ViewMode } from '../../services/embeddable';
-import { useKibana } from '../../services/kibana_react';
-import { DataView } from '../../services/data_views';
 import { getNewDashboardTitle } from '../../dashboard_strings';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
-import {
+import type {
   DashboardBuildContext,
   DashboardAppServices,
   DashboardAppState,
@@ -40,6 +40,8 @@ import {
   areRefreshIntervalsEqual,
 } from '../lib';
 import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { pluginServices } from '../../services/plugin_services';
+import { useDashboardMountContext } from './dashboard_mount_context';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -77,31 +79,26 @@ export const useDashboardAppState = ({
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
-  /**
-   * Unpack services
-   */
-  const services = useKibana<DashboardAppServices>().services;
   const {
-    data,
-    core,
-    chrome,
-    embeddable,
-    dataViews,
-    usageCollection,
-    savedDashboards,
-    initializerContext,
-    savedObjectsTagging,
+    services: { savedDashboards },
+  } = useKibana<DashboardAppServices>();
+
+  /**
+   * Unpack services and context
+   */
+  const { scopedHistory } = useDashboardMountContext();
+  const {
+    chrome: { docTitle },
     dashboardCapabilities,
     dashboardSessionStorage,
-    scopedHistory,
-    spacesService,
-    screenshotModeService,
-  } = services;
-  const { docTitle } = chrome;
-  const { notifications } = core;
-  const { query, search } = data;
+    data: { query, search, dataViews },
+    embeddable,
+    initializerContext: { kibanaVersion },
+    screenshotMode: { isScreenshotMode, getScreenshotContext },
+    spaces: { redirectLegacyUrl },
+    notifications,
+  } = pluginServices.getServices();
   const { getStateTransfer } = embeddable;
-  const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
   /**
    * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
@@ -122,19 +119,10 @@ export const useDashboardAppState = ({
      * from the dashboardId. This build context doesn't contain any extrenuous services.
      */
     const dashboardBuildContext: DashboardBuildContext = {
-      query,
-      search,
       history,
-      embeddable,
-      dataViews,
-      notifications,
-      kibanaVersion,
       savedDashboards,
       kbnUrlStateStorage,
-      initializerContext,
-      savedObjectsTagging,
       isEmbeddedExternally,
-      dashboardCapabilities,
       dispatchDashboardStateChange,
       $checkForUnsavedChanges: new Subject(),
       $onDashboardStateChange: dashboardAppState.$onDashboardStateChange,
@@ -146,7 +134,7 @@ export const useDashboardAppState = ({
       /**
        * Ensure default data view exists and there is data in elasticsearch
        */
-      const isEmpty = await isDashboardAppInNoDataState(dataViews);
+      const isEmpty = await isDashboardAppInNoDataState();
       if (showNoDataPage || isEmpty) {
         setShowNoDataPage(true);
         return;
@@ -179,10 +167,10 @@ export const useDashboardAppState = ({
           savedDashboard.aliasId
         );
         const aliasPurpose = savedDashboard.aliasPurpose;
-        if (screenshotModeService?.isScreenshotMode()) {
+        if (isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
-          await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
+          await redirectLegacyUrl?.({ path, aliasPurpose });
         }
         // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
         return;
@@ -202,9 +190,7 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
-      const printLayoutDetected =
-        screenshotModeService?.isScreenshotMode() &&
-        screenshotModeService.getScreenshotContext('layout') === 'print';
+      const printLayoutDetected = isScreenshotMode() && getScreenshotContext('layout') === 'print';
 
       const initialDashboardState = {
         ...savedDashboardState,
@@ -231,16 +217,18 @@ export const useDashboardAppState = ({
       /**
        * Build the dashboard container embeddable, and apply the incoming embeddable if it exists.
        */
+
       const dashboardContainer = await buildDashboardContainer({
         ...dashboardBuildContext,
         initialDashboardState,
         incomingEmbeddable,
         savedDashboard,
-        data,
         executionContext: {
+          type: 'dashboard',
           description: savedDashboard.title,
         },
       });
+
       if (canceled || !dashboardContainer) {
         tryDestroyDashboardContainer(dashboardContainer);
         return;
@@ -251,12 +239,14 @@ export const useDashboardAppState = ({
        */
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
-        dataViews: dashboardBuildContext.dataViews,
-        onUpdateDataViews: (newDataViews: DataView[]) => {
-          if (newDataViews.length > 0 && newDataViews[0].id) {
-            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
+        onUpdateDataViews: async (newDataViewIds: string[]) => {
+          if (newDataViewIds?.[0]) {
+            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);
           }
-          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews }));
+          // fetch all data views. These should be cached locally at this time so we will not need to query ES.
+          const allDataViews = await Promise.all(newDataViewIds.map((id) => dataViews.get(id)));
+          dashboardContainer.setAllDataViews(allDataViews);
+          setDashboardAppState((s) => ({ ...s, dataViews: allDataViews }));
         },
       });
 
@@ -274,7 +264,7 @@ export const useDashboardAppState = ({
        * Any time the redux state, or the last saved state changes, compare them, set the unsaved
        * changes state, and and push the unsaved changes to session storage.
        */
-      const { timefilter } = dashboardBuildContext.query.timefilter;
+      const { timefilter } = query.timefilter;
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
@@ -331,10 +321,6 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            showWriteControls: dashboardBuildContext.dashboardCapabilities.showWriteControls,
-            version: dashboardBuildContext.kibanaVersion,
-            savedObjectsTagging,
-            usageCollection,
             savedDashboard,
           })
         );
@@ -379,12 +365,9 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     isEmbeddedExternally,
     kbnUrlStateStorage,
-    savedObjectsTagging,
-    initializerContext,
     savedDashboardId,
     getStateTransfer,
     savedDashboards,
-    usageCollection,
     scopedHistory,
     notifications,
     dataViews,
@@ -394,11 +377,11 @@ export const useDashboardAppState = ({
     history,
     search,
     query,
-    data,
     showNoDataPage,
     setShowNoDataPage,
-    spacesService?.ui,
-    screenshotModeService,
+    redirectLegacyUrl,
+    getScreenshotContext,
+    isScreenshotMode,
   ]);
 
   /**
@@ -414,7 +397,7 @@ export const useDashboardAppState = ({
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
-      const { timefilter } = data.query.timefilter;
+      const { timefilter } = query.timefilter;
       const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
       if (from && to) timefilter.setTime({ from, to });
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
@@ -425,7 +408,7 @@ export const useDashboardAppState = ({
         viewMode: ViewMode.VIEW,
       })
     );
-  }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
+  }, [lastSavedState, dashboardAppState, query.timefilter, dispatchDashboardStateChange]);
 
   /**
    *  publish state to the state change observable when redux state changes

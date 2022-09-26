@@ -7,15 +7,19 @@
 
 import expect from '@kbn/expect';
 
+import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CreateCaseParams } from '../cases/create';
+import { MlAnomalyCharts } from './anomaly_charts';
 
-export function MachineLearningAnomalyExplorerProvider({
-  getPageObject,
-  getService,
-}: FtrProviderContext) {
+export function MachineLearningAnomalyExplorerProvider(
+  { getPageObject, getService }: FtrProviderContext,
+  anomalyCharts: MlAnomalyCharts
+) {
   const dashboardPage = getPageObject('dashboard');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const cases = getService('cases');
 
   return {
     async assertAnomalyExplorerEmptyListMessageExists() {
@@ -86,10 +90,22 @@ export function MachineLearningAnomalyExplorerProvider({
       await testSubjects.existOrFail('mlAddToDashboardModal');
     },
 
+    async attachSwimLaneToCase(swimLaneType: SwimlaneType = 'overall', params: CreateCaseParams) {
+      const attachTestSubject =
+        swimLaneType === 'overall'
+          ? 'mlAnomalyTimelinePanelAttachOverallButton'
+          : 'mlAnomalyTimelinePanelAttachViewByButton';
+      await testSubjects.click('mlAnomalyTimelinePanelMenu');
+      await testSubjects.click('mlAnomalyTimelinePanelAttachToCaseButton');
+      await testSubjects.click(attachTestSubject);
+
+      await cases.create.createCaseFromModal(params);
+    },
+
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
-        await testSubjects.clickWhenNotDisabled('~mlEmbeddableAddAndEditDashboard');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('~mlEmbeddableAddAndEditDashboard');
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();
@@ -159,13 +175,9 @@ export function MachineLearningAnomalyExplorerProvider({
     },
 
     async assertAnomalyExplorerChartsCount(expectedChartsCount: number) {
-      const chartsContainer = await testSubjects.find('mlExplorerChartsContainer');
-      const actualChartsCount = (
-        await chartsContainer.findAllByClassName('ml-explorer-chart-container', 3000)
-      ).length;
-      expect(actualChartsCount).to.eql(
-        expectedChartsCount,
-        `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
+      await anomalyCharts.assertAnomalyExplorerChartsCount(
+        'mlExplorerChartsContainer',
+        expectedChartsCount
       );
     },
 
@@ -175,6 +187,25 @@ export function MachineLearningAnomalyExplorerProvider({
 
     async scrollMapContainerIntoView() {
       await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
+    },
+
+    async assertSingleMetricViewerButtonEnabled(expectedEnabled = true) {
+      const isEnabled = await testSubjects.isEnabled(
+        'mlAnomalyResultsViewSelectorSingleMetricViewer'
+      );
+      expect(isEnabled).to.eql(
+        expectedEnabled,
+        `Expected the Single Metric Viewer button to be '${
+          expectedEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
+    async attachAnomalyChartsToCase(params: CreateCaseParams) {
+      await testSubjects.click('mlExplorerAnomalyPanelMenu');
+      await testSubjects.click('mlAnomalyAttachChartsToCasesButton');
+
+      await cases.create.createCaseFromModal(params);
     },
   };
 }

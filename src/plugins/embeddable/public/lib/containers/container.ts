@@ -8,8 +8,18 @@
 
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
-import { merge, Subscription } from 'rxjs';
-import { pairwise, take, delay } from 'rxjs/operators';
+import { EMPTY, merge, Subscription } from 'rxjs';
+import {
+  catchError,
+  combineLatestWith,
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  pairwise,
+  switchMap,
+  take,
+} from 'rxjs/operators';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Embeddable,
@@ -47,6 +57,7 @@ export abstract class Container<
   } = {};
 
   private subscription: Subscription | undefined;
+  private readonly anyChildOutputChange$;
 
   constructor(
     input: TContainerInput,
@@ -58,20 +69,50 @@ export abstract class Container<
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
 
-    // initialize all children on the first input change. Delayed so it is run after the constructor is finished.
-    this.getInput$()
-      .pipe(delay(0), take(1))
-      .subscribe(() => {
-        this.initializeChildEmbeddables(input, settings);
-      });
+    // if there is no special initialization logic, we can immediately start updating children on input updates.
+    const awaitingInitialize = Boolean(
+      settings?.initializeSequentially || settings?.childIdInitializeOrder
+    );
+
+    // initialize all children on the first input change.
+    const init$ = this.getInput$().pipe(
+      take(1),
+      mergeMap(async () => {
+        const initPromise = this.initializeChildEmbeddables(input, settings);
+        if (awaitingInitialize) await initPromise;
+      })
+    );
 
     // on all subsequent input changes, diff and update children on changes.
-    this.subscription = this.getInput$()
+    const update$ = this.getInput$()
       // At each update event, get both the previous and current state.
-      .pipe(pairwise())
-      .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
+      .pipe(pairwise());
+
+    this.subscription = init$
+      .pipe(combineLatestWith(update$))
+      .subscribe(([_, [{ panels: prevPanels }, { panels: currentPanels }]]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+
+    this.anyChildOutputChange$ = this.getOutput$().pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                map(() => childId)
+              )
+          )
+        )
+      )
+    );
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {
@@ -221,6 +262,10 @@ export abstract class Container<
     } as unknown as TEmbeddableInput;
   }
 
+  public getAnyChildOutputChange$() {
+    return this.anyChildOutputChange$;
+  }
+
   public destroy() {
     super.destroy();
     Object.values(this.children).forEach((child) => child.destroy());
@@ -327,19 +372,23 @@ export abstract class Container<
     initializeSettings?: EmbeddableContainerSettings
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
+
     if (initializeSettings?.childIdInitializeOrder) {
       const initializeOrderSet = new Set<string>();
+
       for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
         if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
           initializeOrderSet.add(id);
         }
       }
+
       initializeOrder = Array.from(initializeOrderSet);
     }
 
     for (const id of initializeOrder) {
       if (initializeSettings?.initializeSequentially) {
         const embeddable = await this.onPanelAdded(initialInput.panels[id]);
+
         if (embeddable && !isErrorEmbeddable(embeddable)) {
           await this.untilEmbeddableLoaded(id);
         }

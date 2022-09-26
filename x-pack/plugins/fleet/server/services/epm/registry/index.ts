@@ -11,33 +11,44 @@ import mime from 'mime-types';
 import semverGte from 'semver/functions/gte';
 
 import type { Response } from 'node-fetch';
+import type { Logger } from '@kbn/logging';
 
-import { splitPkgKey as split } from '../../../../common';
+import { splitPkgKey as split } from '../../../../common/services';
 
 import { KibanaAssetType } from '../../../types';
 import type {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
-  InstallSource,
   RegistryPackage,
   RegistrySearchResults,
   GetCategoriesRequest,
+  PackageVerificationResult,
+  ArchivePackage,
 } from '../../../types';
 import {
   getArchiveFilelist,
   getPathParts,
   unpackBufferToCache,
+  setVerificationResult,
+  getVerificationResult,
   getPackageInfo,
   setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
 } from '../archive';
-import { streamToBuffer } from '../streams';
+import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
-import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+import {
+  PackageNotFoundError,
+  RegistryResponseError,
+  PackageFailedVerificationError,
+} from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { withPackageSpan } from '../packages/utils';
+
+import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -149,7 +160,10 @@ export async function fetchFindLatestPackageOrUndefined(
   }
 }
 
-export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
+export async function fetchInfo(
+  pkgName: string,
+  pkgVersion: string
+): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
   try {
     // Trailing slash avoids 301 redirect / extra hop
@@ -158,6 +172,18 @@ export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<Re
     return res;
   } catch (err) {
     if (err instanceof RegistryResponseError && err.status === 404) {
+      // Check bundled packages in case the exact package being requested is available on disk
+      const bundledPackage = await getBundledPackageByName(pkgName);
+
+      if (bundledPackage && bundledPackage.version === pkgVersion) {
+        const archivePackage = await generatePackageInfoFromArchiveBuffer(
+          bundledPackage.buffer,
+          'application/zip'
+        );
+
+        return archivePackage.packageInfo;
+      }
+
       throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
     }
     throw err;
@@ -216,7 +242,9 @@ export async function getInfo(name: string, version: string) {
     let packageInfo = getPackageInfo({ name, version });
     if (!packageInfo) {
       packageInfo = await fetchInfo(name, version);
-      setPackageInfo({ name, version, packageInfo });
+      // only cache registry pkg info for integration pkgs because
+      // input type packages must get their pkg info from the archive
+      if (packageInfo.type === 'integration') setPackageInfo({ name, version, packageInfo });
     }
     return packageInfo as RegistryPackage;
   });
@@ -224,28 +252,53 @@ export async function getInfo(name: string, version: string) {
 
 export async function getRegistryPackage(
   name: string,
-  version: string
-): Promise<{ paths: string[]; packageInfo: RegistryPackage }> {
-  const installSource = 'registry';
+  version: string,
+  options?: { ignoreUnverified?: boolean; getPkgInfoFromArchive?: boolean }
+): Promise<{
+  paths: string[];
+  packageInfo: RegistryPackage;
+  verificationResult?: PackageVerificationResult;
+}> {
+  const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let paths = getArchiveFilelist({ name, version });
+  let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
   if (!paths || paths.length === 0) {
-    const { archiveBuffer, archivePath } = await withPackageSpan(
-      'Fetch package archive from registry',
-      () => fetchArchiveBuffer(name, version)
+    const {
+      archiveBuffer,
+      archivePath,
+      verificationResult: latestVerificationResult,
+    } = await withPackageSpan('Fetch package archive from registry', () =>
+      fetchArchiveBuffer({
+        pkgName: name,
+        pkgVersion: version,
+        shouldVerify: verifyPackage,
+        ignoreUnverified: options?.ignoreUnverified,
+      })
     );
+    if (latestVerificationResult) {
+      verificationResult = latestVerificationResult;
+      setVerificationResult({ name, version }, latestVerificationResult);
+    }
     paths = await withPackageSpan('Unpack archive', () =>
       unpackBufferToCache({
         name,
         version,
-        installSource,
         archiveBuffer,
         contentType: ensureContentType(archivePath),
       })
     );
+    const cachedInfo = getPackageInfo({ name, version });
+    if (options?.getPkgInfoFromArchive && !cachedInfo) {
+      const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
+        archiveBuffer,
+        ensureContentType(archivePath)
+      );
+      setPackageInfo({ packageInfo, name, version });
+    }
   }
 
   const packageInfo = await getInfo(name, version);
-  return { paths, packageInfo };
+  return { paths, packageInfo, verificationResult };
 }
 
 function ensureContentType(archivePath: string) {
@@ -256,32 +309,67 @@ function ensureContentType(archivePath: string) {
   return contentType;
 }
 
-export async function ensureCachedArchiveInfo(
-  name: string,
-  version: string,
-  installSource: InstallSource = 'registry'
-) {
-  const paths = getArchiveFilelist({ name, version });
-  if (!paths || paths.length === 0) {
-    if (installSource === 'registry') {
-      await getRegistryPackage(name, version);
-    } else {
-      throw new PackageCacheError(
-        `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
-      );
-    }
-  }
-}
-
-export async function fetchArchiveBuffer(
-  pkgName: string,
-  pkgVersion: string
-): Promise<{ archiveBuffer: Buffer; archivePath: string }> {
+export async function fetchArchiveBuffer({
+  pkgName,
+  pkgVersion,
+  shouldVerify,
+  ignoreUnverified = false,
+}: {
+  pkgName: string;
+  pkgVersion: string;
+  shouldVerify: boolean;
+  ignoreUnverified?: boolean;
+}): Promise<{
+  archiveBuffer: Buffer;
+  archivePath: string;
+  verificationResult?: PackageVerificationResult;
+}> {
+  const logger = appContextService.getLogger();
   const { download: archivePath } = await getInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+  if (shouldVerify) {
+    const verificationResult = await verifyPackageArchiveSignature({
+      pkgName,
+      pkgVersion,
+      pkgArchiveBuffer: archiveBuffer,
+      logger,
+    });
 
+    if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
+      throw new PackageFailedVerificationError(pkgName, pkgVersion);
+    }
+    return { archiveBuffer, archivePath, verificationResult };
+  }
   return { archiveBuffer, archivePath };
+}
+
+export async function getPackageArchiveSignatureOrUndefined({
+  pkgName,
+  pkgVersion,
+  logger,
+}: {
+  pkgName: string;
+  pkgVersion: string;
+  logger: Logger;
+}): Promise<string | undefined> {
+  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
+
+  if (!signaturePath) {
+    logger.debug(
+      `Package ${pkgName}-${pkgVersion} does not have a signature_path, verification will not be possible.`
+    );
+    return undefined;
+  }
+
+  try {
+    const { body } = await fetchFile(signaturePath);
+
+    return streamToString(body);
+  } catch (e) {
+    logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
+    return undefined;
+  }
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
@@ -312,6 +400,18 @@ export function getNoticePath(paths: string[]): string | undefined {
   for (const path of paths) {
     const parts = getPathParts(path.replace(/^\/package\//, ''));
     if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
+}
+
+export function getLicensePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'license') {
       const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
       return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
     }

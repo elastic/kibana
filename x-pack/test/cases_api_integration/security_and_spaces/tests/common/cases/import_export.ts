@@ -245,6 +245,7 @@ const expectCaseCreateUserAction = (
     ...restCreateCase,
     status: CaseStatuses.open,
     severity: CaseSeverity.LOW,
+    assignees: [],
   });
   expect(restParsedConnector).to.eql(restConnector);
 };

@@ -70,6 +70,7 @@ function GaugeVisualization(props) {
     type: model.gauge_style || 'half',
     additionalLabel: props.additionalLabel,
     backgroundColor: panelBackgroundColor,
+    initialRender: props.initialRender,
   };
 
   if (colors.text) {

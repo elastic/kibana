@@ -11,7 +11,6 @@ import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@el
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
-import { EsHitRecord } from '../../application/types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../discover_tour';
 
 /**
@@ -21,11 +20,11 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
   const current = rows[rowIndex];
   useEffect(() => {
-    if ((current as EsHitRecord).isAnchor) {
+    if (current.isAnchor) {
       setCellProps({
         className: 'dscDocsGrid__cell--highlight',
       });
-    } else if (expanded && current && expanded._id === current._id) {
+    } else if (expanded && current && expanded.id === current.id) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
@@ -41,6 +40,13 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     defaultMessage: 'Toggle dialog with details',
   });
 
+  const testSubj = current.isAnchor
+    ? 'docTableExpandToggleColumnAnchor'
+    : 'docTableExpandToggleColumn';
+  if (!setExpanded) {
+    return null;
+  }
+
   return (
     <EuiToolTip content={buttonLabel} delay="long">
       <EuiButtonIcon
@@ -48,8 +54,8 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         size="xs"
         iconSize="s"
         aria-label={buttonLabel}
-        data-test-subj="docTableExpandToggleColumn"
-        onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
+        data-test-subj={testSubj}
+        onClick={() => setExpanded?.(isCurrentRowExpanded ? undefined : current)}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
         isSelected={isCurrentRowExpanded}

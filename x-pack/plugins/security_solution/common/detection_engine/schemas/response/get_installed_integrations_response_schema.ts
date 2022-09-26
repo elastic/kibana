@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InstalledIntegrationArray } from '../common';
+import type { InstalledIntegrationArray } from '../common';
 
 export interface GetInstalledIntegrationsResponse {
   installed_integrations: InstalledIntegrationArray;

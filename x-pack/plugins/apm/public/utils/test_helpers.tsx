@@ -19,11 +19,7 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '@kbn/core/types/elasticsearch';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { APMConfig } from '../../server';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
@@ -174,7 +170,6 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: {},
     indices: {
       sourcemap: 'myIndex',
       error: 'myIndex',

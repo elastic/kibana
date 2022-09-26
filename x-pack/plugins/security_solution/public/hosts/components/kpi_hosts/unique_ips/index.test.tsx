@@ -25,7 +25,7 @@ describe('Unique IPs KPI', () => {
     from: '2019-06-25T04:31:59.345Z',
     to: '2019-06-25T06:31:59.345Z',
     indexNames: [],
-    narrowDateRange: jest.fn(),
+    updateDateRange: jest.fn(),
     setQuery: jest.fn(),
     skip: false,
   };

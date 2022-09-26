@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INFORMATION_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.users.userRiskInformation.informationAriaLabel',
-  {
-    defaultMessage: 'Information',
-  }
-);
-
 export const INFORMATION_CLASSIFICATION_HEADER = i18n.translate(
   'xpack.securitySolution.users.userRiskInformation.classificationHeader',
   {

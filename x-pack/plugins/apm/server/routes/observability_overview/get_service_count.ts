@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
@@ -33,6 +33,7 @@ export async function getServiceCount({
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

@@ -9,12 +9,13 @@ import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
+import { useMlKibana } from '../../../contexts/kibana';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
 
@@ -111,6 +112,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   updateLanguage,
 }) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
+  const { services } = useMlKibana();
+  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
+    services;
 
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
@@ -153,8 +157,8 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
 
   return (
     <EuiInputPopover
-      style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
+      css={{ 'max-width': '100%' }}
+      closePopover={setErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput
           bubbleSubmitEvent={false}
@@ -166,6 +170,8 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           disableAutoFocus
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
+          appName={appName}
+          deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
         />
       }
       isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}

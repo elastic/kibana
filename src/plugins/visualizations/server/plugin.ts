@@ -17,10 +17,8 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
-import { registerVisualizationsCollector } from './usage_collector';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
@@ -39,7 +37,6 @@ export class VisualizationsPlugin
   public setup(
     core: CoreSetup,
     plugins: {
-      usageCollection?: UsageCollectionSetup;
       embeddable: EmbeddableSetup;
       data: DataPluginSetup;
     }
@@ -65,10 +62,6 @@ export class VisualizationsPlugin
         schema: schema.boolean(),
       },
     });
-
-    if (plugins.usageCollection) {
-      registerVisualizationsCollector(plugins.usageCollection);
-    }
 
     plugins.embeddable.registerEmbeddableFactory(
       makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()

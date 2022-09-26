@@ -86,9 +86,9 @@ export const ACTIONS_COLUMN = {
 
         try {
           const query = (item as Query).key || (item as RecentQuery).query_string || '""';
-          const response = await http.get<{ id: string }>(
+          const response = await http.post<{ id: string }>(
             `/internal/app_search/engines/${engineName}/curations/find_or_create`,
-            { query: { query } }
+            { body: JSON.stringify({ query }) }
           );
           navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
         } catch (e) {

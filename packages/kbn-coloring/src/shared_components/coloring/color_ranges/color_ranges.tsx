@@ -45,8 +45,8 @@ export function ColorRanges({
   const rangeType = paletteConfiguration?.rangeType ?? DEFAULT_RANGE_TYPE;
 
   useEffect(() => {
-    setColorRangesValidity(validateColorRanges(colorRanges));
-  }, [colorRanges]);
+    setColorRangesValidity(validateColorRanges(colorRanges, rangeType === 'percent'));
+  }, [colorRanges, rangeType]);
 
   return (
     <EuiFlexGroup

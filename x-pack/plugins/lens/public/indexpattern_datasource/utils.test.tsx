@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { getPrecisionErrorWarningMessages } from './utils';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { getPrecisionErrorWarningMessages, cloneLayer } from './utils';
 import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -15,9 +16,11 @@ import { EuiButton } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IndexPatternLayer } from './types';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
+    const datatableUtilitites = createDatatableUtilitiesMock();
     let state: IndexPatternPrivateState;
     let framePublicAPI: FramePublicAPI;
     let docLinks: DocLinksStart;
@@ -39,11 +42,6 @@ describe('indexpattern_datasource utils', () => {
             },
           },
         },
-        indexPatterns: {
-          one: {
-            getFieldByName: (x: string) => ({ name: x, displayName: x }),
-          },
-        },
       } as unknown as IndexPatternPrivateState;
       framePublicAPI = {
         activeData: {
@@ -60,6 +58,13 @@ describe('indexpattern_datasource utils', () => {
             ],
           },
         },
+        dataViews: {
+          indexPatterns: {
+            one: {
+              getFieldByName: (x: string) => ({ name: x, displayName: x }),
+            },
+          },
+        },
       } as unknown as FramePublicAPI;
 
       docLinks = {
@@ -72,7 +77,13 @@ describe('indexpattern_datasource utils', () => {
     });
     test('should not show precisionError if hasPrecisionError is false', () => {
       expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+        getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        )
       ).toHaveLength(0);
     });
 
@@ -80,7 +91,13 @@ describe('indexpattern_datasource utils', () => {
       delete framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError;
 
       expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+        getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        )
       ).toHaveLength(0);
     });
 
@@ -95,6 +112,7 @@ describe('indexpattern_datasource utils', () => {
         const setStateMock = jest.fn();
 
         const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
           state,
           framePublicAPI,
           docLinks,
@@ -119,6 +137,7 @@ describe('indexpattern_datasource utils', () => {
         (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = true;
 
         const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
           state,
           framePublicAPI,
           docLinks,
@@ -157,7 +176,13 @@ describe('indexpattern_datasource utils', () => {
         } as unknown as GenericIndexPatternColumn,
       };
       const setState = jest.fn();
-      const warnings = getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, setState);
+      const warnings = getPrecisionErrorWarningMessages(
+        datatableUtilitites,
+        state,
+        framePublicAPI,
+        docLinks,
+        setState
+      );
 
       expect(warnings).toHaveLength(1);
       const DummyComponent = () => <>{warnings[0]}</>;
@@ -170,6 +195,44 @@ describe('indexpattern_datasource utils', () => {
         type: 'rare',
         maxDocCount: 1,
       });
+    });
+  });
+
+  describe('cloneLayer', () => {
+    test('should clone layer with renewing ids', () => {
+      expect(
+        cloneLayer(
+          {
+            a: {
+              columns: {
+                '899ee4b6-3147-4d45-94bf-ea9c02e55d28': {
+                  params: {
+                    orderBy: {
+                      type: 'column',
+                      columnId: 'ae62cfc8-faa5-4096-a30c-f92ac59922a0',
+                    },
+                    orderDirection: 'desc',
+                  },
+                },
+                'ae62cfc8-faa5-4096-a30c-f92ac59922a0': {
+                  params: {
+                    emptyAsNull: true,
+                  },
+                },
+              },
+              columnOrder: [
+                '899ee4b6-3147-4d45-94bf-ea9c02e55d28',
+                'ae62cfc8-faa5-4096-a30c-f92ac59922a0',
+              ],
+              incompleteColumns: {},
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            },
+          } as unknown as Record<string, IndexPatternLayer>,
+          'a',
+          'b',
+          (id) => id + 'C'
+        )
+      ).toMatchSnapshot();
     });
   });
 });

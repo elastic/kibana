@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -44,7 +44,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       it('renders lens visualization using savedLens expression', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
+        await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
 
       it('adds existing lens embeddable from the visualize library', async () => {
@@ -68,7 +68,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await PageObjects.canvas.deleteSelectedElement();
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
         await PageObjects.canvas.createNewVis('lens');
-        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
         await PageObjects.lens.goToTimeRange();
         await PageObjects.lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

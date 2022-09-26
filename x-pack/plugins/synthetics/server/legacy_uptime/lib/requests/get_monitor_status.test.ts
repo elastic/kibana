@@ -6,7 +6,7 @@
  */
 
 import { getMonitorStatus } from './get_monitor_status';
-import { getUptimeESMockClient, setupMockEsCompositeQuery } from './helper';
+import { getUptimeESMockClient, setupMockEsCompositeQuery } from './test_helpers';
 
 export interface BucketItemCriteria {
   monitorId: string;

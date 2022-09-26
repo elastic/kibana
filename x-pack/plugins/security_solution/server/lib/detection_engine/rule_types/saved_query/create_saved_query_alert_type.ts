@@ -9,25 +9,23 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import {
-  CompleteRule,
-  savedQueryRuleParams,
-  SavedQueryRuleParams,
-} from '../../schemas/rule_schemas';
+import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
+import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
+
 export const createSavedQueryAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  createOptions: CreateQueryRuleOptions
+): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
+  const { experimentalFeatures, version, osqueryCreateAction, licensing } = createOptions;
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, savedQueryRuleParams);
+          const [validated, errors] = validateNonExact(object, unifiedQueryRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -43,7 +41,6 @@ export const createSavedQueryAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -66,33 +63,44 @@ export const createSavedQueryAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
-          bulkCreate,
-          exceptionItems,
-          listClient,
+          inputIndex,
+          runtimeMappings,
           completeRule,
-          searchAfterSize,
           tuple,
+          listClient,
+          ruleExecutionLogger,
+          searchAfterSize,
+          bulkCreate,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
 
       const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        eventsTelemetry: undefined,
-        listClient,
-        logger,
-        completeRule: completeRule as CompleteRule<SavedQueryRuleParams>,
-        searchAfterSize,
-        services,
+        inputIndex,
+        runtimeMappings,
+        completeRule: completeRule as CompleteRule<UnifiedQueryRuleParams>,
         tuple,
+        experimentalFeatures,
+        listClient,
+        ruleExecutionLogger,
+        eventsTelemetry: undefined,
+        services,
         version,
+        searchAfterSize,
+        bulkCreate,
         wrapHits,
+        primaryTimestamp,
+        secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
+        osqueryCreateAction,
+        licensing,
       });
       return { ...result, state };
     },

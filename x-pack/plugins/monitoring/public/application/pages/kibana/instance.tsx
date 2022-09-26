@@ -12,7 +12,7 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
@@ -23,7 +23,7 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 // @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 // @ts-ignore
@@ -36,6 +36,11 @@ import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
+
+  const showRules =
+    data.metrics.kibana_instance_rule_executions &&
+    data.metrics.kibana_instance_rule_executions.length &&
+    data.metrics.kibana_instance_rule_executions[0].indices_found.ecs;
 
   return (
     <EuiPage>
@@ -95,6 +100,42 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
               />
               <EuiSpacer />
             </EuiFlexItem>
+            {showRules && (
+              <>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_rule_executions}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_rule_failures}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_action_executions}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_action_failures}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+              </>
+            )}
           </EuiFlexGrid>
         </EuiPageContent>
       </EuiPageBody>
@@ -107,7 +148,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {

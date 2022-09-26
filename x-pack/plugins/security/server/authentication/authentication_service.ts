@@ -26,6 +26,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
@@ -48,10 +49,12 @@ interface AuthenticationServiceStartParams {
   clusterClient: IClusterClient;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
+  isElasticCloudDeployment: () => boolean;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -118,7 +121,7 @@ export class AuthenticationService {
       // If security is disabled, then continue with no user credentials.
       if (!license.isEnabled()) {
         this.logger.debug(
-          'Current license does not support any security features, authentication is not needed.'
+          'Authentication is not required, as security features are disabled in Elasticsearch.'
         );
         return t.authenticated();
       }
@@ -296,11 +299,13 @@ export class AuthenticationService {
     config,
     clusterClient,
     featureUsageService,
+    userProfileService,
     http,
     loggers,
     session,
     applicationName,
     kibanaFeatures,
+    isElasticCloudDeployment,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -330,12 +335,17 @@ export class AuthenticationService {
       loggers,
       clusterClient,
       basePath: http.basePath,
-      config: { authc: config.authc },
+      config: {
+        authc: config.authc,
+        accessAgreement: config.accessAgreement,
+      },
       getCurrentUser,
       featureUsageService,
+      userProfileService,
       getServerBaseURL,
       license: this.license,
       session,
+      isElasticCloudDeployment,
     });
 
     return {

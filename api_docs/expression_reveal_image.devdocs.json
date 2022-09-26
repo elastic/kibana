@@ -14,13 +14,7 @@
           "(theme$?: ",
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -35,6 +29,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRevealImage",
@@ -46,17 +41,12 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -72,13 +62,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
+          "CoreSetup",
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -93,6 +77,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRevealImage",
@@ -102,17 +87,12 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -136,6 +116,7 @@
       ],
       "path": "src/plugins/expression_reveal_image/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -159,6 +140,7 @@
       ],
       "path": "src/plugins/expression_reveal_image/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -174,7 +156,7 @@
         "label": "revealImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"revealImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; origin: { types: \"string\"[]; help: string; default: string; options: ",
+          "() => { name: \"revealImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { image: { types: (\"null\" | \"string\")[]; help: string; default: null; }; emptyImage: { types: (\"null\" | \"string\")[]; help: string; default: null; }; origin: { types: \"string\"[]; help: string; default: string; options: ",
           "Origin",
           "[]; }; }; fn: (percent: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string; emptyImage: string; origin: ",
           "Origin",
@@ -182,6 +164,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/expression_functions/reveal_image_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -202,6 +185,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -217,6 +201,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/expression_functions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -231,6 +216,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -245,6 +231,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -259,6 +246,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

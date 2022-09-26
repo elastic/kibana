@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { defaultsDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import supertest from 'supertest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import {
@@ -15,15 +19,12 @@ import {
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import supertest from 'supertest';
+import { CliArgs, Env } from '@kbn/config';
 
 import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
-import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 
-export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
+export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -156,6 +157,7 @@ export const request: Record<
   head: (root, path) => getSupertest(root, 'head', path),
   post: (root, path) => getSupertest(root, 'post', path),
   put: (root, path) => getSupertest(root, 'put', path),
+  patch: (root, path) => getSupertest(root, 'patch', path),
 };
 
 export interface TestElasticsearchUtils {

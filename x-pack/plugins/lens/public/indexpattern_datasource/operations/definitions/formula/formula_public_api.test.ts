@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { convertDataViewIntoLensIndexPattern } from '../../../loader';
 import { insertOrReplaceFormulaColumn } from './parse';
 import { createFormulaPublicApi, FormulaPublicApi } from './formula_public_api';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DateHistogramIndexPatternColumn, PersistedIndexPatternLayer } from '../../../types';
+import { convertDataViewIntoLensIndexPattern } from '../../../../data_views_service/loader';
 
 jest.mock('./parse', () => ({
   insertOrReplaceFormulaColumn: jest.fn().mockReturnValue({}),
 }));
 
-jest.mock('../../../loader', () => ({
+jest.mock('../../../../data_views_service/loader', () => ({
   convertDataViewIntoLensIndexPattern: jest.fn((v) => v),
 }));
 

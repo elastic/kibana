@@ -17,6 +17,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -37,6 +38,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -48,6 +50,7 @@
         "description": [],
         "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -70,6 +73,7 @@
       ],
       "path": "src/plugins/screenshot_mode/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     }
@@ -91,6 +95,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -111,6 +116,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -122,6 +128,7 @@
         "description": [],
         "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -143,6 +150,7 @@
         ],
         "path": "src/plugins/screenshot_mode/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -173,6 +181,7 @@
       ],
       "path": "src/plugins/screenshot_mode/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "screenshotMode",
@@ -188,6 +197,7 @@
           ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "screenshotMode",
@@ -203,6 +213,7 @@
               ],
               "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -219,6 +230,7 @@
               ],
               "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -238,6 +250,7 @@
           ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -254,6 +267,7 @@
       "description": [],
       "path": "src/plugins/screenshot_mode/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "screenshotMode",
@@ -266,17 +280,12 @@
           ],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => boolean"
           ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "screenshotMode",
@@ -286,17 +295,12 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -326,6 +330,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotMode",
@@ -341,6 +346,7 @@
             ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -357,6 +363,7 @@
             ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -379,6 +386,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -397,6 +405,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotMode",
@@ -412,6 +421,7 @@
             ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -428,6 +438,7 @@
             ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -446,6 +457,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -464,6 +476,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -484,6 +497,7 @@
         ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -495,6 +509,7 @@
         "description": [],
         "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

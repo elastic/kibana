@@ -7,10 +7,10 @@
 
 import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
-import { TrustedApp } from '../../../../common/endpoint/types';
+import type { TrustedApp } from '../../../../common/endpoint/types';
 
 const getCommonItemDataOverrides = () => {
   return {

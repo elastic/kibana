@@ -39,14 +39,13 @@ export default function ({
         expect(result.columns.length).to.be(2);
         const significantTermColumn = result.columns[0];
         expect(significantTermColumn.name).to.be('Top 10 unusual terms from "headings" text');
+        expect(significantTermColumn.meta.sourceParams.type).to.be('significant_text');
 
         const countColumn = result.columns[1];
         expect(countColumn.name).to.be('Count');
 
         expect(result.rows.length).to.be(10);
-
-        expect(result.rows[0]['col-0-1']).to.be('facebook.com');
-        expect(result.rows[0]['col-1-2']).to.be(815);
+        // Don't check rows values as significant text could be flaky
       });
     });
   });

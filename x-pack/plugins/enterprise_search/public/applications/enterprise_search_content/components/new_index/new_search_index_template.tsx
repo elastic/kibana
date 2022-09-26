@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Bind create index button
- */
-
 import React, { ChangeEvent } from 'react';
 
 import { useValues, useActions } from 'kea';
 
 import {
   EuiButton,
-  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSelect,
@@ -31,162 +26,206 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Engine } from '../../../app_search/components/engine/types';
-
-import { SUPPORTED_LANGUAGES, NEW_INDEX_TEMPLATE_TYPES } from './constants';
+import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
+import { LanguageForOptimization } from './types';
 
-export interface ISearchIndex {
-  description: React.ReactNode;
-  docsUrl: string;
-  type: string;
+export interface Props {
+  buttonLoading?: boolean;
+  disabled?: boolean;
+  docsUrl?: string;
+  error?: string | React.ReactNode;
   onNameChange?(name: string): void;
+  onSubmit(name: string, language: LanguageForOptimization): void;
+  title: React.ReactNode;
+  type: string;
 }
 
-export interface ISearchEngineOption {
-  label: string;
-  value: Engine;
-}
-
-export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
+export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
-  description,
-  type,
+  disabled,
+  docsUrl,
+  error,
+  title,
   onNameChange,
+  onSubmit,
+  buttonLoading,
 }) => {
-  const { searchEngineSelectOptions, name, language, rawName, selectedSearchEngines } =
-    useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguage, setSelectedSearchEngineOptions } =
-    useActions(NewSearchIndexLogic);
+  const {
+    fullIndexName,
+    fullIndexNameExists,
+    fullIndexNameIsValid,
+    language,
+    rawName,
+    languageSelectValue,
+  } = useValues(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
     if (onNameChange) {
-      onNameChange(e.target.value);
+      onNameChange(fullIndexName);
     }
   };
 
   const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
+    setLanguageSelectValue(e.target.value);
+  };
+
+  const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
+
+  const formError = () => {
+    if (fullIndexNameExists) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.alreadyExists.error',
+        {
+          defaultMessage: 'An index with the name {indexName} already exists',
+          values: {
+            indexName: fullIndexName,
+          },
+        }
+      );
+    }
+    if (!fullIndexNameIsValid) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.isInvalid.error',
+        {
+          defaultMessage: '{indexName} is an invalid index name',
+          values: {
+            indexName: fullIndexName,
+          },
+        }
+      );
+    }
+    return error;
   };
 
   return (
     <EuiPanel hasBorder>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.title',
-                {
-                  defaultMessage: 'New {type}',
-                  values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
-                }
-              )}
-            </h2>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            <p>
-              {description}
-              <EuiLink target="_blank" href="#">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMore.linkText',
-                  {
-                    defaultMessage: 'Learn more',
-                  }
-                )}
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
-                  {
-                    defaultMessage: 'Name your {type}',
-                    values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
-                  }
-                )}
-                fullWidth
-              >
-                <EuiFieldText
-                  placeholder={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
+      <EuiForm
+        component="form"
+        id="enterprise-search-add-connector"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit(fullIndexName, language);
+        }}
+      >
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiFormRow
+                  isDisabled={disabled}
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
                     {
-                      defaultMessage: 'Set a name for the {type}',
-                      values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
+                      defaultMessage: 'Index name',
+                    }
+                  )}
+                  isInvalid={formInvalid}
+                  error={formError()}
+                  helpText={i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
+                    {
+                      defaultMessage: 'Your index will be named: {indexName}',
+                      values: {
+                        indexName: fullIndexName,
+                      },
                     }
                   )}
                   fullWidth
-                  isInvalid={false}
-                  value={rawName}
-                  onChange={handleNameChange}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
+                >
+                  <EuiFieldText
+                    placeholder={i18n.translate(
+                      'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
+                      {
+                        defaultMessage: 'Set a name for your index',
+                      }
+                    )}
+                    fullWidth
+                    disabled={disabled}
+                    isInvalid={false}
+                    value={rawName}
+                    onChange={handleNameChange}
+                    autoFocus
+                    prepend="search-"
+                  />
+                </EuiFormRow>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineTwo',
+                    {
+                      defaultMessage:
+                        'Names should be lowercase and cannot contain spaces or special characters.',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  isDisabled={disabled}
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
+                    {
+                      defaultMessage: 'Language analyzer',
+                    }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputHelpText',
+                    {
+                      defaultMessage: 'Language can be changed later, but may require a reindex',
+                    }
+                  )}
+                >
+                  <EuiSelect
+                    disabled={disabled}
+                    options={SUPPORTED_LANGUAGES}
+                    onChange={handleLanguageChange}
+                    value={languageSelectValue}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              isDisabled={!rawName || buttonLoading || formInvalid || disabled}
+              isLoading={buttonLoading}
+              type="submit"
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.createIndex.buttonText',
+                {
+                  defaultMessage: 'Create index',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          {!!docsUrl && (
             <EuiFlexItem grow={false}>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
+              <EuiLink target="_blank" href={docsUrl}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
                   {
-                    defaultMessage: 'Language',
+                    defaultMessage: 'View the documentation',
                   }
                 )}
-              >
-                <EuiSelect
-                  options={SUPPORTED_LANGUAGES}
-                  onChange={handleLanguageChange}
-                  value={language}
-                />
-              </EuiFormRow>
+              </EuiLink>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {searchEngineSelectOptions.length !== 0 && (
-          <EuiFlexItem grow>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.attachSearchEngines.label',
-                {
-                  defaultMessage: 'Attach search engines',
-                }
-              )}
-              fullWidth
-              helpText={i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.attachSearchEngines.helpText',
-                {
-                  defaultMessage:
-                    'Select one or more existing search engines. You can also create one later',
-                }
-              )}
-            >
-              <EuiComboBox
-                fullWidth
-                options={searchEngineSelectOptions}
-                onChange={(options) => {
-                  setSelectedSearchEngineOptions(options);
-                }}
-                selectedOptions={selectedSearchEngines}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow>{children}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <span>
-        <EuiButton fill isDisabled={!name}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.createIndex.buttonText',
-            {
-              defaultMessage: 'Create search index',
-            }
           )}
-        </EuiButton>
-      </span>
+        </EuiFlexGroup>
+      </EuiForm>
+      <EuiHorizontalRule />
+      {children}
     </EuiPanel>
   );
 };

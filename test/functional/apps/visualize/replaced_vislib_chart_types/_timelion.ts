@@ -20,7 +20,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const security = getService('security');
   const monacoEditor = getService('monacoEditor');
-  const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
   const find = getService('find');
   const retry = getService('retry');
@@ -33,9 +32,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'long_window_logstash',
         'test_logstash_reader',
       ]);
-      await kibanaServer.uiSettings.update({
-        'timelion:legacyChartsLibrary': false,
-      });
       await visualize.initTests(true);
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickTimelion();
@@ -316,12 +312,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-
-    after(
-      async () =>
-        await kibanaServer.uiSettings.update({
-          'timelion:legacyChartsLibrary': true,
-        })
-    );
   });
 }

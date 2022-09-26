@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Values } from '@kbn/utility-types';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { Values } from '@kbn/utility-types';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 const FEATURES = {
   HOST_ISOLATION: 'Host isolation',
@@ -18,6 +18,10 @@ const FEATURES = {
   RANSOMWARE_PROTECTION: 'Ransomeware protection',
   MEMORY_THREAT_PROTECTION: 'Memory threat protection',
   BEHAVIOR_PROTECTION: 'Behavior protection',
+  KILL_PROCESS: 'Kill process',
+  SUSPEND_PROCESS: 'Suspend process',
+  RUNNING_PROCESSES: 'Get running processes',
+  ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURES;

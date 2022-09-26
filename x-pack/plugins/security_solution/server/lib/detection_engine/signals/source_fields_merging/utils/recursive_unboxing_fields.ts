@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash/fp';
-import { set } from '@elastic/safer-lodash-set/fp';
-import { SearchTypes } from '../../../../../../common/detection_engine/types';
-import { FieldsType } from '../types';
+import { set } from '@kbn/safer-lodash-set/fp';
+import type { SearchTypes } from '../../../../../../common/detection_engine/types';
+import type { FieldsType } from '../types';
 
 /**
  * Recursively unboxes fields from an array when it is common sense to unbox them and safe to

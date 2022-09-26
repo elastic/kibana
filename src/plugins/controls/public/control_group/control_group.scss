@@ -200,6 +200,15 @@ $controlMinWidth: $euiSize * 14;
       box-shadow: 0 0 0 1px $euiColorLightShade;
     }
 
+    &--fatalError {
+      right: $euiSizeXS;
+      top: -$euiSizeL;
+      padding: $euiSizeXS;
+      border-radius: $euiBorderRadius;
+      background-color: $euiColorEmptyShade;
+      box-shadow: 0 0 0 1px $euiColorLightShade;
+    }
+
     &--twoLine {
       right: $euiSizeXS;
       top: -$euiSizeXS;
@@ -219,17 +228,7 @@ $controlMinWidth: $euiSize * 14;
       opacity: 0;
     }
     .controlFrame__formControlLayout {
-      background-color: tintOrShade($euiColorSuccess, 90%, 70%);
-      color: transparent !important;
-      box-shadow: none;
-
-      .euiFormLabel {
-        opacity: 0;
-      }
-
-      .controlFrame__control {
-        opacity: 0;
-      }
+      opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
     }
   }
 }

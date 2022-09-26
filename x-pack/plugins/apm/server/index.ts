@@ -41,7 +41,6 @@ const configSchema = schema.object({
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
-  profilingEnabled: schema.boolean({ defaultValue: false }),
   agent: schema.object({
     migrations: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
@@ -99,7 +98,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.apm.maxServiceSelections',
+      'xpack.apm.maxServiceSelection',
       `uiSettings.overrides[${maxSuggestions}]`,
       { level: 'warning' }
     ),
@@ -107,7 +106,6 @@ export const config: PluginConfigDescriptor<APMConfig> = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
-    profilingEnabled: true,
   },
   schema: configSchema,
 };
@@ -126,5 +124,3 @@ export type {
   APIEndpoint,
 } from './routes/apm_routes/get_global_apm_server_route_repository';
 export type { APMRouteHandlerResources } from './routes/typings';
-
-export type { ProcessorEvent } from '../common/processor_event';

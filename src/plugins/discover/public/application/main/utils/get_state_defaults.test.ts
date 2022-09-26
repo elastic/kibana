@@ -7,23 +7,18 @@
  */
 
 import { getStateDefaults } from './get_state_defaults';
-import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { uiSettingsMock } from '../../../__mocks__/ui_settings';
-import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('getStateDefaults', () => {
-  const storage = discoverServiceMock.storage;
-
-  test('index pattern with timefield', () => {
-    savedSearchMock.searchSource = createSearchSourceMock({ index: indexPatternWithTimefieldMock });
+  test('data view with timefield', () => {
+    savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewWithTimefieldMock });
     const actual = getStateDefaults({
-      config: uiSettingsMock,
-      data: dataPluginMock.createStartContract(),
+      services: discoverServiceMock,
       savedSearch: savedSearchMock,
-      storage,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -31,12 +26,14 @@ describe('getStateDefaults', () => {
           "default_column",
         ],
         "filters": undefined,
+        "grid": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,
+        "rowsPerPage": undefined,
         "savedQuery": undefined,
         "sort": Array [
           Array [
@@ -49,14 +46,12 @@ describe('getStateDefaults', () => {
     `);
   });
 
-  test('index pattern without timefield', () => {
-    savedSearchMock.searchSource = createSearchSourceMock({ index: indexPatternMock });
+  test('data view without timefield', () => {
+    savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewMock });
 
     const actual = getStateDefaults({
-      config: uiSettingsMock,
-      data: dataPluginMock.createStartContract(),
+      services: discoverServiceMock,
       savedSearch: savedSearchMock,
-      storage,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -64,12 +59,14 @@ describe('getStateDefaults', () => {
           "default_column",
         ],
         "filters": undefined,
+        "grid": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "index": "the-index-pattern-id",
+        "index": "the-data-view-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,
+        "rowsPerPage": undefined,
         "savedQuery": undefined,
         "sort": Array [],
         "viewMode": undefined,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { IExecutionLogWithErrorsResult } from '@kbn/alerting-plugin/common';
+import { IExecutionLogResult, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -15,6 +15,8 @@ import {
   RuleSummary,
   AlertingFrameworkHealth,
   ResolvedRule,
+  SnoozeSchedule,
+  BulkEditResponse,
 } from '../../../../types';
 import {
   deleteRules,
@@ -35,9 +37,17 @@ import {
   alertingFrameworkHealth,
   resolveRule,
   loadExecutionLogAggregations,
+  loadGlobalExecutionLogAggregations,
   LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
+  loadActionErrorLog,
+  LoadActionErrorLogProps,
   snoozeRule,
+  bulkSnoozeRules,
+  BulkSnoozeRulesProps,
   unsnoozeRule,
+  bulkUnsnoozeRules,
+  BulkUnsnoozeRulesProps,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -66,11 +76,17 @@ export interface ComponentOpts {
   loadRuleTypes: () => Promise<RuleType[]>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
-  ) => Promise<IExecutionLogWithErrorsResult>;
+  ) => Promise<IExecutionLogResult>;
+  loadGlobalExecutionLogAggregations: (
+    props: LoadGlobalExecutionLogAggregationsProps
+  ) => Promise<IExecutionLogResult>;
+  loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
-  snoozeRule: (rule: Rule, snoozeEndTime: string | -1) => Promise<void>;
-  unsnoozeRule: (rule: Rule) => Promise<void>;
+  snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  bulkSnoozeRules: (props: BulkSnoozeRulesProps) => Promise<BulkEditResponse>;
+  unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
+  bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<BulkEditResponse>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -147,13 +163,33 @@ export function withBulkRuleOperations<T>(
             http,
           })
         }
+        loadGlobalExecutionLogAggregations={async (
+          loadProps: LoadGlobalExecutionLogAggregationsProps
+        ) =>
+          loadGlobalExecutionLogAggregations({
+            ...loadProps,
+            http,
+          })
+        }
+        loadActionErrorLog={async (loadProps: LoadActionErrorLogProps) =>
+          loadActionErrorLog({
+            ...loadProps,
+            http,
+          })
+        }
         resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
-        snoozeRule={async (rule: Rule, snoozeEndTime: string | -1) => {
-          return await snoozeRule({ http, id: rule.id, snoozeEndTime });
+        snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
+          return await snoozeRule({ http, id: rule.id, snoozeSchedule });
         }}
-        unsnoozeRule={async (rule: Rule) => {
-          return await unsnoozeRule({ http, id: rule.id });
+        bulkSnoozeRules={async (bulkSnoozeRulesProps: BulkSnoozeRulesProps) => {
+          return await bulkSnoozeRules({ http, ...bulkSnoozeRulesProps });
+        }}
+        unsnoozeRule={async (rule: Rule, scheduleIds?: string[]) => {
+          return await unsnoozeRule({ http, id: rule.id, scheduleIds });
+        }}
+        bulkUnsnoozeRules={async (bulkUnsnoozeRulesProps: BulkUnsnoozeRulesProps) => {
+          return await bulkUnsnoozeRules({ http, ...bulkUnsnoozeRulesProps });
         }}
       />
     );

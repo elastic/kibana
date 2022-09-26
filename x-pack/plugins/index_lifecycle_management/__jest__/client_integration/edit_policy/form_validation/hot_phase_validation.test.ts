@@ -10,7 +10,8 @@ import { i18nTexts } from '../../../../public/application/sections/edit_policy/i
 import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
-describe('<EditPolicy /> hot phase validation', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141645
+describe.skip('<EditPolicy /> hot phase validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
@@ -36,11 +37,12 @@ describe('<EditPolicy /> hot phase validation', () => {
   });
 
   describe('rollover', () => {
-    test(`doesn't allow no max primary shard size, no max index size, no max age, no max docs`, async () => {
+    test(`doesn't allow no max primary shard size, no max primary docs, no max age, no max docs, no max index size`, async () => {
       await actions.rollover.toggleDefault();
       expect(actions.rollover.hasSettingRequiredCallout()).toBeFalsy();
 
       await actions.rollover.setMaxPrimaryShardSize('');
+      await actions.rollover.setMaxPrimaryShardDocs('');
       await actions.rollover.setMaxAge('');
       await actions.rollover.setMaxDocs('');
       await actions.rollover.setMaxSize('');
@@ -50,94 +52,131 @@ describe('<EditPolicy /> hot phase validation', () => {
       expect(actions.rollover.hasSettingRequiredCallout()).toBeTruthy();
     });
 
-    test(`doesn't allow -1 for max primary shard size`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxPrimaryShardSize('-1');
+    describe('max primary shard size', () => {
+      test(`doesn't allow -1`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxPrimaryShardSize('-1');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
+
+      test(`doesn't allow 0`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxPrimaryShardSize('0');
+
+        actions.errors.waitForValidation();
+
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
     });
 
-    test(`doesn't allow 0 for max primary shard size`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxPrimaryShardSize('0');
+    describe('max primary docs size', () => {
+      test(`doesn't allow -1`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxPrimaryShardDocs('-1');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
+
+      test(`doesn't allow 0`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxPrimaryShardDocs('0');
+
+        actions.errors.waitForValidation();
+
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
+
+      test(`doesn't allow decimals`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxPrimaryShardDocs('5.5');
+
+        actions.errors.waitForValidation();
+
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
+      });
     });
 
-    test(`doesn't allow -1 for max size`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxSize('-1');
+    describe('max size', () => {
+      test(`doesn't allow -1`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxSize('-1');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
+
+      test(`doesn't allow 0`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxSize('0');
+
+        actions.errors.waitForValidation();
+
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
     });
 
-    test(`doesn't allow 0 for max size`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxSize('0');
+    describe('max age', () => {
+      test(`doesn't allow -1`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxAge('-1');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
+
+      test(`doesn't allow 0`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxAge('0');
+
+        actions.errors.waitForValidation();
+
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
+
+      test(`doesn't allow decimals`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxAge('5.5');
+
+        actions.errors.waitForValidation();
+
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
+      });
     });
 
-    test(`doesn't allow -1 for max age`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxAge('-1');
+    describe('max docs', () => {
+      test(`doesn't allow -1`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxDocs('-1');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
-    });
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
 
-    test(`doesn't allow 0 for max age`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxAge('0');
+      test(`doesn't allow 0`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxDocs('0');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
-    });
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      });
 
-    test(`doesn't allow decimals for max age`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxAge('5.5');
+      test(`doesn't allow decimals`, async () => {
+        await actions.rollover.toggleDefault();
+        await actions.rollover.setMaxDocs('5.5');
 
-      actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
-    });
-
-    test(`doesn't allow -1 for max docs`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxDocs('-1');
-
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
-    });
-
-    test(`doesn't allow 0 for max docs`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxDocs('0');
-
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
-    });
-
-    test(`doesn't allow decimals for max docs`, async () => {
-      await actions.rollover.toggleDefault();
-      await actions.rollover.setMaxDocs('5.5');
-
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
+        actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
+      });
     });
   });
 

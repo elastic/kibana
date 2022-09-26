@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SPAN_ID,
   SPAN_LINKS,
@@ -12,7 +13,6 @@ import {
   TRANSACTION_ID,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -40,6 +40,7 @@ export async function getLinkedParentsOfSpan({
     },
     _source: [SPAN_LINKS],
     body: {
+      track_total_hits: false,
       size: 1,
       query: {
         bool: {

@@ -32,8 +32,12 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
 
   const runningState = useObservable(inferrer.runningState$);
   const inputText = useObservable(inferrer.inputText$);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const inputComponent = useMemo(() => inferrer.getInputComponent(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const infoComponent = useMemo(() => inferrer.getInfoComponent(), []);
 
   async function run() {
     setErrorText(null);
@@ -46,6 +50,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
 
   return (
     <>
+      <>{infoComponent}</>
       <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>

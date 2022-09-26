@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { PreferenceFormattedP1DTDate } from '../../formatted_date';
 import { showNewsItem } from '../helpers';
 import { NewsLink } from '../news_link';
-import { NewsItem } from '../types';
+import type { NewsItem } from '../types';
 
 const NewsItemPreviewImage = styled.img`
   height: 56px;

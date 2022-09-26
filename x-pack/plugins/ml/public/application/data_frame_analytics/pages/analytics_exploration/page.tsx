@@ -51,12 +51,13 @@ export const Page: FC<{
       setJobsExist(count > 0);
     } catch (e) {
       // Swallow the error and just show the empty table in the analytics id selector
-      console.error('Error checking analytics jobs exist', e); // eslint-disable-line
+      console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
     }
   };
 
   useEffect(function checkJobs() {
     checkJobsExist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -70,6 +71,7 @@ export const Page: FC<{
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [analyticsId?.job_id, analyticsId?.model_id]
   );
 
@@ -108,7 +110,7 @@ export const Page: FC<{
         />
       ) : null}
       {jobIdToUse !== undefined && (
-        <MlPageHeader key={`${jobIdToUse}-id`}>
+        <MlPageHeader>
           <FormattedMessage
             id="xpack.ml.dataframe.analyticsExploration.titleWithId"
             defaultMessage="Explore results for job ID {id}"

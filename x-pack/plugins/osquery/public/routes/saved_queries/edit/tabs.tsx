@@ -5,75 +5,96 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { ReactElement } from 'react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
+import { useKibana } from '../../../common/lib/kibana';
+import type { AddToTimelinePayload } from '../../../timelines/get_add_to_timeline';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
-import { ActionAgentsStatus } from '../../../action_results/action_agents_status';
+
+const CASES_OWNER: string[] = [];
 
 interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
   startDate?: string;
+  ecsMapping?: ECSMapping;
+  failedAgentsCount?: number;
   endDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
+  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   actionId,
   agentIds,
+  ecsMapping,
   endDate,
+  failedAgentsCount,
   startDate,
   addToTimeline,
+  addToCase,
 }) => {
+  const { cases } = useKibana().services;
+  const casePermissions = cases.helpers.canUseCases();
+  const CasesContext = cases.ui.getCasesContext();
+
   const tabs = useMemo(
     () => [
       {
         id: 'results',
         name: 'Results',
         content: (
-          <>
-            <EuiSpacer />
-            <ResultsTable
-              actionId={actionId}
-              agentIds={agentIds}
-              startDate={startDate}
-              endDate={endDate}
-              addToTimeline={addToTimeline}
-            />
-          </>
+          <ResultsTable
+            actionId={actionId}
+            agentIds={agentIds}
+            ecsMapping={ecsMapping}
+            startDate={startDate}
+            endDate={endDate}
+            addToTimeline={addToTimeline}
+            addToCase={addToCase}
+          />
         ),
       },
       {
         id: 'status',
         name: 'Status',
         content: (
-          <>
-            <EuiSpacer />
-            <ActionResultsSummary
-              actionId={actionId}
-              agentIds={agentIds}
-              expirationDate={endDate}
-            />
-          </>
+          <ActionResultsSummary actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
         ),
+        append: failedAgentsCount ? (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {failedAgentsCount}
+          </EuiNotificationBadge>
+        ) : null,
       },
     ],
-    [actionId, agentIds, endDate, startDate, addToTimeline]
+    [
+      actionId,
+      agentIds,
+      ecsMapping,
+      startDate,
+      endDate,
+      addToTimeline,
+      addToCase,
+      failedAgentsCount,
+    ]
   );
 
   return (
-    <>
-      <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
-      <EuiSpacer size="s" />
+    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
       <EuiTabbedContent
+        // TODO: extend the EuiTabbedContent component to support EuiTabs props
+        // bottomBorder={false}
         tabs={tabs}
         initialSelectedTab={tabs[0]}
         autoFocus="selected"
         expand={false}
       />
-    </>
+    </CasesContext>
   );
 };
 

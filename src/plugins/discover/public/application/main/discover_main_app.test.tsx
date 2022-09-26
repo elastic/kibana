@@ -7,27 +7,28 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
-import { SavedObject } from '@kbn/core/types';
-import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { setHeaderActionMenuMounter } from '../../kibana_services';
+import { setHeaderActionMenuMounter, setUrlTracker } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
 
 setHeaderActionMenuMounter(jest.fn());
+setUrlTracker(urlTrackerMock);
 
 describe('DiscoverMainApp', () => {
   test('renders', () => {
-    const indexPatternList = [indexPatternMock].map((ip) => {
+    const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as Array<SavedObject<DataViewAttributes>>;
+    }) as unknown as DataViewListItem[];
     const props = {
-      indexPatternList,
+      dataViewList,
       savedSearch: savedSearchMock,
     };
     const history = createMemoryHistory({
@@ -43,6 +44,6 @@ describe('DiscoverMainApp', () => {
     );
 
     expect(component.find(DiscoverTopNav).exists()).toBe(true);
-    expect(component.find(DiscoverTopNav).prop('indexPattern')).toEqual(indexPatternMock);
+    expect(component.find(DiscoverTopNav).prop('dataView')).toEqual(dataViewMock);
   });
 });

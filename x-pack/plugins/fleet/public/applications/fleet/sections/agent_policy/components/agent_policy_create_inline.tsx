@@ -22,11 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../common';
+import { dataTypes } from '../../../../../../common/constants';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
-import { sendCreateAgentPolicy } from '../../../hooks';
+import { sendCreateAgentPolicy, useStartServices } from '../../../hooks';
 
 import { agentPolicyFormValidation } from '.';
 
@@ -50,6 +50,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   isFleetServerPolicy,
   agentPolicyName,
 }) => {
+  const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
@@ -117,10 +118,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             defaultMessage="Type of hosts are controlled by an {agentPolicy}. Create a new agent policy to get started."
             values={{
               agentPolicy: (
-                <EuiLink
-                  href={'https://www.elastic.co/guide/en/fleet/current/agent-policy.html'}
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.createAgentPolicyDocLink"
                     defaultMessage="agent policy"
@@ -176,7 +174,8 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
       <>
         <EuiSpacer size="s" />
         <StyledEuiAccordion
-          id="advancedOptions"
+          id="advancedOptionsJustChanged"
+          data-test-subj="advancedOptionsButton"
           buttonContent={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"

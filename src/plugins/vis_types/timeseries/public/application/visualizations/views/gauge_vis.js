@@ -14,6 +14,7 @@ import { css } from '@emotion/react';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 import { COLORS } from '../constants/chart';
 import { isEmptyValue } from '../../../../common/last_value_utils';
+import { RenderCounter } from '../../components/render_counter';
 
 export class GaugeVis extends Component {
   constructor(props) {
@@ -24,6 +25,7 @@ export class GaugeVis extends Component {
       left: 0,
       translateX: 1,
       translateY: 1,
+      resized: false,
     };
     this.handleResize = this.handleResize.bind(this);
     this.checkResizeThrottled = _.throttle(() => {
@@ -44,17 +46,19 @@ export class GaugeVis extends Component {
 
   handleResize() {
     // Bingo!
-    const newState = calculateCoordinates(this.inner, this.resize, this.state);
-    this.setState(newState);
+    this.setState({
+      ...calculateCoordinates(this.inner, this.resize, this.state),
+      resized: true,
+    });
   }
 
   render() {
-    const { type, value, max, color } = this.props;
+    const { type, value, max, color, initialRender } = this.props;
 
     // if value is empty array, no metrics to display.
     const formattedValue = isEmptyValue(value) ? 1 : value;
 
-    const { scale, translateX, translateY } = this.state;
+    const { scale, translateX, translateY, resized } = this.state;
     const size = 2 * Math.PI * 50;
     const sliceSize = type === 'half' ? 0.6 : 1;
     const percent = formattedValue < max ? formattedValue / max : 1;
@@ -113,17 +117,19 @@ export class GaugeVis extends Component {
     return (
       <EuiResizeObserver onResize={this.checkResizeThrottled}>
         {(resizeRef) => (
-          <div
-            ref={(el) => {
-              this.resize = el;
-              resizeRef(el);
-            }}
-            css={resizeCSS}
-          >
-            <div css={svgCSS} ref={(el) => (this.inner = el)}>
-              {svg}
+          <RenderCounter initialRender={initialRender} postponeExecution={!resized}>
+            <div
+              ref={(el) => {
+                this.resize = el;
+                resizeRef(el);
+              }}
+              css={resizeCSS}
+            >
+              <div css={svgCSS} ref={(el) => (this.inner = el)}>
+                {svg}
+              </div>
             </div>
-          </div>
+          </RenderCounter>
         )}
       </EuiResizeObserver>
     );

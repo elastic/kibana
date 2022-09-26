@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anomalies, AnomaliesByHost, Anomaly } from '../types';
+import type { Anomalies, AnomaliesByHost, Anomaly } from '../types';
 import { getHostNameFromInfluencers } from '../influencers/get_host_name_from_influencers';
 
 export const convertAnomaliesToHosts = (

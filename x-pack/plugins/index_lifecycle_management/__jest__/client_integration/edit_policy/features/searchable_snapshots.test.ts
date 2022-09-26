@@ -40,17 +40,21 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(actions.warm.forceMergeExists()).toBeTruthy();
     expect(actions.warm.shrinkExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
+    expect(actions.warm.downsample.exists()).toBeTruthy();
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeTruthy();
+    expect(actions.cold.downsample.exists()).toBeTruthy();
 
     await actions.hot.setSearchableSnapshot('my-repo');
 
     expect(actions.warm.forceMergeExists()).toBeFalsy();
     expect(actions.warm.shrinkExists()).toBeFalsy();
     expect(actions.warm.readonlyExists()).toBeFalsy();
+    expect(actions.warm.downsample.exists()).toBeFalsy();
     // searchable snapshot in cold is still visible
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeFalsy();
+    expect(actions.cold.downsample.exists()).toBeFalsy();
   });
 
   test('disabling rollover toggle, but enabling default rollover', async () => {

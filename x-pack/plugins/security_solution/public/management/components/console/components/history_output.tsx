@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { CommonProps, EuiFlexGroup } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { CommandExecutionOutput } from './command_execution_output';
 import { useCommandHistory } from '../hooks/state_selectors/use_command_history';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
@@ -42,9 +43,10 @@ export const HistoryOutput = memo<OutputHistoryProps>((commonProps) => {
       data-test-subj={getTestId('historyOutput')}
       {...commonProps}
       wrap={true}
-      direction="row"
-      alignItems="flexEnd"
+      direction="column"
+      alignItems="stretch"
       responsive={false}
+      gutterSize="none"
     >
       {historyBody}
     </EuiFlexGroup>

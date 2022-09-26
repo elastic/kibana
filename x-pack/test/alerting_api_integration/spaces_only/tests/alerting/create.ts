@@ -85,7 +85,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         created_by: null,
         schedule: { interval: '1m' },
         scheduled_task_id: response.body.scheduled_task_id,
-        snooze_schedule: response.body.snooze_schedule,
         updated_by: null,
         api_key_owner: null,
         throttle: '1m',
@@ -109,6 +108,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         spaceId: Spaces.space1.id,
         consumer: 'alertsFixture',
       });
+      expect(taskRecord.task.enabled).to.eql(true);
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
@@ -181,7 +181,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         created_by: null,
         schedule: { interval: '1m' },
         scheduled_task_id: response.body.scheduled_task_id,
-        snooze_schedule: response.body.snooze_schedule,
         updated_by: null,
         api_key_owner: null,
         throttle: '1m',
@@ -477,7 +476,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           createdBy: null,
           schedule: { interval: '1m' },
           scheduledTaskId: response.body.scheduledTaskId,
-          snoozeSchedule: response.body.snoozeSchedule,
           updatedBy: null,
           apiKeyOwner: null,
           throttle: '1m',
@@ -501,6 +499,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           spaceId: Spaces.space1.id,
           consumer: 'alertsFixture',
         });
+        expect(taskRecord.task.enabled).to.eql(true);
         // Ensure AAD isn't broken
         await checkAAD({
           supertest,

@@ -38,11 +38,11 @@ default space is used.
 
 === {api-examples-title}
 
-Return all alerts attached to case `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
+Return all alerts attached to case `a8b26350-0c55-11ed-918a-2d2edf3e58bc`:
 
 [source,sh]
 --------------------------------------------------
-GET api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/alerts
+GET api/cases/a8b26350-0c55-11ed-918a-2d2edf3e58bc/alerts
 --------------------------------------------------
 // KIBANA
 
@@ -52,9 +52,9 @@ The API returns a JSON array listing the alerts. For example:
 --------------------------------------------------
 [
    {
-      "id": "09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540",
-      "index": ".internal.alerts-security.alerts-default-000001",
-      "attached_at": "2022-04-13T21:35:24.602Z"
+      "id": "f6a7d0c3-d52d-432c-b2e6-447cd7fce04d",
+      "index": ".alerts-observability.logs.alerts-default",
+      "attached_at": "2022-07-25T20:09:40.963Z"
    }
 ]
 --------------------------------------------------

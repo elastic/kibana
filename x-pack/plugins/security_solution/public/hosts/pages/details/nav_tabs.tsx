@@ -7,21 +7,24 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { HostDetailsNavTab } from './types';
+import type { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
+import { TECHNICAL_PREVIEW } from '../../../overview/pages/translations';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `${HOSTS_PATH}/${hostName}/${tabName}`;
+  `${HOSTS_PATH}/name/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = ({
   hasMlUserPermissions,
   isRiskyHostsEnabled,
   hostName,
+  isEnterprise,
 }: {
   hostName: string;
   hasMlUserPermissions: boolean;
   isRiskyHostsEnabled: boolean;
+  isEnterprise?: boolean;
 }): HostDetailsNavTab => {
   const hiddenTabs = [];
 
@@ -50,24 +53,22 @@ export const navTabsHostDetails = ({
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
       disabled: false,
     },
-    [HostsTableType.alerts]: {
-      id: HostsTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
-      disabled: false,
-    },
     [HostsTableType.risk]: {
       id: HostsTableType.risk,
       name: i18n.NAVIGATION_HOST_RISK_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.risk),
       disabled: false,
+      isBeta: true,
+      betaOptions: {
+        text: TECHNICAL_PREVIEW,
+      },
     },
     [HostsTableType.sessions]: {
       id: HostsTableType.sessions,
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.sessions),
       disabled: false,
-      isBeta: true,
+      isBeta: false,
     },
   };
 
@@ -77,6 +78,10 @@ export const navTabsHostDetails = ({
 
   if (!isRiskyHostsEnabled) {
     hiddenTabs.push(HostsTableType.risk);
+  }
+
+  if (!isEnterprise) {
+    hiddenTabs.push(HostsTableType.sessions);
   }
 
   return omit(hiddenTabs, hostDetailsNavTabs);

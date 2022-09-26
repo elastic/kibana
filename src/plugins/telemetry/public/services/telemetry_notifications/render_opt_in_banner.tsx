@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { OverlayStart } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { OptInBanner } from '../../components/opt_in_banner';
-import { TelemetryConstants } from '../..';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { TelemetryConstants } from '../..';
 
 interface RenderBannerConfig {
   overlays: OverlayStart;
@@ -19,8 +19,14 @@ interface RenderBannerConfig {
 }
 
 export function renderOptInBanner({ setOptIn, overlays, telemetryConstants }: RenderBannerConfig) {
+  const OptInBannerLazy = withSuspense(
+    React.lazy(() =>
+      import('../../components/opt_in_banner').then(({ OptInBanner }) => ({ default: OptInBanner }))
+    )
+  );
+
   const mount = toMountPoint(
-    <OptInBanner onChangeOptInClick={setOptIn} telemetryConstants={telemetryConstants} />
+    <OptInBannerLazy onChangeOptInClick={setOptIn} telemetryConstants={telemetryConstants} />
   );
   const bannerId = overlays.banners.add(mount, 10000);
 

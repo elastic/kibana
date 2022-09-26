@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash';
 import { resolve } from 'path';
-import glob from 'glob';
+import globby from 'globby';
 
 import Url from 'url';
 
@@ -17,11 +17,8 @@ import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
 const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
-  const pattern = resolve(
-    __dirname,
-    '../../plugins/security_solution/cypress/integration/**/*.spec.ts'
-  );
-  const integrationsPaths = glob.sync(pattern);
+  const pattern = resolve(__dirname, '../../plugins/security_solution/cypress/e2e/**/*.cy.ts');
+  const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
   return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
@@ -57,6 +54,15 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   });
 }
 
+/**
+ * Takes total CI jobs number(totalCiJobs) between which tests will be split and sequential number of the job(ciJobNumber).
+ * This helper will split file list cypress integrations into chunks, and run integrations in chunk which match ciJobNumber
+ * If both totalCiJobs === 1 && ciJobNumber === 1, this function will run all existing tests, without splitting them
+ * @param context FtrProviderContext
+ * @param {number} totalCiJobs - total number of jobs between which tests will be split
+ * @param {number} ciJobNumber - number of job
+ * @returns
+ */
 export async function SecuritySolutionCypressCliTestRunnerCI(
   context: FtrProviderContext,
   totalCiJobs: number,

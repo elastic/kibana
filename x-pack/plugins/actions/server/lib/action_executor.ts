@@ -21,10 +21,12 @@ import {
 import {
   ActionType,
   ActionTypeExecutorResult,
+  ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
   PreConfiguredAction,
   RawAction,
+  ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionsClient } from '../actions_client';
@@ -203,15 +205,19 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
-        let rawResult: ActionTypeExecutorResult<unknown>;
+        let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
-          const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
-            actionId,
-            actionType,
-            params,
-            config,
-            secrets,
-          });
+          const configurationUtilities = actionTypeRegistry.getUtils();
+          const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+            },
+            { configurationUtilities }
+          );
 
           rawResult = await actionType.executor({
             actionId,
@@ -221,6 +227,7 @@ export class ActionExecutor {
             secrets: validatedSecrets,
             isEphemeral,
             taskInfo,
+            configurationUtilities,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -231,6 +238,7 @@ export class ActionExecutor {
               status: 'error',
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
+              error: err,
               retry: false,
             };
           }
@@ -256,6 +264,12 @@ export class ActionExecutor {
           event.message = `action execution failure: ${actionLabel}`;
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
+          if (result.error) {
+            logger.error(result.error, {
+              tags: [actionTypeId, actionId, 'action-run-failed'],
+              error: { stack_trace: result.error.stack },
+            });
+          }
           logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
         } else {
           span?.setOutcome('failure');
@@ -269,7 +283,8 @@ export class ActionExecutor {
         }
 
         eventLogger.logEvent(event);
-        return result;
+        const { error, ...resultWithoutError } = result;
+        return resultWithoutError;
       }
     );
   }
@@ -393,7 +408,7 @@ async function getActionInfoInternal(
   };
 }
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
   if (result.serviceMessage) {
@@ -417,15 +432,18 @@ interface ValidateActionOpts {
   secrets: unknown;
 }
 
-function validateAction({ actionId, actionType, params, config, secrets }: ValidateActionOpts) {
+function validateAction(
+  { actionId, actionType, params, config, secrets }: ValidateActionOpts,
+  validatorServices: ValidatorServices
+) {
   let validatedParams: Record<string, unknown>;
   let validatedConfig: Record<string, unknown>;
   let validatedSecrets: Record<string, unknown>;
 
   try {
-    validatedParams = validateParams(actionType, params);
-    validatedConfig = validateConfig(actionType, config);
-    validatedSecrets = validateSecrets(actionType, secrets);
+    validatedParams = validateParams(actionType, params, validatorServices);
+    validatedConfig = validateConfig(actionType, config, validatorServices);
+    validatedSecrets = validateSecrets(actionType, secrets, validatorServices);
     if (actionType.validate?.connector) {
       validateConnector(actionType, {
         config,

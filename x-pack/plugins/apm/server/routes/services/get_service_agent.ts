@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   SERVICE_NAME,
@@ -48,6 +48,7 @@ export async function getServiceAgent({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
       _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],
       query: {

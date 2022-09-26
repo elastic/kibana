@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';
 import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
@@ -16,10 +15,11 @@ import {
   AbstractSourceDescriptor,
   Attribution,
   DataRequestMeta,
+  StyleDescriptor,
   Timeslice,
 } from '../../../common/descriptor_types';
+import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
-import { PreIndexedShape } from '../../../common/elasticsearch_util';
 
 export type OnSourceChangeArgs = {
   propName: string;
@@ -31,6 +31,8 @@ export type SourceEditorArgs = {
   currentLayerType: string;
   numberOfJoins: number;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
+  style: IStyle;
 };
 
 export type ImmutableSourceProperty = {
@@ -60,7 +62,6 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -150,11 +151,6 @@ export class AbstractSource implements ISource {
 
   isESSource(): boolean {
     return false;
-  }
-
-  // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
-    return null;
   }
 
   // Returns function used to format value

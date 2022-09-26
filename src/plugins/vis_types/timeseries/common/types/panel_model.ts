@@ -22,7 +22,7 @@ interface MetricVariable {
   name?: string;
 }
 
-interface Percentile {
+export interface Percentile {
   id: string;
   mode: 'line' | 'band';
   field?: string;
@@ -162,7 +162,7 @@ export interface Panel {
   max_bars: number;
   pivot_id?: string | Array<string | null>;
   pivot_label?: string;
-  pivot_rows?: string;
+  pivot_rows?: number | string;
   pivot_type?: KBN_FIELD_TYPES | Array<KBN_FIELD_TYPES | null>;
   series: Series[];
   show_grid: number;

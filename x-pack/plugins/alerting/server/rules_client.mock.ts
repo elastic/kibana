@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RulesClient } from './rules_client';
+import { RulesClientApi } from './types';
 
-type Schema = PublicMethodsOf<RulesClient>;
+type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;
 
 const createRulesClientMock = () => {
@@ -31,11 +30,15 @@ const createRulesClientMock = () => {
     listAlertTypes: jest.fn(),
     getAlertSummary: jest.fn(),
     getExecutionLogForRule: jest.fn(),
+    getGlobalExecutionLogWithAuth: jest.fn(),
+    getActionErrorLog: jest.fn(),
     getSpaceId: jest.fn(),
     bulkEdit: jest.fn(),
     snooze: jest.fn(),
     unsnooze: jest.fn(),
-    updateSnoozedUntilTime: jest.fn(),
+    calculateIsSnoozedUntil: jest.fn(),
+    clearExpiredSnoozes: jest.fn(),
+    runSoon: jest.fn(),
   };
   return mocked;
 };

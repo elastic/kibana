@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse, Logger } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse, Logger } from '@kbn/core/server';
 
-import { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
   LegacyRuleAlertSavedObjectAction,

@@ -9,7 +9,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../../config';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { termsAggSuggestions } from './terms_agg';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

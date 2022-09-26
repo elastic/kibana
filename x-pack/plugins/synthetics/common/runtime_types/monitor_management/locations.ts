@@ -37,8 +37,8 @@ export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
 export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
 export const LocationGeoCodec = t.interface({
-  lat: t.number,
-  lon: t.number,
+  lat: t.union([t.string, t.number]),
+  lon: t.union([t.string, t.number]),
 });
 
 export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);
@@ -53,24 +53,37 @@ export const ManifestLocationCodec = t.interface({
   status: LocationStatusCodec,
 });
 
-export const ServiceLocationCodec = t.interface({
-  id: t.string,
-  label: t.string,
-  geo: LocationGeoCodec,
-  url: t.string,
-  isServiceManaged: t.boolean,
-  status: LocationStatusCodec,
-});
+export const ServiceLocationCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    label: t.string,
+    isServiceManaged: t.boolean,
+  }),
+  t.partial({
+    url: t.string,
+    geo: LocationGeoCodec,
+    status: LocationStatusCodec,
+    isInvalid: t.boolean,
+  }),
+]);
+
+export const PublicLocationCodec = t.intersection([
+  ServiceLocationCodec,
+  t.interface({ url: t.string }),
+]);
+
+export const PublicLocationsCodec = t.array(PublicLocationCodec);
 
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
-    isServiceManaged: t.boolean,
   }),
   t.partial({
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
+    isInvalid: t.boolean,
+    isServiceManaged: t.boolean,
   }),
 ]);
 
@@ -129,3 +142,5 @@ export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiRes
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
 export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;
 export type Locations = t.TypeOf<typeof LocationsCodec>;
+export type PublicLocation = t.TypeOf<typeof PublicLocationCodec>;
+export type PublicLocations = t.TypeOf<typeof PublicLocationsCodec>;

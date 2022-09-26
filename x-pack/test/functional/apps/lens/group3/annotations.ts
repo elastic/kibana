@@ -13,8 +13,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const from = 'Sep 19, 2015 @ 06:31:44.000';
+  const to = 'Sep 23, 2015 @ 18:31:44.000';
 
   describe('lens annotations tests', () => {
+    before(async () => {
+      await PageObjects.common.setTime({ from, to });
+    });
+    after(async () => {
+      await PageObjects.common.unsetTime();
+    });
+
     it('should show a disabled annotation layer button if there is no date histogram in data layer', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -51,10 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should duplicate the style when duplicating an annotation and group them in the chart', async () => {
       // drag and drop to the empty field to generate a duplicate
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
-        'lnsXY_xAnnotationsPanel > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+        to: 'lnsXY_xAnnotationsPanel > lns-empty-dimension',
+      });
 
       await (
         await find.byCssSelector(
@@ -67,7 +76,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         )
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
-      await testSubjects.existOrFail('xyVisAnnotationText');
+      await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+    });
+
+    it('should add query annotation layer and allow edition', async () => {
+      await PageObjects.lens.removeLayer(1);
+      await PageObjects.lens.createLayer('annotations');
+
+      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      expect(
+        await (
+          await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+        ).getVisibleText()
+      ).to.eql('Event');
+      await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+      await testSubjects.click('lnsXY_annotation_query');
+      await PageObjects.lens.configureQueryAnnotation({
+        queryString: '*',
+        timeField: 'utc_time',
+        textDecoration: { type: 'name' },
+        extraFields: ['clientip'],
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
     });
   });

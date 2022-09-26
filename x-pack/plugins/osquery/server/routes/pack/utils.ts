@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { pick, reduce } from 'lodash';
+import { isEmpty, pick, reduce } from 'lodash';
+import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
@@ -13,18 +14,27 @@ import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 export const convertPackQueriesToSO = (queries) =>
   reduce(
     queries,
-    (acc, value, key) => {
+    (acc, value, key: string) => {
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
       acc.push({
         id: key,
-        ...pick(value, ['query', 'interval', 'platform', 'version']),
+        ...pick(value, ['name', 'query', 'interval', 'platform', 'version']),
+        ...(value.snapshot !== undefined ? { snapshot: value.snapshot } : {}),
+        ...(value.removed !== undefined ? { removed: value.removed } : {}),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
 
       return acc;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [] as Array<Record<string, any>>
+    [] as Array<{
+      id: string;
+      name: string;
+      query: string;
+      interval: number;
+      snapshot?: boolean;
+      removed?: boolean;
+      ecs_mapping?: Record<string, unknown>;
+    }>
   );
 
 // @ts-expect-error update types
@@ -32,12 +42,13 @@ export const convertSOQueriesToPack = (queries, options?: { removeMultiLines?: b
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    (acc, { id: queryId, ecs_mapping, query, ...rest }, key) => {
+    (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
         query: options?.removeMultiLines ? removeMultilines(query) : query,
-        ecs_mapping: convertECSMappingToObject(ecs_mapping),
+        ...(!isEmpty(ecs_mapping) ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) } : {}),
+        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
       };
 
       return acc;

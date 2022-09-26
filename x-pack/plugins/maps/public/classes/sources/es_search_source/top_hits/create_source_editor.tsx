@@ -19,7 +19,10 @@ import { TopHitsForm } from './top_hits_form';
 import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;
+  onSourceConfigChange: (
+    sourceConfig: Partial<ESSearchSourceDescriptor> | null,
+    isPointsOnly: boolean
+  ) => void;
 }
 
 interface State {
@@ -88,6 +91,8 @@ export class CreateSourceEditor extends Component<Props, State> {
       tooltipProperties.push(indexPattern.timeFieldName);
     }
 
+    const field = geoFieldName && indexPattern?.getFieldByName(geoFieldName);
+
     const sourceConfig =
       indexPattern && geoFieldName && sortField && topHitsSplitField
         ? {
@@ -101,7 +106,8 @@ export class CreateSourceEditor extends Component<Props, State> {
             topHitsSize,
           }
         : null;
-    this.props.onSourceConfigChange(sourceConfig);
+    const isPointsOnly = field ? field.type === 'geo_point' : false;
+    this.props.onSourceConfigChange(sourceConfig, isPointsOnly);
   };
 
   _renderGeoSelect() {

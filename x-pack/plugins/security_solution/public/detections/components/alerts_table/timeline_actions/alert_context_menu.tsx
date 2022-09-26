@@ -9,33 +9,34 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
-import { connect, ConnectedProps } from 'react-redux';
-import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
+import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
+import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import { Ecs } from '../../../../../common/ecs';
-import {
-  AddExceptionFlyout,
-  AddExceptionFlyoutProps,
-} from '../../../../common/components/exceptions/add_exception_flyout';
+import type { Ecs } from '../../../../../common/ecs';
+import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import * as i18n from '../translations';
-import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import type { inputsModel, State } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
-import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
+import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -315,6 +316,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.ADD_EXCEPTION_FLYOUT,
   });
 
   const enrichedAlert: AlertData | undefined = useMemo(() => {
@@ -331,7 +333,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   /**
    * This should be re-visited after UEBA work is merged
    */
-  const useRuleIndices = useMemo(() => {
+  const memoRuleIndices = useMemo(() => {
     if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
       return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
         ? enrichedAlert['kibana.alert.rule.parameters'].index
@@ -341,8 +343,17 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
         ? enrichedAlert.signal.rule.index
         : [enrichedAlert.signal.rule.index];
     }
-    return ruleIndices;
-  }, [enrichedAlert, ruleIndices]);
+    return [];
+  }, [enrichedAlert]);
+
+  const memoDataViewId = useMemo(() => {
+    if (
+      enrichedAlert != null &&
+      enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
+    ) {
+      return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
+    }
+  }, [enrichedAlert]);
 
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
@@ -350,7 +361,8 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     <AddExceptionFlyout
       ruleName={ruleName}
       ruleId={ruleId}
-      ruleIndices={useRuleIndices}
+      ruleIndices={memoRuleIndices}
+      dataViewId={memoDataViewId}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading}

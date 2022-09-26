@@ -8,6 +8,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import objectHash from 'object-hash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -23,14 +24,13 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Node, NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
 type Destination = {
-  backendName: string;
+  dependencyName: string;
   spanId: string;
   spanType: string;
   spanSubtype: string;
@@ -43,10 +43,10 @@ type Destination = {
     }
 );
 
-// This operation tries to find a service for a backend, by:
+// This operation tries to find a service for a dependency, by:
 // - getting a span for each value of span.destination.service.resource (which indicates an outgoing call)
 // - for each span, find the transaction it creates
-// - if there is a transaction, match the backend name (span.destination.service.resource) to a service
+// - if there is a transaction, match the dependency name (span.destination.service.resource) to a service
 export const getDestinationMap = ({
   setup,
   start,
@@ -74,6 +74,7 @@ export const getDestinationMap = ({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -91,7 +92,7 @@ export const getDestinationMap = ({
               size: 10000,
               sources: asMutableArray([
                 {
-                  backendName: {
+                  dependencyName: {
                     terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
                   },
                 },
@@ -130,7 +131,7 @@ export const getDestinationMap = ({
       const spanId = sample[SPAN_ID] as string;
 
       destinationsBySpanId.set(spanId, {
-        backendName: bucket.key.backendName as string,
+        dependencyName: bucket.key.dependencyName as string,
         spanId,
         spanType: (sample[SPAN_TYPE] as string | null) || '',
         spanSubtype: (sample[SPAN_SUBTYPE] as string | null) || '',
@@ -144,6 +145,7 @@ export const getDestinationMap = ({
           events: [ProcessorEvent.transaction],
         },
         body: {
+          track_total_hits: false,
           query: {
             bool: {
               filter: [
@@ -189,11 +191,11 @@ export const getDestinationMap = ({
       }
     });
 
-    const nodesByBackendName = new Map<string, Node>();
+    const nodesBydependencyName = new Map<string, Node>();
 
     destinationsBySpanId.forEach((destination) => {
       const existingDestination =
-        nodesByBackendName.get(destination.backendName) ?? {};
+        nodesBydependencyName.get(destination.dependencyName) ?? {};
 
       const mergedDestination = {
         ...existingDestination,
@@ -211,17 +213,17 @@ export const getDestinationMap = ({
         };
       } else {
         node = {
-          backendName: mergedDestination.backendName,
+          dependencyName: mergedDestination.dependencyName,
           spanType: mergedDestination.spanType,
           spanSubtype: mergedDestination.spanSubtype,
-          id: objectHash({ backendName: mergedDestination.backendName }),
-          type: NodeType.backend,
+          id: objectHash({ dependencyName: mergedDestination.dependencyName }),
+          type: NodeType.dependency,
         };
       }
 
-      nodesByBackendName.set(destination.backendName, node);
+      nodesBydependencyName.set(destination.dependencyName, node);
     });
 
-    return nodesByBackendName;
+    return nodesBydependencyName;
   });
 };

@@ -290,46 +290,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "application_usage_transactional:5f01fd40-b0b0-11ea-9510-fdf248d5f2a4",
-    "index": ".kibana_1",
-    "source": {
-      "application_usage_transactional": {
-        "appId": "management",
-        "minutesOnScreen": 1.60245,
-        "numberOfClicks": 6,
-        "timestamp": "2020-06-17T15:36:54.292Z"
-      },
-      "references": [
-      ],
-      "type": "application_usage_transactional",
-      "updated_at": "2020-06-17T15:36:54.292Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "application_usage_transactional:4ca5ac00-b0b0-11ea-9510-fdf248d5f2a4",
-    "index": ".kibana_1",
-    "source": {
-      "application_usage_transactional": {
-        "appId": "home",
-        "minutesOnScreen": 0.4106666666666667,
-        "numberOfClicks": 3,
-        "timestamp": "2020-06-17T15:36:23.487Z"
-      },
-      "references": [
-      ],
-      "type": "application_usage_transactional",
-      "updated_at": "2020-06-17T15:36:23.488Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "ui-metric:kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36",
     "index": ".kibana_1",
     "source": {

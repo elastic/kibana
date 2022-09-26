@@ -13,7 +13,7 @@ import { getFieldValidityAndErrorMessage } from '../helpers';
 import { useFormContext } from '../form_context';
 import { useField, InternalFieldConfig } from '../hooks';
 
-interface Props {
+export interface Props {
   path: string;
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;

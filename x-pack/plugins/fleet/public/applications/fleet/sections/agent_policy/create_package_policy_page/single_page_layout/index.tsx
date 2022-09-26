@@ -24,7 +24,15 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
 import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
-import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
+import type { CreatePackagePolicyRequest } from '../../../../../../../common/types';
+
+import { splitPkgKey } from '../../../../../../../common/services';
+import {
+  dataTypes,
+  FLEET_SYSTEM_PACKAGE,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../../common/constants';
+import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -39,12 +47,21 @@ import {
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
 } from '../../../../hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../../components';
+import {
+  Loading,
+  Error,
+  ExtensionWrapper,
+  DevtoolsRequestFlyoutButton,
+} from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { useUIExtension } from '../../../../hooks';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import {
+  pkgKeyFromPackageInfo,
+  isVerificationError,
+  ExperimentalFeaturesService,
+} from '../../../../services';
 
 import type {
   PackagePolicyFormState,
@@ -54,16 +71,24 @@ import type {
 
 import { IntegrationBreadcrumb } from '../components';
 
+import type { PackagePolicyValidationResults } from '../services';
+import { validatePackagePolicy, validationHasErrors } from '../services';
+import {
+  StepConfigurePackagePolicy,
+  StepDefinePackagePolicy,
+  SelectedPolicyTab,
+  StepSelectHosts,
+} from '../components';
+import {
+  generateCreatePackagePolicyDevToolsRequest,
+  generateCreateAgentPolicyDevToolsRequest,
+} from '../../services';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import type { PackagePolicyValidationResults } from './services';
-import { validatePackagePolicy, validationHasErrors } from './services';
-import { StepConfigurePackagePolicy } from './step_configure_package';
-import { StepDefinePackagePolicy } from './step_define_package_policy';
-import { SelectedPolicyTab, StepSelectHosts } from './step_select_hosts';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
-    padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+    padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
   // compensating for EuiBottomBar hiding the content
@@ -134,7 +159,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '', // TODO: Blank for now as we only support default output
     inputs: [],
   });
 
@@ -147,6 +171,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const navigateAddAgentHelp = (policy?: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
+
+  const confirmForceInstall = useConfirmForceInstall();
+
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
@@ -216,16 +243,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [setNewAgentPolicy, newAgentPolicy, selectedPolicyTab]
   );
 
-  const updateSelectedPolicy = useCallback(
-    (policy) => {
-      setSelectedPolicyTab(policy);
-      setPolicyValidation(policy, newAgentPolicy);
+  const updateSelectedPolicyTab = useCallback(
+    (selectedTab) => {
+      setSelectedPolicyTab(selectedTab);
+      setPolicyValidation(selectedTab, newAgentPolicy);
     },
     [setSelectedPolicyTab, newAgentPolicy]
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
@@ -292,7 +318,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Save package policy
   const savePackagePolicy = useCallback(
-    async (pkgPolicy: NewPackagePolicy) => {
+    async (pkgPolicy: CreatePackagePolicyRequest['body']) => {
       setFormState('LOADING');
       const result = await sendCreatePackagePolicy(pkgPolicy);
       setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
@@ -301,8 +327,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [agentCount]
   );
 
-  const createAgentPolicy = useCallback(async (): Promise<string | undefined> => {
-    let policyId;
+  const createAgentPolicy = useCallback(async (): Promise<AgentPolicy | undefined> => {
+    let createdAgentPolicy;
     setFormState('LOADING');
     // do not create agent policy with system integration if package policy already is for system package
     const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
@@ -314,88 +340,105 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       throw resp.error;
     }
     if (resp.data) {
-      policyId = resp.data.item.id;
-      setAgentPolicy(resp.data.item);
+      createdAgentPolicy = resp.data.item;
+      setAgentPolicy(createdAgentPolicy);
+      updatePackagePolicy({ policy_id: createdAgentPolicy.id });
+    }
+    return createdAgentPolicy;
+  }, [packagePolicy?.package?.name, newAgentPolicy, withSysMonitoring, updatePackagePolicy]);
 
-      updatePackagePolicy({ policy_id: policyId });
-    }
-    return policyId;
-  }, [newAgentPolicy, updatePackagePolicy, withSysMonitoring, packagePolicy]);
+  const onSubmit = useCallback(
+    async ({
+      force,
+      overrideCreatedAgentPolicy,
+    }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
+      if (formState === 'VALID' && hasErrors) {
+        setFormState('INVALID');
+        return;
+      }
+      if (agentCount !== 0 && formState !== 'CONFIRM') {
+        setFormState('CONFIRM');
+        return;
+      }
+      let createdPolicy = overrideCreatedAgentPolicy;
+      if (selectedPolicyTab === SelectedPolicyTab.NEW && !overrideCreatedAgentPolicy) {
+        try {
+          createdPolicy = await createAgentPolicy();
+        } catch (e) {
+          notifications.toasts.addError(e, {
+            title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+              defaultMessage: 'Unable to create agent policy',
+            }),
+          });
+          return;
+        }
+      }
 
-  const onSubmit = useCallback(async () => {
-    if (formState === 'VALID' && hasErrors) {
-      setFormState('INVALID');
-      return;
-    }
-    if (agentCount !== 0 && formState !== 'CONFIRM') {
-      setFormState('CONFIRM');
-      return;
-    }
-    let policyId;
-    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
-      try {
-        policyId = await createAgentPolicy();
-      } catch (e) {
-        notifications.toasts.addError(e, {
-          title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-            defaultMessage: 'Unable to create agent policy',
+      setFormState('LOADING');
+      // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
+      const { error, data } = await savePackagePolicy({
+        ...packagePolicy,
+        policy_id: createdPolicy?.id ?? packagePolicy.policy_id,
+        force,
+      });
+      if (!error) {
+        setSavedPackagePolicy(data!.item);
+
+        const hasAgentsAssigned = agentCount && agentPolicy;
+        if (!hasAgentsAssigned) {
+          setFormState('SUBMITTED_NO_AGENTS');
+          return;
+        }
+        onSaveNavigate(data!.item);
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
+            defaultMessage: `'{packagePolicyName}' integration added.`,
+            values: {
+              packagePolicyName: packagePolicy.name,
+            },
           }),
+          text: hasAgentsAssigned
+            ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+                values: {
+                  agentPolicyName: agentPolicy!.name,
+                },
+              })
+            : undefined,
+          'data-test-subj': 'packagePolicyCreateSuccessToast',
         });
-        return;
+      } else {
+        if (isVerificationError(error)) {
+          setFormState('VALID'); // don't show the add agent modal
+          const forceInstall = await confirmForceInstall(packagePolicy.package!);
+
+          if (forceInstall) {
+            // skip creating the agent policy because it will have already been successfully created
+            onSubmit({ overrideCreatedAgentPolicy: createdPolicy, force: true });
+          }
+          return;
+        }
+        notifications.toasts.addError(error, {
+          title: 'Error',
+        });
+        setFormState('VALID');
       }
-    }
-
-    setFormState('LOADING');
-    // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
-    const { error, data } = await savePackagePolicy({
-      ...packagePolicy,
-      policy_id: policyId ?? packagePolicy.policy_id,
-    });
-    if (!error) {
-      setSavedPackagePolicy(data!.item);
-
-      const hasAgentsAssigned = agentCount && agentPolicy;
-      if (!hasAgentsAssigned) {
-        setFormState('SUBMITTED_NO_AGENTS');
-        return;
-      }
-      onSaveNavigate(data!.item);
-
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-          defaultMessage: `'{packagePolicyName}' integration added.`,
-          values: {
-            packagePolicyName: packagePolicy.name,
-          },
-        }),
-        text: hasAgentsAssigned
-          ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-              defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
-              values: {
-                agentPolicyName: agentPolicy!.name,
-              },
-            })
-          : undefined,
-        'data-test-subj': 'packagePolicyCreateSuccessToast',
-      });
-    } else {
-      notifications.toasts.addError(error, {
-        title: 'Error',
-      });
-      setFormState('VALID');
-    }
-  }, [
-    formState,
-    hasErrors,
-    agentCount,
-    savePackagePolicy,
-    onSaveNavigate,
-    agentPolicy,
-    notifications.toasts,
-    packagePolicy,
-    selectedPolicyTab,
-    createAgentPolicy,
-  ]);
+    },
+    [
+      formState,
+      hasErrors,
+      agentCount,
+      selectedPolicyTab,
+      savePackagePolicy,
+      packagePolicy,
+      createAgentPolicy,
+      notifications.toasts,
+      agentPolicy,
+      onSaveNavigate,
+      confirmForceInstall,
+    ]
+  );
 
   const integrationInfo = useMemo(
     () =>
@@ -431,7 +474,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         validation={validation}
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
-        updateSelectedTab={updateSelectedPolicy}
+        updateSelectedTab={updateSelectedPolicyTab}
         selectedAgentPolicyId={queryParamsPolicyId}
       />
     ),
@@ -443,7 +486,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateNewAgentPolicy,
       validation,
       withSysMonitoring,
-      updateSelectedPolicy,
+      updateSelectedPolicyTab,
       queryParamsPolicyId,
     ]
   );
@@ -521,6 +564,43 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
+  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
+    ExperimentalFeaturesService.get();
+
+  const showDevtoolsRequest =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
+    isShowDevtoolRequestExperimentEnabled;
+
+  const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+      return [
+        `${generateCreateAgentPolicyDevToolsRequest(
+          newAgentPolicy,
+          withSysMonitoring && !packagePolicyIsSystem
+        )}\n\n${generateCreatePackagePolicyDevToolsRequest({
+          ...packagePolicy,
+        })}`,
+        i18n.translate(
+          'xpack.fleet.createPackagePolicy.devtoolsRequestWithAgentPolicyDescription',
+          {
+            defaultMessage:
+              'These Kibana requests creates a new agent policy and a new package policy.',
+          }
+        ),
+      ];
+    }
+
+    return [
+      generateCreatePackagePolicyDevToolsRequest({
+        ...packagePolicy,
+      }),
+      i18n.translate('xpack.fleet.createPackagePolicy.devtoolsRequestDescription', {
+        defaultMessage: 'This Kibana request creates a new package policy.',
+      }),
+    ];
+  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab]);
+
   // Display package error if there is one
   if (packageInfoError) {
     return (
@@ -591,9 +671,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {showDevtoolsRequest ? (
+                  <EuiFlexItem grow={false}>
+                    <DevtoolsRequestFlyoutButton
+                      request={devtoolRequest}
+                      description={devtoolRequestDescription}
+                      btnProps={{
+                        color: 'ghost',
+                      }}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    onClick={onSubmit}
+                    onClick={() => onSubmit()}
                     isLoading={formState === 'LOADING'}
                     disabled={formState !== 'VALID' || hasAgentPolicyError || !validationResults}
                     iconType="save"

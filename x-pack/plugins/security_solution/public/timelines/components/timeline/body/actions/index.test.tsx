@@ -10,7 +10,6 @@ import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -33,33 +32,36 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(),
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalKibanaLib = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
         },
       },
-      cases: mockCasesContract(),
-      uiSettings: {
-        get: jest.fn(),
-      },
-      savedObjects: {
-        client: {},
-      },
-      timelines: { ...mockTimelines },
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
-}));
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
+  };
+});
 
 const defaultProps = {
   ariaRowindex: 2,

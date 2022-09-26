@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import {
-  CommonProps,
   EuiPageHeader,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
@@ -88,8 +87,6 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         >
           <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
         </EuiPageContent>
-
-        <SpyRoute pageName={SecurityPageName.administration} />
       </div>
     );
   }

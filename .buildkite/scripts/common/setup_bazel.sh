@@ -16,12 +16,7 @@ BAZEL_CACHE_MODE=${BAZEL_CACHE_MODE:-gcs}
 if [[ "$BAZEL_CACHE_MODE" == "gcs" ]]; then
   echo "[bazel] enabling caching with GCS buckets"
 
-  BAZEL_REGION="us-central1"
-  if [[ "$(curl -is metadata.google.internal || true)" ]]; then
-    # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
-    BAZEL_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -d'/' -f1 | cut -c3- | rev)
-  fi
-
+  BAZEL_REGION="${BUILDKITE_AGENT_GCP_REGION:-us-central1}"
   BAZEL_BUCKET="kibana-ci-bazel_$BAZEL_REGION"
 
   echo "[bazel] using GCS bucket: $BAZEL_BUCKET"

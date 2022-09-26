@@ -18,22 +18,40 @@ const IndexPatternFlyoutContentContainer = ({
   onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
-  showEmptyPrompt = true,
+  editData,
+  allowAdHocDataView,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
   } = useKibana<DataViewEditorContext>();
 
-  const onSaveClick = async (dataViewSpec: DataViewSpec) => {
+  const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
-      const indexPattern = await dataViews.createAndSave(dataViewSpec);
+      let saveResponse;
+      if (editData) {
+        const { name = '', timeFieldName, title = '' } = dataViewSpec;
+        editData.title = title;
+        editData.name = name;
+        editData.timeFieldName = timeFieldName;
+        saveResponse = editData.isPersisted()
+          ? await dataViews.updateSavedObject(editData)
+          : editData;
+      } else {
+        saveResponse = persist
+          ? await dataViews.createAndSave(dataViewSpec)
+          : await dataViews.create(dataViewSpec);
+      }
 
-      const message = i18n.translate('indexPatternEditor.saved', {
-        defaultMessage: "Saved '{indexPatternTitle}'",
-        values: { indexPatternTitle: indexPattern.title },
-      });
-      notifications.toasts.addSuccess(message);
-      await onSave(indexPattern);
+      if (saveResponse && !(saveResponse instanceof Error)) {
+        if (persist) {
+          const message = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: "Saved '{indexPatternName}'",
+            values: { indexPatternName: saveResponse.getName() },
+          });
+          notifications.toasts.addSuccess(message);
+        }
+        await onSave(saveResponse);
+      }
     } catch (e) {
       const title = i18n.translate('indexPatternEditor.dataView.unableSaveLabel', {
         defaultMessage: 'Failed to save data view.',
@@ -49,7 +67,8 @@ const IndexPatternFlyoutContentContainer = ({
       onCancel={onCancel}
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
-      showEmptyPrompt={showEmptyPrompt}
+      editData={editData}
+      allowAdHoc={allowAdHocDataView || false}
     />
   );
 };

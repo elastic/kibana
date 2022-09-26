@@ -8,6 +8,7 @@
 import { AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -21,13 +22,17 @@ import {
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
   PostCancelActionRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 import type { FleetAuthzRouter } from '../security';
 
+import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
+
 import {
   getAgentsHandler,
+  getAgentTagsHandler,
   getAgentHandler,
   updateAgentHandler,
   deleteAgentHandler,
@@ -35,6 +40,9 @@ import {
   putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
+  bulkUpdateAgentTagsHandler,
+  getAvailableVersionsHandler,
+  getActionStatusHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -70,6 +78,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     },
     updateAgentHandler
   );
+  // Bulk Update Tags
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN,
+      validate: PostBulkUpdateAgentTagsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    bulkUpdateAgentTagsHandler
+  );
   // Delete
   router.delete(
     {
@@ -92,6 +111,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     },
     getAgentsHandler
   );
+  // List Agent Tags
+  router.get(
+    {
+      path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
+      validate: GetTagsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentTagsHandler
+  );
 
   // Agent actions
   router.post(
@@ -106,6 +136,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -121,6 +152,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -213,6 +245,18 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     getCurrentUpgradesHandler
   );
 
+  // Current actions
+  router.get(
+    {
+      path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
+      validate: GetActionStatusRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getActionStatusHandler
+  );
+
   // Bulk reassign
   router.post(
     {
@@ -235,5 +279,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     postBulkAgentsUnenrollHandler
+  );
+
+  // Available versions for upgrades
+  router.get(
+    {
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAvailableVersionsHandler
   );
 };

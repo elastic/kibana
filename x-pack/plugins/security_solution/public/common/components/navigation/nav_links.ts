@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 import { useAppLinks } from '../../links';
 import type { SecurityPageName } from '../../../app/types';
-import { NavLinkItem } from './types';
-import { AppLinkItems } from '../../links/types';
+import type { NavLinkItem } from './types';
+import type { AppLinkItems } from '../../links/types';
 
 export const useAppNavLinks = (): NavLinkItem[] => {
   const appLinks = useAppLinks();
@@ -31,6 +31,8 @@ const formatNavLinkItems = (appLinks: AppLinkItems): NavLinkItem[] =>
     ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
     ...(link.landingImage != null ? { image: link.landingImage } : {}),
     ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
+    ...(link.isBeta != null ? { isBeta: link.isBeta } : {}),
+    ...(link.betaOptions != null ? { betaOptions: link.betaOptions } : {}),
     ...(link.links && link.links.length
       ? {
           links: formatNavLinkItems(link.links),

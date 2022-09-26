@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { ColorSchemas, getHeatmapColors } from '@kbn/charts-plugin/common';
-import { Range } from '@kbn/expressions-plugin';
+import { Range } from '@kbn/expressions-plugin/common';
 
 export interface PaletteConfig {
   color: Array<string | undefined>;

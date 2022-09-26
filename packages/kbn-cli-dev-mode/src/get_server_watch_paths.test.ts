@@ -76,7 +76,9 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/plugins/lists/server/scripts,
       <absolute path>/x-pack/plugins/security_solution/scripts,
       <absolute path>/x-pack/plugins/security_solution/server/lib/detection_engine/scripts,
-      <absolute path>/x-pack/plugins/uptime/e2e,
+      <absolute path>/x-pack/plugins/synthetics/e2e,
+      <absolute path>/x-pack/plugins/ux/e2e,
+      <absolute path>/x-pack/plugins/observability/e2e,
     ]
   `);
 });

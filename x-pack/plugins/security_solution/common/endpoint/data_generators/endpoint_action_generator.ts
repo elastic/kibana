@@ -5,29 +5,27 @@
  * 2.0.
  */
 
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_INDEX } from '../constants';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import {
+import type {
   ActionDetails,
-  ActivityLogItemTypes,
+  EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
-  ISOLATION_ACTIONS,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  ProcessesEntry,
 } from '../types';
-
-const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
+import { ActivityLogItemTypes } from '../types';
+import { RESPONSE_ACTION_COMMANDS } from '../service/response_actions/constants';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -41,8 +39,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
           data: {
-            command: this.randomIsolateCommand(),
+            command: this.randomResponseActionCommand(),
             comment: this.randomString(15),
+            parameters: undefined,
           },
         },
         error: undefined,
@@ -58,16 +57,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     overrides: DeepPartial<LogsEndpointAction> = {}
   ): estypes.SearchHit<LogsEndpointAction> {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
-      _index: `.ds-${ENDPOINT_ACTIONS_INDEX}-some_namespace`,
+      _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
-  }
-
-  generateIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'isolate' } } }), overrides);
-  }
-
-  generateUnIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'unisolate' } } }), overrides);
   }
 
   /** Generates an endpoint action response */
@@ -75,6 +66,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     overrides: DeepPartial<LogsEndpointActionResponse> = {}
   ): LogsEndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
+
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
+      );
+    });
 
     return merge(
       {
@@ -86,10 +85,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           action_id: this.seededUUIDv4(),
           completed_at: timeStamp.toISOString(),
           data: {
-            command: this.randomIsolateCommand(),
+            command: this.randomResponseActionCommand(),
             comment: '',
+            parameters: undefined,
           },
-          started_at: this.randomPastDate(),
+          // randomly before a few hours/minutes/seconds later
+          started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
+          output: undefined,
         },
         error: undefined,
       },
@@ -110,75 +112,44 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       agents: ['agent-a'],
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: { 'agent-a': { name: 'Host-agent-a' } },
       id: '123',
       isCompleted: true,
       isExpired: false,
       wasSuccessful: true,
       errors: undefined,
-      logEntries: [
-        {
-          item: {
-            data: {
-              '@timestamp': '2022-04-27T16:08:47.449Z',
-              action_id: '123',
-              agents: ['agent-a'],
-              data: {
-                command: 'isolate',
-                comment: '5wb6pu6kh2xix5i',
-              },
-              expiration: '2022-04-29T16:08:47.449Z',
-              input_type: 'endpoint',
-              type: 'INPUT_ACTION',
-              user_id: 'elastic',
-            },
-            id: '44d8b915-c69c-4c48-8c86-b57d0bd631d0',
-          },
-          type: 'fleetAction',
-        },
-        {
-          item: {
-            data: {
-              '@timestamp': '2022-04-30T16:08:47.449Z',
-              action_data: {
-                command: 'unisolate',
-                comment: '',
-              },
-              action_id: '123',
-              agent_id: 'agent-a',
-              completed_at: '2022-04-30T16:08:47.449Z',
-              error: '',
-              started_at: '2022-04-30T16:08:47.449Z',
-            },
-            id: '54-65-65-98',
-          },
-          type: 'fleetResponse',
-        },
-        {
-          item: {
-            data: {
-              '@timestamp': '2022-04-30T16:08:47.449Z',
-              EndpointActions: {
-                action_id: '123',
-                completed_at: '2022-04-30T16:08:47.449Z',
-                data: {
-                  command: 'unisolate',
-                  comment: '',
-                },
-                started_at: '2022-04-30T16:08:47.449Z',
-              },
-              agent: {
-                id: 'agent-a',
-              },
-            },
-            id: '32-65-98',
-          },
-          type: 'response',
-        },
-      ],
       startedAt: '2022-04-27T16:08:47.449Z',
+      status: 'successful',
+      comment: 'thisisacomment',
+      createdBy: 'auserid',
+      parameters: undefined,
+      outputs: {},
+      agentState: {
+        'agent-a': {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+        },
+      },
     };
 
     return merge(details, overrides);
+  }
+
+  generateActivityLogAction(
+    overrides: DeepPartial<EndpointActivityLogAction>
+  ): EndpointActivityLogAction {
+    return merge(
+      {
+        type: ActivityLogItemTypes.ACTION,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generate(),
+        },
+      },
+      overrides
+    );
   }
 
   generateActivityLogActionResponse(
@@ -219,7 +190,33 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  protected randomIsolateCommand() {
-    return this.randomChoice(ISOLATION_COMMANDS);
+  randomResponseActionProcesses(n?: number): ProcessesEntry[] {
+    const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
+    const entries = [];
+    for (let i = 0; i < numberOfEntries; i++) {
+      entries.push({
+        command: this.randomResponseActionProcessesCommand(),
+        pid: this.randomN(1000).toString(),
+        entity_id: this.randomString(50),
+        user: this.randomUser(),
+      });
+    }
+
+    return entries;
+  }
+
+  protected randomResponseActionProcessesCommand() {
+    const commands = [
+      '/opt/cmd1',
+      '/opt/cmd2',
+      '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+      '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+    ];
+
+    return this.randomChoice(commands);
+  }
+
+  protected randomResponseActionCommand() {
+    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
   }
 }

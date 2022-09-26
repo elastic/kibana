@@ -9,10 +9,9 @@ import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -27,11 +26,14 @@ import {
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
+  updateIndexPatterns,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
+import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
+import { replaceIndexpattern } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -61,15 +63,17 @@ export function App({
 
   const {
     data,
-    chrome,
+    dataViews,
+    uiActions,
     uiSettings,
+    chrome,
     inspector: lensInspector,
     application,
-    notifications,
     savedObjectsTagging,
     getOriginatingAppName,
     spaces,
     http,
+    notifications,
     executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
@@ -143,22 +147,6 @@ export function App({
       ),
     [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );
-
-  useEffect(() => {
-    const kbnUrlStateStorage = createKbnUrlStateStorage({
-      history,
-      useHash: uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(notifications.toasts),
-    });
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
-      data.query,
-      kbnUrlStateStorage
-    );
-
-    return () => {
-      stopSyncingQueryServiceStateWithUrl();
-    };
-  }, [data.search.session, notifications.toasts, uiSettings, data.query, history]);
 
   useEffect(() => {
     onAppLeave((actions) => {
@@ -380,6 +368,30 @@ export function App({
     );
   }, [initialContext]);
 
+  const indexPatternService = useMemo(
+    () =>
+      createIndexPatternService({
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
+        contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
+        updateIndexPatterns: (newIndexPatternsState, options) => {
+          dispatch(updateIndexPatterns(newIndexPatternsState));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+        replaceIndexPattern: (newIndexPattern, oldId, options) => {
+          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+      }),
+    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
+  );
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp">
@@ -393,14 +405,17 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
+          currentDoc={currentDoc}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
           initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           theme$={theme$}
+          indexPatternService={indexPatternService}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -408,6 +423,7 @@ export function App({
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
             lensInspector={lensInspector}
+            indexPatternService={indexPatternService}
           />
         )}
       </div>
@@ -469,13 +485,19 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
   lensInspector,
+  indexPatternService,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
   showNoDataPopover: () => void;
+  indexPatternService: IndexPatternServiceAPI;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
-    <EditorFrameContainer showNoDataPopover={showNoDataPopover} lensInspector={lensInspector} />
+    <EditorFrameContainer
+      showNoDataPopover={showNoDataPopover}
+      lensInspector={lensInspector}
+      indexPatternService={indexPatternService}
+    />
   );
 });

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
+import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
-import {
+import type {
   BrowserField,
   BrowserFields,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -26,7 +25,7 @@ import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
-export type { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
   const result: Array<Partial<BrowserField>> = [];
@@ -84,35 +83,10 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const indicesExistOrDataTemporarilyUnavailable = (
-  indicesExist: boolean | null | undefined
-) => indicesExist || isUndefined(indicesExist);
-
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
-
 interface FetchIndexReturn {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
@@ -134,7 +108,6 @@ export const useFetchIndex = (
 
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
@@ -162,14 +135,13 @@ export const useFetchIndex = (
                     const stringifyIndices = response.indicesExist.sort().join();
 
                     previousIndexesName.current = response.indicesExist;
-                    const { browserFields, docValueFields } = getDataViewStateFromIndexFields(
+                    const { browserFields } = getDataViewStateFromIndexFields(
                       stringifyIndices,
                       response.indexFields
                     );
                     setLoading(false);
                     setState({
                       browserFields,
-                      docValueFields,
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
                       indexPatterns: getIndexFields(stringifyIndices, response.indexFields),

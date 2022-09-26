@@ -8,19 +8,15 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
 import {
-  ActionTypeModel,
-  GenericValidationResult,
-  ConnectorValidationResult,
-} from '../../../../types';
-import {
-  PagerDutyActionConnector,
   PagerDutyConfig,
   PagerDutySecrets,
   PagerDutyActionParams,
   EventActionOptions,
 } from '../types';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 export function getActionType(): ActionTypeModel<
   PagerDutyConfig,
@@ -42,22 +38,6 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Send to PagerDuty',
       }
     ),
-    validateConnector: async (
-      action: PagerDutyActionConnector
-    ): Promise<ConnectorValidationResult<PagerDutyConfig, PagerDutySecrets>> => {
-      const translations = await import('./translations');
-      const secretsErrors = {
-        routingKey: new Array<string>(),
-      };
-      const validationResult = {
-        secrets: { errors: secretsErrors },
-      };
-
-      if (!action.secrets.routingKey) {
-        secretsErrors.routingKey.push(translations.INTEGRATION_KEY_REQUIRED);
-      }
-      return validationResult;
-    },
     validateParams: async (
       actionParams: PagerDutyActionParams
     ): Promise<
@@ -104,6 +84,14 @@ export function getActionType(): ActionTypeModel<
     },
     actionConnectorFields: lazy(() => import('./pagerduty_connectors')),
     actionParamsFields: lazy(() => import('./pagerduty_params')),
+    defaultActionParams: {
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      eventAction: EventActionOptions.TRIGGER,
+    },
+    defaultRecoveredActionParams: {
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      eventAction: EventActionOptions.RESOLVE,
+    },
   };
 }
 

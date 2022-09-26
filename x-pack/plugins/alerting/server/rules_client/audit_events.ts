@@ -25,8 +25,11 @@ export enum RuleAuditAction {
   AGGREGATE = 'rule_aggregate',
   BULK_EDIT = 'rule_bulk_edit',
   GET_EXECUTION_LOG = 'rule_get_execution_log',
+  GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
+  GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
+  RUN_SOON = 'rule_run_soon',
 }
 
 type VerbsTuple = [string, string, string];
@@ -52,8 +55,19 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing execution log for',
     'accessed execution log for',
   ],
+  rule_get_global_execution_log: [
+    'access execution log',
+    'accessing execution log',
+    'accessed execution log',
+  ],
+  rule_get_action_error_log: [
+    'access action error log for',
+    'accessing action error log for',
+    'accessed action error log for',
+  ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
+  rule_run_soon: ['run', 'running', 'ran'],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -73,8 +87,11 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
   rule_get_execution_log: 'access',
+  rule_get_global_execution_log: 'access',
+  rule_get_action_error_log: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
+  rule_run_soon: 'access',
 };
 
 export interface RuleAuditEventParams {

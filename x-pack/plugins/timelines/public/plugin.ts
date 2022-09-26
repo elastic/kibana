@@ -10,13 +10,8 @@ import { throttle } from 'lodash';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
-import {
-  getLastUpdatedLazy,
-  getLoadingPanelLazy,
-  getTGridLazy,
-  getFieldsBrowserLazy,
-} from './methods';
+import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
+import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
@@ -73,12 +68,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
-      },
-      getFieldBrowser: (props: FieldBrowserProps) => {
-        return getFieldsBrowserLazy(props, {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          store: this._store!,
-        });
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;

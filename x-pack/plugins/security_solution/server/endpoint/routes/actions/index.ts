@@ -6,13 +6,12 @@
  */
 
 import { registerActionDetailsRoutes } from './details';
-import { SecuritySolutionPluginRouter } from '../../../types';
-import { EndpointAppContext } from '../../types';
-import { registerHostIsolationRoutes } from './isolation';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { EndpointAppContext } from '../../types';
 import { registerActionStatusRoutes } from './status';
 import { registerActionAuditLogRoutes } from './audit_log';
-
-export * from './isolation';
+import { registerActionListRoutes } from './list';
+import { registerResponseActionRoutes } from './response_actions';
 
 // wrap route registration
 
@@ -20,8 +19,9 @@ export function registerActionRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
-  registerHostIsolationRoutes(router, endpointContext);
   registerActionStatusRoutes(router, endpointContext);
   registerActionAuditLogRoutes(router, endpointContext);
+  registerActionListRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
+  registerResponseActionRoutes(router, endpointContext);
 }

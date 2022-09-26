@@ -21,38 +21,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
   redirectTo={[MockFunction]}
   title="search by title"
 >
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
+  <Memo(TableListViewComp)
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -60,7 +29,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -93,6 +62,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -103,48 +73,23 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter="\\"search by title\\""
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
     tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
+  >
+    <DashboardUnsavedListing
+      redirectTo={[MockFunction]}
+      refreshUnsavedDashboards={[Function]}
+      unsavedDashboardIds={
+        Array [
+          "dashboardUnsavedOne",
+          "dashboardUnsavedTwo",
+        ]
       }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
+    />
+  </Memo(TableListViewComp)>
 </DashboardListing>
 `;
 
@@ -169,38 +114,7 @@ exports[`after fetch initialFilter 1`] = `
   }
   redirectTo={[MockFunction]}
 >
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
+  <Memo(TableListViewComp)
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -208,7 +122,7 @@ exports[`after fetch initialFilter 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -241,6 +155,7 @@ exports[`after fetch initialFilter 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -251,48 +166,23 @@ exports[`after fetch initialFilter 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter="testFilter"
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
     tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
+  >
+    <DashboardUnsavedListing
+      redirectTo={[MockFunction]}
+      refreshUnsavedDashboards={[Function]}
+      unsavedDashboardIds={
+        Array [
+          "dashboardUnsavedOne",
+          "dashboardUnsavedTwo",
+        ]
       }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
+    />
+  </Memo(TableListViewComp)>
 </DashboardListing>
 `;
 
@@ -316,38 +206,7 @@ exports[`after fetch renders all table rows 1`] = `
   }
   redirectTo={[MockFunction]}
 >
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
+  <Memo(TableListViewComp)
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -355,7 +214,7 @@ exports[`after fetch renders all table rows 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -388,6 +247,7 @@ exports[`after fetch renders all table rows 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -398,48 +258,23 @@ exports[`after fetch renders all table rows 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
     tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
+  >
+    <DashboardUnsavedListing
+      redirectTo={[MockFunction]}
+      refreshUnsavedDashboards={[Function]}
+      unsavedDashboardIds={
+        Array [
+          "dashboardUnsavedOne",
+          "dashboardUnsavedTwo",
+        ]
       }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
+    />
+  </Memo(TableListViewComp)>
 </DashboardListing>
 `;
 
@@ -463,38 +298,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   }
   redirectTo={[MockFunction]}
 >
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
+  <Memo(TableListViewComp)
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -502,7 +306,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -535,6 +339,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -545,48 +350,23 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
     tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
+  >
+    <DashboardUnsavedListing
+      redirectTo={[MockFunction]}
+      refreshUnsavedDashboards={[Function]}
+      unsavedDashboardIds={
+        Array [
+          "dashboardUnsavedOne",
+          "dashboardUnsavedTwo",
+        ]
       }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
+    />
+  </Memo(TableListViewComp)>
 </DashboardListing>
 `;
 
@@ -610,38 +390,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
   }
   redirectTo={[MockFunction]}
 >
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
+  <Memo(TableListViewComp)
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -673,7 +422,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
               <EuiButton
                 aria-label="Continue editing New Dashboard"
                 color="primary"
-                data-test-subj="createDashboardPromptButton"
+                data-test-subj="newItemButton"
                 fill={true}
                 iconType="pencil"
                 onClick={[Function]}
@@ -693,6 +442,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Dashboard in progress
@@ -703,195 +453,22 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
     tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
+  >
+    <DashboardUnsavedListing
+      redirectTo={[MockFunction]}
+      refreshUnsavedDashboards={[Function]}
+      unsavedDashboardIds={
+        Array [
+          "unsavedDashboard",
+        ]
       }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
-</DashboardListing>
-`;
-
-exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
-<DashboardListing
-  kbnUrlStateStorage={
-    Object {
-      "cancel": [Function],
-      "change$": [Function],
-      "get": [Function],
-      "kbnUrlControls": Object {
-        "cancel": [Function],
-        "flush": [Function],
-        "getPendingUrl": [Function],
-        "listen": [Function],
-        "update": [Function],
-        "updateAsync": [Function],
-      },
-      "set": [Function],
-    }
-  }
-  redirectTo={[MockFunction]}
->
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
-    createItem={[Function]}
-    deleteItems={[Function]}
-    editItem={[Function]}
-    emptyPrompt={
-      <EuiEmptyPrompt
-        actions={
-          <EuiButton
-            data-test-subj="createDashboardPromptButton"
-            fill={true}
-            iconType="plusInCircle"
-            onClick={[Function]}
-          >
-            Create a dashboard
-          </EuiButton>
-        }
-        body={
-          <React.Fragment>
-            <p>
-              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
-            </p>
-            <p>
-              <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                values={
-                  Object {
-                    "sampleDataInstallLink": <EuiLink
-                      onClick={[Function]}
-                    >
-                      Add some sample data
-                    </EuiLink>,
-                  }
-                }
-              />
-            </p>
-          </React.Fragment>
-        }
-        iconType="dashboardApp"
-        title={
-          <h1
-            id="dashboardListingHeading"
-          >
-            Create your first dashboard
-          </h1>
-        }
-      />
-    }
-    entityName="dashboard"
-    entityNamePlural="dashboards"
-    findItems={[Function]}
-    headingId="dashboardListingHeading"
-    initialFilter=""
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
-    tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
-      }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
+    />
+  </Memo(TableListViewComp)>
 </DashboardListing>
 `;
 
@@ -915,38 +492,7 @@ exports[`after fetch showWriteControls 1`] = `
   }
   redirectTo={[MockFunction]}
 >
-  <TableListView
-    application={
-      Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      }
-    }
+  <Memo(TableListViewComp)
     emptyPrompt={
       <EuiEmptyPrompt
         body={
@@ -957,6 +503,7 @@ exports[`after fetch showWriteControls 1`] = `
         iconType="glasses"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             No dashboards to view
@@ -967,47 +514,22 @@ exports[`after fetch showWriteControls 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
     tableListTitle="Dashboards"
-    theme={
-      Object {
-        "theme$": Observable {
-          "_subscribe": [Function],
-        },
+  >
+    <DashboardUnsavedListing
+      redirectTo={[MockFunction]}
+      refreshUnsavedDashboards={[Function]}
+      unsavedDashboardIds={
+        Array [
+          "dashboardUnsavedOne",
+          "dashboardUnsavedTwo",
+        ]
       }
-    }
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  />
+    />
+  </Memo(TableListViewComp)>
 </DashboardListing>
 `;

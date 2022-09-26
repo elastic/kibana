@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
-import type { SavedObjectReferenceWithContext, ToastsStart } from '@kbn/core/public';
+import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

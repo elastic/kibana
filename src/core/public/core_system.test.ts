@@ -41,8 +41,19 @@ import {
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
+import {
+  KIBANA_LOADED_EVENT,
+  LOAD_START,
+  LOAD_BOOTSTRAP_START,
+  LOAD_CORE_CREATED,
+  LOAD_FIRST_NAV,
+  LOAD_SETUP_DONE,
+  LOAD_START_DONE,
+} from './events';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
+(global.navigator as any).deviceMemory = 5;
+jest.spyOn(global.navigator as any, 'hardwareConcurrency', 'get').mockReturnValue(4);
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
@@ -70,6 +81,35 @@ const defaultCoreSystemParams = {
 beforeEach(() => {
   jest.clearAllMocks();
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
+
+  window.performance.mark = jest.fn();
+  window.performance.clearMarks = jest.fn();
+  window.performance.getEntriesByName = jest.fn().mockReturnValue([
+    {
+      detail: LOAD_START,
+      startTime: 111,
+    },
+    {
+      detail: LOAD_BOOTSTRAP_START,
+      startTime: 222,
+    },
+    {
+      detail: LOAD_CORE_CREATED,
+      startTime: 333,
+    },
+    {
+      detail: LOAD_SETUP_DONE,
+      startTime: 444,
+    },
+    {
+      detail: LOAD_START_DONE,
+      startTime: 555,
+    },
+    {
+      detail: LOAD_FIRST_NAV,
+      startTime: 666,
+    },
+  ]);
 });
 
 function createCoreSystem(params = {}) {
@@ -221,7 +261,9 @@ describe('#start()', () => {
     });
 
     await core.setup();
-    await core.start();
+
+    const services = await core.start();
+    await services?.application.navigateToApp('home');
   }
 
   it('clears the children of the rootDomElement and appends container for rendering service with #kibana-body, notifications, overlays', async () => {
@@ -233,28 +275,75 @@ describe('#start()', () => {
     );
   });
 
-  it('reports the event Loaded Kibana', async () => {
+  it('reports the deprecated event Loaded Kibana', async () => {
     await startCore();
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(1, 'Loaded Kibana', {
       kibana_version: '1.2.3',
+      protocol: 'http:',
     });
+
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
   });
 
-  it('reports the event Loaded Kibana (with memory)', async () => {
-    fetchOptionalMemoryInfoMock.mockReturnValue({
-      memory_js_heap_size_limit: 3,
-      memory_js_heap_size_total: 2,
-      memory_js_heap_size_used: 1,
+  it('reports the metric event kibana-loaded and clears marks', async () => {
+    await startCore();
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'performance_metric', {
+      eventName: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: '1.2.3',
+        protocol: 'http:',
+        deviceMemory: '5',
+        hardwareConcurrency: '4',
+      },
+      key1: LOAD_START,
+      key2: LOAD_BOOTSTRAP_START,
+      key3: LOAD_CORE_CREATED,
+      key4: LOAD_SETUP_DONE,
+      key5: LOAD_START_DONE,
+      value1: 111,
+      value2: 222,
+      value3: 333,
+      value4: 444,
+      value5: 555,
+      duration: 666,
     });
 
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the event kibana-loaded (with memory)', async () => {
+    const performanceMemory = {
+      usedJSHeapSize: 1,
+      jsHeapSizeLimit: 3,
+      totalJSHeapSize: 4,
+    };
+    fetchOptionalMemoryInfoMock.mockReturnValue(performanceMemory);
+
     await startCore();
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
-      kibana_version: '1.2.3',
-      memory_js_heap_size_limit: 3,
-      memory_js_heap_size_total: 2,
-      memory_js_heap_size_used: 1,
+
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'performance_metric', {
+      eventName: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: '1.2.3',
+        protocol: 'http:',
+        deviceMemory: '5',
+        hardwareConcurrency: '4',
+        ...performanceMemory,
+      },
+      key1: LOAD_START,
+      key2: LOAD_BOOTSTRAP_START,
+      key3: LOAD_CORE_CREATED,
+      key4: LOAD_SETUP_DONE,
+      key5: LOAD_START_DONE,
+      value1: 111,
+      value2: 222,
+      value3: 333,
+      value4: 444,
+      value5: 555,
+      duration: 666,
     });
   });
 

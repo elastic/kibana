@@ -6,6 +6,8 @@
  */
 
 import * as t from 'io-ts';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { keyBy, mapValues } from 'lodash';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -14,10 +16,8 @@ import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
 import { lookupServices } from './lookup_services';
-import {
-  ServiceGroup,
-  SavedServiceGroup,
-} from '../../../common/service_groups';
+import { SavedServiceGroup } from '../../../common/service_groups';
+import { getServicesCounts } from './get_services_counts';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -28,9 +28,74 @@ const serviceGroupsRoute = createApmServerRoute({
     resources
   ): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const serviceGroups = await getServiceGroups({ savedObjectsClient });
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+    const serviceGroups = await getServiceGroups({
+      savedObjectsClient,
+    });
     return { serviceGroups };
+  },
+});
+
+const serviceGroupsWithServiceCountRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service_groups/services_count',
+  params: t.type({
+    query: rangeRt,
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ servicesCounts: Record<string, number> }> => {
+    const { context, params } = resources;
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+
+    const {
+      query: { start, end },
+    } = params;
+
+    const [setup, maxNumberOfServices] = await Promise.all([
+      setupRequest(resources),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
+
+    const serviceGroups = await getServiceGroups({
+      savedObjectsClient,
+    });
+
+    const serviceGroupsWithServiceCount = await Promise.all(
+      serviceGroups.map(
+        async ({
+          id,
+          kuery,
+        }): Promise<{ id: string; servicesCount: number }> => {
+          const servicesCount = await getServicesCounts({
+            setup,
+            kuery,
+            maxNumberOfServices,
+            start,
+            end,
+          });
+
+          return {
+            id,
+            servicesCount,
+          };
+        }
+      )
+    );
+
+    const servicesCounts = mapValues(
+      keyBy(serviceGroupsWithServiceCount, 'id'),
+      'servicesCount'
+    );
+
+    return { servicesCounts };
   },
 });
 
@@ -46,7 +111,9 @@ const serviceGroupRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<{ serviceGroup: SavedServiceGroup }> => {
     const { context, params } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
     const serviceGroup = await getServiceGroup({
       savedObjectsClient,
       serviceGroupId: params.query.serviceGroup,
@@ -58,11 +125,11 @@ const serviceGroupRoute = createApmServerRoute({
 const serviceGroupSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-group',
   params: t.type({
-    query: t.intersection([
-      rangeRt,
+    query: t.union([
       t.partial({
         serviceGroupId: t.string,
       }),
+      t.undefined,
     ]),
     body: t.type({
       groupName: t.string,
@@ -74,24 +141,15 @@ const serviceGroupSaveRoute = createApmServerRoute({
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
-    const { start, end, serviceGroupId } = params.query;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const setup = await setupRequest(resources);
-    const items = await lookupServices({
-      setup,
-      kuery: params.body.kuery,
-      start,
-      end,
-    });
-    const serviceNames = items.map(({ serviceName }): string => serviceName);
-    const serviceGroup: ServiceGroup = {
-      ...params.body,
-      serviceNames,
-    };
+    const { serviceGroupId } = params.query;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+
     await saveServiceGroup({
       savedObjectsClient,
       serviceGroupId,
-      serviceGroup,
+      serviceGroup: params.body,
     });
   },
 });
@@ -126,14 +184,21 @@ const serviceGroupServicesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
-    const { params } = resources;
+    const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
-    const setup = await setupRequest(resources);
+    const {
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+    const [setup, maxNumberOfServices] = await Promise.all([
+      setupRequest(resources),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
     const items = await lookupServices({
       setup,
       kuery,
       start,
       end,
+      maxNumberOfServices,
     });
     return { items };
   },
@@ -145,4 +210,5 @@ export const serviceGroupRouteRepository = {
   ...serviceGroupSaveRoute,
   ...serviceGroupDeleteRoute,
   ...serviceGroupServicesRoute,
+  ...serviceGroupsWithServiceCountRoute,
 };

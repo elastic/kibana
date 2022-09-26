@@ -11,7 +11,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import React, { useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import FilterItems, { Props as FilterItemsProps } from './filter_item/filter_items';
+import FilterItems, { type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
 
@@ -27,6 +27,11 @@ export interface Props {
    * Applies extra styles necessary when coupled with the query bar
    */
   afterQueryBar?: boolean;
+
+  /**
+   * Disable all interactive actions
+   */
+  isDisabled?: boolean;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -50,6 +55,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         indexPatterns={props.indexPatterns!}
         timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         hiddenPanelOptions={props.hiddenPanelOptions}
+        readOnly={props.isDisabled}
       />
     </EuiFlexGroup>
   );

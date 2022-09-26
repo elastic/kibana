@@ -34,7 +34,7 @@ export const UsersContainer = React.memo(() => {
           />
         )}
       />
-      <Route
+      <Route // Redirect to the first tab when tabName is not present.
         path={usersDetailsPagePath}
         render={({
           match: {
@@ -44,13 +44,30 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/${detailName}/${UsersTableType.authentications}`,
+              pathname: `${USERS_PATH}/name/${detailName}/${UsersTableType.authentications}`,
               search,
             }}
           />
         )}
       />
-      <Route
+
+      <Route // Compatibility redirect for the old user detail path.
+        path={`${USERS_PATH}/:detailName/:tabName?`}
+        render={({
+          match: {
+            params: { detailName, tabName = UsersTableType.authentications },
+          },
+          location: { search = '' },
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${USERS_PATH}/name/${detailName}/${tabName}`,
+              search,
+            }}
+          />
+        )}
+      />
+      <Route // Redirect to the first tab when tabName is not present.
         path={USERS_PATH}
         render={({ location: { search = '' } }) => (
           <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />

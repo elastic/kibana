@@ -14,7 +14,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
-/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
 import { Props } from '..';

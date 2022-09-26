@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -20,7 +21,6 @@ import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_sum
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 interface Props {

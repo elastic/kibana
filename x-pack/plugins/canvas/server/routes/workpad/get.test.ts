@@ -8,8 +8,8 @@
 import { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
-import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
 import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';
@@ -112,9 +112,8 @@ describe('GET workpad', () => {
       },
     });
 
-    const savedObjectsClient = savedObjectsClientMock.create();
     mockRouteContext.canvas.workpad.get.mockImplementation(() => {
-      throw savedObjectsClient.errors.createGenericNotFoundError(CANVAS_TYPE, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(CANVAS_TYPE, id);
     });
 
     const response = await routeHandler(

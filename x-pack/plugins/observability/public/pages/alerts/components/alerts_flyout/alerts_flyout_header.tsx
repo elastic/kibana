@@ -6,19 +6,16 @@
  */
 import React from 'react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { get } from 'lodash';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { FlyoutProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertsFlyoutHeader({ alert }: FlyoutProps) {
   return (
     <>
-      <ExperimentalBadge />
       <EuiSpacer size="s" />
       <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-        <h2>{get(alert, ALERT_RULE_NAME)}</h2>
+        <h2>{alert.fields[ALERT_RULE_NAME]}</h2>
       </EuiTitle>
     </>
   );

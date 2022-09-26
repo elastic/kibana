@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -17,9 +18,8 @@ import {
   sendNoResultsFoundMsg,
   sendPartialMsg,
   sendResetMsg,
-} from './use_saved_search_messages';
+} from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
-import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
@@ -30,9 +30,11 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  RecordRawType,
   SavedSearchData,
-} from './use_saved_search';
+} from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
+import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -45,6 +47,7 @@ export interface FetchDeps {
   services: DiscoverServices;
   useNewFieldsApi: boolean;
 }
+
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
  * documents, and depending on whether a chart is shown either the aggregation query to load the chart data
@@ -62,7 +65,7 @@ export function fetchAll(
   const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
 
   /**
-   * Method to create a an error handler that will forward the received error
+   * Method to create an error handler that will forward the received error
    * to the specified subjects. It will ignore AbortErrors and will use the data
    * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
    */
@@ -80,38 +83,42 @@ export function fetchAll(
   };
 
   try {
-    const indexPattern = searchSource.getField('index')!;
-
+    const dataView = searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
+    const { hideChart, sort, query } = appStateContainer.getState();
+    const recordRawType = getRawRecordType(query);
+    const useSql = recordRawType === RecordRawType.PLAIN;
 
-    const { hideChart, sort } = appStateContainer.getState();
-
-    // Update the base searchSource, base for all child fetches
-    updateSearchSource(searchSource, false, {
-      indexPattern,
-      services,
-      sort: sort as SortOrder[],
-      useNewFieldsApi,
-    });
+    if (recordRawType === RecordRawType.DOCUMENT) {
+      // Update the base searchSource, base for all child fetches
+      updateSearchSource(searchSource, false, {
+        dataView,
+        services,
+        sort: sort as SortOrder[],
+        useNewFieldsApi,
+      });
+    }
 
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$);
-    sendLoadingMsg(dataSubjects.totalHits$);
-    sendLoadingMsg(dataSubjects.charts$);
+    sendLoadingMsg(dataSubjects.main$, recordRawType);
+    sendLoadingMsg(dataSubjects.documents$, recordRawType, query);
+    sendLoadingMsg(dataSubjects.totalHits$, recordRawType);
+    sendLoadingMsg(dataSubjects.charts$, recordRawType);
 
     const isChartVisible =
-      !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
+      !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
     // Start fetching all required requests
-    const documents = fetchDocuments(searchSource.createCopy(), fetchDeps);
-    const charts = isChartVisible ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
-    const totalHits = !isChartVisible
-      ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
-      : undefined;
-
+    const documents =
+      useSql && query
+        ? fetchSql(query, services.dataViews, data, services.expressions)
+        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+    const charts =
+      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
+    const totalHits =
+      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
      * if there are results, indicating that we have finished some of the requests that have been
@@ -137,12 +144,15 @@ export function fetchAll(
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.PARTIAL,
             result: docs.length,
+            recordRawType,
           });
         }
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: docs,
+          recordRawType,
+          query,
         });
 
         checkHitCount(docs.length);
@@ -157,12 +167,14 @@ export function fetchAll(
         dataSubjects.totalHits$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: chart.totalHits,
+          recordRawType,
         });
 
         dataSubjects.charts$.next({
           fetchStatus: FetchStatus.COMPLETE,
           chartData: chart.chartData,
           bucketInterval: chart.bucketInterval,
+          recordRawType,
         });
 
         checkHitCount(chart.totalHits);
@@ -171,7 +183,11 @@ export function fetchAll(
 
     totalHits
       ?.then((hitCount) => {
-        dataSubjects.totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: hitCount });
+        dataSubjects.totalHits$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: hitCount,
+          recordRawType,
+        });
         checkHitCount(hitCount);
       })
       .catch(sendErrorTo(dataSubjects.totalHits$));

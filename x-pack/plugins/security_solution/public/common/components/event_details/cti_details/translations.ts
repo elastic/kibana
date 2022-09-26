@@ -28,13 +28,6 @@ export const INVESTIGATION_ENRICHMENT_TITLE = i18n.translate(
   }
 );
 
-export const HOST_RISK_DATA_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
-  {
-    defaultMessage: 'Host Risk Data',
-  }
-);
-
 export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipContent',
   {
@@ -58,33 +51,11 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_INDICATOR_ENRICHMENTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsDescription',
-  {
-    defaultMessage:
-      'We did not find any threat intelligence indicators with any of the indicator match rules.',
-  }
-);
-
-export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle',
-  {
-    defaultMessage: 'No Threat Intelligence Enrichment Found',
-  }
-);
-
 export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
     defaultMessage:
       "We haven't found field value has additional information available from threat intelligence sources we searched in the past 30 days by default.",
-  }
-);
-
-export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentsFoundTitle',
-  {
-    defaultMessage: 'No Indicator Match or Threat Intel Enrichment Found',
   }
 );
 
@@ -96,28 +67,10 @@ export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NO_HOST_RISK_DATA_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noRiskDataDescription',
-  {
-    defaultMessage: 'These is no host risk data found for this alert',
-  }
-);
-
-export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation',
-});
-
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.investigationTimeQueryTitle',
   {
     defaultMessage: 'Enrichment with Threat Intelligence',
-  }
-);
-
-export const CHANGE_ENRICHMENT_LOOKBACK = i18n.translate(
-  'xpack.securitySolution.alertDetails.changeEnrichmentQueryLookback',
-  {
-    defaultMessage: 'search a different time range',
   }
 );
 
@@ -143,5 +96,47 @@ export const ENRICHED_DATA = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.enrichedDataTitle',
   {
     defaultMessage: 'Enriched data',
+  }
+);
+
+export const CURRENT_HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.hostRiskClassification',
+  {
+    defaultMessage: 'Current host risk classification',
+  }
+);
+
+export const ORIGINAL_HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.originalHostRiskClassification',
+  {
+    defaultMessage: 'Original host risk classification',
+  }
+);
+
+export const HOST_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
+  {
+    defaultMessage: 'Host Risk Data',
+  }
+);
+
+export const USER_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.userRiskDataTitle',
+  {
+    defaultMessage: 'User Risk Data',
+  }
+);
+
+export const ORIGINAL_USER_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.originalUserRiskClassification',
+  {
+    defaultMessage: 'Original risk classification',
+  }
+);
+
+export const CURRENT_USER_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.currentUserRiskClassification',
+  {
+    defaultMessage: 'Current user risk classification',
   }
 );

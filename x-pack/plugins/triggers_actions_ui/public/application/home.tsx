@@ -16,7 +16,7 @@ import {
   routeToConnectors,
   routeToRules,
   routeToInternalAlerts,
-  routeToInternalShareableComponentsSandbox,
+  routeToLogs,
 } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
@@ -31,10 +31,8 @@ const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
+const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
-const InternalShareableComponentsSandbox = lazy(
-  () => import('./internal/shareable_components_sandbox/shareable_components_sandbox')
-);
 
 export interface MatchParams {
   section: Section;
@@ -54,9 +52,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     docLinks,
   } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
-  const isInternalShareableComponentsSandboxEnabled = getIsExperimentalFeatureEnabled(
-    'internalShareableComponentsSandbox'
-  );
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
@@ -82,6 +77,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       ),
     });
   }
+
+  tabs.push({
+    id: 'logs',
+    name: <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />,
+  });
 
   if (isInternalAlertsTableEnabled) {
     tabs.push({
@@ -150,6 +150,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
+            <Route
+              exact
+              path={routeToLogs}
+              component={suspendedComponentWithProps(LogsList, 'xl')}
+            />
             {canShowActions && (
               <Route
                 exact
@@ -162,13 +167,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               path={routeToRules}
               component={suspendedComponentWithProps(RulesList, 'xl')}
             />
-            {isInternalShareableComponentsSandboxEnabled && (
-              <Route
-                exact
-                path={routeToInternalShareableComponentsSandbox}
-                component={suspendedComponentWithProps(InternalShareableComponentsSandbox, 'xl')}
-              />
-            )}
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact

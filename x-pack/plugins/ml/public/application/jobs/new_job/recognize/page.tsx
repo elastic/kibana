@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { merge } from 'lodash';
 import moment from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
@@ -40,7 +41,6 @@ import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
-import { isPopulatedObject } from '../../../../../common/util/object_utils';
 import { RuntimeMappings } from '../../../../../common/types/fields';
 import { addExcludeFrozenToQuery } from '../../../../../common/util/query_utils';
 import { MlPageHeader } from '../../../components/page_header';
@@ -101,7 +101,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         })
       : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
           defaultMessage: 'data view {dataViewName}',
-          values: { dataViewName: dataView.title },
+          values: { dataViewName: dataView.getName() },
         });
   const displayQueryWarning = savedSearch !== null;
   const tempQuery = savedSearch === null ? undefined : combinedQuery;
@@ -142,8 +142,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
       return {
-        start: start.epoch,
-        end: end.epoch,
+        start,
+        end,
       };
     } else {
       return Promise.resolve(timeRange);
@@ -152,6 +152,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
   useEffect(() => {
     loadModule();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**

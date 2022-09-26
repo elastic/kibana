@@ -6,27 +6,10 @@
  */
 
 import { getImportRulesSchemaMock } from './import_rules_schema.mock';
-import { ImportRulesSchema } from './import_rules_schema';
+import type { ImportRulesSchema } from './import_rules_schema';
 import { importRuleValidateTypeDependents } from './import_rules_type_dependents';
 
 describe('import_rules_type_dependents', () => {
-  test('saved_id is required when type is saved_query and will not validate without out', () => {
-    const schema: ImportRulesSchema = { ...getImportRulesSchemaMock(), type: 'saved_query' };
-    delete schema.saved_id;
-    const errors = importRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['when "type" is "saved_query", "saved_id" is required']);
-  });
-
-  test('saved_id is required when type is saved_query and validates with it', () => {
-    const schema: ImportRulesSchema = {
-      ...getImportRulesSchemaMock(),
-      type: 'saved_query',
-      saved_id: '123',
-    };
-    const errors = importRuleValidateTypeDependents(schema);
-    expect(errors).toEqual([]);
-  });
-
   test('You cannot omit timeline_title when timeline_id is present', () => {
     const schema: ImportRulesSchema = {
       ...getImportRulesSchemaMock(),
@@ -65,14 +48,5 @@ describe('import_rules_type_dependents', () => {
     delete schema.timeline_id;
     const errors = importRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['when "timeline_title" exists, "timeline_id" must also exist']);
-  });
-
-  test('threshold is required when type is threshold and validates with it', () => {
-    const schema: ImportRulesSchema = {
-      ...getImportRulesSchemaMock(),
-      type: 'threshold',
-    };
-    const errors = importRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
   });
 });

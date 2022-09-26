@@ -32,6 +32,10 @@ jest.mock('../../app_context', () => {
       getSavedObjects: jest.fn(() => ({
         createImporter: jest.fn(),
       })),
+      getSavedObjectsTagging: jest.fn(() => ({
+        createInternalAssignmentService: jest.fn(),
+        createTagClient: jest.fn(),
+      })),
     },
   };
 });
@@ -59,6 +63,7 @@ jest.mock('../archive', () => {
     ),
     unpackBufferToCache: jest.fn(),
     setPackageInfo: jest.fn(),
+    deleteVerificationResult: jest.fn(),
   };
 });
 
@@ -205,6 +210,7 @@ describe('install', () => {
     });
 
     it('should install from bundled package if one exists', async () => {
+      (install._installPackage as jest.Mock).mockResolvedValue({});
       mockGetBundledPackages.mockResolvedValue([
         {
           name: 'test_package',
@@ -213,13 +219,15 @@ describe('install', () => {
         },
       ]);
 
-      await installPackage({
+      const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'test_package-1.0.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
       });
+
+      expect(response.error).toBeUndefined();
 
       expect(install._installPackage).toHaveBeenCalledWith(
         expect.objectContaining({ installSource: 'upload' })

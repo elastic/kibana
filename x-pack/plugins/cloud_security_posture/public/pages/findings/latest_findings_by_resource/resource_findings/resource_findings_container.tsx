@@ -5,26 +5,46 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import type { DataView } from '@kbn/data-plugin/common';
+import {
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiPageHeader,
+  type EuiDescriptionListProps,
+} from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEuiTheme } from '@elastic/eui';
 import { generatePath } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
+import type { Evaluation } from '../../../../../common/types';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
+import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
-import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
-import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
+import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery } from '../../types';
-import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../../utils';
+import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
+import {
+  getFindingsPageSizeInfo,
+  getFilters,
+  getPaginationQuery,
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../../utils/utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
+import { ErrorCallout } from '../../layout/error_callout';
+import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
 
-const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
+const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
+  query,
+  filters,
+  sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
   pageSize: 10,
 });
@@ -40,24 +60,74 @@ const BackToResourcesButton = () => (
   </Link>
 );
 
-export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
-  useCspBreadcrumbs([findingsNavigation.findings_default]);
-  const { euiTheme } = useEuiTheme();
-  const params = useParams<{ resourceId: string }>();
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
-
-  const resourceFindings = useResourceFindings({
-    resourceId: params.resourceId,
-    ...getBaseQuery({
-      dataView,
-      filters: urlQuery.filters,
-      query: urlQuery.query,
+const getResourceFindingSharedValues = (sharedValues: {
+  resourceId: string;
+  resourceSubType: string;
+  resourceName: string;
+  clusterId: string;
+}): EuiDescriptionListProps['listItems'] => [
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
+      defaultMessage: 'Resource Type',
     }),
+    description: sharedValues.resourceSubType,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceIdTitle', {
+      defaultMessage: 'Resource ID',
+    }),
+    description: sharedValues.resourceId,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.clusterIdTitle', {
+      defaultMessage: 'Cluster ID',
+    }),
+    description: sharedValues.clusterId,
+  },
+];
+
+export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
+  const params = useParams<{ resourceId: string }>();
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+
+  /**
+   * Page URL query to ES query
+   */
+  const baseEsQuery = useBaseEsQuery({
+    dataView,
+    filters: urlQuery.filters,
+    query: urlQuery.query,
+  });
+
+  /**
+   * Page ES query result
+   */
+  const resourceFindings = useResourceFindings({
     ...getPaginationQuery({
       pageSize: urlQuery.pageSize,
       pageIndex: urlQuery.pageIndex,
     }),
+    sort: urlQuery.sort,
+    query: baseEsQuery.query,
+    resourceId: params.resourceId,
+    enabled: !baseEsQuery.error,
   });
+
+  const error = resourceFindings.error || baseEsQuery.error;
+
+  const handleDistributionClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: getFilters({
+        filters: urlQuery.filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -66,40 +136,90 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
         loading={resourceFindings.isFetching}
       />
-      <PageWrapper>
-        <PageTitle>
-          <BackToResourcesButton />
-          <PageTitleText
-            title={
-              <div style={{ padding: euiTheme.size.s }}>
-                <FormattedMessage
-                  id="xpack.csp.findings.resourceFindingsTitle"
-                  defaultMessage="{resourceId} - Findings"
-                  values={{ resourceId: params.resourceId }}
-                />
-              </div>
-            }
-          />
-        </PageTitle>
-        <EuiSpacer />
-        <ResourceFindingsTable
-          loading={resourceFindings.isFetching}
-          data={resourceFindings.data}
-          error={resourceFindings.error}
-          pagination={getPaginationTableParams({
-            pageSize: urlQuery.pageSize,
-            pageIndex: urlQuery.pageIndex,
-            totalItemCount: resourceFindings.data?.total || 0,
-          })}
-          setTableOptions={({ page }) =>
-            setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+      <PageTitle>
+        <BackToResourcesButton />
+        <PageTitleText
+          title={
+            <CloudPosturePageTitle
+              title={i18n.translate(
+                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
+                {
+                  defaultMessage: '{resourceName} - Findings',
+                  values: { resourceName: resourceFindings.data?.resourceName },
+                }
+              )}
+            />
           }
         />
-      </PageWrapper>
+      </PageTitle>
+      <EuiPageHeader
+        description={
+          resourceFindings.data && (
+            <CspInlineDescriptionList
+              listItems={getResourceFindingSharedValues({
+                resourceId: params.resourceId,
+                resourceName: resourceFindings.data.resourceName,
+                resourceSubType: resourceFindings.data.resourceSubType,
+                clusterId: resourceFindings.data.clusterId,
+              })}
+            />
+          )
+        }
+      />
+      <EuiSpacer />
+      {error && <ErrorCallout error={error} />}
+      {!error && (
+        <>
+          {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
+            <FindingsDistributionBar
+              {...{
+                distributionOnClick: handleDistributionClick,
+                type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
+                  defaultMessage: 'Findings',
+                }),
+                total: resourceFindings.data.total,
+                passed: resourceFindings.data.count.passed,
+                failed: resourceFindings.data.count.failed,
+                ...getFindingsPageSizeInfo({
+                  pageIndex: urlQuery.pageIndex,
+                  pageSize: urlQuery.pageSize,
+                  currentPageSize: resourceFindings.data.page.length,
+                }),
+              }}
+            />
+          )}
+          <EuiSpacer />
+          <ResourceFindingsTable
+            loading={resourceFindings.isFetching}
+            items={resourceFindings.data?.page || []}
+            pagination={getPaginationTableParams({
+              pageSize: urlQuery.pageSize,
+              pageIndex: urlQuery.pageIndex,
+              totalItemCount: resourceFindings.data?.total || 0,
+            })}
+            sorting={{
+              sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+            }}
+            setTableOptions={({ page, sort }) =>
+              setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
+            }
+            onAddFilter={(field, value, negate) =>
+              setUrlQuery({
+                pageIndex: 0,
+                filters: getFilters({
+                  filters: urlQuery.filters,
+                  dataView,
+                  field,
+                  value,
+                  negate,
+                }),
+              })
+            }
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -27,13 +27,14 @@ export const getGoalVisTypeDefinition = (
   description: i18n.translate('visTypeGauge.goal.goalDescription', {
     defaultMessage: 'Track how a metric progresses to a goal.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {
       addTooltip: true,
       addLegend: false,
       isDisplayWarning: false,
-      type: 'gauge',
+      type: 'goal',
       gauge: {
         verticalSplit: false,
         autoExtend: false,
@@ -90,6 +91,7 @@ export const getGoalVisTypeDefinition = (
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

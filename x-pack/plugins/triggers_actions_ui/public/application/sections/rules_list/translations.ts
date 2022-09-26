@@ -114,10 +114,24 @@ export const ALERT_ERROR_DISABLED_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_VALIDATE_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonValidate',
+  {
+    defaultMessage: 'An error occurred when validating the rule parameters.',
+  }
+);
+
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {
     defaultMessage: 'Action limit exceeded',
+  }
+);
+
+export const ALERT_WARNING_MAX_ALERTS_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxAlerts',
+  {
+    defaultMessage: 'Alert limit exceeded',
   }
 );
 
@@ -136,9 +150,51 @@ export const rulesErrorReasonTranslationsMapping = {
   license: ALERT_ERROR_LICENSE_REASON,
   timeout: ALERT_ERROR_TIMEOUT_REASON,
   disabled: ALERT_ERROR_DISABLED_REASON,
+  validate: ALERT_ERROR_VALIDATE_REASON,
 };
 
 export const rulesWarningReasonTranslationsMapping = {
   maxExecutableActions: ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON,
+  maxAlerts: ALERT_WARNING_MAX_ALERTS_REASON,
   unknown: ALERT_WARNING_UNKNOWN_REASON,
 };
+
+export const SELECT_ALL_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel',
+  { defaultMessage: 'Toggle select all rules' }
+);
+
+export const SELECT_SHOW_BULK_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectShowBulkActionsAriaLabel',
+  { defaultMessage: 'Show bulk actions' }
+);
+
+export const TOTAL_RULES = (formattedTotalRules: string, totalRules: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.totalRulesLabel', {
+    values: { formattedTotalRules, totalRules },
+    defaultMessage: '{formattedTotalRules} {totalRules, plural, =1 {rule} other {rules}}',
+  });
+};
+
+export const SELECTED_RULES = (formattedSelectedRules: string, selectedRules: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.selectedRulesButton', {
+    values: { formattedSelectedRules, selectedRules },
+    defaultMessage:
+      'Selected {formattedSelectedRules} {selectedRules, plural, =1 {rule} other {rules}}',
+  });
+};
+
+export const SELECT_ALL_RULES = (formattedTotalRules: string, totalRules: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.selectAllRulesButton', {
+    values: { formattedTotalRules, totalRules },
+    defaultMessage:
+      'Select all {formattedTotalRules} {totalRules, plural, =1 {rule} other {rules}}',
+  });
+};
+
+export const CLEAR_SELECTION = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.clearAllSelectionButton',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);

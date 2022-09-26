@@ -15,7 +15,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     class="euiFlyoutHeader"
   >
     <h2
-      class="euiTitle euiTitle--medium"
+      class="euiTitle emotion-euiTitle-m"
       data-test-subj="apiRequestFlyoutTitle"
     >
       Test title
@@ -32,7 +32,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
         class="euiFlyoutBody__overflowContent"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText emotion-euiText-m"
         >
           <p
             data-test-subj="apiRequestFlyoutDescription"
@@ -41,10 +41,10 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
         <div
-          class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div
           class="eui-textRight"
@@ -75,7 +75,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           </span>
         </div>
         <div
-          class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div>
           <pre>

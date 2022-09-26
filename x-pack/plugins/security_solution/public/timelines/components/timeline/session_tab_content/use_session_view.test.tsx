@@ -61,7 +61,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () =>
             jest.fn().mockReturnValue({
               onBlur: jest.fn(),

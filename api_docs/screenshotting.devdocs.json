@@ -4,21 +4,7 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "screenshotting",
-        "id": "def-public.LayoutTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "LayoutTypes",
-        "description": [
-          "\nSupported layout types."
-        ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "screenshotting",
@@ -42,6 +28,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -73,6 +60,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotting",
@@ -87,7 +75,8 @@
               "\"pdf\""
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -102,7 +91,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -117,7 +107,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -134,15 +125,16 @@
                 "pluginId": "screenshotting",
                 "scope": "common",
                 "docId": "kibScreenshottingPluginApi",
-                "section": "def-common.LayoutTypes",
-                "text": "LayoutTypes"
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -158,6 +150,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotting",
@@ -172,7 +165,8 @@
               "PdfScreenshotMetrics"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -187,7 +181,8 @@
               "Buffer"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -202,7 +197,8 @@
               "Error[]"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -217,7 +213,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -244,6 +241,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotting",
@@ -260,7 +258,8 @@
               "\"png\" | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -270,20 +269,13 @@
             "label": "layout",
             "description": [],
             "signature": [
-              "{ id?: ",
-              {
-                "pluginId": "screenshotting",
-                "scope": "common",
-                "docId": "kibScreenshottingPluginApi",
-                "section": "def-common.LayoutTypes",
-                "text": "LayoutTypes"
-              },
-              ".PRESERVE_LAYOUT | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "{ id?: \"preserve_layout\" | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -305,6 +297,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -333,6 +326,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -355,6 +349,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -370,6 +365,7 @@
       ],
       "path": "x-pack/plugins/screenshotting/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "screenshotting",
@@ -387,6 +383,7 @@
           ],
           "path": "x-pack/plugins/screenshotting/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [
             "Observable with output messages."
           ],
@@ -402,7 +399,8 @@
                 "string[]"
               ],
               "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -467,7 +465,8 @@
             ">; }"
           ],
           "path": "x-pack/plugins/screenshotting/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -478,21 +477,7 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "screenshotting",
-        "id": "def-common.LayoutTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "LayoutTypes",
-        "description": [
-          "\nSupported layout types."
-        ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "screenshotting",
@@ -516,6 +501,24 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-common.LayoutType",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutType",
+        "description": [
+          "\nSupported layout types."
+        ],
+        "signature": [
+          "\"canvas\" | \"preserve_layout\" | \"print\""
+        ],
+        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -530,6 +533,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -544,6 +548,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -558,6 +563,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -572,6 +578,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

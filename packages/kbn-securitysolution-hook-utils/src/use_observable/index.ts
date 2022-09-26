@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef, useReducer } from 'react';
+import { useCallback, useEffect, useRef, useReducer, Reducer } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
 import { useIsMounted } from '../use_is_mounted';
@@ -23,18 +23,16 @@ export type Action<T> =
   | { type: 'setError'; error: unknown }
   | { type: 'load' };
 
-const createReducer =
-  <T>() =>
-  (state: State<T>, action: Action<T>) => {
-    switch (action.type) {
-      case 'setResult':
-        return { ...state, result: action.result, loading: false };
-      case 'setError':
-        return { ...state, error: action.error, loading: false };
-      case 'load':
-        return { loading: true, result: undefined, error: undefined };
-    }
-  };
+function reducer<T>(state: State<T>, action: Action<T>) {
+  switch (action.type) {
+    case 'setResult':
+      return { ...state, result: action.result, loading: false };
+    case 'setError':
+      return { ...state, error: action.error, loading: false };
+    case 'load':
+      return { loading: true, result: undefined, error: undefined };
+  }
+}
 
 /**
  *
@@ -47,8 +45,7 @@ export const useObservable = <Args extends unknown[], Result>(
 ): Task<Args, Result> => {
   const isMounted = useIsMounted();
   const subRef = useRef<Subscription | undefined>();
-  const reducer = createReducer<Result>();
-  const [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer<Reducer<State<Result>, Action<Result>>>(reducer, {
     loading: false,
     error: undefined,
     result: undefined,

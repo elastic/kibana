@@ -17,7 +17,7 @@ import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 describe('discover sidebar field details', function () {
   const onAddFilter = jest.fn();
   const defaultProps = {
-    indexPattern: stubDataView,
+    dataView: stubDataView,
     details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
     onAddFilter,
   };

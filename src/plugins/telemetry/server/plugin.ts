@@ -7,15 +7,19 @@
  */
 
 import { URL } from 'url';
-import type { Observable } from 'rxjs';
 import {
-  BehaviorSubject,
+  type Observable,
+  startWith,
   firstValueFrom,
   ReplaySubject,
   exhaustMap,
   timer,
   distinctUntilChanged,
   filter,
+  takeUntil,
+  tap,
+  shareReplay,
+  map,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
@@ -35,13 +39,14 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import type { TelemetryConfigType } from './config';
+import type { TelemetryConfigLabels, TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { getTelemetrySavedObject, TelemetrySavedObject } from './telemetry_repository';
 import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
@@ -76,6 +81,8 @@ export interface TelemetryPluginStart {
    * Resolves `true` if the user has opted into send Elastic usage data.
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
+   *
+   * @track-adoption
    */
   getIsOptedIn: () => Promise<boolean>;
 }
@@ -87,7 +94,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private readonly currentKibanaVersion: string;
   private readonly initialConfig: TelemetryConfigType;
   private readonly config$: Observable<TelemetryConfigType>;
-  private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
+  private readonly isOptedIn$: Observable<boolean>;
+  private isOptedIn?: boolean;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
   /**
@@ -105,16 +113,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private savedObjectsInternalClient$ = new ReplaySubject<SavedObjectsClient>(1);
 
-  /**
-   * Poll for the opt-in status and update the `isOptedIn$` subject.
-   * @private
-   */
-  private readonly optInPollerSubscription = timer(0, OPT_IN_POLL_INTERVAL_MS)
-    .pipe(
-      exhaustMap(() => this.getOptInStatus()),
-      distinctUntilChanged()
-    )
-    .subscribe((isOptedIn) => this.isOptedIn$.next(isOptedIn));
+  private pluginStop$ = new ReplaySubject<void>(1);
 
   private security?: SecurityPluginStart;
 
@@ -131,17 +130,26 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     // If the opt-in selection cannot be changed, set it as early as possible.
     const { optIn, allowChangingOptInStatus } = this.initialConfig;
-    if (allowChangingOptInStatus === false) {
-      this.isOptedIn$.next(optIn);
-    }
+    this.isOptedIn = allowChangingOptInStatus === false ? optIn : undefined;
+
+    // Poll for the opt-in status
+    this.isOptedIn$ = timer(0, OPT_IN_POLL_INTERVAL_MS).pipe(
+      exhaustMap(() => this.getOptInStatus()),
+      takeUntil(this.pluginStop$),
+      startWith(this.isOptedIn),
+      filter((isOptedIn): isOptedIn is boolean => typeof isOptedIn === 'boolean'),
+      distinctUntilChanged(),
+      tap((optedIn) => (this.isOptedIn = optedIn)),
+      shareReplay(1)
+    );
   }
 
   public setup(
     { analytics, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
-    if (this.isOptedIn$.value !== undefined) {
-      analytics.optIn({ global: { enabled: this.isOptedIn$.value } });
+    if (this.isOptedIn !== undefined) {
+      analytics.optIn({ global: { enabled: this.isOptedIn } });
     }
 
     const currentKibanaVersion = this.currentKibanaVersion;
@@ -150,6 +158,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       channelName: 'kibana-server',
       version: currentKibanaVersion,
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
+    });
+
+    analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
+      name: 'telemetry labels',
+      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      schema: {
+        labels: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+          },
+        },
+      },
     });
 
     const config$ = this.config$;
@@ -190,9 +211,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   ) {
     const { analytics, savedObjects } = core;
 
-    this.isOptedIn$
-      .pipe(filter((isOptedIn): isOptedIn is boolean => typeof isOptedIn === 'boolean'))
-      .subscribe((isOptedIn) => analytics.optIn({ global: { enabled: isOptedIn } }));
+    this.isOptedIn$.subscribe((enabled) => analytics.optIn({ global: { enabled } }));
 
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsInternalRepository = savedObjectsInternalRepository;
@@ -203,17 +222,22 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.startFetcher(core, telemetryCollectionManager);
 
     return {
-      getIsOptedIn: async () => this.isOptedIn$.value === true,
+      getIsOptedIn: async () => this.isOptedIn === true,
     };
   }
 
   public stop() {
-    this.optInPollerSubscription.unsubscribe();
-    this.isOptedIn$.complete();
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
+    this.savedObjectsInternalClient$.complete();
+    this.fetcherTask.stop();
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {
-    const internalRepositoryClient = await firstValueFrom(this.savedObjectsInternalClient$);
+    const internalRepositoryClient = await firstValueFrom(this.savedObjectsInternalClient$, {
+      defaultValue: undefined,
+    });
+    if (!internalRepositoryClient) return;
 
     let telemetrySavedObject: TelemetrySavedObject | undefined;
     try {

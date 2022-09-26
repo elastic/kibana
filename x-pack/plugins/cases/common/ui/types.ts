@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '..';
 import {
   CasePatchRequest,
   CaseStatuses,
@@ -21,13 +27,16 @@ import {
   CasesStatusResponse,
   CasesMetricsResponse,
   CaseSeverity,
+  CommentResponseExternalReferenceType,
+  CommentResponseTypePersistableState,
 } from '../api';
+import { PUSH_CASES_CAPABILITY } from '../constants';
 import { SnakeToCamelCase } from '../types';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean };
+  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
 }
 
@@ -65,6 +74,8 @@ export type CaseViewRefreshPropInterface = null | {
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
 export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
+export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
+export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
@@ -74,9 +85,9 @@ export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
-  outcome: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  outcome: ResolvedSimpleSavedObject['outcome'];
+  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
 export interface QueryParams {
@@ -88,9 +99,11 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  searchFields: string[];
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
+  assignees: string[];
   reporters: User[];
   owner: string[];
 }
@@ -109,11 +122,7 @@ export enum SortFieldCase {
   closedAt = 'closedAt',
 }
 
-export interface ElasticUser {
-  readonly email?: string | null;
-  readonly fullName?: string | null;
-  readonly username?: string | null;
-}
+export type ElasticUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
@@ -129,6 +138,7 @@ export interface BulkUpdateStatus {
   id: string;
   version: string;
 }
+
 export interface ActionLicense {
   id: string;
   name: string;
@@ -149,14 +159,12 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
 >;
 
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
-  updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
   onError?: () => void;
@@ -227,3 +235,20 @@ export interface Ecs {
 export type CaseActionConnector = ActionConnector;
 
 export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
+
+export interface CasesPermissions {
+  all: boolean;
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+  push: boolean;
+}
+
+export interface CasesCapabilities {
+  [CREATE_CASES_CAPABILITY]: boolean;
+  [READ_CASES_CAPABILITY]: boolean;
+  [UPDATE_CASES_CAPABILITY]: boolean;
+  [DELETE_CASES_CAPABILITY]: boolean;
+  [PUSH_CASES_CAPABILITY]: boolean;
+}

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -15,7 +16,6 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -145,6 +145,7 @@ export async function getServiceInstancesSystemMetricStatistics<
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

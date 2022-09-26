@@ -12,7 +12,7 @@ import { getId } from '../../lib/get_id';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
-import { isGroupId } from '../../components/workpad_page/positioning_utils';
+import { isGroupId } from '../../lib/workpad';
 
 const { set, del, insert } = immutable;
 

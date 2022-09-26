@@ -13,10 +13,3 @@ export const ERROR_NETWORK_DNS = i18n.translate(
     defaultMessage: `An error has occurred on network dns search`,
   }
 );
-
-export const FAIL_NETWORK_DNS = i18n.translate(
-  'xpack.securitySolution.networkDns.failSearchDescription',
-  {
-    defaultMessage: `Failed to run search on network dns`,
-  }
-);

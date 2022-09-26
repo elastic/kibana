@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getHasData({ setup }: { setup: Setup }) {
@@ -21,6 +21,7 @@ export async function getHasData({ setup }: { setup: Setup }) {
       },
       terminate_after: 1,
       body: {
+        track_total_hits: 1,
         size: 0,
       },
     };

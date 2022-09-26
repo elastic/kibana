@@ -6,11 +6,9 @@
  */
 
 import { useSelector } from 'react-redux';
-import { State } from '../store';
-import {
-  ExperimentalFeatures,
-  getExperimentalAllowedValues,
-} from '../../../common/experimental_features';
+import type { State } from '../store';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { getExperimentalAllowedValues } from '../../../common/experimental_features';
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 

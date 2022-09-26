@@ -1,0 +1,82 @@
+{
+  "id": "@kbn/core-overlays-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-overlays-browser-mocks",
+        "id": "def-server.overlayServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "overlayServiceMock",
+        "description": [],
+        "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-overlays-browser-mocks",
+            "id": "def-server.overlayServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PublicMethodsOf",
+              "<",
+              "OverlayService",
+              ">>"
+            ],
+            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-overlays-browser-mocks",
+            "id": "def-server.overlayServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DeeplyMockedKeys",
+              "<",
+              "OverlayStart",
+              ">"
+            ],
+            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

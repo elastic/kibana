@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   firstNonNullValue,
   values,
 } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
-import {
+import type {
   ECSField,
   ResolverNode,
   FieldsObject,
   ResolverSchema,
 } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
-import { NodeID } from '.';
+import type { NodeID } from '.';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
 
@@ -29,30 +30,39 @@ export interface TreeOptions {
   descendantLevels: number;
   descendants: number;
   ancestors: number;
-  timeRange: {
+  timeRange?: {
     from: string;
     to: string;
   };
   schema: ResolverSchema;
   nodes: NodeID[];
   indexPatterns: string[];
+  includeHits?: boolean;
 }
+
+export type TreeResponse = Promise<
+  | ResolverNode[]
+  | {
+      alertIds: string[] | undefined;
+      statsNodes: ResolverNode[];
+    }
+>;
 
 /**
  * Handles retrieving nodes of a resolver tree.
  */
 export class Fetcher {
-  constructor(private readonly client: IScopedClusterClient) {}
+  private alertsClient?: AlertsClient;
+  constructor(private readonly client: IScopedClusterClient, alertsClient?: AlertsClient) {
+    this.alertsClient = alertsClient;
+  }
 
   /**
    * This method retrieves the ancestors and descendants of a resolver tree.
    *
    * @param options the options for retrieving the structure of the tree.
    */
-  public async tree(
-    options: TreeOptions,
-    isInternalRequest: boolean = false
-  ): Promise<ResolverNode[]> {
+  public async tree(options: TreeOptions, isInternalRequest: boolean = false): TreeResponse {
     const treeParts = await Promise.all([
       this.retrieveAncestors(options, isInternalRequest),
       this.retrieveDescendants(options, isInternalRequest),
@@ -70,7 +80,7 @@ export class Fetcher {
     treeNodes: FieldsObject[],
     options: TreeOptions,
     isInternalRequest: boolean
-  ): Promise<ResolverNode[]> {
+  ): TreeResponse {
     const statsIDs: NodeID[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
@@ -86,7 +96,12 @@ export class Fetcher {
       isInternalRequest,
     });
 
-    const eventStats = await query.search(this.client, statsIDs);
+    const { eventStats, alertIds } = await query.search(
+      this.client,
+      statsIDs,
+      this.alertsClient,
+      options.includeHits ?? false
+    );
     const statsNodes: ResolverNode[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
@@ -96,16 +111,21 @@ export class Fetcher {
       // at this point id should never be undefined, it should be enforced by the Elasticsearch query
       // but let's check anyway
       if (id !== undefined) {
+        const stats = (eventStats && eventStats[id]) ?? { total: 0, byCategory: {} };
         statsNodes.push({
           id,
           parent,
           name,
           data: node,
-          stats: eventStats[id] ?? { total: 0, byCategory: {} },
+          stats,
         });
       }
     }
-    return statsNodes;
+    if (options.includeHits) {
+      return { alertIds, statsNodes };
+    } else {
+      return statsNodes;
+    }
   }
 
   private static getNextAncestorsToFind(

@@ -23,15 +23,15 @@ import {
   keys,
 } from '@elastic/eui';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { useDebounceWithOptions } from '../../../../shared_components';
-import { RangeTypeLens, isValidRange } from './ranges';
-import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
-  NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
-  LabelInput,
-} from '../shared_components';
+  NewBucketButton,
+  useDebounceWithOptions,
+} from '../../../../shared_components';
+import { RangeTypeLens, isValidRange } from './ranges';
+import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
+import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
 
 const generateId = htmlIdGenerator();
@@ -246,6 +246,7 @@ export const AdvancedRangeEditor = ({
 
   return (
     <EuiFormRow
+      fullWidth
       label={i18n.translate('xpack.lens.indexPattern.ranges.customRanges', {
         defaultMessage: 'Ranges',
       })}

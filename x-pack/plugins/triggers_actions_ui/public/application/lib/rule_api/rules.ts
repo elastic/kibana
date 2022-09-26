@@ -4,28 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
+
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
+import { Rule } from '../../../types';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import { transformRule } from './common_transformations';
-
-export interface LoadRulesProps {
-  http: HttpSetup;
-  page: Pagination;
-  searchText?: string;
-  typesFilter?: string[];
-  actionTypesFilter?: string[];
-  tagsFilter?: string[];
-  ruleExecutionStatusesFilter?: string[];
-  ruleStatusesFilter?: RuleStatus[];
-  sort?: Sorting;
-}
-
-const rewriteResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {
-  return results.map((item) => transformRule(item));
-};
+import { LoadRulesProps, rewriteRulesResponseRes } from './rules_helpers';
 
 export async function loadRules({
   http,
@@ -73,6 +57,6 @@ export async function loadRules({
     page: res.page,
     perPage: res.per_page,
     total: res.total,
-    data: rewriteResponseRes(res.data),
+    data: rewriteRulesResponseRes(res.data),
   };
 }

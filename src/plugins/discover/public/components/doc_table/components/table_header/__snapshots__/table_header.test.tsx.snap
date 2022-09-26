@@ -23,7 +23,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
           data-euiicon-type="clock"
           tabindex="0"
         >
-          Primary time field.
+          time - this field represents the time that events occurred.
         </span>
       </span>
       <span

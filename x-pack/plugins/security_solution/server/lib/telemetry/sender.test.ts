@@ -33,6 +33,46 @@ describe('TelemetryEventsSender', () => {
       const sender = new TelemetryEventsSender(logger);
       const input = [
         {
+          credential_access: {
+            Target: {
+              process: {
+                path: 'DeviceHarddiskVolume3WindowsSystem32lsass.exe',
+                pid: 808,
+                ppid: 584,
+                sid: 0,
+              },
+            },
+            handle_type: 'process',
+            desired_access_numeric: 2097151,
+            desired_access: [
+              'DELETE',
+              'READ_CONTROL',
+              'SYNCHRONIZE',
+              'WRITE_DAC',
+              'WRITE_OWNER',
+              'STANDARD_RIGHTS_REQUIRED',
+              'PROCESS_ALL_ACCESS',
+            ],
+            call_stack: {
+              entries: [
+                {
+                  memory_address: 140706712704004,
+                  start_address_allocation_offset: 644100,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32\ntdll.dll',
+                },
+                {
+                  memory_address: 140706669379902,
+                  start_address_allocation_offset: 180542,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32KernelBase.dll',
+                },
+                {
+                  memory_address: 140704414232808,
+                  start_address_allocation_offset: 127208,
+                  module_path: 'Unbacked',
+                },
+              ],
+            },
+          },
           event: {
             kind: 'alert',
             id: 'test',
@@ -86,6 +126,7 @@ describe('TelemetryEventsSender', () => {
             },
             something_else: 'nope',
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             nope: 'nope',
@@ -109,12 +150,58 @@ describe('TelemetryEventsSender', () => {
           threat: {
             ignored_object: true, // this field is not allowlisted
           },
+          Persistence: {
+            name: 'foo',
+            path: '/foo/bar',
+            runatload: true,
+            args: ['foo', 'bar'],
+          },
         },
       ];
 
       const result = sender.processEvents(input);
       expect(result).toStrictEqual([
         {
+          credential_access: {
+            Target: {
+              process: {
+                path: 'DeviceHarddiskVolume3WindowsSystem32lsass.exe',
+                pid: 808,
+                ppid: 584,
+                sid: 0,
+              },
+            },
+            handle_type: 'process',
+            desired_access_numeric: 2097151,
+            desired_access: [
+              'DELETE',
+              'READ_CONTROL',
+              'SYNCHRONIZE',
+              'WRITE_DAC',
+              'WRITE_OWNER',
+              'STANDARD_RIGHTS_REQUIRED',
+              'PROCESS_ALL_ACCESS',
+            ],
+            call_stack: {
+              entries: [
+                {
+                  memory_address: 140706712704004,
+                  start_address_allocation_offset: 644100,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32\ntdll.dll',
+                },
+                {
+                  memory_address: 140706669379902,
+                  start_address_allocation_offset: 180542,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32KernelBase.dll',
+                },
+                {
+                  memory_address: 140704414232808,
+                  start_address_allocation_offset: 127208,
+                  module_path: 'Unbacked',
+                },
+              ],
+            },
+          },
           event: {
             kind: 'alert',
             id: 'test',
@@ -164,6 +251,7 @@ describe('TelemetryEventsSender', () => {
               name: 'windows',
             },
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
@@ -180,6 +268,12 @@ describe('TelemetryEventsSender', () => {
                 id: 1234,
               },
             },
+          },
+          Persistence: {
+            name: 'foo',
+            path: '/foo/bar',
+            runatload: true,
+            args: ['foo', 'bar'],
           },
         },
       ]);
@@ -211,6 +305,7 @@ describe('TelemetryEventsSender', () => {
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
+      sender['isTelemetryServicesReachable'] = jest.fn(async () => true);
       sender['telemetryUsageCounter'] = telemetryUsageCounter;
       sender['sendEvents'] = jest.fn(async () => {
         sender['telemetryUsageCounter']?.incrementCounter({
@@ -241,6 +336,23 @@ describe('TelemetryEventsSender', () => {
         getIsOptedIn: jest.fn(async () => false),
       };
       sender['telemetryStart'] = telemetryStart;
+
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      expect(sender['queue'].length).toBe(2);
+      await sender['sendIfDue']();
+
+      expect(sender['queue'].length).toBe(0);
+      expect(sender['sendEvents']).toBeCalledTimes(0);
+    });
+
+    it("shouldn't send when telemetry when opted in but cannot connect to elastic telemetry services", async () => {
+      const sender = new TelemetryEventsSender(logger);
+      sender['sendEvents'] = jest.fn();
+      const telemetryStart = {
+        getIsOptedIn: jest.fn(async () => true),
+      };
+      sender['telemetryStart'] = telemetryStart;
+      sender['isTelemetryServicesReachable'] = jest.fn(async () => false);
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender['queue'].length).toBe(2);

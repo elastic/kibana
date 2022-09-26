@@ -10,6 +10,11 @@ import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  createUsersAndRoles,
+  deleteUsersAndRoles,
+} from '../../../cases_api_integration/common/lib/authentication';
+import { users, roles, casesAllUser, casesAllUser2 } from './common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -85,10 +90,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const caseTitle = 'matchme';
 
       before(async () => {
-        await cases.api.createCase({ title: caseTitle, tags: ['one'] });
+        await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+
+        const profiles = await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] });
+
+        await cases.api.createCase({
+          title: caseTitle,
+          tags: ['one'],
+          description: 'lots of information about an incident',
+        });
         await cases.api.createCase({ title: 'test2', tags: ['two'] });
-        await cases.api.createCase({ title: 'test3' });
-        await cases.api.createCase({ title: 'test4' });
+        await cases.api.createCase({ title: 'test3', assignees: [{ uid: profiles[0].uid }] });
+        await cases.api.createCase({ title: 'test4', assignees: [{ uid: profiles[1].uid }] });
+
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -104,14 +119,63 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       after(async () => {
         await cases.api.deleteAllCases();
         await cases.casesTable.waitForCasesToBeDeleted();
+        await deleteUsersAndRoles(getService, users, roles);
       });
 
-      it('filters cases from the list with partial match', async () => {
+      it('filters cases from the list using a full string match', async () => {
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
 
         // search
         const input = await testSubjects.find('search-cases');
         await input.type(caseTitle);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('only shows cases with a wildcard query "test*" matching the title', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('test*');
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(3);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('does not search the owner field', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('cases');
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(0);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('only shows cases by matching the word "information" from the cases description', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('information');
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('only shows cases with a wildcard query "informa*" matching the cases description', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('informa*');
         await input.pressKeys(browser.keys.ENTER);
 
         await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -134,19 +198,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      /**
-       * TODO: Improve the test by creating a case from a
-       * different user and filter by the new user
-       * and not the default one
-       */
-      it('filters cases by reporter', async () => {
-        await cases.casesTable.filterByReporter('elastic');
-        await cases.casesTable.validateCasesTableHasNthRows(4);
+      it('filters cases by the first cases all user assignee', async () => {
+        await cases.casesTable.filterByAssignee('all');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+      });
+
+      it('filters cases by the casesAllUser2 assignee', async () => {
+        await cases.casesTable.filterByAssignee('2');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
       });
     });
 
     describe('severity filtering', () => {
       before(async () => {
+        await cases.navigation.navigateToApp();
         await cases.api.createCase({ severity: CaseSeverity.LOW });
         await cases.api.createCase({ severity: CaseSeverity.LOW });
         await cases.api.createCase({ severity: CaseSeverity.HIGH });
@@ -155,6 +220,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
+
       beforeEach(async () => {
         /**
          * There is no easy way to clear the filtering.

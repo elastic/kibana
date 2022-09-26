@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import type { SyntheticEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';

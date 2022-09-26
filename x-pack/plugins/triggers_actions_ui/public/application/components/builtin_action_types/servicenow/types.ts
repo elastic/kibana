@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
   ExecutorSubActionAddEventParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/actions-plugin/server/builtin_action_types/servicenow/types';
+} from '@kbn/stack-connectors-plugin/server/connector_types/cases/servicenow/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<

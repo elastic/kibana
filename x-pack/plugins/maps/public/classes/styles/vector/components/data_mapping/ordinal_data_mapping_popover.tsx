@@ -46,7 +46,7 @@ const DATA_MAPPING_OPTIONS = [
       <Fragment>
         <strong>{interpolateTitle}</strong>
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.interpolateDescription"
               defaultMessage="Interpolate values from the data domain to the style on a linear scale"
@@ -63,7 +63,7 @@ const DATA_MAPPING_OPTIONS = [
       <Fragment>
         <strong>{percentilesTitle}</strong>
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.percentilesDescription"
               defaultMessage="Divide style into bands that map to values"

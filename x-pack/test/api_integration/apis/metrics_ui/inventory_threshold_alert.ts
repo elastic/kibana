@@ -136,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
+          executionTimestamp: new Date(DATES['8.0.0'].rx.max),
           condition: {
             ...baseCondition,
             metric: 'rx',
@@ -155,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 1666.6666666666667,
+            currentValue: 79351.95,
           },
           'host-1': {
             metric: 'rx',
@@ -168,13 +169,55 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 2000,
+            currentValue: 10,
+          },
+        });
+      });
+      it('should work with a long threshold', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          executionTimestamp: new Date(DATES['8.0.0'].rx.max),
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [107374182400],
+            comparator: Comparator.LT,
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 79351.95,
+          },
+          'host-1': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 10,
           },
         });
       });
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,
+          executionTimestamp: new Date(DATES['8.0.0'].rx.max),
           condition: {
             ...baseCondition,
             metric: 'rx' as SnapshotMetricType,
@@ -196,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 2266.6666666666665,
+            currentValue: 125658.70833333333,
           },
           'host-1': {
             metric: 'rx',
@@ -209,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 2266.6666666666665,
+            currentValue: 11.666666666666668,
           },
         });
       });

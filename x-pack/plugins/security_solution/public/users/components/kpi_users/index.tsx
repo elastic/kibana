@@ -6,24 +6,25 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
-import { UsersKpiProps } from './types';
+import type { UsersKpiProps } from './types';
 
-import { HostsKpiAuthentications } from '../../../hosts/components/kpi_hosts/authentications';
+import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
-import { RISKY_USERS_DOC_LINK } from '../constants';
+import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
-    const [_, { isModuleEnabled }] = useUserRiskScore({});
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
+    const [loading, { isLicenseValid, isModuleEnabled }] = useUserRiskScore();
 
     return (
       <>
-        {isModuleEnabled === false && (
+        {isLicenseValid && !isModuleEnabled && !loading && (
           <>
             <CallOutSwitcher
               namespace="users"
@@ -36,9 +37,11 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
                 description: (
                   <>
                     {i18n.LEARN_MORE}{' '}
-                    <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
-                      {i18n.USER_RISK_DATA}
-                    </EuiLink>
+                    <RiskScoreDocLink
+                      external={false}
+                      riskScoreEntity={RiskScoreEntity.user}
+                      title={i18n.USER_RISK_DATA}
+                    />
                     <EuiSpacer />
                   </>
                 ),
@@ -54,19 +57,19 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
-            <HostsKpiAuthentications
+            <UsersKpiAuthentications
               filterQuery={filterQuery}
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />

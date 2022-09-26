@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MergeStrategyFunction } from '../types';
+import type { MergeStrategyFunction } from '../types';
 
 /**
  * Does nothing and does not merge source with fields

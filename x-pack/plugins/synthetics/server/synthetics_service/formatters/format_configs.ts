@@ -6,7 +6,13 @@
  */
 
 import { isNil, omitBy } from 'lodash';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import {
+  BrowserFields,
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+  HeartbeatConfig,
+} from '../../../common/runtime_types';
 import { formatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
@@ -19,6 +25,8 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.REVISION,
   ConfigKey.CUSTOM_HEARTBEAT_ID,
+  ConfigKey.FORM_MONITOR_TYPE,
+  ConfigKey.TEXT_ASSERTION,
   'secrets',
 ];
 
@@ -51,4 +59,32 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
   });
 
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
+};
+
+export const formatHeartbeatRequest = ({
+  monitor,
+  monitorId,
+  customHeartbeatId,
+  runOnce,
+  testRunId,
+}: {
+  monitor: SyntheticsMonitor;
+  monitorId: string;
+  customHeartbeatId?: string;
+  runOnce?: boolean;
+  testRunId?: string;
+}): HeartbeatConfig => {
+  const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
+  return {
+    ...monitor,
+    id: customHeartbeatId || monitorId,
+    fields: {
+      config_id: monitorId,
+      'monitor.project.name': projectId || undefined,
+      'monitor.project.id': projectId || undefined,
+      run_once: runOnce,
+      test_run_id: testRunId,
+    },
+    fields_under_root: true,
+  };
 };

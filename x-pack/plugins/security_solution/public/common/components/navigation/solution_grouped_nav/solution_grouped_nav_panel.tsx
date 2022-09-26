@@ -20,13 +20,13 @@ import {
   EuiTitle,
   EuiWindowEvent,
   keys,
-  useIsWithinBreakpoints,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
-import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
+import { EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
+import { NavItemBetaBadge } from '../nav_item_beta_badge';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -34,6 +34,7 @@ export interface SolutionNavPanelProps {
   title: string;
   items: DefaultSideNavItem[];
   categories?: LinkCategories;
+  bottomOffset?: string;
 }
 export interface SolutionNavPanelCategoriesProps {
   categories: LinkCategories;
@@ -42,10 +43,6 @@ export interface SolutionNavPanelCategoriesProps {
 }
 export interface SolutionNavPanelItemsProps {
   items: DefaultSideNavItem[];
-  onClose: () => void;
-}
-export interface SolutionNavPanelItemProps {
-  item: DefaultSideNavItem;
   onClose: () => void;
 }
 
@@ -58,11 +55,13 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   title,
   categories,
   items,
+  bottomOffset,
 }) => {
-  const [hasTimelineBar] = useShowTimeline();
-  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
-  const isTimelineVisible = hasTimelineBar && isLargerBreakpoint;
+  const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
   const panelClasses = classNames('eui-yScroll');
+
+  // Only larger breakpoint needs to add bottom offset, other sizes should have full height
+  const bottomOffsetLargerBreakpoint = isLargerBreakpoint ? bottomOffset : undefined;
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -82,8 +81,8 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanelStyled
               className={panelClasses}
-              hasShadow={!isTimelineVisible}
-              $hasBottomBar={isTimelineVisible}
+              hasShadow={!bottomOffsetLargerBreakpoint}
+              $bottomOffset={bottomOffsetLargerBreakpoint}
               borderRadius="none"
               paddingSize="l"
               data-test-subj="groupedNavPanel"
@@ -136,6 +135,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
           return acc;
         }, []);
 
+        if (!links.length) {
+          return null;
+        }
+
         return (
           <Fragment key={label}>
             <EuiTitle size="xxxs">
@@ -153,10 +156,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>
-    {items.map(({ id, href, onClick, label, description }) => (
+    {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
       <Fragment key={id}>
         <EuiDescriptionListTitle>
-          <a
+          <FlexLink
             data-test-subj={`groupedNavPanelLink-${id}`}
             href={href}
             onClick={(ev) => {
@@ -167,7 +170,8 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-          </a>
+            {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+          </FlexLink>
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
       </Fragment>

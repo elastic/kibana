@@ -37,6 +37,7 @@ export const WorkspaceRoute = ({
     capabilities,
     storage,
     data,
+    unifiedSearch,
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
@@ -73,9 +74,10 @@ export const WorkspaceRoute = ({
       appName: 'graph',
       storage,
       data,
+      unifiedSearch,
       ...coreStart,
     }),
-    [coreStart, data, storage]
+    [coreStart, data, storage, unifiedSearch]
   );
 
   const [store] = useState(() =>
@@ -120,13 +122,14 @@ export const WorkspaceRoute = ({
     savedObjectsClient,
     spaces,
     coreStart,
+    data,
   });
 
   if (!loaded) {
     return null;
   }
 
-  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = loaded;
+  const { savedWorkspace, sharingSavedObjectProps } = loaded;
 
   return (
     <I18nProvider>
@@ -145,7 +148,6 @@ export const WorkspaceRoute = ({
             coreStart={coreStart}
             canEditDrillDownUrls={canEditDrillDownUrls}
             overlays={overlays}
-            indexPatterns={indexPatterns}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
           />

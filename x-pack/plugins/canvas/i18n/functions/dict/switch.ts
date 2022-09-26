@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { switchFn } from '../../../canvas_plugin_src/functions/common/switch';
+import type { switchFn } from '../../../canvas_plugin_src/functions/common/switch';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

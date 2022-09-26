@@ -28,16 +28,19 @@ export interface NewAgentPolicy {
   // Nullable to allow user to reset to default outputs
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
+  download_source_id?: string | null;
+  schema_version?: string;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
-  package_policies: string[] | PackagePolicy[];
+  package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
   revision: number;
+  agents?: number;
 }
 
 export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
@@ -58,6 +61,7 @@ export interface FullAgentPolicyInput {
   type: string;
   data_stream: { namespace: string };
   use_output: string;
+  package_policy_id: string;
   meta?: {
     package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
     [key: string]: unknown;
@@ -105,6 +109,7 @@ export interface FullAgentPolicy {
       metrics: boolean;
       logs: boolean;
     };
+    download: { source_uri: string };
   };
 }
 

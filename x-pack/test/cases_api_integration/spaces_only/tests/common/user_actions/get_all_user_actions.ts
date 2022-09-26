@@ -18,7 +18,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -28,16 +28,30 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it(`should get user actions in space1`, async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
-      const body = await getCaseUserActions({ supertest, caseID: postedCase.id, auth: authSpace1 });
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
+      const body = await getCaseUserActions({
+        supertest: supertestWithoutAuth,
+        caseID: postedCase.id,
+        auth: authSpace1,
+      });
 
       expect(body.length).to.eql(1);
     });
 
     it(`should not get user actions in the wrong space`, async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
       const body = await getCaseUserActions({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseID: postedCase.id,
         auth: getAuthWithSuperUser('space2'),
       });

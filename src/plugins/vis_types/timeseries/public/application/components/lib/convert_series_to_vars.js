@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { startsWith, snakeCase } from 'lodash';
 import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../common/enums';
 import { getLastValue } from '../../../../common/last_value_utils';
@@ -17,7 +17,7 @@ import { createFieldFormatter } from './create_field_formatter';
 import moment from 'moment';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
 
-export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap) => {
+export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap, dataView) => {
   const variables = {};
   const dateFormat = getConfig?.('dateFormat') ?? 'lll';
   model.series.forEach((seriesModel) => {
@@ -30,7 +30,8 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           label = snakeCase(label);
         }
 
-        const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
+        // label might be not purely alphanumeric, wrap in brackets to map sure it's resolved correctly
+        const varName = [`[${label}]`, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter =
           seriesModel.formatter === DATA_FORMATTERS.DEFAULT
@@ -56,12 +57,21 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           const fieldsForTerms = getFieldsForTerms(seriesModel.terms_field);
 
           if (fieldsForTerms.length === 1) {
-            rowLabel = createFieldFormatter(fieldsForTerms[0], fieldFormatMap)(row.label);
+            rowLabel = createFieldFormatter(
+              fieldsForTerms[0],
+              fieldFormatMap,
+              undefined,
+              false,
+              dataView
+            )(row.label);
           }
         }
 
         set(variables, varName, data);
-        set(variables, `${label}.label`, rowLabel);
+        // label might be not purely alphanumeric, wrap in brackets to map sure it's resolved correctly
+        set(variables, `[${label}].label`, rowLabel);
+        // compatibility
+        set(variables, `[${label}].formatted`, rowLabel);
       });
   });
   return variables;

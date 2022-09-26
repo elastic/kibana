@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
 
 import {
-  EuiPageTemplate,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,9 +25,9 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../shared/doc_links';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-
 import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
+import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
 
 // Replace FormattedMessage with i18n strings
 
@@ -61,9 +60,9 @@ export const ElasticsearchGuide: React.FC = () => {
   }, []);
 
   return (
-    <EuiPageTemplate>
+    <EnterpriseSearchElasticsearchPageTemplate>
       <SetPageChrome />
-      <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexGroup alignItems="flexStart" data-test-subj="elasticsearchGuide">
         {/* maxWidth is needed to prevent code blocks with long unbreakable strings (Kibana PR Cloud ID) from stretching the column */}
         <EuiFlexItem grow={3} style={{ maxWidth: 800 }}>
           <EuiText>
@@ -193,6 +192,6 @@ export const ElasticsearchGuide: React.FC = () => {
           <ElasticsearchResources />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate>
+    </EnterpriseSearchElasticsearchPageTemplate>
   );
 };

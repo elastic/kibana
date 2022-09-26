@@ -54,61 +54,77 @@ export const hostSystemOverview: TSVBMetricModelCreator = (
     },
     {
       id: 'rx',
-      split_mode: 'terms',
-      terms_field: 'system.network.name',
       metrics: [
         {
-          field: 'system.network.in.bytes',
-          id: 'max-net-in',
+          field: 'host.network.ingress.bytes',
+          id: 'avg-net-in',
+          type: 'avg',
+        },
+        {
+          id: 'max-period',
           type: 'max',
+          field: 'metricset.period',
         },
         {
-          field: 'max-net-in',
-          id: 'deriv-max-net-in',
-          type: 'derivative',
-          unit: '1s',
-        },
-        {
-          id: 'posonly-deriv-max-net-in',
+          id: '3216b170-f192-11ec-a8e3-dd984b7213e2',
           type: 'calculation',
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-in' }],
-          script: 'params.rate > 0.0 ? params.rate : 0.0',
-        },
-        {
-          function: 'sum',
-          id: 'seriesagg-sum',
-          type: 'series_agg',
+          variables: [
+            {
+              id: '34e64c30-f192-11ec-a8e3-dd984b7213e2',
+              name: 'value',
+              field: 'avg-net-in',
+            },
+            {
+              id: '3886cb80-f192-11ec-a8e3-dd984b7213e2',
+              name: 'period',
+              field: 'max-period',
+            },
+          ],
+          script: 'params.value / (params.period / 1000)',
         },
       ],
+      filter: {
+        language: 'kuery',
+        query: 'host.network.ingress.bytes : * ',
+      },
+      split_mode: 'everything',
     },
     {
       id: 'tx',
-      split_mode: 'terms',
-      terms_field: 'system.network.name',
       metrics: [
         {
-          field: 'system.network.out.bytes',
-          id: 'max-net-out',
+          field: 'host.network.egress.bytes',
+          id: 'avg-net-out',
+          type: 'avg',
+        },
+        {
+          id: 'max-period',
           type: 'max',
+          field: 'metricset.period',
         },
         {
-          field: 'max-net-out',
-          id: 'deriv-max-net-out',
-          type: 'derivative',
-          unit: '1s',
-        },
-        {
-          id: 'posonly-deriv-max-net-out',
+          id: '3216b170-f192-11ec-a8e3-dd984b7213e2',
           type: 'calculation',
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-out' }],
-          script: 'params.rate > 0.0 ? params.rate : 0.0',
-        },
-        {
-          function: 'sum',
-          id: 'seriesagg-sum',
-          type: 'series_agg',
+          variables: [
+            {
+              id: '34e64c30-f192-11ec-a8e3-dd984b7213e2',
+              name: 'value',
+              field: 'avg-net-out',
+            },
+            {
+              id: '3886cb80-f192-11ec-a8e3-dd984b7213e2',
+              name: 'period',
+              field: 'max-period',
+            },
+          ],
+          script: 'params.value / (params.period / 1000)',
         },
       ],
+      filter: {
+        language: 'kuery',
+        query: 'host.network.egress.bytes : * ',
+      },
+      split_mode: 'everything',
     },
   ],
 });

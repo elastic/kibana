@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
+import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -134,6 +133,7 @@ export interface EndpointMetricsAggregation {
     endpoint_agents: {
       buckets: Array<{ key: string; doc_count: number; latest_metrics: EndpointMetricHits }>;
     };
+    endpoint_count: { value: number };
   };
 }
 
@@ -290,18 +290,6 @@ export interface EndpointMetadataDocument {
   };
 }
 
-// List HTTP Types
-
-export const GetTrustedAppsRequestSchema = {
-  query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-    per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
-    kuery: schema.maybe(schema.string()),
-  }),
-};
-
-export type GetEndpointListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
-
 export interface GetEndpointListResponse {
   per_page: number;
   page: number;
@@ -374,4 +362,70 @@ export interface TimelineTelemetryTemplate {
   alert_id: string | undefined;
   event_id: string;
   timeline: TimelineTelemetryEvent[];
+}
+
+export interface ValueListMetaData {
+  total_list_count: number;
+  types: Array<{
+    type: string;
+    count: number;
+  }>;
+  lists: Array<{
+    id: string;
+    count: number;
+  }>;
+  included_in_exception_lists_count: number;
+  used_in_indicator_match_rule_count: number;
+}
+
+export interface ValueListResponseAggregation {
+  aggregations: {
+    total_value_list_count: number;
+    type_breakdown: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ValueListItemsResponseAggregation {
+  aggregations: {
+    value_list_item_count: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ValueListExceptionListResponseAggregation {
+  aggregations: {
+    vl_included_in_exception_lists_count: { value: number };
+  };
+}
+
+export interface ValueListIndicatorMatchResponseAggregation {
+  aggregations: {
+    vl_used_in_indicator_match_rule_count: { value: number };
+  };
+}
+
+export interface TaskMetric {
+  name: string;
+  passed: boolean;
+  time_executed_in_ms: number;
+  start_time: number;
+  end_time: number;
+  error_message?: string;
+}
+
+export interface TelemetryConfiguration {
+  telemetry_max_buffer_size: number;
+  max_security_list_telemetry_batch: number;
+  max_endpoint_telemetry_batch: number;
+  max_detection_rule_telemetry_batch: number;
+  max_detection_alerts_batch: number;
 }

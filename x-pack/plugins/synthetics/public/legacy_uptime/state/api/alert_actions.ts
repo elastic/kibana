@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleAction as RuleActionOrig } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import type {
   IndexActionParams,
   PagerDutyActionParams,
   ServerLogActionParams,
@@ -15,8 +15,7 @@ import {
   JiraActionParams,
   WebhookActionParams,
   EmailActionParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/actions-plugin/server';
+} from '@kbn/stack-connectors-plugin/server/connector_types';
 import { NewAlertParams } from './alerts';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../../common/translations';

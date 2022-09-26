@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DocValueFields } from '../../common/search_strategy';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BrowserFields } from '../../common/search_strategy/index_fields';
 
 const DEFAULT_INDEX_PATTERN = [
@@ -814,17 +813,6 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
 };
-
-export const mockDocValueFields: DocValueFields[] = [
-  {
-    field: '@timestamp',
-    format: 'date_time',
-  },
-  {
-    field: 'event.end',
-    format: 'date_time',
-  },
-];
 
 export const mockRuntimeMappings: MappingRuntimeFields = {
   '@a.runtime.field': {

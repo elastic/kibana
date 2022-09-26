@@ -10,21 +10,25 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
+import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { buildRelatedIntegrationsDescription } from './required_integrations_description';
+import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
 } from '../../../../../common/detection_engine/schemas/common';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import { FieldValueTimeline } from '../pick_timeline';
-import { FormSchema } from '../../../../shared_imports';
-import { ListItems } from './types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+} from '../../../pages/detection_engine/rules/types';
+import type { FieldValueTimeline } from '../pick_timeline';
+import type { FormSchema } from '../../../../shared_imports';
+import type { ListItems } from './types';
 import {
   buildQueryBarDescription,
   buildSeverityDescription,
@@ -160,6 +164,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
 };
 
 /* eslint complexity: ["error", 25]*/
+// eslint-disable-next-line complexity
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -171,12 +176,14 @@ export const getDescriptionItem = (
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
+    const savedQueryName = get('queryBar.title', data);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
       savedId,
+      savedQueryName,
       indexPatterns,
     });
   } else if (field === 'eqlOptions') {
@@ -238,9 +245,15 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
+  } else if (field === 'dataViewId') {
+    return [];
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
+  } else if (field === 'index') {
+    if (get('dataViewId', data)) {
+      return [];
+    }
   }
 
   const description: string = get(field, data);

@@ -18,7 +18,7 @@ import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -27,7 +27,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { mockState } from './__mocks__/syncthetics_store.mock';
+import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { stringifyUrlParams } from '../url_params';

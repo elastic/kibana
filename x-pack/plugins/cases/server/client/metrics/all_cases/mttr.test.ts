@@ -21,7 +21,9 @@ const getAuthorizationFilter = jest.fn().mockResolvedValue({});
 
 const clientArgs = {
   logger,
-  caseService,
+  services: {
+    caseService,
+  },
   authorization: { getAuthorizationFilter },
 } as unknown as CasesClientArgs;
 
@@ -43,28 +45,28 @@ describe('MTTR', () => {
     expect(await handler.compute()).toEqual({});
   });
 
-  it('returns zero values when aggregation returns undefined', async () => {
+  it('returns null when aggregation returns undefined', async () => {
     caseService.executeAggregations.mockResolvedValue(undefined);
     const handler = new MTTR(constructorOptions);
     handler.setupFeature('mttr');
 
-    expect(await handler.compute()).toEqual({ mttr: 0 });
+    expect(await handler.compute()).toEqual({ mttr: null });
   });
 
-  it('returns zero values when aggregation returns empty object', async () => {
+  it('returns null when aggregation returns empty object', async () => {
     caseService.executeAggregations.mockResolvedValue({});
     const handler = new MTTR(constructorOptions);
     handler.setupFeature('mttr');
 
-    expect(await handler.compute()).toEqual({ mttr: 0 });
+    expect(await handler.compute()).toEqual({ mttr: null });
   });
 
-  it('returns zero values when aggregation returns empty mttr object', async () => {
+  it('returns null when aggregation returns empty mttr object', async () => {
     caseService.executeAggregations.mockResolvedValue({ mttr: {} });
     const handler = new MTTR(constructorOptions);
     handler.setupFeature('mttr');
 
-    expect(await handler.compute()).toEqual({ mttr: 0 });
+    expect(await handler.compute()).toEqual({ mttr: null });
   });
 
   it('returns values when there is a mttr value', async () => {
@@ -100,11 +102,13 @@ describe('MTTR', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases.attributes.created_at",
                       },
                       "gte",
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "2022-04-28T15:18:00.000Z",
                       },
@@ -115,11 +119,13 @@ describe('MTTR', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases.attributes.created_at",
                       },
                       "lte",
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "2022-04-28T15:22:00.000Z",
                       },
@@ -134,16 +140,14 @@ describe('MTTR', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 
-import { savedQueryType, packType, packAssetType } from './lib/saved_query/saved_object_mappings';
-import { usageMetricType } from './routes/usage/saved_object_mappings';
+import {
+  savedQueryType,
+  packType,
+  packAssetType,
+  usageMetricType,
+} from './lib/saved_query/saved_object_mappings';
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   savedObjects.registerType(usageMetricType);

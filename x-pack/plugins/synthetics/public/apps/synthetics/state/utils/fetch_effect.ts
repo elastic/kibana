@@ -7,7 +7,7 @@
 
 import { call, put } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../../mocks';
-import {
-  ArtifactListPageRenderingSetup,
-  getArtifactListPageRenderingSetup,
-  getDeferred,
-} from '../mocks';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import type { trustedAppsAllHttpMocks } from '../../../mocks';
+import type { ArtifactListPageRenderingSetup } from '../mocks';
+import { getArtifactListPageRenderingSetup } from '../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { getDeferred } from '../../mocks';
 
-describe('When displaying the Delete artfifact modal in the Artifact List Page', () => {
+describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
@@ -39,37 +37,54 @@ describe('When displaying the Delete artfifact modal in the Artifact List Page',
     });
   };
 
-  beforeEach(async () => {
-    const renderSetup = getArtifactListPageRenderingSetup();
+  beforeEach(
+    async () => {
+      const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, coreStart, mockedApi, getFirstCard } = renderSetup);
+      ({ history, coreStart, mockedApi, getFirstCard } = renderSetup);
 
-    history.push('somepage?show=create');
+      history.push('somepage?show=create');
 
-    renderResult = renderSetup.renderArtifactListPage();
+      renderResult = renderSetup.renderArtifactListPage();
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+      await act(async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+        });
       });
-    });
 
-    await clickCardAction('delete');
+      await clickCardAction('delete');
 
-    cancelButton = renderResult.getByTestId(
-      'testPage-deleteModal-cancelButton'
-    ) as HTMLButtonElement;
-    submitButton = renderResult.getByTestId(
-      'testPage-deleteModal-submitButton'
-    ) as HTMLButtonElement;
-  });
+      // Wait for the dialog to be present
+      await act(async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-deleteModal')).not.toBeNull();
+        });
+      });
 
-  it('should show Cancel and Delete buttons enabled', async () => {
+      cancelButton = renderResult.getByTestId(
+        'testPage-deleteModal-cancelButton'
+      ) as HTMLButtonElement;
+
+      submitButton = renderResult.getByTestId(
+        'testPage-deleteModal-submitButton'
+      ) as HTMLButtonElement;
+    },
+    // Timeout set to 10s
+    // In some cases, whose causes are unknown, a test will timeout and will point
+    // to this setup as the culprid. It rarely happens, but in order to avoid it,
+    // the timeout below is being set to 10s
+    10000
+  );
+
+  // FLAKY: https://github.com/elastic/kibana/issues/139527
+  it.skip('should show Cancel and Delete buttons enabled', async () => {
     expect(cancelButton).toBeEnabled();
     expect(submitButton).toBeEnabled();
   });
 
-  it('should close modal if Cancel/Close buttons are clicked', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/139528
+  it.skip('should close modal if Cancel/Close buttons are clicked', async () => {
     userEvent.click(cancelButton);
 
     expect(renderResult.queryByTestId('testPage-deleteModal')).toBeNull();
@@ -88,7 +103,9 @@ describe('When displaying the Delete artfifact modal in the Artifact List Page',
       expect(submitButton).toBeEnabled();
     });
 
-    deferred.resolve(); // cleanup
+    await act(async () => {
+      deferred.resolve(); // cleanup
+    });
   });
 
   it('should show success toast if deleted successfully', async () => {

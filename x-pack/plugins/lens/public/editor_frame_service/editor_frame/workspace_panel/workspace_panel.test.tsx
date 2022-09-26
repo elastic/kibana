@@ -134,7 +134,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -152,7 +152,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -174,7 +174,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -562,7 +562,10 @@ describe('workspace_panel', () => {
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/onActiveDataChange',
-      payload: tablesData,
+      payload: {
+        activeData: tablesData,
+        requestWarnings: [],
+      },
     });
   });
 

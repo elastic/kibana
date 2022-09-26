@@ -6,13 +6,18 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiPageTemplate, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiLink,
+} from '@elastic/eui';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
-import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
+import type { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
+import type { EventFiltersPageLocation } from '../../../../event_filters/types';
+import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 interface CommonProps {
   policyId: string;
   policyName: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import {
+import type {
   EndpointAction,
   EndpointActionResponse,
   HostMetadata,
@@ -77,35 +77,36 @@ export const indexEndpointAndFleetActionsForHost = async (
       )
       .catch(wrapErrorAndRejectPromise);
 
-    if (fleetActionGenerator.randomFloat() < 0.4) {
-      const endpointActionsBody = {
-        EndpointActions: {
-          ...action,
-          '@timestamp': undefined,
-          user_id: undefined,
-        },
-        agent: {
-          id: [agentId],
-        },
-        '@timestamp': action['@timestamp'],
-        user: {
-          id: action.user_id,
-        },
+    const endpointActionsBody: LogsEndpointAction & {
+      EndpointActions: LogsEndpointAction['EndpointActions'] & {
+        '@timestamp': undefined;
+        user_id: undefined;
       };
+    } = {
+      EndpointActions: {
+        ...action,
+        '@timestamp': undefined,
+        user_id: undefined,
+      },
+      agent: {
+        id: [agentId],
+      },
+      '@timestamp': action['@timestamp'],
+      user: {
+        id: action.user_id,
+      },
+    };
 
-      await Promise.all([
-        indexFleetActions,
-        esClient
-          .index({
-            index: ENDPOINT_ACTIONS_INDEX,
-            body: endpointActionsBody,
-            refresh: 'wait_for',
-          })
-          .catch(wrapErrorAndRejectPromise),
-      ]);
-    } else {
-      await indexFleetActions;
-    }
+    await Promise.all([
+      indexFleetActions,
+      esClient
+        .index({
+          index: ENDPOINT_ACTIONS_INDEX,
+          body: endpointActionsBody,
+          refresh: 'wait_for',
+        })
+        .catch(wrapErrorAndRejectPromise),
+    ]);
 
     const randomFloat = fleetActionGenerator.randomFloat();
     // Create an action response for the above
@@ -114,12 +115,12 @@ export const indexEndpointAndFleetActionsForHost = async (
       agent_id: agentId,
       action_response: {
         endpoint: {
-          // add ack to 2/5th of fleet response
-          ack: randomFloat < 0.4 ? true : undefined,
+          // add ack to 4/5th of fleet response
+          ack: randomFloat < 0.8 ? true : undefined,
         },
       },
-      // error for 3/10th of responses
-      error: randomFloat < 0.3 ? 'some error happened' : undefined,
+      // error for 1/10th of responses
+      error: randomFloat < 0.1 ? 'some error happened' : undefined,
     });
 
     const indexFleetResponses = esClient
@@ -133,7 +134,8 @@ export const indexEndpointAndFleetActionsForHost = async (
       )
       .catch(wrapErrorAndRejectPromise);
 
-    if (randomFloat < 0.4) {
+    // 70% has endpoint response
+    if (randomFloat < 0.7) {
       const endpointActionResponseBody = {
         EndpointActions: {
           ...actionResponse,
@@ -146,13 +148,13 @@ export const indexEndpointAndFleetActionsForHost = async (
         agent: {
           id: agentId,
         },
-        // error for 3/10th of responses
+        // error for 1/10th of responses
         error:
-          randomFloat < 0.3
-            ? undefined
-            : {
+          randomFloat < 0.1
+            ? {
                 message: actionResponse.error,
-              },
+              }
+            : undefined,
         '@timestamp': actionResponse['@timestamp'],
       };
 
@@ -167,6 +169,7 @@ export const indexEndpointAndFleetActionsForHost = async (
           .catch(wrapErrorAndRejectPromise),
       ]);
     } else {
+      // 30% has only fleet response
       await indexFleetResponses;
     }
 
@@ -174,24 +177,23 @@ export const indexEndpointAndFleetActionsForHost = async (
     response.actionResponses.push(actionResponse);
   }
 
-  // Add edge cases (maybe)
+  // Add edge case fleet actions (maybe)
   if (fleetActionGenerator.randomFloat() < 0.3) {
     const randomFloat = fleetActionGenerator.randomFloat();
 
-    // 60% of the time just add either an Isolate -OR- an UnIsolate action
-    if (randomFloat < 0.6) {
+    const actionStartedAt = {
+      '@timestamp': new Date().toISOString(),
+    };
+    // 70% of the time just add either an Isolate -OR- an UnIsolate action
+    if (randomFloat < 0.7) {
       let action: EndpointAction;
 
       if (randomFloat < 0.3) {
         // add a pending isolation
-        action = fleetActionGenerator.generateIsolateAction({
-          '@timestamp': new Date().toISOString(),
-        });
+        action = fleetActionGenerator.generateIsolateAction(actionStartedAt);
       } else {
         // add a pending UN-isolation
-        action = fleetActionGenerator.generateUnIsolateAction({
-          '@timestamp': new Date().toISOString(),
-        });
+        action = fleetActionGenerator.generateUnIsolateAction(actionStartedAt);
       }
 
       action.agents = [agentId];
@@ -209,13 +211,9 @@ export const indexEndpointAndFleetActionsForHost = async (
 
       response.actions.push(action);
     } else {
-      // Else (40% of the time) add a pending isolate AND pending un-isolate
-      const action1 = fleetActionGenerator.generateIsolateAction({
-        '@timestamp': new Date().toISOString(),
-      });
-      const action2 = fleetActionGenerator.generateUnIsolateAction({
-        '@timestamp': new Date().toISOString(),
-      });
+      // Else (30% of the time) add a pending isolate AND pending un-isolate
+      const action1 = fleetActionGenerator.generateIsolateAction(actionStartedAt);
+      const action2 = fleetActionGenerator.generateUnIsolateAction(actionStartedAt);
 
       action1.agents = [agentId];
       action2.agents = [agentId];

@@ -7,16 +7,34 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { monitorListReducer } from './monitor_management/monitor_list';
-import { serviceLocationReducer } from './monitor_management/service_locations';
-import { uiReducer } from './ui';
-import { indexStatusReducer } from './index_status';
+import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
+import { uiReducer, UiState } from './ui';
+import { indexStatusReducer, IndexStatusState } from './index_status';
+import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthetics_enablement';
+import { monitorListReducer, MonitorListState } from './monitor_list';
+import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
+import { monitorOverviewReducer, MonitorOverviewState } from './overview';
+import { BrowserJourneyState } from './browser_journey/models';
+import { browserJourneyReducer } from './browser_journey';
 
-export const rootReducer = combineReducers({
+export interface SyntheticsAppState {
+  ui: UiState;
+  indexStatus: IndexStatusState;
+  syntheticsEnablement: SyntheticsEnablementState;
+  monitorList: MonitorListState;
+  serviceLocations: ServiceLocationsState;
+  monitorDetails: MonitorDetailsState;
+  overview: MonitorOverviewState;
+  browserJourney: BrowserJourneyState;
+}
+
+export const rootReducer = combineReducers<SyntheticsAppState>({
   ui: uiReducer,
   indexStatus: indexStatusReducer,
-  serviceLocations: serviceLocationReducer,
+  syntheticsEnablement: syntheticsEnablementReducer,
   monitorList: monitorListReducer,
+  serviceLocations: serviceLocationsReducer,
+  monitorDetails: monitorDetailsReducer,
+  overview: monitorOverviewReducer,
+  browserJourney: browserJourneyReducer,
 });
-
-export type SyntheticsAppState = ReturnType<typeof rootReducer>;

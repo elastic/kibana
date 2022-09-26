@@ -12,7 +12,6 @@ import {
 } from '../../../../../common/http_api/cluster';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { handleError } from '../../../../lib/errors';
 import { MonitoringCore } from '../../../../types';
 
@@ -32,11 +31,6 @@ export function clusterRoute(server: MonitoringCore) {
       body: validateBody,
     },
     handler: async (req) => {
-      const config = server.config;
-
-      const indexPatterns = getIndexPatterns(config, {
-        filebeatIndexPattern: config.ui.logs.index,
-      });
       const options = {
         clusterUuid: req.params.clusterUuid,
         start: req.payload.timeRange.min,
@@ -45,7 +39,7 @@ export function clusterRoute(server: MonitoringCore) {
       };
 
       try {
-        const clusters = await getClustersFromRequest(req, indexPatterns, options);
+        const clusters = await getClustersFromRequest(req, options);
         return postClusterResponsePayloadRT.encode(clusters);
       } catch (err) {
         throw handleError(err, req);

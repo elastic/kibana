@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useRule, ReturnRule } from './use_rule';
+import type { ReturnRule } from './use_rule';
+import { useRule } from './use_rule';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

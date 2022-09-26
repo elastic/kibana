@@ -15,6 +15,7 @@ export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
 export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
+export const DOWNLOAD_SOURCE_API_ROOT = `${API_ROOT}/agent_download_sources`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
@@ -48,17 +49,20 @@ export const DATA_STREAM_API_ROUTES = {
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
   LIST_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
+  BULK_GET_PATTERN: `${PACKAGE_POLICY_API_ROOT}/_bulk_get`,
   INFO_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   CREATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   DELETE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/delete`,
   UPGRADE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade`,
   DRYRUN_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade/dryrun`,
+  ORPHANED_INTEGRATION_POLICIES: `${INTERNAL_ROOT}/orphaned_integration_policies`,
 };
 
 // Agent policy API routes
 export const AGENT_POLICY_API_ROUTES = {
   LIST_PATTERN: `${AGENT_POLICY_API_ROOT}`,
+  BULK_GET_PATTERN: `${AGENT_POLICY_API_ROOT}/_bulk_get`,
   INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
   CREATE_PATTERN: `${AGENT_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
@@ -92,6 +96,7 @@ export const SETTINGS_API_ROUTES = {
 
 // App API routes
 export const APP_API_ROUTES = {
+  HEALTH_CHECK_PATTERN: `${API_ROOT}/health_check`,
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
   // deprecated since 8.0
@@ -103,6 +108,7 @@ export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/agents`,
   INFO_PATTERN: `${API_ROOT}/agents/{agentId}`,
   UPDATE_PATTERN: `${API_ROOT}/agents/{agentId}`,
+  BULK_UPDATE_AGENT_TAGS_PATTERN: `${API_ROOT}/agents/bulk_update_agent_tags`,
   DELETE_PATTERN: `${API_ROOT}/agents/{agentId}`,
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
@@ -112,6 +118,7 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
+  AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
   // deprecated since 8.0
@@ -119,6 +126,8 @@ export const AGENT_API_ROUTES = {
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
   CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
+  ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
+  LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -148,4 +157,13 @@ export const PRECONFIGURATION_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
   RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
   RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
+};
+
+// Agent download source routes
+export const DOWNLOAD_SOURCE_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/agent_download_sources`,
+  INFO_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+  CREATE_PATTERN: `${API_ROOT}/agent_download_sources`,
+  UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+  DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };

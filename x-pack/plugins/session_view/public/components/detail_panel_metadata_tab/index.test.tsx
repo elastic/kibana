@@ -11,6 +11,7 @@ import {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common/types/process_tree';
 import { DetailPanelMetadataTab } from '.';
 
@@ -40,9 +41,16 @@ const TEST_ORCHESTRATOR_RESOURCE_NAME = 'pdcsi-node-6hvsp';
 const TEST_ORCHESTRATOR_RESOURCE_TYPE = 'pod';
 const TEST_ORCHESTRATOR_RESOURCE_IP = 'PLACEHOLDER_FOR_RESOURCE.IP';
 const TEST_ORCHESTRATOR_NAMESPACE = 'kube-system';
-const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
+const TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE = 'elastic-k8s-cluster';
 const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
-const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
+const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_CLUSTER.NAME';
+
+// Cloud data
+const TEST_CLOUD_INSTANCE_NAME = 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2';
+const TEST_CLOUD_ACCOUNT_ID = 'PLACEHOLDER_FOR_CLOUD_ACCOUNT_ID';
+const TEST_CLOUD_PROJECT_ID = 'elastic-security-dev';
+const TEST_CLOUD_PROVIDER = 'gcp';
+const TEST_CLOUD_REGION = 'us-central1-c';
 
 const TEST_HOST: ProcessEventHost = {
   architecture: TEST_ARCHITECTURE,
@@ -78,15 +86,29 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
     name: TEST_ORCHESTRATOR_RESOURCE_NAME,
     type: TEST_ORCHESTRATOR_RESOURCE_TYPE,
     ip: TEST_ORCHESTRATOR_RESOURCE_IP,
+    parent: {
+      type: TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE,
+    },
   },
   namespace: TEST_ORCHESTRATOR_NAMESPACE,
   cluster: {
     name: TEST_ORCHESTRATOR_CLUSTER_NAME,
     id: TEST_ORCHESTRATOR_CLUSTER_ID,
   },
-  parent: {
-    type: TEST_ORCHESTRATOR_PARENT_TYPE,
+};
+
+const TEST_CLOUD: ProcessEventCloud = {
+  instance: {
+    name: TEST_CLOUD_INSTANCE_NAME,
   },
+  account: {
+    id: TEST_CLOUD_ACCOUNT_ID,
+  },
+  project: {
+    id: TEST_CLOUD_PROJECT_ID,
+  },
+  provider: TEST_CLOUD_PROVIDER,
+  region: TEST_CLOUD_REGION,
 };
 
 describe('DetailPanelMetadataTab component', () => {
@@ -102,13 +124,11 @@ describe('DetailPanelMetadataTab component', () => {
     it('renders DetailPanelMetadataTab correctly (non cloud environment)', async () => {
       renderResult = mockedContext.render(<DetailPanelMetadataTab processHost={TEST_HOST} />);
 
-      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryAllByText('id').length).toBe(1);
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
       expect(renderResult.queryAllByText('name').length).toBe(1);
-      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_IP.join(', '))).toBeVisible();
@@ -116,13 +136,15 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion
-      renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      renderResult.queryByText('Host OS')?.click();
+      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
       expect(renderResult.queryByText('os.kernel')).toBeVisible();
       expect(renderResult.queryByText('os.name')).toBeVisible();
       expect(renderResult.queryByText('os.platform')).toBeVisible();
       expect(renderResult.queryByText('os.version')).toBeVisible();
+      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FAMILY)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FULL)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_KERNEL)).toBeVisible();
@@ -133,6 +155,7 @@ describe('DetailPanelMetadataTab component', () => {
       // Orchestrator and Container should be missing if session came from a Non-cloud env
       expect(renderResult.queryByText('Container')).toBeNull();
       expect(renderResult.queryByText('Orchestrator')).toBeNull();
+      expect(renderResult.queryByText('Cloud')).toBeNull();
     });
 
     it('renders DetailPanelMetadataTab correctly (cloud environment)', async () => {
@@ -141,14 +164,13 @@ describe('DetailPanelMetadataTab component', () => {
           processHost={TEST_HOST}
           processContainer={TEST_CONTAINER}
           processOrchestrator={TEST_ORCHESTRATOR}
+          processCloud={TEST_CLOUD}
         />
       );
 
-      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
-      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_IP.join(', '))).toBeVisible();
@@ -160,13 +182,15 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryAllByText('name').length).toBe(2);
 
       // expand host os accordion
-      renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      renderResult.queryByText('Host OS')?.click();
+      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
       expect(renderResult.queryByText('os.kernel')).toBeVisible();
       expect(renderResult.queryByText('os.name')).toBeVisible();
       expect(renderResult.queryByText('os.platform')).toBeVisible();
       expect(renderResult.queryByText('os.version')).toBeVisible();
+      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FAMILY)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FULL)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_KERNEL)).toBeVisible();
@@ -175,7 +199,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
 
       // expand Container Accordion
-      renderResult.queryByText('Container')?.querySelector('button')?.click();
+      renderResult.queryByText('Container')?.click();
       expect(renderResult.queryByText('image.name')).toBeVisible();
       expect(renderResult.queryByText('image.tag')).toBeVisible();
       expect(renderResult.queryByText('image.hash.all')).toBeVisible();
@@ -186,21 +210,34 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_HASH_ALL)).toBeVisible();
 
       // expand Orchestrator Accordion
-      renderResult.queryByText('Orchestrator')?.querySelector('button')?.click();
+      renderResult.queryByText('Orchestrator')?.click();
       expect(renderResult.queryByText('resource.name')).toBeVisible();
       expect(renderResult.queryByText('resource.type')).toBeVisible();
       expect(renderResult.queryByText('resource.ip')).toBeVisible();
       expect(renderResult.queryByText('namespace')).toBeVisible();
-      expect(renderResult.queryByText('parent.type')).toBeVisible();
+      expect(renderResult.queryByText('resource.parent.type')).toBeVisible();
       expect(renderResult.queryByText('cluster.id')).toBeVisible();
       expect(renderResult.queryByText('cluster.name')).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_NAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_IP)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_NAMESPACE)).toBeVisible();
-      expect(renderResult.queryByText(TEST_ORCHESTRATOR_PARENT_TYPE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_NAME)).toBeVisible();
+
+      // expand Cloud Accordion
+      renderResult.queryByText('Cloud')?.click();
+      expect(renderResult.queryByText('instance.name')).toBeVisible();
+      expect(renderResult.queryByText('provider')).toBeVisible();
+      expect(renderResult.queryByText('region')).toBeVisible();
+      expect(renderResult.queryByText('account.id')).toBeVisible();
+      expect(renderResult.queryByText('project.id')).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_INSTANCE_NAME)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_PROVIDER)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_REGION)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_ACCOUNT_ID)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_PROJECT_ID)).toBeVisible();
     });
   });
 });

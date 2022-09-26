@@ -12,12 +12,15 @@ import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';
 import { IConfigService } from '@kbn/config';
 
-import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
-} from '../elasticsearch/elasticsearch_config';
-import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
+} from '@kbn/core-elasticsearch-server-internal';
+import {
+  type SavedObjectsConfigType,
+  savedObjectsConfig,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
 
 const createGlobalConfig = ({
   elasticsearch,

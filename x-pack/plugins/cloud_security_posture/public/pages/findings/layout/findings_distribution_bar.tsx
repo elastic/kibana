@@ -9,8 +9,8 @@ import { css } from '@emotion/react';
 import {
   EuiHealth,
   EuiBadge,
-  EuiTextColor,
   EuiSpacer,
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
@@ -18,13 +18,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
+import type { Evaluation } from '../../../../common/types';
 
 interface Props {
   total: number;
   passed: number;
   failed: number;
+  distributionOnClick: (evaluation: Evaluation) => void;
   pageStart: number;
   pageEnd: number;
+  type: string;
 }
 
 const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
@@ -33,21 +37,22 @@ export const FindingsDistributionBar = (props: Props) => (
   <div>
     <Counters {...props} />
     <EuiSpacer size="s" />
-    <DistributionBar {...props} />
+    {<DistributionBar {...props} />}
   </div>
 );
 
-const Counters = ({ pageStart, pageEnd, total, failed, passed }: Props) => (
+const Counters = (props: Props) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem>
-      <CurrentPageOfTotal pageStart={pageStart} pageEnd={pageEnd} total={total} />
+      <CurrentPageOfTotal {...props} />
     </EuiFlexItem>
     <EuiFlexItem
+      grow={1}
       css={css`
         align-items: flex-end;
       `}
     >
-      <PassedFailedCounters passed={passed} failed={failed} />
+      <PassedFailedCounters {...props} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -64,14 +69,14 @@ const PassedFailedCounters = ({ passed, failed }: Pick<Props, 'passed' | 'failed
     >
       <Counter
         label={i18n.translate('xpack.csp.findings.distributionBar.totalPassedLabel', {
-          defaultMessage: 'Passed',
+          defaultMessage: 'Passed Findings',
         })}
         color={euiTheme.colors.success}
         value={passed}
       />
       <Counter
         label={i18n.translate('xpack.csp.findings.distributionBar.totalFailedLabel', {
-          defaultMessage: 'Failed',
+          defaultMessage: 'Failed Findings',
         })}
         color={euiTheme.colors.danger}
         value={failed}
@@ -84,38 +89,66 @@ const CurrentPageOfTotal = ({
   pageEnd,
   pageStart,
   total,
-}: Pick<Props, 'pageEnd' | 'pageStart' | 'total'>) => (
+  type,
+}: Pick<Props, 'pageEnd' | 'pageStart' | 'total' | 'type'>) => (
   <EuiTextColor color="subdued">
     <FormattedMessage
       id="xpack.csp.findings.distributionBar.showingPageOfTotalLabel"
-      defaultMessage="Showing {pageStart}-{pageEnd} of {total} Findings"
+      defaultMessage="Showing {pageStart}-{pageEnd} of {total} {type}"
       values={{
         pageStart: <b>{pageStart}</b>,
         pageEnd: <b>{pageEnd}</b>,
         total: <b>{formatNumber(total)}</b>,
+        type,
       }}
     />
   </EuiTextColor>
 );
 
-const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({ passed, failed }) => {
+const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
+  passed,
+  failed,
+  distributionOnClick,
+}) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       css={css`
         height: 8px;
-        background: ${euiTheme.colors.subdued};
+        background: ${euiTheme.colors.subduedText};
       `}
     >
-      <DistributionBarPart value={passed} color={euiTheme.colors.success} />
-      <DistributionBarPart value={failed} color={euiTheme.colors.danger} />
+      <DistributionBarPart
+        value={passed}
+        color={euiTheme.colors.success}
+        distributionOnClick={() => {
+          distributionOnClick(RULE_PASSED);
+        }}
+      />
+      <DistributionBarPart
+        value={failed}
+        color={euiTheme.colors.danger}
+        distributionOnClick={() => {
+          distributionOnClick(RULE_FAILED);
+        }}
+      />
     </EuiFlexGroup>
   );
 };
 
-const DistributionBarPart = ({ value, color }: { value: number; color: string }) => (
-  <div
+const DistributionBarPart = ({
+  value,
+  color,
+  distributionOnClick,
+}: {
+  value: number;
+  color: string;
+  distributionOnClick: () => void;
+}) => (
+  <button
+    onClick={distributionOnClick}
     css={css`
       flex: ${value};
       background: ${color};
@@ -126,10 +159,10 @@ const DistributionBarPart = ({ value, color }: { value: number; color: string })
 
 const Counter = ({ label, value, color }: { label: string; value: number; color: string }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem>
+    <EuiFlexItem grow={1}>
       <EuiHealth color={color}>{label}</EuiHealth>
     </EuiFlexItem>
-    <EuiFlexItem>
+    <EuiFlexItem grow={false}>
       <EuiBadge>{formatNumber(value)}</EuiBadge>
     </EuiFlexItem>
   </EuiFlexGroup>

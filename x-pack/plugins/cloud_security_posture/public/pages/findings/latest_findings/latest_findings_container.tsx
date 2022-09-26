@@ -5,57 +5,94 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import type { DataView } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { number } from 'io-ts';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { Evaluation } from '../../../../common/types';
+import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
+import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
-import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { useLatestFindings } from './use_latest_findings';
 import type { FindingsGroupByNoneQuery } from './use_latest_findings';
 import type { FindingsBaseURLQuery } from '../types';
-import { useFindingsCounter } from '../use_findings_count';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../utils';
-import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
+import {
+  getFindingsPageSizeInfo,
+  getFilters,
+  getPaginationQuery,
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../utils/utils';
+import { PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
-import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
-import { findingsNavigation } from '../../../common/navigation/constants';
+import { useUrlQuery } from '../../../common/hooks/use_url_query';
+import { ErrorCallout } from '../layout/error_callout';
+import { getLimitProperties } from '../utils/get_limit_properties';
 
-export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
+export const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
+  query,
+  filters,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
   pageSize: 10,
 });
 
-export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) => {
-  useCspBreadcrumbs([findingsNavigation.findings_default]);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+const MAX_ITEMS = 500;
 
-  const baseEsQuery = useMemo(
-    () => getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
-    [dataView, urlQuery.filters, urlQuery.query]
+export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+
+  /**
+   * Page URL query to ES query
+   */
+  const baseEsQuery = useBaseEsQuery({
+    dataView,
+    filters: urlQuery.filters,
+    query: urlQuery.query,
+  });
+
+  /**
+   * Page ES query result
+   */
+  const findingsGroupByNone = useLatestFindings({
+    ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: urlQuery.pageSize }),
+    query: baseEsQuery.query,
+    sort: urlQuery.sort,
+    enabled: !baseEsQuery.error,
+  });
+
+  const error = findingsGroupByNone.error || baseEsQuery.error;
+
+  const { isLastLimitedPage, limitedTotalItemCount } = useMemo(
+    () =>
+      getLimitProperties(
+        findingsGroupByNone.data?.total || 0,
+        MAX_ITEMS,
+        urlQuery.pageSize,
+        urlQuery.pageIndex
+      ),
+    [findingsGroupByNone.data?.total, urlQuery.pageIndex, urlQuery.pageSize]
   );
 
-  const findingsCount = useFindingsCounter(baseEsQuery);
-  const findingsGroupByNone = useLatestFindings({
-    ...baseEsQuery,
-    ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: urlQuery.pageSize }),
-    sort: urlQuery.sort,
-  });
-
-  const findingsDistribution = getFindingsDistribution({
-    total: findingsGroupByNone.data?.total,
-    passed: findingsCount.data?.passed,
-    failed: findingsCount.data?.failed,
-    pageIndex: urlQuery.pageIndex,
-    pageSize: urlQuery.pageSize,
-    currentPageSize: findingsGroupByNone.data?.page.length,
-  });
+  const handleDistributionClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: getFilters({
+        filters: urlQuery.filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -64,32 +101,87 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
-        loading={findingsCount.isFetching}
+        loading={findingsGroupByNone.isFetching}
       />
-      <PageWrapper>
-        <LatestFindingsPageTitle />
-        <FindingsGroupBySelector type="default" />
-        {findingsDistribution && <FindingsDistributionBar {...findingsDistribution} />}
-        <EuiSpacer />
-        <FindingsTable
-          data={findingsGroupByNone.data}
-          error={findingsGroupByNone.error}
-          loading={findingsGroupByNone.isFetching}
-          pagination={getPaginationTableParams({
-            pageSize: urlQuery.pageSize,
-            pageIndex: urlQuery.pageIndex,
-            totalItemCount: findingsGroupByNone.data?.total || 0,
-          })}
-          sorting={{
-            sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
-          }}
-          setTableOptions={({ page, sort }) =>
-            setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
-          }
-        />
-      </PageWrapper>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <LatestFindingsPageTitle />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
+          {!error && <FindingsGroupBySelector type="default" />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {error && <ErrorCallout error={error} />}
+      {!error && (
+        <>
+          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
+            <FindingsDistributionBar
+              {...{
+                distributionOnClick: handleDistributionClick,
+                type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+                  defaultMessage: 'Findings',
+                }),
+                total: findingsGroupByNone.data.total,
+                passed: findingsGroupByNone.data.count.passed,
+                failed: findingsGroupByNone.data.count.failed,
+                ...getFindingsPageSizeInfo({
+                  pageIndex: urlQuery.pageIndex,
+                  pageSize: urlQuery.pageSize,
+                  currentPageSize: findingsGroupByNone.data.page.length,
+                }),
+              }}
+            />
+          )}
+          <EuiSpacer />
+          <FindingsTable
+            loading={findingsGroupByNone.isFetching}
+            items={findingsGroupByNone.data?.page || []}
+            pagination={getPaginationTableParams({
+              pageSize: urlQuery.pageSize,
+              pageIndex: urlQuery.pageIndex,
+              totalItemCount: limitedTotalItemCount,
+            })}
+            sorting={{
+              sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+            }}
+            setTableOptions={({ page, sort }) =>
+              setUrlQuery({
+                sort,
+                pageIndex: page.index,
+                pageSize: page.size,
+              })
+            }
+            onAddFilter={(field, value, negate) =>
+              setUrlQuery({
+                pageIndex: 0,
+                filters: getFilters({
+                  filters: urlQuery.filters,
+                  dataView,
+                  field,
+                  value,
+                  negate,
+                }),
+              })
+            }
+          />
+          {isLastLimitedPage && (
+            <>
+              <EuiSpacer size="xxl" />
+              <EuiBottomBar data-test-subj="test-bottom-bar">
+                <EuiText textAlign="center">
+                  <FormattedMessage
+                    id="xpack.csp.findings.latestFindings.bottomBarLabel"
+                    defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+                    values={{
+                      maxItems: MAX_ITEMS,
+                    }}
+                  />
+                </EuiText>
+              </EuiBottomBar>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 };
@@ -97,28 +189,13 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
 const LatestFindingsPageTitle = () => (
   <PageTitle>
     <PageTitleText
-      title={<FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />}
+      title={
+        <CloudPosturePageTitle
+          title={i18n.translate('xpack.csp.findings.latestFindings.latestFindingsPageTitle', {
+            defaultMessage: 'Findings',
+          })}
+        />
+      }
     />
   </PageTitle>
 );
-
-const getFindingsDistribution = ({
-  total,
-  passed,
-  failed,
-  currentPageSize,
-  pageIndex,
-  pageSize,
-}: Record<'currentPageSize' | 'total' | 'passed' | 'failed', number | undefined> &
-  Record<'pageIndex' | 'pageSize', number>) => {
-  if (!number.is(total) || !number.is(passed) || !number.is(failed) || !number.is(currentPageSize))
-    return;
-
-  return {
-    total,
-    passed,
-    failed,
-    pageStart: pageIndex * pageSize + 1,
-    pageEnd: pageIndex * pageSize + currentPageSize,
-  };
-};

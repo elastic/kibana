@@ -6,4 +6,5 @@
  */
 
 export { useGetEndpointDetails } from './endpoint/use_get_endpoint_details';
-export { useShowEndpointResponseActionsConsole } from './endpoint/use_show_endpoint_response_actions_console';
+export { useWithShowEndpointResponder } from './endpoint/use_with_show_endpoint_responder';
+export { useGetEndpointActionList } from './endpoint/use_get_endpoint_action_list';

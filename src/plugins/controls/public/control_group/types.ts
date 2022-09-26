@@ -7,9 +7,15 @@
  */
 
 import { ContainerOutput } from '@kbn/embeddable-plugin/public';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { ControlGroupInput } from '../../common/control_group/types';
 import { CommonControlOutput } from '../types';
 
-export type ControlGroupOutput = ContainerOutput & CommonControlOutput;
+export type ControlGroupOutput = ContainerOutput &
+  Omit<CommonControlOutput, 'dataViewId'> & { dataViewIds: string[] };
+
+// public only - redux embeddable state type
+export type ControlGroupReduxState = ReduxEmbeddableState<ControlGroupInput, ControlGroupOutput>;
 
 export {
   type ControlsPanels,

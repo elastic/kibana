@@ -14,11 +14,11 @@ import { CommentResponseAlertsType } from '../../../../common/api';
 import { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionUsernameWithAvatar } from '../avatar_username';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -28,10 +28,12 @@ type BuilderArgs = Pick<
   | 'onRuleDetailsClick'
   | 'loadingAlertData'
   | 'onShowAlertDetails'
+  | 'userProfiles'
 > & { comment: SnakeToCamelCase<CommentResponseAlertsType> };
 
 const getSingleAlertUserAction = ({
   userAction,
+  userProfiles,
   comment,
   alertData,
   getRuleDetailsHref,
@@ -53,13 +55,9 @@ const getSingleAlertUserAction = ({
   return [
     {
       username: (
-        <UserActionUsernameWithAvatar
-          username={userAction.createdBy.username}
-          fullName={userAction.createdBy.fullName}
-        />
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <SingleAlertCommentEvent
           actionId={userAction.actionId}
@@ -72,7 +70,7 @@ const getSingleAlertUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -94,6 +92,7 @@ const getSingleAlertUserAction = ({
 
 const getMultipleAlertsUserAction = ({
   userAction,
+  userProfiles,
   comment,
   alertData,
   getRuleDetailsHref,
@@ -110,13 +109,9 @@ const getMultipleAlertsUserAction = ({
   return [
     {
       username: (
-        <UserActionUsernameWithAvatar
-          username={userAction.createdBy.username}
-          fullName={userAction.createdBy.fullName}
-        />
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <MultipleAlertsCommentEvent
           actionId={userAction.actionId}
@@ -130,7 +125,7 @@ const getMultipleAlertsUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>

@@ -4,24 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/public';
-
-export interface IQueryPayload {
-  attributes?: {
-    name: string;
-    id: string;
-  };
-}
+import type { SavedObject } from '@kbn/core/public';
+import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: Array<{
-    id: string;
-    name: string;
-    interval: number;
-    ecs_mapping: Record<string, unknown>;
-  }>;
+  queries: Record<string, Omit<PackQueryFormData, 'id'>>;
   version?: number;
   enabled: boolean | undefined;
   created_at: string;
@@ -29,3 +18,9 @@ export type PackSavedObject = SavedObject<{
   updated_at: string;
   updated_by: string | undefined;
 }>;
+
+export type PackItem = PackSavedObject['attributes'] & {
+  id: string;
+  policy_ids: string[];
+  read_only?: boolean;
+};

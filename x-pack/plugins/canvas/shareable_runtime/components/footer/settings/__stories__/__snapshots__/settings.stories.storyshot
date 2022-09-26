@@ -21,11 +21,11 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiPopover euiPopover--anchorUpRight"
+        className="euiPopover emotion-euiPopover"
         id="settings"
       >
         <div
-          className="euiPopover__anchor"
+          className="euiPopover__anchor css-16vtueo-render"
         >
           <button
             aria-label="Settings"
@@ -71,11 +71,11 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiPopover euiPopover--anchorUpRight"
+        className="euiPopover emotion-euiPopover"
         id="settings"
       >
         <div
-          className="euiPopover__anchor"
+          className="euiPopover__anchor css-16vtueo-render"
         >
           <button
             aria-label="Settings"

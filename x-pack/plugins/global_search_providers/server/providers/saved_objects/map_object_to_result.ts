@@ -41,7 +41,7 @@ export const mapToResult = (
   object: SavedObjectsFindResult<unknown>,
   type: SavedObjectsType
 ): GlobalSearchProviderResult => {
-  const { defaultSearchField, getInAppUrl } = type.management ?? {};
+  const { defaultSearchField, getInAppUrl, getTitle } = type.management ?? {};
   if (defaultSearchField === undefined || getInAppUrl === undefined) {
     throw new Error('Trying to map an object from a type without management metadata');
   }
@@ -49,7 +49,7 @@ export const mapToResult = (
     id: object.id,
     // defaultSearchField is dynamic and not 'directly' bound to the generic type of the SavedObject
     // so we are forced to cast the attributes to any to access the properties associated with it.
-    title: (object.attributes as any)[defaultSearchField],
+    title: getTitle ? getTitle(object) : (object.attributes as any)[defaultSearchField],
     type: object.type,
     icon: type.management?.icon ?? undefined,
     url: getInAppUrl(object).path,

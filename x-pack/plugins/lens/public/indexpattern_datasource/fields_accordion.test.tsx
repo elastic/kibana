@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IndexPattern } from './types';
+import { IndexPattern } from '../types';
 import { FieldItem } from './field_item';
 import { FieldsAccordion, FieldsAccordionProps, FieldItemSharedProps } from './fields_accordion';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -19,7 +19,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 describe('Fields Accordion', () => {
   let defaultProps: FieldsAccordionProps;
   let indexPattern: IndexPattern;
-  let core: ReturnType<typeof coreMock['createSetup']>;
+  let core: ReturnType<typeof coreMock['createStart']>;
   let fieldProps: FieldItemSharedProps;
 
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('Fields Accordion', () => {
         },
       ],
     } as IndexPattern;
-    core = coreMock.createSetup();
+    core = coreMock.createStart();
     core.http.post.mockClear();
 
     fieldProps = {

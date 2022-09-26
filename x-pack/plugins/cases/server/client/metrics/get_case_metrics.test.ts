@@ -151,7 +151,7 @@ describe('getCaseMetrics', () => {
       clientArgs
     );
 
-    expect(mockServices.alertsService.executeAggregations).toBeCalledTimes(1);
+    expect(mockServices.services.alertsService.executeAggregations).toBeCalledTimes(1);
   });
 });
 
@@ -209,11 +209,13 @@ function createMockClientArgs() {
   const clientArgs = {
     authorization,
     unsecuredSavedObjectsClient: soClient,
-    caseService,
     logger,
-    attachmentService,
-    alertsService,
-    userActionService,
+    services: {
+      caseService,
+      attachmentService,
+      alertsService,
+      userActionService,
+    },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

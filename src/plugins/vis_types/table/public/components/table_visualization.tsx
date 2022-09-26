@@ -7,11 +7,10 @@
  */
 
 import './table_visualization.scss';
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
-
 import { CoreStart } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TableVisConfig, TableVisData } from '../types';
@@ -22,6 +21,7 @@ import { useUiState } from '../utils';
 interface TableVisualizationComponentProps {
   core: CoreStart;
   handlers: IInterpreterRenderHandlers;
+  renderComplete: () => void;
   visData: TableVisData;
   visConfig: TableVisConfig;
 }
@@ -31,10 +31,14 @@ const TableVisualizationComponent = ({
   handlers,
   visData: { direction, table, tables },
   visConfig,
+  renderComplete,
 }: TableVisualizationComponentProps) => {
-  useEffect(() => {
-    handlers.done();
-  }, [handlers]);
+  useLayoutEffect(() => {
+    // Temporary solution: DataGrid should provide onRender callback
+    setTimeout(() => {
+      renderComplete();
+    }, 300);
+  }, [renderComplete]);
 
   const uiStateProps = useUiState(handlers.uiState as PersistedState);
 
@@ -60,6 +64,7 @@ const TableVisualizationComponent = ({
               tables={tables}
               visConfig={visConfig}
               uiStateProps={uiStateProps}
+              enforceMinWidth={direction === 'column'}
             />
           )}
         </div>

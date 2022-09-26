@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import uuid from 'uuid';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -22,6 +23,10 @@ import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_key
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
+jest.mock('../../lib/snooze/is_snooze_active', () => ({
+  isSnoozeActive: jest.fn(() => true),
 }));
 
 const taskManager = taskManagerMock.createStart();
@@ -124,7 +129,7 @@ describe('bulkEdit()', () => {
 
     mockCreatePointInTimeFinderAsInternalUser();
 
-    unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [existingRule],
     });
 
@@ -145,7 +150,7 @@ describe('bulkEdit()', () => {
   });
   describe('tags operations', () => {
     test('should add new tag', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -184,21 +189,23 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('tags', ['foo', 'test-1']);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            tags: ['foo', 'test-1'],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['foo', 'test-1'],
+            }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
 
     test('should delete tag', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -234,21 +241,23 @@ describe('bulkEdit()', () => {
 
       expect(result.rules[0]).toHaveProperty('tags', []);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            tags: [],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: [],
+            }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
 
     test('should set tags', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -284,17 +293,288 @@ describe('bulkEdit()', () => {
 
       expect(result.rules[0]).toHaveProperty('tags', ['test-1', 'test-2']);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            tags: ['test-1', 'test-2'],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['test-1', 'test-2'],
+            }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
+    });
+  });
+
+  describe('snoozeSchedule operations', () => {
+    const getSnoozeSchedule = () => {
+      return {
+        id: uuid.v4(),
+        duration: 28800000,
+        rRule: {
+          dtstart: '2010-09-19T11:49:59.329Z',
+          count: 1,
+          tzid: 'UTC',
+        },
+      };
+    };
+    test('should add snooze', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              snoozeSchedule: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      const snoozePayload = getSnoozeSchedule();
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: snoozePayload,
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              snoozeSchedule: [snoozePayload],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should delete snooze', async () => {
+      const existingSnooze = [getSnoozeSchedule(), getSnoozeSchedule()];
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              snoozeSchedule: existingSnooze,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'delete',
+            field: 'snoozeSchedule',
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              snoozeSchedule: [],
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should error if adding snooze schedule to rule with 5 schedules', async () => {
+      const existingSnooze = [
+        getSnoozeSchedule(),
+        getSnoozeSchedule(),
+        getSnoozeSchedule(),
+        getSnoozeSchedule(),
+        getSnoozeSchedule(),
+      ];
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              snoozeSchedule: existingSnooze,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              snoozeSchedule: existingSnooze,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      const snoozePayload = getSnoozeSchedule();
+
+      const response = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: snoozePayload,
+          },
+        ],
+      });
+      expect(response.errors.length).toEqual(1);
+      expect(response.errors[0].message).toEqual(
+        'Error updating rule: rule cannot have more than 5 snooze schedules'
+      );
+    });
+
+    test('should ignore siem rules when bulk editing snooze', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            attributes: { ...existingDecryptedRule.attributes, consumer: 'siem' } as any,
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              snoozeSchedule: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      const snoozePayload = getSnoozeSchedule();
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: snoozePayload,
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes as any)
+          .snoozeSchedule
+      ).toBeUndefined();
+    });
+  });
+
+  describe('apiKey operations', () => {
+    test('should bulk update API key', async () => {
+      // Does not generate API key for disabled rules
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(createAPIKeyMock).not.toHaveBeenCalled();
+
+      // Explicitly bulk editing the apiKey will set the api key, even if the rule is disabled
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        operations: [
+          {
+            field: 'apiKey',
+            operation: 'set',
+          },
+        ],
+      });
+
+      expect(createAPIKeyMock).toHaveBeenCalled();
     });
   });
 
@@ -331,14 +611,12 @@ describe('bulkEdit()', () => {
             {
               type: 'literal',
               value: 'alert.attributes.tags',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'APM',
-            },
-            {
-              type: 'literal',
-              value: true,
+              isQuoted: true,
             },
           ],
           function: 'is',
@@ -383,14 +661,12 @@ describe('bulkEdit()', () => {
                 {
                   type: 'literal',
                   value: 'alert.id',
+                  isQuoted: false,
                 },
                 {
                   type: 'literal',
                   value: 'alert:2',
-                },
-                {
-                  type: 'literal',
-                  value: false,
+                  isQuoted: false,
                 },
               ],
               function: 'is',
@@ -401,14 +677,12 @@ describe('bulkEdit()', () => {
                 {
                   type: 'literal',
                   value: 'alert.id',
+                  isQuoted: false,
                 },
                 {
                   type: 'literal',
                   value: 'alert:3',
-                },
-                {
-                  type: 'literal',
-                  value: false,
+                  isQuoted: false,
                 },
               ],
               function: 'is',
@@ -544,14 +818,12 @@ describe('bulkEdit()', () => {
             {
               type: 'literal',
               value: 'alert.attributes.tags',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'APM',
-            },
-            {
-              type: 'literal',
-              value: true,
+              isQuoted: true,
             },
           ],
           function: 'is',
@@ -582,7 +854,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkUpdate failed', async () => {
+    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkCreate failed', async () => {
       createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
@@ -593,7 +865,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      unsecuredSavedObjectsClient.bulkUpdate.mockImplementation(() => {
+      unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
         throw new Error('Fail');
       });
 
@@ -629,7 +901,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -803,7 +1075,7 @@ describe('bulkEdit()', () => {
         minimumScheduleInterval: { value: '3m', enforce: true },
       });
 
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [],
       });
 
@@ -827,7 +1099,7 @@ describe('bulkEdit()', () => {
 
   describe('paramsModifier', () => {
     test('should update index pattern params', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -864,19 +1136,21 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('params.index', ['test-index-*']);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            params: expect.objectContaining({
-              index: ['test-index-*'],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              params: expect.objectContaining({
+                index: ['test-index-*'],
+              }),
             }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
   });
 
@@ -897,6 +1171,83 @@ describe('bulkEdit()', () => {
       ).rejects.toThrow(
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
       );
+    });
+  });
+
+  describe('task manager', () => {
+    test('should call task manager method bulkCreateSchedules if operation set new schedules', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(['task-123'], {
+        interval: '10m',
+      });
+    });
+
+    test('should not call task manager method bulkCreateSchedules if operation is not set schedule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'tags',
+            operation: 'set',
+            value: ['test-tag'],
+          },
+        ],
+      });
+
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
   });
 });

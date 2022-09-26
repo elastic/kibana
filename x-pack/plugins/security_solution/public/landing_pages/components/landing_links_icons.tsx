@@ -8,11 +8,12 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } fr
 import React from 'react';
 import styled from 'styled-components';
 
+import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
 import {
   SecuritySolutionLinkAnchor,
   withSecuritySolutionLink,
 } from '../../common/components/links';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];
@@ -29,13 +30,13 @@ const Description = styled(EuiFlexItem)`
 `;
 
 const StyledEuiTitle = styled(EuiTitle)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGrid columns={3} gutterSize="xl">
-    {items.map(({ title, description, id, icon }) => (
+    {items.map(({ title, description, id, icon, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <EuiFlexGroup
           direction="column"
@@ -50,9 +51,18 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StyledEuiTitle size="xxs">
-              <SecuritySolutionLinkAnchor deepLinkId={id}>
-                <h2>{title}</h2>
-              </SecuritySolutionLinkAnchor>
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <SecuritySolutionLinkAnchor deepLinkId={id}>
+                    <h2>{title}</h2>
+                  </SecuritySolutionLinkAnchor>
+                </EuiFlexItem>
+                {isBeta && (
+                  <EuiFlexItem grow={false}>
+                    <NavItemBetaBadge text={betaOptions?.text} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </StyledEuiTitle>
           </EuiFlexItem>
           <Description>

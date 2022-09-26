@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RouteSpyState } from './types';
+import { SecurityPageName } from '../../../app/types';
+import type { RouteSpyState } from './types';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 
@@ -35,7 +36,7 @@ export const generateHistoryMock = () => ({
 export const mockHistory = generateHistoryMock();
 
 export const generateRoutesMock = (): RouteSpyState => ({
-  pageName: '',
+  pageName: SecurityPageName.noPage,
   detailName: undefined,
   tabName: undefined,
   search: '',

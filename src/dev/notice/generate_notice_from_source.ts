@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import vfs from 'vinyl-fs';
+import { readFile } from 'fs/promises';
+import { relative } from 'path';
+import globby from 'globby';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
@@ -30,45 +33,37 @@ interface Options {
  * into the repository.
  */
 export async function generateNoticeFromSource({ productName, directory, log }: Options) {
-  const globs = ['**/*.{js,less,css,ts,tsx}'];
+  const select = [
+    '**/*.{js,mjs,scss,css,ts,tsx}',
+    '!{node_modules,build,dist,data,built_assets,shared_built_assets}/**',
+    '!packages/*/{node_modules,build,dist}/**',
+    '!src/plugins/*/{node_modules,build,dist}/**',
+    '!x-pack/{node_modules,build,dist,data}/**',
+    '!x-pack/packages/*/{node_modules,build,dist}/**',
+    '!x-pack/plugins/**/{node_modules,build,dist}/**',
+    '!**/target/**',
+  ];
 
-  const options = {
-    cwd: directory,
-    nodir: true,
-    ignore: [
-      '{node_modules,build,dist,data,built_assets}/**',
-      'packages/*/{node_modules,build,dist}/**',
-      'src/plugins/*/{node_modules,build,dist}/**',
-      'x-pack/{node_modules,build,dist,data}/**',
-      'x-pack/packages/*/{node_modules,build,dist}/**',
-      'x-pack/plugins/**/{node_modules,build,dist}/**',
-      '**/target/**',
-    ],
-  };
-
-  log.debug('vfs.src globs', globs);
-  log.debug('vfs.src options', options);
   log.info(`Searching ${directory} for multi-line comments starting with @notice`);
 
-  const files = vfs.src(globs, options);
-  const noticeComments: string[] = [];
-  await new Promise((resolve, reject) => {
-    files
-      .on('data', (file) => {
-        log.verbose(`Checking for @notice comments in ${file.relative}`);
-
-        const source = file.contents.toString('utf8');
-        let match;
-        while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
-          log.info(`Found @notice comment in ${file.relative}`);
-          if (!noticeComments.includes(match[1])) {
-            noticeComments.push(match[1]);
-          }
-        }
-      })
-      .on('error', reject)
-      .on('end', resolve);
+  const files = globby.stream(select, {
+    cwd: directory,
+    followSymbolicLinks: false,
+    absolute: true,
   });
+  const noticeComments: string[] = [];
+  for await (const file of files) {
+    const source = await readFile(file, 'utf-8');
+    const relativeFile = relative(directory, file.toString());
+    log.verbose(`Checking for @notice comments in ${relativeFile}`);
+    let match;
+    while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
+      log.info(`Found @notice comment in ${relativeFile}`);
+      if (!noticeComments.includes(match[1])) {
+        noticeComments.push(match[1]);
+      }
+    }
+  }
 
   let noticeText = '';
   noticeText += `${productName}\n`;

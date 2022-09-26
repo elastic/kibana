@@ -73,6 +73,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       loadTestFile(require.resolve('./smokescreen'));
     } else {
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./ad_hoc_data_view'));
       loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));

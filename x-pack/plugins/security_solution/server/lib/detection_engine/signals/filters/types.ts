@@ -5,18 +5,15 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
-
 import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListClient } from '@kbn/lists-plugin/server';
-import { BuildRuleMessage } from '../rule_messages';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
-  logger: Logger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   events: Array<estypes.SearchHit<T>>;
-  buildRuleMessage: BuildRuleMessage;
 }
 
 export type FilterEventsAgainstListReturn<T> = [
@@ -30,8 +27,7 @@ export interface CreateSetToFilterAgainstOptions<T> {
   listId: string;
   listType: Type;
   listClient: ListClient;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
 export interface FilterEventsOptions<T> {
@@ -43,8 +39,7 @@ export interface CreateFieldAndSetTuplesOptions<T> {
   events: Array<estypes.SearchHit<T>>;
   exceptionItem: ExceptionListItemSchema;
   listClient: ListClient;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
 export interface FieldSet {

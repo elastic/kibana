@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  CreateExceptionListSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,

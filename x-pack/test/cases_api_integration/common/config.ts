@@ -21,6 +21,7 @@ interface CreateTestConfigOptions {
 }
 
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
   '.jira',

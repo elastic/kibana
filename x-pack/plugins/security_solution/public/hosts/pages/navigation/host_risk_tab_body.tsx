@@ -9,20 +9,27 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { HostsComponentsQueryProps } from './types';
+import { last } from 'lodash/fp';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
+import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../../../common/components/risk_score_over_time';
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
+import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { hostsModel, hostsSelectors } from '../../store';
+import type { State } from '../../../common/store';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const QUERY_ID = HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE;
@@ -32,6 +39,13 @@ const HostRiskTabBodyComponent: React.FC<
     hostName: string;
   }
 > = ({ hostName, startDate, endDate, setQuery, deleteQuery }) => {
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.details)
+  );
   const { buttonHref } = useDashboardButtonHref({
     from: startDate,
     to: endDate,
@@ -46,13 +60,18 @@ const HostRiskTabBodyComponent: React.FC<
     [startDate, endDate]
   );
 
+  const filterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
   const { toggleStatus: overTimeToggleStatus, setToggleStatus: setOverTimeToggleStatus } =
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
 
-  const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useHostRiskScore({
+    filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,
@@ -81,7 +100,25 @@ const HostRiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  const rules = data && data.length > 0 ? data[data.length - 1].risk_stats.rule_risks : [];
+  const lastHostRiskItem = last(data);
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
+
+  if (isDeprecated) {
+    return (
+      <RiskScoresDeprecated
+        entityType={RiskScoreEntity.host}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
+  }
+
+  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+  }
 
   return (
     <>
@@ -105,7 +142,7 @@ const HostRiskTabBodyComponent: React.FC<
             queryId={QUERY_ID}
             toggleStatus={contributorsToggleStatus}
             toggleQuery={toggleContributorsQuery}
-            rules={rules}
+            rules={lastHostRiskItem ? lastHostRiskItem.host.risk.rule_risks : []}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

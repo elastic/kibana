@@ -95,12 +95,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
-      await PageObjects.lens.switchToVisualization('lnsMetric');
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 
     it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
@@ -125,23 +125,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
       await PageObjects.lens.switchToVisualization('line');
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'geo.src',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.src',
+      });
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'median',
-          field: 'bytes',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'median',
+        field: 'bytes',
+      });
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
@@ -280,13 +274,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
+      expect(data?.axes?.y?.[1].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
 
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
+      expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
@@ -308,23 +302,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.createLayer();
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'geo.src',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.src',
+      });
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
 
       await PageObjects.lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-asDonut > lnsSuggestion');
@@ -515,6 +503,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.editDimensionFormat('Number');
       await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.waitForVisualization();
 
       const values = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))

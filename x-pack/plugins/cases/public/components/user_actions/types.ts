@@ -6,6 +6,7 @@
  */
 
 import { EuiCommentProps } from '@elastic/eui';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { SnakeToCamelCase } from '../../../common/types';
 import { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
@@ -15,12 +16,16 @@ import { UserActionMarkdownRefObject } from './markdown_form';
 import { CasesNavigation } from '../links';
 import { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { CurrentUserProfile } from '../types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   data: Case;
-  fetchUserActions: () => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
@@ -29,9 +34,7 @@ export interface UserActionTreeProps {
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
-  updateCase: (newCase: Case) => void;
   useFetchAlertData: UseFetchAlertData;
-  userCanCrud: boolean;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
@@ -39,11 +42,14 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 
 export interface UserActionBuilderArgs {
   caseData: Case;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   userAction: CaseUserActions;
   caseServices: CaseServices;
   comments: Comment[];
   index: number;
-  userCanCrud: boolean;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
   >;

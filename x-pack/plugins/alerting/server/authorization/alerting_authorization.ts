@@ -31,8 +31,10 @@ export enum ReadOperations {
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
+  GetActionErrorLog = 'getActionErrorLog',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
+  RunSoon = 'runSoon',
 }
 
 export enum WriteOperations {

@@ -6,7 +6,7 @@
  */
 
 import { translation } from './selectors';
-import { CameraState, Vector2 } from '../../types';
+import type { CameraState, Vector2 } from '../../types';
 import { distance } from '../../models/vector2';
 
 /**

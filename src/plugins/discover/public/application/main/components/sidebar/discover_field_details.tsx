@@ -15,14 +15,14 @@ import { Bucket, FieldDetails } from './types';
 
 interface DiscoverFieldDetailsProps {
   field: DataViewField;
-  indexPattern: DataView;
+  dataView: DataView;
   details: FieldDetails;
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldDetails({
   field,
-  indexPattern,
+  dataView,
   details,
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
@@ -43,7 +43,7 @@ export function DiscoverFieldDetails({
           </div>
           <EuiSpacer size="xs" />
           <EuiText size="xs">
-            {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
+            {onAddFilter && !dataView.metaFields.includes(field.name) && !field.scripted ? (
               <EuiLink
                 onClick={() => onAddFilter('_exists_', field.name, '+')}
                 data-test-subj="onAddFilterButton"

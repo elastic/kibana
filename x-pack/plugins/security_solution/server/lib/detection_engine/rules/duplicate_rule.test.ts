@@ -6,8 +6,8 @@
  */
 
 import uuid from 'uuid';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleParams } from '../schemas/rule_schemas';
 import { duplicateRule } from './duplicate_rule';
 
 jest.mock('uuid', () => ({
@@ -34,6 +34,7 @@ describe('duplicateRule', () => {
       outputIndex: '.siem-signals-default',
       meta: undefined,
       maxSignals: 100,
+      responseActions: [],
       relatedIntegrations: [],
       requiredFields: [],
       riskScore: 42,
@@ -58,6 +59,8 @@ describe('duplicateRule', () => {
       timelineTitle: undefined,
       ruleNameOverride: undefined,
       timestampOverride: undefined,
+      timestampOverrideFallbackDisabled: undefined,
+      dataViewId: undefined,
     },
     schedule: {
       interval: '5m',

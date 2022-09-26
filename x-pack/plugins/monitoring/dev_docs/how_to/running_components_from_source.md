@@ -20,7 +20,7 @@ For metricbeat collection, omit the monitoring settings.
 
 Optionally set `--max-workers=1` for less terminal noise once the initial build is complete.
 
-The passwords won't be the usual "changeme" so run this to set them for use with typical kibana dev settings:
+The passwords won't be the usual "changeme" so run this to set them for use with typical Kibana dev settings:
 
 ```shell
 curl -k -u elastic-admin:elastic-password -H 'Content-Type: application/json' \
@@ -31,7 +31,10 @@ curl -k -u elastic:changeme -H 'Content-Type: application/json' \
 
 ### Multi-cluster tests (for CCR/CCS or listing)
 
-For multi-cluster tests its best to create a package first:
+To setup multiple clusters we'll start by running a single node cluster first, this generates some config files that we can edit and copy when adding
+more nodes or clusters.
+
+For multi-cluster tests it's best to create a package first:
 
 ```shell
 ./gradlew localDistro
@@ -40,13 +43,19 @@ For multi-cluster tests its best to create a package first:
 Then move into the distro path:
 
 ```shell
-cd build/distribution/local/*
+cd "$(ls -1dt build/distribution/local/elasticsearch-* | head -n1)"
 ```
 
-Then start the server (for example with internal collection enabled):
+Then start the server, with or without internal collection enabled:
 
 ```shell
 ./bin/elasticsearch -E cluster.name=main -E xpack.license.self_generated.type=trial -E xpack.monitoring.collection.enabled=true -E xpack.monitoring.exporters.id0.type=local
+```
+
+Or:
+
+```shell
+./bin/elasticsearch -E xpack.license.self_generated.type=trial
 ```
 
 Once it shows the generated password, stop the server (Ctrl+C) and disable SSL by changing this entry in `config/elasticsearch.yml`:
@@ -65,10 +74,10 @@ curl -u elastic:changeme -H 'Content-Type: application/json' \
 http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
 ```
 
-To start the second server (in another terminal from the same directory), first copy the config and export the new location as `ES_PATH_CONF`
+To start the second server (in another terminal from the same directory), run the commands below:
 
 ```shell
-export ES_PATH_CONF=config2
+export ES_PATH_CONF=config-secondary
 mkdir -p "${ES_PATH_CONF}"
 cp -r config/* "${ES_PATH_CONF}"
 ```
@@ -79,23 +88,28 @@ To report internal collection to the main server, you also need to add the passw
 echo changeme | ./bin/elasticsearch-keystore add xpack.monitoring.exporters.id0.auth.secure_password
 ```
 
-And finally start the server
+And finally start the server, with or without internal collection enabled (make sure ES_PATH_CONF is still set to `config-secondary`):
 
 ```shell
-./bin/elasticsearch -E cluster.name=secondary -E http.port=9201 -E transport.port=9301 -E path.data=data2 -E xpack.license.self_generated.type=trial \
+./bin/elasticsearch -E cluster.name=secondary -E http.port=9210 -E transport.port=9310 -E path.data=data-secondary -E xpack.license.self_generated.type=trial \
                     -E xpack.monitoring.collection.enabled=true \
                     -E xpack.monitoring.exporters.id0.type=http -E xpack.monitoring.exporters.id0.host=http://localhost:9200 \
                     -E xpack.monitoring.exporters.id0.auth.username=elastic \
                     -E xpack.monitoring.exporters.id0.ssl.verification_mode=none
 ```
 
+Or:
+```shell
+./bin/elasticsearch -E cluster.name=secondary -E http.port=9210 -E transport.port=9310 -E path.data=data2 -E xpack.license.self_generated.type=trial
+```
+
 You'll likely want to reset the passwords for the secondary cluster as well:
 
 ```shell
 curl -k -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
-  http://localhost:9201/_security/user/elastic/_password -d'{"password": "changeme"}'
+  http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme"}'
 curl -k -u elastic:changeme -H 'Content-Type: application/json' \
-  http://localhost:9201/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+  http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme"}'
 ```
 
 For metricbeat collection, omit the monitoring settings, provide both cluster hosts to the elasticsearch metricbeat module config (see [metricbeat](#metricbeat) section below), and remove the exporter password from the keychain:
@@ -106,23 +120,23 @@ For metricbeat collection, omit the monitoring settings, provide both cluster ho
 
 #### CCR configuration
 
-Once you have two clusters going you can use something like this to configure the remote (or use kibana).
+Once you have two clusters going you can use something like this to configure the remote (or use Kibana).
 
 ```
 curl -u elastic:changeme -H 'Content-Type: application/json' \
-  -XPUT -d'{"persistent": {"cluster": {"remote": {"secondary": {"seeds": ["127.0.0.1:9301"]}}}}}' \
+  -XPUT -d'{"persistent": {"cluster": {"remote": {"secondary": {"seeds": ["127.0.0.1:9310"]}}}}}' \
   http://localhost:9200/_cluster/settings
 ```
 
 Create an index on the secondary cluster:
 
 ```
-curl -XPOST -H'Content-Type: application/json' -d'{"some": "stuff"}' -u elastic:changeme http://localhost:9201/stuff/_doc
+curl -XPOST -H'Content-Type: application/json' -d'{"some": "stuff"}' -u elastic:changeme http://localhost:9210/stuff/_doc
 ```
 
-Then use the "Cross-Cluster Replication" kibana UI to set up a follower index (`stuff-replica`) in the main cluster.
+Then use the "Cross-Cluster Replication" Kibana UI to set up a follower index (`stuff-replica`) in the main cluster.
 
-Note that the replica may show as "paused" for the first few seconds of replication.
+Note that the replica may show as "paused" for the first few seconds of replication. Wait and refresh the page.
 
 You can `POST` some additional documents to the secondary cluster ensure you have something in the "Ops synced" metrics on stack monitoring.
 
@@ -130,17 +144,181 @@ The [CCR Tutorial](https://www.elastic.co/guide/en/elasticsearch/reference/curre
 
 ### Machine Learning configuration
 
+Note: You might want to skip to the Beats section first to gather data to run the ML job on.
+
 If you used one of the above methods to launch Elasticsearch it should already be capable of running ML jobs. For cloud configurations, make sure your deployment includes at least one ML node (or has auto-scaled one) before you attempt to monitor ML jobs.
 
-You can create job using the machine learning UI in kibana. Select (or create) a data view that's getting some data ingested. Create a "Single metric" job that counts the documents being ingested. You can push the "Use full data" button as well, since you probably have a small test data set.
+You can create job using the machine learning UI in Kibana. Select (or create) a data view that's getting some data ingested. Create a "Single metric" job that counts the documents being ingested. You can push the "Use full data" button as well, since you probably have a small test data set.
+
+Note: There seems to be a router bug that throws you back to the overview page when clicking "Use full data", just try again.
 
 Once the job is created push the "Start job running in real time". This will help exercise the active-job state in Stack Monitoring UI.
+
+### Multi-node configuration
+
+This is a little trickier, but possible.
+
+As noted [in the public docs](https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-discovery-bootstrap-cluster.html) be careful about the presence of any old `data*` or `config*` directories. The commands below should work on the first run, but if you have previously started any other clusters with the same paths, they might fail. Elasticsearch won't start if it detects the possibility of data loss due to incorrect cluster bootstrapping.
+
+Here's an example setting up a 3-node `main` cluster across 3 terminal windows, assuming you've already started an initial cluster and set `xpack.security.http.ssl` set to false in the config as above.
+
+Note that the first two nodes will pause after initial setup, waiting for the last one to become available.
+
+In the first terminal run this for node main-0:
+
+```
+export ES_PATH_CONF=config-main-0
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=main -Enode.name=main-0 \
+  -E http.port=9200 -E transport.port=9300 -E path.data=data-main-0 \
+  -Ediscovery.seed_hosts=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302
+```
+
+This will hold waiting for a second node.
+
+In the second terminal run this for node main-1:
+
+```
+export ES_PATH_CONF=config-main-1
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=main -Enode.name=main-1 \
+  -E http.port=9201 -E transport.port=9301 -E path.data=data-main-1 \
+  -Ediscovery.seed_hosts=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302
+```
+
+At this point, the 2 nodes will elect a master which will print out the password for the `elastic` user. You can use this to then reset the password on any of the nodes, the same as above, like so:
+
+```
+curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
+http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme"}'
+curl -u elastic:changeme -H 'Content-Type: application/json' \
+http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+```
+
+Then in the third terminal run this for node main-2:
+
+```
+export ES_PATH_CONF=config-main-2
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=main -Enode.name=main-2 \
+  -E http.port=9202 -E transport.port=9302 -E path.data=data-main-2 \
+  -Ediscovery.seed_hosts=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302
+```
+
+One the third node is booted you should be able to see all 3 in the nodes list of any instance. You can confirm this with:
+
+```
+curl -u elastic:changeme localhost:9200/_cat/nodes
+```
+
+Starting a 3 node secondary cluster is a similar process, included here for easy copy-paste.
+
+In a terminal for secondary-0 run:
+
+```
+export ES_PATH_CONF=config-secondary-0
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=secondary -Enode.name=secondary-0 \
+  -E http.port=9210 -E transport.port=9310 -E path.data=data-secondary-0 \
+  -Ediscovery.seed_hosts=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312
+```
+
+For secondary-1 run:
+
+```
+export ES_PATH_CONF=config-secondary-1
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=secondary -Enode.name=secondary-1 \
+  -E http.port=9211 -E transport.port=9311 -E path.data=data-secondary-1 \
+  -Ediscovery.seed_hosts=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312
+```
+
+At this point you can reset the password via port 9210:
+
+```
+curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
+http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme"}'
+curl -u elastic:changeme -H 'Content-Type: application/json' \
+http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+```
+
+Then for secondary-2 run:
+
+```
+export ES_PATH_CONF=config-secondary-2
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=secondary -Enode.name=secondary-2 \
+  -E http.port=9212 -E transport.port=9312 -E path.data=data-secondary-2 \
+  -Ediscovery.seed_hosts=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312
+```
+
+Note that all 6 nodes will need to be in the metricbeat config if you want to run the Stack Monitoring UI as well. Here's an example `metricbeat.multinode.yaml` you can use as a starting point:
+
+```yaml
+http.enabled: true
+
+metricbeat.modules:
+  - module: system
+
+  - module: elasticsearch
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      # main
+      - "localhost:9200"
+      - "localhost:9201"
+      - "localhost:9202"
+      # secondary
+      - "localhost:9210"
+      - "localhost:9211"
+      - "localhost:9212"
+    username: "elastic"
+    password: "changeme"
+
+  - module: kibana
+    xpack.enabled: true
+    basepath: "/ftw"
+    period: 10s
+    hosts: [ "localhost:5601" ]
+    username: "elastic"
+    password: "changeme"
+
+  - module: beat
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      # filebeat
+      - "http://localhost:5068"
+
+output.elasticsearch:
+  hosts: [ "localhost:9200" ]
+  username: "elastic"
+  password: "changeme"
+```
 
 ## Kibana
 
 See the [local setup](local_setup.md) guide for running from source.
 
-If you need to run kibana from a release snapshot on macOS, note that you'll likely need to run `xattr -r -d com.apple.quarantine node/bin/node` to be able to run the packaged node runtime.
+If you need to run Kibana from a release snapshot on macOS, note that you'll likely need to run `xattr -r -d com.apple.quarantine node/bin/node` to be able to run the packaged node runtime.
 
 ## Beats
 
@@ -170,7 +348,7 @@ metricbeat.modules:
       # main
       - "localhost:9200"
       # secondary
-      - "localhost:9201"
+      - "localhost:9210"
     username: "elastic"
     password: "changeme"
 
@@ -265,8 +443,8 @@ filebeat.modules:
     server:
       enabled: true
       var.paths:
-        - ../../elasticsearch/build/distribution/local/elasticsearch-8.1.0-SNAPSHOT/logs/*.log
-        - ../../elasticsearch/build/distribution/local/elasticsearch-8.1.0-SNAPSHOT/logs/*_server.json
+        - ../../elasticsearch/build/distribution/local/elasticsearch-*-SNAPSHOT/logs/*.log
+        - ../../elasticsearch/build/distribution/local/elasticsearch-*-SNAPSHOT/logs/*_server.json
 
 output.elasticsearch:
   hosts: [ "http://localhost:9200" ]
@@ -403,7 +581,7 @@ So far it seems the easiest way to run enterprise search is via the docker conta
 
 These instructions enable monitoring using a version of metricbeat that is packaged along with enterprise search.
 
-First add `enterpriseSearch.host: 'http://localhost:3002'` to your kibana config to enable the enterprise search UI.
+First add `enterpriseSearch.host: 'http://localhost:3002'` to your Kibana config to enable the enterprise search UI.
 
 Then run the container. Note that this includes a `kibana.host` setting which may vary depending on your base path:
 

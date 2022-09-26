@@ -11,7 +11,7 @@ import { useKibana } from '../lib/kibana';
 import { errorToToaster, useStateToaster } from '../components/toasters';
 
 import * as i18n from './translations';
-import { IndexPatternSavedObject } from './types';
+import type { IndexPatternSavedObject } from './types';
 import { getIndexPatterns } from './api/api';
 
 type Return = [boolean, IndexPatternSavedObject[]];

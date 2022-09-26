@@ -12,6 +12,8 @@ import type {
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
@@ -78,7 +80,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly spaceId: string;
   private readonly types: string[];
   private readonly spacesClient: ISpacesClient;
-  public readonly errors: SavedObjectsClientContract['errors'];
+  public readonly errors: typeof SavedObjectsErrorHelpers;
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, getSpacesService, typeRegistry } = options;
@@ -90,7 +92,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
-    this.errors = baseClient.errors;
+    this.errors = SavedObjectsErrorHelpers;
   }
 
   async checkConflicts(
@@ -134,6 +136,17 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.delete(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  async bulkDelete<T = unknown>(
+    objects: SavedObjectsBulkDeleteObject[] = [],
+    options: SavedObjectsBulkDeleteOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.bulkDelete(objects, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

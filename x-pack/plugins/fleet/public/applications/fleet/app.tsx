@@ -27,7 +27,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz, useFlyoutContext } from './hooks';
+import { useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -58,6 +58,7 @@ import { MissingESRequirementsPage } from './sections/agents/agent_requirements_
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -303,6 +304,7 @@ const FleetTopNav = memo(
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
+    const fleetStatus = useFleetStatus();
 
     return (
       <>
@@ -324,6 +326,10 @@ export const AppRoutes = memo(
 
           <Route path={FLEET_ROUTING_PATHS.settings}>
             <SettingsApp />
+          </Route>
+
+          <Route path={FLEET_ROUTING_PATHS.debug}>
+            <DebugPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}
@@ -356,7 +362,11 @@ export const AppRoutes = memo(
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
-              defaultMode="standalone"
+              defaultMode={
+                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                  ? 'managed'
+                  : 'standalone'
+              }
               isIntegrationFlow={true}
               onClose={() => flyoutContext.closeEnrollmentFlyout()}
             />

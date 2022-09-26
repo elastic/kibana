@@ -10,12 +10,10 @@ import { omit } from 'lodash/fp';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
 import { useSetBreadcrumbs } from '../breadcrumbs';
-import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { GenericNavRecord } from '../types';
+import type { GenericNavRecord } from '../types';
 
 /**
  * @description - This hook provides the structure necessary by the KibanaPageTemplate for rendering the primary security_solution side navigation.
@@ -23,8 +21,7 @@ import { GenericNavRecord } from '../types';
  */
 export const useSecuritySolutionNavigation = () => {
   const [routeProps] = useRouteSpy();
-  const urlMapState = makeMapStateToProps();
-  const { urlState } = useDeepEqualSelector(urlMapState);
+
   const {
     chrome,
     application: { getUrlForApp, navigateToUrl },
@@ -32,7 +29,12 @@ export const useSecuritySolutionNavigation = () => {
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
-  const disabledNavTabs = [...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : [])];
+  const disabledNavTabs = [
+    ...(!useIsExperimentalFeatureEnabled('kubernetesEnabled') ? ['kubernetes'] : []),
+    ...(!useIsExperimentalFeatureEnabled('threatIntelligenceEnabled')
+      ? ['threat-intelligence']
+      : []),
+  ];
   const enabledNavTabs: GenericNavRecord = omit(disabledNavTabs, navTabs);
 
   const setBreadcrumbs = useSetBreadcrumbs();
@@ -70,14 +72,7 @@ export const useSecuritySolutionNavigation = () => {
   ]);
 
   return usePrimaryNavigation({
-    query: urlState.query,
-    filters: urlState.filters,
     navTabs: enabledNavTabs,
     pageName,
-    sourcerer: urlState.sourcerer,
-    savedQuery: urlState.savedQuery,
-    tabName,
-    timeline: urlState.timeline,
-    timerange: urlState.timerange,
   });
 };

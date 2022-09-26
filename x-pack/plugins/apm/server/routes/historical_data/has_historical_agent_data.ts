@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../lib/helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
@@ -22,6 +22,7 @@ export async function hasHistoricalAgentData(setup: Setup) {
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 0,
     },
   };

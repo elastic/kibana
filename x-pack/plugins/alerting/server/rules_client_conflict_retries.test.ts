@@ -141,9 +141,9 @@ async function enable(success: boolean) {
     return expectConflict(success, err);
   }
 
-  // a successful enable call makes 2 calls to update, so that's 3 total,
-  // 1 with conflict + 2 on success
-  expectSuccess(success, 3);
+  // a successful enable call makes 1 call to update, so with
+  // conflict, we would expect 1 on conflict, 1 on success
+  expectSuccess(success, 2);
 }
 
 async function disable(success: boolean) {
@@ -310,7 +310,7 @@ beforeEach(() => {
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
 
-  taskManager.runNow.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '' });
   taskManager.schedule.mockResolvedValue({
     id: 'scheduled-task-id',
     scheduledAt: new Date(),

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
@@ -25,6 +25,7 @@ import {
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 const supportedTypes = new Set([
   'string',
@@ -42,7 +43,7 @@ const SCALE = 'ratio';
 const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
       defaultMessage: 'Unique count of {name}',
@@ -53,7 +54,9 @@ function ofName(name: string, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    reducedTimeRange
   );
 }
 
@@ -65,11 +68,17 @@ export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternCol
   };
 }
 
-export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
+export const cardinalityOperation: OperationDefinition<
+  CardinalityIndexPatternColumn,
+  'field',
+  {},
+  true
+> = {
   type: OPERATION_TYPE,
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
   }),
+  allowAsReference: true,
   input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -84,6 +93,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
@@ -97,11 +107,16 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   },
   filterable: true,
   shiftable: true,
+  canReduceTimeRange: true,
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.timeShift,
+      column.reducedTimeRange
+    ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -109,6 +124,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
@@ -123,41 +139,39 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
-        optionElement: (
-          <>
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                defaultMessage: 'Hide zero values',
-              })}
-              labelProps={{
-                style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
-                },
-              }}
-              checked={Boolean(currentColumn.params?.emptyAsNull)}
-              onChange={() => {
-                updateLayer(
-                  updateColumnParam({
-                    layer,
-                    columnId,
-                    paramName: 'emptyAsNull',
-                    value: !currentColumn.params?.emptyAsNull,
-                  })
-                );
-              }}
-              compressed
-            />
-          </>
+        inlineElement: (
+          <EuiSwitch
+            label={
+              <EuiText size="xs">
+                {i18n.translate('xpack.lens.indexPattern.hideZero', {
+                  defaultMessage: 'Hide zero values',
+                })}
+              </EuiText>
+            }
+            labelProps={{
+              style: {
+                fontWeight: euiThemeVars.euiFontWeightMedium,
+              },
+            }}
+            checked={Boolean(currentColumn.params?.emptyAsNull)}
+            onChange={() => {
+              paramEditorUpdater(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'emptyAsNull',
+                  value: !currentColumn.params?.emptyAsNull,
+                })
+              );
+            }}
+            compressed
+          />
         ),
-        title: '',
-        showInPopover: true,
-        inlineElement: null,
-        onClick: () => {},
       },
     ];
   },
@@ -175,7 +189,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
   },

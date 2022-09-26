@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
 import {
   SERVICE_NAME,
@@ -21,7 +22,6 @@ import {
   AGENT_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
@@ -68,6 +68,7 @@ async function fetchSpanLinksDetails({
       AGENT_NAME,
     ],
     body: {
+      track_total_hits: false,
       size: 1000,
       query: {
         bool: {

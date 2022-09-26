@@ -10,6 +10,7 @@ import {
   Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_LOG_LEVEL,
   PARENT_ID,
@@ -17,7 +18,6 @@ import {
   TRACE_ID,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
 
@@ -36,6 +36,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.error],
     },
     body: {
+      track_total_hits: false,
       size: maxTraceItems,
       query: {
         bool: {
@@ -54,6 +55,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: maxTraceItems + 1,
       size: maxTraceItems,
       query: {
         bool: {
@@ -71,7 +73,6 @@ export async function getTraceItems(
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
       ] as Sort,
-      track_total_hits: true,
     },
   });
 

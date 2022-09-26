@@ -13,8 +13,9 @@ import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
-import { CaseAttachments } from '../../../types';
+import { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
+import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
@@ -35,9 +36,10 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
     toastContent: props.toastContent,
   });
 
-  const { dispatch } = useCasesContext();
+  const { dispatch, appId } = useCasesContext();
   const casesToasts = useCasesToast();
   const { createAttachments } = useCreateAttachments();
+  const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -51,7 +53,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
   }, [dispatch]);
 
   const handleOnRowClick = useCallback(
-    async (theCase: Case | undefined, attachments: CaseAttachments) => {
+    async (theCase: Case | undefined, attachments: CaseAttachmentsWithoutOwner) => {
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
@@ -63,8 +65,11 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
       try {
         // add attachments to the case
         if (attachments !== undefined && attachments.length > 0) {
+          startTransaction({ appId, attachments });
+
           await createAttachments({
             caseId: theCase.id,
+            caseOwner: theCase.owner,
             data: attachments,
             throwOnError: true,
           });
@@ -85,11 +90,19 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
         props.onRowClick(theCase);
       }
     },
-    [casesToasts, closeModal, createNewCaseFlyout, createAttachments, props]
+    [
+      props,
+      closeModal,
+      createNewCaseFlyout,
+      startTransaction,
+      appId,
+      createAttachments,
+      casesToasts,
+    ]
   );
 
   const openModal = useCallback(
-    ({ attachments }: { attachments?: CaseAttachments } = {}) => {
+    ({ attachments }: { attachments?: CaseAttachmentsWithoutOwner } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {

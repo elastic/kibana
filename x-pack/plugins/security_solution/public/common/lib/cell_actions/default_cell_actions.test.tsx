@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import type {
   BrowserFields,
   TimelineNonEcsData,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
-import { Ecs } from '../../../../common/ecs';
-import { ColumnHeaderType } from '../../../timelines/store/timeline/model';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type { Ecs } from '../../../../common/ecs';
+import type { ColumnHeaderType } from '../../../timelines/store/timeline/model';
 
-import { defaultCellActions, EmptyComponent } from './default_cell_actions';
-import { COLUMNS_WITH_LINKS } from './helpers';
+import { defaultCellActions } from './default_cell_actions';
+import { COLUMNS_WITH_LINKS, EmptyComponent } from './helpers';
 
 describe('default cell actions', () => {
   const browserFields: BrowserFields = {};

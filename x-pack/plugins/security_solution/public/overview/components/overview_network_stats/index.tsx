@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
-import { FormattedStat, StatGroup } from '../types';
+import type { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
+import type { FormattedStat, StatGroup } from '../types';
 import { StatValue } from '../stat_value';
 
 interface OverviewNetworkProps {

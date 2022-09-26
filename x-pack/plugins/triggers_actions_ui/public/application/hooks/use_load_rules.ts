@@ -8,7 +8,8 @@ import { useMemo, useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { Rule, Pagination } from '../../types';
-import { loadRules, LoadRulesProps } from '../lib/rule_api';
+import type { LoadRulesProps } from '../lib/rule_api';
+import { loadRulesWithKueryFilter } from '../lib/rule_api/rules_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
 
 interface RuleState {
@@ -18,6 +19,7 @@ interface RuleState {
 }
 
 type UseLoadRulesProps = Omit<LoadRulesProps, 'http'> & {
+  hasDefaultRuleTypesFiltersOn?: boolean;
   onPage: (pagination: Pagination) => void;
   onError: (message: string) => void;
 };
@@ -92,6 +94,7 @@ export function useLoadRules({
   sort,
   onPage,
   onError,
+  hasDefaultRuleTypesFiltersOn = false,
 }: UseLoadRulesProps) {
   const { http } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -110,7 +113,7 @@ export function useLoadRules({
     dispatch({ type: ActionTypes.SET_LOADING, payload: true });
 
     try {
-      const rulesResponse = await loadRules({
+      const rulesResponse = await loadRulesWithKueryFilter({
         http,
         page,
         searchText,
@@ -135,9 +138,10 @@ export function useLoadRules({
         onPage({ ...page, index: 0 });
       }
 
+      const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(typesFilter);
       const isFilterApplied = !(
         isEmpty(searchText) &&
-        isEmpty(typesFilter) &&
+        hasEmptyTypesFilter &&
         isEmpty(actionTypesFilter) &&
         isEmpty(ruleExecutionStatusesFilter) &&
         isEmpty(ruleStatusesFilter) &&
@@ -167,7 +171,7 @@ export function useLoadRules({
     ruleStatusesFilter,
     tagsFilter,
     sort,
-    dispatch,
+    hasDefaultRuleTypesFiltersOn,
     onPage,
     onError,
   ]);

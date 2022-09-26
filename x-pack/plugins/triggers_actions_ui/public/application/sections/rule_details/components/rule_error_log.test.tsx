@@ -19,8 +19,6 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
 
 const mockLogResponse: any = {
-  total: 8,
-  data: [],
   totalErrors: 12,
   errors: [
     {
@@ -93,20 +91,6 @@ const mockLogResponse: any = {
       message:
         "rule execution failure: .es-query:d87fcbd0-b11b-11ec-88f6-293354dba871: 'Mine' - x_content_parse_exception: [parsing_exception] Reason: unknown query [match_allxxxx] did you mean [match_all]?",
     },
-    {
-      id: 'd53a401e-2a3a-4abe-8913-26e08a503903',
-      timestamp: '2022-03-31T18:01:03.112Z',
-      type: 'alerting',
-      message:
-        "rule execution failure: .es-query:d87fcbd0-b11b-11ec-88f6-293354dba871: 'Mine' - x_content_parse_exception: [parsing_exception] Reason: unknown query [match_allxxxx] did you mean [match_all]?",
-    },
-    {
-      id: '9cfeae08-24b4-4d5c-b870-a303418f1400',
-      timestamp: '2022-03-31T18:00:00.113Z',
-      type: 'alerting',
-      message:
-        "rule execution failure: .es-query:d87fcbd0-b11b-11ec-88f6-293354dba871: 'Mine' - x_content_parse_exception: [parsing_exception] Reason: unknown query [match_allxxxx] did you mean [match_all]?",
-    },
   ],
 };
 
@@ -135,7 +119,7 @@ const mockRule: Rule = {
   },
 };
 
-const loadExecutionLogAggregationsMock = jest.fn();
+const loadActionErrorLogMock = jest.fn();
 
 describe('rule_error_log', () => {
   beforeEach(() => {
@@ -151,16 +135,13 @@ describe('rule_error_log', () => {
         ];
       }
     });
-    loadExecutionLogAggregationsMock.mockResolvedValue(mockLogResponse);
+    loadActionErrorLogMock.mockResolvedValue(mockLogResponse);
   });
 
   it('renders correctly', async () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
     const wrapper = mountWithIntl(
-      <RuleErrorLog
-        rule={mockRule}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     // No data initially
@@ -169,16 +150,16 @@ describe('rule_error_log', () => {
     );
 
     // Run the initial load fetch call
-    expect(loadExecutionLogAggregationsMock).toHaveBeenCalledTimes(1);
+    expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1);
 
-    expect(loadExecutionLogAggregationsMock).toHaveBeenCalledWith(
+    expect(loadActionErrorLogMock).toHaveBeenCalledWith(
       expect.objectContaining({
         dateEnd: '1969-12-31T19:00:00-05:00',
         dateStart: '1969-12-30T19:00:00-05:00',
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
-        perPage: 1,
-        sort: { timestamp: { order: 'desc' } },
+        perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -200,20 +181,27 @@ describe('rule_error_log', () => {
   });
 
   it('can sort on timestamp columns', async () => {
+    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+
     const wrapper = mountWithIntl(
-      <RuleErrorLog
-        rule={mockRule}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
-    expect(
-      wrapper.find('.euiTableRow').first().find('.euiTableCellContent').first().text()
-    ).toEqual('Mar 31, 2022 @ 14:03:33.133');
+
+    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dateEnd: '1969-12-31T19:00:00-05:00',
+        dateStart: '1969-12-30T19:00:00-05:00',
+        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+        page: 0,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
+      })
+    );
 
     wrapper.find('button[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
 
@@ -222,28 +210,47 @@ describe('rule_error_log', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find('.euiTableRow').first().find('.euiTableCellContent').first().text()
-    ).toEqual('Mar 31, 2022 @ 14:00:00.113');
+    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dateEnd: '1969-12-31T19:00:00-05:00',
+        dateStart: '1969-12-30T19:00:00-05:00',
+        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+        page: 0,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'asc' } }],
+      })
+    );
+
+    nowMock.mockRestore();
   });
 
   it('can paginate', async () => {
-    loadExecutionLogAggregationsMock.mockResolvedValue({
+    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+
+    loadActionErrorLogMock.mockResolvedValue({
       ...mockLogResponse,
-      total: 100,
+      totalErrors: 100,
     });
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog
-        rule={mockRule}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
+
+    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dateEnd: '1969-12-31T19:00:00-05:00',
+        dateStart: '1969-12-30T19:00:00-05:00',
+        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+        page: 0,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
+      })
+    );
 
     expect(wrapper.find('.euiPagination').exists()).toBeTruthy();
 
@@ -255,17 +262,25 @@ describe('rule_error_log', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('.euiTableRow').length).toEqual(2);
+    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dateEnd: '1969-12-31T19:00:00-05:00',
+        dateStart: '1969-12-30T19:00:00-05:00',
+        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+        page: 1,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
+      })
+    );
+
+    nowMock.mockRestore();
   });
 
   it('can filter by start and end date', async () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog
-        rule={mockRule}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -273,14 +288,14 @@ describe('rule_error_log', () => {
       wrapper.update();
     });
 
-    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         dateEnd: '1969-12-31T19:00:00-05:00',
         dateStart: '1969-12-30T19:00:00-05:00',
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
-        perPage: 1,
-        sort: { timestamp: { order: 'desc' } },
+        perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -297,14 +312,14 @@ describe('rule_error_log', () => {
       wrapper.update();
     });
 
-    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         dateStart: '1969-12-31T18:45:00-05:00',
         dateEnd: '1969-12-31T19:00:00-05:00',
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
-        perPage: 1,
-        sort: { timestamp: { order: 'desc' } },
+        perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -313,10 +328,7 @@ describe('rule_error_log', () => {
 
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
-      <RuleErrorLog
-        rule={mockRule}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -324,20 +336,17 @@ describe('rule_error_log', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(RefineSearchPrompt).text()).toBeFalsy();
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
   });
 
   it('shows the refine search prompt when our queries return too much data', async () => {
-    loadExecutionLogAggregationsMock.mockResolvedValue({
+    loadActionErrorLogMock.mockResolvedValue({
       ...mockLogResponse,
-      totalErrors: 1000,
+      totalErrors: 1100,
     });
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog
-        rule={mockRule}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -345,8 +354,31 @@ describe('rule_error_log', () => {
       wrapper.update();
     });
 
+    // Initially do not show the prompt
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+
+    // // Go to the last page
+    wrapper.find('[data-test-subj="pagination-button-99"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Prompt is shown
     expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
-      'These are the first 1000 matching your search, refine your search to see others. Back to top.'
+      'These are the first 1000 documents matching your search, refine your search to see others. Back to top.'
     );
+
+    // Go to the second last page
+    wrapper.find('[data-test-subj="pagination-button-98"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Prompt is not shown
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
   });
 });

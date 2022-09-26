@@ -62,16 +62,18 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();
 
+  const commandOutput = output?.type === 'elasticsearch' ? output : undefined;
+
   const installCommands = (['linux', 'mac', 'windows', 'deb', 'rpm'] as PLATFORM_TYPE[]).reduce(
     (acc, platform) => {
       acc[platform] = getInstallCommandForPlatform(
         platform,
-        output?.hosts?.[0] ?? '',
+        commandOutput?.hosts?.[0] ?? '<ELASTICSEARCH_HOST>',
         serviceToken ?? '',
         fleetServerPolicyId,
         fleetServerHost,
         deploymentMode === 'production',
-        output?.ca_trusted_fingerprint,
+        commandOutput?.ca_trusted_fingerprint ?? undefined,
         kibanaVersion
       );
 
@@ -107,7 +109,9 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         windowsCommand={installCommands.windows}
         linuxDebCommand={installCommands.deb}
         linuxRpmCommand={installCommands.rpm}
-        isK8s={false}
+        k8sCommand={installCommands.kubernetes}
+        hasK8sIntegration={false}
+        hasFleetServer={true}
       />
     </>
   );

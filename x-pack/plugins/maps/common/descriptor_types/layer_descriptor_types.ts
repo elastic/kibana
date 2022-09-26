@@ -7,10 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
+  EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
@@ -77,9 +77,15 @@ export type VectorLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
   joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
+  disableTooltips?: boolean;
 };
 
 export type HeatmapLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
+};
+
+export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.EMS_VECTOR_TILE;
+  style: EMSVectorTileStyleDescriptor;
 };

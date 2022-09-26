@@ -12,7 +12,11 @@ import {
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { TrustedAppConditionEntry, NewTrustedApp, PutTrustedAppsRequestParams } from '../types';
+import type {
+  TrustedAppConditionEntry,
+  NewTrustedApp,
+  PutTrustedAppsRequestParams,
+} from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {

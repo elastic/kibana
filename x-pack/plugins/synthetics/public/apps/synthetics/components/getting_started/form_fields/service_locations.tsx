@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Controller, FieldErrors, Control } from 'react-hook-form';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { Controller, FieldErrors, Control } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { serviceLocationsSelector } from '../../../state/monitor_management/selectors';
+
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { selectServiceLocationsState } from '../../../state';
+
 import { SimpleFormData } from '../simple_monitor_form';
 import { ConfigKey } from '../../../../../../common/constants/monitor_management';
 
@@ -21,7 +23,7 @@ export const ServiceLocationsField = ({
   errors: FieldErrors;
   control: Control<SimpleFormData, any>;
 }) => {
-  const locations = useSelector(serviceLocationsSelector);
+  const { locations } = useSelector(selectServiceLocationsState);
 
   return (
     <EuiFormRow

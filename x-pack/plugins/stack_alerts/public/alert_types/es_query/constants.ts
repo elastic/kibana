@@ -19,6 +19,7 @@ export const DEFAULT_VALUES = {
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
+  EXCLUDE_PREVIOUS_HITS: true,
 };
 
 export const EXPRESSION_ERRORS = {
@@ -31,6 +32,7 @@ export const EXPRESSION_ERRORS = {
   thresholdComparator: new Array<string>(),
   timeWindowSize: new Array<string>(),
   searchConfiguration: new Array<string>(),
+  searchType: new Array<string>(),
 };
 
 export const EXPRESSION_ERROR_KEYS = Object.keys(EXPRESSION_ERRORS) as ErrorKey[];

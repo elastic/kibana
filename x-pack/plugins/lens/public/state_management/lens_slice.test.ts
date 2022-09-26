@@ -6,7 +6,7 @@
  */
 
 import { EnhancedStore } from '@reduxjs/toolkit';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,
   switchVisualization,
@@ -227,6 +227,7 @@ describe('lensSlice', () => {
           removeLayer: (layerIds: unknown, layerId: string) =>
             (layerIds as string[]).filter((id: string) => id !== layerId),
           insertLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
+          getCurrentIndexPatternId: jest.fn(() => 'indexPattern1'),
         };
       };
       const datasourceStates = {

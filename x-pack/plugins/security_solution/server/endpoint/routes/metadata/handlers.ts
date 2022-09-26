@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   IScopedClusterClient,
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { errorHandler } from '../error_handler';
-import {
+import type {
   HostInfo,
   HostMetadata,
   HostResultList,
-  HostStatus,
   MetadataListResponse,
 } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { kibanaRequestToMetadataListESQuery } from './query_builders';
-import { EndpointAppContext, HostListQueryResult } from '../../types';
-import { GetMetadataRequestSchema } from '.';
+import type { EndpointAppContext, HostListQueryResult } from '../../types';
+import type { GetMetadataRequestSchema } from '.';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIdsByStatus } from './support/agent_status';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { queryResponseToHostListResult } from './support/query_strategies';
-import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
-import { EndpointFleetServicesInterface } from '../../services/fleet/endpoint_fleet_services_factory';
+import type { EndpointFleetServicesInterface } from '../../services/fleet/endpoint_fleet_services_factory';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;

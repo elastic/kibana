@@ -32,20 +32,23 @@ module.exports = {
   moduleNameMapper: {
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
-    'elastic-apm-node': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/apm_agent_mock.js',
+    'elastic-apm-node':
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/apm_agent_mock.js',
     '\\.module.(css|scss)$':
-      '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/css_module_mock.js',
-    '\\.(css|less|scss)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/style_mock.js',
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/css_module_mock.js',
+    '\\.(css|less|scss)$':
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/style_mock.js',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/file_mock.js',
     '\\.ace\\.worker$':
-      '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/worker_module_mock.js',
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/worker_module_mock.js',
     '\\.editor\\.worker(\\.js)?$':
-      '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/worker_module_mock.js',
-    '^(!!)?file-loader!': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/worker_module_mock.js',
+    '^(!!)?file-loader!':
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/file_mock.js',
     ...Object.fromEntries(
       Array.from(pkgMap.entries()).map(([pkgId, repoRelativeDir]) => [
-        `^${pkgId}(/?.*)$`,
+        `^${pkgId}(/.*)?$`,
         `<rootDir>/${repoRelativeDir}$1`,
       ])
     ),
@@ -58,7 +61,7 @@ module.exports = {
   reporters: [
     'default',
     [
-      '@kbn/test/target_node/jest/junit_reporter',
+      '@kbn/test/target_node/src/jest/junit_reporter',
       {
         rootDirectory: '.',
       },
@@ -66,7 +69,7 @@ module.exports = {
     ...(process.env.TEST_GROUP_TYPE_UNIT
       ? [
           [
-            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+            '@kbn/test/target_node/src/jest/ci_stats_jest_reporter',
             {
               testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
             },
@@ -77,24 +80,24 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/polyfills.jsdom.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/enzyme.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/babel_polyfill.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/polyfills.jsdom.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/enzyme.js',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/setup_test.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/react_testing_library.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/setup_test.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.eui.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
   ],
 
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/emotion.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing
@@ -115,7 +118,7 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },
@@ -124,7 +127,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|d3-interpolate|d3-color))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|react-monaco-editor|d3-interpolate|d3-color))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 
@@ -139,7 +142,8 @@ module.exports = {
   ],
 
   // A custom resolver to preserve symlinks by default
-  resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+  resolver:
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/preserve_symlinks_resolver.js',
 
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };

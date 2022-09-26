@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core/public';
 import { createAction } from '@reduxjs/toolkit';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 export function createAsyncAction<Payload, SuccessPayload>(actionStr: string) {
   return {

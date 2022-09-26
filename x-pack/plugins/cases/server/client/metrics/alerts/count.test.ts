@@ -21,7 +21,9 @@ const getAuthorizationFilter = jest.fn().mockResolvedValue({});
 
 const clientArgs = {
   logger,
-  attachmentService,
+  services: {
+    attachmentService,
+  },
   authorization: { getAuthorizationFilter },
 } as unknown as CasesClientArgs;
 

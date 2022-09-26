@@ -18,7 +18,7 @@ import { RuleDurationFormat } from '../../rules_list/components/rule_duration_fo
 
 describe('rule_event_log_list_cell_renderer', () => {
   it('renders primitive values correctly', () => {
-    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="message" value="test" />);
+    const wrapper = mount(<RuleEventLogListCellRenderer columnId="message" value="test" />);
 
     expect(wrapper.text()).toEqual('test');
   });

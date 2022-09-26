@@ -22,13 +22,21 @@ import {
   User,
 } from '../../../common/api';
 import {
+  BuilderDeps,
   BuilderParameters,
   BuilderReturnValue,
   CommonBuilderArguments,
   UserActionParameters,
 } from './types';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export abstract class UserActionBuilder {
+  protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+
+  constructor(deps: BuilderDeps) {
+    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
+  }
+
   protected getCommonUserActionAttributes({ user, owner }: { user: User; owner: string }) {
     return {
       created_at: new Date().toISOString(),

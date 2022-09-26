@@ -9,35 +9,19 @@
 import React, { useCallback } from 'react';
 import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { FormatFactory } from '../types';
 
 interface SplitChartProps {
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   columns: Datatable['columns'];
-  formatFactory: FormatFactory;
 }
 
 const SPLIT_COLUMN = '__split_column__';
 const SPLIT_ROW = '__split_row__';
 
-export const SplitChart = ({
-  splitColumnAccessor,
-  splitRowAccessor,
-  columns,
-  formatFactory,
-}: SplitChartProps) => {
-  const format = useCallback(
-    (value: unknown, accessor: ExpressionValueVisDimension | string) => {
-      const formatParams = getFormatByAccessor(accessor, columns);
-      const formatter = formatParams ? formatFactory(formatParams) : formatFactory();
-      return formatter.convert(value);
-    },
-    [columns, formatFactory]
-  );
-
+export const SplitChart = ({ splitColumnAccessor, splitRowAccessor, columns }: SplitChartProps) => {
   const getData = useCallback(
     (datum: Record<string, any>, accessor: ExpressionValueVisDimension | string) => {
       const splitColumn = getColumnByAccessor(accessor, columns);
@@ -53,7 +37,6 @@ export const SplitChart = ({
           id={SPLIT_COLUMN}
           by={(spec, datum) => getData(datum, splitColumnAccessor)}
           sort={Predicate.DataIndex}
-          format={(value) => format(value, splitColumnAccessor)}
         />
       )}
       {splitRowAccessor && (
@@ -61,12 +44,11 @@ export const SplitChart = ({
           id={SPLIT_ROW}
           by={(spec, datum) => getData(datum, splitRowAccessor)}
           sort={Predicate.DataIndex}
-          format={(value) => format(value, splitRowAccessor)}
         />
       )}
       <SmallMultiples
-        splitVertically={splitColumnAccessor ? SPLIT_COLUMN : undefined}
-        splitHorizontally={splitRowAccessor ? SPLIT_ROW : undefined}
+        splitVertically={splitRowAccessor ? SPLIT_ROW : undefined}
+        splitHorizontally={splitColumnAccessor ? SPLIT_COLUMN : undefined}
       />
     </>
   ) : null;

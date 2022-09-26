@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { isSavedQueryPrebuilt } from './utils';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
@@ -16,7 +16,7 @@ import { convertECSMappingToObject } from '../utils';
 export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/saved_query/{id}',
+      path: '/api/osquery/saved_queries/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -40,10 +40,13 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         );
       }
 
-      savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
+      savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        savedQuery.id
+      );
 
       return response.ok({
-        body: savedQuery,
+        body: { data: savedQuery },
       });
     }
   );

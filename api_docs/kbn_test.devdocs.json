@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -28,7 +29,38 @@
             "label": "path",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.Config.module",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "module",
+            "description": [],
+            "signature": [
+              "{ type: \"config\"; path: string; provider: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.FtrConfigProvider",
+                "text": "FtrConfigProvider"
+              },
+              "; } | { type: \"journey\"; path: string; provider: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.FtrConfigProvider",
+                "text": "FtrConfigProvider"
+              },
+              "; journey: Journey; }"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -42,6 +74,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -55,6 +88,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -72,6 +106,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -85,6 +120,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -102,6 +138,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -115,6 +152,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -129,6 +167,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -146,6 +185,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -161,6 +201,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -174,6 +215,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -184,6 +226,7 @@
                 "description": [],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/test",
@@ -203,7 +246,8 @@
                       }
                     ],
                     "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -219,6 +263,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -239,6 +284,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -256,6 +302,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -269,6 +316,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -286,6 +334,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -299,6 +348,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -312,7 +362,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; waitForLogLine?: string | RegExp | undefined; waitFor?: ((server: ",
+              "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
               {
                 "pluginId": "@kbn/test",
                 "scope": "server",
@@ -328,6 +378,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -341,6 +392,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -358,6 +410,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -378,6 +431,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -392,7 +446,8 @@
               "node_modules/@types/semver/classes/semver"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -406,6 +461,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -419,6 +475,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -436,6 +493,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -453,6 +511,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -466,6 +525,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -485,6 +545,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -498,6 +559,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -515,6 +577,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -528,6 +591,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -541,39 +605,33 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/test",
                 "id": "def-server.FunctionalTestRunner.Unnamed.$2",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "configFile",
+                "label": "config",
                 "description": [],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "server",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-server.Config",
+                    "text": "Config"
+                  }
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/test",
                 "id": "def-server.FunctionalTestRunner.Unnamed.$3",
-                "type": "Any",
-                "tags": [],
-                "label": "configOverrides",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner.Unnamed.$4",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "esVersion",
@@ -591,6 +649,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -608,6 +667,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -621,6 +681,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -638,29 +699,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.readConfigFile",
-            "type": "Function",
-            "tags": [],
-            "label": "readConfigFile",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
-                "text": "Config"
-              },
-              ">"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
-            "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -676,6 +715,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -689,6 +729,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -716,6 +757,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -729,6 +771,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -742,6 +785,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -759,6 +803,7 @@
         "description": [],
         "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -771,7 +816,8 @@
               "KbnClientStatus"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -784,7 +830,8 @@
               "KbnClientPlugins"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -797,7 +844,8 @@
               "KbnClientVersion"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -810,7 +858,8 @@
               "KbnClientSavedObjects"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -823,7 +872,8 @@
               "KbnClientSpaces"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -836,7 +886,8 @@
               "KbnClientUiSettings"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -849,7 +900,8 @@
               "KbnClientImportExport"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -865,6 +917,7 @@
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -884,6 +937,7 @@
                 ],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -907,6 +961,7 @@
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -920,6 +975,7 @@
                 ],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -937,6 +993,7 @@
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -950,6 +1007,93 @@
                 ],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.KbnClientRequesterError",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnClientRequesterError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.KbnClientRequesterError",
+            "text": "KbnClientRequesterError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.axiosError",
+            "type": "Object",
+            "tags": [],
+            "label": "axiosError",
+            "description": [],
+            "signature": [
+              "AxiosError",
+              "<unknown, any> | undefined"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -967,6 +1111,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -996,7 +1141,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1026,7 +1172,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1056,7 +1203,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1086,7 +1234,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1116,7 +1265,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1146,7 +1296,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1176,7 +1327,8 @@
               "]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1198,7 +1350,8 @@
               "<[]>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1212,6 +1365,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -1225,6 +1379,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1252,6 +1407,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1261,7 +1417,8 @@
             "label": "triggered",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1275,7 +1432,8 @@
               "<void>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1289,7 +1447,8 @@
               "<void>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -1303,6 +1462,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -1316,6 +1476,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1327,6 +1488,7 @@
                 "description": [],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/test",
@@ -1339,7 +1501,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1358,6 +1521,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -1371,6 +1535,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1390,6 +1555,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -1403,6 +1569,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1420,6 +1587,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -1433,6 +1601,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1455,6 +1624,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1468,6 +1638,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1482,6 +1653,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1496,6 +1668,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1531,6 +1704,7 @@
         ],
         "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1550,6 +1724,7 @@
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1572,6 +1747,7 @@
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1599,6 +1775,7 @@
         ],
         "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1618,6 +1795,7 @@
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1653,6 +1831,7 @@
         ],
         "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1672,6 +1851,7 @@
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1694,6 +1874,7 @@
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1720,6 +1901,7 @@
         ],
         "path": "packages/kbn-test/src/es/test_es_cluster.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1733,6 +1915,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1769,6 +1952,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1790,6 +1974,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1808,6 +1993,7 @@
         ],
         "path": "packages/kbn-test/src/mocha/xml.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1821,6 +2007,96 @@
             ],
             "path": "packages/kbn-test/src/mocha/xml.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.getKibanaCliArg",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaCliArg",
+        "description": [
+          "\nParse a list of Kibana CLI Arg flags and find the flag with the given name. If the flag has no\nvalue then a boolean will be returned (assumed to be a switch flag). If the flag does have a value\nthat can be parsed by `JSON.stringify()` the parsed result is returned. Otherwise the raw string\nvalue is returned."
+        ],
+        "signature": [
+          "(rawFlags: string[], name: string) => ",
+          "ArgValue",
+          " | ",
+          "ArgValue",
+          "[] | undefined"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.getKibanaCliArg.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.getKibanaCliArg.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.getKibanaCliLoggers",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaCliLoggers",
+        "description": [
+          "\nParse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended\nin a subsequent FTR config"
+        ],
+        "signature": [
+          "(rawFlags: string[]) => unknown[]"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.getKibanaCliLoggers.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1843,6 +2119,7 @@
         ],
         "path": "packages/kbn-test/src/jest/get_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1858,6 +2135,7 @@
             ],
             "path": "packages/kbn-test/src/jest/get_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1874,6 +2152,7 @@
             ],
             "path": "packages/kbn-test/src/jest/get_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1898,7 +2177,7 @@
             "section": "def-server.EsVersion",
             "text": "EsVersion"
           },
-          ", path: string, settingOverrides: any) => Promise<",
+          ", path: string, settingOverrides: any, extendSettings: (vars: any) => any) => Promise<",
           {
             "pluginId": "@kbn/test",
             "scope": "server",
@@ -1908,8 +2187,9 @@
           },
           ">"
         ],
-        "path": "packages/kbn-test/src/functional_test_runner/lib/config/read_config_file.ts",
+        "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -1921,8 +2201,9 @@
             "signature": [
               "ToolingLog"
             ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/config/read_config_file.ts",
+            "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1941,8 +2222,9 @@
                 "text": "EsVersion"
               }
             ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/config/read_config_file.ts",
+            "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1955,8 +2237,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/config/read_config_file.ts",
+            "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1969,11 +2252,44 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/config/read_config_file.ts",
+            "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.readConfigFile.$5",
+            "type": "Function",
+            "tags": [],
+            "label": "extendSettings",
+            "description": [],
+            "signature": [
+              "(vars: any) => any"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.runCheckFtrConfigsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrConfigsCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1989,22 +2305,7 @@
         ],
         "path": "packages/kbn-test/src/jest/run_check_jest_configs_cli.ts",
         "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
-        "id": "def-server.runFailedTestsReporterCli",
-        "type": "Function",
-        "tags": [],
-        "label": "runFailedTestsReporterCli",
-        "description": [],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-test/src/failed_tests_reporter/run_failed_tests_reporter_cli.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2021,6 +2322,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2037,6 +2339,7 @@
         ],
         "path": "packages/kbn-test/src/jest/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2050,6 +2353,7 @@
             ],
             "path": "packages/kbn-test/src/jest/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2068,6 +2372,7 @@
         ],
         "path": "packages/kbn-test/src/kbn_archiver_cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2078,28 +2383,82 @@
         "type": "Function",
         "tags": [],
         "label": "runTests",
-        "description": [],
-        "signature": [
-          "(options: RunTestsParams) => Promise<void>"
+        "description": [
+          "\nRun servers and tests for each config"
         ],
-        "path": "packages/kbn-test/src/functional_tests/tasks.ts",
+        "signature": [
+          "(log: ",
+          "ToolingLog",
+          ", options: { configs: string[]; esVersion: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.EsVersion",
+            "text": "EsVersion"
+          },
+          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[] | undefined; exclude: string[] | undefined; }; suiteFilters: { include: string[] | undefined; exclude: string[] | undefined; }; }) => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
             "id": "def-server.runTests.$1",
             "type": "Object",
             "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              "ToolingLog"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.runTests.$2",
+            "type": "Object",
+            "tags": [],
             "label": "options",
             "description": [],
             "signature": [
-              "RunTestsParams"
+              "{ configs: string[]; esVersion: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.EsVersion",
+                "text": "EsVersion"
+              },
+              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[] | undefined; exclude: string[] | undefined; }; suiteFilters: { include: string[] | undefined; exclude: string[] | undefined; }; }"
             ],
-            "path": "packages/kbn-test/src/functional_tests/tasks.ts",
+            "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.runTestsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runTestsCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/run_tests/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2111,26 +2470,80 @@
         "label": "startServers",
         "description": [],
         "signature": [
-          "({ ...options }: StartServerOptions) => Promise<void>"
+          "(log: ",
+          "ToolingLog",
+          ", options: { config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.EsVersion",
+            "text": "EsVersion"
+          },
+          "; installDir: string | undefined; logsDir: string | undefined; }) => Promise<void>"
         ],
-        "path": "packages/kbn-test/src/functional_tests/tasks.ts",
+        "path": "packages/kbn-test/src/functional_tests/start_servers/start_servers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
             "id": "def-server.startServers.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ ...options }",
+            "label": "log",
             "description": [],
             "signature": [
-              "StartServerOptions"
+              "ToolingLog"
             ],
-            "path": "packages/kbn-test/src/functional_tests/tasks.ts",
+            "path": "packages/kbn-test/src/functional_tests/start_servers/start_servers.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.startServers.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.EsVersion",
+                "text": "EsVersion"
+              },
+              "; installDir: string | undefined; logsDir: string | undefined; }"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/start_servers/start_servers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.startServersCli",
+        "type": "Function",
+        "tags": [],
+        "label": "startServersCli",
+        "description": [
+          "\nStart servers"
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/start_servers/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2146,6 +2559,7 @@
         ],
         "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2159,6 +2573,7 @@
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2173,6 +2588,7 @@
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2200,6 +2616,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2215,6 +2632,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2230,6 +2648,7 @@
         "description": [],
         "path": "packages/kbn-test/src/es/test_es_cluster.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2242,7 +2661,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2255,7 +2675,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2270,7 +2691,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2285,7 +2707,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2298,7 +2721,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2311,7 +2735,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2326,7 +2751,8 @@
               "\"basic\" | \"gold\" | \"trial\" | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2339,7 +2765,22 @@
               "ToolingLog"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.CreateTestEsClusterOptions.writeLogsToPath",
+            "type": "string",
+            "tags": [],
+            "label": "writeLogsToPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2354,7 +2795,8 @@
               "TestEsClusterNodesOptions[] | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2369,7 +2811,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2384,7 +2827,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2399,7 +2843,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2414,7 +2859,8 @@
               "string | number | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2430,6 +2876,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2443,6 +2890,7 @@
                 ],
                 "path": "packages/kbn-test/src/es/test_es_cluster.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2477,6 +2925,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2486,7 +2935,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2496,7 +2946,8 @@
             "label": "url",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2510,6 +2961,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2519,7 +2971,8 @@
             "label": "enabled",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2529,7 +2982,8 @@
             "label": "portInContainer",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2539,7 +2993,8 @@
             "label": "port",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2549,7 +3004,8 @@
             "label": "image",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2562,7 +3018,22 @@
               "string | RegExp | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.DockerServerSpec.waitForLogLineTimeoutMs",
+            "type": "number",
+            "tags": [],
+            "label": "waitForLogLineTimeoutMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2590,6 +3061,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2609,6 +3081,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2624,6 +3097,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2640,7 +3114,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2668,6 +3143,7 @@
         ],
         "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2679,7 +3155,8 @@
               "url of es instance"
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2694,7 +3171,8 @@
               "{ username: string; password: string; } | undefined"
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2709,7 +3187,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2723,6 +3202,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2735,7 +3215,8 @@
               "ToolingLog"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2754,7 +3235,8 @@
               }
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -2776,6 +3258,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2789,6 +3272,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2816,6 +3300,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -2827,10 +3312,11 @@
               "\nDetermine if a service is avaliable"
             ],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2840,10 +3326,11 @@
                 "label": "serviceName",
                 "description": [],
                 "signature": [
-                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\""
+                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\""
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2857,10 +3344,11 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2874,6 +3362,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2887,10 +3376,11 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2904,6 +3394,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2953,10 +3444,13 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -2970,6 +3464,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3017,10 +3512,13 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3034,6 +3532,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3081,10 +3580,13 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3098,6 +3600,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3145,10 +3648,13 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3162,6 +3668,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3209,10 +3716,13 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3226,6 +3736,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3273,10 +3784,81 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "type": "string",
+                "tags": [],
+                "label": "serviceName",
+                "description": [],
+                "signature": [
+                  "\"dedicatedTaskRunner\""
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.GenericFtrProviderContext.getService",
+            "type": "Function",
+            "tags": [],
+            "label": "getService",
+            "description": [],
+            "signature": [
+              "{ (serviceName: \"config\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.Config",
+                "text": "Config"
+              },
+              "; (serviceName: \"log\"): ",
+              "ToolingLog",
+              "; (serviceName: \"lifecycle\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.Lifecycle",
+                "text": "Lifecycle"
+              },
+              "; (serviceName: \"dockerServers\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.DockerServersService",
+                "text": "DockerServersService"
+              },
+              "; (serviceName: \"esVersion\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.EsVersion",
+                "text": "EsVersion"
+              },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
+              "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3290,6 +3872,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3309,6 +3892,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3322,6 +3906,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3341,6 +3926,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3354,6 +3940,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3373,6 +3960,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3386,10 +3974,24 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.GenericFtrProviderContext.updateBaselines",
+            "type": "boolean",
+            "tags": [],
+            "label": "updateBaselines",
+            "description": [
+              "\nDid the user request that baselines get updated?"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3403,6 +4005,7 @@
         "description": [],
         "path": "packages/kbn-test/src/es/test_es_cluster.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -3415,7 +4018,8 @@
               "number[]"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3428,7 +4032,8 @@
               "Node[]"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3442,6 +4047,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3457,6 +4063,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3472,6 +4079,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3487,6 +4095,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3503,6 +4112,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3518,6 +4128,7 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -3533,6 +4144,7 @@
         "description": [],
         "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -3542,7 +4154,8 @@
             "label": "url",
             "description": [],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3555,7 +4168,8 @@
               "Buffer[] | undefined"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3568,7 +4182,8 @@
               "ToolingLog"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3582,7 +4197,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3595,7 +4211,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3609,7 +4226,29 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.Suite.currentTest",
+            "type": "Object",
+            "tags": [],
+            "label": "currentTest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.Test",
+                "text": "Test"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/test",
             "id": "def-server.Suite.suites",
@@ -3628,7 +4267,8 @@
               "[]"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3648,7 +4288,8 @@
               "[]"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3658,7 +4299,8 @@
             "label": "title",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3668,7 +4310,8 @@
             "label": "file",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3688,7 +4331,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3710,6 +4354,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/test",
@@ -3731,6 +4376,7 @@
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3744,7 +4390,8 @@
             "label": "root",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3754,7 +4401,8 @@
             "label": "suiteTag",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3768,6 +4416,7 @@
         "description": [],
         "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -3781,6 +4430,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3792,7 +4442,8 @@
             "label": "title",
             "description": [],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3805,7 +4456,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3825,7 +4477,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3839,6 +4492,7 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3853,7 +4507,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3872,6 +4527,7 @@
         ],
         "path": "packages/kbn-test/src/ci_parallel_process_prefix.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3902,17 +4558,53 @@
         ],
         "path": "packages/kbn-test/src/es/test_es_cluster.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.KIBANA_ROOT",
-        "type": "string",
+        "id": "def-server.FtrConfigProvider",
+        "type": "Type",
         "tags": [],
-        "label": "KIBANA_ROOT",
+        "label": "FtrConfigProvider",
         "description": [],
-        "path": "packages/kbn-test/src/functional_tests/lib/paths.ts",
+        "signature": [
+          "<T>(ctx: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.FtrConfigProviderContext",
+            "text": "FtrConfigProviderContext"
+          },
+          ") => T | Promise<T>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.FtrConfigProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.FtrConfigProviderContext",
+                "text": "FtrConfigProviderContext"
+              }
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3937,6 +4629,7 @@
         ],
         "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3950,6 +4643,7 @@
         "description": [],
         "path": "packages/kbn-test/src/kbn/users.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -3959,7 +4653,8 @@
             "label": "username",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -3969,7 +4664,8 @@
             "label": "password",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3986,6 +4682,7 @@
         ],
         "path": "packages/kbn-test/src/es/es_test_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4000,6 +4697,7 @@
         ],
         "path": "packages/kbn-test/src/kbn/kbn_test_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4011,6 +4709,7 @@
         "description": [],
         "path": "packages/kbn-test/src/kbn/users.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -4020,7 +4719,8 @@
             "label": "username",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -4030,7 +4730,8 @@
             "label": "password",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4044,6 +4745,7 @@
         "description": [],
         "path": "packages/kbn-test/src/kbn/users.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -4053,7 +4755,8 @@
             "label": "username",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -4063,7 +4766,8 @@
             "label": "password",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4079,6 +4783,7 @@
         ],
         "path": "packages/kbn-test/src/kbn/users.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
@@ -4091,7 +4796,8 @@
               "any"
             ],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test",
@@ -4101,7 +4807,8 @@
             "label": "password",
             "description": [],
             "path": "packages/kbn-test/src/kbn/users.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

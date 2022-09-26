@@ -194,6 +194,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         duration: {
           type: 'long',
         },
+        skipRecurrences: {
+          type: 'date',
+          format: 'strict_date_time',
+        },
         rRule: {
           type: 'nested',
           properties: {
@@ -250,10 +254,6 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
       },
-    },
-    isSnoozedUntil: {
-      type: 'date',
-      format: 'strict_date_time',
     },
   },
 };

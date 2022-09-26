@@ -27,6 +27,8 @@ interface Props {
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
 }
 
+const DEFAULT_AGENT_VERSION = 'latest';
+
 const excludeOptions = [
   {
     value: 'main',
@@ -98,7 +100,9 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         ({ type }) => type === 'apm'
       );
       onChange({
-        isValid: validateVersion(runtimeAttachmentSettings.version),
+        isValid:
+          !runtimeAttachmentSettings.enabled ||
+          validateVersion(runtimeAttachmentSettings.version),
         updatedPolicy: {
           ...newPolicy,
           inputs: [
@@ -195,7 +199,9 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         apmVars?.java_attacher_discovery_rules?.value ?? '[]\n',
         [initialDiscoveryRule]
       )}
-      version={apmVars?.java_attacher_agent_version?.value || null}
+      version={
+        apmVars?.java_attacher_agent_version?.value || DEFAULT_AGENT_VERSION
+      }
       invalidatePackagePolicy={invalidatePackagePolicy}
     />
   );

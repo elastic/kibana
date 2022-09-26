@@ -5,32 +5,45 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ENDPOINTS_ACTION_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
 } from '../../../common/endpoint/constants';
-import {
-  httpHandlerMockFactory,
-  ResponseProvidersInterface,
-} from '../../common/mock/endpoint/http_handler_mock_factory';
-import {
+import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
+import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
+import type {
   ActionDetailsApiResponse,
-  HostIsolationResponse,
+  ActionListApiResponse,
+  ResponseActionApiResponse,
   PendingActionsResponse,
+  ActionDetails,
+  GetProcessesActionOutputContent,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
-  isolateHost: () => HostIsolationResponse;
+  isolateHost: () => ResponseActionApiResponse;
 
-  releaseHost: () => HostIsolationResponse;
+  releaseHost: () => ResponseActionApiResponse;
+
+  killProcess: () => ActionDetailsApiResponse;
+
+  suspendProcess: () => ActionDetailsApiResponse;
 
   actionDetails: (options: HttpFetchOptionsWithPath) => ActionDetailsApiResponse;
 
+  actionList: (options: HttpFetchOptionsWithPath) => ActionListApiResponse;
+
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
+
+  processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -38,16 +51,36 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'isolateHost',
     path: ISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '1-2-3' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
     },
   },
   {
     id: 'releaseHost',
     path: UNISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '3-2-1' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
+    },
+  },
+  {
+    id: 'killProcess',
+    path: KILL_PROCESS_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails() as ActionDetails;
+      return { data: response };
+    },
+  },
+  {
+    id: 'suspendProcess',
+    path: SUSPEND_PROCESS_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails() as ActionDetails;
+      return { data: response };
     },
   },
   {
@@ -64,6 +97,27 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     },
   },
   {
+    id: 'actionList',
+    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    method: 'get',
+    handler: (): ActionListApiResponse => {
+      const response = new EndpointActionGenerator('seed').generateActionDetails();
+
+      return {
+        elasticAgentIds: ['agent-a'],
+        commands: ['isolate'],
+        page: 0,
+        pageSize: 10,
+        startDate: 'now-10d',
+        endDate: 'now',
+        data: [response],
+        statuses: undefined,
+        userIds: ['elastic'],
+        total: 1,
+      };
+    },
+  },
+  {
     id: 'agentPendingActionsSummary',
     path: ACTION_STATUS_ROUTE,
     method: 'get',
@@ -75,6 +129,26 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           generator.generateAgentPendingActionsSummary({ agent_id: id })
         ),
       };
+    },
+  },
+  {
+    id: 'processes',
+    path: GET_PROCESSES_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<GetProcessesActionOutputContent> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails({
+        outputs: {
+          '1': {
+            type: 'json',
+            content: {
+              entries: generator.randomResponseActionProcesses(3),
+            },
+          },
+        },
+      }) as ActionDetails<GetProcessesActionOutputContent>;
+
+      return { data: response };
     },
   },
 ]);

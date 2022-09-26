@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  readCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { EditableTitle, EditableTitleProps } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -20,27 +24,24 @@ describe('EditableTitle', () => {
     title: 'Test title',
     onSubmit: submitTitle,
     isLoading: false,
-    userCanCrud: true,
   };
+
+  let appMock: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMock = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper).toMatchSnapshot();
+    const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+    expect(renderResult.getByText('Test title')).toBeInTheDocument();
   });
 
   it('does not show the edit icon when the user does not have edit permissions', () => {
     const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...{ ...defaultProps, userCanCrud: false }} />
+      <TestProviders permissions={readCasesPermissions()}>
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -265,12 +266,6 @@ describe('EditableTitle', () => {
   });
 
   describe('Badges', () => {
-    let appMock: AppMockRenderer;
-
-    beforeEach(() => {
-      appMock = createAppMockRenderer();
-    });
-
     it('does not render the badge if the release is ga', () => {
       const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
 

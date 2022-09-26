@@ -53,7 +53,7 @@ export const SimpleMonitorForm = () => {
     <EuiForm
       onSubmit={handleSubmit(onSubmit)}
       component="form"
-      isInvalid={isSubmitted && !isValid}
+      isInvalid={isSubmitted && !isValid && !loading}
       noValidate
     >
       <EuiFormRow
@@ -77,7 +77,13 @@ export const SimpleMonitorForm = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton type="submit" fill iconType="plusInCircleFilled" isLoading={loading}>
+          <EuiButton
+            type="submit"
+            fill
+            iconType="plusInCircleFilled"
+            isLoading={loading}
+            data-test-subj="syntheticsMonitorConfigSubmitButton"
+          >
             {CREATE_MONITOR_LABEL}
           </EuiButton>
         </EuiFlexItem>

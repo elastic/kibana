@@ -12,20 +12,16 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { UserDetailsLink } from '../../../common/components/links';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 
-import {
-  Columns,
-  Criteria,
-  ItemsPerRow,
-  PaginatedTable,
-} from '../../../common/components/paginated_table';
+import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
 import { usersActions, usersModel, usersSelectors } from '../../store';
-import { User } from '../../../../common/search_strategy/security_solution/users/all';
-import { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
+import type { User } from '../../../../common/search_strategy/security_solution/users/all';
+import type { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
 
 const tableType = usersModel.UsersTableType.allUsers;
 

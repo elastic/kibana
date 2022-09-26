@@ -77,6 +77,13 @@ export { getActionsColumnWidth } from './components/t_grid/body/column_headers/h
 export { DEFAULT_ACTION_BUTTON_WIDTH } from './components/t_grid/body/constants';
 export { useBulkActionItems } from './hooks/use_bulk_action_items';
 export { getPageRowIndex } from '../common/utils/pagination';
+export {
+  convertKueryToDslFilter,
+  convertKueryToElasticSearchQuery,
+  convertToBuildEsQuery,
+  escapeKuery,
+  escapeQueryValue,
+} from './components/utils/keury';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
@@ -86,3 +93,7 @@ export function plugin() {
 
 export { StatefulEventContext } from './components/stateful_event_context';
 export { TimelineContext } from './components/t_grid/shared';
+
+export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
+
+export { combineQueries } from './components/t_grid/helpers';

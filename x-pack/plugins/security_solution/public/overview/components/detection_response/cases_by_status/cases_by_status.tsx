@@ -7,12 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { AxisStyle, Rotation, ScaleType } from '@elastic/charts';
+import type { AxisStyle, Rotation } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { LastUpdatedAt } from '../utils';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HeaderSection } from '../../../../common/components/header_section';
 import {
@@ -84,24 +85,6 @@ const barColors = {
   'in-progress': '#f1d86f',
   closed: '#d3dae6',
 };
-
-export const emptyChartSettings = [
-  {
-    key: 'open',
-    value: [{ y: 20, x: STATUS_OPEN, g: STATUS_OPEN }],
-    color: barColors.empty,
-  },
-  {
-    key: 'in-progress',
-    value: [{ y: 20, x: STATUS_IN_PROGRESS, g: STATUS_IN_PROGRESS }],
-    color: barColors.empty,
-  },
-  {
-    key: 'closed',
-    value: [{ y: 20, x: STATUS_CLOSED, g: STATUS_CLOSED }],
-    color: barColors.empty,
-  },
-];
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;

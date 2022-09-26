@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   PluginStart as DataPluginStart,
@@ -21,20 +20,13 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { setupRoutes } from './routes';
-import { getUiSettings } from './ui_settings';
-import {
-  registerLensUsageCollector,
-  initializeLensTelemetry,
-  scheduleLensTelemetry,
-} from './usage';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
 
 export interface PluginSetupContract {
-  usageCollection?: UsageCollectionSetup;
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsServerSetup;
@@ -63,34 +55,20 @@ export interface LensServerPluginSetup {
 }
 
 export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
-  private readonly telemetryLogger: Logger;
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
 
-  constructor(private initializerContext: PluginInitializerContext) {
-    this.telemetryLogger = initializerContext.logger.get('usage');
-  }
+  constructor() {}
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );
     setupSavedObjects(core, getFilterMigrations, this.customVisualizationMigrations);
-    setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
-    core.uiSettings.register(getUiSettings());
-
-    if (plugins.usageCollection && plugins.taskManager) {
-      registerLensUsageCollector(
-        plugins.usageCollection,
-        core
-          .getStartServices()
-          .then(([_, { taskManager }]) => taskManager as TaskManagerStartContract)
-      );
-      initializeLensTelemetry(this.telemetryLogger, core, plugins.taskManager);
-    }
 
     const lensEmbeddableFactory = makeLensEmbeddableFactory(
       getFilterMigrations,
+      DataViewPersistableStateService.getAllMigrations.bind(DataViewPersistableStateService),
       this.customVisualizationMigrations
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
@@ -109,9 +87,6 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
   }
 
   start(core: CoreStart, plugins: PluginStartContract) {
-    if (plugins.taskManager) {
-      scheduleLensTelemetry(this.telemetryLogger, plugins.taskManager);
-    }
     return {};
   }
 

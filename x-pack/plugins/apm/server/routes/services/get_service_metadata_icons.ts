@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
@@ -14,7 +14,7 @@ import {
   CONTAINER_ID,
   KUBERNETES,
   SERVICE_NAME,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   HOST_OS_PLATFORM,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
@@ -36,7 +36,7 @@ export interface ServiceMetadataIcons {
 
 export const should = [
   { exists: { field: CONTAINER_ID } },
-  { exists: { field: POD_NAME } },
+  { exists: { field: KUBERNETES_POD_NAME } },
   { exists: { field: CLOUD_PROVIDER } },
   { exists: { field: HOST_OS_PLATFORM } },
   { exists: { field: AGENT_NAME } },
@@ -71,6 +71,7 @@ export async function getServiceMetadataIcons({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
       _source: [
         KUBERNETES,

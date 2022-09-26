@@ -10,15 +10,17 @@ import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Case, CommentType } from '../../common';
-import { useToasts } from './lib/kibana';
-import { useCaseViewNavigation } from './navigation';
-import { CaseAttachments } from '../types';
+import { useKibana, useToasts } from './lib/kibana';
+import { generateCaseViewPath } from './navigation';
+import { CaseAttachmentsWithoutOwner } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
+import { OWNER_INFO } from '../../common/constants';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 const LINE_CLAMP = 3;
 const Title = styled.span`
@@ -34,7 +36,7 @@ const EuiTextStyled = styled(EuiText)`
   `}
 `;
 
-function getAlertsCount(attachments: CaseAttachments): number {
+function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
     if (attachment.type === CommentType.alert) {
@@ -57,7 +59,7 @@ function getToastTitle({
 }: {
   theCase: Case;
   title?: string;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }): string {
   if (title !== undefined) {
     return title;
@@ -78,7 +80,7 @@ function getToastContent({
 }: {
   theCase: Case;
   content?: string;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }): string | undefined {
   if (content !== undefined) {
     return content;
@@ -93,8 +95,12 @@ function getToastContent({
   return undefined;
 }
 
+const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
+  Object.keys(OWNER_INFO).includes(owner);
+
 export const useCasesToast = () => {
-  const { navigateToCaseView } = useCaseViewNavigation();
+  const { appId } = useCasesContext();
+  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
 
   const toasts = useToasts();
 
@@ -106,15 +112,23 @@ export const useCasesToast = () => {
       content,
     }: {
       theCase: Case;
-      attachments?: CaseAttachments;
+      attachments?: CaseAttachmentsWithoutOwner;
       title?: string;
       content?: string;
     }) => {
+      const appIdToNavigateTo = isValidOwner(theCase.owner)
+        ? OWNER_INFO[theCase.owner].appId
+        : appId;
+
+      const url = getUrlForApp(appIdToNavigateTo, {
+        deepLinkId: 'cases',
+        path: generateCaseViewPath({ detailName: theCase.id }),
+      });
+
       const onViewCaseClick = () => {
-        navigateToCaseView({
-          detailName: theCase.id,
-        });
+        navigateToUrl(url);
       };
+
       const renderTitle = getToastTitle({ theCase, title, attachments });
       const renderContent = getToastContent({ theCase, content, attachments });
 

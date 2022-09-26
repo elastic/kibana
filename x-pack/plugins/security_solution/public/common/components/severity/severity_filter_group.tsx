@@ -6,17 +6,17 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { FilterChecked } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
   EuiPopover,
-  FilterChecked,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { RiskSeverity } from '../../../../common/search_strategy';
-import { SeverityCount } from './types';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import type { SeverityCount } from './types';
 import { RiskScore } from './common';
 
 interface SeverityItems {

@@ -64,6 +64,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     const [config] = router.get.mock.calls[0];
@@ -86,6 +87,7 @@ describe('healthRoute', () => {
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -126,6 +128,7 @@ describe('healthRoute', () => {
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -171,6 +174,7 @@ describe('healthRoute', () => {
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
+      shouldRunTasks: true,
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -212,6 +216,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     stats$.next(mockStat);
@@ -270,6 +275,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     stats$.next(warnRuntimeStat);
@@ -346,6 +352,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     stats$.next(errorRuntimeStat);
@@ -409,6 +416,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     const serviceStatus = getLatest(serviceStatus$);
@@ -490,6 +498,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     await sleep(0);
@@ -563,6 +572,7 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
     });
 
     await sleep(0);

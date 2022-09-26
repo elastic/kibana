@@ -6,7 +6,7 @@
  */
 
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   SERVICE_NAME,
@@ -50,6 +50,7 @@ export async function getAllEnvironments({
       // use timeout + min_doc_count to return as early as possible
       // if filter is not defined to prevent timeouts
       ...(!serviceName ? { timeout: '1ms' } : {}),
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

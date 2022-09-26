@@ -6,7 +6,7 @@
  */
 
 import { getJourneyScreenshot } from './get_journey_screenshot';
-import { mockSearchResult } from './helper';
+import { mockSearchResult } from './test_helpers';
 
 describe('getJourneyScreenshot', () => {
   it('returns screenshot data', async () => {

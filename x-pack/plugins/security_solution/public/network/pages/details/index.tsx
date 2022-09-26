@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-  LastEventIndexKey,
-} from '../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -24,7 +25,6 @@ import { LastEventTime } from '../../../common/components/last_event_time';
 import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { networkToCriteria } from '../../../common/components/ml/criteria/network_to_criteria';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
 import { IpOverview } from '../../components/details';
@@ -33,39 +33,47 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { ConditionalFlexGroup } from '../navigation/conditional_flex_group';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { NetworkHttpQueryTable } from './network_http_query_table';
-import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
-import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
-import { TlsQueryTable } from './tls_query_table';
-import { UsersQueryTable } from './users_query_table';
-import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { navTabsNetworkDetails } from './nav_tabs';
+import { NetworkDetailsTabs } from './details_tabs';
+import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks/use_installed_security_jobs';
+
 export { getTrailingBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
 const NetworkDetailsComponent: React.FC = () => {
   const dispatch = useDispatch();
+  const capabilities = useMlCapabilities();
   const { to, from, setQuery, isInitializing } = useGlobalTime();
   const { detailName, flowTarget } = useParams<{
     detailName: string;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
   }>();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
+
+  const { signalIndexName } = useSignalIndex();
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
@@ -76,7 +84,7 @@ const NetworkDetailsComponent: React.FC = () => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -92,30 +100,38 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
+
+  const queryFilters = useMemo(
+    () => [...getNetworkDetailsPageFilter(ip), ...filters],
+    [filters, ip]
+  );
+
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
-    filters,
+    filters: queryFilters,
   });
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
-    docValueFields,
     skip: isInitializing,
     filterQuery,
     indexNames: selectedPatterns,
     ip,
   });
 
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
+    jobIds,
+    aggregationInterval: 'auto',
   });
 
   const headerDraggableArguments = useMemo(
@@ -129,12 +145,20 @@ const NetworkDetailsComponent: React.FC = () => {
     [isInitializing, filterQuery]
   );
 
+  const entityFilter = useMemo(
+    () => ({
+      field: `${flowTarget}.ip`,
+      value: detailName,
+    }),
+    [detailName, flowTarget]
+  );
+
   return (
     <div data-test-subj="network-details-page">
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -144,7 +168,6 @@ const NetworkDetailsComponent: React.FC = () => {
               draggableArguments={headerDraggableArguments}
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.ipDetails}
                   indexNames={selectedPatterns}
                   ip={ip}
@@ -171,132 +194,43 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               endDate={to}
               narrowDateRange={narrowDateRange}
+              indexPatterns={selectedPatterns}
             />
 
             <EuiHorizontalRule />
-
-            <ConditionalFlexGroup direction="column">
-              <EuiFlexItem>
-                <NetworkTopNFlowQueryTable
-                  endDate={to}
-                  filterQuery={filterQuery}
-                  flowTarget={FlowTargetSourceDest.source}
-                  indexNames={selectedPatterns}
-                  ip={ip}
-                  skip={shouldSkip}
-                  startDate={from}
-                  type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <NetworkTopNFlowQueryTable
-                  endDate={to}
-                  flowTarget={FlowTargetSourceDest.destination}
-                  filterQuery={filterQuery}
-                  indexNames={selectedPatterns}
-                  ip={ip}
-                  skip={shouldSkip}
-                  startDate={from}
-                  type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            </ConditionalFlexGroup>
-
             <EuiSpacer />
 
-            <ConditionalFlexGroup direction="column">
-              <EuiFlexItem>
-                <NetworkTopCountriesQueryTable
-                  endDate={to}
-                  filterQuery={filterQuery}
-                  flowTarget={FlowTargetSourceDest.source}
-                  indexNames={selectedPatterns}
-                  ip={ip}
-                  skip={shouldSkip}
-                  startDate={from}
-                  type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
+            {canReadAlerts && (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <AlertCountByRuleByStatus
+                      entityFilter={entityFilter}
+                      signalIndexName={signalIndexName}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </>
+            )}
 
-              <EuiFlexItem>
-                <NetworkTopCountriesQueryTable
-                  endDate={to}
-                  flowTarget={FlowTargetSourceDest.destination}
-                  filterQuery={filterQuery}
-                  indexNames={selectedPatterns}
-                  ip={ip}
-                  skip={shouldSkip}
-                  startDate={from}
-                  type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            </ConditionalFlexGroup>
-
+            <SecuritySolutionTabNavigation
+              navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
+            />
             <EuiSpacer />
-
-            <UsersQueryTable
+            <NetworkDetailsTabs
+              ip={ip}
               endDate={to}
+              startDate={from}
               filterQuery={filterQuery}
+              indexNames={selectedPatterns}
+              skip={shouldSkip}
+              setQuery={setQuery}
+              indexPattern={indexPattern}
               flowTarget={flowTarget}
-              indexNames={selectedPatterns}
-              ip={ip}
-              skip={shouldSkip}
-              startDate={from}
-              type={type}
-              setQuery={setQuery}
-            />
-
-            <EuiSpacer />
-
-            <NetworkHttpQueryTable
-              endDate={to}
-              filterQuery={filterQuery}
-              indexNames={selectedPatterns}
-              ip={ip}
-              skip={shouldSkip}
-              startDate={from}
-              type={type}
-              setQuery={setQuery}
-            />
-
-            <EuiSpacer />
-
-            <TlsQueryTable
-              endDate={to}
-              filterQuery={filterQuery}
-              flowTarget={flowTarget as unknown as FlowTargetSourceDest}
-              indexNames={selectedPatterns}
-              ip={ip}
-              setQuery={setQuery}
-              skip={shouldSkip}
-              startDate={from}
-              type={type}
-            />
-
-            <EuiSpacer />
-
-            <AnomaliesQueryTabBody
-              filterQuery={filterQuery}
-              setQuery={setQuery}
-              startDate={from}
-              endDate={to}
-              skip={shouldSkip}
-              indexNames={selectedPatterns}
-              ip={ip}
-              type={type}
-              flowTarget={flowTarget}
-              narrowDateRange={narrowDateRange}
-              hideHistogramIfEmpty={true}
-              AnomaliesTableComponent={AnomaliesNetworkTable}
             />
           </SecuritySolutionPageWrapper>
         </>

@@ -8,7 +8,7 @@ at website logs, but this type of dashboard works on any type of data.
 When you're done, you'll have a complete overview of the sample web logs data. 
 
 [role="screenshot"]
-image::images/lens_logsDashboard_7.16.png[Logs dashboard]
+image::images/lens_logsDashboard_8.4.0.png[Logs dashboard]
 
 Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
@@ -18,7 +18,9 @@ Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 Add the sample web logs data, and create and set up the dashboard.
 
-. Go to the *Home* page, then click *Try sample data*.
+. On the home page, click *Try sample data*.
+
+. Click *Other sample data sets*. 
 
 . On the *Sample web logs* card, click *Add data*.
 
@@ -38,10 +40,10 @@ Open the visualization editor, then make sure the correct fields appear.
 
 . On the dashboard, click *Create visualization*.
 
-. Make sure the *kibana_sample_data_logs* index appears.
+. Make sure the *{kib} Sample Data Logs* {data-source} appears.
 +
 [role="screenshot"]
-image::images/lens_dataViewDropDown_8.0.png[Data view dropdown]
+image::images/lens_dataViewDropDown_8.4.0.png[Data view dropdown]
 
 To create the visualizations in this tutorial, you'll use the following fields:
 
@@ -68,23 +70,20 @@ The only number function that you can use with *clientip* is *Unique count*, als
 . Open the *Visualization type* dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_visualizationTypeDropdown_8.0.png[Visualization type dropdown]
+image::images/lens_visualizationTypeDropdown_8.4.0.png[Visualization type dropdown]
 
 . From the *Available fields* list, drag *clientip* to the workspace or layer pane.
 +
 [role="screenshot"]
-image::images/lens_metricUniqueCountOfClientip_7.16.png[Metric visualization of the clientip field]
+image::images/lens_metricUniqueCountOfClientip_8.4.0.png[Metric visualization of the clientip field]
 +
 In the layer pane, *Unique count of clientip* appears because the editor automatically applies the *Unique count* function to the *clientip* field. *Unique count* is the only numeric function that works with IP addresses.
 
 . In the layer pane, click *Unique count of clientip*.
 
-.. In the *Display name* field, enter `Unique visitors`.
+.. In the *Name* field, enter `Unique visitors`.
 
 .. Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_metricUniqueVisitors_7.16.png[Metric visualization that displays number of unique visitors]
 
 . Click *Save and return*.
 +
@@ -122,23 +121,21 @@ To increase the minimum time interval:
 
 . In the layer pane, click *timestamp*.
 
-. Select *Customize time interval*.
-
-. Change the *Minimum interval* to *1 days*, then click *Close*.
+. Change the *Minimum interval* to *1d*, then click *Close*.
 +
-You can increase and decrease the minimum interval, but you are unable to decrease the interval below the <<advanced-options,*Advanced Settings*>>. 
+You can increase and decrease the minimum interval, but you are unable to decrease the interval below the configured <<advanced-options,*Advanced Settings*>>. 
 
 To save space on the dashboard, hide the axis labels.
 
-. Open the *Left axis* menu, then deselect *Show*.
+. Open the *Left axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_leftAxisMenu_7.16.png[Left axis menu]
+image::images/lens_lineChartMetricOverTimeLeftAxis_8.3.png[Left axis menu]
 
-. Open the *Bottom axis* menu, then deselect *Show*.
+. Open the *Bottom axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTime_7.16.png[Line chart that displays metric data over time]
+image::images/lens_lineChartMetricOverTimeBottomAxis_8.3.png[Bottom axis menu]
 
 . Click *Save and return*
 
@@ -147,6 +144,9 @@ Since you removed the axis labels, add a panel title:
 . Open the panel menu, then select *Edit panel title*.
 
 . In the *Panel title* field, enter `Median of bytes`, then click *Save*.
++
+[role="screenshot"]
+image::images/lens_lineChartMetricOverTime_8.4.0.png[Line chart that displays metric data over time]
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
@@ -179,11 +179,11 @@ The chart labels are unable to display because the *request.keyword* field conta
 [role="screenshot"]
 image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword by most unique visitors]
 
-. In the layer pane, click *Top values of request.keyword*.
+. In the layer pane, click *Top 5 values of request.keyword*.
 
 .. In the *Number of values* field, enter `10`.
 
-.. In the *Display name* field, enter `Page URL`.
+.. In the *Name* field, enter `Page URL`.
 
 .. Click *Close*.
 +
@@ -204,7 +204,9 @@ Create a proportional visualization that helps you determine if your users trans
 
 . From the *Available fields* list, drag *bytes* to the *Vertical axis* field in the layer pane.
 
-. Click *Median of bytes*, click the *Sum* function, then click *Close*.
+. In the layer pane, click *Median of bytes*. 
+
+. Click the *Sum* quick function, then click *Close*.
 
 . From the *Available fields* list, drag *bytes* to the *Break down by* field in the layer pane.
 
@@ -259,9 +261,9 @@ The distribution of a number can help you find patterns. For example, you can an
 
 . In the layer pane, click *Median of bytes*.
 
-.. Click the *Sum* function.
+.. Click the *Sum* quick function.
 
-.. In the *Display name* field, enter `Transferred bytes`.
+.. In the *Name* field, enter `Transferred bytes`.
 
 .. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
 
@@ -292,11 +294,11 @@ Add a panel title:
 
 . From the *Available fields* list, drag *Records* to the *Size by* field in the layer pane. 
 
-. In the editor, click *Add or drag-and-drop a field* for *Group by*.
+. In the layer pane, click *Add or drag-and-drop a field* for *Group by*.
 
 Create a filter for each website traffic source:
 
-. From *Select a function*, click *Filters*.
+. Click *Filters*.
 
 . Click *All records*, enter the following in the query bar, then press Return:
 
@@ -322,16 +324,16 @@ Add the user geography grouping:
 
 . From the *Available fields* list, drag *geo.srcdest* to the workspace.
 
-. To change the *Group by* order, drag *Top values of geo.srcdest* in the layer pane so that appears first.
+. To change the *Group by* order, drag *Top 3 values of geo.srcdest* in the layer pane so that appears first.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_7_2.png[Treemap visualization]
 
 Remove the documents that do not match the filter criteria:
 
-. In the layer pane, click *Top values of geo.srcdest*.
+. In the layer pane, click *Top 3 values of geo.srcdest*.
 
-. Click *Advanced*, then deselect *Group other values as "Other"*, the click *Close*.
+. Click *Advanced*, deselect *Group other values as "Other"*, then click *Close*.
 +
 [role="screenshot"]
 image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
@@ -361,7 +363,7 @@ Decrease the size of the following panels, then move the panels to the first row
 * *Website traffic*
 +
 [role="screenshot"]
-image::images/lens_logsDashboard_7.16.png[Logs dashboard]
+image::images/lens_logsDashboard_8.4.0.png[Logs dashboard]
 
 [discrete]
 === Save the dashboard

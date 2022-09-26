@@ -18,6 +18,13 @@ export const DETECTION_RESPONSE = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalytics',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -36,6 +43,10 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
 
 export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
   defaultMessage: 'Users',
+});
+
+export const KUBERNETES = i18n.translate('xpack.securitySolution.navigation.kubernetes', {
+  defaultMessage: 'Kubernetes',
 });
 
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
@@ -92,6 +103,9 @@ export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });
+export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findings', {
+  defaultMessage: 'Findings',
+});
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
@@ -104,6 +118,10 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
   defaultMessage: 'Blocklist',
+});
+
+export const ACTION_HISTORY = i18n.translate('xpack.securitySolution.navigation.actionHistory', {
+  defaultMessage: 'Action history',
 });
 
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
@@ -127,3 +145,10 @@ export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
 export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
   defaultMessage: 'Privileges required',
 });
+
+export const THREAT_INTELLIGENCE = i18n.translate(
+  'xpack.securitySolution.navigation.threatIntelligence',
+  {
+    defaultMessage: 'Intelligence',
+  }
+);

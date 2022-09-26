@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, Y_CONFIG } from '../constants';
+import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG, XYCurveTypes } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
@@ -20,10 +20,10 @@ export const commonDataLayerArgs: Omit<
   CommonDataLayerFnArgs,
   'accessors' | 'xAccessor' | 'splitAccessor'
 > = {
-  hide: {
+  simpleView: {
     types: ['boolean'],
     default: false,
-    help: strings.getHideHelp(),
+    help: strings.getSimpleView(),
   },
   seriesType: {
     aliases: ['_'],
@@ -43,6 +43,27 @@ export const commonDataLayerArgs: Omit<
     default: false,
     help: strings.getIsHistogramHelp(),
   },
+  isPercentage: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsPercentageHelp(),
+  },
+  isStacked: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsStackedHelp(),
+  },
+  isHorizontal: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsHorizontalHelp(),
+  },
+  curveType: {
+    types: ['string'],
+    options: [...Object.values(XYCurveTypes)],
+    help: strings.getCurveTypeHelp(),
+    strict: true,
+  },
   lineWidth: {
     types: ['number'],
     help: strings.getLineWidthHelp(),
@@ -59,9 +80,9 @@ export const commonDataLayerArgs: Omit<
     types: ['boolean'],
     help: strings.getShowLinesHelp(),
   },
-  yConfig: {
-    types: [Y_CONFIG],
-    help: strings.getYConfigHelp(),
+  decorations: {
+    types: [DATA_DECORATION_CONFIG],
+    help: strings.getDecorationsHelp(),
     multi: true,
   },
   columnToLabel: {

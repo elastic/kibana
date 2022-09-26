@@ -8,15 +8,15 @@
 import { last, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { StartServices } from '../../../../types';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { StartServices } from '../../../../types';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
-import { getTrailingBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
+import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
-import {
+import type {
   RouteSpyState,
   HostRouteSpyState,
   NetworkRouteSpyState,
@@ -25,9 +25,10 @@ import {
 } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { GenericNavRecord, NavigateToUrl } from '../types';
+import type { GenericNavRecord, NavigateToUrl } from '../types';
 import { getLeadingBreadcrumbsForSecurityPage } from './get_breadcrumbs_for_page';
-import { GetSecuritySolutionUrl, useGetSecuritySolutionUrl } from '../../link_to';
+import type { GetSecuritySolutionUrl } from '../../link_to';
+import { useGetSecuritySolutionUrl } from '../../link_to';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 
 export interface ObjectWithNavTabs {
@@ -78,12 +79,18 @@ export const getBreadcrumbsForRoute = (
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
 
-  if (!spyState || !object.navTabs || !spyState.pageName || isCaseRoutes(spyState)) {
+  if (
+    !spyState ||
+    !object.navTabs ||
+    !spyState.pageName ||
+    isCaseRoutes(spyState) ||
+    isCloudSecurityPostureManagedRoutes(spyState)
+  ) {
     return null;
   }
 
   const newMenuLeadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
-    spyState.pageName as SecurityPageName,
+    spyState.pageName,
     getSecuritySolutionUrl,
     object.navTabs,
     isGroupedNavigationEnabled
@@ -96,18 +103,6 @@ export const getBreadcrumbsForRoute = (
   const leadingBreadcrumbs = isGroupedNavigationEnabled
     ? newMenuLeadingBreadcrumbs
     : [siemRootBreadcrumb, pageBreadcrumb];
-
-  // Admin URL works differently. All admin pages are under '/administration'
-  if (isAdminRoutes(spyState)) {
-    if (isGroupedNavigationEnabled) {
-      return emptyLastBreadcrumbUrl([...leadingBreadcrumbs, ...getAdminBreadcrumbs(spyState)]);
-    } else {
-      return [
-        ...(siemRootBreadcrumb ? [siemRootBreadcrumb] : []),
-        ...getAdminBreadcrumbs(spyState),
-      ];
-    }
-  }
 
   return emptyLastBreadcrumbUrl([
     ...leadingBreadcrumbs,
@@ -134,6 +129,10 @@ const getTrailingBreadcrumbsForRoutes = (
     return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
 
+  if (isKubernetesRoutes(spyState)) {
+    return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
   return [];
 };
 
@@ -148,12 +147,15 @@ const isUsersRoutes = (spyState: RouteSpyState): spyState is UsersRouteSpyState 
 
 const isCaseRoutes = (spyState: RouteSpyState) => spyState.pageName === SecurityPageName.case;
 
-const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
-  spyState.pageName === SecurityPageName.administration;
+const isKubernetesRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.kubernetes;
 
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState.pageName === SecurityPageName.rules ||
   spyState.pageName === SecurityPageName.rulesCreate;
+
+const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.cloudSecurityPostureRules;
 
 const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);

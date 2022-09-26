@@ -42,7 +42,7 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiText euiText--small css-slhc61-EuiText"
+              class="euiText emotion-EuiText"
             >
               cmd test alert
             </div>
@@ -51,7 +51,7 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
+              class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
               style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
               title="open"
             >
@@ -70,7 +70,7 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
+              class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
               style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
               title="exec"
             >
@@ -127,7 +127,7 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiText euiText--small css-slhc61-EuiText"
+            class="euiText emotion-EuiText"
           >
             cmd test alert
           </div>
@@ -136,7 +136,7 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
+            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
             style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
             title="open"
           >
@@ -155,7 +155,7 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
+            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
             style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="exec"
           >

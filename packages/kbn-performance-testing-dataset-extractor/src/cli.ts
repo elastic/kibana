@@ -12,8 +12,12 @@
  *
  *************************************************************/
 
+import path from 'path';
+
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { Journey } from '@kbn/journeys';
+
 import { extractor } from './extractor';
 
 export async function runExtractor() {
@@ -43,14 +47,7 @@ export async function runExtractor() {
         throw createFlagError('--es-password must be defined');
       }
 
-      const journeyName = flags.journeyName;
-      if (journeyName && typeof journeyName !== 'string') {
-        throw createFlagError('--journeyName must be a string');
-      }
-      if (!journeyName) {
-        throw createFlagError('--journeyName must be defined');
-      }
-
+      const withoutStaticResources = !!flags['without-static-resources'] || false;
       const buildId = flags.buildId;
       if (buildId && typeof buildId !== 'string') {
         throw createFlagError('--buildId must be a string');
@@ -59,22 +56,52 @@ export async function runExtractor() {
         throw createFlagError('--buildId must be defined');
       }
 
+      const configPath = flags.config;
+      if (typeof configPath !== 'string') {
+        throw createFlagError('--config must be a string');
+      }
+      const journey = await Journey.load(path.resolve(configPath));
+
+      const scalabilitySetup = journey.config.getScalabilityConfig();
+      if (!scalabilitySetup) {
+        log.warning(
+          `'scalabilitySetup' is not defined in config file, output file for Kibana scalability run won't be generated`
+        );
+      }
+
+      const testData = {
+        esArchives: journey.config.getEsArchives(),
+        kbnArchives: journey.config.getKbnArchives(),
+      };
+
       return extractor({
-        param: { journeyName, buildId },
-        client: { baseURL, username, password },
+        param: {
+          journeyName: journey.config.getName(),
+          scalabilitySetup,
+          testData,
+          buildId,
+          withoutStaticResources,
+        },
+        client: {
+          baseURL,
+          username,
+          password,
+        },
         log,
       });
     },
     {
       description: `CLI to fetch and normalize APM traces for journey scalability testing`,
       flags: {
-        string: ['journeyName', 'buildId', 'es-url', 'es-username', 'es-password'],
+        string: ['config', 'buildId', 'es-url', 'es-username', 'es-password'],
+        boolean: ['without-static-resources'],
         help: `
-          --journeyName      Single user performance journey name, stored in APM-based document as label: 'labels.journeyName'
-          --buildId          BUILDKITE_JOB_ID or uuid generated locally, stored in APM-based document as label: 'labels.testBuildId'
-          --es-url           url for Elasticsearch (APM cluster)
-          --es-username      username for Elasticsearch (APM cluster)
-          --es-password      password for Elasticsearch (APM cluster)
+          --config <config_path>     path to an FTR config file that sets scalabilitySetup and journeyName (stored as 'labels.journeyName' in APM-based document)
+          --buildId <buildId>        BUILDKITE_JOB_ID or uuid generated locally, stored in APM-based document as label: 'labels.testBuildId'
+          --es-url <url>             url for Elasticsearch (APM cluster)
+          --es-username <username>   username for Elasticsearch (APM cluster)
+          --es-password <password>   password for Elasticsearch (APM cluster)
+          --without-static-resources filters out traces with url path matching static resources pattern
         `,
       },
     }

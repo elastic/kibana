@@ -17,7 +17,7 @@ import {
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
 import { aggTermsFnName } from './terms_fn';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../..';
 
@@ -33,11 +33,9 @@ const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
   defaultMessage: 'Terms',
 });
 
-export interface AggParamsTerms extends BaseAggParams {
+export interface CommonAggParamsTerms extends BaseAggParams {
   field: string;
   orderBy: string;
-  orderAgg?: AggConfigSerialized;
-  order?: 'asc' | 'desc';
   size?: number;
   shardSize?: number;
   missingBucket?: boolean;
@@ -45,8 +43,23 @@ export interface AggParamsTerms extends BaseAggParams {
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string;
-  include?: string;
+  exclude?: string[] | string | number[];
+  include?: string[] | string | number[];
+  includeIsRegex?: boolean;
+  excludeIsRegex?: boolean;
+}
+
+export interface AggParamsTermsSerialized extends CommonAggParamsTerms {
+  orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
+}
+
+export interface AggParamsTerms extends CommonAggParamsTerms {
+  orderAgg?: IAggConfig;
+  order?: {
+    value: 'asc' | 'desc';
+    text: string;
+  };
 }
 
 export const getTermsBucketAgg = () =>
@@ -119,7 +132,13 @@ export const getTermsBucketAgg = () =>
       {
         name: 'shardSize',
         write: (aggConfig, output) => {
-          output.params.shard_size = aggConfig.params.shardSize;
+          if (aggConfig.params.shardSize) {
+            output.params.shard_size = aggConfig.params.shardSize;
+          } else if (aggConfig.params.size <= 10) {
+            // 25 is the default shard size set for size:10 by Elasticsearch.
+            // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+            output.params.shard_size = 25;
+          }
         },
       },
       {
@@ -177,6 +196,16 @@ export const getTermsBucketAgg = () =>
         advanced: true,
         shouldShow: isStringOrNumberType,
         ...migrateIncludeExcludeFormat,
+      },
+      {
+        name: 'includeIsRegex',
+        default: true,
+        write: noop,
+      },
+      {
+        name: 'excludeIsRegex',
+        default: true,
+        write: noop,
       },
     ],
   });

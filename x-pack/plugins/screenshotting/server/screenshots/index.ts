@@ -9,6 +9,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
+import { Semaphore } from '@kbn/std';
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
 import { from, Observable, of, throwError } from 'rxjs';
@@ -46,7 +47,6 @@ import { createLayout, Layout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
-import { Semaphore } from './semaphore';
 
 export type { ScreenshotObservableResult, UrlOrUrlWithContext } from './observable';
 
@@ -126,8 +126,8 @@ export class Screenshots {
       )
       .pipe(
         this.semaphore.acquire(),
-        mergeMap(({ driver, unexpectedExit$, close }) => {
-          const screen = new ScreenshotObservableHandler(
+        mergeMap(({ driver, error$, close }) => {
+          const screen: ScreenshotObservableHandler = new ScreenshotObservableHandler(
             driver,
             this.config,
             eventLogger,
@@ -143,9 +143,9 @@ export class Screenshots {
 
                   this.logger.error(error);
                   eventLogger.error(error, Transactions.SCREENSHOTTING);
-                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
+                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow "as-is" screenshot with injected warning message
                 }),
-                takeUntil(unexpectedExit$),
+                takeUntil(error$),
                 screen.getScreenshots()
               )
             ),
@@ -203,7 +203,6 @@ export class Screenshots {
           openUrl: 60000,
           waitForElements: 30000,
           renderComplete: 30000,
-          loadDelay: 3000,
         },
         urls: [],
       }

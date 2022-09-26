@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiFlyoutSize } from '@elastic/eui';
 import {
   useGeneratedHtmlId,
   EuiFlyout,
@@ -19,7 +21,8 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 
-import { Form, FormHook } from '../../../../../../../shared_imports';
+import type { FormHook } from '../../../../../../../shared_imports';
+import { Form } from '../../../../../../../shared_imports';
 
 import * as i18n from '../../../translations';
 
@@ -30,6 +33,7 @@ interface BulkEditFormWrapperProps {
   children: React.ReactNode;
   onClose: () => void;
   onSubmit: () => void;
+  flyoutSize?: EuiFlyoutSize;
 }
 
 const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
@@ -39,6 +43,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   children,
   onClose,
   onSubmit,
+  flyoutSize = 's',
 }) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RulesBulkEditForm',
@@ -46,7 +51,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
 
   const { isValid } = form;
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size="s">
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size={flyoutSize}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
           <h2 id={simpleFlyoutTitleId}>{title}</h2>
@@ -59,12 +64,11 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="cross"
               onClick={onClose}
               flush="left"
               data-test-subj="rulesBulkEditFormCancelBtn"
             >
-              {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
+              {i18n.BULK_EDIT_FLYOUT_FORM_CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

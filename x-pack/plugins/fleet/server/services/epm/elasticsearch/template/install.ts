@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 import type {
   RegistryDataStream,
   IndexTemplateEntry,
@@ -22,9 +23,7 @@ import type {
   EsAssetReference,
   PackageInfo,
 } from '../../../../types';
-
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -224,7 +223,7 @@ type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPL
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
   name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
 
-function buildComponentTemplates(params: {
+export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
@@ -242,6 +241,15 @@ function buildComponentTemplates(params: {
 
   const templateSettings = merge(defaultSettings, indexTemplateSettings);
 
+  const indexTemplateMappings = registryElasticsearch?.['index_template.mappings'] ?? {};
+
+  const mappingsProperties = merge(mappings.properties, indexTemplateMappings.properties ?? {});
+
+  const mappingsDynamicTemplates = uniqBy(
+    concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
+    (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
+  );
+
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -257,7 +265,11 @@ function buildComponentTemplates(params: {
           },
         },
       },
-      mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
+      mappings: {
+        properties: mappingsProperties,
+        dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates'),
+      },
     },
     _meta,
   };
@@ -354,7 +366,7 @@ export function prepareTemplate({
   pkg,
   dataStream,
 }: {
-  pkg: Pick<PackageInfo, 'name' | 'version'>;
+  pkg: Pick<PackageInfo, 'name' | 'version' | 'type'>;
   dataStream: RegistryDataStream;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
@@ -365,14 +377,7 @@ export function prepareTemplate({
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
 
-  let pipelineName;
-  if (dataStream.ingest_pipeline) {
-    pipelineName = getPipelineNameForInstallation({
-      pipelineName: dataStream.ingest_pipeline,
-      dataStream,
-      packageVersion,
-    });
-  }
+  const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
     templateName,

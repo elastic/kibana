@@ -6,24 +6,18 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109904
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
-
-export * from './deprecated';
 
 /*
  * Filters:
  */
 
-export { getEsQueryConfig, FilterStateStore } from '../common';
+export { getEsQueryConfig } from '../common';
 export {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
   getIndexPatternFromFilter,
 } from './query';
 
@@ -59,8 +53,6 @@ import {
   validateDataView,
 } from './data_views';
 
-export type { IndexPatternsService } from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -75,13 +67,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
@@ -122,13 +110,11 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
-  getNumberHistogramIntervalByDatatableColumn,
-  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
+  calcAutoIntervalLessThan,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -195,7 +181,6 @@ export {
   SearchSource,
   SearchSessionState,
   SortDirection,
-  handleResponse,
 } from './search';
 
 export type {
@@ -232,13 +217,11 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
-    getNumberHistogramIntervalByDatatableColumn,
-    getDateHistogramMetaDataByDatatableColumn,
+    calcAutoIntervalLessThan,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 };
 
 /*
@@ -249,7 +232,7 @@ export const search = {
  * Types to be shared externally
  * @public
  */
-export type { RefreshInterval, TimeRange } from '../common';
+export type { RefreshInterval } from '../common';
 
 export {
   createSavedQueryService,
@@ -265,7 +248,7 @@ export {
 } from './query';
 
 export { NowProvider } from './now_provider';
-export type { NowProviderInternalContract } from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
 
 export type {
   QueryState,
@@ -308,7 +291,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  IDataPluginServices,
   DataPublicPluginStartActions,
 } from './types';
 

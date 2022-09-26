@@ -11,12 +11,14 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
+  EuiText,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PROJECT_LABEL } from '../../common/translations';
 import {
   CommonFields,
   ConfigKey,
@@ -24,13 +26,11 @@ import {
   ICMPSimpleFields,
   Ping,
   ServiceLocations,
-  SourceType,
   EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
   BrowserFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
@@ -55,6 +55,7 @@ interface Props {
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
   errorSummaries?: Ping[];
+  statusSummaries?: Ping[];
 }
 
 export const MonitorManagementList = ({
@@ -69,7 +70,7 @@ export const MonitorManagementList = ({
   errorSummaries,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
-  const isXl = useBreakpoints().up('xl');
+  const isXl = useIsWithinMinBreakpoint('xxl');
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: EncryptedSyntheticsMonitorWithId[] = useMemo(
@@ -160,6 +161,12 @@ export const MonitorManagementList = ({
     },
     {
       align: 'left' as const,
+      field: ConfigKey.PROJECT_ID,
+      name: PROJECT_LABEL,
+      render: (value: string) => (value ? <EuiText size="s">{value}</EuiText> : null),
+    },
+    {
+      align: 'left' as const,
       field: ConfigKey.SCHEDULE,
       name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.schedule', {
         defaultMessage: 'Frequency (min)',
@@ -184,23 +191,12 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
-        <EuiToolTip
-          content={
-            monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
-              ? i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled.tooltip', {
-                  defaultMessage:
-                    'This monitor was added from an external project. Configuration is read only.',
-                })
-              : ''
-          }
-        >
-          <MonitorEnabled
-            id={monitor.id}
-            monitor={monitor}
-            isDisabled={!canEdit || monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
-            onUpdate={onUpdate}
-          />
-        </EuiToolTip>
+        <MonitorEnabled
+          id={monitor.id}
+          monitor={monitor}
+          isDisabled={!canEdit}
+          onUpdate={onUpdate}
+        />
       ),
     },
     {

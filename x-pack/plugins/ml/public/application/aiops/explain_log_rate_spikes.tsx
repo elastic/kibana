@@ -6,32 +6,61 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExplainLogRateSpikes } from '@kbn/aiops-plugin/public';
 
 import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
+import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
 
 export const ExplainLogRateSpikesPage: FC = () => {
-  const {
-    services: { docLinks },
-  } = useMlKibana();
+  const { services } = useMlKibana();
 
   const context = useMlContext();
+  const dataView = context.currentDataView;
+  const savedSearch = context.currentSavedSearch;
 
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.explainLogRateSpikes.pageHeader"
-          defaultMessage="Explain log rate spikes"
-        />
+        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.explainLogRateSpikes.pageHeader"
+              defaultMessage="Explain log rate spikes"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TechnicalPreviewBadge />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </MlPageHeader>
-      <ExplainLogRateSpikes dataView={context.currentDataView} />
-      <HelpMenu docLink={docLinks.links.ml.guide} />
+      {dataView && (
+        <ExplainLogRateSpikes
+          dataView={dataView}
+          savedSearch={savedSearch}
+          appDependencies={pick(services, [
+            'application',
+            'data',
+            'charts',
+            'fieldFormats',
+            'http',
+            'notifications',
+            'share',
+            'storage',
+            'uiSettings',
+            'unifiedSearch',
+          ])}
+        />
+      )}
+      <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );
 };

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
@@ -15,6 +16,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
+  ACTION_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -30,12 +32,18 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
+  ACTION_HISTORY,
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
-import { LinkItem } from '../common/links/types';
-import { StartPlugins } from '../types';
-
+import { licenseService } from '../common/hooks/use_license';
+import type { LinkItem } from '../common/links/types';
+import type { StartPlugins } from '../types';
+import {
+  manageCategories as cloudSecurityPostureCategories,
+  manageLinks as cloudSecurityPostureLinks,
+} from '../cloud_security_posture/links';
+import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
 import { IconEndpointPolicies } from './icons/endpoint_policies';
@@ -44,6 +52,7 @@ import { IconExceptionLists } from './icons/exception_lists';
 import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
+import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
   {
@@ -63,17 +72,19 @@ const categories = [
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.actionHistory,
     ],
   },
+  ...cloudSecurityPostureCategories,
 ];
 
-const links: LinkItem = {
+export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavEnabled: false,
+  globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -92,7 +103,6 @@ const links: LinkItem = {
 
       landingIcon: IconSiemRules,
       path: RULES_PATH,
-      globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
           defaultMessage: 'Rules',
@@ -103,7 +113,6 @@ const links: LinkItem = {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
-          globalNavEnabled: false,
           skipUrlState: true,
           hideTimeline: true,
         },
@@ -117,7 +126,8 @@ const links: LinkItem = {
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
-      globalNavEnabled: false,
+      skipUrlState: true,
+      hideTimeline: true,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
@@ -127,12 +137,10 @@ const links: LinkItem = {
     {
       id: SecurityPageName.endpoints,
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
-        defaultMessage: 'Hosts running endpoint security.',
+        defaultMessage: 'Hosts running Elastic Defend.',
       }),
       landingIcon: IconEndpoints,
-      globalNavEnabled: true,
       title: ENDPOINTS,
-      globalNavOrder: 9006,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -198,10 +206,52 @@ const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    {
+      id: SecurityPageName.actionHistory,
+      title: ACTION_HISTORY,
+      description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
+        defaultMessage: 'View the history of response actions performed on hosts.',
+      }),
+      landingIcon: IconActionHistory,
+      path: ACTION_HISTORY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
+    cloudSecurityPostureLinks,
   ],
 };
 
-export const getManagementLinkItems = async (core: CoreStart, plugins: StartPlugins) => {
-  // TODO: implement async logic to exclude links
+const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+  ...links,
+  links: links.links?.filter((link) => !linkIds.includes(link.id)),
+});
+
+export const getManagementFilteredLinks = async (
+  core: CoreStart,
+  plugins: StartPlugins
+): Promise<LinkItem> => {
+  try {
+    const currentUserResponse = await plugins.security.authc.getCurrentUser();
+    const privileges = calculateEndpointAuthz(
+      licenseService,
+      plugins.fleet?.authz,
+      currentUserResponse.roles
+    );
+    if (!privileges.canAccessEndpointManagement) {
+      return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    }
+    if (!privileges.canIsolateHost) {
+      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+        core.http
+      );
+      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+      if (!summaryResponse.total) {
+        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+      }
+    }
+  } catch {
+    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+  }
+
   return links;
 };

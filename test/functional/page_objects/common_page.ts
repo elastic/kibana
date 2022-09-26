@@ -177,8 +177,8 @@ export class CommonPageObject extends FtrService {
   ) {
     const appConfig = {
       // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
-      pathname: `${basePath}${this.config.get(['apps', appName]).pathname}${subUrl}`,
-      search,
+      pathname: `${basePath}${this.config.get(['apps', appName]).pathname}${subUrl || ''}`,
+      search: search || '',
     };
 
     await this.navigate({
@@ -265,6 +265,20 @@ export class CommonPageObject extends FtrService {
           await this.testSubjects.find('kibanaChrome');
         }
 
+        // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
+        // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
+        if (
+          appName === 'home' &&
+          currentUrl.includes('app/home') &&
+          disableWelcomePrompt &&
+          (await this.isChromeHidden())
+        ) {
+          await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+          const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
+          this.log.debug(msg);
+          throw new Error(msg);
+        }
+
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
 
         const navSuccessful = currentUrl
@@ -279,7 +293,6 @@ export class CommonPageObject extends FtrService {
         }
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
-          await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
         }
         return currentUrl;
       });
@@ -401,9 +414,9 @@ export class CommonPageObject extends FtrService {
   async closeToast() {
     const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
     await toast.moveMouseTo();
-    const title = await (await this.find.byCssSelector('.euiToastHeader__title')).getVisibleText();
+    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
 
-    await this.find.clickByCssSelector('.euiToast__closeButton');
+    await this.testSubjects.click('toastCloseButton');
     return title;
   }
 
@@ -411,7 +424,7 @@ export class CommonPageObject extends FtrService {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
-        await this.find.clickByCssSelector('.euiToast__closeButton');
+        await this.testSubjects.click('toastCloseButton');
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
       }
@@ -423,7 +436,7 @@ export class CommonPageObject extends FtrService {
     for (const toastElement of toasts) {
       try {
         await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
         await closeBtn.click();
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
@@ -536,7 +549,7 @@ export class CommonPageObject extends FtrService {
    * @param time
    */
   async setTime(time: TimeStrings) {
-    await this.kibanaServer.uiSettings.replace({
+    await this.kibanaServer.uiSettings.update({
       'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
     });
   }

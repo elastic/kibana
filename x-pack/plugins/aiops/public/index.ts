@@ -13,6 +13,4 @@ export function plugin() {
   return new AiopsPlugin();
 }
 
-export type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
-export { ExplainLogRateSpikes } from './shared_lazy_components';
-export type { AiopsPluginSetup, AiopsPluginStart } from './types';
+export { ExplainLogRateSpikes, LogCategorization } from './shared_lazy_components';

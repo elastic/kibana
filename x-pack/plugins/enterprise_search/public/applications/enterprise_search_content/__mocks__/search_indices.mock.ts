@@ -5,39 +5,110 @@
  * 2.0.
  */
 
-import { SearchIndex } from '../types';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-export const searchIndices = [
+import { ConnectorStatus, SyncStatus } from '../../../../common/types/connectors';
+import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
+
+export const indices: ElasticsearchIndexWithIngestion[] = [
   {
-    name: 'Our API Index',
-    indexSlug: 'index-1',
-    source_type: 'API',
-    elasticsearch_index_name: 'ent-search-api-one',
-    search_engines: 'Search Engine One, Search Engine Two',
-    document_count: 100,
+    count: 1,
+    hidden: false,
+    name: 'api',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'Customer Feedback',
-    indexSlug: 'index-2',
-    source_type: 'Elasticsearch Index',
-    elasticsearch_index_name: 'es-index-two',
-    search_engines: 'Search Engine One',
-    document_count: 100,
+    connector: {
+      api_key_id: null,
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      description: null,
+      error: null,
+      id: '2',
+      index_name: 'connector',
+      is_native: false,
+      language: 'en',
+      last_seen: null,
+      last_sync_error: null,
+      last_sync_status: SyncStatus.COMPLETED,
+      last_synced: null,
+      name: 'connector',
+      scheduling: {
+        enabled: false,
+        interval: '',
+      },
+      service_type: null,
+      status: ConnectorStatus.CONFIGURED,
+      sync_now: false,
+    },
+    count: 1,
+    hidden: false,
+    name: 'connector',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'Dharma Crawler',
-    indexSlug: 'index-3',
-    source_type: 'Crawler',
-    elasticsearch_index_name: 'ent-search-crawler-one',
-    search_engines: 'Search Engine One, Search Engine Two',
-    document_count: 100,
+    count: 1,
+    crawler: {
+      id: '3',
+      index_name: 'crawler',
+    },
+    hidden: false,
+    name: 'crawler',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'My Custom Source',
-    indexSlug: 'index-4',
-    source_type: 'Content Source',
-    elasticsearch_index_name: 'ent-search-custom-source-one',
-    search_engines: '--',
-    document_count: 1,
+    connector: {
+      api_key_id: null,
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      description: null,
+      error: null,
+      id: '4',
+      index_name: 'connector-crawler',
+      is_native: true,
+      language: 'en',
+      last_seen: null,
+      last_sync_error: null,
+      last_sync_status: SyncStatus.COMPLETED,
+      last_synced: null,
+      name: 'connector-crawler',
+      scheduling: {
+        enabled: false,
+        interval: '',
+      },
+      service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+      status: ConnectorStatus.CONFIGURED,
+      sync_now: false,
+    },
+    count: 1,
+    crawler: {
+      id: '5',
+      index_name: 'crawler',
+    },
+    hidden: false,
+    name: 'connector-crawler',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
-] as SearchIndex[];
+];

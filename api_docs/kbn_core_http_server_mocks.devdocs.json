@@ -1,0 +1,871 @@
+{
+  "id": "@kbn/core-http-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.createCoreContext",
+        "type": "Function",
+        "tags": [],
+        "label": "createCoreContext",
+        "description": [],
+        "signature": [
+          "(overrides?: Partial<",
+          "CoreContext",
+          ">) => ",
+          "CoreContext"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.createCoreContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "CoreContext",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.createHttpServer",
+        "type": "Function",
+        "tags": [],
+        "label": "createHttpServer",
+        "description": [
+          "\nCreates a concrete HttpServer with a mocked context."
+        ],
+        "signature": [
+          "(overrides?: Partial<",
+          "CoreContext",
+          ">) => ",
+          "HttpService"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.createHttpServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "CoreContext",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpServicePrebootMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpServicePrebootMock",
+        "description": [],
+        "signature": [
+          "{ registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContextBase",
+          ">) => void]>; basePath: ",
+          "IBasePath",
+          "; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", []>; } & ",
+          "HttpServicePreboot",
+          "<",
+          "RequestHandlerContextBase",
+          ">"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpServiceSetupMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpServiceSetupMock",
+        "description": [],
+        "signature": [
+          "{ csp: ",
+          "ICspConfig",
+          "; registerRouteHandlerContext: jest.MockInstance<",
+          "IContextContainer",
+          ", [contextName: Exclude<keyof ContextType, \"resolve\">, provider: ",
+          "IContextProvider",
+          "<ContextType, Exclude<keyof ContextType, \"resolve\">>]>; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", []>; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
+          "SessionStorageFactory",
+          "<unknown>>, [cookieOptions: ",
+          "SessionStorageCookieOptions",
+          "<unknown>]>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "OnPreRoutingHandler",
+          "]>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
+          "OnPreAuthHandler",
+          "]>; registerAuth: jest.MockInstance<void, [handler: ",
+          "AuthenticationHandler",
+          "]>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
+          "OnPostAuthHandler",
+          "]>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
+          "OnPreResponseHandler",
+          "]>; } & Omit<",
+          "HttpServiceSetup",
+          "<ContextType>, \"createRouter\" | \"basePath\"> & { basePath: BasePathMocked; createRouter: jest.MockedFunction<() => ",
+          "RouterMock",
+          ">; }"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpServiceStartMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpServiceStartMock",
+        "description": [],
+        "signature": [
+          "{ basePath: ",
+          "IBasePath",
+          "; auth: ",
+          "HttpAuth",
+          "; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", []>; } & ",
+          "HttpServiceStart",
+          " & { basePath: BasePathMocked; }"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.InternalHttpServicePrebootMock",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalHttpServicePrebootMock",
+        "description": [],
+        "signature": [
+          "{ auth: ",
+          "HttpAuth",
+          "; server: ",
+          "Server",
+          "; externalUrl: ",
+          "ExternalUrlConfig",
+          "; csp: ",
+          "ICspConfig",
+          "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string]>; registerRouteHandlerContext: jest.MockInstance<any, [pluginOpaqueId: symbol, contextName: never, provider: ",
+          "IContextProvider",
+          "<",
+          "RequestHandlerContextBase",
+          ", never>]>; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", []>; registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContextBase",
+          ">) => void]>; } & Omit<",
+          "InternalHttpServicePreboot",
+          ", \"basePath\"> & { basePath: BasePathMocked; }"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.InternalHttpServiceSetupMock",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalHttpServiceSetupMock",
+        "description": [],
+        "signature": [
+          "{ server: ",
+          "Server",
+          "; externalUrl: ",
+          "ExternalUrlConfig",
+          "; csp: ",
+          "ICspConfig",
+          "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string]>; registerRouteHandlerContext: jest.MockInstance<any, [pluginOpaqueId: symbol, contextName: never, provider: ",
+          "IContextProvider",
+          "<",
+          "RequestHandlerContextBase",
+          ", never>]>; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", []>; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
+          "SessionStorageFactory",
+          "<unknown>>, [cookieOptions: ",
+          "SessionStorageCookieOptions",
+          "<unknown>]>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "OnPreRoutingHandler",
+          "]>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
+          "OnPreAuthHandler",
+          "]>; registerAuth: jest.MockInstance<void, [handler: ",
+          "AuthenticationHandler",
+          "]>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
+          "OnPostAuthHandler",
+          "]>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
+          "OnPreResponseHandler",
+          "]>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContextBase",
+          ">]>; registerPrebootRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContextBase",
+          ">) => void]>; } & Omit<",
+          "InternalHttpServiceSetup",
+          ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          "RouterMock",
+          ">; authRequestHeaders: jest.Mocked<",
+          "IAuthHeadersStorage",
+          ">; }"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.InternalHttpServiceStartMock",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalHttpServiceStartMock",
+        "description": [],
+        "signature": [
+          "{ isListening: jest.MockInstance<boolean, []>; basePath: ",
+          "IBasePath",
+          "; auth: ",
+          "HttpAuth",
+          "; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", []>; } & ",
+          "InternalHttpServiceStart",
+          " & { basePath: BasePathMocked; }"
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.httpServerMock",
+        "type": "Object",
+        "tags": [],
+        "label": "httpServerMock",
+        "description": [],
+        "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServerMock.createKibanaRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "createKibanaRequest",
+            "description": [],
+            "signature": [
+              "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
+              "RequestFixtureOptions",
+              "<P, Q, B> | undefined) => ",
+              "KibanaRequest",
+              "<P, Q, B, any>"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-mocks",
+                "id": "def-server.httpServerMock.createKibanaRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "RequestFixtureOptions",
+                  "<P, Q, B> | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-http-router-server-mocks/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServerMock.createRawRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "createRawRequest",
+            "description": [],
+            "signature": [
+              "(customization?: ",
+              "DeepPartialObject",
+              "<",
+              "Request",
+              "> | undefined) => ",
+              "Request"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-mocks",
+                "id": "def-server.httpServerMock.createRawRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "customization",
+                "description": [],
+                "signature": [
+                  "DeepPartialObject",
+                  "<",
+                  "Request",
+                  "> | undefined"
+                ],
+                "path": "node_modules/@types/kbn__hapi-mocks/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServerMock.createResponseFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "createResponseFactory",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "KibanaResponseFactory",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServerMock.createLifecycleResponseFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "createLifecycleResponseFactory",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "LifecycleResponseFactory",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServerMock.createToolkit",
+            "type": "Function",
+            "tags": [],
+            "label": "createToolkit",
+            "description": [],
+            "signature": [
+              "() => ToolkitMock"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.httpServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "httpServiceMock",
+        "description": [],
+        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<HttpServiceContract>"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "createBasePath",
+            "description": [],
+            "signature": [
+              "(serverBasePath?: string, publicBaseUrl?: string) => BasePathMocked"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-mocks",
+                "id": "def-server.httpServiceMock.createBasePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "serverBasePath",
+                "description": [],
+                "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server-mocks",
+                "id": "def-server.httpServiceMock.createBasePath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "publicBaseUrl",
+                "description": [],
+                "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createAuth",
+            "type": "Function",
+            "tags": [],
+            "label": "createAuth",
+            "description": [],
+            "signature": [
+              "() => AuthMocked"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createInternalPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPrebootContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerMocksPluginApi",
+                "section": "def-server.InternalHttpServicePrebootMock",
+                "text": "InternalHttpServicePrebootMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createPrebootContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerMocksPluginApi",
+                "section": "def-server.HttpServicePrebootMock",
+                "text": "HttpServicePrebootMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerMocksPluginApi",
+                "section": "def-server.InternalHttpServiceSetupMock",
+                "text": "InternalHttpServiceSetupMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "<ContextType extends ",
+              "RequestHandlerContextBase",
+              " = ",
+              "RequestHandlerContextBase",
+              ">() => ",
+              {
+                "pluginId": "@kbn/core-http-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerMocksPluginApi",
+                "section": "def-server.HttpServiceSetupMock",
+                "text": "HttpServiceSetupMock"
+              },
+              "<ContextType>"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerMocksPluginApi",
+                "section": "def-server.InternalHttpServiceStartMock",
+                "text": "InternalHttpServiceStartMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerMocksPluginApi",
+                "section": "def-server.HttpServiceStartMock",
+                "text": "HttpServiceStartMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createOnPreAuthToolkit",
+            "type": "Function",
+            "tags": [],
+            "label": "createOnPreAuthToolkit",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "OnPreAuthToolkit",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createOnPostAuthToolkit",
+            "type": "Function",
+            "tags": [],
+            "label": "createOnPostAuthToolkit",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "OnPostAuthToolkit",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createOnPreResponseToolkit",
+            "type": "Function",
+            "tags": [],
+            "label": "createOnPreResponseToolkit",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "OnPreResponseToolkit",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createOnPreRoutingToolkit",
+            "type": "Function",
+            "tags": [],
+            "label": "createOnPreRoutingToolkit",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "OnPreRoutingToolkit",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createAuthToolkit",
+            "type": "Function",
+            "tags": [],
+            "label": "createAuthToolkit",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "AuthToolkit",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createAuthHeaderStorage",
+            "type": "Function",
+            "tags": [],
+            "label": "createAuthHeaderStorage",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "IAuthHeadersStorage",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServiceMock.createRouter",
+            "type": "Function",
+            "tags": [],
+            "label": "createRouter",
+            "description": [],
+            "signature": [
+              "({ routerPath }?: { routerPath?: string | undefined; } | undefined) => ",
+              "RouterMock"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-mocks",
+                "id": "def-server.httpServiceMock.createRouter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ routerPath?: string | undefined; } | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-http-router-server-mocks/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.sessionStorageMock",
+        "type": "Object",
+        "tags": [],
+        "label": "sessionStorageMock",
+        "description": [],
+        "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.sessionStorageMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "<T>() => jest.Mocked<",
+              "SessionStorage",
+              "<T>>"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.sessionStorageMock.createFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "createFactory",
+            "description": [],
+            "signature": [
+              "<T>() => DeepMocked<",
+              "SessionStorageFactory",
+              "<T>>"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * A set of fields describing Kibana user.
+ */
 export interface User {
   username: string;
   email?: string;
@@ -23,6 +26,30 @@ export interface EditUser extends User {
   confirmPassword?: string;
 }
 
-export function getUserDisplayName(user: User) {
-  return user.full_name || user.username;
+/**
+ * Set of available name-related fields to pick as display name.
+ */
+export interface GetUserDisplayNameParams {
+  /**
+   * Username of the user.
+   */
+  username: string;
+
+  /**
+   * Optional email of the user.
+   */
+  email?: string;
+
+  /**
+   * Optional full name of the user.
+   */
+  full_name?: string;
+}
+
+/**
+ * Determines the display name for the provided user information.
+ * @param params Set of available user's name-related fields.
+ */
+export function getUserDisplayName(params: GetUserDisplayNameParams) {
+  return params.full_name || params.email || params.username;
 }

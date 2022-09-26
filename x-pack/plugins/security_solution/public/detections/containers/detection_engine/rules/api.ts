@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { camelCase } from 'lodash';
-import dateMath from '@kbn/datemath';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -17,32 +15,27 @@ import {
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
-  detectionEngineRuleExecutionEventsUrl,
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
+  DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '../../../../../common/constants';
-import {
-  AggregateRuleExecutionEvent,
-  BulkAction,
-  RuleExecutionStatus,
-} from '../../../../../common/detection_engine/schemas/common';
-import {
+import type { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type {
   FullResponseSchema,
   PreviewResponse,
 } from '../../../../../common/detection_engine/schemas/request';
-import {
-  RulesSchema,
-  GetAggregateRuleExecutionEventsResponse,
+import type {
+  GetInstalledIntegrationsResponse,
+  RulesReferencedByExceptionListsSchema,
 } from '../../../../../common/detection_engine/schemas/response';
-import { GetInstalledIntegrationsResponse } from '../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
 
-import {
+import type {
   UpdateRulesProps,
   CreateRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
   Rule,
   FetchRuleProps,
-  BasicFetchProps,
   ImportDataProps,
   ExportDocumentsProps,
   ImportDataResponse,
@@ -51,6 +44,7 @@ import {
   BulkActionProps,
   BulkActionResponseMap,
   PreviewRulesProps,
+  FindRulesReferencedByExceptionsProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -79,8 +73,8 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Fu
  *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
-  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     body: JSON.stringify(rule),
     signal,
@@ -97,8 +91,11 @@ export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Ru
  *
  * @throws An error if response is not OK
  */
-export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
-  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+export const patchRule = async ({
+  ruleProperties,
+  signal,
+}: PatchRuleProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,
@@ -160,14 +157,11 @@ export const fetchRules = async ({
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
 
-  return KibanaServices.get().http.fetch<FetchRulesResponse>(
-    `${DETECTION_ENGINE_RULES_URL}/_find`,
-    {
-      method: 'GET',
-      query,
-      signal,
-    }
-  );
+  return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
+    method: 'GET',
+    query,
+    signal,
+  });
 };
 
 /**
@@ -208,6 +202,7 @@ export const pureFetchRuleById = async ({
  * @param ids string[] rule ids to select rules to perform bulk action with
  * @param edit BulkEditActionPayload edit action payload
  * @param action bulk action to perform
+ * @param isDryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
@@ -216,6 +211,7 @@ export const performBulkAction = async <Action extends BulkAction>({
   query,
   edit,
   ids,
+  isDryRun,
 }: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
   KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
     DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -227,6 +223,9 @@ export const performBulkAction = async <Action extends BulkAction>({
         ...(ids ? { ids } : {}),
         ...(query !== undefined ? { query } : {}),
       }),
+      query: {
+        ...(isDryRun ? { dry_run: isDryRun } : {}),
+      },
     }
   );
 
@@ -237,9 +236,7 @@ export const performBulkAction = async <Action extends BulkAction>({
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({
-  signal,
-}: BasicFetchProps): Promise<{
+export const createPrepackagedRules = async (): Promise<{
   rules_installed: number;
   rules_updated: number;
   timelines_installed: number;
@@ -252,7 +249,6 @@ export const createPrepackagedRules = async ({
     timelines_updated: number;
   }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
-    signal,
   });
 
   return result;
@@ -321,64 +317,6 @@ export const exportRules = async ({
 };
 
 /**
- * Fetch rule execution events (e.g. status changes) from Event Log.
- *
- * @param ruleId Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
- * @param start Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
- * @param end End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
- * @param queryText search string in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
- * @param statusFilters RuleExecutionStatus[] array of `statusFilters` (e.g. `succeeded,failed,partial failure`)
- * @param page current page to fetch
- * @param perPage number of results to fetch per page
- * @param sortField keyof AggregateRuleExecutionEvent field to sort by
- * @param sortOrder SortOrder what order to sort by (e.g. `asc` or `desc`)
- * @param signal AbortSignal Optional signal for cancelling the request
- *
- * @throws An error if response is not OK
- */
-export const fetchRuleExecutionEvents = async ({
-  ruleId,
-  start,
-  end,
-  queryText,
-  statusFilters,
-  page,
-  perPage,
-  sortField,
-  sortOrder,
-  signal,
-}: {
-  ruleId: string;
-  start: string;
-  end: string;
-  queryText?: string;
-  statusFilters?: RuleExecutionStatus[];
-  page?: number;
-  perPage?: number;
-  sortField?: keyof AggregateRuleExecutionEvent;
-  sortOrder?: SortOrder;
-  signal?: AbortSignal;
-}): Promise<GetAggregateRuleExecutionEventsResponse> => {
-  const url = detectionEngineRuleExecutionEventsUrl(ruleId);
-  const startDate = dateMath.parse(start);
-  const endDate = dateMath.parse(end, { roundUp: true });
-  return KibanaServices.get().http.fetch<GetAggregateRuleExecutionEventsResponse>(url, {
-    method: 'GET',
-    query: {
-      start: startDate?.utc().toISOString(),
-      end: endDate?.utc().toISOString(),
-      query_text: queryText,
-      status_filters: statusFilters?.sort()?.join(','),
-      page,
-      per_page: perPage,
-      sort_field: sortField,
-      sort_order: sortOrder,
-    },
-    signal,
-  });
-};
-
-/**
  * Fetch all unique Tags used by Rules
  *
  * @param signal to cancel request
@@ -401,7 +339,7 @@ export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<st
 export const getPrePackagedRulesStatus = async ({
   signal,
 }: {
-  signal: AbortSignal;
+  signal: AbortSignal | undefined;
 }): Promise<PrePackagedRulesStatusResponse> =>
   KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
@@ -432,6 +370,31 @@ export const fetchInstalledIntegrations = async ({
       method: 'GET',
       query: {
         packages: packages?.sort()?.join(','),
+      },
+      signal,
+    }
+  );
+
+/**
+ * Fetch info on what exceptions lists are referenced by what rules
+ *
+ * @param lists exception list information needed for making request
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const findRuleExceptionReferences = async ({
+  lists,
+  signal,
+}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
+  KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
+    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
+    {
+      method: 'GET',
+      query: {
+        ids: lists.map(({ id }) => id).join(','),
+        list_ids: lists.map(({ listId }) => listId).join(','),
+        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
       },
       signal,
     }

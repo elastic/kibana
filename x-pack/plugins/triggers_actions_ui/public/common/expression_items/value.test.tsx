@@ -102,7 +102,7 @@ describe('value expression', () => {
     expect(wrapper.find('[data-test-subj="valueFieldTitle"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="valueFieldNumber"]').exists()).toBeFalsy();
 
-    wrapper.find('[data-test-subj="valueExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -123,7 +123,7 @@ describe('value expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="valueExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

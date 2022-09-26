@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL } from '../../translations';
 
 export const kpiUniqueIpsBarLensAttributes: LensAttributes = {

@@ -137,6 +137,10 @@ represent. Defaults to 10. If you modify the
 `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same
 value in this setting.
 
+`monitoring.ui.kibana.reporting.stale_status_threshold_seconds`::
+Specifies how many seconds can pass before the Kibana status reports are considered stale.
+Defaults to `120`.
+
 [float]
 [[monitoring-ui-cgroup-settings]]
 ===== Monitoring UI container settings

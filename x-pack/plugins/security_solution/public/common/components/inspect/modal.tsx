@@ -19,14 +19,15 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useMemo, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { useLocation } from 'react-router-dom';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
@@ -43,11 +44,11 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
-interface ModalInspectProps {
+export interface ModalInspectProps {
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
-  inputId?: InputsModelId;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   request: string;
   response: string;
   title: string | React.ReactElement | React.ReactNode;

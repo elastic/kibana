@@ -6,26 +6,37 @@
  */
 
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Ping } from '../../../../../../common/runtime_types';
 import { testNowMonitorAction } from '../../../../state/actions';
 import { testNowRunSelector, TestRunStats } from '../../../../state/reducers/test_now_runs';
+import * as labels from '../translations';
 
 export const TestNowColumn = ({
   monitorId,
   configId,
+  selectedMonitor,
 }: {
   monitorId: string;
   configId?: string;
+  selectedMonitor: Ping;
 }) => {
   const dispatch = useDispatch();
 
   const testNowRun = useSelector(testNowRunSelector(configId));
 
+  if (selectedMonitor.monitor.fleet_managed) {
+    return (
+      <EuiToolTip content={labels.PRIVATE_AVAILABLE_LABEL}>
+        <>--</>
+      </EuiToolTip>
+    );
+  }
+
   if (!configId) {
     return (
-      <EuiToolTip content={TEST_NOW_AVAILABLE_LABEL}>
+      <EuiToolTip content={labels.TEST_NOW_AVAILABLE_LABEL}>
         <>--</>
       </EuiToolTip>
     );
@@ -43,38 +54,13 @@ export const TestNowColumn = ({
   }
 
   return (
-    <EuiToolTip content={testNowRun ? TEST_SCHEDULED_LABEL : TEST_NOW_LABEL}>
+    <EuiToolTip content={testNowRun ? labels.TEST_SCHEDULED_LABEL : labels.TEST_NOW_LABEL}>
       <EuiButtonIcon
         iconType="play"
         onClick={() => testNowClick()}
         isDisabled={!isTestNowCompleted}
-        aria-label={TEST_NOW_ARIA_LABEL}
+        aria-label={labels.TEST_NOW_ARIA_LABEL}
       />
     </EuiToolTip>
   );
 };
-
-export const TEST_NOW_ARIA_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.testNow.AriaLabel',
-  {
-    defaultMessage: 'CLick to run test now',
-  }
-);
-
-export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.testNow.available',
-  {
-    defaultMessage: 'Test now is only available for monitors added via Monitor Management.',
-  }
-);
-
-export const TEST_NOW_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.label', {
-  defaultMessage: 'Test now',
-});
-
-export const TEST_SCHEDULED_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.testNow.scheduled',
-  {
-    defaultMessage: 'Test is already scheduled',
-  }
-);

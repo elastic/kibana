@@ -13,8 +13,8 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
-import { OpenTimelineResult, OpenTimelineProps } from './types';
-import { TimelinesTableProps } from './timelines_table';
+import type { OpenTimelineResult, OpenTimelineProps } from './types';
+import type { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
@@ -35,9 +35,7 @@ jest.mock('react-router-dom', () => {
 const mockTheme = getMockTheme({
   eui: {
     euiSizeL: '10px',
-    paddingSizes: {
-      s: '10px',
-    },
+    euiSizeS: '10px',
     euiBreakpoints: {
       l: '1200px',
     },
@@ -313,7 +311,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
@@ -333,7 +335,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
@@ -353,7 +359,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
@@ -373,7 +383,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')

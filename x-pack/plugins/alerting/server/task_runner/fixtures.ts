@@ -245,31 +245,34 @@ export const generateRunnerResult = ({
   };
 };
 
-export const generateEnqueueFunctionInput = () => ({
-  apiKey: 'MTIzOmFiYw==',
-  executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-  id: '1',
-  params: {
-    foo: true,
-  },
-  consumer: 'bar',
-  relatedSavedObjects: [
-    {
-      id: '1',
-      namespace: undefined,
-      type: 'alert',
-      typeId: RULE_TYPE_ID,
+export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
+  const input = {
+    apiKey: 'MTIzOmFiYw==',
+    executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    id: '1',
+    params: {
+      foo: true,
     },
-  ],
-  source: {
+    consumer: 'bar',
+    relatedSavedObjects: [
+      {
+        id: '1',
+        namespace: undefined,
+        type: 'alert',
+        typeId: RULE_TYPE_ID,
+      },
+    ],
     source: {
-      id: '1',
-      type: 'alert',
+      source: {
+        id: '1',
+        type: 'alert',
+      },
+      type: 'SAVED_OBJECT',
     },
-    type: 'SAVED_OBJECT',
-  },
-  spaceId: 'default',
-});
+    spaceId: 'default',
+  };
+  return isArray ? [input] : input;
+};
 
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({
   [String(id)]: {

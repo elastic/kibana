@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 
 const RULES_PAGE_LINK = '/app/observability/alerts/rules';
 const STAT_CLASS = 'euiStat';
-const STAT_TITLE_PRIMARY_CLASS = 'euiStat__title--primary';
+const STAT_TITLE_PRIMARY_SELECTOR = '[class*="euiStat__title-primary"]';
 const STAT_BUTTON_CLASS = 'euiButtonEmpty';
 
 describe('Rule stats', () => {
@@ -44,7 +44,7 @@ describe('Rule stats', () => {
     const disabledElement = await findByText('Disabled');
     expect(disabledElement).toBeInTheDocument();
     expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
-    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(0);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeFalsy();
     expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
   });
 
@@ -82,7 +82,7 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[4]);
-    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(1);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
   });
 
   test('snoozed stat is not clickable, when there are no snoozed rules', async () => {
@@ -101,7 +101,7 @@ describe('Rule stats', () => {
     const snoozedElement = await findByText('Snoozed');
     expect(snoozedElement).toBeInTheDocument();
     expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
-    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(0);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeFalsy();
     expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
   });
 
@@ -138,7 +138,7 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[3]);
-    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(1);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
   });
 
   test('errors stat is not clickable, when there are no error rules', async () => {
@@ -157,7 +157,7 @@ describe('Rule stats', () => {
     const errorsElement = await findByText('Errors');
     expect(errorsElement).toBeInTheDocument();
     expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
-    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(0);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeFalsy();
     expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
   });
 
@@ -194,6 +194,6 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[2]);
-    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(1);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
   });
 });

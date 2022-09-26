@@ -40,6 +40,7 @@
         ],
         "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -51,7 +52,8 @@
               "Shipper's unique name"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -67,6 +69,7 @@
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -88,6 +91,7 @@
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -104,6 +108,7 @@
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -113,12 +118,10 @@
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
             "id": "def-common.FullStoryShipper.extendContext",
             "type": "Function",
-            "tags": [
-              "inheritDoc"
-            ],
+            "tags": [],
             "label": "extendContext",
             "description": [
-              "\n{@inheritDoc IShipper.extendContext}"
+              "\nCalls `fs.identify`, `fs.setUserVars` and `fs.setVars` depending on the fields provided in the newContext."
             ],
             "signature": [
               "(newContext: ",
@@ -127,6 +130,7 @@
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -134,12 +138,15 @@
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
-                "description": [],
+                "description": [
+                  "The full new context to set {@link EventContext }"
+                ],
                 "signature": [
                   "EventContext"
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -149,18 +156,17 @@
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
             "id": "def-common.FullStoryShipper.optIn",
             "type": "Function",
-            "tags": [
-              "inheritDoc"
-            ],
+            "tags": [],
             "label": "optIn",
             "description": [
-              "\n{@inheritDoc IShipper.optIn}"
+              "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
             ],
             "signature": [
               "(isOptedIn: boolean) => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -168,12 +174,15 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
-                "description": [],
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
                 "signature": [
                   "boolean"
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -183,20 +192,19 @@
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
             "id": "def-common.FullStoryShipper.reportEvents",
             "type": "Function",
-            "tags": [
-              "inheritDoc"
-            ],
+            "tags": [],
             "label": "reportEvents",
             "description": [
-              "\n{@inheritDoc IShipper.reportEvents}"
+              "\nFilters the events by the eventTypesAllowlist from the config.\nThen it transforms the event into a FS valid format and calls `fs.event`."
             ],
             "signature": [
               "(events: ",
               "Event",
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -204,13 +212,16 @@
                 "type": "Array",
                 "tags": [],
                 "label": "events",
-                "description": [],
+                "description": [
+                  "batched events {@link Event }"
+                ],
                 "signature": [
                   "Event",
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -222,12 +233,15 @@
             "type": "Function",
             "tags": [],
             "label": "shutdown",
-            "description": [],
+            "description": [
+              "\nShuts down the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
+            ],
             "signature": [
               "() => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -265,6 +279,7 @@
         ],
         "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -279,7 +294,8 @@
               "string[] | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -295,6 +311,7 @@
         ],
         "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -306,7 +323,8 @@
               "\nThe FullStory account id."
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -321,7 +339,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -336,7 +355,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -351,7 +371,8 @@
               "boolean | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-fullstory",
@@ -366,7 +387,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -12,6 +12,7 @@ import type {
   IRouter,
   KibanaRequest,
   KibanaResponseFactory,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
@@ -89,7 +90,7 @@ describe.skip('onRequestInterceptor', () => {
       http: http as unknown as CoreSetup['http'],
     });
 
-    const router = http.createRouter('/');
+    const router = http.createRouter<RequestHandlerContext>('/');
 
     initKbnServer(router, http.basePath);
 

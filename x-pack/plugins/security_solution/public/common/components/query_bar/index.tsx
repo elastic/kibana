@@ -8,16 +8,12 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import {
-  FilterManager,
-  TimeHistory,
-  TimeRange,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { TimeHistory } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface QueryBarComponentProps {
@@ -37,6 +33,7 @@ export interface QueryBarComponentProps {
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
   displayStyle?: SearchBarProps['displayStyle'];
+  isDisabled?: boolean;
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
@@ -57,6 +54,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     onSavedQuery,
     dataTestSubj,
     displayStyle,
+    isDisabled,
   }) => {
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -105,6 +103,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
       <SearchBar
@@ -129,10 +128,11 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showQueryBar={true}
         showQueryInput={true}
         showSaveQuery={true}
-        timeHistory={new TimeHistory(new Storage(localStorage))}
+        timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
         displayStyle={displayStyle}
+        isDisabled={isDisabled}
       />
     );
   }

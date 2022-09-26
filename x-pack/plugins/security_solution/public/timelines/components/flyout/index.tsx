@@ -10,7 +10,7 @@ import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { AppLeaveHandler } from '@kbn/core/public';
+import type { AppLeaveHandler } from '@kbn/core/public';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineActions } from '../../store/timeline';
@@ -29,7 +29,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const {
-    activeTab,
     show,
     status: timelineStatus,
     updated,
@@ -122,7 +121,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
         <EuiFocusTrap disabled={!focusOwnership}>
           <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
-        <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
       </>
     </EuiOutsideClickDetector>
   );

@@ -5,36 +5,38 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { getActionCompletionInfo, mapToNormalizedActionRequest } from './utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
+  formatEndpointActionResults,
+  categorizeResponseResults,
+  getActionCompletionInfo,
+  mapToNormalizedActionRequest,
+  getAgentHostNamesWithIds,
+  getActionStatus,
+} from './utils';
+import type {
   ActionDetails,
-  ActivityLogAction,
   ActivityLogActionResponse,
-  EndpointAction,
   EndpointActionResponse,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import {
-  ACTION_REQUEST_INDICES,
-  ACTION_RESPONSE_INDICES,
-  catchAndWrapError,
-  categorizeActionResults,
-  categorizeResponseResults,
-  getUniqueLogData,
-} from '../../utils';
+import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import type { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
   actionId: string
 ): Promise<ActionDetails> => {
-  let actionRequestsLogEntries: Array<ActivityLogAction | EndpointActivityLogAction>;
+  let actionRequestsLogEntries: EndpointActivityLogAction[];
 
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
   let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
@@ -44,9 +46,9 @@ export const getActionDetailsById = async (
     const [actionRequestEsSearchResults, actionResponsesEsSearchResults] = await Promise.all([
       // Get the action request(s)
       esClient
-        .search<EndpointAction | LogsEndpointAction>(
+        .search<LogsEndpointAction>(
           {
-            index: ACTION_REQUEST_INDICES,
+            index: ENDPOINT_ACTIONS_INDEX,
             body: {
               query: {
                 bool: {
@@ -84,11 +86,9 @@ export const getActionDetailsById = async (
         .catch(catchAndWrapError),
     ]);
 
-    actionRequestsLogEntries = getUniqueLogData(
-      categorizeActionResults({
-        results: actionRequestEsSearchResults?.hits?.hits ?? [],
-      })
-    ) as Array<ActivityLogAction | EndpointActivityLogAction>;
+    actionRequestsLogEntries = formatEndpointActionResults(
+      actionRequestEsSearchResults?.hits?.hits ?? []
+    );
 
     // Multiple Action records could have been returned, but we only really
     // need one since they both hold similar data
@@ -110,22 +110,42 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
-    normalizedActionRequest.agents,
-    actionResponses
-  );
+  // get host metadata info with queried agents
+  const agentsHostInfo = await getAgentHostNamesWithIds({
+    esClient,
+    metadataService,
+    agentIds: normalizedActionRequest.agents,
+  });
+
+  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+    getActionCompletionInfo(normalizedActionRequest.agents, actionResponses);
+
+  const { isExpired, status } = getActionStatus({
+    expirationDate: normalizedActionRequest.expiration,
+    isCompleted,
+    wasSuccessful,
+  });
 
   const actionDetails: ActionDetails = {
     id: actionId,
     agents: normalizedActionRequest.agents,
+    hosts: normalizedActionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+      acc[id] = { name: agentsHostInfo[id] ?? '' };
+      return acc;
+    }, {}),
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
-    logEntries: [...actionRequestsLogEntries, ...actionResponses],
     isCompleted,
     completedAt,
     wasSuccessful,
     errors,
-    isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
+    isExpired,
+    status,
+    outputs,
+    agentState,
+    createdBy: normalizedActionRequest.createdBy,
+    comment: normalizedActionRequest.comment,
+    parameters: normalizedActionRequest.parameters,
   };
 
   return actionDetails;

@@ -95,8 +95,7 @@ export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOpt
         // @ts-ignore
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 4 : 3),
-        // @ts-ignore
-        color: theme.euiTextColors.default,
+        color: theme.euiTextColor,
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
         'font-size': theme.euiFontSizeXS,
         'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
@@ -104,9 +103,9 @@ export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOpt
         shape: (el: cytoscape.NodeSingular) => shapeForNode(el, theme),
         'text-background-color': theme.euiColorLightestShade,
         'text-background-opacity': 0,
-        'text-background-padding': theme.paddingSizes.xs,
+        'text-background-padding': theme.euiSizeXS,
         'text-background-shape': 'roundrectangle',
-        'text-margin-y': parseInt(theme.paddingSizes.s, 10),
+        'text-margin-y': parseInt(theme.euiSizeS, 10),
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'wrap',
@@ -123,7 +122,7 @@ export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOpt
         'target-arrow-color': lineColor,
         'target-arrow-shape': 'triangle',
         // @ts-ignore
-        'target-distance-from-node': theme.paddingSizes.xs,
+        'target-distance-from-node': theme.euiSizeXS,
         width: 1,
         'source-arrow-shape': 'none',
       },

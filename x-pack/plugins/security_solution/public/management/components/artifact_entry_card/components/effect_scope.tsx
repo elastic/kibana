@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { CommonProps, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,7 +18,7 @@ import {
 } from './translations';
 import { TextValueDisplay } from './text_value_display';
 import { ContextMenuWithRouterSupport } from '../../context_menu_with_router_support';
-import { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_router';
+import type { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 // FIXME:PT support being able to show per policy label for Artifacst that have >0 policies, but no menu

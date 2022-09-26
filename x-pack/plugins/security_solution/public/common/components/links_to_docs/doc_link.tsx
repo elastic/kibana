@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { useKibana } from '../../lib/kibana';
 import { ExternalLink } from './external_link';
 import { COMMON_ARIA_LABEL_ENDING } from './links_translations';

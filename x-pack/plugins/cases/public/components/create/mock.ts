@@ -25,9 +25,10 @@ export const sampleData: CasePostRequest = {
     syncAlerts: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
+  assignees: [],
 };
 
-export const sampleConnectorData = { loading: false, connectors: [] };
+export const sampleConnectorData = { isLoading: false, data: [] };
 
 export const useGetIncidentTypesResponse = {
   isLoading: false,

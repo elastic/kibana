@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import {
+  IEvent,
+  IEventLogger,
+  millisToNanos,
+  SAVED_OBJECT_REL_PRIMARY,
+} from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
@@ -31,6 +37,7 @@ type RuleContext = RuleContextOpts & {
 };
 
 interface DoneOpts {
+  timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
 }
@@ -100,7 +107,12 @@ export class AlertingEventLogger {
   }
 
   public getStartAndDuration(): { start?: Date; duration?: string | number } {
-    return { start: this.startTime, duration: this.event?.event?.duration };
+    return {
+      start: this.startTime,
+      duration: this.startTime
+        ? millisToNanos(new Date().getTime() - this.startTime!.getTime())
+        : '0',
+    };
   }
 
   public setRuleName(ruleName: string) {
@@ -152,7 +164,7 @@ export class AlertingEventLogger {
     this.eventLogger.logEvent(createActionExecuteRecord(this.ruleContext, action));
   }
 
-  public done({ status, metrics }: DoneOpts) {
+  public done({ status, metrics, timings }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -185,6 +197,10 @@ export class AlertingEventLogger {
 
     if (metrics) {
       updateEvent(this.event, { metrics });
+    }
+
+    if (timings) {
+      updateEvent(this.event, { timings });
     }
 
     this.eventLogger.logEvent(this.event);
@@ -324,9 +340,10 @@ interface UpdateEventOpts {
   status?: string;
   reason?: string;
   metrics?: RuleRunMetrics;
+  timings?: TaskRunnerTimings;
 }
 export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
-  const { message, outcome, error, ruleName, status, reason, metrics } = opts;
+  const { message, outcome, error, ruleName, status, reason, metrics, timings } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -368,6 +385,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     event.kibana.alert.rule = event.kibana.alert.rule || {};
     event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
     event.kibana.alert.rule.execution.metrics = {
+      ...event.kibana.alert.rule.execution.metrics,
       number_of_triggered_actions: metrics.numberOfTriggeredActions
         ? metrics.numberOfTriggeredActions
         : 0,
@@ -382,6 +400,17 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       number_of_searches: metrics.numSearches ? metrics.numSearches : 0,
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
+    };
+  }
+
+  if (timings) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.metrics = {
+      ...event.kibana.alert.rule.execution.metrics,
+      ...timings,
     };
   }
 }

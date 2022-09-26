@@ -31,7 +31,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
-import { BackendContents } from './backend_contents';
+import { DependencyContents } from './dependency_contents';
 import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
@@ -64,7 +64,7 @@ function getContentsComponent(
     return EdgeContents;
   }
 
-  return BackendContents;
+  return DependencyContents;
 }
 
 export interface ContentsProps {
@@ -200,7 +200,6 @@ export function Popover({
       isOpen={isOpen}
       ref={popoverRef}
       style={popoverStyle}
-      initialFocus={false}
     >
       <EuiFlexGroup
         direction="column"

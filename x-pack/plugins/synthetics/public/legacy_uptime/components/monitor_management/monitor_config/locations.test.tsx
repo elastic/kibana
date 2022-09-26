@@ -22,6 +22,7 @@ describe('<ServiceLocations />', () => {
       lon: 1,
     },
     url: 'url',
+    isServiceManaged: true,
   };
   const locationTestSubId = `syntheticsServiceLocation--${location.id}`;
   const state = {

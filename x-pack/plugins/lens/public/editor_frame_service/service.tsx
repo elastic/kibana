@@ -6,14 +6,23 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataViewsContract,
+} from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -29,15 +38,23 @@ export interface EditorFrameSetupPlugins {
   expressions: ExpressionsSetup;
   charts: ChartsPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  dataViews: DataViewsPublicPluginSetup;
 }
 
 export interface EditorFrameStartPlugins {
+  uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions: UiActionsStart;
   charts: ChartsPluginSetup;
+  dataViews: DataViewsPublicPluginStart;
+}
+
+export interface EditorFramePlugins {
+  dataViews: DataViewsContract;
+  uiSettings: IUiSettingsClient;
+  storage: IStorageWrapper;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -67,7 +84,7 @@ export class EditorFrameService {
    * This is an asynchronous process.
    * @param doc parsed Lens saved object
    */
-  public documentToExpression = async (doc: Document) => {
+  public documentToExpression = async (doc: Document, services: EditorFramePlugins) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       this.loadDatasources(),
       this.loadVisualizations(),
@@ -75,7 +92,7 @@ export class EditorFrameService {
 
     const { persistedStateToExpression } = await import('../async_services');
 
-    return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
+    return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
   };
 
   public setup(): EditorFrameSetup {
@@ -99,7 +116,7 @@ export class EditorFrameService {
       const { EditorFrame } = await import('../async_services');
 
       return {
-        EditorFrameContainer: ({ showNoDataPopover, lensInspector }) => {
+        EditorFrameContainer: ({ showNoDataPopover, lensInspector, indexPatternService }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -108,6 +125,7 @@ export class EditorFrameService {
                 plugins={plugins}
                 lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
+                indexPatternService={indexPatternService}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}

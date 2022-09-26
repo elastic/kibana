@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { FieldFormatParams, SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
 import { ExpressionValueVisDimension } from '../expression_functions';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
@@ -68,7 +68,7 @@ export function getAccessor(dimension: string | ExpressionValueVisDimension) {
 export function getFormatByAccessor(
   dimension: string | ExpressionValueVisDimension,
   columns: DatatableColumn[],
-  defaultColumnFormat?: SerializedFieldFormat<FieldFormatParams>
+  defaultColumnFormat?: SerializedFieldFormat
 ) {
   return typeof dimension === 'string'
     ? getColumnByAccessor(dimension, columns)?.meta.params || defaultColumnFormat

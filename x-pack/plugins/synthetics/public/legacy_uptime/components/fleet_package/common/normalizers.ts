@@ -6,6 +6,7 @@
  */
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { parseJsonIfString } from '../helpers/parsers';
 import { CommonFields, ConfigKey, DataStream } from '../types';
 import {
   DEFAULT_COMMON_FIELDS,
@@ -27,7 +28,8 @@ export type CommonNormalizerMap = Record<keyof CommonFields | ConfigKey.NAME, No
 export const cronToSecondsNormalizer = (value: string) =>
   value ? value.slice(0, value.length - 1) : null;
 
-export const jsonToJavascriptNormalizer = (value: string) => (value ? JSON.parse(value) : null);
+export const jsonToJavascriptNormalizer = (value: string) =>
+  value ? parseJsonIfString(value) : null;
 
 export function getNormalizer<Fields>(key: string, defaultValues: Fields): Normalizer {
   return (fields: NewPackagePolicyInput['vars']) =>
@@ -82,10 +84,13 @@ export const commonNormalizers: CommonNormalizerMap = {
     }
   },
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
+  [ConfigKey.CONFIG_ID]: getCommonNormalizer(ConfigKey.CONFIG_ID),
   [ConfigKey.TAGS]: getCommonjsonToJavascriptNormalizer(ConfigKey.TAGS),
   [ConfigKey.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKey.TIMEOUT),
   [ConfigKey.NAMESPACE]: (fields) =>
     fields?.[ConfigKey.NAMESPACE]?.value ?? DEFAULT_NAMESPACE_STRING,
   [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
   [ConfigKey.MONITOR_SOURCE_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_SOURCE_TYPE),
+  [ConfigKey.FORM_MONITOR_TYPE]: getCommonNormalizer(ConfigKey.FORM_MONITOR_TYPE),
+  [ConfigKey.JOURNEY_ID]: getCommonNormalizer(ConfigKey.JOURNEY_ID),
 };

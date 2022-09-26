@@ -10,21 +10,16 @@
         "tags": [],
         "label": "ExplainLogRateSpikes",
         "description": [
-          "\nLazy-wrapped ExplainLogRateSpikes React component"
+          "\nLazy-wrapped ExplainLogRateSpikesAppState React component"
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "aiops",
-            "scope": "public",
-            "docId": "kibAiopsPluginApi",
-            "section": "def-public.ExplainLogRateSpikesProps",
-            "text": "ExplainLogRateSpikesProps"
-          },
+          "ExplainLogRateSpikesAppStateProps",
           ">) => JSX.Element"
         ],
         "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "aiops",
@@ -37,17 +32,53 @@
             ],
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "aiops",
-                "scope": "public",
-                "docId": "kibAiopsPluginApi",
-                "section": "def-public.ExplainLogRateSpikesProps",
-                "text": "ExplainLogRateSpikesProps"
-              },
+              "ExplainLogRateSpikesAppStateProps",
               ">"
             ],
             "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogCategorization",
+        "type": "Function",
+        "tags": [],
+        "label": "LogCategorization",
+        "description": [
+          "\nLazy-wrapped LogCategorizationAppStateProps React component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          "LogCategorizationAppStateProps",
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorization.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              "LogCategorizationAppStateProps",
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -55,64 +86,10 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "parentPluginId": "aiops",
-        "id": "def-public.ExplainLogRateSpikesProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExplainLogRateSpikesProps",
-        "description": [
-          "\nExplainLogRateSpikes props require a data view."
-        ],
-        "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "aiops",
-            "id": "def-public.ExplainLogRateSpikesProps.dataView",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [
-              "The data view to analyze."
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              }
-            ],
-            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [],
-    "start": {
-      "parentPluginId": "aiops",
-      "id": "def-public.AiopsPluginStart",
-      "type": "Type",
-      "tags": [],
-      "label": "AiopsPluginStart",
-      "description": [
-        "\naiops plugin public start contract"
-      ],
-      "signature": [
-        "void"
-      ],
-      "path": "x-pack/plugins/aiops/public/types.ts",
-      "deprecated": false,
-      "lifecycle": "start",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "server": {
     "classes": [],
@@ -132,6 +109,7 @@
       ],
       "path": "x-pack/plugins/aiops/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -147,6 +125,7 @@
       ],
       "path": "x-pack/plugins/aiops/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -168,10 +147,11 @@
           "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Explain log rate spikes UI\" during development until the first release."
         ],
         "signature": [
-          "false"
+          "true"
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -188,6 +168,7 @@
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -204,6 +185,7 @@
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

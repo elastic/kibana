@@ -6,12 +6,12 @@
  */
 
 import { omit } from 'lodash/fp';
-import { DraggableLocation } from 'react-beautiful-dnd';
-import { Dispatch } from 'redux';
+import type { DraggableLocation } from 'react-beautiful-dnd';
+import type { Dispatch } from 'redux';
 
 import { updateProviders } from '../../../store/timeline/actions';
 
-import { DataProvider, DataProvidersAnd } from './data_provider';
+import type { DataProvider, DataProvidersAnd } from './data_provider';
 
 export const omitAnd = (provider: DataProvider): DataProvidersAnd => omit('and', provider);
 

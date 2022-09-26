@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { get } from 'lodash/fp';
+import { get, set } from 'lodash/fp';
 import {
   Direction,
   FlowTarget,
@@ -21,12 +21,15 @@ import {
   setNetworkDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
   updateNetworkTable,
+  updateNetworkAnomaliesJobIdFilter,
+  updateNetworkAnomaliesInterval,
 } from './actions';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
-import { NetworkDetailsTableType, NetworkModel, NetworkTableType } from './model';
+import type { NetworkModel } from './model';
+import { NetworkType, NetworkDetailsTableType, NetworkTableType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -93,6 +96,10 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [NetworkTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
     },
   },
   details: {
@@ -152,6 +159,10 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.asc,
         },
       },
+      [NetworkDetailsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
     },
     flowTarget: FlowTarget.source,
   },
@@ -189,4 +200,18 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: setNetworkDetailsQueriesActivePageToZero(state),
     },
   }))
+  .case(updateNetworkAnomaliesJobIdFilter, (state, { jobIds, networkType }) => {
+    if (networkType === NetworkType.page) {
+      return set('page.queries.anomalies.jobIdSelection', jobIds, state);
+    } else {
+      return set('details.queries.anomalies.jobIdSelection', jobIds, state);
+    }
+  })
+  .case(updateNetworkAnomaliesInterval, (state, { interval, networkType }) => {
+    if (networkType === NetworkType.page) {
+      return set('page.queries.anomalies.intervalSelection', interval, state);
+    } else {
+      return set('details.queries.anomalies.intervalSelection', interval, state);
+    }
+  })
   .build();

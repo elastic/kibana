@@ -10,22 +10,24 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { buildUserNamesFilter, RiskSeverity } from '../../../../common/search_strategy';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { DescriptionList } from '../../../../common/utility_types';
+import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import {
-  dateRenderer,
-  DefaultFieldRenderer,
-} from '../../../timelines/components/field_renderers/field_renderers';
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
-import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
+import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
 
 import * as i18n from './translations';
@@ -33,7 +35,8 @@ import * as i18n from './translations';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
-import { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
+import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
+import { RiskScoreHeaderTitle } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -48,11 +51,12 @@ export interface UserSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   userName: string;
+  indexPatterns: string[];
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
   padding-top: ${({ theme }) => theme.eui.euiSizeM};
-  width: 66.6%;
+  width: ${({ $width }: { $width: string }) => $width};
 `;
 
 export const UserOverview = React.memo<UserSummaryProps>(
@@ -69,12 +73,22 @@ export const UserOverview = React.memo<UserSummaryProps>(
     startDate,
     endDate,
     userName,
+    indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const [_, { data: userRisk, isModuleEnabled }] = useUserRiskScore({
-      filterQuery: userName ? buildUserNamesFilter([userName]) : undefined,
+    const filterQuery = useMemo(
+      () => (userName ? buildUserNamesFilter([userName]) : undefined),
+      [userName]
+    );
+
+    const { from, to } = useGlobalTime();
+
+    const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
+      filterQuery,
+      skip: userName == null,
+      timerange: { to, from },
     });
 
     const getDefaultRenderer = useCallback(
@@ -82,7 +96,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         <DefaultFieldRenderer
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
-          idPrefix={contextID ? `user-overview-${contextID}` : 'iuser-overview'}
+          idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           isDraggable={isDraggable}
         />
       ),
@@ -90,33 +104,44 @@ export const UserOverview = React.memo<UserSummaryProps>(
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
-      if (isModuleEnabled) {
-        const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-        return [
-          {
-            title: i18n.USER_RISK_SCORE,
-            description: (
-              <>
-                {userRiskData ? Math.round(userRiskData.risk_stats.risk_score) : getEmptyTagValue()}
-              </>
-            ),
-          },
-          {
-            title: i18n.USER_RISK_CLASSIFICATION,
-            description: (
-              <>
-                {userRiskData ? (
-                  <RiskScore severity={userRiskData.risk as RiskSeverity} hideBackgroundColor />
-                ) : (
-                  getEmptyTagValue()
-                )}
-              </>
-            ),
-          },
-        ];
-      }
-      return [undefined, undefined];
-    }, [userRisk, isModuleEnabled]);
+      const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+      return [
+        {
+          title: (
+            <RiskScoreHeaderTitle
+              title={i18n.USER_RISK_SCORE}
+              riskScoreEntity={RiskScoreEntity.user}
+              showTooltip={false}
+            />
+          ),
+          description: (
+            <>
+              {userRiskData
+                ? Math.round(userRiskData.user.risk.calculated_score_norm)
+                : getEmptyTagValue()}
+            </>
+          ),
+        },
+        {
+          title: (
+            <RiskScoreHeaderTitle
+              title={i18n.USER_RISK_CLASSIFICATION}
+              riskScoreEntity={RiskScoreEntity.host}
+              showTooltip={false}
+            />
+          ),
+          description: (
+            <>
+              {userRiskData ? (
+                <RiskScore severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
+              ) : (
+                getEmptyTagValue()
+              )}
+            </>
+          ),
+        },
+      ];
+    }, [userRisk]);
 
     const column = useMemo(
       () => [
@@ -169,11 +194,25 @@ export const UserOverview = React.memo<UserSummaryProps>(
         [
           {
             title: i18n.FIRST_SEEN,
-            description: data ? dateRenderer(data.firstSeen) : getEmptyTagValue(),
+            description: (
+              <FirstLastSeen
+                indexPatterns={indexPatterns}
+                field={'user.name'}
+                value={userName}
+                type={FirstLastSeenType.FIRST_SEEN}
+              />
+            ),
           },
           {
             title: i18n.LAST_SEEN,
-            description: data ? dateRenderer(data.lastSeen) : getEmptyTagValue(),
+            description: (
+              <FirstLastSeen
+                indexPatterns={indexPatterns}
+                field={'user.name'}
+                value={userName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ),
           },
         ],
         [
@@ -200,7 +239,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [data, getDefaultRenderer, contextID, isDraggable, firstColumn]
+      [data, indexPatterns, getDefaultRenderer, contextID, isDraggable, userName, firstColumn]
     );
     return (
       <>
@@ -227,11 +266,12 @@ export const UserOverview = React.memo<UserSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {userRiskScore && userRiskLevel && (
+        {isLicenseValid && (
           <UserRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="user-risk-overview"
+            $width={isInDetailsSidePanel ? '100%' : '66.6%'}
           >
             <EuiFlexItem>
               <DescriptionListStyled listItems={[userRiskScore]} />

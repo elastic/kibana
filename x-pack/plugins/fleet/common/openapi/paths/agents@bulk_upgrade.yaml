@@ -8,6 +8,10 @@ post:
         application/json:
           schema:
               type: object
+              properties:
+                actionId: 
+                  type: string
+                  description: action id when running in async mode (>10k agents)
               additionalProperties:
                 type: object
                 properties:
@@ -32,3 +36,9 @@ post:
       application/json:
         schema:
           $ref: ../components/schemas/bulk_upgrade_agents.yaml
+        example:
+          version: 8.4.0
+          source_uri: https://artifacts.elastic.co/downloads/beats/elastic-agent
+          rollout_duration_seconds: 3600
+          agents: [agent1, agent2]
+          start_time: 2022-08-03T14:00:00.000Z

@@ -8,7 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
-import { getFlyoutDisplay } from '../selectors/ui_selectors';
+import { getFlyoutDisplay, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
@@ -82,9 +82,20 @@ export function setOpenTOCDetails(layerIds?: string[]) {
 }
 
 export function showTOCDetails(layerId: string) {
-  return {
-    type: SHOW_TOC_DETAILS,
-    layerId,
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const openTOCDetails = getOpenTOCDetails(getState());
+    if (openTOCDetails.includes(layerId)) {
+      // details already open, nothing to do
+      return;
+    }
+
+    dispatch({
+      type: SHOW_TOC_DETAILS,
+      layerId,
+    });
   };
 }
 

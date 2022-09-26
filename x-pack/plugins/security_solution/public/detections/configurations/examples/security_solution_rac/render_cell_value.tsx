@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { ALERT_SEVERITY, ALERT_REASON } from '@kbn/rule-data-utils';
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { DefaultDraggable } from '../../../../common/components/draggables';
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
 import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 const reason =

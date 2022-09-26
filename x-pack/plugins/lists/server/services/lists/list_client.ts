@@ -9,15 +9,18 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createBootstrapIndex,
   deleteAllIndex,
+  deleteIndexTemplate,
   deletePolicy,
   deleteTemplate,
-  getIndexExists,
+  getBootstrapIndexExists,
+  getIndexTemplateExists,
   getPolicyExists,
   getTemplateExists,
+  setIndexTemplate,
   setPolicy,
-  setTemplate,
 } from '@kbn/securitysolution-es-utils';
 import type {
+  FoundAllListItemsSchema,
   FoundListItemSchema,
   FoundListSchema,
   ListItemArraySchema,
@@ -32,6 +35,7 @@ import {
   deleteListItem,
   deleteListItemByValue,
   exportListItemsToStream,
+  findAllListItems,
   findListItem,
   getListItem,
   getListItemByValue,
@@ -54,6 +58,7 @@ import type {
   DeleteListItemOptions,
   DeleteListOptions,
   ExportListItemsToStreamOptions,
+  FindAllListItemsOptions,
   FindListItemOptions,
   FindListOptions,
   GetListItemByValueOptions,
@@ -244,7 +249,7 @@ export class ListClient {
   public getListIndexExists = async (): Promise<boolean> => {
     const { esClient } = this;
     const listIndex = this.getListIndex();
-    return getIndexExists(esClient, listIndex);
+    return getBootstrapIndexExists(esClient, listIndex);
   };
 
   /**
@@ -254,7 +259,7 @@ export class ListClient {
   public getListItemIndexExists = async (): Promise<boolean> => {
     const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return getIndexExists(esClient, listItemIndex);
+    return getBootstrapIndexExists(esClient, listItemIndex);
   };
 
   /**
@@ -304,7 +309,7 @@ export class ListClient {
   public getListTemplateExists = async (): Promise<boolean> => {
     const { esClient } = this;
     const listIndex = this.getListIndex();
-    return getTemplateExists(esClient, listIndex);
+    return getIndexTemplateExists(esClient, listIndex);
   };
 
   /**
@@ -312,6 +317,26 @@ export class ListClient {
    * @returns True if the list item template for ILM exists, otherwise false.
    */
   public getListItemTemplateExists = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    return getIndexTemplateExists(esClient, listItemIndex);
+  };
+
+  /**
+   * Returns true if the list template for ILM exists, otherwise false
+   * @returns True if the list template for ILM exists, otherwise false.
+   */
+  public getLegacyListTemplateExists = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    return getTemplateExists(esClient, listIndex);
+  };
+
+  /**
+   * Returns true if the list item template for ILM exists, otherwise false
+   * @returns True if the list item template for ILM exists, otherwise false.
+   */
+  public getLegacyListItemTemplateExists = async (): Promise<boolean> => {
     const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getTemplateExists(esClient, listItemIndex);
@@ -343,7 +368,7 @@ export class ListClient {
     const { esClient } = this;
     const template = this.getListTemplate();
     const listIndex = this.getListIndex();
-    return setTemplate(esClient, listIndex, template);
+    return setIndexTemplate(esClient, listIndex, template);
   };
 
   /**
@@ -354,7 +379,7 @@ export class ListClient {
     const { esClient } = this;
     const template = this.getListItemTemplate();
     const listItemIndex = this.getListItemIndex();
-    return setTemplate(esClient, listItemIndex, template);
+    return setIndexTemplate(esClient, listItemIndex, template);
   };
 
   /**
@@ -424,7 +449,7 @@ export class ListClient {
   public deleteListTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
     const listIndex = this.getListIndex();
-    return deleteTemplate(esClient, listIndex);
+    return deleteIndexTemplate(esClient, listIndex);
   };
 
   /**
@@ -432,6 +457,26 @@ export class ListClient {
    * @returns The contents of the list item template
    */
   public deleteListItemTemplate = async (): Promise<unknown> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    return deleteIndexTemplate(esClient, listItemIndex);
+  };
+
+  /**
+   * Deletes the list boot strap index for ILM policies.
+   * @returns The contents of the bootstrap response from Elasticsearch
+   */
+  public deleteLegacyListTemplate = async (): Promise<unknown> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    return deleteTemplate(esClient, listIndex);
+  };
+
+  /**
+   * Delete the list item boot strap index for ILM policies.
+   * @returns The contents of the bootstrap response from Elasticsearch
+   */
+  public deleteLegacyListItemTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteTemplate(esClient, listItemIndex);
@@ -765,6 +810,7 @@ export class ListClient {
     sortField,
     sortOrder,
     searchAfter,
+    runtimeMappings,
   }: FindListOptions): Promise<FoundListSchema> => {
     const { esClient } = this;
     const listIndex = this.getListIndex();
@@ -775,6 +821,7 @@ export class ListClient {
       listIndex,
       page,
       perPage,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,
@@ -802,6 +849,7 @@ export class ListClient {
     currentIndexPosition,
     perPage,
     page,
+    runtimeMappings,
     sortField,
     sortOrder,
     searchAfter,
@@ -818,7 +866,28 @@ export class ListClient {
       listItemIndex,
       page,
       perPage,
+      runtimeMappings,
       searchAfter,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  public findAllListItems = async ({
+    listId,
+    filter,
+    sortField,
+    sortOrder,
+  }: FindAllListItemsOptions): Promise<FoundAllListItemsSchema | null> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    const listItemIndex = this.getListItemIndex();
+    return findAllListItems({
+      esClient,
+      filter,
+      listId,
+      listIndex,
+      listItemIndex,
       sortField,
       sortOrder,
     });

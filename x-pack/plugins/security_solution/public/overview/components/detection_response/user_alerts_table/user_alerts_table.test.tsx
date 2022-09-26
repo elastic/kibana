@@ -11,7 +11,7 @@ import { fireEvent, render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableUserAlertsResult } from './mock_data';
-import { UseUserAlertsItems } from './use_user_alerts_items';
+import type { UseUserAlertsItems } from './use_user_alerts_items';
 import { UserAlertsTable } from './user_alerts_table';
 
 const mockGetAppUrl = jest.fn();

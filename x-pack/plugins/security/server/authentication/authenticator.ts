@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { IBasePath, IClusterClient, LoggerFactory } from '@kbn/core/server';
-import { KibanaRequest } from '@kbn/core/server';
+import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -17,8 +18,6 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
@@ -26,6 +25,7 @@ import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session, SessionValue } from '../session_management';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -80,14 +80,16 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
+  isElasticCloudDeployment: () => boolean;
 }
 
 /** @internal */
@@ -129,7 +131,7 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
 
 function assertRequest(request: KibanaRequest) {
-  if (!(request instanceof KibanaRequest)) {
+  if (!(request instanceof CoreKibanaRequest)) {
     throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
 }
@@ -162,7 +164,11 @@ function isLoginAttemptWithProviderType(
   );
 }
 
-function isSessionAuthenticated(sessionValue?: Readonly<SessionValue> | null) {
+type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+function isSessionAuthenticated(
+  sessionValue?: Readonly<SessionValue> | null
+): sessionValue is WithRequiredProperty<SessionValue, 'username'> {
   return !!sessionValue?.username;
 }
 
@@ -231,6 +237,7 @@ export class Authenticator {
         logger: this.options.loggers.get('tokens'),
       }),
       getServerBaseURL: this.options.getServerBaseURL,
+      isElasticCloudDeployment: this.options.isElasticCloudDeployment,
     };
 
     this.providers = new Map(
@@ -327,23 +334,6 @@ export class Authenticator {
           authenticationResult,
           existingSessionValue,
         });
-
-        // Checking for presence of `user` object to determine success state rather than
-        // `success()` method since that indicates a successful authentication and `redirect()`
-        // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
-        if (authenticationResult.user || authenticationResult.failed()) {
-          const auditLogger = this.options.audit.asScoped(request);
-          auditLogger.log(
-            userLoginEvent({
-              // We must explicitly specify the sessionId for login events because we just created the session, so
-              // it won't automatically get included in the audit event from the request context.
-              sessionId: sessionUpdateResult?.value?.sid,
-              authenticationResult,
-              authenticationProvider: providerName,
-              authenticationType: provider.type,
-            })
-          );
-        }
 
         return this.handlePreAccessRedirects(
           request,
@@ -634,6 +624,21 @@ export class Authenticator {
       existingSessionValue: Readonly<SessionValue> | null;
     }
   ) {
+    // Log failed `user_login` attempt only if creating a brand new session or if the existing session is
+    // not authenticated (e.g. during SAML handshake). If the existing session is authenticated we will
+    // invalidate it and log a `user_logout` event instead.
+    if (authenticationResult.failed() && !isSessionAuthenticated(existingSessionValue)) {
+      const auditLogger = this.options.audit.asScoped(request);
+      auditLogger.log(
+        userLoginEvent({
+          sessionId: existingSessionValue?.sid,
+          authenticationResult,
+          authenticationProvider: provider.name,
+          authenticationType: provider.type,
+        })
+      );
+    }
+
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
       return null;
     }
@@ -712,16 +717,56 @@ export class Authenticator {
       existingSessionValue = null;
     }
 
+    let userProfileId = existingSessionValue?.userProfileId;
+
+    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // store user profile identifier in the session value.
+    const shouldActivateProfile = authenticationResult.userProfileGrant;
+
+    if (shouldActivateProfile) {
+      this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
+      userProfileId = (
+        await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
+      ).uid;
+
+      if (
+        existingSessionValue?.userProfileId &&
+        existingSessionValue.userProfileId !== userProfileId
+      ) {
+        this.logger.warn(`User profile for "${authenticationResult.user?.username}" has changed.`);
+      }
+    }
+
     let newSessionValue;
     if (!existingSessionValue) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
+        userProfileId,
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
       });
+
+      // Log successful `user_login` event if a new authenticated session was created or an existing session was overwritten and
+      // the username or authentication provider changed. When username or authentication provider changes the session
+      // gets invalidated (logging `user_logout` event) before a new session is created.
+      if (
+        isNewSessionAuthenticated &&
+        (!isExistingSessionAuthenticated || usernameHasChanged || providerHasChanged)
+      ) {
+        const auditLogger = this.options.audit.asScoped(request);
+        auditLogger.log(
+          userLoginEvent({
+            sessionId: newSessionValue?.sid, // We must explicitly specify the `sessionId` here since we just created the session and it can't be inferred from the request context.
+            authenticationResult,
+            authenticationProvider: provider.name,
+            authenticationType: provider.type,
+          })
+        );
+      }
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
+        userProfileId,
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSessionValue.state,
@@ -749,7 +794,7 @@ export class Authenticator {
     sessionValue,
     skipAuditEvent,
   }: InvalidateSessionValueParams) {
-    if (sessionValue && !skipAuditEvent) {
+    if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLogoutEvent({
@@ -786,21 +831,27 @@ export class Authenticator {
    * @param sessionValue Current session value if any.
    */
   private shouldRedirectToAccessAgreement(sessionValue: SessionValue | null) {
-    // Request should be redirected to Access Agreement UI only if all following conditions are met:
-    //  1. Request can be redirected (not API call)
-    //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
-    //     session yet (based on the flag we store in the session)
-    //  3. Request is authenticated by the provider that has `accessAgreement` configured
-    //  4. Current license allows access agreement
-    //  5. And it's not a request to the Access Agreement UI itself
-    return (
-      sessionValue != null &&
-      !sessionValue.accessAgreementAcknowledged &&
-      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
-        sessionValue.provider.name
-      ]?.accessAgreement &&
-      this.options.license.getFeatures().allowAccessAgreement
-    );
+    // If user doesn't have an active session or if they already acknowledged
+    // access agreement (based on the flag we store in the session) - bail out.
+    if (sessionValue == null || sessionValue.accessAgreementAcknowledged) {
+      return false;
+    }
+
+    // If access agreement is neither enabled globally (for all providers)
+    // nor for the provider that authenticated user request - bail out.
+    const providerConfig = (this.options.config.authc.providers as Record<string, any>)[
+      sessionValue.provider.type
+    ]?.[sessionValue.provider.name];
+
+    if (
+      !this.options.config.accessAgreement?.message &&
+      !providerConfig?.accessAgreement?.message
+    ) {
+      return false;
+    }
+
+    // Check if the current license allows access agreement.
+    return this.options.license.getFeatures().allowAccessAgreement;
   }
 
   /**
@@ -829,6 +880,7 @@ export class Authenticator {
     const isUpdatedSessionAuthenticated = isSessionAuthenticated(sessionUpdateResult?.value);
 
     let preAccessRedirectURL;
+
     if (isUpdatedSessionAuthenticated && sessionUpdateResult?.overwritten) {
       this.logger.debug('Redirecting user to the overwritten session UI.');
       preAccessRedirectURL = `${this.options.basePath.serverBasePath}${OVERWRITTEN_SESSION_ROUTE}`;

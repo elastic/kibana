@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -14,12 +15,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ApmPluginStartDeps } from '../../../../plugin';
 import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../../common/trace_explorer';
-import { useStaticDataView } from '../../../../hooks/use_static_data_view';
+import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { EQLCodeEditorSuggestionType } from '../../../shared/eql_code_editor/constants';
 import { LazilyLoadedEQLCodeEditor } from '../../../shared/eql_code_editor/lazily_loaded_code_editor';
@@ -56,8 +58,13 @@ export function TraceSearchBox({
   error,
   loading,
 }: Props) {
-  const { unifiedSearch } = useApmPluginContext();
-  const { value: dataView } = useStaticDataView();
+  const { unifiedSearch, core, data } = useApmPluginContext();
+  const { notifications, http, docLinks, uiSettings } = core;
+  const {
+    services: { storage },
+  } = useKibana<ApmPluginStartDeps>();
+
+  const { dataView } = useApmDataView();
 
   return (
     <EuiFlexGroup direction="column">
@@ -132,6 +139,21 @@ export function TraceSearchBox({
                           ...query,
                           query: String(e.query ?? ''),
                         });
+                      }}
+                      appName={i18n.translate(
+                        'xpack.apm.traceExplorer.appName',
+                        {
+                          defaultMessage: 'APM',
+                        }
+                      )}
+                      deps={{
+                        unifiedSearch,
+                        notifications,
+                        http,
+                        docLinks,
+                        uiSettings,
+                        data,
+                        storage,
                       }}
                     />
                   </form>

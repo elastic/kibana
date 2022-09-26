@@ -373,7 +373,7 @@ describe('Saved Object', () => {
             } as SimpleSavedObject<SavedObjectAttributes>);
 
             const indexPattern = createStubIndexPattern({
-              spec: { id: 'my-index', title: 'my-index' },
+              spec: { id: 'my-index', title: 'my-index', version: '1' },
             });
             savedObject.searchSource!.setField('index', indexPattern);
             return savedObject.save(saveOptionsMock).then(() => {
@@ -411,6 +411,7 @@ describe('Saved Object', () => {
             const indexPattern = createStubIndexPattern({
               spec: {
                 id: 'non-existant-index',
+                version: '1',
               },
             });
 

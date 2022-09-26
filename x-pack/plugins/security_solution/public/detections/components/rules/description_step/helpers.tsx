@@ -20,16 +20,18 @@ import {
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
-import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterLabel } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -44,10 +46,13 @@ import {
 } from '../../../mitre/mitre_tactics_techniques';
 
 import * as i18n from './translations';
-import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
+import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
-import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+} from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
@@ -73,16 +78,28 @@ export const buildQueryBarDescription = ({
   filterManager,
   query,
   savedId,
+  savedQueryName,
   indexPatterns,
   queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
+  const isLoadedFromSavedQuery = !isEmpty(savedId) && !isEmpty(savedQueryName);
+  if (isLoadedFromSavedQuery) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.SAVED_QUERY_NAME_LABEL} </>,
+        description: <>{savedQueryName} </>,
+      },
+    ];
+  }
+
   if (!isEmpty(filters)) {
     filterManager.setFilters(filters);
     items = [
       ...items,
       {
-        title: <>{i18n.FILTERS_LABEL} </>,
+        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL} </>,
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
@@ -109,20 +126,14 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        title: (
+          <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : queryLabel ?? i18n.QUERY_LABEL}</>
+        ),
         description: <Query>{query}</Query>,
       },
     ];
   }
-  if (!isEmpty(savedId)) {
-    items = [
-      ...items,
-      {
-        title: <>{i18n.SAVED_ID_LABEL} </>,
-        description: <>{savedId} </>,
-      },
-    ];
-  }
+
   return items;
 };
 
@@ -165,7 +176,7 @@ const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 const TechniqueLinkItem = styled(EuiButtonEmpty)`
@@ -489,6 +500,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'new_terms': {
+      return [
+        {
+          title: label,
+          description: i18n.NEW_TERMS_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }
@@ -556,7 +575,7 @@ export const buildRequiredFieldsDescription = (
   label: string,
   requiredFields: RequiredFieldArray
 ): ListItems[] => {
-  if (requiredFields == null) {
+  if (isEmpty(requiredFields)) {
     return [];
   }
 
@@ -569,7 +588,11 @@ export const buildRequiredFieldsDescription = (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
                 <EuiFlexItem grow={false}>
-                  <FieldIcon data-test-subj="field-type-icon" type={rF.type} />
+                  <FieldIcon
+                    data-test-subj="field-type-icon"
+                    type={castEsToKbnFieldTypeName(rF.type)}
+                    label={rF.type}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FieldTypeText grow={false} size={'s'}>

@@ -9,7 +9,6 @@
 
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server/authorization';
 
 module.exports = {

@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
-import { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
 import {
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+  SimpleSavedObject,
+} from '@kbn/core/public';
+import { omit } from 'lodash';
+import { DataViewSavedObjectConflictError } from '../common/errors';
+import {
+  DataViewAttributes,
+  SavedObject,
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-  SavedObject,
-  DataViewSavedObjectConflictError,
-} from '../common';
+} from '../common/types';
 
 type SOClient = Pick<
   SavedObjectsClientContract,
@@ -24,7 +30,7 @@ const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject)
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),
-  } as any);
+  } as SavedObject<T>);
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SOClient;
@@ -49,14 +55,14 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   async update(
     type: string,
     id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsUpdateOptions<unknown>
   ) {
     const response = await this.savedObjectClient.update(type, id, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
 
-  async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
+  async create(type: string, attributes: DataViewAttributes, options?: SavedObjectsCreateOptions) {
     const response = await this.savedObjectClient.create(type, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }

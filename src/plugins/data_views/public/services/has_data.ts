@@ -8,29 +8,18 @@
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
-import {
-  HasDataViewsResponse,
-  IndicesResponse,
-  IndicesResponseModified,
-  IndicesViaSearchResponse,
-} from '..';
+import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
+import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
 
-  private isUserDataIndex = (source: IndicesResponseModified): boolean => {
+  private isUserDataSource = (source: IndicesResponseModified): boolean => {
     // filter out indices that start with `.`
     if (source.name.startsWith('.')) return false;
 
-    // filter out empty sources created by apm server
-    if (source.name.startsWith('apm-')) return false;
-
     // filter out sources from DEFAULT_ASSETS_TO_IGNORE
-    if (source.name === DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
-    if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
-    if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
-    if (source.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE)
-      return false;
+    if (DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE.includes(source.name)) return false; // filter out data streams that we know are created automatically during on-boarding
 
     return true;
   };
@@ -50,17 +39,17 @@ export class HasData {
         return hasLocalESData;
       },
       /**
-       * Check to see if any data view exists
+       * Check to see if a data view exists
        */
       hasDataView: async (): Promise<boolean> => {
-        const dataViewsCheck = await this.findDataViews(http);
+        const dataViewsCheck = await this.hasDataViews(http);
         return dataViewsCheck;
       },
       /**
        * Check to see if user created data views exist
        */
       hasUserDataView: async (): Promise<boolean> => {
-        const userDataViewsCheck = await this.findUserDataViews(http);
+        const userDataViewsCheck = await this.hasUserDataViews(http);
         return userDataViewsCheck;
       },
     };
@@ -115,7 +104,11 @@ export class HasData {
       .then((resp) => {
         return !!(resp && resp.total >= 0);
       })
-      .catch(() => false);
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(`getIndicesViaSearch failed with error, assuming there is data`, e);
+        return true;
+      });
 
   private getIndices = async ({
     http,
@@ -145,7 +138,7 @@ export class HasData {
       showAllIndices: false,
     })
       .then((dataSources: IndicesResponseModified[]) => {
-        return dataSources.some(this.isUserDataIndex);
+        return dataSources.some(this.isUserDataSource);
       })
       .catch(() => this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false }));
 
@@ -165,22 +158,33 @@ export class HasData {
   private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
     http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`);
 
-  private findDataViews = (http: HttpStart): Promise<boolean> => {
+  private hasDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })
       .then((response: HasDataViewsResponse) => {
         const { hasDataView } = response;
         return hasDataView;
       })
-      .catch(() => false);
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(`hasDataViews failed with error, assuming there are data views`, e);
+        return true;
+      });
   };
 
-  private findUserDataViews = (http: HttpStart): Promise<boolean> => {
+  private hasUserDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })
       .then((response: HasDataViewsResponse) => {
         const { hasUserDataView } = response;
         return hasUserDataView;
       })
-      .catch(() => false);
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `hasUserDataViews failed with error, assuming there are user-created data views`,
+          e
+        );
+        return true;
+      });
   };
 }
 

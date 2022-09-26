@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import type React from 'react';
+import { useCallback, useState, useMemo } from 'react';
 
+import type { OnColumnFocused } from '@kbn/timelines-plugin/public';
 import {
   isArrowDownOrArrowUp,
   isArrowUp,
   isEscape,
   focusColumn,
-  OnColumnFocused,
 } from '@kbn/timelines-plugin/public';
 
 type FocusOwnership = 'not-owned' | 'owned';

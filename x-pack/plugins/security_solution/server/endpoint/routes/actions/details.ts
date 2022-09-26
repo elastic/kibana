@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -58,6 +58,7 @@ export const getActionDetailsRequestHandler = (
             (
               await context.core
             ).elasticsearch.client.asInternalUser,
+            endpointContext.service.getEndpointMetadataService(),
             req.params.action_id
           ),
         },

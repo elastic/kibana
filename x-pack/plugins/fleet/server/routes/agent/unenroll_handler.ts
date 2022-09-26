@@ -16,9 +16,8 @@ import type {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
 } from '../../types';
-import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
@@ -37,7 +36,7 @@ export const postAgentUnenrollHandler: RequestHandler<
     const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -46,13 +45,6 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentUnenrollRequestSchema.body>
 > = async (context, request, response) => {
-  if (!licenseService.isGoldPlus()) {
-    return response.customError({
-      statusCode: 403,
-      body: { message: 'Requires Gold license' },
-    });
-  }
-
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -65,6 +57,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       ...agentOptions,
       revoke: request.body?.revoke,
       force: request.body?.force,
+      batchSize: request.body?.batchSize,
     });
     const body = results.items.reduce<PostBulkAgentUnenrollResponse>((acc, so) => {
       acc[so.id] = {
@@ -74,8 +67,8 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
