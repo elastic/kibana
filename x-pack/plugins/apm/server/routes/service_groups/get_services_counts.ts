@@ -35,6 +35,7 @@ export async function getServicesCounts({
       ],
     },
     body: {
+      track_total_hits: 0,
       size: 0,
       query: {
         bool: {
