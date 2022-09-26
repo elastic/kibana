@@ -65,7 +65,7 @@ Cases::
 Fixes an issue where the recent cases widget shows cases from other solutions {kibana-pull}141221[#141221]
 
 Discover::
-* Fixes scrolling prevented by Discover embeddable on touch devices {kibana-pull}141718[#141718]
+* Fixes scrolling prevented by saved search embeddable on touch devices {kibana-pull}141718[#141718]
 * Fixes columns management for saved search embeddable {kibana-pull}140799[#140799]
 
 Elastic Security::
