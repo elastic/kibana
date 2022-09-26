@@ -5,42 +5,73 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiButton, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { getHasZipUrlMonitors } from '../../../state/api/has_zip_url_monitors';
 
 export const ZipUrlDeprecation = () => {
+  const sessionStorageKey = 'SYNTHETICS_ZIP_URL_DEPRECATION_HAS_BEEN_DISMISSED';
+  const noticeHasBeenDismissed = window.sessionStorage.getItem(sessionStorageKey) === 'true';
   const { data, loading } = useFetcher(() => {
     return getHasZipUrlMonitors();
   }, []);
   const hasZipUrlMonitors = !loading && data && data.hasZipUrlMonitors;
-  return hasZipUrlMonitors ? (
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.title"
-          defaultMessage="Deprecation notice"
-        />
-      }
-      size="s"
-      color="warning"
-    >
-      <FormattedMessage
-        id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.content"
-        defaultMessage="Zip URL source is deprecated and will be removed in a future version. Project monitors are now available to create monitors from a remote repository. For more information, {link}"
-        values={{
-          link: (
-            <EuiLink target="_blank" href="" external>
+  const [shouldShowNotice, setShouldShowNotice] = useState(
+    Boolean(hasZipUrlMonitors && !noticeHasBeenDismissed)
+  );
+
+  const handleDismissDeprecationNotice = () => {
+    window.sessionStorage.setItem(sessionStorageKey, 'true');
+    setShouldShowNotice(false);
+  };
+
+  useEffect(() => {
+    setShouldShowNotice(Boolean(hasZipUrlMonitors && !noticeHasBeenDismissed));
+  }, [hasZipUrlMonitors, noticeHasBeenDismissed]);
+
+  return shouldShowNotice ? (
+    <>
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.synthetics.browser.zipUrl.deprecation.title"
+            defaultMessage="Deprecation notice"
+          />
+        }
+        color="warning"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <span>
               <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
-                defaultMessage="read the documentation"
+                id="xpack.synthetics.browser.zipUrl.deprecation.content"
+                defaultMessage="Zip URL source is deprecated and will be removed in a future version. Project monitors are now available to create monitors from a remote repository. For more information, {link}"
+                values={{
+                  link: (
+                    <EuiLink target="_blank" href="" external>
+                      <FormattedMessage
+                        id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                        defaultMessage="read the documentation"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiCallOut>
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={handleDismissDeprecationNotice} color="warning">
+              <FormattedMessage
+                id="xpack.synthetics.browser.zipUrl.deprecation.dismiss"
+                defaultMessage="Dismiss"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
+    </>
   ) : null;
 };

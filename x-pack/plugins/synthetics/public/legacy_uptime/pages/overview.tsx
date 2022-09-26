@@ -38,15 +38,18 @@ export const OverviewPageComponent = () => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" wrap responsive={false} flex-direction="column">
-        <EuiFlexItemStyled>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={true}>
           <ZipUrlDeprecation />
-          <EuiSpacer size="s" />
-        </EuiFlexItemStyled>
-        <QueryBar />
-        <EuiFlexItemStyled grow={true}>
-          <FilterGroup />
-        </EuiFlexItemStyled>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            <QueryBar />
+            <EuiFlexItemStyled grow={true}>
+              <FilterGroup />
+            </EuiFlexItemStyled>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <StatusPanel />

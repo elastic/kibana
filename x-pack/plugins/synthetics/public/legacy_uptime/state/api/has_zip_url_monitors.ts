@@ -6,9 +6,9 @@
  */
 
 import { API_URLS } from '../../../../common/constants';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../../../common/types';
+import { SyntheticsHasZipUrlMonitorsResponse } from '../../../../common/types/zip_url_deprecation';
 import { apiService } from './utils';
 
-export const getHasZipUrlMonitors = async (): Promise<DecryptedSyntheticsMonitorSavedObject> => {
+export const getHasZipUrlMonitors = async (): Promise<SyntheticsHasZipUrlMonitorsResponse> => {
   return await apiService.get(API_URLS.SYNTHETICS_HAS_ZIP_URL_MONITORS);
 };
