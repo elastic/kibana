@@ -25,11 +25,11 @@ interface TimeDurationWithAllowedUnits {
   allowedDurations?: never;
 }
 
-type TimeDuration = TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits;
+type TimeDurationType = TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits;
 
 const isTimeSafe = (time: number) => time >= 1 && Number.isSafeInteger(time);
 
-export const TimeDuration = ({ allowedUnits, allowedDurations }: TimeDuration) => {
+export const TimeDuration = ({ allowedUnits, allowedDurations }: TimeDurationType) => {
   return new t.Type<string, string, unknown>(
     'TimeDuration',
     t.string.is,
