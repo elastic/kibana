@@ -163,7 +163,7 @@
               "\nCreate a new file object with the provided metadata.\n"
             ],
             "signature": [
-              "(args: { name: string; alt?: string | undefined; meta?: Record<string, unknown> | undefined; mimeType?: string | undefined; } & { kind: string; }) => Promise<{ file: ",
+              "(args: Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -206,7 +206,7 @@
               "\nDelete a file object and all associated share and content objects.\n"
             ],
             "signature": [
-              "(args: { id: string; } & { kind: string; }) => Promise<{ ok: true; }>"
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ ok: true; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -241,7 +241,7 @@
               "\nGet a file object by ID.\n"
             ],
             "signature": [
-              "(args: { id: string; } & { kind: string; }) => Promise<{ file: ",
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -284,15 +284,7 @@
               "\nList all file objects, of a given {@link FileKind}.\n"
             ],
             "signature": [
-              "(args: ",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.Pagination",
-                "text": "Pagination"
-              },
-              " & { kind: string; }) => Promise<{ files: ",
+              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -335,7 +327,7 @@
               "\nUpdate a set of of metadata values of the file object.\n"
             ],
             "signature": [
-              "(args: { name?: string | undefined; alt?: string | undefined; meta?: Record<string, unknown> | undefined; } & { id: string; } & { kind: string; }) => Promise<{ file: ",
+              "(args: Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ file: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -378,12 +370,11 @@
               "\nStream the contents of the file to Kibana server for storage.\n"
             ],
             "signature": [
-              "(args: { body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }) => Promise<{ ok: true; size: number; }>"
+              "(args: Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }) => Promise<{ ok: true; size: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "files",
@@ -395,13 +386,15 @@
                   "- upload file args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"] & { kind: string; } & ExtraArgs"
+                  "Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -413,7 +406,7 @@
               "\nStream a download of the file object's content.\n"
             ],
             "signature": [
-              "(args: { id: string; fileName?: string | undefined; } & { kind: string; }) => Promise<any>"
+              "(args: Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }) => Promise<any>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -499,7 +492,7 @@
               "\nShare a file by creating a new file share instance.\n"
             ],
             "signature": [
-              "(args: { validUntil?: number | undefined; name?: string | undefined; } & { fileId: string; } & { kind: string; }) => Promise<",
+              "(args: Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }) => Promise<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -542,7 +535,7 @@
               "\nDelete a file share instance.\n"
             ],
             "signature": [
-              "(args: { id: string; } & { kind: string; }) => Promise<{ ok: true; }>"
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ ok: true; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -577,7 +570,7 @@
               "\nGet a file share instance.\n"
             ],
             "signature": [
-              "(args: { id: string; } & { kind: string; }) => Promise<{ share: ",
+              "(args: Readonly<{} & { id: string; }> & { kind: string; }) => Promise<{ share: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -620,15 +613,7 @@
               "\nList all file shares. Optionally scoping to a specific\nfile.\n"
             ],
             "signature": [
-              "(args: ",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.Pagination",
-                "text": "Pagination"
-              },
-              " & { forFileId?: string | undefined; } & { kind: string; }) => Promise<{ shares: ",
+              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { kind: string; }) => Promise<{ shares: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -1112,7 +1097,7 @@
           "\nA files client that is scoped to a specific {@link FileKind}.\n\nMore convenient if you want to re-use the same client for the same file kind\nand not specify the kind every time."
         ],
         "signature": [
-          "{ create: (arg: Omit<{ name: string; alt?: string | undefined; meta?: Record<string, unknown> | undefined; mimeType?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "{ create: (arg: Omit<Readonly<{ meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; mimeType?: string | undefined; } & { name: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1120,7 +1105,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>; }>; delete: (arg: Omit<{ id: string; } & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getById: (arg: Omit<{ id: string; } & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "<unknown>; }>; delete: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getById: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1128,15 +1113,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>; }>; list: (arg?: Omit<",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.Pagination",
-            "text": "Pagination"
-          },
-          " & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
+          "<unknown>; }>; list: (arg?: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1144,7 +1121,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>[]; }>; update: (arg: Omit<{ name?: string | undefined; alt?: string | undefined; meta?: Record<string, unknown> | undefined; } & { id: string; } & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "<unknown>[]; }>; update: (arg: Omit<Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1152,7 +1129,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>; }>; upload: (arg: Omit<{ body: unknown; } & { id: string; } & { selfDestructOnAbort?: boolean | undefined; } & { kind: string; } & { abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<{ id: string; fileName?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
+          "<unknown>; }>; upload: (arg: Omit<Readonly<{} & { id: string; }> & Readonly<{ selfDestructOnAbort?: boolean | undefined; } & {}> & { body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; }, \"kind\">) => Promise<{ ok: true; size: number; }>; download: (arg: Omit<Readonly<{ fileName?: string | undefined; } & { id: string; }> & { kind: string; }, \"kind\">) => Promise<any>; getDownloadHref: (arg: Omit<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1160,7 +1137,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>, \"kind\">) => string; share: (arg: Omit<{ validUntil?: number | undefined; name?: string | undefined; } & { fileId: string; } & { kind: string; }, \"kind\">) => Promise<",
+          "<unknown>, \"kind\">) => string; share: (arg: Omit<Readonly<{ name?: string | undefined; validUntil?: number | undefined; } & {}> & Readonly<{} & { fileId: string; }> & { kind: string; }, \"kind\">) => Promise<",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1168,7 +1145,7 @@
             "section": "def-common.FileShareJSONWithToken",
             "text": "FileShareJSONWithToken"
           },
-          ">; unshare: (arg: Omit<{ id: string; } & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getShare: (arg: Omit<{ id: string; } & { kind: string; }, \"kind\">) => Promise<{ share: ",
+          ">; unshare: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ ok: true; }>; getShare: (arg: Omit<Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ share: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1176,15 +1153,7 @@
             "section": "def-common.FileShareJSON",
             "text": "FileShareJSON"
           },
-          "; }>; listShares: (arg: Omit<",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.Pagination",
-            "text": "Pagination"
-          },
-          " & { forFileId?: string | undefined; } & { kind: string; }, \"kind\">) => Promise<{ shares: ",
+          "; }>; listShares: (arg: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; forFileId?: string | undefined; } & {}> & { kind: string; }, \"kind\">) => Promise<{ shares: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1200,15 +1169,7 @@
             "section": "def-common.FilesMetrics",
             "text": "FilesMetrics"
           },
-          ">; publicDownload: (arg: Omit<{ fileName?: string | undefined; } & { token: string; }, \"kind\">) => Promise<any>; find: (arg: Omit<{ kind?: string[] | undefined; name?: string[] | undefined; meta?: {} | undefined; extension?: string[] | undefined; status?: string[] | undefined; } & ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.Pagination",
-            "text": "Pagination"
-          },
-          ", \"kind\">) => Promise<{ files: ",
+          ">; publicDownload: (arg: Omit<Readonly<{ fileName?: string | undefined; } & {}> & Readonly<{} & { token: string; }>, \"kind\">) => Promise<any>; find: (arg: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; kind?: string | string[] | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}>, \"kind\">) => Promise<{ files: ",
           {
             "pluginId": "files",
             "scope": "common",
