@@ -59,6 +59,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the detection response actions in rule + alerts
    */
   responseActionsEnabled: true,
+
+  /**
+   * Enables endpoint package level rbac
+   */
+  endpointRbacEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
