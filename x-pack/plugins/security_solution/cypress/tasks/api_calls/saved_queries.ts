@@ -34,20 +34,19 @@ export const createSavedQuery = (
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
-  export const deleteSavedQueries = () => {
-    const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-    cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'query',
-              },
+export const deleteSavedQueries = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'query',
             },
-          ],
-        },
+          },
+        ],
       },
-    });
-  };
-  
+    },
+  });
+};
