@@ -8,6 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { getFilter } from './get_filter';
 
 export interface LoadGlobalExecutionKPIAggregationsProps {
   id: string;
@@ -16,21 +17,6 @@ export interface LoadGlobalExecutionKPIAggregationsProps {
   dateStart: string;
   dateEnd?: string;
 }
-
-const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; message?: string }) => {
-  const filter: string[] = [];
-
-  if (outcomeFilter && outcomeFilter.length) {
-    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
-  }
-
-  if (message) {
-    const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
-    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
-  }
-
-  return filter;
-};
 
 export const loadGlobalExecutionKPIAggregations = ({
   id,
