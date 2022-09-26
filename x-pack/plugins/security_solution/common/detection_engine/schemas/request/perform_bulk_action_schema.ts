@@ -42,7 +42,13 @@ export enum BulkActionEditType {
 
 export const throttleForBulkActions = t.union([
   t.literal('rule'),
-  TimeDuration({ allowedUnits: ['h', 'd'] }),
+  TimeDuration({
+    allowedDurations: [
+      [1, 'h'],
+      [1, 'd'],
+      [7, 'd'],
+    ],
+  }),
 ]);
 export type ThrottleForBulkActions = t.TypeOf<typeof throttleForBulkActions>;
 
