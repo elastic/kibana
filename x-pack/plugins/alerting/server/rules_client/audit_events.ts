@@ -29,6 +29,7 @@ export enum RuleAuditAction {
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
+  RUN_SOON = 'rule_run_soon',
 }
 
 type VerbsTuple = [string, string, string];
@@ -66,6 +67,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
+  rule_run_soon: ['run', 'running', 'ran'],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -89,6 +91,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_get_action_error_log: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
+  rule_run_soon: 'access',
 };
 
 export interface RuleAuditEventParams {

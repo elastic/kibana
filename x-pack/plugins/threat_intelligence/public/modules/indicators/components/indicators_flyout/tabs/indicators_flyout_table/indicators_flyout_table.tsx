@@ -10,8 +10,7 @@ import { Indicator } from '../../../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from '../../components/indicator_empty_prompt';
 import { IndicatorFieldsTable } from '../../components/indicator_fields_table';
 
-export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';
-export const TIMELINE_BUTTON_TEST_ID = 'tiFlyoutTableRowTimelineButton';
+export const TABLE_TEST_ID = 'tiFlyoutTableTabRow';
 
 const search = {
   box: {

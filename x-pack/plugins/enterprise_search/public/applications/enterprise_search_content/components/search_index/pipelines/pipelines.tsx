@@ -7,20 +7,43 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
+import { docLinks } from '../../../../shared/doc_links';
+
+import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
+import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
+import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
+import { PipelinesLogic } from './pipelines_logic';
 
 export const SearchIndexPipelines: React.FC = () => {
+  const { showAddMlInferencePipelineModal } = useValues(PipelinesLogic);
+  const { closeAddMlInferencePipelineModal, openAddMlInferencePipelineModal } =
+    useActions(PipelinesLogic);
+
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
+      <EuiFlexGroup direction="row" wrap>
+        <EuiFlexItem grow={5}>
           <DataPanel
             hasBorder
+            footerDocLink={
+              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
+                  {
+                    defaultMessage: 'Learn more about using pipelines in Enterprise Search',
+                  }
+                )}
+              </EuiLink>
+            }
             title={
               <h2>
                 {i18n.translate(
@@ -31,13 +54,30 @@ export const SearchIndexPipelines: React.FC = () => {
                 )}
               </h2>
             }
+            subtitle={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.subtitle',
+              {
+                defaultMessage: 'Ingest pipelines optimize your index for search applications',
+              }
+            )}
             iconType="logstashInput"
           >
-            <div />
+            <IngestPipelinesCard />
           </DataPanel>
-          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem grow={5}>
           <DataPanel
             hasBorder
+            footerDocLink={
+              <EuiLink href="" external color="subdued">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
+                  {
+                    defaultMessage: 'Learn more about deploying ML models in Elastic',
+                  }
+                )}
+              </EuiLink>
+            }
             title={
               <h2>
                 {i18n.translate(
@@ -48,13 +88,25 @@ export const SearchIndexPipelines: React.FC = () => {
                 )}
               </h2>
             }
+            subtitle={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitle',
+              {
+                defaultMessage:
+                  'Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline',
+              }
+            )}
             iconType="compute"
+            action={
+              <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
+            }
           >
-            <div />
+            <MlInferencePipelineProcessorsCard />
           </DataPanel>
         </EuiFlexItem>
-        <EuiFlexItem />
       </EuiFlexGroup>
+      {showAddMlInferencePipelineModal && (
+        <AddMLInferencePipelineModal onClose={closeAddMlInferencePipelineModal} />
+      )}
     </>
   );
 };

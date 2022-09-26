@@ -78,8 +78,8 @@ describe('TTYSearchBar component', () => {
 
     // two calls, first instance -h is at line 22, 2nd at line 42
     expect(props.seekToLine).toHaveBeenCalledTimes(2);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 24);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 94);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 26);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 100);
 
     expect(props.xTermSearchFn).toHaveBeenCalledTimes(3);
     expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);

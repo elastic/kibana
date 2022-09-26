@@ -8,12 +8,13 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import moment from 'moment';
+import uuid from 'uuid';
 
 import { isAgentUpgradeable } from '../../../common/services';
 
 import type { Agent, BulkActionResult } from '../../types';
 
-import { HostedAgentPolicyRestrictionRelatedError, IngestManagerError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
 
 import { appContextService } from '../app_context';
 
@@ -21,7 +22,7 @@ import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
 import { errorsToResults, bulkUpdateAgents } from './crud';
-import { createAgentAction } from './actions';
+import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -80,7 +81,7 @@ export async function upgradeBatch(
       const isNotAllowed =
         !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
       if (isNotAllowed) {
-        throw new IngestManagerError(`${agent.id} is not upgradeable`);
+        throw new FleetError(`Agent ${agent.id} is not upgradeable`);
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {
@@ -115,16 +116,38 @@ export async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
+  const actionId = options.actionId ?? uuid();
+  const errorCount = Object.keys(errors).length;
+  const total = options.total ?? agentsToUpdate.length + errorCount;
+
   await createAgentAction(esClient, {
-    id: options.actionId,
+    id: actionId,
     created_at: now,
     data,
     ack_data: data,
     type: 'UPGRADE',
-    total: options.total,
+    total,
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
   });
+
+  if (errorCount > 0) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping ${errorCount} agents, as failed validation (cannot upgrade hosted agent or agent not upgradeable)`
+      );
+
+    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
+    await bulkCreateAgentActionResults(
+      esClient,
+      Object.keys(errors).map((agentId) => ({
+        agentId,
+        actionId,
+        error: errors[agentId].message,
+      }))
+    );
+  }
 
   await bulkUpdateAgents(
     esClient,

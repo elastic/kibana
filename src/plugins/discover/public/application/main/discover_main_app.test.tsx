@@ -12,13 +12,15 @@ import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
-import { setHeaderActionMenuMounter } from '../../kibana_services';
+import { setHeaderActionMenuMounter, setUrlTracker } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
 
 setHeaderActionMenuMounter(jest.fn());
+setUrlTracker(urlTrackerMock);
 
 describe('DiscoverMainApp', () => {
   test('renders', () => {

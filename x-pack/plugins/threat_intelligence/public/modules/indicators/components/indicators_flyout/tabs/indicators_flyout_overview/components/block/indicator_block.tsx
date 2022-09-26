@@ -25,7 +25,7 @@ const VisibleOnHover = euiStyled.div`
     & .actionsWrapper {
       visibility: hidden;
       display: inline-block;
-      margin-inline-start: ${theme.eui.euiSizeXS};
+      margin-inline-start: ${theme.eui.euiSizeS};
     }
 
     &:hover .actionsWrapper {
@@ -44,15 +44,16 @@ const panelProps = {
 export interface IndicatorBlockProps {
   indicator: Indicator;
   field: string;
+  ['data-test-subj']?: string;
 }
 
 /**
  * Renders indicator field value in a rectangle, to highlight it even more
  */
-export const IndicatorBlock: VFC<IndicatorBlockProps> = ({ field, indicator }) => {
+export const IndicatorBlock: VFC<IndicatorBlockProps> = ({ field, indicator, ...props }) => {
   return (
     <EuiPanel {...panelProps}>
-      <VisibleOnHover>
+      <VisibleOnHover data-test-subj={`${props['data-test-subj']}Item`}>
         <EuiText>
           <IndicatorFieldLabel field={field} />
         </EuiText>
@@ -60,7 +61,7 @@ export const IndicatorBlock: VFC<IndicatorBlockProps> = ({ field, indicator }) =
         <EuiText size="s">
           <IndicatorFieldValue indicator={indicator} field={field} />
           <span className="actionsWrapper">
-            <IndicatorValueActions indicator={indicator} field={field} />
+            <IndicatorValueActions indicator={indicator} field={field} {...props} />
           </span>
         </EuiText>
       </VisibleOnHover>

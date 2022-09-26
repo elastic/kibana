@@ -44,7 +44,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alerts,
     alertsCount,
     isLoading,
-    onColumnsChange,
     onPageChange,
     onSortChange,
     sort: sortingFields,
@@ -66,18 +65,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
 
-  const toolbarVisibility = useCallback(() => {
-    const { rowSelection } = bulkActionsState;
-    return getToolbarVisibility({
-      bulkActions,
-      alertsCount,
-      rowSelection,
-      alerts: alertsData.alerts,
-      updatedAt: props.updatedAt,
-      isLoading,
-    });
-  }, [bulkActionsState, bulkActions, alertsCount, alertsData.alerts, props.updatedAt, isLoading])();
-
   const {
     pagination,
     onChangePageSize,
@@ -91,7 +78,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageSize: props.pageSize,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
+  const {
+    visibleColumns,
+    onToggleColumn,
+    onResetColumns,
+    updatedAt,
+    browserFields,
+    onChangeVisibleColumns,
+  } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
@@ -104,16 +98,32 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [alerts, setFlyoutAlertIndex]
   );
 
-  const onChangeVisibleColumns = useCallback(
-    (newColumns: string[]) => {
-      setVisibleColumns(newColumns);
-      onColumnsChange(
-        props.columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
-        newColumns
-      );
-    },
-    [onColumnsChange, props.columns]
-  );
+  const toolbarVisibility = useCallback(() => {
+    const { rowSelection } = bulkActionsState;
+    return getToolbarVisibility({
+      bulkActions,
+      alertsCount,
+      rowSelection,
+      alerts: alertsData.alerts,
+      updatedAt,
+      isLoading,
+      columnIds: visibleColumns,
+      onToggleColumn,
+      onResetColumns,
+      browserFields,
+    });
+  }, [
+    bulkActionsState,
+    bulkActions,
+    alertsCount,
+    alertsData.alerts,
+    updatedAt,
+    browserFields,
+    isLoading,
+    visibleColumns,
+    onToggleColumn,
+    onResetColumns,
+  ])();
 
   const leadingControlColumns = useMemo(() => {
     const isActionButtonsColumnActive =
@@ -203,7 +213,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
-    return <>{value.length ? value.join() : '--'}</>;
+    if (Array.isArray(value)) {
+      return <>{value.length ? value.join() : '--'}</>;
+    }
+    return <>{value}</>;
   };
 
   const renderCellValue = useCallback(

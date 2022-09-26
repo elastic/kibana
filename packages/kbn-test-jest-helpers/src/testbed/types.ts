@@ -10,9 +10,9 @@ import { Store } from 'redux';
 import { ReactWrapper as GenericReactWrapper } from 'enzyme';
 import { LocationDescriptor } from 'history';
 
-export type AsyncSetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
-export type SyncSetupFunc<T> = (props?: any) => TestBed<T>;
-export type SetupFunc<T> = (props?: any) => TestBed<T> | Promise<TestBed<T>>;
+export type AsyncSetupFunc<T, P extends object = any> = (props?: P) => Promise<TestBed<T>>;
+export type SyncSetupFunc<T, P extends object = any> = (props?: P) => TestBed<T>;
+export type SetupFunc<T, P extends object = any> = (props?: P) => TestBed<T> | Promise<TestBed<T>>;
 export type ReactWrapper = GenericReactWrapper<any>;
 
 export interface EuiTableMetaData {

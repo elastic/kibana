@@ -20,6 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'error',
     'discover',
     'timePicker',
+    'unifiedSearch',
+    'lens',
     'security',
     'spaceSelector',
     'header',
@@ -79,6 +81,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
+    });
+
+    it('should visualize correctly using adhoc data view', async () => {
+      await PageObjects.discover.createAdHocDataView('logst', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('discoverEditVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.try(async () => {
+        const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
+        expect(selectedPattern).to.eql('logst*');
+      });
     });
   });
 }

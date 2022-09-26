@@ -17,6 +17,7 @@ import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
+import { getHTTPResponseCode, ObservabilityError } from '../errors';
 
 export function registerRoutes({
   repository,
@@ -69,8 +70,30 @@ export function registerRoutes({
             spacesService,
           })) as any;
 
+          if (data === undefined) {
+            return response.noContent();
+          }
+
           return response.ok({ body: data });
         } catch (error) {
+          if (error instanceof ObservabilityError) {
+            logger.error(error.message);
+            return response.customError({
+              statusCode: getHTTPResponseCode(error),
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
+          if (Boom.isBoom(error)) {
+            logger.error(error.output.payload.message);
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: { message: error.output.payload.message },
+            });
+          }
+
           logger.error(error);
           const opts = {
             statusCode: 500,
@@ -79,16 +102,12 @@ export function registerRoutes({
             },
           };
 
-          if (Boom.isBoom(error)) {
-            opts.statusCode = error.output.statusCode;
-          }
-
           if (error instanceof errors.RequestAbortedError) {
             opts.statusCode = 499;
             opts.body.message = 'Client closed request';
           }
 
-          return response.custom(opts);
+          return response.customError(opts);
         }
       }
     );

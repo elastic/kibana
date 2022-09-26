@@ -35,7 +35,8 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { calculateTotalPages, combineQueries } from '../helpers';
+import { calculateTotalPages } from '../helpers';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
   ControlColumnProps,
@@ -63,6 +64,7 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -203,7 +205,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const ACTION_BUTTON_COUNT = 6;
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
@@ -331,7 +334,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (

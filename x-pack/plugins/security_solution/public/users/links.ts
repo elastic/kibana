@@ -47,7 +47,6 @@ export const links: LinkItem = {
         defaultMessage: 'User risk',
       }),
       path: `${USERS_PATH}/userRisk`,
-      experimentalKey: 'riskyUsersEnabled',
     },
     {
       id: SecurityPageName.usersEvents,

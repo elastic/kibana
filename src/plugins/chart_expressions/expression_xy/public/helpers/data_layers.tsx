@@ -481,7 +481,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
-    stackAccessors: isStacked && xColumnId ? [xColumnId] : [],
+    stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
     id: generateSeriesId(
       layer,
       splitColumnIds.length ? splitColumnIds : [EMPTY_ACCESSOR],

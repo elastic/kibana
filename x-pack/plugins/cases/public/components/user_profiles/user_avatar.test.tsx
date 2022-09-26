@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { CaseUserAvatar } from './user_avatar';
+import { UserInfoWithAvatar } from './types';
 
 describe('CaseUserAvatar', () => {
   let appMockRender: AppMockRenderer;
@@ -19,7 +20,7 @@ describe('CaseUserAvatar', () => {
   });
 
   it('renders the avatar of Damaged Raccoon profile', () => {
-    appMockRender.render(<CaseUserAvatar size="s" profile={userProfiles[0]} />);
+    appMockRender.render(<CaseUserAvatar size="s" userInfo={userProfiles[0]} />);
 
     expect(screen.getByText('DR')).toBeInTheDocument();
   });
@@ -28,5 +29,17 @@ describe('CaseUserAvatar', () => {
     appMockRender.render(<CaseUserAvatar size="s" />);
 
     expect(screen.getByText('?')).toBeInTheDocument();
+  });
+
+  it('renders the avatar without avatar data', () => {
+    const userInfo: UserInfoWithAvatar = {
+      user: {
+        username: 'Super_user',
+      },
+    };
+
+    appMockRender.render(<CaseUserAvatar size="s" userInfo={userInfo} />);
+
+    expect(screen.getByText('S')).toBeInTheDocument();
   });
 });

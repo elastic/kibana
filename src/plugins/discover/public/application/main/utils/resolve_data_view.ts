@@ -7,7 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewListItem,
+  DataViewsContract,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 interface DataViewData {
@@ -22,7 +27,7 @@ interface DataViewData {
   /**
    * Id of the requested data view
    */
-  stateVal: string;
+  stateVal?: string;
   /**
    * Determines if requested data view was found
    */
@@ -73,18 +78,56 @@ export function getDataViewId(
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView(
-  id: string,
   dataViews: DataViewsContract,
-  config: IUiSettingsClient
+  config: IUiSettingsClient,
+  id?: string,
+  dataViewSpec?: DataViewSpec
 ): Promise<DataViewData> {
   const dataViewList = await dataViews.getIdsWithTitle();
+  let fetchId: string | undefined = id;
 
-  const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
+  /**
+   * Handle redirect with data view spec provided via history location state
+   */
+  if (dataViewSpec) {
+    const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
+    if (!isPersisted) {
+      const createdAdHocDataView = await dataViews.create(dataViewSpec);
+      return {
+        list: dataViewList || [],
+        loaded: createdAdHocDataView,
+        stateVal: createdAdHocDataView.id,
+        stateValFound: true,
+      };
+    }
+    // reassign fetchId in case of persisted data view spec provided
+    fetchId = dataViewSpec.id!;
+  }
+
+  // try to fetch adhoc data view first
+  try {
+    const fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    if (fetchedDataView && !fetchedDataView.isPersisted()) {
+      return {
+        list: dataViewList || [],
+        loaded: fetchedDataView,
+        stateVal: id,
+        stateValFound: true,
+      };
+    }
+    // Skipping error handling, since 'get' call trying to fetch
+    // adhoc data view which only created using Promise.resolve(dataView),
+    // Any other error will be handled by the next 'get' call below.
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  // fetch persisted data view
+  const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
     loaded: await dataViews.get(actualId),
-    stateVal: id,
-    stateValFound: !!id && actualId === id,
+    stateVal: fetchId,
+    stateValFound: !!fetchId && actualId === fetchId,
   };
 }
 

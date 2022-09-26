@@ -1,5 +1,5 @@
 get:
-  summary: Returns information about the users who opened cases in the default space. 
+  summary: Returns information about the users who opened cases in the default space.
   operationId: getCaseReportersDefaultSpace
   description: >
     You must have read privileges for the **Cases** feature in the **Management**,
@@ -24,12 +24,7 @@ get:
             items:
               type: object
               properties:
-                email:
-                  type: string
-                full_name:
-                  type: string
-                username: 
-                  type: string
+                $ref: '../components/schemas/user_properties.yaml'
           examples:
             getReportersResponse:
               $ref: '../components/examples/get_reporters_response.yaml'

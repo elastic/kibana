@@ -509,7 +509,7 @@
           "\nStorybook parameters provided from the controls addon."
         ],
         "signature": [
-          "{ title: any; description: any; category: any; button: any; canAccessFleet: any; }"
+          "{ description: any; category: any; title: any; button: any; canAccessFleet: any; }"
         ],
         "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
         "deprecated": false,

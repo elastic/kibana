@@ -15,6 +15,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 // @ts-expect-error
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
@@ -148,6 +149,9 @@ export class MapsPlugin implements Plugin {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );
+    const getDataViewMigrations = DataViewPersistableStateService.getAllMigrations.bind(
+      DataViewPersistableStateService
+    );
 
     const { usageCollection, home, features, customIntegrations } = plugins;
     const config$ = this._initializerContext.config.create();
@@ -195,10 +199,10 @@ export class MapsPlugin implements Plugin {
       },
     });
 
-    setupSavedObjects(core, getFilterMigrations);
+    setupSavedObjects(core, getFilterMigrations, getDataViewMigrations);
     registerMapsUsageCollector(usageCollection);
 
-    setupEmbeddable(plugins.embeddable, getFilterMigrations);
+    setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
     return {
       config: config$,

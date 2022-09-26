@@ -38,6 +38,7 @@ describe('getDataSourceInfo', () => {
       undefined,
       false,
       undefined,
+      undefined,
       dataViews
     );
     expect(indexPatternId).toBe('12345');
@@ -49,6 +50,7 @@ describe('getDataSourceInfo', () => {
       { id: 'dataview-1-id' },
       'timeField-1',
       false,
+      undefined,
       undefined,
       dataViews
     );
@@ -62,6 +64,7 @@ describe('getDataSourceInfo', () => {
       'timeField-1',
       true,
       { id: 'test2' },
+      undefined,
       dataViews
     );
     expect(indexPatternId).toBe('test2');

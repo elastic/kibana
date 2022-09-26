@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
+import { useRiskScoreFeatureStatus } from '../feature_status';
 import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
@@ -20,7 +21,6 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
@@ -31,7 +31,9 @@ export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueri
   isInspected: boolean;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  isModuleEnabled: boolean | undefined;
+  isModuleEnabled: boolean;
+  isLicenseValid: boolean;
+  isDeprecated: boolean;
 }
 
 export interface UseRiskScoreParams {
@@ -51,7 +53,6 @@ export interface UseRiskScoreParams {
 interface UseRiskScore<T> extends UseRiskScoreParams {
   defaultIndex: string | undefined;
   factoryQueryType: T;
-  featureEnabled: boolean;
 }
 
 export const initialResult: Omit<
@@ -66,7 +67,6 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   return useRiskScore({
     timerange,
@@ -75,7 +75,6 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    featureEnabled: riskyHostsFeatureEnabled,
     defaultIndex,
     factoryQueryType: RiskQueries.hostsRiskScore,
   });
@@ -86,7 +85,6 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
 
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
   return useRiskScore({
     timerange,
     onlyLatest,
@@ -94,7 +92,6 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    featureEnabled: riskyUsersFeatureEnabled,
     defaultIndex,
     factoryQueryType: RiskQueries.usersRiskScore,
   });
@@ -106,13 +103,20 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   sort,
   skip = false,
   pagination,
-  featureEnabled,
   defaultIndex,
   factoryQueryType,
 }: UseRiskScore<T>): [boolean, RiskScoreState<T>] => {
   const { querySize, cursorStart } = pagination || {};
 
   const { addError } = useAppToasts();
+
+  const {
+    isDeprecated,
+    isEnabled,
+    isLicenseValid,
+    isLoading: isDeprecatedLoading,
+    refetch: refetchDeprecated,
+  } = useRiskScoreFeatureStatus(factoryQueryType, defaultIndex);
 
   const {
     loading,
@@ -127,17 +131,40 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     abort: skip,
     showErrorToast: false,
   });
+  const refetchAll = useCallback(() => {
+    if (defaultIndex) {
+      refetchDeprecated(defaultIndex);
+      refetch();
+    }
+  }, [defaultIndex, refetch, refetchDeprecated]);
+
+  // since query does not take timerange arg, we need to manually refetch when time range updates
+  // the results can be different if the user has run the ML for the first time since pressing refresh
+  useEffect(() => {
+    refetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerange?.to, timerange?.from]);
 
   const riskScoreResponse = useMemo(
     () => ({
       data: response.data,
       inspect,
-      refetch,
+      refetch: refetchAll,
       totalCount: response.totalCount,
-      isModuleEnabled: skip ? featureEnabled : featureEnabled && response.data != null,
+      isLicenseValid,
+      isDeprecated,
+      isModuleEnabled: isEnabled,
       isInspected: false,
     }),
-    [featureEnabled, inspect, refetch, response.data, response.totalCount, skip]
+    [
+      inspect,
+      isDeprecated,
+      isEnabled,
+      isLicenseValid,
+      refetchAll,
+      response.data,
+      response.totalCount,
+    ]
   );
 
   const riskScoreRequest = useMemo(
@@ -154,13 +181,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
                     querySize,
                   }
                 : undefined,
-            timerange: timerange
-              ? { to: timerange.to, from: timerange.from, interval: '' }
-              : undefined,
             sort,
           }
         : null,
-    [cursorStart, defaultIndex, factoryQueryType, filterQuery, querySize, sort, timerange]
+    [cursorStart, defaultIndex, factoryQueryType, filterQuery, querySize, sort]
   );
 
   useEffect(() => {
@@ -172,10 +196,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && featureEnabled) {
+    if (!skip && riskScoreRequest != null && isLicenseValid && isEnabled && !isDeprecated) {
       search(riskScoreRequest);
     }
-  }, [featureEnabled, riskScoreRequest, search, skip]);
+  }, [isEnabled, isDeprecated, isLicenseValid, riskScoreRequest, search, skip]);
 
-  return [loading, riskScoreResponse];
+  return [loading || isDeprecatedLoading, riskScoreResponse];
 };

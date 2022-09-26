@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { FC, VFC } from 'react';
 import { IndicatorsFilters } from './containers/indicators_filters/indicators_filters';
 import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
@@ -16,9 +16,19 @@ import { FiltersGlobal } from '../../containers/filters_global';
 import QueryBar from '../query_bar/components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
 import { FieldTypesProvider } from '../../containers/field_types_provider';
+import { InspectorProvider } from '../../containers/inspector';
+import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
 
-export const IndicatorsPage: VFC = () => {
+const IndicatorsPageProviders: FC = ({ children }) => (
+  <FieldTypesProvider>
+    <InspectorProvider>{children}</InspectorProvider>
+  </FieldTypesProvider>
+);
+
+const IndicatorsPageContent: VFC = () => {
   const { browserFields, indexPattern } = useSourcererDataView();
+
+  const columnSettings = useColumnSettings();
 
   const {
     timeRange,
@@ -35,6 +45,7 @@ export const IndicatorsPage: VFC = () => {
     filters,
     filterQuery,
     timeRange,
+    sorting: columnSettings.sorting.columns,
   });
 
   return (
@@ -60,15 +71,22 @@ export const IndicatorsPage: VFC = () => {
         <IndicatorsFilters filterManager={filterManager}>
           <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
           <IndicatorsTable
-            {...indicators}
             browserFields={browserFields}
             indexPattern={indexPattern}
+            columnSettings={columnSettings}
+            {...indicators}
           />
         </IndicatorsFilters>
       </DefaultPageLayout>
     </FieldTypesProvider>
   );
 };
+
+export const IndicatorsPage: VFC = () => (
+  <IndicatorsPageProviders>
+    <IndicatorsPageContent />
+  </IndicatorsPageProviders>
+);
 
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export
