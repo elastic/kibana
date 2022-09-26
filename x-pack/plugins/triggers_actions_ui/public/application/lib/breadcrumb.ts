@@ -6,9 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToRules, routeToRuleDetails } from '../constants';
+import { routeToHome, routeToConnectors, routeToRules } from '../constants';
 
-export const getAlertingSectionBreadcrumb = (type: string): { text: string; href: string } => {
+export const getAlertingSectionBreadcrumb = (
+  type: string,
+  returnHref: boolean = false
+): { text: string; href?: string } => {
   // Home and sections
   switch (type) {
     case 'connectors':
@@ -16,14 +19,22 @@ export const getAlertingSectionBreadcrumb = (type: string): { text: string; href
         text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
           defaultMessage: 'Connectors',
         }),
-        href: `${routeToConnectors}`,
+        ...(returnHref
+          ? {
+              href: `${routeToConnectors}`,
+            }
+          : {}),
       };
     case 'rules':
       return {
         text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
           defaultMessage: 'Rules',
         }),
-        href: `${routeToRules}`,
+        ...(returnHref
+          ? {
+              href: `${routeToRules}`,
+            }
+          : {}),
       };
     default:
       return {
@@ -31,16 +42,11 @@ export const getAlertingSectionBreadcrumb = (type: string): { text: string; href
           defaultMessage: 'Rules and Connectors',
         }),
         href: `${routeToHome}`,
+        ...(returnHref
+          ? {
+              href: `${routeToHome}`,
+            }
+          : {}),
       };
   }
-};
-
-export const getRuleDetailsBreadcrumb = (
-  id: string,
-  name: string
-): { text: string; href: string } => {
-  return {
-    text: name,
-    href: `${routeToRuleDetails.replace(':ruleId', id)}`,
-  };
 };
