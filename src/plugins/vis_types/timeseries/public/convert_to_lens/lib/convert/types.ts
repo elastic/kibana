@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   Layer as BaseLayer,
   Column as BaseColumn,
-  ColumnWithMeta as GenericColumnWithMeta,
+  GenericColumnWithMeta,
   PercentileColumn as BasePercentileColumn,
   PercentileRanksColumn as BasePercentileRanksColumn,
   FiltersColumn,
