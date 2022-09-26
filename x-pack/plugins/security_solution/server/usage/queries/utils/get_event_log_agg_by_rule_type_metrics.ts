@@ -69,6 +69,11 @@ export const getEventLogAggByRuleTypeMetrics = (
           field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
         },
       },
+      avgTotalSearchDuration: {
+        avg: {
+          field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+        },
+      },
       maxTotalEnrichmentDuration: {
         max: {
           field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
@@ -79,9 +84,9 @@ export const getEventLogAggByRuleTypeMetrics = (
           field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
         },
       },
-      avgTotalSearchDuration: {
+      avgTotalEnrichmentDuration: {
         avg: {
-          field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+          field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
         },
       },
     },

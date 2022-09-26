@@ -84,6 +84,11 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
               field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
             },
           },
+          avgTotalEnrichmentDuration: {
+            avg: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
         },
       },
     });
@@ -156,6 +161,11 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
           },
           minTotalEnrichmentDuration: {
             min: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
+          avgTotalEnrichmentDuration: {
+            avg: {
               field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
             },
           },
@@ -234,6 +244,11 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
               field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
             },
           },
+          avgTotalEnrichmentDuration: {
+            avg: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
         },
       },
       'siem.indicatorRule': {
@@ -300,6 +315,11 @@ describe('get_event_log_agg_by_rule_types_metrics', () => {
           },
           minTotalEnrichmentDuration: {
             min: {
+              field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+            },
+          },
+          avgTotalEnrichmentDuration: {
+            avg: {
               field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
             },
           },
