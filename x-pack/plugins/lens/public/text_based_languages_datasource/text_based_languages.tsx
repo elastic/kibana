@@ -14,7 +14,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -82,6 +82,66 @@ export function getTextBasedLanguagesDatasource({
       };
     });
   };
+  const getSuggestionsForVisualizeField = (
+    state: TextBasedLanguagesPrivateState,
+    indexPatternId: string,
+    fieldName: string
+    // indexPatterns: any
+  ) => {
+    const context = state.initialContext;
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
+      const newLayerId = generateId();
+      const index = context.dataViewSpec.title;
+      const query = context.query;
+      const newId = generateId();
+      const newColumn = {
+        columnId: newId,
+        fieldName,
+        meta: {
+          type: 'number' as DatatableColumnType,
+        },
+      };
+      const updatedState = {
+        ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            index,
+            query,
+            columns: [newColumn],
+            allColumns: [newColumn],
+          },
+        },
+      };
+
+      return [
+        {
+          state: {
+            ...updatedState,
+          },
+          table: {
+            changeType: 'initial' as TableChangeType,
+            isMultiRow: false,
+            layerId: newLayerId,
+            columns:
+              [newColumn].map((f) => {
+                return {
+                  columnId: f.columnId,
+                  operation: {
+                    dataType: f?.meta?.type as DataType,
+                    label: f.fieldName,
+                    isBucketed: Boolean(f?.meta?.type !== 'number'),
+                  },
+                };
+              }) ?? [],
+          },
+          keptLayerIds: [newLayerId],
+        },
+      ];
+    }
+
+    return [];
+  };
   const TextBasedLanguagesDatasource: Datasource<
     TextBasedLanguagesPrivateState,
     TextBasedLanguagesPersistedState
@@ -116,12 +176,13 @@ export function getTextBasedLanguagesDatasource({
       });
       return errors;
     },
-    initialize(state?: TextBasedLanguagesPersistedState) {
+    initialize(state?: TextBasedLanguagesPersistedState, ref?, context?) {
       const initState = state || { layers: {} };
       return {
         ...initState,
         fieldList: [],
         indexPatternRefs: [],
+        initialContext: context,
       };
     },
     onRefreshIndexPattern() {},
@@ -541,7 +602,7 @@ export function getTextBasedLanguagesDatasource({
       });
       return [];
     },
-    getDatasourceSuggestionsForVisualizeField: getSuggestionsForState,
+    getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,

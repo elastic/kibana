@@ -204,6 +204,11 @@ export function getVisualizeFieldSuggestions({
       context: visualizeTriggerFieldContext,
     });
   }
+  if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
+    if (visualizeTriggerFieldContext.query) {
+      return suggestions.find((s) => s.datasourceId === 'textBasedLanguages');
+    }
+  }
 
   if (suggestions.length) {
     return suggestions.find((s) => s.visualizationId === activeVisualization?.id) || suggestions[0];

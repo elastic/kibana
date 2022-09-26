@@ -12,6 +12,7 @@ import {
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from '@kbn/ui-actions-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
@@ -46,7 +47,8 @@ async function getCompatibleActions(
 export function triggerVisualizeActions(
   field: DataViewField,
   contextualFields: string[],
-  dataView?: DataView
+  dataView?: DataView,
+  query?: AggregateQuery
 ) {
   if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
@@ -55,6 +57,7 @@ export function triggerVisualizeActions(
     fieldName: field.name,
     contextualFields,
     originatingApp: PLUGIN_ID,
+    query,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }

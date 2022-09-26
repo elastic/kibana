@@ -447,9 +447,6 @@ function DiscoverFieldComponent({
       fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
     />
   );
-  if (!isDocumentRecord) {
-    return button;
-  }
 
   const renderPopover = () => {
     const dateRange = data?.query?.timefilter.timefilter.getAbsoluteTime();
@@ -462,45 +459,49 @@ function DiscoverFieldComponent({
 
     return (
       <>
-        {showLegacyFieldStats ? (
+        {isDocumentRecord && (
           <>
-            {showFieldStats && (
+            {showLegacyFieldStats ? (
               <>
-                <EuiTitle size="xxxs">
-                  <h5>
-                    {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                      defaultMessage: 'Top 5 values',
-                    })}
-                  </h5>
-                </EuiTitle>
-                <DiscoverFieldDetails
-                  dataView={dataView}
-                  field={field}
-                  details={getDetails(field)}
-                  onAddFilter={onAddFilter}
-                />
+                {showFieldStats && (
+                  <>
+                    <EuiTitle size="xxxs">
+                      <h5>
+                        {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                          defaultMessage: 'Top 5 values',
+                        })}
+                      </h5>
+                    </EuiTitle>
+                    <DiscoverFieldDetails
+                      dataView={dataView}
+                      field={field}
+                      details={getDetails(field)}
+                      onAddFilter={onAddFilter}
+                    />
+                  </>
+                )}
               </>
-            )}
-          </>
-        ) : (
-          <>
-            {Boolean(dateRange) && (
-              <FieldStats
-                services={services}
-                query={state.query!}
-                filters={state.filters!}
-                fromDate={dateRange.from}
-                toDate={dateRange.to}
-                dataViewOrDataViewId={dataView}
-                field={fieldForStats}
-                data-test-subj="dscFieldStats"
-                onAddFilter={addFilterAndClosePopover}
-              />
+            ) : (
+              <>
+                {Boolean(dateRange) && (
+                  <FieldStats
+                    services={services}
+                    query={state.query!}
+                    filters={state.filters!}
+                    fromDate={dateRange.from}
+                    toDate={dateRange.to}
+                    dataViewOrDataViewId={dataView}
+                    field={fieldForStats}
+                    data-test-subj="dscFieldStats"
+                    onAddFilter={addFilterAndClosePopover}
+                  />
+                )}
+              </>
             )}
           </>
         )}
 
-        {multiFields && (
+        {isDocumentRecord && multiFields && (
           <>
             {(showFieldStats || !showLegacyFieldStats) && <EuiSpacer size="m" />}
             <MultiFields
@@ -518,6 +519,7 @@ function DiscoverFieldComponent({
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           contextualFields={contextualFields}
+          query={state.query}
         />
       </>
     );
