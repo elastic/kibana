@@ -674,9 +674,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
           Date.parse(scheduledTask.scheduledAt)
         );
-        expect(Date.parse(task.runAt)).to.be.greaterThan(
-          Date.parse(scheduledTask.runAt)
-        );
+        expect(Date.parse(task.runAt)).to.be.greaterThan(Date.parse(scheduledTask.runAt));
       });
     });
 
