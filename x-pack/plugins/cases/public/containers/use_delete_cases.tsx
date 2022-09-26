@@ -25,6 +25,7 @@ export const useDeleteCases = () => {
       mutationKey: casesMutationsKeys.deleteCases,
       onSuccess: (_, caseIds) => {
         queryClient.invalidateQueries(casesQueriesKeys.casesList());
+        queryClient.invalidateQueries(casesQueriesKeys.tags());
         queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
         // TODO fix title
         showSuccessToast(i18n.DELETE_CASE(caseIds.length));

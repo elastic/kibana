@@ -31,6 +31,7 @@ export const useUpdateCases = () => {
       mutationKey: casesMutationsKeys.updateCases,
       onSuccess: (_, { successToasterTitle }) => {
         queryClient.invalidateQueries(casesQueriesKeys.casesList());
+        queryClient.invalidateQueries(casesQueriesKeys.tags());
         queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
         showSuccessToast(successToasterTitle);

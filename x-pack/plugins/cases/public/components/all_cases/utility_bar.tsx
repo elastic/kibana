@@ -21,13 +21,13 @@ import { getBulkItems } from '../bulk_actions';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
+import { useRefreshCases } from './use_on_refresh_cases';
 
 interface OwnProps {
   data: Cases;
   enableBulkActions: boolean;
   filterOptions: FilterOptions;
   selectedCases: Case[];
-  refreshCases?: (a?: boolean) => void;
 }
 
 type Props = OwnProps;
@@ -52,15 +52,12 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   enableBulkActions = false,
   filterOptions,
   selectedCases,
-  refreshCases,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
+  const refreshCases = useRefreshCases();
 
-  // Delete case
   const { mutate: deleteCases } = useDeleteCases();
-
-  // Update case
   const { mutate: updateCases } = useUpdateCases();
 
   const toggleBulkDeleteModal = useCallback((cases: Case[]) => {

@@ -49,6 +49,7 @@ import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { CurrentUserProfile } from '../types';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { useRefreshCases } from './use_on_refresh_cases';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -103,7 +104,6 @@ export interface GetCasesColumn {
   filterStatus: string;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
-  refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
@@ -114,7 +114,6 @@ export const useCasesColumns = ({
   filterStatus,
   userProfiles,
   currentUserProfile,
-  refreshCases,
   isSelectorView,
   connectors = [],
   onRowClick,
@@ -123,6 +122,7 @@ export const useCasesColumns = ({
   // Delete case
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { mutate: deleteCases } = useDeleteCases();
+  const refreshCases = useRefreshCases();
 
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
@@ -153,7 +153,7 @@ export const useCasesColumns = ({
         updateValue,
         caseData,
         onSuccess: () => {
-          if (refreshCases != null) refreshCases();
+          refreshCases();
         },
       });
     },

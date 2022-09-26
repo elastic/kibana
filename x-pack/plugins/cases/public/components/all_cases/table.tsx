@@ -35,7 +35,6 @@ interface CasesTableProps {
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<Case>['onChange'];
   pagination: Pagination;
-  refreshCases: (a?: boolean) => void;
   selectedCases: Case[];
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
@@ -59,7 +58,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   isSelectorView,
   onChange,
   pagination,
-  refreshCases,
   selectedCases,
   selection,
   showActions,
@@ -92,7 +90,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         enableBulkActions={showActions}
         filterOptions={filterOptions}
         selectedCases={selectedCases}
-        refreshCases={refreshCases}
       />
       <EuiBasicTable
         className={classnames({ isSelectorView })}
