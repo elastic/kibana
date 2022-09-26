@@ -13,7 +13,7 @@ import {
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DURATION,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
@@ -24,14 +24,14 @@ import {
   calculateThroughputWithInterval,
   calculateThroughputWithRange,
 } from '../../lib/helpers/calculate_throughput';
-import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
+import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../lib/helpers/setup_request';
-import { calculateImpactBuilder } from '../traces/calculate_impact_builder';
 import {
   getDocumentTypeFilterForServiceDestinationStatistics,
   getLatencyFieldForServiceDestinationStatistics,
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
+import { calculateImpactBuilder } from '../traces/calculate_impact_builder';
 
 const MAX_NUM_OPERATIONS = 500;
 
@@ -74,13 +74,28 @@ export async function getTopDependencyOperations({
     offset,
   });
 
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start: startWithOffset,
+    end: endWithOffset,
+    searchAggregatedServiceMetrics: searchServiceDestinationMetrics,
+  });
+
+  const field = getLatencyFieldForServiceDestinationStatistics(
+    searchServiceDestinationMetrics
+  );
+
   const aggs = {
     duration: {
-      avg: {
-        field: getLatencyFieldForServiceDestinationStatistics(
-          searchServiceDestinationMetrics
-        ),
-      },
+      ...(searchServiceDestinationMetrics
+        ? {
+            weighted_avg: {
+              value: { field },
+              weight: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+              },
+            },
+          }
+        : { avg: { field } }),
     },
     successful: {
       filter: {
@@ -132,18 +147,20 @@ export async function getTopDependencyOperations({
             },
             aggs: {
               over_time: {
-                date_histogram: getMetricsDateHistogramParams({
-                  start: startWithOffset,
-                  end: endWithOffset,
-                  metricsInterval: 60,
-                }),
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: startWithOffset,
+                    max: endWithOffset,
+                  },
+                },
                 aggs,
               },
               ...aggs,
               total_time: {
-                sum: {
-                  field: SPAN_DURATION,
-                },
+                sum: { field },
               },
             },
           },
