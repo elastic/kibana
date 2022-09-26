@@ -904,6 +904,7 @@ packages/kbn-rule-data-utils @elastic/apm-ui
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
+packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-solution-platform
