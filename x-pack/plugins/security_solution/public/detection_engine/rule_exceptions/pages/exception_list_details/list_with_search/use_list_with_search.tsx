@@ -9,8 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { GetExceptionItemProps } from '../../../components/list_common';
-import { ViewerStatus } from '../../../components/list_common';
+import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
+import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import {
   prepareFetchExceptionItemsParams,
   fetchListExceptionItems,

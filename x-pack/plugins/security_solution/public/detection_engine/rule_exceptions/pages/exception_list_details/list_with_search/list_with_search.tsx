@@ -14,13 +14,13 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import * as i18n from '../translations';
 import {
   SearchBar,
   ExceptionItems,
   EmptyViewerState,
   ViewerStatus,
-} from '../../../components/list_common';
+} from '@kbn/securitysolution-exception-list-components';
+import * as i18n from '../translations';
 
 import { useListWithSearchComponent } from './use_list_with_search';
 

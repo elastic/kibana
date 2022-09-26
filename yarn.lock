@@ -3568,6 +3568,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-hook-utils@link:bazel-bin/packages/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
@@ -7630,6 +7634,10 @@
   uid ""
 
 "@types/kbn__securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components/npm_module_types":
   version "0.0.0"
   uid ""
 
