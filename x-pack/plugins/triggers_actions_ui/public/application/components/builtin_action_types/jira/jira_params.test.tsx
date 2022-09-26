@@ -6,20 +6,25 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import JiraParamsFields from './jira_params';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssues } from './use_get_issues';
+import { useGetSingleIssue } from './use_get_single_issue';
 import { ActionConnector } from '../../../../types';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-jest.mock('../../../../common/lib/kibana');
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
-jest.mock('./search_issues', () => ({ SearchIssues: () => <></> }));
+jest.mock('./use_get_issues');
+jest.mock('./use_get_single_issue');
 
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
+const useGetIssuesMock = useGetIssues as jest.Mock;
+const useGetSingleIssueMock = useGetSingleIssue as jest.Mock;
 
 const actionParams = {
   subAction: 'pushToService',
@@ -56,8 +61,7 @@ const defaultProps = {
   messageVariables: [],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/139062
-describe.skip('JiraParamsFields renders', () => {
+describe('JiraParamsFields renders', () => {
   const useGetIssueTypesResponse = {
     isLoading: false,
     issueTypes: [
@@ -84,11 +88,16 @@ describe.skip('JiraParamsFields renders', () => {
             name: 'Medium',
             id: '3',
           },
+          {
+            name: 'High',
+            id: '1',
+          },
         ],
         defaultValue: { name: 'Medium', id: '3' },
       },
     },
   };
+
   const useGetFieldsByIssueTypeResponseNoPriority = {
     ...useGetFieldsByIssueTypeResponse,
     fields: {
@@ -97,106 +106,116 @@ describe.skip('JiraParamsFields renders', () => {
       description: { allowedValues: [], defaultValue: {} },
     },
   };
+
   const useGetFieldsByIssueTypeResponseLoading = {
     isLoading: true,
     fields: {},
+  };
+
+  const useGetIssuesResponse = {
+    isLoading: false,
+    issues: [{ id: '1', key: '1', title: 'parent issue' }],
+  };
+
+  const useGetSingleIssueResponse = {
+    issue: { id: '1', key: '1', title: 'parent issue' },
+    isLoading: false,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
+    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
+    useGetSingleIssueMock.mockReturnValue(useGetSingleIssueResponse);
   });
 
-  test('all params fields are rendered', () => {
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('value')).toStrictEqual(
-      '10006'
-    );
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('value')).toStrictEqual(
-      'High'
-    );
-    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="labelsComboBox"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+  it('all params fields are rendered', async () => {
+    const results = render(<JiraParamsFields {...defaultProps} />);
+
+    expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
+    expect((results.getByRole('option', { name: 'Bug' }) as HTMLOptionElement).selected).toBe(true);
+
+    expect(results.getByTestId('prioritySelect')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+        true
+      );
+    });
+
+    expect(results.getByTestId('summaryInput')).toBeInTheDocument();
+    expect(results.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(results.getByTestId('labelsComboBox')).toBeInTheDocument();
+    expect(results.getByTestId('commentsTextArea')).toBeInTheDocument();
   });
 
-  test('it shows loading when loading issue types', () => {
+  it('it shows loading when loading issue types', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+    const results = render(<JiraParamsFields {...defaultProps} />);
 
-    expect(
-      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('isLoading')
-    ).toBeTruthy();
+    expect(results.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  test('it shows loading when loading fields', () => {
+  it('it shows loading when loading fields', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       isLoading: true,
     });
 
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+    const results = render(<JiraParamsFields {...defaultProps} />);
 
-    expect(
-      wrapper.find('[data-test-subj="prioritySelect"]').first().prop('isLoading')
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="labelsComboBox"]').first().prop('isLoading')
-    ).toBeTruthy();
+    const prioritySelect = within(results.getByTestId('priority-wrapper'));
+    const labelsComboBox = within(results.getByTestId('labels-wrapper'));
+
+    expect(prioritySelect.getByRole('progressbar')).toBeInTheDocument();
+    expect(labelsComboBox.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  test('it disabled the fields when loading issue types', () => {
+  it('it disabled the fields when loading issue types', async () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+    const results = render(<JiraParamsFields {...defaultProps} />);
+    const labels = within(results.getByTestId('labelsComboBox'));
 
-    expect(
-      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
-    ).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('disabled')).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="labelsComboBox"]').first().prop('isDisabled')
-    ).toBeTruthy();
+    expect(results.getByTestId('issueTypeSelect')).toBeDisabled();
+    expect(results.getByTestId('prioritySelect')).toBeDisabled();
+    expect(labels.getByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
-  test('it disabled the fields when loading fields', () => {
+  it('it disabled the fields when loading fields', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       isLoading: true,
     });
 
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+    const results = render(<JiraParamsFields {...defaultProps} />);
+    const labels = within(results.getByTestId('labelsComboBox'));
 
-    expect(
-      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
-    ).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('disabled')).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="labelsComboBox"]').first().prop('isDisabled')
-    ).toBeTruthy();
+    expect(results.getByTestId('issueTypeSelect')).toBeDisabled();
+    expect(results.getByTestId('prioritySelect')).toBeDisabled();
+    expect(labels.getByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
-  test('hide unsupported fields', () => {
+  it('hide unsupported fields', () => {
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       fields: {},
     });
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+    const results = render(<JiraParamsFields {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="issueTypeSelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="summaryInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
+    expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
+    expect(results.getByTestId('summaryInput')).toBeInTheDocument();
+    expect(results.getByTestId('commentsTextArea')).toBeInTheDocument();
 
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="labelsComboBox"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="search-parent-issues"]').exists()).toBeFalsy();
+    expect(results.queryByTestId('prioritySelect')).toBeFalsy();
+    expect(results.queryByTestId('descriptionTextArea')).toBeFalsy();
+    expect(results.queryByTestId('labelsComboBox')).toBeFalsy();
+    expect(results.queryByTestId('search-parent-issues')).toBeFalsy();
   });
 
-  test('If issue type is undefined, set to first item in issueTypes', () => {
+  it('If issue type is undefined, set to first item in issueTypes', () => {
     const newProps = {
       ...defaultProps,
       actionParams: {
@@ -210,13 +229,13 @@ describe.skip('JiraParamsFields renders', () => {
         },
       },
     };
-    mount(<JiraParamsFields {...newProps} />);
+    render(<JiraParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1].incident.issueType).toEqual(
       useGetIssueTypesResponse.issueTypes[0].id
     );
   });
 
-  test('If issue type is not an option in issueTypes, set to first item in issueTypes', () => {
+  it('If issue type is not an option in issueTypes, set to first item in issueTypes', () => {
     const newProps = {
       ...defaultProps,
       actionParams: {
@@ -230,13 +249,13 @@ describe.skip('JiraParamsFields renders', () => {
         },
       },
     };
-    mount(<JiraParamsFields {...newProps} />);
+    render(<JiraParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1].incident.issueType).toEqual(
       useGetIssueTypesResponse.issueTypes[0].id
     );
   });
 
-  test('When issueType and fields are null, return empty priority', () => {
+  it('When issueType and fields are null, return empty priority', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       fields: null,
@@ -254,19 +273,24 @@ describe.skip('JiraParamsFields renders', () => {
         },
       },
     };
-    const wrapper = mount(<JiraParamsFields {...newProps} />);
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toEqual(false);
+
+    const results = render(<JiraParamsFields {...newProps} />);
+    expect(results.queryByTestId('prioritySelect')).toBeFalsy();
   });
-  test('If summary has errors, form row is invalid', () => {
+
+  it('If summary has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
       errors: { 'subActionParams.incident.summary': ['error'] },
     };
-    const wrapper = mount(<JiraParamsFields {...newProps} />);
-    const summary = wrapper.find('[data-test-subj="summary-row"]').first();
-    expect(summary.prop('isInvalid')).toBeTruthy();
+
+    const results = render(<JiraParamsFields {...newProps} />);
+    const summary = within(results.getByTestId('summary-row'));
+
+    expect(summary.getByText('error')).toBeInTheDocument();
   });
-  test('When subActionParams is undefined, set to default', () => {
+
+  it('When subActionParams is undefined, set to default', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, issueTypes: [] });
     const { subActionParams, ...newParams } = actionParams;
 
@@ -274,13 +298,15 @@ describe.skip('JiraParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<JiraParamsFields {...newProps} />);
+
+    render(<JiraParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {},
       comments: [],
     });
   });
-  test('When subAction is undefined, set to default', () => {
+
+  it('When subAction is undefined, set to default', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, issueTypes: [] });
     const { subAction, ...newParams } = actionParams;
 
@@ -288,38 +314,83 @@ describe.skip('JiraParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<JiraParamsFields {...newProps} />);
-    expect(editAction.mock.calls[1][1]).toEqual('pushToService');
+
+    render(<JiraParamsFields {...newProps} />);
+    expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
-  test('Resets fields when connector changes', () => {
-    const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+
+  it('Resets fields when connector changes', () => {
+    const results = render(<JiraParamsFields {...defaultProps} />);
+
+    results.rerender(
+      <JiraParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+    );
+
     expect(editAction.mock.calls.length).toEqual(1);
-    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
-    expect(editAction.mock.calls.length).toEqual(2);
-    expect(editAction.mock.calls[1][1]).toEqual({
+    expect(editAction.mock.calls[0][1]).toEqual({
       incident: {},
       comments: [],
     });
   });
+
   describe('UI updates', () => {
-    const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
-    const simpleFields = [
-      { dataTestSubj: 'input[data-test-subj="summaryInput"]', key: 'summary' },
-      { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
-      { dataTestSubj: '[data-test-subj="issueTypeSelect"]', key: 'issueType' },
-      { dataTestSubj: '[data-test-subj="prioritySelect"]', key: 'priority' },
-    ];
+    it('updates summary', () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
 
-    simpleFields.forEach((field) =>
-      test(`${field.key} update triggers editAction :D`, () => {
-        const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-        const theField = wrapper.find(field.dataTestSubj).first();
-        theField.prop('onChange')!(changeEvent);
-        expect(editAction.mock.calls[1][1].incident[field.key]).toEqual(changeEvent.target.value);
-      })
-    );
+      fireEvent.change(results.getByTestId('summaryInput'), { target: { value: 'new title' } });
+      expect(editAction.mock.calls[0][1].incident.summary).toEqual('new title');
+    });
 
-    test('Parent update triggers editAction', () => {
+    it('updates description', () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+
+      fireEvent.change(results.getByTestId('descriptionTextArea'), {
+        target: { value: 'new desc' },
+      });
+
+      expect(editAction.mock.calls[0][1].incident.description).toEqual('new desc');
+    });
+
+    it('updates issue type', () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+
+      expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
+      expect((results.getByRole('option', { name: 'Bug' }) as HTMLOptionElement).selected).toBe(
+        true
+      );
+
+      act(() => {
+        userEvent.selectOptions(
+          results.getByTestId('issueTypeSelect'),
+          results.getByRole('option', { name: 'Task' })
+        );
+      });
+
+      expect(editAction.mock.calls[0][1].incident.issueType).toEqual('10005');
+    });
+
+    it('updates priority', async () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+
+      expect(results.getByTestId('prioritySelect')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+          true
+        );
+      });
+
+      act(() => {
+        userEvent.selectOptions(
+          results.getByTestId('prioritySelect'),
+          results.getByRole('option', { name: 'Medium' })
+        );
+      });
+
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
+    });
+
+    it('updates parent', async () => {
       useGetFieldsByIssueTypeMock.mockReturnValue({
         ...useGetFieldsByIssueTypeResponse,
         fields: {
@@ -327,40 +398,46 @@ describe.skip('JiraParamsFields renders', () => {
           parent: {},
         },
       });
-      const newProps = {
-        ...defaultProps,
-        actionParams: {
-          ...actionParams,
-          subActionParams: {
-            ...actionParams.subActionParams,
-            incident: {
-              ...actionParams.subActionParams.incident,
-              parent: '10002',
-            },
-          },
-        },
-      };
-      const wrapper = mount(<JiraParamsFields {...newProps} />);
-      const parent = wrapper.find('[data-test-subj="parent-search"]');
 
-      (
-        parent.props() as unknown as {
-          onChange: (val: string) => void;
-        }
-      ).onChange('Cool');
-      expect(editAction.mock.calls[1][1].incident.parent).toEqual('Cool');
+      const results = render(<JiraParamsFields {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(results.getByTestId('search-parent-issues')).toBeInTheDocument();
+      });
+
+      const parentField = within(results.getByTestId('search-parent-issues'));
+
+      await act(async () => {
+        await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
+          delay: 1,
+        });
+      });
+
+      await waitFor(async () => {
+        expect(results.getByText('parent issue')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(editAction.mock.calls[0][1].incident.parent).toEqual('1');
+      });
     });
-    test('Label update triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
-      (
-        labels.at(0).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ label: 'Cool' }]);
-      expect(editAction.mock.calls[1][1].incident.labels).toEqual(['Cool']);
+
+    it('updates labels correctly', async () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+      const labels = within(results.getByTestId('labelsComboBox'));
+
+      await act(async () => {
+        await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
+          delay: 1,
+        });
+      });
+
+      await waitFor(() => {
+        expect(editAction.mock.calls[0][1].incident.labels).toEqual(['kibana', 'l']);
+      });
     });
-    test('Label undefined update triggers editAction', () => {
+
+    it('Label undefined update triggers editAction', async () => {
       const newProps = {
         ...defaultProps,
         actionParams: {
@@ -374,41 +451,35 @@ describe.skip('JiraParamsFields renders', () => {
           },
         },
       };
-      const wrapper = mount(<JiraParamsFields {...newProps} />);
-      const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
+      const results = render(<JiraParamsFields {...newProps} />);
+      const labels = within(results.getByTestId('labelsComboBox'));
 
-      (
-        labels.at(0).props() as unknown as {
-          onBlur: () => void;
-        }
-      ).onBlur();
-      expect(editAction.mock.calls[1][1].incident.labels).toEqual([]);
-    });
-    test('New label creation triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
-      const searchValue = 'neato';
-      (
-        labels.at(0).props() as unknown as {
-          onCreateOption: (searchValue: string) => void;
-        }
-      ).onCreateOption(searchValue);
-      expect(editAction.mock.calls[1][1].incident.labels).toEqual(['kibana', searchValue]);
-    });
-    test('A comment triggers editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
-      expect(comments.simulate('change', changeEvent));
-      expect(editAction.mock.calls[1][1].comments.length).toEqual(1);
+      fireEvent.focusOut(labels.getByTestId('comboBoxSearchInput'));
+
+      await waitFor(() => {
+        expect(editAction.mock.calls[0][1].incident.labels).toEqual([]);
+      });
     });
 
-    test('Clears any left behind priority when issueType changes and hasPriority becomes false', () => {
+    it('updates a comment ', () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+      const comments = results.getByTestId('commentsTextArea');
+
+      fireEvent.change(comments, {
+        target: { value: 'new comment' },
+      });
+
+      expect(editAction.mock.calls[0][1].comments).toEqual([
+        { comment: 'new comment', commentId: '1' },
+      ]);
+    });
+
+    it('Clears any left behind priority when issueType changes and hasPriority becomes false', async () => {
       useGetFieldsByIssueTypeMock
         .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
         .mockReturnValue(useGetFieldsByIssueTypeResponseNoPriority);
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      wrapper.setProps({
+
+      const rerenderProps = {
         ...{
           ...defaultProps,
           actionParams: {
@@ -416,23 +487,42 @@ describe.skip('JiraParamsFields renders', () => {
             incident: { issueType: '10001' },
           },
         },
+      };
+
+      const results = render(<JiraParamsFields {...defaultProps} />);
+
+      expect(results.getByTestId('prioritySelect')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+          true
+        );
       });
-      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
-      expect(editAction.mock.calls[1][1].incident.priority).toEqual(null);
+
+      results.rerender(<JiraParamsFields {...rerenderProps} />);
+
+      await waitFor(() => {
+        expect(results.queryByTestId('priority-wrapper')).toBeFalsy();
+        expect(editAction.mock.calls[0][1].incident.priority).toEqual(null);
+      });
     });
 
-    test('Preserve priority when the issue type fields are loading and hasPriority becomes stale', () => {
+    it('Preserve priority when the issue type fields are loading and hasPriority becomes stale', async () => {
       useGetFieldsByIssueTypeMock
         .mockReturnValueOnce(useGetFieldsByIssueTypeResponseLoading)
         .mockReturnValue(useGetFieldsByIssueTypeResponse);
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+
+      const results = render(<JiraParamsFields {...defaultProps} />);
 
       expect(editAction).not.toBeCalled();
 
-      wrapper.setProps({ ...defaultProps }); // just to force component call useGetFieldsByIssueType again
+      results.rerender(<JiraParamsFields {...defaultProps} />);
 
-      expect(editAction).toBeCalledTimes(1);
-      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
+      await waitFor(() => {
+        expect((results.getByRole('option', { name: 'High' }) as HTMLOptionElement).selected).toBe(
+          true
+        );
+      });
     });
   });
 });
