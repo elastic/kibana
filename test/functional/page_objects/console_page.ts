@@ -233,8 +233,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async responseHasDeprecationWarning() {
-    const response = await this.getResponse();
-    return response.trim().startsWith('#!');
+    // Retry for a while to allow the deprecation warning to appear
+    return await this.retry.try(async () => {
+      const response = await this.getResponse();
+      return response.trim().startsWith('#!');
+    });
   }
 
   public async clickFoldWidget() {
