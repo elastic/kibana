@@ -103,6 +103,7 @@ export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
 ]);
@@ -160,6 +161,7 @@ export const HTTPSimpleFieldsCodec = t.intersection([
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.MAX_REDIRECTS]: t.string,
     [ConfigKey.URLS]: t.string,
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
 ]);
