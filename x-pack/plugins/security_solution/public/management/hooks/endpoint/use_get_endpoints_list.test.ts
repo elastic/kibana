@@ -198,4 +198,52 @@ describe('useGetEndpointsList hook', () => {
     const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: '' }));
     expect(res.data?.length).toEqual(50);
   });
+
+  it('should only list 10 more agents when 50 or more agents are already selected', async () => {
+    const getApiResponse = apiMocks.responseProvider.metadataList.getMockImplementation();
+
+    apiMocks.responseProvider.metadataList.mockImplementation(() => {
+      if (getApiResponse) {
+        const generator = new EndpointDocGenerator('seed');
+        const total = 61;
+        const data = Array.from({ length: total }, () => {
+          const endpoint = {
+            metadata: generator.generateHostMetadata(),
+            host_status: HostStatus.UNHEALTHY,
+          };
+
+          generator.updateCommonInfo();
+
+          return endpoint;
+        });
+
+        return {
+          ...getApiResponse(),
+          data,
+          page: 0,
+          // since we're mocking that all 50 agents are selected
+          // page size is set to max allowed
+          pageSize: 10000,
+          total,
+        };
+      }
+      throw new Error('some error');
+    });
+
+    // verify metadata list does indeed have all 61 agents
+    expect(apiMocks.responseProvider.metadataList().data?.length).toEqual(61);
+
+    // get the first 50 agents to select
+    const agentIdsToSelect = apiMocks.responseProvider
+      .metadataList()
+      .data.map((d) => d.metadata.agent.id)
+      .slice(0, 50);
+
+    // call useGetEndpointsList  with all 50 agents selected
+    const res = await renderReactQueryHook(() =>
+      useGetEndpointsList({ searchString: '', selectedAgentIds: agentIdsToSelect })
+    );
+    // verify useGetEndpointsList hook returns 60 agents
+    expect(res.data?.length).toEqual(60);
+  });
 });
