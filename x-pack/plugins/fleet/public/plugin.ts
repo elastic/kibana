@@ -46,7 +46,7 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import { calculateAuthz } from '../common/authz';
+import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -277,17 +277,20 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
-      authz: calculateAuthz({
-        fleet: {
-          all: capabilities.fleetv2.all as boolean,
-          setup: false,
-        },
-        integrations: {
-          all: capabilities.fleet.all as boolean,
-          read: capabilities.fleet.read as boolean,
-        },
-        isSuperuser: false,
-      }),
+      authz: {
+        ...calculateAuthz({
+          fleet: {
+            all: capabilities.fleetv2.all as boolean,
+            setup: false,
+          },
+          integrations: {
+            all: capabilities.fleet.all as boolean,
+            read: capabilities.fleet.read as boolean,
+          },
+          isSuperuser: false,
+        }),
+        packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
+      },
 
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();

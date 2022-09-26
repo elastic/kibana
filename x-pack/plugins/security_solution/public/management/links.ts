@@ -7,7 +7,11 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
@@ -53,6 +57,7 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
   {
@@ -230,13 +235,19 @@ export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
+  const fleetAuthz = plugins.fleet?.authz;
+  const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = calculateEndpointAuthz(
-      licenseService,
-      plugins.fleet?.authz,
-      currentUserResponse.roles
-    );
+    const privileges = fleetAuthz
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUserResponse.roles,
+          isEndpointRbacEnabled
+        )
+      : getEndpointAuthzInitialState();
     if (!privileges.canAccessEndpointManagement) {
       return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
     }
