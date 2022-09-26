@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '../context';
+import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '../containers/indicators_filters/context';
 
 /**
  * Hook to retrieve {@link IndicatorsFiltersContext} (contains FilterManager)
