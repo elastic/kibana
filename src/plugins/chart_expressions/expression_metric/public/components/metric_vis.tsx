@@ -36,6 +36,7 @@ import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver } from '@elastic/eui';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -267,7 +268,7 @@ export const MetricVis = ({
           : config.metric.color ?? defaultColor,
     };
 
-    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : 'default';
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
     if (config.metric.trends && config.metric.trends[trendId]) {
       const metricWTrend: MetricWTrend = {
         ...baseMetric,

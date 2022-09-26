@@ -17,7 +17,7 @@ import {
 import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { MetricWTrend } from '@elastic/charts';
 import type { TrendlineExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
+import { DEFAULT_TRENDLINE_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_TRENDLINE_NAME,
@@ -105,10 +105,10 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
     const trends: Record<string, MetricWTrend['trend']> = {};
 
     if (!args.breakdownBy) {
-      trends.default = table.rows.map((row) => ({
+      trends[DEFAULT_TRENDLINE_NAME] = table.rows.map((row) => ({
         x: row[timeColId],
         y: row[metricColId],
-      })); // TODO is the table ordered correctly?
+      }));
     } else {
       const breakdownByColId = getColumnByAccessor(args.breakdownBy, table.columns)?.id;
 
