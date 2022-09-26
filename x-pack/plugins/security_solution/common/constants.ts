@@ -465,10 +465,6 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
 }
 
-export const RISKY_HOSTS_EXTERNAL_DOC_LINK =
-  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
-export const RISKY_USERS_EXTERNAL_DOC_LINK =
-  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/user-risk-score.md';
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =

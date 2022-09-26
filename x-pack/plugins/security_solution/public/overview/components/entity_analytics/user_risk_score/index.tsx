@@ -30,7 +30,7 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 
-import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
@@ -146,7 +146,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
               <EuiFlexItem>
                 <EuiButtonEmpty
                   rel="noopener nofollow noreferrer"
-                  href={RISKY_USERS_EXTERNAL_DOC_LINK}
+                  href={RISKY_USERS_DOC_LINK}
                   target="_blank"
                 >
                   {i18n.LEARN_MORE}
