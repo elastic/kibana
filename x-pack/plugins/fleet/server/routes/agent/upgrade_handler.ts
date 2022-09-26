@@ -47,26 +47,43 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await getAgentById(esClient, request.params.agentId);
-
-  if (agent.unenrollment_started_at || agent.unenrolled_at) {
-    return response.customError({
-      statusCode: 400,
-      body: {
-        message: 'cannot upgrade an unenrolling or unenrolled agent',
-      },
-    });
-  }
-  if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
-    return response.customError({
-      statusCode: 400,
-      body: {
-        message: `agent ${request.params.agentId} is not upgradeable`,
-      },
-    });
-  }
-
   try {
+    const agent = await getAgentById(esClient, request.params.agentId);
+
+    const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
+    const agentIsFleetServer = fleetServerAgents.some(
+      (fleetServerAgent) => fleetServerAgent.id === agent.id
+    );
+    if (!agentIsFleetServer) {
+      try {
+        checkFleetServerVersion(version, fleetServerAgents);
+      } catch (err) {
+        return response.customError({
+          statusCode: 400,
+          body: {
+            message: err.message,
+          },
+        });
+      }
+    }
+
+    if (agent.unenrollment_started_at || agent.unenrolled_at) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: 'cannot upgrade an unenrolling or unenrolled agent',
+        },
+      });
+    }
+    if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: `agent ${request.params.agentId} is not upgradeable`,
+        },
+      });
+    }
+
     await AgentService.sendUpgradeAgentAction({
       soClient,
       esClient,
