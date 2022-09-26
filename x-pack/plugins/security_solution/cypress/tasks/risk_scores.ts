@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable no-dupe-keys */
+
+// eslint-disable-next-line import/no-nodejs-modules
+import querystring from 'querystring';
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const enum RiskScoreEntity {
   host = 'host',
@@ -87,7 +91,7 @@ export const deleteRiskScoreIngestPipelines = (names: string[]) => {
   });
 };
 
-const getTransformState = (transformId: string) => {
+export const getTransformState = (transformId: string) => {
   return cy.request<{ transforms: Array<{ id: string; state: string }>; count: number }>({
     method: 'get',
     url: `/api/transform/transforms/${transformId}/_stats`,
@@ -154,6 +158,7 @@ const deleteStoredScript = (id: string) => {
     url: `/internal/risk_score/stored_scripts/delete`,
     body: { id },
     failOnStatusCode: false,
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 };
 
@@ -166,13 +171,66 @@ export const deleteSavedObjects = (
   deleteAll: boolean
 ) => {
   return cy.request({
-    method: 'delete',
+    method: 'post',
     url: `/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/${templateName}`,
     failOnStatusCode: false,
     body: {
       deleteAll,
     },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
+};
+
+export const createSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDashboards`) => {
+  return cy.request({
+    method: 'post',
+    url: `/internal/risk_score/prebuilt_content/saved_objects/_bulk_create/${templateName}`,
+    failOnStatusCode: false,
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
+export const HOST_RISK_SCORE = 'Host Risk Score';
+export const USER_RISK_SCORE = 'User Risk Score';
+
+export const RISK_SCORE_TAG_DESCRIPTION =
+  'Security Solution Risk Score auto-generated tag' as const;
+
+const getRiskScore = (riskScoreEntity: RiskScoreEntity) =>
+  riskScoreEntity === RiskScoreEntity.user ? USER_RISK_SCORE : HOST_RISK_SCORE;
+export const getRiskScoreTagName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `${getRiskScore(riskScoreEntity)} ${spaceId}`;
+
+export const findSavedObject = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
+  const tagParams = {
+    type: 'tag',
+    search: getRiskScoreTagName(riskScoreEntity, spaceId),
+    searchFields: ['name'],
+    sortField: 'updated_at',
+    sortOrder: 'desc',
+  };
+  const search = getRiskScoreTagName(riskScoreEntity, spaceId);
+  const getSearchFields = encodeURI(`["name"]`);
+
+  const getReference = (tagId: string) => encodeURIComponent(`[{"type":"tag","id":"${tagId}"}]`);
+
+  return cy
+    .request({
+      method: 'get',
+      url: `/api/saved_objects/_find?fields=id&type=tag&sort_field=updated_at&search=${search}&search_fields=name`,
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    })
+    .then((res) => {
+      console.log('-------', search, res);
+
+      return cy.request({
+        method: 'get',
+        url: `api/saved_objects/_find?fields=id&type=index-pattern&type=tag&type=visualization&type=dashboard&type=lens&sort_field=updated_at&has_reference=${getReference(
+          res.body.saved_objects[0].id
+        )}`,
+        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      });
+    });
 };
 
 /**
@@ -218,8 +276,8 @@ export const deleteRiskScore = async ({
     : legacyScriptIds;
 
   await deleteTransforms(transformIds);
-  await deleteRiskScoreIngestPipelines(ingestPipelinesNames);
-  await deleteStoredScripts(scripts);
+  deleteRiskScoreIngestPipelines(ingestPipelinesNames);
+  deleteStoredScripts(scripts);
   deleteSavedObjects(`${riskScoreEntity}RiskScoreDashboards`, deleteAll);
   deleteRiskScoreIndicies(riskScoreEntity, spaceId);
 };
