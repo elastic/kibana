@@ -11,7 +11,7 @@ import fs from 'fs/promises';
 
 const fsMock = fs as jest.Mocked<typeof fs>;
 
-describe('renderFullStoryLibraryFactory', () => {
+describe('renderGainSightLibraryFactory', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     fsMock.readFile.mockResolvedValue(Buffer.from('fake fs src'));
