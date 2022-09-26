@@ -27,42 +27,6 @@ const mockClient = {
   },
 };
 
-describe('createAndReferenceMlInferencePipeline util function', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should default the destination field to the pipeline name", async () => {
-    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
-    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-
-    const indexName = 'my-index';
-    const pipelineName = 'my-pipeline';
-    const modelId = 'my-model-id';
-    const sourceField = 'my-source-field';
-
-    await createAndReferenceMlInferencePipeline(
-      indexName,
-      pipelineName,
-      modelId,
-      sourceField,
-      undefined, // Omitted destination field
-      mockClient as unknown as ElasticsearchClient
-    );
-
-    // Verify the object passed to pipeline creation contains the default target field name
-    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(expect.objectContaining({
-      processors: expect.arrayContaining([
-        expect.objectContaining({
-          inference: expect.objectContaining({
-            target_field: `ml.inference.${pipelineName}`
-          })
-        })
-      ])
-    }));
-  });
-});
-
 describe('createMlInferencePipeline util function', () => {
   const pipelineName = 'my-pipeline';
   const modelId = 'my-model-id';
@@ -121,6 +85,36 @@ describe('createMlInferencePipeline util function', () => {
         id: 'ml-inference-my_pipeline_with_spaces',
       })
     );
+  });
+
+  it("should default the destination field to the pipeline name", async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
+    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
+
+    const indexName = 'my-index';
+    const pipelineName = 'my-pipeline';
+    const modelId = 'my-model-id';
+    const sourceField = 'my-source-field';
+
+    await createAndReferenceMlInferencePipeline(
+      indexName,
+      pipelineName,
+      modelId,
+      sourceField,
+      undefined, // Omitted destination field
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    // Verify the object passed to pipeline creation contains the default target field name
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(expect.objectContaining({
+      processors: expect.arrayContaining([
+        expect.objectContaining({
+          inference: expect.objectContaining({
+            target_field: `ml.inference.${pipelineName}`
+          })
+        })
+      ])
+    }));
   });
 
   it('should throw an error without creating the pipeline if it already exists', () => {
