@@ -42,10 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('can update data view name', async () => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
           const name1 = 'good data view name';
           const name2 = 'better data view name';
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
+              title,
               name: name1,
             },
           });
