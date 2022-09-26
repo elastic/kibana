@@ -25,6 +25,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import { splitPkgKey } from '../../../../../../../common/services';
+import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
+
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
@@ -490,21 +492,23 @@ export function Detail() {
       });
     }
 
-    tabs.push({
-      id: 'api-reference',
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
-          defaultMessage="API reference"
-        />
-      ),
-      isSelected: panel === 'api-reference',
-      'data-test-subj': `tab-api-reference`,
-      href: getHref('integration_details_api_reference', {
-        pkgkey: packageInfoKey,
-        ...(integration ? { integration } : {}),
-      }),
-    });
+    if (!HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo.name)) {
+      tabs.push({
+        id: 'api-reference',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
+            defaultMessage="API reference"
+          />
+        ),
+        isSelected: panel === 'api-reference',
+        'data-test-subj': `tab-api-reference`,
+        href: getHref('integration_details_api_reference', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
 
     return tabs;
   }, [
