@@ -83,12 +83,6 @@ export const entityAnalyticsLinks: LinkItem = {
   }),
   path: ENTITY_ANALYTICS_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
-  licenseType: 'platinum',
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.appLinks.technicalPreview', {
-      defaultMessage: 'technical preview',
-    }),
-  },
+  isBeta: false,
   globalSearchKeywords: [ENTITY_ANALYTICS],
 };

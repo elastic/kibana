@@ -7,16 +7,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildMultiRuleAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertsFilter,
 } from '../../../detections/components/alerts_table/default_config';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
 import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
@@ -78,12 +77,17 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             'acknowledged',
             'in-progress',
           ]);
-          const filter = getQueryFilter(
+
+          const exceptionsToFilter = exceptionItemsToAddOrUpdate.map((exception) =>
+            removeIdFromExceptionItemsEntries(exception)
+          );
+
+          const filter = await getEsQueryFilter(
             '',
             'kuery',
             [...ruleStaticIds.flatMap((id) => buildAlertsFilter(id)), ...alertStatusFilter],
             bulkCloseIndex,
-            prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
+            prepareExceptionItemsForBulkClose(exceptionsToFilter),
             false
           );
 

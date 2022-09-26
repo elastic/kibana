@@ -90,6 +90,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     query: getData().query.queryString.getQuery() as Query,
     initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
+    dataViewSpec: context.dataViewSpec,
   });
 
   return location;

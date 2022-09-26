@@ -2538,13 +2538,7 @@
             "text": "DataPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "data",
@@ -2593,13 +2587,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
@@ -2619,13 +2607,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "DataStartDependencies",
               ", ",
@@ -2659,13 +2641,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "DataStartDependencies",
                   ", ",
@@ -2710,13 +2686,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { uiActions, fieldFormats, dataViews, screenshotMode }: ",
               "DataStartDependencies",
               ") => ",
@@ -2740,13 +2710,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -3532,16 +3496,16 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -11419,11 +11383,11 @@
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
             },
             {
               "plugin": "stackAlerts",
@@ -11524,6 +11488,10 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/data/data_service.ts"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
             },
             {
               "plugin": "stackAlerts",

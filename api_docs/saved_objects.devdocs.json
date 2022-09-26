@@ -783,7 +783,9 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          "<",
+          "SavedObjectAttributes",
+          ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
           ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
         ],
@@ -807,7 +809,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              "<",
+              "SavedObjectAttributes",
+              ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -1518,6 +1522,16 @@
         ],
         "label": "SavedObject",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObject",
+            "text": "SavedObject"
+          },
+          "<T>"
+        ],
         "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
@@ -1637,7 +1651,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">"
+              "<T>>"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
@@ -1870,7 +1884,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">) | undefined"
+              "<T>>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
@@ -2085,7 +2099,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ") => Promise<",
+              "<",
+              "SavedObjectAttributes",
+              ">) => Promise<",
               {
                 "pluginId": "savedObjects",
                 "scope": "public",
@@ -2093,7 +2109,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">) | undefined"
+              "<",
+              "SavedObjectAttributes",
+              ">>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
@@ -2113,7 +2131,10 @@
                     "docId": "kibSavedObjectsPluginApi",
                     "section": "def-public.SavedObject",
                     "text": "SavedObject"
-                  }
+                  },
+                  "<",
+                  "SavedObjectAttributes",
+                  ">"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
@@ -2189,7 +2210,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">(object: T, references: ",
+              "<",
+              "SavedObjectAttributes",
+              ">>(object: T, references: ",
               "SavedObjectReference",
               "[]) => void) | undefined"
             ],
@@ -3089,7 +3112,10 @@
               "docId": "kibSavedObjectsPluginApi",
               "section": "def-public.SavedObject",
               "text": "SavedObject"
-            }
+            },
+            "<",
+            "SavedObjectAttributes",
+            ">"
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,

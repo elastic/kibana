@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { getQueryFilter } from '../get_query_filter';
 import type { SearchEnrichments } from './types';
 
 export const searchEnrichments: SearchEnrichments = async ({ index, services, query, fields }) => {
@@ -15,7 +15,13 @@ export const searchEnrichments: SearchEnrichments = async ({ index, services, qu
       body: {
         _source: '',
         fields,
-        query: getQueryFilter('', 'kuery', [query], index, []),
+        query: getQueryFilter({
+          query: '',
+          language: 'kuery',
+          filters: [query],
+          index,
+          exceptionFilter: undefined,
+        }),
       },
       track_total_hits: false,
     });

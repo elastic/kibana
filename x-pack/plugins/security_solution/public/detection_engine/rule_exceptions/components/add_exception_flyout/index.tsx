@@ -27,11 +27,6 @@ import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import {
-  isEqlRule,
-  isNewTermsRule,
-  isThresholdRule,
-} from '../../../../../common/detection_engine/utils';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from './translations';
 import * as sharedI18n from '../../utils/translations';
@@ -55,6 +50,7 @@ import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { entrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
+import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 
 export interface AddExceptionFlyoutProps {
   rules: Rule[] | null;
@@ -122,11 +118,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       // When dealing with numerous rules that can be a mix of those that do and
       // don't work with large value lists we'll need to communicate that to the
       // user but not block.
-      return (
-        !isEqlRule(rules[0].type) &&
-        !isThresholdRule(rules[0].type) &&
-        !isNewTermsRule(rules[0].type)
-      );
+      return ruleTypesThatAllowLargeValueLists.includes(rules[0].type);
     } else {
       return true;
     }

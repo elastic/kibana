@@ -259,7 +259,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && allowLargeValueLists
+          isFirst
         );
 
     const comboBox = (
@@ -401,6 +401,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             onChange={handleFieldListValueChange}
             data-test-subj="exceptionBuilderEntryFieldList"
+            allowLargeValueLists={allowLargeValueLists}
           />
         );
       case OperatorTypeEnum.EXISTS:

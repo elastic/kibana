@@ -29,6 +29,8 @@ const DEFAULT_VALUES = {
   mlInferencePipelineProcessors: undefined,
   pipelineState: DEFAULT_PIPELINE_VALUES,
   showModal: false,
+  showAddMlInferencePipelineModal: false,
+  hasIndexIngestionPipeline: false,
 };
 
 describe('PipelinesLogic', () => {
@@ -85,6 +87,7 @@ describe('PipelinesLogic', () => {
       expect(PipelinesLogic.values).toEqual({
         ...DEFAULT_VALUES,
         pipelineState: { ...DEFAULT_PIPELINE_VALUES, name: 'new_pipeline_name' },
+        hasIndexIngestionPipeline: true,
       });
     });
     describe('makeRequest', () => {
@@ -154,6 +157,7 @@ describe('PipelinesLogic', () => {
             connector: { ...connectorIndex.connector, pipeline: newPipeline },
           },
           pipelineState: newPipeline,
+          hasIndexIngestionPipeline: true,
         });
       });
       it('should not set configState if modal is open', () => {

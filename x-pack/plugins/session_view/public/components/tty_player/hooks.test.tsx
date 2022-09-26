@@ -14,7 +14,7 @@ import {
   TTY_LINES_PER_FRAME,
 } from '../../../common/constants';
 
-const VIM_LINE_START = 19;
+const VIM_LINE_START = 22;
 
 describe('TTYPlayer/hooks', () => {
   beforeAll(() => {

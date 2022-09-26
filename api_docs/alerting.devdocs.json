@@ -2563,7 +2563,15 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; }"
+          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; } | { operation: \"set\"; field: \"snoozeSchedule\"; value: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnoozeSchedule",
+            "text": "RuleSnoozeSchedule"
+          },
+          "; } | { operation: \"delete\"; field: \"snoozeSchedule\"; value?: string[] | undefined; } | { operation: \"set\"; field: \"apiKey\"; value?: undefined; }"
         ],
         "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
         "deprecated": false,

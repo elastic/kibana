@@ -55,12 +55,10 @@ export const DEFAULT_TTY_FONT_SIZE = 11;
 export const DEFAULT_TTY_ROWS = 66;
 export const DEFAULT_TTY_COLS = 280;
 
-// we split terminal output on both newlines and cursor movements.
-export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\x1b\[\d+;\d+[Hf])/gi;
-
-// used when searching output
-export const TTY_STRIP_CONTROL_CODES_REGEX =
-  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gi;
+// we split terminal output on both newlines, carriage returns and cursor movements.
+// this helps search navigate through results without having a single line rewrite itself before we highlight the match.
+// it also creates a more interesting play by play
+export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\r\n?|\x1b\[\d+;\d*[Hf]?)/gi;
 
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+

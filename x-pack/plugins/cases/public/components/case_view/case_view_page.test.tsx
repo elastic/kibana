@@ -427,6 +427,11 @@ describe('CaseViewPage', () => {
               }),
             },
           },
+          notifications: {
+            toasts: {
+              addDanger: () => {},
+            },
+          },
         },
       }),
     }));

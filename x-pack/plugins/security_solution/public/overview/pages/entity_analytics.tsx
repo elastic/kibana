@@ -7,6 +7,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
+import { ENTITY_ANALYTICS } from '../../app/translations';
+import { Paywall } from '../../common/components/paywall';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
@@ -24,30 +27,26 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
 
   return (
     <>
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage
-              title={i18n.ENTITY_ANALYTICS_TITLE}
-              badgeOptions={{
-                text: i18n.TECHNICAL_PREVIEW,
-                color: 'white',
-                size: 's',
-                beta: true,
-              }}
-            >
-              <SiemSearchBar
-                id={InputsModelId.global}
-                indexPattern={indexPattern}
-                hideFilterBar
-                hideQueryInput
-              />
+            <HeaderPage title={ENTITY_ANALYTICS}>
+              {isPlatinumOrTrialLicense && capabilitiesFetched && (
+                <SiemSearchBar
+                  id={InputsModelId.global}
+                  indexPattern={indexPattern}
+                  hideFilterBar
+                  hideQueryInput
+                />
+              )}
             </HeaderPage>
-
-            {isSourcererLoading ? (
+            {!isPlatinumOrTrialLicense && capabilitiesFetched ? (
+              <Paywall featureDescription={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
+            ) : isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">

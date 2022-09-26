@@ -49,24 +49,16 @@ const ResourceFindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      baseFindingsColumns['resource.id'],
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(
-        { ...baseFindingsColumns['resource.sub_type'], sortable: false },
-        { onAddFilter }
-      ),
-      createColumnWithFilters(
-        { ...baseFindingsColumns['resource.name'], sortable: false },
-        { onAddFilter }
-      ),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
       baseFindingsColumns['rule.tags'],
-      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
   );
+
   if (!loading && !items.length)
     return (
       <EuiEmptyPrompt

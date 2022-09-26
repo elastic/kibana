@@ -151,10 +151,9 @@ export const goToEndpointExceptionsTab = () => {
   cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
 };
 
-export const editException = () => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(0).click({ force: true });
-
-  cy.get(EDIT_EXCEPTION_BTN).eq(0).click({ force: true });
+export const openEditException = (index = 0) => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
 };
 
 export const removeException = () => {

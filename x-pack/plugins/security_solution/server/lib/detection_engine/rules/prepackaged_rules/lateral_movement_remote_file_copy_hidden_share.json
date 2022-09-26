@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Remote File Copy to a Hidden Share",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"cmd.exe\", \"powershell.exe\", \"robocopy.exe\", \"xcopy.exe\") and\n  process.args : (\"copy*\", \"move*\", \"cp\", \"mv\") and process.args : \"*$*\"\n",
+  "query": "process where event.type == \"start\" and\n  process.name : (\"cmd.exe\", \"powershell.exe\", \"robocopy.exe\", \"xcopy.exe\") and\n  process.args : (\"copy*\", \"move*\", \"cp\", \"mv\") and process.args : \"*$*\"\n",
   "required_fields": [
     {
       "ecs": true,
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 101
 }

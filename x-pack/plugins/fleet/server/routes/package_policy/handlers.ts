@@ -203,8 +203,11 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
+        ignoreUnverified: force,
       });
-      newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
+      newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
+        experimental_data_stream_features: pkg.experimental_data_stream_features,
+      });
     } else {
       newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(soClient, {
         ...newPolicy,
@@ -292,7 +295,8 @@ export const updatePackagePolicyHandler: RequestHandler<
       });
       newData = simplifiedPackagePolicytoNewPackagePolicy(
         body as unknown as SimplifiedPackagePolicy,
-        pkgInfo
+        pkgInfo,
+        { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
     } else {
       // removed fields not recognized by schema

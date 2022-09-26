@@ -193,8 +193,8 @@ describe('Add exception from rule details', () => {
     // Trying to figure out with EUI why the search won't trigger
     it('Can search for items', () => {
       // displays existing exception items
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
 
       // can search for an exception value
       searchForExceptionItem('foo');

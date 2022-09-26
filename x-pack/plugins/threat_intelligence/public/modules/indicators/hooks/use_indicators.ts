@@ -13,12 +13,13 @@ import {
 } from '@kbn/data-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useInspector } from '../../../hooks/use_inspector';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { THREAT_QUERY_BASE } from '../../../../common/constants';
 import { useSourcererDataView } from './use_sourcerer_data_view';
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
+import { getRuntimeMappings } from '../utils/get_runtime_mappings';
+import { getIndicatorsQuery } from '../utils/get_indicators_query';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -67,6 +68,8 @@ export const useIndicators = ({
   } = useKibana();
   const { selectedPatterns } = useSourcererDataView();
 
+  const { inspectorAdapters } = useInspector();
+
   const searchSubscription$ = useRef<Subscription>();
   const abortController = useRef(new AbortController());
 
@@ -80,36 +83,9 @@ export const useIndicators = ({
     pageSizeOptions: PAGE_SIZES,
   });
 
-  const queryToExecute = useMemo(
-    () =>
-      buildEsQuery(
-        undefined,
-        [
-          {
-            query: THREAT_QUERY_BASE,
-            language: 'kuery',
-          },
-          {
-            query: filterQuery.query as string,
-            language: 'kuery',
-          },
-        ],
-        [
-          ...filters,
-          {
-            query: {
-              range: {
-                ['@timestamp']: {
-                  gte: timeRange?.from,
-                  lte: timeRange?.to,
-                },
-              },
-            },
-            meta: {},
-          },
-        ]
-      ),
-    [filterQuery, filters, timeRange?.from, timeRange?.to]
+  const query = useMemo(
+    () => getIndicatorsQuery({ filters, timeRange, filterQuery }),
+    [filterQuery, filters, timeRange]
   );
 
   const loadData = useCallback(
@@ -118,32 +94,30 @@ export const useIndicators = ({
 
       setLoading(true);
 
+      const request = inspectorAdapters.requests.start('Indicator search', {});
+
+      request.stats({
+        indexPattern: {
+          label: 'Index patterns',
+          value: selectedPatterns,
+        },
+      });
+
+      const requestBody = {
+        query,
+        runtime_mappings: getRuntimeMappings(),
+        fields: [{ field: '*', include_unmapped: true }],
+        size,
+        from,
+        sort: sorting.map(({ id, direction }) => ({ [id]: direction })),
+      };
+
       searchSubscription$.current = searchService
         .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(
           {
             params: {
               index: selectedPatterns,
-              body: {
-                size,
-                from,
-                fields: [{ field: '*', include_unmapped: true }],
-                query: queryToExecute,
-                sort: sorting.map(({ id, direction }) => ({ [id]: direction })),
-                runtime_mappings: {
-                  'threat.indicator.name': {
-                    type: 'keyword',
-                    script: {
-                      source: threatIndicatorNamesScript(),
-                    },
-                  },
-                  'threat.indicator.name_origin': {
-                    type: 'keyword',
-                    script: {
-                      source: threatIndicatorNamesOriginScript(),
-                    },
-                  },
-                },
-              },
+              body: requestBody,
             },
           },
           {
@@ -158,20 +132,29 @@ export const useIndicators = ({
             if (isCompleteResponse(response)) {
               setLoading(false);
               searchSubscription$.current?.unsubscribe();
+              request.stats({}).ok({ json: response });
+              request.json(requestBody);
             } else if (isErrorResponse(response)) {
               setLoading(false);
+              request.error({ json: response });
               searchSubscription$.current?.unsubscribe();
             }
           },
-          error: (msg) => {
-            searchService.showError(msg);
+          error: (requestError) => {
+            searchService.showError(requestError);
             searchSubscription$.current?.unsubscribe();
+
+            if (requestError instanceof Error && requestError.name.includes('Abort')) {
+              inspectorAdapters.requests.reset();
+            } else {
+              request.error({ json: requestError });
+            }
 
             setLoading(false);
           },
         });
     },
-    [queryToExecute, searchService, selectedPatterns, sorting]
+    [inspectorAdapters.requests, query, searchService, selectedPatterns, sorting]
   );
 
   const onChangeItemsPerPage = useCallback(

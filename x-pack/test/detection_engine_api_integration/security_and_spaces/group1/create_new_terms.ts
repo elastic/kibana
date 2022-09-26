@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_status': 'open',
         'kibana.alert.depth': 1,
         'kibana.alert.reason':
-          'authentication event by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',
+          'authentication event with source 8.42.77.171 by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',
         'kibana.alert.severity': 'high',
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.parameters': {

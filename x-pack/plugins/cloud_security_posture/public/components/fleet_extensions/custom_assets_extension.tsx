@@ -37,7 +37,7 @@ export const CspCustomAssetsExtension = () => {
       name: cloudPosturePages.rules.name,
       url: application.getUrlForApp(SECURITY_APP_NAME, { path: cloudPosturePages.benchmarks.path }),
       description: i18n.translate('xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel', {
-        defaultMessage: 'Manage CSP Rules ',
+        defaultMessage: 'View CSP Rules ',
       }),
     },
   ];
