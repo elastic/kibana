@@ -32,7 +32,7 @@ import {
   HISTOGRAM_HEIGHT_KEY,
 } from './discover_main_content';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
+import { Panels, PANELS_MODE } from '@kbn/unified-histogram-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
@@ -204,34 +204,34 @@ describe('Discover main content component', () => {
     it('should set the panels mode to DISCOVER_PANELS_MODE.RESIZABLE when viewing on medium screens and above', async () => {
       const component = await mountComponent();
       setWindowWidth(component, euiThemeVars.euiBreakpoints.m);
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.RESIZABLE);
+      expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.RESIZABLE);
     });
 
     it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED when viewing on small screens and below', async () => {
       const component = await mountComponent();
       setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
+      expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
     });
 
     it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if hideChart is true', async () => {
       const component = await mountComponent({ hideChart: true });
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
+      expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
     });
 
     it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if isTimeBased is false', async () => {
       const component = await mountComponent({ isTimeBased: false });
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
+      expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.FIXED);
     });
 
     it('should set the panels mode to DISCOVER_PANELS_MODE.SINGLE if isPlainRecord is true', async () => {
       const component = await mountComponent({ isPlainRecord: true });
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.SINGLE);
+      expect(component.find(Panels).prop('mode')).toBe(PANELS_MODE.SINGLE);
     });
 
     it('should set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is false', async () => {
       const component = await mountComponent();
       setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      const expectedHeight = component.find(DiscoverPanels).prop('topPanelHeight');
+      const expectedHeight = component.find(Panels).prop('topPanelHeight');
       expect(component.find(DiscoverChart).childAt(0).getDOMNode()).toHaveStyle({
         height: `${expectedHeight}px`,
       });
@@ -240,7 +240,7 @@ describe('Discover main content component', () => {
     it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is true', async () => {
       const component = await mountComponent({ hideChart: true });
       setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      const expectedHeight = component.find(DiscoverPanels).prop('topPanelHeight');
+      const expectedHeight = component.find(Panels).prop('topPanelHeight');
       expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
@@ -249,7 +249,7 @@ describe('Discover main content component', () => {
     it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and isTimeBased is false', async () => {
       const component = await mountComponent({ isTimeBased: false });
       setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      const expectedHeight = component.find(DiscoverPanels).prop('topPanelHeight');
+      const expectedHeight = component.find(Panels).prop('topPanelHeight');
       expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
@@ -294,7 +294,7 @@ describe('Discover main content component', () => {
       const component = await mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(null);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBeGreaterThan(0);
+      expect(component.find(Panels).prop('topPanelHeight')).toBeGreaterThan(0);
     });
 
     it('should pass the stored topPanelHeight to DiscoverPanels if a value is found in storage', async () => {
@@ -304,7 +304,7 @@ describe('Discover main content component', () => {
       const component = await mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(topPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(topPanelHeight);
+      expect(component.find(Panels).prop('topPanelHeight')).toBe(topPanelHeight);
     });
 
     it('should update the topPanelHeight in storage and pass the new value to DiscoverPanels when the topPanelHeight changes', async () => {
@@ -313,13 +313,13 @@ describe('Discover main content component', () => {
       storage.set = jest.fn().mockImplementation(originalSet);
       const component = await mountComponent({ storage });
       const newTopPanelHeight = 123;
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).not.toBe(newTopPanelHeight);
+      expect(component.find(Panels).prop('topPanelHeight')).not.toBe(newTopPanelHeight);
       act(() => {
-        component.find(DiscoverPanels).prop('onTopPanelHeightChange')(newTopPanelHeight);
+        component.find(Panels).prop('onTopPanelHeightChange')(newTopPanelHeight);
       });
       component.update();
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(newTopPanelHeight);
+      expect(component.find(Panels).prop('topPanelHeight')).toBe(newTopPanelHeight);
     });
 
     it('should reset the topPanelHeight to the default when onResetChartHeight is called on DiscoverChart', async () => {
@@ -327,21 +327,21 @@ describe('Discover main content component', () => {
       const originalSet = storage.set;
       storage.set = jest.fn().mockImplementation(originalSet);
       const component = await mountComponent({ storage });
-      const defaultTopPanelHeight = component.find(DiscoverPanels).prop('topPanelHeight');
+      const defaultTopPanelHeight = component.find(Panels).prop('topPanelHeight');
       const newTopPanelHeight = 123;
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).not.toBe(newTopPanelHeight);
+      expect(component.find(Panels).prop('topPanelHeight')).not.toBe(newTopPanelHeight);
       act(() => {
-        component.find(DiscoverPanels).prop('onTopPanelHeightChange')(newTopPanelHeight);
+        component.find(Panels).prop('onTopPanelHeightChange')(newTopPanelHeight);
       });
       component.update();
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(newTopPanelHeight);
+      expect(component.find(Panels).prop('topPanelHeight')).toBe(newTopPanelHeight);
       act(() => {
         component.find(DiscoverChart).prop('onResetChartHeight')!();
       });
       component.update();
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, defaultTopPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(defaultTopPanelHeight);
+      expect(component.find(Panels).prop('topPanelHeight')).toBe(defaultTopPanelHeight);
     });
 
     it('should pass undefined for onResetChartHeight to DiscoverChart when the chart is the default height', async () => {

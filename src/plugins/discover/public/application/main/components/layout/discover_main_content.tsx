@@ -20,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import { Panels, PANELS_MODE } from '@kbn/unified-histogram-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -30,7 +31,6 @@ import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
@@ -140,10 +140,10 @@ export const DiscoverMainContent = ({
       : 'eui-fullHeight';
 
   const panelsMode = isPlainRecord
-    ? DISCOVER_PANELS_MODE.SINGLE
+    ? PANELS_MODE.SINGLE
     : showFixedPanels
-    ? DISCOVER_PANELS_MODE.FIXED
-    : DISCOVER_PANELS_MODE.RESIZABLE;
+    ? PANELS_MODE.FIXED
+    : PANELS_MODE.RESIZABLE;
 
   return (
     <>
@@ -162,7 +162,7 @@ export const DiscoverMainContent = ({
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
           onResetChartHeight={
             topPanelHeight !== defaultTopPanelHeight &&
-            panelsMode === DISCOVER_PANELS_MODE.RESIZABLE
+            panelsMode === PANELS_MODE.RESIZABLE
               ? resetTopPanelHeight
               : undefined
           }
@@ -215,7 +215,7 @@ export const DiscoverMainContent = ({
           )}
         </EuiFlexGroup>
       </InPortal>
-      <DiscoverPanels
+      <Panels
         className="dscPageContent__inner"
         mode={panelsMode}
         resizeRef={resizeRef}
