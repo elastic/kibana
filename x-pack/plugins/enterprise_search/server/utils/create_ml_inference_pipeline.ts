@@ -41,14 +41,14 @@ export const createAndReferenceMlInferencePipeline = async (
   pipelineName: string,
   modelId: string,
   sourceField: string,
-  destinationField: string,
+  destinationField: string | null | undefined,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
   const createPipelineResult = await createMlInferencePipeline(
     pipelineName,
     modelId,
     sourceField,
-    destinationField || modelId,
+    destinationField || pipelineName,
     esClient
   );
 
