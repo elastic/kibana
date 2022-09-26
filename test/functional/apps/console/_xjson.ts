@@ -116,7 +116,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.enterRequest(
           '\nGET foo/_msearch \n{}\n{"query": {"match_all": {}}}\n{"index": "bar"}\n{"query": {"match_all": {}}}'
         );
-        expect(await PageObjects.console.getRequestBodyCount()).to.be(4);
+        // Retry because body elements are not always immediately visible.
+        await retry.try(async () => {
+          expect(await PageObjects.console.getRequestBodyCount()).to.be(4);
+        });
       });
 
       it('should not trigger error for multiple bodies for _msearch requests', async () => {
@@ -143,7 +146,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.enterRequest(
           '\nPOST test/_doc/1 \n{\n "foo": """look "escaped" quotes"""'
         );
-        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
+        // Retry until typing is finished and validation errors are gone.
+        await retry.try(async () => {
+          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
+        });
       });
 
       it('should have correct syntax highlighting for inline comments', async () => {
