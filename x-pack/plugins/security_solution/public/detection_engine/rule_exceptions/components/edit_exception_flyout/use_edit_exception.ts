@@ -37,14 +37,18 @@ export const useEditExceptionItems = (): ReturnUseEditExceptionItems => {
 
     const updateExceptionItem = async ({ itemsToUpdate }: EditExceptionItemHookProps) => {
       if (updateExceptions == null) return;
+
       try {
         setIsLoading(true);
 
         await updateExceptions({ items: itemsToUpdate });
 
         addSuccess({
-          title: i18n.EDIT_EXCEPTION_SUCCESS,
-          text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
+          title: i18n.EDIT_RULE_EXCEPTION_SUCCESS_TITLE,
+          text: i18n.EDIT_RULE_EXCEPTION_SUCCESS_TEXT(
+            itemsToUpdate.map(({ name }) => name).join(', '),
+            itemsToUpdate.length
+          ),
         });
 
         if (isSubscribed) {
@@ -53,7 +57,7 @@ export const useEditExceptionItems = (): ReturnUseEditExceptionItems => {
       } catch (e) {
         if (isSubscribed) {
           setIsLoading(false);
-          addError(e, { title: i18n.SUBMIT_ERROR_TITLE });
+          addError(e, { title: i18n.EDIT_RULE_EXCEPTION_ERROR_TITLE });
           throw new Error(e);
         }
       }

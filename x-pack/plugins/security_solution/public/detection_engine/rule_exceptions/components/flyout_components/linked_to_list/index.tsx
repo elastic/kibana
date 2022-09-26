@@ -11,6 +11,7 @@ import styled, { css } from 'styled-components';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
+import type { RuleReferences } from '../../../logic/use_find_references';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
 import type { RuleReferenceSchema } from '../../../../../../common/detection_engine/schemas/response';
 import { getAddToListsTableColumns } from '../add_to_lists_table/utils';
@@ -21,6 +22,7 @@ export interface TableListInterface extends ExceptionListSchema {
 
 interface ExceptionsLinkedToListComponentProps {
   list: ExceptionListSchema;
+  updateReferences: (refs: RuleReferences | null) => void;
 }
 
 const SectionHeader = styled(EuiTitle)`
@@ -31,6 +33,7 @@ const SectionHeader = styled(EuiTitle)`
 
 const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponentProps> = ({
   list,
+  updateReferences,
 }): JSX.Element => {
   const [listsToDisplay, setListsToDisplay] = useState<TableListInterface[]>([]);
 
@@ -40,14 +43,16 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
 
   useEffect(() => {
     if (!isLoadingReferences) {
+      const references = ruleReferences != null ? ruleReferences[list.list_id] : [];
       const transformedData = {
         ...list,
-        references: ruleReferences != null ? ruleReferences[list.list_id] : [],
+        references,
       };
 
       setListsToDisplay([transformedData]);
+      updateReferences(ruleReferences);
     }
-  }, [list, isLoadingReferences, ruleReferences]);
+  }, [list, isLoadingReferences, ruleReferences, updateReferences]);
 
   return (
     <EuiPanel

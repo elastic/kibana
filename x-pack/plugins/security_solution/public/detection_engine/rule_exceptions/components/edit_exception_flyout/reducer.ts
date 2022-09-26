@@ -7,6 +7,7 @@
 
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { RuleReferences } from '../../logic/use_find_references';
 
 export interface State {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
@@ -15,6 +16,8 @@ export interface State {
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
+  entryErrorExists: boolean;
+  listsReferences: RuleReferences | null;
 }
 
 export type Action =
@@ -34,9 +37,21 @@ export type Action =
       type: 'setDisableBulkCloseAlerts';
       disableBulkCloseAlerts: boolean;
     }
-    | {
+  | {
       type: 'setBulkCloseIndex';
       bulkCloseIndex: string[] | undefined;
+    }
+  | {
+      type: 'setExceptionItems';
+      items: ExceptionsBuilderReturnExceptionItem[];
+    }
+  | {
+      type: 'setConditionValidationErrorExists';
+      errorExists: boolean;
+    }
+  | {
+      type: 'setSharedListReferences';
+      listsReferences: RuleReferences | null;
     };
 
 export const createExceptionItemsReducer =
@@ -84,6 +99,30 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           bulkCloseIndex,
+        };
+      }
+      case 'setExceptionItems': {
+        const { items } = action;
+
+        return {
+          ...state,
+          exceptionItems: items,
+        };
+      }
+      case 'setConditionValidationErrorExists': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          entryErrorExists: errorExists,
+        };
+      }
+      case 'setSharedListReferences': {
+        const { listsReferences } = action;
+
+        return {
+          ...state,
+          listsReferences,
         };
       }
       default:

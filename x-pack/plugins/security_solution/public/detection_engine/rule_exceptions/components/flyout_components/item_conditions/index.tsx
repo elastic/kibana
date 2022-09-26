@@ -74,7 +74,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
    * Supported exception list types are 'endpoint', 'detection' and 'rule_default' */
   exceptionListType: ExceptionListType;
   /* OS selection handler */
-  onOsChange: (os: OsTypeArray | undefined) => void;
+  onOsChange?: (os: OsTypeArray | undefined) => void;
   /* Exception item builder takes a callback used when there are updates to the item */
 
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
@@ -160,7 +160,9 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   const handleOSSelectionChange = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>): void => {
       const os = selectedOptions[0].value;
-      onOsChange(os ? os : undefined);
+      if (onOsChange != null) {
+        onOsChange(os ? os : undefined);
+      }
     },
     [onOsChange]
   );

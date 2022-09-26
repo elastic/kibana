@@ -91,3 +91,24 @@ export const EDIT_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
       "This rule's query contains an EQL sequence statement. The exception modified will apply to all events in the sequence.",
   }
 );
+
+export const EDIT_RULE_EXCEPTION_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.editRuleExceptionToastSuccessTitle',
+  {
+    defaultMessage: 'Rule exception updated',
+  }
+);
+
+export const EDIT_RULE_EXCEPTION_SUCCESS_TEXT = (exceptionItemName: string, numItems: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.editRuleExceptionToastSuccessText', {
+    values: { exceptionItemName, numItems },
+    defaultMessage:
+      '{numItems, plural, =1 {Exception} other {Exceptions}} - {exceptionItemName} - {numItems, plural, =1 {has} other {have}} been updated.',
+  });
+
+  export const EDIT_RULE_EXCEPTION_ERROR_TITLE = i18n.translate(
+    'xpack.securitySolution.exceptions.editRuleExceptionToastSuccessTitle',
+    {
+      defaultMessage: 'Error updating exception',
+    }
+  );

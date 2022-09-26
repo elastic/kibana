@@ -225,6 +225,7 @@ export const ExceptionBuilderComponent = ({
 
   const handleExceptionItemChange = useCallback(
     (item: ExceptionsBuilderExceptionItem, index: number): void => {
+      console.log('BUILDER handleExceptionItemChange', {item})
       const updatedExceptions = [
         ...exceptions.slice(0, index),
         {
@@ -369,9 +370,13 @@ export const ExceptionBuilderComponent = ({
   }, [handleAddNewExceptionItemEntry, setUpdateOrDisabled, setUpdateAddNested]);
 
   const memoExceptionItems = useMemo(() => {
-    console.log('BUILDER PRE FILTER', {exceptions})
+    console.log('BUILDER memoExceptionItems', {exceptions: filterExceptionItems(exceptions)})
     return filterExceptionItems(exceptions);
   }, [exceptions]);
+
+  // useEffect(() => {
+  //   setUpdateExceptions([]);
+  // }, [osTypes, setUpdateExceptions]);
 
   // Bubble up changes to parent
   useEffect(() => {

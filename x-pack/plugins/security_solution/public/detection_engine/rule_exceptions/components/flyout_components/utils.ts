@@ -127,3 +127,36 @@ export const entrichNewExceptionItems = ({
 
   return enriched;
 };
+
+/**
+ * Series of utils to modify and prepare exception items for update or creation
+ * @param itemName user defined exception item name
+ * @param commentToAdd comment to be added to item
+ * @param addToRules boolean determining if user selected to add items to default rule list
+ * @param addToSharedLists boolean determining if user selected to add items to shared list
+ * @param sharedLists shared exception lists that were selected to add items to
+ * @param selectedOs os selection
+ * @param listType exception list type
+ * @param items exception items to be modified
+ */
+export const entrichExceptionItemsForUpdate = ({
+  itemName,
+  commentToAdd,
+  selectedOs,
+  listType,
+  items,
+}: {
+  itemName: string;
+  commentToAdd: string;
+  selectedOs: OsType[];
+  listType: ExceptionListTypeEnum;
+  items: ExceptionsBuilderReturnExceptionItem[];
+}): ExceptionsBuilderReturnExceptionItem[] => {
+  const enriched: ExceptionsBuilderReturnExceptionItem[] = pipe(
+    enrichItemWithComment(commentToAdd),
+    enrichItemWithName(itemName),
+    enrichEndpointItems(listType, selectedOs)
+  )(items);
+
+  return enriched;
+};

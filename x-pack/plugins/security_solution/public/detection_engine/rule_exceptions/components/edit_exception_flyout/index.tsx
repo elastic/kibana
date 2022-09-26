@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-// Component being re-implemented in 8.5
-
-/* eslint-disable complexity */
-
-import React, { memo, useState, useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiHorizontalRule,
-  EuiCheckbox,
   EuiSpacer,
   EuiFormRow,
   EuiText,
@@ -32,14 +27,9 @@ import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ExceptionListType,
-  OsTypeArray,
-  OsType,
-  CreateExceptionListItemSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import { isEmpty } from 'lodash/fp';
 import * as i18n from './translations';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { createExceptionItemsReducer } from './reducer';
@@ -48,6 +38,18 @@ import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 import { ExceptionsFlyoutComments } from '../flyout_components/item_comments';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { ExceptionsConditions } from '../flyout_components/item_conditions';
+import {
+  isEqlRule,
+  isNewTermsRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
+import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
+import { filterIndexPatterns } from '../../utils/helpers';
+import { entrichExceptionItemsForUpdate } from '../flyout_components/utils';
+import { useEditExceptionItems } from './use_edit_exception';
+import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
+import type { RuleReferences } from '../../logic/use_find_references';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -55,6 +57,7 @@ interface EditExceptionFlyoutProps {
   showAlertCloseOptions: boolean;
   rule?: Rule;
   onCancel: (arg: boolean) => void;
+  onConfirm: (arg: boolean) => void;
 }
 
 const FlyoutHeader = styled(EuiFlyoutHeader)`
@@ -71,13 +74,27 @@ const FlyoutBodySection = styled(EuiFlyoutBody)`
   `}
 `;
 
+const FlyoutFooterGroup = styled(EuiFlexGroup)`
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSizeS};
+  `}
+`;
+
 const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   list,
   itemToEdit,
   rule,
   showAlertCloseOptions,
   onCancel,
+  onConfirm,
 }): JSX.Element => {
+  const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
+  const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
+
+  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
+  const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
+
   const [
     {
       exceptionItems,
@@ -85,6 +102,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       newComment,
       bulkCloseAlerts,
       disableBulkClose,
+      bulkCloseIndex,
+      entryErrorExists,
+      listsReferences,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -94,7 +114,36 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts: false,
     disableBulkClose: true,
     bulkCloseIndex: undefined,
+    entryErrorExists: false,
+    listsReferences: null,
   });
+
+  console.log('EDIT MODAL', { exceptionItems, exceptionItemName });
+
+  const allowLargeValueLists = useMemo((): boolean => {
+    if (rule != null) {
+      // We'll only block this when we know what rule we're dealing with.
+      // When editing an item outside the context of a specific rule,
+      // we won't block but should communicate to the user that large value lists
+      // won't be applied to all rule types.
+      return !isEqlRule(rule.type) && !isThresholdRule(rule.type) && !isNewTermsRule(rule.type);
+    } else {
+      return true;
+    }
+  }, [rule]);
+
+  /**
+   * Reducer action dispatchers
+   * */
+  const setExceptionItemsToAdd = useCallback(
+    (items: ExceptionsBuilderReturnExceptionItem[]): void => {
+      dispatch({
+        type: 'setExceptionItems',
+        items,
+      });
+    },
+    [dispatch]
+  );
 
   const setExceptionItemMeta = useCallback(
     (value: [string, string]): void => {
@@ -146,9 +195,78 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     [dispatch]
   );
 
+  const setConditionsValidationError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setConditionValidationErrorExists',
+        errorExists,
+      });
+    },
+    [dispatch]
+  );
+
+  const setSharedListReferences = useCallback(
+    (refs: RuleReferences | null): void => {
+      dispatch({
+        type: 'setSharedListReferences',
+        listsReferences: refs,
+      });
+    },
+    [dispatch]
+  );
+
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
   }, [onCancel]);
+
+  const handleSubmit = useCallback(async (): Promise<void> => {
+    if (submitEditExceptionItems == null) return;
+
+    try {
+      const items = entrichExceptionItemsForUpdate({
+        itemName: exceptionItemName,
+        commentToAdd: newComment,
+        listType: list.type,
+        selectedOs: itemToEdit.os_types,
+        items: exceptionItems,
+      });
+
+      await submitEditExceptionItems({
+        itemsToUpdate: items,
+      });
+
+      const ruleDefaultRule = rule != null ? [rule.rule_id] : [];
+      const referencedRules =
+        listsReferences != null
+          ? listsReferences[list.list_id].map(({ rule_id: ruleId }) => ruleId)
+          : [];
+      const ruleIdsForBulkClose =
+        list.type === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
+
+      if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
+        await closeAlerts(ruleIdsForBulkClose, items, undefined, bulkCloseIndex);
+      }
+
+      onConfirm(true);
+    } catch (e) {
+      onCancel(false);
+    }
+  }, [
+    bulkCloseAlerts,
+    bulkCloseIndex,
+    closeAlerts,
+    exceptionItemName,
+    exceptionItems,
+    itemToEdit.os_types,
+    list.list_id,
+    list.type,
+    listsReferences,
+    newComment,
+    onCancel,
+    onConfirm,
+    rule,
+    submitEditExceptionItems,
+  ]);
 
   const editExceptionMessage = useMemo(
     () =>
@@ -156,6 +274,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
         : i18n.EDIT_EXCEPTION_TITLE,
     [list.type]
+  );
+
+  const isSubmitButtonDisabled = useMemo(
+    () =>
+      isSubmitting ||
+      isClosingAlerts ||
+      exceptionItems.every((item) => item.entries.length === 0) ||
+      isLoading ||
+      entryErrorExists,
+    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts]
   );
 
   return (
@@ -171,10 +299,25 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           exceptionItemName={exceptionItemName}
           onChange={setExceptionItemMeta}
         />
+        <EuiHorizontalRule />
+        <ExceptionsConditions
+          exceptionItemName={exceptionItemName}
+          allowLargeValueLists={allowLargeValueLists}
+          exceptionListItems={[itemToEdit]}
+          exceptionListType={list.type}
+          indexPatterns={indexPatterns}
+          rules={rules}
+          selectedOs={selectedOs}
+          showOsTypeOptions={list.type === ExceptionListTypeEnum.ENDPOINT}
+          isEdit
+          onExceptionItemAdd={setExceptionItemsToAdd}
+          onSetErrorExists={setConditionsValidationError}
+          onFilterIndexPatterns={filterIndexPatterns}
+        />
         {list.type === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
-            <ExceptionsLinkedToLists list={list} />
+            <ExceptionsLinkedToLists list={list} updateReferences={setSharedListReferences} />
           </>
         )}
         {list.type === ExceptionListTypeEnum.RULE_DEFAULT && rule != null && (
@@ -204,6 +347,22 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           </>
         )}
       </FlyoutBodySection>
+      <EuiFlyoutFooter>
+        <FlyoutFooterGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty data-test-subj="cancelExceptionEditButton" onClick={handleCloseFlyout}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+
+          <EuiButton
+            data-test-subj="editExceptionConfirmButton"
+            onClick={handleSubmit}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
+            {editExceptionMessage}
+          </EuiButton>
+        </FlyoutFooterGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

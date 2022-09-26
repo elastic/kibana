@@ -68,10 +68,12 @@ export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
 export const filterExceptionItems = (
   exceptions: ExceptionsBuilderExceptionItem[]
 ): ExceptionsBuilderReturnExceptionItem[] => {
+  console.log('INSIDE filterExceptionItems', {exceptions})
   return exceptions.reduce<ExceptionsBuilderReturnExceptionItem[]>((acc, exception) => {
+    console.log('filterExceptionItems', {exception})
     const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
       const strippedSingleEntry = removeIdFromItem(singleEntry);
-
+      console.log({strippedSingleEntry})
       if (entriesNested.is(strippedSingleEntry)) {
         const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
           const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
