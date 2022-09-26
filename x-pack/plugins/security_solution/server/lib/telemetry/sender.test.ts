@@ -173,6 +173,22 @@ describe('TelemetryEventsSender', () => {
             runatload: true,
             args: ['foo', 'bar'],
           },
+          
+          dll: {
+            Ext: {
+              relative_file_creation_time: 35588490.2737149, 
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual', 
+                volume_device_type: 'CD-ROM File System', 
+                dos_name: 'D:', 
+                product_id: 'Virtual DVD-ROM', 
+                vendor_id: 'Msft', 
+                nt_name: 'CdRom0', 
+                file_system_type: 'CDFS'
+              },
+            },
+          },
         },
       ];
 
