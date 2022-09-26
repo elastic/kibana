@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
-    describe.only('one agent', () => {
+    describe('one agent', () => {
       const fleetServerVersion = '7.16.0';
 
       beforeEach(async () => {
@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
         await supertest
-          .post(`/api/fleet/agents/agentWithFS/upgrade`)
+          .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: fleetServerVersion,
