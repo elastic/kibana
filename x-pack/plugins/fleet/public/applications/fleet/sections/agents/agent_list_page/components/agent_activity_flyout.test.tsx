@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, fireEvent } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { IntlProvider } from '@kbn/i18n-react';
 
 import { useActionStatus } from '../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
@@ -44,15 +44,23 @@ describe('AgentActivityFlyout', () => {
     });
   });
 
+  beforeEach(() => {
+    jest.useFakeTimers('modern').setSystemTime(new Date('2022-09-15T10:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   const renderComponent = () => {
     return render(
-      <I18nProvider>
+      <IntlProvider timeZone="UTC" locale="en">
         <AgentActivityFlyout
           onClose={mockOnClose}
           onAbortSuccess={mockOnAbortSuccess}
           refreshAgentActivity={false}
         />
-      </I18nProvider>
+      </IntlProvider>
     );
   };
 
@@ -89,7 +97,48 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Started on Sep 15, 2022 12:00 PM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+
+    act(() => {
+      fireEvent.click(result.getByText('Abort upgrade'));
+    });
+
+    expect(mockAbortUpgrade).toHaveBeenCalled();
+  });
+
+  it('should render agent activity for scheduled upgrade', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action2',
+        nbAgentsActionCreated: 5,
+        nbAgentsAck: 0,
+        version: '8.5.0',
+        startTime: '2022-09-16T10:00:00.000Z',
+        type: 'UPGRADE',
+        nbAgentsActioned: 5,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-17T10:00:00.000Z',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.getByText('Agent activity')).toBeInTheDocument();
+
+    expect(
+      result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
+    ).toEqual('5 agents scheduled to upgrade to version 8.5.0');
+    expect(
+      result.container
+        .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Scheduled for Sep 16, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
 
     act(() => {
       fireEvent.click(result.getByText('Abort upgrade'));
@@ -127,7 +176,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Completed Sep 15, 2022 2:00 PM'.replace(/\s/g, ''));
+    ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
   });
 
   it('should render agent activity for expired unenroll', () => {
@@ -158,7 +207,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Expired on Sep 14, 2022 12:00 PM'.replace(/\s/g, ''));
+    ).toContain('Expired on Sep 14, 2022 10:00 AM'.replace(/\s/g, ''));
   });
 
   it('should render agent activity for cancelled upgrade', () => {
@@ -191,7 +240,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Cancelled on Sep 15, 2022 1:00 PM'.replace(/\s/g, ''));
+    ).toContain('Cancelled on Sep 15, 2022 11:00 AM'.replace(/\s/g, ''));
   });
 
   it('should render agent activity for failed reassign', () => {
@@ -225,7 +274,7 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain(
-      'A problem occurred during this operation. Started on Sep 15, 2022 12:00 PM.'.replace(
+      'A problem occurred during this operation. Started on Sep 15, 2022 10:00 AM.'.replace(
         /\s/g,
         ''
       )
@@ -261,6 +310,6 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Completed Sep 15, 2022 2:00 PM'.replace(/\s/g, ''));
+    ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
   });
 });
