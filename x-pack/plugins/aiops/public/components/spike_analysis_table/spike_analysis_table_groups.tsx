@@ -228,9 +228,26 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnGroup',
       field: 'group',
-      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel', {
-        defaultMessage: 'Group',
-      }),
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip',
+            {
+              defaultMessage:
+                'Displays field values unique to the group. Expand row to see all values.',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel"
+              defaultMessage="Group"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
         for (const fieldName in group) {
@@ -287,7 +304,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
             {
               defaultMessage:
-                'A visual representation of the impact of the field on the message rate difference',
+                'A visual representation of the impact of the group on the message rate difference',
             }
           )}
         >
@@ -361,9 +378,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.impactLabelColumnTooltip',
             {
-              defaultMessage: 'The level of impact of the field on the message rate difference',
+              defaultMessage: 'The level of impact of the group on the message rate difference',
             }
           )}
         >
