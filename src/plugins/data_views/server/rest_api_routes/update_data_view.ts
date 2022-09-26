@@ -119,15 +119,14 @@ export const updateDataView = async ({
     dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
-  if (changeCount < 1) {
-    throw new Error('Index pattern change set is empty.');
+  if (changeCount > 1) {
+    await dataViewsService.updateSavedObject(dataView);
+
+    if (doRefreshFields && refreshFields) {
+      await dataViewsService.refreshFields(dataView);
+    }
   }
 
-  await dataViewsService.updateSavedObject(dataView);
-
-  if (doRefreshFields && refreshFields) {
-    await dataViewsService.refreshFields(dataView);
-  }
   return dataView;
 };
 
