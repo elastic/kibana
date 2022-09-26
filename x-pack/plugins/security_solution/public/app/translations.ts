@@ -121,7 +121,7 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
 });
 
 export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
-  'xpack.securitySolution.navigation.actionHistory',
+  'xpack.securitySolution.navigation.responseActionsHistory',
   {
     defaultMessage: 'Response actions history',
   }
