@@ -197,6 +197,9 @@ describe.skip('ES-index-backed file client', () => {
       })
     );
 
-    await Promise.all([fileClient.delete({ id: id1 }), fileClient.delete({ id: id2 })]);
+    await Promise.all([
+      fileClient.delete({ id: id1, hasContent: false }),
+      fileClient.delete({ id: id2, hasContent: false }),
+    ]);
   });
 });
