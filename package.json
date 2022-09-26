@@ -69,7 +69,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.16.0",
+    "node": "16.17.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -319,6 +319,7 @@
     "@kbn/ml-is-populated-object": "link:bazel-bin/x-pack/packages/ml/is_populated_object",
     "@kbn/ml-string-hash": "link:bazel-bin/x-pack/packages/ml/string_hash",
     "@kbn/monaco": "link:bazel-bin/packages/kbn-monaco",
+    "@kbn/osquery-io-ts-types": "link:bazel-bin/packages/kbn-osquery-io-ts-types",
     "@kbn/plugin-discovery": "link:bazel-bin/packages/kbn-plugin-discovery",
     "@kbn/react-field": "link:bazel-bin/packages/kbn-react-field",
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
@@ -1047,6 +1048,7 @@
     "@types/kbn__monaco": "link:bazel-bin/packages/kbn-monaco/npm_module_types",
     "@types/kbn__optimizer": "link:bazel-bin/packages/kbn-optimizer/npm_module_types",
     "@types/kbn__optimizer-webpack-helpers": "link:bazel-bin/packages/kbn-optimizer-webpack-helpers/npm_module_types",
+    "@types/kbn__osquery-io-ts-types": "link:bazel-bin/packages/kbn-osquery-io-ts-types/npm_module_types",
     "@types/kbn__performance-testing-dataset-extractor": "link:bazel-bin/packages/kbn-performance-testing-dataset-extractor/npm_module_types",
     "@types/kbn__plugin-discovery": "link:bazel-bin/packages/kbn-plugin-discovery/npm_module_types",
     "@types/kbn__plugin-generator": "link:bazel-bin/packages/kbn-plugin-generator/npm_module_types",
@@ -1241,7 +1243,7 @@
     "babel-plugin-require-context-hook": "^1.0.0",
     "babel-plugin-styled-components": "^2.0.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "backport": "^8.9.2",
+    "backport": "^8.9.4",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
     "chokidar": "^3.5.3",
