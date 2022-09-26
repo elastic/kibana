@@ -23,7 +23,7 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import expect from 'expect';
+import { expect } from 'expect';
 import {
   createListsIndex,
   deleteAllExceptions,

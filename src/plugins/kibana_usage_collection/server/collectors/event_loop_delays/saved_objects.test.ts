@@ -24,7 +24,7 @@ describe('serializeSavedObjectId', () => {
 describe('storeHistogram', () => {
   const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
-  jest.useFakeTimers('modern');
+  jest.useFakeTimers();
   const mockNow = jest.getRealSystemTime();
   jest.setSystemTime(mockNow);
 
