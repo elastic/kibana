@@ -1308,7 +1308,7 @@ export const samplePieVis = {
         {
           id: '1',
           enabled: true,
-          type: 'count',
+          type: { name: 'count' },
           params: {},
           schema: 'metric',
           toSerializedFieldFormat: () => ({
@@ -1318,7 +1318,7 @@ export const samplePieVis = {
         {
           id: '2',
           enabled: true,
-          type: 'terms',
+          type: { name: 'terms' },
           params: {
             field: 'Carrier',
             orderBy: '1',

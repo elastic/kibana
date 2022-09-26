@@ -29,6 +29,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly note;
   public readonly getSupportedTriggers;
   public readonly navigateToLens;
+  public readonly getExpressionVariables;
   public readonly icon;
   public readonly image;
   public readonly stage;
@@ -62,6 +63,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.note = opts.note ?? '';
     this.getSupportedTriggers = opts.getSupportedTriggers;
     this.navigateToLens = opts.navigateToLens;
+    this.getExpressionVariables = opts.getExpressionVariables;
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;

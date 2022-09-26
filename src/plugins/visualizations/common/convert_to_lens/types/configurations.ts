@@ -170,4 +170,33 @@ export interface XYConfiguration {
   valuesInLegend?: boolean;
 }
 
-export type Configuration = XYConfiguration;
+export interface SortingState {
+  columnId: string | undefined;
+  direction: 'asc' | 'desc' | 'none';
+}
+
+export interface PagingState {
+  size: number;
+  enabled: boolean;
+}
+
+export interface ColumnState {
+  columnId: string;
+  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  alignment?: 'left' | 'right' | 'center';
+  collapseFn?: string;
+}
+
+export interface TableVisConfiguration {
+  columns: ColumnState[];
+  layerId: string;
+  layerType: 'data';
+  sorting?: SortingState;
+  rowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeightLines?: number;
+  headerRowHeightLines?: number;
+  paging?: PagingState;
+}
+
+export type Configuration = XYConfiguration | TableVisConfiguration;

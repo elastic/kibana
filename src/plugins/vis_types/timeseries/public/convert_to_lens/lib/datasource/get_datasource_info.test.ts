@@ -33,7 +33,7 @@ describe('getDataSourceInfo', () => {
   });
 
   test('should return the default dataview if model_indexpattern is string', async () => {
-    const { indexPatternId, timeField } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       'test',
       undefined,
       false,
@@ -41,12 +41,13 @@ describe('getDataSourceInfo', () => {
       undefined,
       dataViews
     );
+    const { indexPatternId, timeField } = datasourceInfo!;
     expect(indexPatternId).toBe('12345');
     expect(timeField).toBe('@timestamp');
   });
 
   test('should return the correct dataview if model_indexpattern is object', async () => {
-    const { indexPatternId, timeField } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       { id: 'dataview-1-id' },
       'timeField-1',
       false,
@@ -54,12 +55,14 @@ describe('getDataSourceInfo', () => {
       undefined,
       dataViews
     );
+    const { indexPatternId, timeField } = datasourceInfo!;
+
     expect(indexPatternId).toBe('dataview-1-id');
     expect(timeField).toBe('timeField-1');
   });
 
   test('should fetch the correct data if overwritten dataview is provided', async () => {
-    const { indexPatternId, timeField } = await getDataSourceInfo(
+    const datasourceInfo = await getDataSourceInfo(
       { id: 'dataview-1-id' },
       'timeField-1',
       true,
@@ -67,6 +70,8 @@ describe('getDataSourceInfo', () => {
       undefined,
       dataViews
     );
+    const { indexPatternId, timeField } = datasourceInfo!;
+
     expect(indexPatternId).toBe('test2');
     expect(timeField).toBe('timeField2');
   });

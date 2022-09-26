@@ -70,7 +70,7 @@ describe('convertToLens', () => {
     mockConvertToDateHistogramColumn.mockReturnValue({});
     mockGetMetricsColumns.mockReturnValue([{}]);
     mockGetBucketsColumns.mockReturnValue([{}]);
-    mockGetConfigurationForTimeseries.mockReturnValue({});
+    mockGetConfigurationForTimeseries.mockReturnValue({ layers: [] });
   });
 
   afterEach(() => {

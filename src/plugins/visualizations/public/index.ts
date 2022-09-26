@@ -30,7 +30,7 @@ export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbedda
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { VisualizeInput } from './embeddable';
 export type { VisualizeEmbeddable } from './embeddable';
-export type { SchemaConfig } from './vis_schemas';
+export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
 export type { PersistedState } from './persisted_state';
 export type {
@@ -66,4 +66,12 @@ export { urlFor, getFullPath } from './utils/saved_visualize_utils';
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
-export { VISUALIZE_EDITOR_TRIGGER, ACTION_CONVERT_TO_LENS } from './triggers';
+export {
+  VISUALIZE_EDITOR_TRIGGER,
+  AGG_BASED_VISUALIZATION_TRIGGER,
+  ACTION_CONVERT_TO_LENS,
+  ACTION_CONVERT_AGG_BASED_TO_LENS,
+} from './triggers';
+
+export const convertToLensModule = import('./convert_to_lens');
+export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
