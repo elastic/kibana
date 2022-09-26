@@ -69,6 +69,7 @@ export async function generateAgent(
 
   await es.index({
     index: '.fleet-agents',
+    id,
     body: {
       id,
       active: true,
