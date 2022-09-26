@@ -9,7 +9,6 @@ post:
   operationId: pushCase
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/connector_id.yaml'

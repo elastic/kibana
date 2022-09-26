@@ -7,7 +7,6 @@ post:
     feature privileges, depending on the owner of the case you're creating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/case_id.yaml'
@@ -46,7 +45,6 @@ delete:
     feature privileges, depending on the owner of the cases you're deleting.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/case_id.yaml'
@@ -67,7 +65,6 @@ patch:
     NOTE: You cannot change the comment type or the owner of a comment.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/case_id.yaml'
@@ -107,7 +104,6 @@ get:
   deprecated: true
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
