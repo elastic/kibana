@@ -6,7 +6,7 @@
  */
 
 import Fs from 'fs';
-import { RetryService } from '../../../../../test/common/services/retry';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 
 export class FileWrapper {
   constructor(private readonly path: string, private readonly retry: RetryService) {}

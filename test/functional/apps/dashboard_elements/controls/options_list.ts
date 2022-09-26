@@ -75,7 +75,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Options List Control creation and editing experience', async () => {
+    // Skip on cloud until issue is fixed
+    // Issue: https://github.com/elastic/kibana/issues/141280
+    describe('Options List Control creation and editing experience', function () {
+      this.tags(['skipCloudFailedTest']);
       it('can add a new options list control from a blank state', async () => {
         await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
