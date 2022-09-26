@@ -7,9 +7,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common'
-import { securityMock } from '@kbn/security-plugin/public/mocks'
-import { useCurrentUser } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
@@ -249,7 +246,7 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id']} },
+        process: { entry_leader: { entity_id: ['test_id'] } },
       };
 
       const wrapper = mount(
@@ -257,7 +254,7 @@ describe('Actions', () => {
           <Actions {...defaultProps} ecsData={ecsData} />
         </TestProviders>
       );
-  
+
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(false);
     });
 
@@ -266,30 +263,34 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id']} },
+        process: { entry_leader: { entity_id: ['test_id'] } },
       };
-      
+
       const wrapper = mount(
         <TestProviders>
-          <Actions {...defaultProps} ecsData={ecsData} timelineId={TimelineId.kubernetesPageSessions}  />
+          <Actions
+            {...defaultProps}
+            ecsData={ecsData}
+            timelineId={TimelineId.kubernetesPageSessions}
+          />
         </TestProviders>
       );
-      
+
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
     });
 
     test('it should show session view button on action tabs for enterprise users', () => {
       const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
-      licenseServiceMock.isEnterprise.mockReturnValue(true)
-    
+      licenseServiceMock.isEnterprise.mockReturnValue(true);
+
       const ecsData = {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id']} },
+        process: { entry_leader: { entity_id: ['test_id'] } },
       };
-      
+
       const wrapper = mount(
         <TestProviders>
           <Actions {...defaultProps} ecsData={ecsData} />
