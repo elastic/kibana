@@ -39,6 +39,12 @@ export async function getActionStatuses(
           terms: { field: 'action_id', size: actions.length || 10 },
           aggs: {
             max_timestamp: { max: { field: '@timestamp' } },
+            agent_count: {
+              cardinality: {
+                field: 'agent_id',
+                precision_threshold: 40000, // max value
+              },
+            },
           },
         },
       },
@@ -58,7 +64,7 @@ export async function getActionStatuses(
     const matchingBucket = (acks?.aggregations?.ack_counts as any)?.buckets?.find(
       (bucket: any) => bucket.key === action.actionId
     );
-    const nbAgentsAck = matchingBucket?.doc_count ?? 0;
+    const nbAgentsAck = (matchingBucket?.agent_count as any)?.value ?? 0;
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
     const complete = nbAgentsAck >= nbAgentsActioned;
