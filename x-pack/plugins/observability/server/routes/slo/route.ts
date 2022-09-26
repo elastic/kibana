@@ -7,8 +7,9 @@
 
 import {
   CreateSLO,
+  DeleteSLO,
   DefaultResourceInstaller,
-  DefaultTransformInstaller,
+  DefaultTransformManager,
   KibanaSavedObjectsSLORepository,
 } from '../../services/slo';
 import {
@@ -17,7 +18,7 @@ import {
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { SLITypes } from '../../types/models';
-import { createSLOParamsSchema } from '../../types/schema';
+import { createSLOParamsSchema, deleteSLOParamsSchema } from '../../types/rest_specs';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<SLITypes, TransformGenerator> = {
@@ -36,10 +37,15 @@ const createSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const spaceId = spacesService.getSpaceId(request);
 
-    const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
+    const resourceInstaller = new DefaultResourceInstaller(esClient, logger, spaceId);
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformInstaller = new DefaultTransformInstaller(transformGenerators, esClient, logger);
-    const createSLO = new CreateSLO(resourceInstaller, repository, transformInstaller, spaceId);
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      esClient,
+      logger,
+      spaceId
+    );
+    const createSLO = new CreateSLO(resourceInstaller, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
 
@@ -47,4 +53,29 @@ const createSLORoute = createObservabilityServerRoute({
   },
 });
 
-export const slosRouteRepository = createSLORoute;
+const deleteSLORoute = createObservabilityServerRoute({
+  endpoint: 'DELETE /api/observability/slos/{id}',
+  options: {
+    tags: [],
+  },
+  params: deleteSLOParamsSchema,
+  handler: async ({ context, request, params, logger, spacesService }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const spaceId = spacesService.getSpaceId(request);
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(
+      transformGenerators,
+      esClient,
+      logger,
+      spaceId
+    );
+
+    const deleteSLO = new DeleteSLO(repository, transformManager, esClient);
+
+    await deleteSLO.execute(params.path.id);
+  },
+});
+
+export const slosRouteRepository = { ...createSLORoute, ...deleteSLORoute };

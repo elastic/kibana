@@ -9,6 +9,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
@@ -17,11 +18,13 @@ import { ResponseActionsLog } from './response_actions_log';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
+import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
+import uuid from 'uuid';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;
-  error?: null;
+  error?: Partial<IHttpFetchError> | null;
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
@@ -107,6 +110,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+jest.mock('../../hooks/endpoint/use_get_endpoints_list');
+
+const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
+
 describe('Response Actions Log', () => {
   const testPrefix = 'response-actions-list';
 
@@ -138,6 +145,19 @@ describe('Response Actions Log', () => {
       ...baseMockedActionList,
       data: await getActionListMock({ actionCount: 13 }),
     };
+
+    mockUseGetEndpointsList.mockReturnValue({
+      data: Array.from({ length: 50 }).map(() => {
+        const id = uuid.v4();
+        return {
+          id,
+          name: `Host-${id.slice(0, 8)}`,
+        };
+      }),
+      page: 0,
+      pageSize: 50,
+      total: 50,
+    });
   });
 
   afterEach(() => {
@@ -145,6 +165,28 @@ describe('Response Actions Log', () => {
       ...baseMockedActionList,
     };
     jest.clearAllMocks();
+  });
+
+  describe('When index does not exist yet', () => {
+    it('should show global loader when waiting for response', () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        isFetched: false,
+        isFetching: true,
+      };
+      render();
+      expect(renderResult.getByTestId(`${testPrefix}-global-loader`)).toBeTruthy();
+    });
+    it('should show empty page when there is no index', () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        error: {
+          body: { statusCode: 404, message: 'index_not_found_exception' },
+        },
+      };
+      render();
+      expect(renderResult.getByTestId(`${testPrefix}-empty-state`)).toBeTruthy();
+    });
   });
 
   describe('Without data', () => {
@@ -172,8 +214,10 @@ describe('Response Actions Log', () => {
     it('should show table when there is data', async () => {
       render();
 
-      expect(renderResult.getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
-      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+      const { getByTestId } = renderResult;
+
+      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
       );
     });
@@ -271,15 +315,16 @@ describe('Response Actions Log', () => {
 
     it('should paginate table when there is data', async () => {
       render();
+      const { getByTestId } = renderResult;
 
-      expect(renderResult.getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
-      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
       );
 
-      const page2 = renderResult.getByTestId('pagination-button-1');
+      const page2 = getByTestId('pagination-button-1');
       userEvent.click(page2);
-      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 11-13 of 13 response actions'
       );
     });
@@ -291,9 +336,10 @@ describe('Response Actions Log', () => {
       };
 
       render();
+      const { getByTestId } = renderResult;
 
-      expect(renderResult.getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
-      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 33 response actions'
       );
 
@@ -334,27 +380,29 @@ describe('Response Actions Log', () => {
 
     it('should expand each row to show details', async () => {
       render();
+      const { getAllByTestId, queryAllByTestId } = renderResult;
 
-      const expandButtons = renderResult.getAllByTestId(`${testPrefix}-expand-button`);
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       expandButtons.map((button) => userEvent.click(button));
-      const trays = renderResult.getAllByTestId(`${testPrefix}-details-tray`);
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
       expect(trays).toBeTruthy();
       expect(trays.length).toEqual(13);
 
       expandButtons.map((button) => userEvent.click(button));
-      const noTrays = renderResult.queryAllByTestId(`${testPrefix}-details-tray`);
+      const noTrays = queryAllByTestId(`${testPrefix}-details-tray`);
       expect(noTrays).toEqual([]);
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
       render();
+      const { getByTestId } = renderResult;
 
-      const quickMenuButton = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
+      const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
       userEvent.click(quickMenuButton);
       await waitForEuiPopoverOpen();
 
-      const toggle = renderResult.getByTestId('superDatePickerToggleRefreshButton');
-      const intervalInput = renderResult.getByTestId('superDatePickerRefreshIntervalInput');
+      const toggle = getByTestId('superDatePickerToggleRefreshButton');
+      const intervalInput = getByTestId('superDatePickerRefreshIntervalInput');
 
       userEvent.click(toggle);
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
@@ -374,8 +422,10 @@ describe('Response Actions Log', () => {
 
     it('should set date picker with relative dates', async () => {
       render();
-      const quickMenuButton = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
-      const startDatePopoverButton = renderResult.getByTestId(`superDatePickerShowDatesButton`);
+      const { getByTestId } = renderResult;
+
+      const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
+      const startDatePopoverButton = getByTestId(`superDatePickerShowDatesButton`);
 
       // shows 24 hours at first
       expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
@@ -383,16 +433,18 @@ describe('Response Actions Log', () => {
       // pick another relative date
       userEvent.click(quickMenuButton);
       await waitForEuiPopoverOpen();
-      userEvent.click(renderResult.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
+      userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
     });
   });
 
   describe('Action status ', () => {
     const expandRows = () => {
-      const expandButtons = renderResult.getAllByTestId(`${testPrefix}-expand-button`);
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       expandButtons.map((button) => userEvent.click(button));
-      const outputs = renderResult.getAllByTestId(`${testPrefix}-details-tray-output`);
+      const outputs = getAllByTestId(`${testPrefix}-details-tray-output`);
       return outputs;
     };
 
@@ -468,12 +520,12 @@ describe('Response Actions Log', () => {
   });
 
   describe('Actions filter', () => {
-    const filterPrefix = '-actions-filter';
+    const filterPrefix = 'actions-filter';
 
     it('should have a search bar', () => {
       render();
-      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
-      const searchBar = renderResult.getByTestId(`${testPrefix}${filterPrefix}-search`);
+      userEvent.click(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const searchBar = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
       expect(searchBar).toBeTruthy();
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual(
         'Search actions'
@@ -482,8 +534,10 @@ describe('Response Actions Log', () => {
 
     it('should show a list of actions when opened', () => {
       render();
-      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
-      const filterList = renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverList`);
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
       expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
       expect(
@@ -493,21 +547,23 @@ describe('Response Actions Log', () => {
 
     it('should have `clear all` button `disabled` when no selected values', () => {
       render();
-      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
-      const clearAllButton = renderResult.getByTestId(
-        `${testPrefix}${filterPrefix}-clearAllButton`
-      );
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
   });
 
   describe('Statuses filter', () => {
-    const filterPrefix = '-statuses-filter';
+    const filterPrefix = 'statuses-filter';
 
     it('should show a list of statuses when opened', () => {
       render();
-      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
-      const filterList = renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverList`);
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
       expect(filterList.querySelectorAll('ul>li').length).toEqual(3);
       expect(
@@ -517,11 +573,172 @@ describe('Response Actions Log', () => {
 
     it('should have `clear all` button `disabled` when no selected values', () => {
       render();
-      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+
+      userEvent.click(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = renderResult.getByTestId(
-        `${testPrefix}${filterPrefix}-clearAllButton`
+        `${testPrefix}-${filterPrefix}-clearAllButton`
       );
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('Hosts Filter', () => {
+    const filterPrefix = 'hosts-filter';
+
+    it('should show hosts filter for non-flyout or page', () => {
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`)).toBeTruthy();
+    });
+
+    it('should have a search bar ', () => {
+      render({ showHostNames: true });
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const searchBar = getByTestId(`${testPrefix}-${filterPrefix}-search`);
+      expect(searchBar).toBeTruthy();
+      expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual('Search hosts');
+    });
+
+    it('should show a list of host names when opened', () => {
+      render({ showHostNames: true });
+      const { getByTestId } = renderResult;
+
+      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      userEvent.click(popoverButton);
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(filterList.querySelectorAll('ul>li').length).toEqual(9);
+      expect(
+        getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`).querySelector(
+          '.euiNotificationBadge'
+        )?.textContent
+      ).toEqual('50');
+    });
+
+    it('should not pin selected host names to the top when opened and selections are being made', () => {
+      render({ showHostNames: true });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      userEvent.click(popoverButton);
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      // click 3 options skip alternates
+      allFilterOptions.forEach((option, i) => {
+        if ([1, 3, 5].includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+
+      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+
+      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
+        number[]
+      >((acc, curr, i) => {
+        if (curr.getAttribute('aria-checked') === 'true') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions).toEqual([1, 3, 5]);
+    });
+
+    it('should pin selected host names to the top when opened after selections were made', () => {
+      render({ showHostNames: true });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      userEvent.click(popoverButton);
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      // click 3 options skip alternates
+      allFilterOptions.forEach((option, i) => {
+        if ([1, 3, 5].includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+
+      // close
+      userEvent.click(popoverButton);
+
+      // re-open
+      userEvent.click(popoverButton);
+      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+
+      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
+        number[]
+      >((acc, curr, i) => {
+        if (curr.getAttribute('aria-checked') === 'true') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions).toEqual([0, 1, 2]);
+    });
+
+    it('should not pin newly selected items with already pinned items', () => {
+      render({ showHostNames: true });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      userEvent.click(popoverButton);
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      // click 3 options skip alternates
+      allFilterOptions.forEach((option, i) => {
+        if ([1, 3, 5].includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+
+      // close
+      userEvent.click(popoverButton);
+
+      // re-open
+      userEvent.click(popoverButton);
+
+      const newSetAllFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      // click new options
+      newSetAllFilterOptions.forEach((option, i) => {
+        if ([4, 6, 8].includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+
+      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
+        number[]
+      >((acc, curr, i) => {
+        if (curr.getAttribute('aria-checked') === 'true') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions).toEqual([0, 1, 2, 4, 6, 8]);
+    });
+
+    it('should update the selected options count correctly', () => {
+      render({ showHostNames: true });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      userEvent.click(popoverButton);
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      // click 3 options skip alternates
+      allFilterOptions.forEach((option, i) => {
+        if ([0, 2, 4, 6].includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+
+      expect(popoverButton.textContent).toEqual('Hosts4');
     });
   });
 });

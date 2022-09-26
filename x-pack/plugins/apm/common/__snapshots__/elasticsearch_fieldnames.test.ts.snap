@@ -221,6 +221,10 @@ exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
+exports[`Error TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
+
+exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
+
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
@@ -232,6 +236,8 @@ exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 exports[`Error TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Error TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
@@ -462,6 +468,10 @@ exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
+exports[`Span TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
+
+exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
+
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
@@ -473,6 +483,8 @@ exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
 exports[`Span TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Span TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
@@ -721,6 +733,10 @@ exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
 exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
+exports[`Transaction TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
+
+exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
+
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
@@ -732,6 +748,8 @@ exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
 exports[`Transaction TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
+
+exports[`Transaction TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 

@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { BETA } from '../../translations';
 
-export const NavItemBetaBadge = ({ text }: { text?: string }) => {
+export const NavItemBetaBadge = ({ text, className }: { text?: string; className?: string }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -21,6 +21,7 @@ export const NavItemBetaBadge = ({ text }: { text?: string }) => {
         margin-left: ${euiTheme.size.s};
         color: ${euiTheme.colors.text};
       `}
+      className={className}
     />
   );
 };

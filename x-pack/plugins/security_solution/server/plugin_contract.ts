@@ -36,6 +36,7 @@ import type {
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -59,6 +60,7 @@ export interface SecuritySolutionPluginSetupDependencies {
 export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
   cases?: CasesPluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;

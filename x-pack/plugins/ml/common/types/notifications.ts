@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { MessageLevel } from '../constants/message_levels';
+import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../constants/notifications';
+
+export type MlNotificationMessageLevel =
+  typeof ML_NOTIFICATIONS_MESSAGE_LEVEL[keyof typeof ML_NOTIFICATIONS_MESSAGE_LEVEL];
 
 export interface NotificationsQueryParams {
-  level?: MessageLevel;
+  level?: MlNotificationMessageLevel;
   type?: string;
   size?: number;
   from?: number;
@@ -22,7 +25,7 @@ export interface NotificationsQueryParams {
 export interface NotificationSource {
   message: string;
   job_id: string;
-  level: MessageLevel;
+  level: MlNotificationMessageLevel;
   timestamp: number;
   node_name: string;
   job_type: string;
@@ -44,5 +47,5 @@ export interface NotificationsCountQueryParams {
 }
 
 export type NotificationsCountResponse = {
-  [key in MessageLevel]: number;
+  [key in MlNotificationMessageLevel]: number;
 };

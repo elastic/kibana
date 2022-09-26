@@ -115,6 +115,12 @@ export const translations = {
     viewInAppButtonText: i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
       defaultMessage: 'View in app',
     }),
+    alertDetailsButtonText: i18n.translate(
+      'xpack.observability.alertsFlyout.alertsDetailsButtonText',
+      {
+        defaultMessage: 'Alert details',
+      }
+    ),
   },
   alertsSearchBar: {
     placeholder: i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {

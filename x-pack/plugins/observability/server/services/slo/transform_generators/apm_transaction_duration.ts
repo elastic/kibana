@@ -10,14 +10,18 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
+import { ALL_VALUE } from '../../../types/schema';
+import {
+  getSLODestinationIndexName,
+  getSLOIngestPipelineName,
+  getSLOTransformId,
+} from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import {
   SLO,
   apmTransactionDurationSLOSchema,
   APMTransactionDurationSLO,
 } from '../../../types/models';
-import { ALL_VALUE } from '../../../types/schema';
 import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
@@ -38,7 +42,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
   }
 
   private buildTransformId(slo: APMTransactionDurationSLO): string {
-    return `slo-${slo.id}`;
+    return getSLOTransformId(slo.id);
   }
 
   private buildSource(slo: APMTransactionDurationSLO) {
@@ -101,14 +105,10 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
   }
 
   private buildDestination(slo: APMTransactionDurationSLO, spaceId: string) {
-    if (slo.settings.destination_index === undefined) {
-      return {
-        pipeline: SLO_INGEST_PIPELINE_NAME,
-        index: getSLODestinationIndexName(spaceId),
-      };
-    }
-
-    return { index: slo.settings.destination_index };
+    return {
+      pipeline: getSLOIngestPipelineName(spaceId),
+      index: getSLODestinationIndexName(spaceId),
+    };
   }
 
   private buildGroupBy() {

@@ -34,11 +34,12 @@ describe('Discover panels component', () => {
       <DiscoverPanels
         mode={mode}
         resizeRef={resizeRef}
-        initialTopPanelHeight={initialTopPanelHeight}
+        topPanelHeight={initialTopPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={topPanel}
         mainPanel={mainPanel}
+        onTopPanelHeightChange={jest.fn()}
       />
     );
   };

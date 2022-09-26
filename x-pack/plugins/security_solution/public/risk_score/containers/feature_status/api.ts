@@ -7,17 +7,12 @@
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
-
-// TODO: Future PR, make this a hard type everywhere relevant
-export const enum RiskEntity {
-  'user' = 'user',
-  'host' = 'host',
-}
+import type { RiskScoreEntity } from '../../../../common/search_strategy';
 
 export const getRiskScoreIndexStatus = async (params: {
   query: {
     indexName: string;
-    entity: RiskEntity;
+    entity: RiskScoreEntity;
   };
   signal?: AbortSignal;
 }): Promise<{
