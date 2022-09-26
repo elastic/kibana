@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { CoreRouteHandlerContext } from './src';
-export type { CoreRouteHandlerContextParams } from './src';
+export { CoreRouteHandlerContext, PrebootCoreRouteHandlerContext } from './src';
+export type { CoreRouteHandlerContextParams, PrebootCoreRouteHandlerContextParams } from './src';

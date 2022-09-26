@@ -464,6 +464,8 @@ export type {
   RequestHandlerContext,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
+  PrebootRequestHandlerContext,
+  PrebootCoreRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 
 /**

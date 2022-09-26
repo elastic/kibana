@@ -58,17 +58,8 @@ import type {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
-import type { RequestHandlerContextBase } from '@kbn/core-http-server';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
-import { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
-
-/**
- * @internal
- */
-export interface PrebootRequestHandlerContext extends RequestHandlerContextBase {
-  core: Promise<PrebootCoreRequestHandlerContext>;
-}
 
 /** @internal */
 export interface InternalCorePreboot {

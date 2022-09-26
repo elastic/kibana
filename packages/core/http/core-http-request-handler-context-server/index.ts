@@ -10,4 +10,7 @@ export type {
   RequestHandlerContext,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
+  PrebootCoreRequestHandlerContext,
+  PrebootRequestHandlerContext,
+  PrebootUiSettingsRequestHandlerContext,
 } from './src';
