@@ -8,7 +8,6 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import {
-  createAndReferenceMlInferencePipeline,
   createMlInferencePipeline,
   addSubPipelineToIndexSpecificMlPipeline,
 } from './create_ml_inference_pipeline';
