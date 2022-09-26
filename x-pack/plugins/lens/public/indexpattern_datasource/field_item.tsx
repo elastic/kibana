@@ -29,7 +29,8 @@ import { Filter, Query } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { AddFieldFilterHandler, FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { DOCUMENT_FIELD_NAME } from '../../common';
@@ -320,6 +321,21 @@ function FieldItemPopoverContents(props: FieldItemProps) {
   } = props;
   const services = useKibana<LensAppServices>().services;
 
+  const onAddFilter: AddFieldFilterHandler = useCallback(
+    (clickedField, values, operation) => {
+      const filterManager = services.data.query.filterManager;
+      const newFilters = generateFilters(
+        filterManager,
+        clickedField,
+        values,
+        operation,
+        indexPattern
+      );
+      filterManager.addFilters(newFilters);
+    },
+    [indexPattern, services.data.query.filterManager]
+  );
+
   const panelHeader = (
     <FieldPanelHeader
       indexPatternId={indexPattern.id}
@@ -345,6 +361,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         fromDate={dateRange.fromDate}
         toDate={dateRange.toDate}
         dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
+        onAddFilter={onAddFilter}
         field={field as DataViewField}
         data-test-subj="lnsFieldListPanel"
         overrideMissingContent={(params) => {
