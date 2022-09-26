@@ -80,6 +80,7 @@ export async function generateAgent(
         elastic: {
           agent: {
             version,
+            upgradeable: true,
           },
         },
       },
