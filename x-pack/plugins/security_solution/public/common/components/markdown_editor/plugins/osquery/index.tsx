@@ -29,7 +29,6 @@ import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
-import { convertECSMappingToObject } from './utils';
 
 const StyledEuiButton = styled(EuiButton)`
   > span > img {
