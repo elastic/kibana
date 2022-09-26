@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import fs from 'fs';
+import fs from 'fs/promises';
 
 import { compact } from 'lodash';
 import pMap from 'p-map';
@@ -21,6 +21,7 @@ import type {
 } from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
+import { FleetError } from '../errors';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
@@ -281,13 +282,15 @@ export async function ensureFleetDirectories() {
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
   const registryUrl = getRegistryUrl();
 
-  if (bundledPackageLocation) {
-    if (!fs.existsSync(bundledPackageLocation)) {
-      logger.warn(
-        `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
-      );
-    }
-  } else {
-    logger.warn('xpack.fleet.developer.bundledPackageLocation is not configured');
+  if (!bundledPackageLocation) {
+    throw new FleetError('xpack.fleet.developer.bundledPackageLocation is not configured');
+  }
+
+  try {
+    await fs.stat(bundledPackageLocation);
+  } catch (error) {
+    logger.warn(
+      `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
+    );
   }
 }

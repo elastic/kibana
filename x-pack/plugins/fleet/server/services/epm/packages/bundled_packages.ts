@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import * as fsp from 'fs/promises';
+import fs from 'fs/promises';
 import path from 'path';
 
 import type { BundledPackage } from '../../../types';
@@ -25,17 +24,19 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
   // If the bundled package directory is missing, we log a warning during setup,
   // so we can safely ignore this case here and just retun and empty array
-  if (!fs.existsSync(bundledPackageLocation)) {
+  try {
+    await fs.stat(bundledPackageLocation);
+  } catch (error) {
     return [];
   }
 
   try {
-    const dirContents = await fsp.readdir(bundledPackageLocation);
+    const dirContents = await fs.readdir(bundledPackageLocation);
     const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
 
     const result = await Promise.all(
       zipFiles.map(async (zipFile) => {
-        const file = await fsp.readFile(path.join(bundledPackageLocation, zipFile));
+        const file = await fs.readFile(path.join(bundledPackageLocation, zipFile));
 
         const { pkgName, pkgVersion } = splitPkgKey(zipFile.replace(/\.zip$/, ''));
 
