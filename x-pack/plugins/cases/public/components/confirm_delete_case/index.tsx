@@ -11,7 +11,6 @@ import * as i18n from './translations';
 
 interface ConfirmDeleteCaseModalProps {
   caseTitle: string;
-  isModalVisible: boolean;
   caseQuantity?: number;
   onCancel: () => void;
   onConfirm: () => void;
@@ -19,14 +18,10 @@ interface ConfirmDeleteCaseModalProps {
 
 const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
   caseTitle,
-  isModalVisible,
   caseQuantity = 1,
   onCancel,
   onConfirm,
 }) => {
-  if (!isModalVisible) {
-    return null;
-  }
   return (
     <EuiConfirmModal
       buttonColor="danger"

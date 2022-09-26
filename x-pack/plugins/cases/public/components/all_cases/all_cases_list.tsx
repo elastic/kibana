@@ -10,7 +10,7 @@ import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui'
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useIsMutating, useQueryClient } from '@tanstack/react-query';
 import {
   Case,
   CaseStatusWithAllStatus,
@@ -39,6 +39,7 @@ import {
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import {
+  DELETE_CASES_CACHE_KEY,
   USER_PROFILES_BULK_GET_CACHE_KEY,
   USER_PROFILES_CACHE_KEY,
 } from '../../containers/constants';
@@ -72,6 +73,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const [refresh, setRefresh] = useState(0);
+    const isMutatingCases = useIsMutating([DELETE_CASES_CACHE_KEY]);
+    const isLoading = Boolean(isMutatingCases);
 
     const hasOwner = !!owner.length;
 
@@ -128,7 +131,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const filterRefetch = useRef<() => void>();
     const tableRef = useRef<EuiBasicTable | null>(null);
-    const [isLoading, handleIsLoading] = useState<boolean>(false);
 
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
@@ -244,7 +246,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
       currentUserProfile,
-      handleIsLoading,
       refreshCases,
       isSelectorView,
       connectors,
@@ -315,7 +316,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           data={data}
           filterOptions={filterOptions}
           goToCreateCase={onRowClick}
-          handleIsLoading={handleIsLoading}
           isCasesLoading={isLoadingCases}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}

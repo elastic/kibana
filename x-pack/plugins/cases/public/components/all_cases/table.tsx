@@ -29,7 +29,6 @@ interface CasesTableProps {
   data: Cases;
   filterOptions: FilterOptions;
   goToCreateCase?: () => void;
-  handleIsLoading: (a: boolean) => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
   isDataEmpty: boolean;
@@ -54,7 +53,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   data,
   filterOptions,
   goToCreateCase,
-  handleIsLoading,
   isCasesLoading,
   isCommentUpdating,
   isDataEmpty,
@@ -93,7 +91,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         data={data}
         enableBulkActions={showActions}
         filterOptions={filterOptions}
-        handleIsLoading={handleIsLoading}
         selectedCases={selectedCases}
         refreshCases={refreshCases}
       />

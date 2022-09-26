@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   UtilityBar,
@@ -15,7 +15,7 @@ import {
   UtilityBarText,
 } from '../utility_bar';
 import * as i18n from './translations';
-import { Cases, Case, DeleteCase, FilterOptions } from '../../../common/ui/types';
+import { Cases, Case, FilterOptions } from '../../../common/ui/types';
 import { getBulkItems } from '../bulk_actions';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -25,9 +25,8 @@ interface OwnProps {
   data: Cases;
   enableBulkActions: boolean;
   filterOptions: FilterOptions;
-  handleIsLoading: (a: boolean) => void;
-  refreshCases?: (a?: boolean) => void;
   selectedCases: Case[];
+  refreshCases?: (a?: boolean) => void;
 }
 
 type Props = OwnProps;
@@ -36,54 +35,21 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   data,
   enableBulkActions = false,
   filterOptions,
-  handleIsLoading,
-  refreshCases,
   selectedCases,
+  refreshCases,
 }) => {
-  const [deleteCases, setDeleteCases] = useState<DeleteCase[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const onCloseModal = useCallback(() => setIsModalVisible(false), []);
 
   // Delete case
-  const { mutate } = useDeleteCases();
+  const { mutate: deleteCases } = useDeleteCases();
 
   // Update case
-  const {
-    dispatchResetIsUpdated,
-    isLoading: isUpdating,
-    isUpdated,
-    updateBulkStatus,
-  } = useUpdateCases();
+  const { updateBulkStatus } = useUpdateCases();
 
-  // useEffect(() => {
-  //   handleIsLoading(isDeleting);
-  // }, [handleIsLoading, isDeleting]);
-
-  useEffect(() => {
-    handleIsLoading(isUpdating);
-  }, [handleIsLoading, isUpdating]);
-
-  useEffect(() => {
-    // if (isDeleted) {
-    //   if (refreshCases != null) refreshCases();
-    //   dispatchResetIsDeleted();
-    // }
-    if (isUpdated) {
-      if (refreshCases != null) refreshCases();
-      dispatchResetIsUpdated();
-    }
-  }, [isUpdated, refreshCases, dispatchResetIsUpdated]);
-
-  const toggleBulkDeleteModal = useCallback(
-    (cases: Case[]) => {
-      handleToggleModal();
-
-      const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title }) => ({
-        id,
-        title,
-      }));
-      setDeleteCases(convertToDeleteCases);
-    },
-    [setDeleteCases, handleToggleModal]
-  );
+  const toggleBulkDeleteModal = useCallback((cases: Case[]) => {
+    setIsModalVisible(true);
+  }, []);
 
   const handleUpdateCaseStatus = useCallback(
     (status: string) => {
@@ -107,6 +73,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     ),
     [selectedCases, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
   );
+
+  const onConfirmDeletion = useCallback(() => {
+    setIsModalVisible(false);
+    deleteCases(selectedCases.map(({ id }) => id));
+  }, [deleteCases, selectedCases]);
 
   return (
     <UtilityBar border>
@@ -143,13 +114,14 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
           </UtilityBarAction>
         </UtilityBarGroup>
       </UtilityBarSection>
-      <ConfirmDeleteCaseModal
-        caseTitle={deleteCases[0]?.title ?? ''}
-        isModalVisible={isDisplayConfirmDeleteModal}
-        caseQuantity={deleteCases.length}
-        onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, deleteCases)}
-      />
+      {isModalVisible ? (
+        <ConfirmDeleteCaseModal
+          caseTitle={selectedCases[0]?.title ?? ''}
+          caseQuantity={selectedCases.length}
+          onCancel={onCloseModal}
+          onConfirm={onConfirmDeletion}
+        />
+      ) : null}
     </UtilityBar>
   );
 };

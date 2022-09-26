@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadgeGroup,
   EuiBadge,
@@ -103,7 +103,6 @@ export interface GetCasesColumn {
   filterStatus: string;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
-  handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
   connectors?: ActionConnector[];
@@ -115,7 +114,6 @@ export const useCasesColumns = ({
   filterStatus,
   userProfiles,
   currentUserProfile,
-  handleIsLoading,
   refreshCases,
   isSelectorView,
   connectors = [],
@@ -123,14 +121,8 @@ export const useCasesColumns = ({
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
-  const {
-    dispatchResetIsDeleted,
-    handleOnDeleteConfirm,
-    handleToggleModal,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-    isLoading: isDeleting,
-  } = useDeleteCases();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const { mutate: deleteCases } = useDeleteCases();
 
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
@@ -142,13 +134,17 @@ export const useCasesColumns = ({
 
   const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
-  const toggleDeleteModal = useCallback(
-    (deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title });
-    },
-    [handleToggleModal]
-  );
+  const onDeleteAction = useCallback((deleteCase: Case) => {
+    setIsModalVisible(true);
+    setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title });
+  }, []);
+
+  const closeModal = useCallback(() => setIsModalVisible(false), []);
+
+  const onConfirmDeletion = useCallback(() => {
+    setIsModalVisible(false);
+    deleteCases([deleteThisCase.id]);
+  }, [deleteCases, deleteThisCase.id]);
 
   const handleDispatchUpdate = useCallback(
     ({ updateKey, updateValue, caseData }: UpdateByKey) => {
@@ -167,9 +163,9 @@ export const useCasesColumns = ({
   const actions = useMemo(
     () =>
       getActions({
-        deleteCaseOnClick: toggleDeleteModal,
+        deleteCaseOnClick: onDeleteAction,
       }),
-    [toggleDeleteModal]
+    [onDeleteAction]
   );
 
   const assignCaseAction = useCallback(
@@ -180,17 +176,6 @@ export const useCasesColumns = ({
     },
     [onRowClick]
   );
-
-  useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingUpdateCase);
-  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
-
-  useEffect(() => {
-    if (isDeleted) {
-      if (refreshCases != null) refreshCases();
-      dispatchResetIsDeleted();
-    }
-  }, [isDeleted, dispatchResetIsDeleted, refreshCases]);
 
   return [
     {
@@ -421,12 +406,13 @@ export const useCasesColumns = ({
             name: (
               <>
                 {i18n.ACTIONS}
-                <ConfirmDeleteCaseModal
-                  caseTitle={deleteThisCase.title}
-                  isModalVisible={isDisplayConfirmDeleteModal}
-                  onCancel={handleToggleModal}
-                  onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase])}
-                />
+                {isModalVisible ? (
+                  <ConfirmDeleteCaseModal
+                    caseTitle={deleteThisCase.title}
+                    onCancel={closeModal}
+                    onConfirm={onConfirmDeletion}
+                  />
+                ) : null}
               </>
             ),
             actions,
