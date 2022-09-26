@@ -2278,7 +2278,7 @@ export class RulesClient {
         const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
         for (const instanceId of recoveredAlertInstanceIds) {
-          const { group: actionGroup, subgroup: actionSubgroup } =
+          const { group: actionGroup } =
             recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
           const instanceState = recoveredAlertInstances[instanceId].getState();
           const message = `instance '${instanceId}' has recovered due to the rule was disabled`;
@@ -2293,7 +2293,6 @@ export class RulesClient {
             message,
             state: instanceState,
             group: actionGroup,
-            subgroup: actionSubgroup,
             namespace: this.namespace,
             spaceId: this.spaceId,
             savedObjects: [
