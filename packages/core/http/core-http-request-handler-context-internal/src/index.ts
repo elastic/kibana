@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type {
-  RequestHandlerContext,
-  CoreRequestHandlerContext,
-  CustomRequestHandlerContext,
-} from './src';
+export { CoreRouteHandlerContext } from './core_route_handler_context';
+export type { CoreRouteHandlerContextParams } from './core_route_handler_context';

@@ -10,4 +10,4 @@ export type {
   RequestHandlerContext,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
-} from './src';
+} from './request_handler_context';

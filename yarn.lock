@@ -2954,6 +2954,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-request-handler-context-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-request-handler-context@link:bazel-bin/packages/core/http/core-http-request-handler-context":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal":
   version "0.0.0"
   uid ""
@@ -7056,6 +7064,14 @@
   uid ""
 
 "@types/kbn__core-http-context-server-mocks@link:bazel-bin/packages/core/http/core-http-context-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-request-handler-context-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-request-handler-context@link:bazel-bin/packages/core/http/core-http-request-handler-context/npm_module_types":
   version "0.0.0"
   uid ""
 
