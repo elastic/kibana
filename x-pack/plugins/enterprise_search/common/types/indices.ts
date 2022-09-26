@@ -36,13 +36,10 @@ export interface ElasticsearchIndex {
 export interface ConnectorIndex extends ElasticsearchIndex {
   connector: Connector;
 }
-export interface ConnectorCrawlerIndex extends ElasticsearchIndex {
-  connector: Connector;
-  crawler: Crawler;
-}
+
 export interface CrawlerIndex extends ElasticsearchIndex {
-  connector?: Connector;
   crawler: Crawler;
+  connector?: Connector;
 }
 
 export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {

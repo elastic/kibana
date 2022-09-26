@@ -7,6 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { ScalabilitySetup } from '@kbn/journeys';
 
 export interface Request {
   transactionId: string;
@@ -31,19 +32,6 @@ export interface Stream<T extends Request> {
   requests: T[];
 }
 
-export interface InjectionStep {
-  action: string;
-  minUsersCount?: number;
-  maxUsersCount: number;
-  duration: string;
-}
-
-export interface ScalabilitySetup {
-  warmup: InjectionStep[];
-  test: InjectionStep[];
-  maxDuration: string;
-}
-
 export interface TestData {
   kbnArchives?: string[];
   esArchives?: string[];
@@ -52,7 +40,7 @@ export interface TestData {
 export interface CLIParams {
   param: {
     journeyName: string;
-    scalabilitySetup: ScalabilitySetup;
+    scalabilitySetup?: ScalabilitySetup;
     testData: TestData;
     buildId: string;
     withoutStaticResources: boolean;

@@ -16,7 +16,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiPopoverFooter,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -30,7 +29,8 @@ import { Filter, Query } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { AddFieldFilterHandler, FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { DOCUMENT_FIELD_NAME } from '../../common';
@@ -38,7 +38,6 @@ import type { IndexPattern, IndexPatternField } from '../types';
 import type { DraggedField } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
-import { getVisualizeGeoFieldMessage } from '../utils';
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
 import { getFieldType } from './pure_utils';
@@ -322,6 +321,21 @@ function FieldItemPopoverContents(props: FieldItemProps) {
   } = props;
   const services = useKibana<LensAppServices>().services;
 
+  const onAddFilter: AddFieldFilterHandler = useCallback(
+    (clickedField, values, operation) => {
+      const filterManager = services.data.query.filterManager;
+      const newFilters = generateFilters(
+        filterManager,
+        clickedField,
+        values,
+        operation,
+        indexPattern
+      );
+      filterManager.addFilters(newFilters);
+    },
+    [indexPattern, services.data.query.filterManager]
+  );
+
   const panelHeader = (
     <FieldPanelHeader
       indexPatternId={indexPattern.id}
@@ -347,26 +361,28 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         fromDate={dateRange.fromDate}
         toDate={dateRange.toDate}
         dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
+        onAddFilter={onAddFilter}
         field={field as DataViewField}
         data-test-subj="lnsFieldListPanel"
-        overrideFooter={({ element }) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         overrideMissingContent={(params) => {
           if (field.type === 'geo_point' || field.type === 'geo_shape') {
             return (
               <>
-                <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
+                {params.element}
 
-                <EuiSpacer size="m" />
-                <VisualizeGeoFieldButton
-                  uiActions={uiActions}
-                  indexPatternId={indexPattern.id}
-                  fieldName={field.name}
-                />
+                <EuiPopoverFooter>
+                  <VisualizeGeoFieldButton
+                    uiActions={uiActions}
+                    indexPattern={indexPattern}
+                    fieldName={field.name}
+                  />
+                </EuiPopoverFooter>
               </>
             );
           }
 
           if (params?.noDataFound) {
+            // TODO: should we replace this with a default message "Analysis is not available for this field?"
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
               <>
@@ -385,7 +401,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
             );
           }
 
-          return null;
+          return params.element;
         }}
       />
     </>

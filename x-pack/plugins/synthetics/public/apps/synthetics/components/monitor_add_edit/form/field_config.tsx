@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
   EuiButtonGroup,
@@ -28,6 +29,7 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
+import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
 import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
 import {
@@ -52,6 +54,7 @@ import { ComboBox } from '../fields/combo_box';
 import { SourceField } from '../fields/source_field';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import { JSONEditor } from '../fields/code_editor';
 
 const getScheduleContent = (value: number) => {
   if (value > 60) {
@@ -390,11 +393,14 @@ export const FIELD: Record<string, FieldMeta> = {
         options: Object.values(locations).map((location) => ({
           label: locations?.find((loc) => location.id === loc.id)?.label,
           id: location.id,
+          key: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
         selectedOptions: Object.values(field?.value as ServiceLocations).map((location) => ({
-          label: locations?.find((loc) => location.id === loc.id)?.label,
+          color: locations.some((s) => s.id === location.id) ? 'default' : 'danger',
+          label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id,
+          key: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
@@ -523,6 +529,9 @@ export const FIELD: Record<string, FieldMeta> = {
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field,
+    }),
+    validation: () => ({
+      validate: (namespace) => isValidNamespace(namespace).error,
     }),
   },
   [ConfigKey.MAX_REDIRECTS]: {
@@ -997,6 +1006,58 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     validation: () => ({
       required: true,
+    }),
+  },
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: {
+    fieldKey: ConfigKey.PLAYWRIGHT_OPTIONS,
+    component: JSONEditor,
+    label: i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.label', {
+      defaultMessage: 'Playwright options',
+    }),
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.helpText', {
+          defaultMessage: 'Configure Playwright agent with custom options. ',
+        })}
+        <EuiLink
+          href={getDocLinks()?.links?.observability?.syntheticsCommandReference}
+          target="_blank"
+        >
+          {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.learnMore', {
+            defaultMessage: 'Learn more',
+          })}
+        </EuiLink>
+      </span>
+    ),
+    error: i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.error', {
+      defaultMessage: 'Invalid JSON format',
+    }),
+    ariaLabel: i18n.translate(
+      'xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel',
+      {
+        defaultMessage: 'Playwright options JSON code editor',
+      }
+    ),
+    controlled: true,
+    required: false,
+    props: ({
+      field,
+      setValue,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+    }) => ({
+      onChange: (json: string) => setValue(ConfigKey.PLAYWRIGHT_OPTIONS, json),
+    }),
+    validation: () => ({
+      validate: (value) => {
+        const validateFn = validate[DataStream.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
+        if (validateFn) {
+          return !validateFn({
+            [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
+          });
+        }
+      },
     }),
   },
 };

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { partition, mapValues, pickBy, isArray } from 'lodash';
+import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -44,12 +43,13 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import { isSortableByColumn } from './definitions/terms/helpers';
+import { DataType } from '../..';
 
-interface ColumnAdvancedParams {
+export interface ColumnAdvancedParams {
   filter?: Query | undefined;
   timeShift?: string | undefined;
   timeScale?: TimeScaleUnit | undefined;
+  dataType?: DataType;
 }
 
 interface ColumnChange {
@@ -67,6 +67,7 @@ interface ColumnChange {
   incompleteFieldOperation?: OperationType;
   columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
+  references?: Array<Omit<ColumnChange, 'layer'>>;
 }
 
 interface ColumnCopy {
@@ -175,6 +176,176 @@ function ensureCompatibleParamsAreMoved<T extends ColumnAdvancedParams>(
   return newColumn;
 }
 
+const insertReferences = ({
+  layer,
+  references,
+  requiredReferences,
+  indexPattern,
+  visualizationGroups,
+  targetGroup,
+}: {
+  layer: IndexPatternLayer;
+  references: Exclude<ColumnChange['references'], undefined>;
+  requiredReferences: RequiredReference[];
+  indexPattern: IndexPattern;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
+}) => {
+  references.forEach((reference) => {
+    const validOperations = requiredReferences.filter((validation) =>
+      isOperationAllowedAsReference({ validation, operationType: reference.op, indexPattern })
+    );
+
+    if (!validOperations.length) {
+      throw new Error(
+        `Can't create reference, ${reference.op} has a validation function which doesn't allow any operations`
+      );
+    }
+  });
+
+  const referenceIds: string[] = [];
+  references.forEach((reference) => {
+    const operation = operationDefinitionMap[reference.op];
+
+    if (operation.input === 'none') {
+      layer = insertNewColumn({
+        layer,
+        columnId: reference.columnId,
+        op: operation.type,
+        indexPattern,
+        columnParams: { ...reference.columnParams },
+        incompleteParams: reference.incompleteParams,
+        initialParams: reference.initialParams,
+        ...(reference.references ? { references: reference.references } : {}),
+        visualizationGroups,
+        targetGroup,
+      });
+
+      referenceIds.push(reference.columnId);
+      return;
+    }
+
+    const field =
+      operation.input === 'field' &&
+      reference.field &&
+      operation.getPossibleOperationForField(reference.field)
+        ? reference.field
+        : undefined;
+
+    if (field) {
+      // Recursively update the layer for each new reference
+      layer = insertNewColumn({
+        layer,
+        columnId: reference.columnId,
+        op: operation.type,
+        indexPattern,
+        field,
+        incompleteParams: reference.incompleteParams,
+        initialParams: reference.initialParams,
+        columnParams: { ...reference.columnParams },
+        visualizationGroups,
+        targetGroup,
+      });
+      referenceIds.push(reference.columnId);
+      return;
+    }
+  });
+  return { layer, referenceIds };
+};
+
+const generateNewReferences = ({
+  op,
+  incompleteFieldOperation,
+  incompleteFieldName,
+  columnParams,
+  layer,
+  requiredReferences,
+  indexPattern,
+  visualizationGroups,
+  targetGroup,
+}: {
+  op: string;
+  incompleteFieldName?: string;
+  incompleteFieldOperation?: OperationType;
+  columnParams?: Record<string, unknown>;
+  layer: IndexPatternLayer;
+  requiredReferences: RequiredReference[];
+  indexPattern: IndexPattern;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
+}) => {
+  const referenceIds = requiredReferences.map((validation) => {
+    const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
+      isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
+    );
+
+    if (!validOperations.length) {
+      throw new Error(
+        `Can't create reference, ${op} has a validation function which doesn't allow any operations`
+      );
+    }
+
+    const newId = generateId();
+    if (incompleteFieldOperation && incompleteFieldName) {
+      const validFields = indexPattern.fields.filter(
+        (validField) => validField.name === incompleteFieldName
+      );
+      layer = insertNewColumn({
+        layer,
+        columnId: newId,
+        op: incompleteFieldOperation,
+        indexPattern,
+        field: validFields[0] ?? documentField,
+        visualizationGroups,
+        columnParams,
+        targetGroup,
+      });
+    }
+    if (validOperations.length === 1) {
+      const def = validOperations[0];
+
+      let validFields =
+        def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
+
+      if (incompleteFieldName) {
+        validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
+      }
+      if (def.input === 'none') {
+        layer = insertNewColumn({
+          layer,
+          columnId: newId,
+          op: def.type,
+          indexPattern,
+          visualizationGroups,
+          targetGroup,
+        });
+      } else if (validFields.length === 1) {
+        // Recursively update the layer for each new reference
+        layer = insertNewColumn({
+          layer,
+          columnId: newId,
+          op: def.type,
+          indexPattern,
+          field: validFields[0],
+          visualizationGroups,
+          targetGroup,
+        });
+      } else {
+        layer = {
+          ...layer,
+          incompleteColumns: {
+            ...layer.incompleteColumns,
+            [newId]: { operationType: def.type },
+          },
+        };
+      }
+    }
+    return newId;
+  });
+
+  return { layer, referenceIds };
+};
+
 // Insert a column into an empty ID. The field parameter is required when constructing
 // a field-based operation, but will cause the function to fail for any other type of operation.
 export function insertNewColumn({
@@ -185,12 +356,12 @@ export function insertNewColumn({
   indexPattern,
   visualizationGroups,
   targetGroup,
-  shouldResetLabel,
   incompleteParams,
   incompleteFieldName,
   incompleteFieldOperation,
   columnParams,
   initialParams,
+  references,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -232,75 +403,33 @@ export function insertNewColumn({
     if (field) {
       throw new Error(`Reference-based operations can't take a field as input when creating`);
     }
+
     let tempLayer = { ...layer };
-    const referenceIds = operationDefinition.requiredReferences.map((validation) => {
-      const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
-        isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
-      );
-
-      if (!validOperations.length) {
-        throw new Error(
-          `Can't create reference, ${op} has a validation function which doesn't allow any operations`
-        );
-      }
-
-      const newId = generateId();
-      if (incompleteFieldOperation && incompleteFieldName) {
-        const validFields = indexPattern.fields.filter(
-          (validField) => validField.name === incompleteFieldName
-        );
-        tempLayer = insertNewColumn({
-          layer: tempLayer,
-          columnId: newId,
-          op: incompleteFieldOperation,
-          indexPattern,
-          field: validFields[0] ?? documentField,
-          visualizationGroups,
-          columnParams,
-          targetGroup,
-        });
-      }
-      if (validOperations.length === 1) {
-        const def = validOperations[0];
-
-        let validFields =
-          def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
-
-        if (incompleteFieldName) {
-          validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
-        }
-        if (def.input === 'none') {
-          tempLayer = insertNewColumn({
-            layer: tempLayer,
-            columnId: newId,
-            op: def.type,
-            indexPattern,
-            visualizationGroups,
-            targetGroup,
-          });
-        } else if (validFields.length === 1) {
-          // Recursively update the layer for each new reference
-          tempLayer = insertNewColumn({
-            layer: tempLayer,
-            columnId: newId,
-            op: def.type,
-            indexPattern,
-            field: validFields[0],
-            visualizationGroups,
-            targetGroup,
-          });
-        } else {
-          tempLayer = {
-            ...tempLayer,
-            incompleteColumns: {
-              ...tempLayer.incompleteColumns,
-              [newId]: { operationType: def.type },
-            },
-          };
-        }
-      }
-      return newId;
-    });
+    let referenceIds: string[] = [];
+    if (references) {
+      const result = insertReferences({
+        layer: tempLayer,
+        references,
+        requiredReferences: operationDefinition.requiredReferences,
+        indexPattern,
+        visualizationGroups,
+        targetGroup,
+      });
+      [tempLayer, referenceIds] = [result.layer, result.referenceIds];
+    } else {
+      const result = generateNewReferences({
+        op,
+        incompleteFieldName,
+        incompleteFieldOperation,
+        columnParams,
+        layer: tempLayer,
+        requiredReferences: operationDefinition.requiredReferences,
+        indexPattern,
+        visualizationGroups,
+        targetGroup,
+      });
+      [tempLayer, referenceIds] = [result.layer, result.referenceIds];
+    }
 
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     if (!possibleOperation) {
@@ -846,12 +975,15 @@ function applyReferenceTransition({
           },
         },
       };
-      layer = adjustColumnReferencesForChangedColumn(
-        {
-          ...newLayer,
-          columnOrder: getColumnOrder(newLayer),
-        },
-        newId
+      layer = updateDefaultLabels(
+        adjustColumnReferencesForChangedColumn(
+          {
+            ...newLayer,
+            columnOrder: getColumnOrder(newLayer),
+          },
+          newId
+        ),
+        indexPattern
       );
       return newId;
     }
@@ -1141,14 +1273,14 @@ export function getMetricOperationTypes(field: IndexPatternField) {
   });
 }
 
-export function updateColumnLabel<C extends GenericIndexPatternColumn>({
+export function updateColumnLabel({
   layer,
   columnId,
   customLabel,
 }: {
   layer: IndexPatternLayer;
   columnId: string;
-  customLabel: string;
+  customLabel?: string;
 }): IndexPatternLayer {
   const oldColumn = layer.columns[columnId];
   return {
@@ -1157,7 +1289,7 @@ export function updateColumnLabel<C extends GenericIndexPatternColumn>({
       ...layer.columns,
       [columnId]: {
         ...oldColumn,
-        label: customLabel ? customLabel : oldColumn.label,
+        label: customLabel !== undefined ? customLabel : oldColumn.label,
         customLabel: Boolean(customLabel),
       },
     } as Record<string, GenericIndexPatternColumn>,
@@ -1626,264 +1758,4 @@ export function getManagedColumnsFrom(
     queue.push(...allNodes[nextId]);
   }
   return store.filter(([, column]) => column);
-}
-
-export function computeLayerFromContext(
-  isLast: boolean,
-  metricsArray: VisualizeEditorLayersContext['metrics'],
-  indexPattern: IndexPattern,
-  format?: string,
-  customLabel?: string
-): IndexPatternLayer {
-  let layer: IndexPatternLayer = {
-    indexPatternId: indexPattern.id,
-    columns: {},
-    columnOrder: [],
-  };
-  if (isArray(metricsArray)) {
-    const metricContext = metricsArray.shift();
-    const field = metricContext
-      ? indexPattern.getFieldByName(metricContext.fieldName) ?? documentField
-      : documentField;
-
-    const operation = metricContext?.agg;
-    // Formula should be treated differently from other operations
-    if (operation === 'formula') {
-      const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
-        FormulaIndexPatternColumn,
-        'managedReference'
-      >;
-      const tempLayer = isLast
-        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
-        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern);
-      let newColumn = operationDefinition.buildColumn({
-        indexPattern,
-        layer: tempLayer,
-      }) as FormulaIndexPatternColumn;
-      let filterBy = metricContext?.params?.kql
-        ? { query: metricContext?.params?.kql, language: 'kuery' }
-        : undefined;
-      if (metricContext?.params?.lucene) {
-        filterBy = metricContext?.params?.lucene
-          ? { query: metricContext?.params?.lucene, language: 'lucene' }
-          : undefined;
-      }
-      newColumn = {
-        ...newColumn,
-        ...(filterBy && { filter: filterBy }),
-        params: {
-          ...newColumn.params,
-          ...metricContext?.params,
-        },
-      } as FormulaIndexPatternColumn;
-      layer = metricContext?.params?.formula
-        ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
-            indexPattern,
-          }).layer
-        : tempLayer;
-    } else {
-      const columnId = generateId();
-      // recursive function to build the layer
-      layer = insertNewColumn({
-        op: operation as OperationType,
-        layer: isLast
-          ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
-          : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
-        columnId,
-        field: !metricContext?.isFullReference ? field ?? documentField : undefined,
-        columnParams: metricContext?.params ?? undefined,
-        incompleteFieldName: metricContext?.isFullReference ? field?.name : undefined,
-        incompleteFieldOperation: metricContext?.isFullReference
-          ? metricContext?.pipelineAggType
-          : undefined,
-        indexPattern,
-        visualizationGroups: [],
-      });
-      if (metricContext) {
-        metricContext.accessor = columnId;
-      }
-    }
-  }
-
-  // update the layer with the custom label and the format
-  let columnIdx = 0;
-  for (const [columnId, column] of Object.entries(layer.columns)) {
-    if (format) {
-      layer = updateColumnParam({
-        layer,
-        columnId,
-        paramName: 'format',
-        value: {
-          id: format,
-          params: {
-            decimals: 0,
-          },
-        },
-      });
-    }
-
-    // for percentiles I want to update all columns with the custom label
-    if (customLabel && column.operationType === 'percentile') {
-      layer = updateColumnLabel({
-        layer,
-        columnId,
-        customLabel,
-      });
-    } else if (customLabel && columnIdx === Object.keys(layer.columns).length - 1) {
-      layer = updateColumnLabel({
-        layer,
-        columnId,
-        customLabel,
-      });
-    }
-    columnIdx++;
-  }
-  return layer;
-}
-
-export function getSplitByTermsLayer(
-  indexPattern: IndexPattern,
-  splitFields: IndexPatternField[],
-  xField: IndexPatternField | undefined,
-  xMode: string | undefined,
-  layer: VisualizeEditorLayersContext
-): IndexPatternLayer {
-  const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
-  const copyMetricsArray = [...metrics];
-
-  const computedLayer = computeLayerFromContext(
-    metrics.length === 1,
-    copyMetricsArray,
-    indexPattern,
-    layer.format,
-    layer.label
-  );
-
-  const [baseField, ...secondaryFields] = splitFields;
-  const columnId = generateId();
-
-  let termsLayer = insertNewColumn({
-    op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer:
-      xField && xMode
-        ? insertNewColumn({
-            op: xMode,
-            layer: computedLayer,
-            columnId: generateId(),
-            field: xField,
-            indexPattern,
-            visualizationGroups: [],
-            columnParams: {
-              interval: timeInterval,
-              dropPartials: dropPartialBuckets,
-            },
-          })
-        : computedLayer,
-    columnId,
-    field: baseField,
-    indexPattern,
-    visualizationGroups: [],
-  });
-
-  if (secondaryFields.length) {
-    termsLayer = updateColumnParam({
-      layer: termsLayer,
-      columnId,
-      paramName: 'secondaryFields',
-      value: secondaryFields.map((i) => i.name),
-    });
-
-    termsLayer = updateDefaultLabels(termsLayer, indexPattern);
-  }
-
-  const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
-  if (termsColumnParams) {
-    for (const [param, value] of Object.entries(termsColumnParams)) {
-      let paramValue = value;
-      if (param === 'orderBy') {
-        const [existingMetricColumn] = Object.keys(termsLayer.columns).filter((colId) =>
-          isSortableByColumn(termsLayer, colId)
-        );
-
-        paramValue = (
-          termsColumnParams.orderBy.type === 'column' && existingMetricColumn
-            ? {
-                type: 'column',
-                columnId: existingMetricColumn,
-              }
-            : { type: 'alphabetical', fallback: true }
-        ) as TermsIndexPatternColumn['params']['orderBy'];
-      }
-      termsLayer = updateColumnParam({
-        layer: termsLayer,
-        columnId,
-        paramName: param,
-        value: paramValue,
-      });
-      // label must be updated after the param is updated (Top {size} values of {field})
-      termsLayer = updateDefaultLabels(termsLayer, indexPattern);
-    }
-  }
-  return termsLayer;
-}
-
-export function getSplitByFiltersLayer(
-  indexPattern: IndexPattern,
-  xField: IndexPatternField | undefined,
-  xMode: string | undefined,
-  layer: VisualizeEditorLayersContext
-): IndexPatternLayer {
-  const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
-  const filterParams = splitFilters?.map((param) => {
-    const query = param.filter ? param.filter.query : '';
-    const language = param.filter ? param.filter.language : 'kuery';
-    return {
-      input: {
-        query,
-        language,
-      },
-      label: param.label ?? '',
-    };
-  });
-  const copyMetricsArray = [...metrics];
-  const computedLayer = computeLayerFromContext(
-    metrics.length === 1,
-    copyMetricsArray,
-    indexPattern,
-    layer.format,
-    layer.label
-  );
-  const columnId = generateId();
-  let filtersLayer = insertNewColumn({
-    op: 'filters',
-    layer:
-      xField && xMode
-        ? insertNewColumn({
-            op: xMode,
-            layer: computedLayer,
-            columnId: generateId(),
-            field: xField,
-            indexPattern,
-            visualizationGroups: [],
-            columnParams: {
-              interval: timeInterval,
-              dropPartials: dropPartialBuckets,
-            },
-          })
-        : computedLayer,
-    columnId,
-    field: undefined,
-    indexPattern,
-    visualizationGroups: [],
-  });
-
-  if (filterParams) {
-    filtersLayer = updateColumnParam({
-      layer: filtersLayer,
-      columnId,
-      paramName: 'filters',
-      value: filterParams,
-    });
-  }
-  return filtersLayer;
 }

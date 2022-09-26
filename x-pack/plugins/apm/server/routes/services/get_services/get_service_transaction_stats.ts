@@ -29,7 +29,7 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
@@ -78,6 +78,7 @@ export async function getServiceTransactionStats({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

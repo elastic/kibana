@@ -161,6 +161,14 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+
+export const cloneLayer = createAction(
+  'cloneLayer',
+  function prepare({ layerId }: { layerId: string }) {
+    return { payload: { newLayerId: generateId(), layerId } };
+  }
+);
+
 export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
@@ -210,6 +218,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
   replaceIndexpattern,
@@ -274,6 +283,53 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...newState,
         stagedPreview: undefined,
       };
+    },
+    [cloneLayer.type]: (
+      state,
+      {
+        payload: { layerId, newLayerId },
+      }: {
+        payload: {
+          layerId: string;
+          newLayerId: string;
+        };
+      }
+    ) => {
+      const clonedIDsMap = new Map<string, string>();
+
+      const getNewId = (prevId: string) => {
+        const inMapValue = clonedIDsMap.get(prevId);
+        if (!inMapValue) {
+          const newId = generateId();
+          clonedIDsMap.set(prevId, newId);
+          return newId;
+        }
+        return inMapValue;
+      };
+
+      if (!state.activeDatasourceId || !state.visualization.activeId) {
+        return state;
+      }
+
+      state.datasourceStates = mapValues(state.datasourceStates, (datasourceState, datasourceId) =>
+        datasourceId
+          ? {
+              ...datasourceState,
+              state: datasourceMap[datasourceId].cloneLayer(
+                datasourceState.state,
+                layerId,
+                newLayerId,
+                getNewId
+              ),
+            }
+          : datasourceState
+      );
+      state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
+        state.visualization.state,
+        layerId,
+        newLayerId,
+        clonedIDsMap
+      );
     },
     [removeOrClearLayer.type]: (
       state,

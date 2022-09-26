@@ -23,7 +23,6 @@ import {
   getLastUpdated,
   indexToViewIndex,
   isConnectorIndex,
-  isConnectorCrawlerIndex,
   isCrawlerIndex,
   isApiIndex,
   isConnectorViewIndex,
@@ -143,20 +142,6 @@ describe('Indices util functions', () => {
     });
     it('should return false for API indices', () => {
       expect(isConnectorIndex(apiIndex)).toEqual(false);
-    });
-  });
-  describe('isConnectorCrawlerIndex', () => {
-    it('should return false for connector indices', () => {
-      expect(isConnectorCrawlerIndex(connectorIndex)).toEqual(false);
-    });
-    it('should return false for connector-crawler indices', () => {
-      expect(isConnectorCrawlerIndex(connectorCrawlerIndex)).toEqual(true);
-    });
-    it('should return false for crawler indices', () => {
-      expect(isConnectorCrawlerIndex(crawlerIndex)).toEqual(false);
-    });
-    it('should return false for API indices', () => {
-      expect(isConnectorCrawlerIndex(apiIndex)).toEqual(false);
     });
   });
   describe('isCrawlerIndex', () => {

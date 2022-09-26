@@ -21,8 +21,9 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { loadFieldStats } from '@kbn/unified-field-list-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
+import { FieldStats } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 import { LensFieldIcon } from '../shared_components';
 
@@ -34,7 +35,9 @@ const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 const clickField = async (wrapper: ReactWrapper, field: string) => {
   await act(async () => {
-    wrapper.find(`[data-test-subj="lnsFieldListPanelField-${field}"] button`).simulate('click');
+    await wrapper
+      .find(`[data-test-subj="lnsFieldListPanelField-${field}"] button`)
+      .simulate('click');
   });
 };
 
@@ -153,6 +156,11 @@ describe('IndexPattern Field Item', () => {
     });
   });
 
+  beforeEach(() => {
+    (loadFieldStats as jest.Mock).mockReset();
+    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
+  });
+
   it('should display displayName of a field', () => {
     const wrapper = mountWithIntl(<InnerFieldItemWrapper {...defaultProps} />);
 
@@ -182,10 +190,14 @@ describe('IndexPattern Field Item', () => {
       <InnerFieldItemWrapper {...defaultProps} editField={editFieldSpy} hideDetails />
     );
     await clickField(wrapper, 'bytes');
-    wrapper.update();
+    await wrapper.update();
     const popoverContent = wrapper.find(EuiPopover).prop('children');
     act(() => {
-      mountWithIntl(popoverContent as ReactElement)
+      mountWithIntl(
+        <KibanaContextProvider services={mockedServices}>
+          {popoverContent as ReactElement}
+        </KibanaContextProvider>
+      )
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .first()
         .simulate('click');
@@ -204,13 +216,46 @@ describe('IndexPattern Field Item', () => {
       />
     );
     await clickField(wrapper, documentField.name);
-    wrapper.update();
+    await wrapper.update();
     const popoverContent = wrapper.find(EuiPopover).prop('children');
     expect(
-      mountWithIntl(popoverContent as ReactElement)
+      mountWithIntl(
+        <KibanaContextProvider services={mockedServices}>
+          {popoverContent as ReactElement}
+        </KibanaContextProvider>
+      )
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .exists()
     ).toBeFalsy();
+  });
+
+  it('should pass add filter callback and pass result to filter manager', async () => {
+    const field = {
+      name: 'test',
+      displayName: 'testLabel',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      filterable: true,
+    };
+
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItemWrapper {...defaultProps} field={field} editField={editFieldSpy} />
+    );
+    await clickField(wrapper, field.name);
+    await wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    const instance = mountWithIntl(
+      <KibanaContextProvider services={mockedServices}>
+        {popoverContent as ReactElement}
+      </KibanaContextProvider>
+    );
+    const onAddFilter = instance.find(FieldStats).prop('onAddFilter');
+    onAddFilter!(field as DataViewField, 'abc', '+');
+    expect(mockedServices.data.query.filterManager.addFilters).toHaveBeenCalledWith([
+      expect.objectContaining({ query: { match_phrase: { test: 'abc' } } }),
+    ]);
   });
 
   it('should request field stats every time the button is clicked', async () => {
@@ -329,13 +374,10 @@ describe('IndexPattern Field Item', () => {
       toDate: 'now-7d',
       field: defaultProps.field,
     });
-
-    (loadFieldStats as jest.Mock).mockReset();
-    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   it('should not request field stats for document field', async () => {
-    const wrapper = mountWithIntl(
+    const wrapper = await mountWithIntl(
       <InnerFieldItemWrapper {...defaultProps} field={documentField} />
     );
 
@@ -343,13 +385,14 @@ describe('IndexPattern Field Item', () => {
 
     await wrapper.update();
 
-    expect(loadFieldStats).not.toHaveBeenCalled();
+    expect(loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
   });
 
   it('should not request field stats for range fields', async () => {
-    const wrapper = mountWithIntl(
+    const wrapper = await mountWithIntl(
       <InnerFieldItemWrapper
         {...defaultProps}
         field={{
@@ -364,6 +407,11 @@ describe('IndexPattern Field Item', () => {
 
     await clickField(wrapper, 'ip_range');
 
-    expect(loadFieldStats).not.toHaveBeenCalled();
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
   });
 });

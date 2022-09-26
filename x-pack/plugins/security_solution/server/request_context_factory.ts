@@ -61,7 +61,7 @@ export class RequestContextFactory implements IRequestContextFactory {
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
     const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
-    const { lists, ruleRegistry, security } = plugins;
+    const { lists, ruleRegistry, security, licensing, osquery } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
@@ -132,6 +132,11 @@ export class RequestContextFactory implements IRequestContextFactory {
       getScopedFleetServices: memoize((req: KibanaRequest) =>
         endpointAppContextService.getScopedFleetServices(req)
       ),
+
+      getQueryRuleAdditionalOptions: {
+        licensing,
+        osqueryCreateAction: osquery.osqueryCreateAction,
+      },
     };
   }
 }

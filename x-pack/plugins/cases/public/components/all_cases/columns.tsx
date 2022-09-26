@@ -40,15 +40,15 @@ import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
-import { CaseUserAvatar } from '../user_profiles/user_avatar';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { CurrentUserProfile } from '../types';
+import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -87,8 +87,8 @@ const AssigneesColumn: React.FC<{
             key={assignee.uid}
             data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
           >
-            <UserToolTip profile={assignee.profile}>
-              <CaseUserAvatar size="s" profile={assignee.profile} />
+            <UserToolTip userInfo={assignee.profile}>
+              <SmallUserAvatar userInfo={assignee.profile} />
             </UserToolTip>
           </EuiFlexItem>
         );
@@ -96,7 +96,9 @@ const AssigneesColumn: React.FC<{
     </EuiFlexGroup>
   );
 };
+
 AssigneesColumn.displayName = 'AssigneesColumn';
+
 export interface GetCasesColumn {
   filterStatus: string;
   userProfiles: Map<string, UserProfileWithAvatar>;
@@ -130,7 +132,7 @@ export const useCasesColumns = ({
     isLoading: isDeleting,
   } = useDeleteCases();
 
-  const { isAlertsEnabled } = useCasesFeatures();
+  const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
@@ -216,17 +218,21 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    {
-      field: 'assignees',
-      name: i18n.ASSIGNEES,
-      render: (assignees: Case['assignees']) => (
-        <AssigneesColumn
-          assignees={assignees}
-          userProfiles={userProfiles}
-          currentUserProfile={currentUserProfile}
-        />
-      ),
-    },
+    ...(caseAssignmentAuthorized
+      ? [
+          {
+            field: 'assignees',
+            name: i18n.ASSIGNEES,
+            render: (assignees: Case['assignees']) => (
+              <AssigneesColumn
+                assignees={assignees}
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
+              />
+            ),
+          },
+        ]
+      : []),
     {
       field: 'tags',
       name: i18n.TAGS,

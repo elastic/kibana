@@ -17,6 +17,45 @@
   transform-origin: center;
 }
 
+.xyAnnotationTooltip {
+  border-radius: 0 !important;
+}
+
+.xyAnnotationTooltip__rows {
+  // max-height: 60vh;
+  overflow-y: hidden;
+}
+
 .xyAnnotationTooltipDetail {
-  padding: $euiSizeXS ($euiSizeXS * 2);
+  padding: $euiSizeXS (
+    $euiSizeXS * 2
+  );
+}
+
+.xyAnnotationTooltip__row {
+  font-weight: $euiFontWeightRegular;
+  padding: $euiSizeS $euiSizeM $euiSizeS $euiSizeS;
+  border-radius: 0 !important;
+}
+
+.xyAnnotationTooltip__extraFields {
+  color: $euiColorDarkShade;
+  margin-top: $euiSizeS;
+}
+
+.xyAnnotationTooltip__extraFieldsKey {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.xyAnnotationTooltip__extraFieldsValue {
+  text-align: right;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.xyAnnotationTooltip__skippedCount {
+  position: relative;
+  text-align: right;
+  font-weight: $euiFontWeightRegular;
 }

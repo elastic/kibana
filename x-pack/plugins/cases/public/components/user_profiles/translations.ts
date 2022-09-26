@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
 
 export * from '../../common/translations';
 
@@ -49,4 +50,11 @@ export const NO_MATCHING_USERS = i18n.translate('xpack.cases.userProfiles.noMatc
 
 export const TRY_MODIFYING_SEARCH = i18n.translate('xpack.cases.userProfiles.tryModifyingSearch', {
   defaultMessage: 'Try modifying your search.',
+});
+
+export const INVALID_ASSIGNEES = i18n.translate('xpack.cases.create.invalidAssignees', {
+  defaultMessage: 'You cannot assign more than {maxAssignees} assignees to a case.',
+  values: {
+    maxAssignees: MAX_ASSIGNEES_PER_CASE,
+  },
 });

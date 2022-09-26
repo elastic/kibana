@@ -19,8 +19,6 @@ import {
   deleteSignalsIndex,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
-  getSimpleRuleOutputWithoutRuleId,
-  removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleUpdate,
   createRule,
   getSimpleRule,
@@ -282,16 +280,16 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
-        const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
+        const outputRule1 = getSimpleRuleOutput('rule-1');
         outputRule1.name = 'some other name';
         outputRule1.version = 2;
 
-        const outputRule2 = getSimpleRuleOutputWithoutRuleId('rule-2');
+        const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.version = 2;
 
-        const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
-        const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
+        const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
+        const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
         expect(bodyToCompare1).to.eql(outputRule1);
         expect(bodyToCompare2).to.eql(outputRule2);
       });

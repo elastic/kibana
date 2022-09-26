@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Abnormal Process ID or Lock File Created",
   "note": "## Triage and analysis\n\n### Investigating Abnormal Process ID or Lock File Created\nDetection alerts from this rule indicate that an unusual PID file was created and could potentially have alternate purposes during an intrusion.  Here are some possible avenues of investigation:\n- Run the following in Osquery to quickly identify unsual PID file size: \"SELECT f.size, f.uid, f.type, f.path from file f WHERE path like '/var/run/%pid';\"\n- Examine the history of this file creation and from which process it was created by using the \"lsof\" command.\n- Examine the contents of the PID file itself, simply by running the \"cat\" command to determine if the expected process ID integer exists and if not, the PID file is not legitimate.\n- Examine the reputation of the SHA256 hash from the PID file in a database like VirusTotal to identify additional pivots and artifacts for investigation.",
-  "query": "/* add file size filters when data is available */\nfile where event.type == \"creation\" and user.id == \"0\" and\n    file.path regex~ \"\"\"/var/run/\\w+\\.(pid|lock|reboot)\"\"\" and file.extension in (\"pid\",\"lock\",\"reboot\") and\n\n    /* handle common legitimate files */\n\n    not file.name in (\n    \"auditd.pid\",\n    \"python*\",\n    \"apport.pid\",\n    \"apport.lock\",\n    \"kworker*\",\n    \"gdm3.pid\",\n    \"sshd.pid\",\n    \"acpid.pid\",\n    \"unattended-upgrades.lock\",\n    \"unattended-upgrades.pid\",\n    \"cmd.pid\",\n    \"cron*.pid\"\n    )\n",
+  "query": "/* add file size filters when data is available */\nfile where event.type == \"creation\" and user.id == \"0\" and\n    file.path regex~ \"\"\"/var/run/\\w+\\.(pid|lock|reboot)\"\"\" and file.extension in (\"pid\",\"lock\",\"reboot\") and\n\n    /* handle common legitimate files */\n\n    not file.name in (\n    \"auditd.pid\",\n    \"python*\",\n    \"apport.pid\",\n    \"apport.lock\",\n    \"kworker*\",\n    \"gdm3.pid\",\n    \"sshd.pid\",\n    \"acpid.pid\",\n    \"unattended-upgrades.lock\",\n    \"unattended-upgrades.pid\",\n    \"cmd.pid\",\n    \"cron*.pid\",\n    \"yum.pid\",\n    \"netconfig.pid\",\n    \"docker.pid\",\n    \"atd.pid\",\n    \"lfd.pid\",\n    \"atop.pid\",\n    \"nginx.pid\",\n    \"dhclient.pid\",\n    \"smtpd.pid\",\n    \"stunnel.pid\"\n    )\n",
   "references": [
     "https://www.sandflysecurity.com/blog/linux-file-masquerading-and-malicious-pids-sandfly-1-2-6-update/",
     "https://twitter.com/GossiTheDog/status/1522964028284411907",
@@ -47,7 +47,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "cac91072-d165-11ec-a764-f661ea17fbce",
   "severity": "medium",
   "tags": [
@@ -77,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 100
 }

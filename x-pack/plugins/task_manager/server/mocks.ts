@@ -30,7 +30,8 @@ const createStartMock = () => {
     supportsEphemeralTasks: jest.fn(),
     bulkUpdateSchedules: jest.fn(),
     bulkSchedule: jest.fn(),
-    bulkEnableDisable: jest.fn(),
+    bulkDisable: jest.fn(),
+    bulkEnable: jest.fn(),
   };
   return mock;
 };

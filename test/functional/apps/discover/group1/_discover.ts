@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const defaultSettings = {
@@ -340,6 +341,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await inspector.close();
         await PageObjects.timePicker.pauseAutoRefresh();
+      });
+    });
+
+    describe('resizable layout panels', () => {
+      it('should allow resizing the layout panels', async () => {
+        const resizeDistance = 100;
+        const topPanel = await testSubjects.find('dscResizablePanelTop');
+        const mainPanel = await testSubjects.find('dscResizablePanelMain');
+        const resizeButton = await testSubjects.find('dsc-resizable-button');
+        const topPanelSize = (await topPanel.getPosition()).height;
+        const mainPanelSize = (await mainPanel.getPosition()).height;
+        await browser.dragAndDrop(
+          { location: resizeButton },
+          { location: { x: 0, y: resizeDistance } }
+        );
+        const newTopPanelSize = (await topPanel.getPosition()).height;
+        const newMainPanelSize = (await mainPanel.getPosition()).height;
+        expect(newTopPanelSize).to.be(topPanelSize + resizeDistance);
+        expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
     });
   });

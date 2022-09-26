@@ -44,6 +44,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((_state, _layerId) => {}),
+    cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
     uniqueLabels: jest.fn((_state) => ({})),

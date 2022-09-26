@@ -42,18 +42,15 @@ export type MockedElasticSearchServiceSetup = jest.Mocked<
 export interface MockedElasticSearchServiceStart {
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
-    (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
+    (type: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
   >;
 }
 
 const createPrebootContractMock = () => {
   const prebootContract: MockedElasticSearchServicePreboot = {
     config: { hosts: [], credentialsSpecified: false },
-    createClient: jest.fn(),
+    createClient: jest.fn((type: string) => elasticsearchClientMock.createCustomClusterClient()),
   };
-  prebootContract.createClient.mockImplementation(() =>
-    elasticsearchClientMock.createCustomClusterClient()
-  );
   return prebootContract;
 };
 
@@ -70,12 +67,8 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
     client: elasticsearchClientMock.createClusterClient(),
-    createClient: jest.fn(),
+    createClient: jest.fn((type: string) => elasticsearchClientMock.createCustomClusterClient()),
   };
-
-  startContract.createClient.mockImplementation(() =>
-    elasticsearchClientMock.createCustomClusterClient()
-  );
   return startContract;
 };
 

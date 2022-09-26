@@ -62,6 +62,8 @@ export interface HistogramField {
 export interface ChangePoint extends FieldValuePair {
   doc_count: number;
   bg_count: number;
+  total_doc_count: number;
+  total_bg_count: number;
   score: number;
   pValue: number | null;
   normalizedScore: number;
@@ -83,4 +85,27 @@ export interface ChangePointHistogramItem {
  */
 export interface ChangePointHistogram extends FieldValuePair {
   histogram: ChangePointHistogramItem[];
+}
+
+/**
+ * Change point histogram data for a group of field/value pairs.
+ */
+export interface ChangePointGroupHistogram {
+  id: string;
+  histogram: ChangePointHistogramItem[];
+}
+
+interface ChangePointGroupItem extends FieldValuePair {
+  duplicate?: boolean;
+}
+
+/**
+ * Tree leaves
+ */
+export interface ChangePointGroup {
+  id: string;
+  group: ChangePointGroupItem[];
+  docCount: number;
+  pValue: number | null;
+  histogram?: ChangePointHistogramItem[];
 }
