@@ -100,7 +100,7 @@ export function ViewAlertRoute() {
         // documents might be updated or deleted
         displayPossibleDocsDiffInfoAlert();
       }
-      // const dataView = await dataViews.get(dataView.id!);
+
       const dataViewSavedObject = await core.savedObjects.client.get('index-pattern', dataView.id!);
       const alertUpdatedAt = fetchedAlert.updatedAt;
       const dataViewUpdatedAt = dataViewSavedObject.updatedAt!;

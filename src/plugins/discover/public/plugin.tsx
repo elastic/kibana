@@ -52,7 +52,7 @@ import {
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition, HistoryLocationState } from './locator';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
@@ -286,9 +286,6 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
-        const historyLocationState = params.history.location.state as
-          | HistoryLocationState
-          | undefined;
 
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
@@ -310,7 +307,7 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services, isDev, historyLocationState);
+        const unmount = renderApp(params.element, services, isDev);
         return () => {
           unlistenParentHistory();
           unmount();

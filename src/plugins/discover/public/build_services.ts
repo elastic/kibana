@@ -51,6 +51,9 @@ import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 
+/**
+ * Location state of internal Discover history instance
+ */
 export interface HistoryLocationState {
   referrer: string;
 }
