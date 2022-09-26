@@ -6,18 +6,19 @@
  */
 
 import { sum } from 'lodash';
-import { createCallerCalleeGraph } from './callercallee';
+import { createCalleeTree } from './callee';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
-describe('Caller-callee operations', () => {
+describe('Callee operations', () => {
   test('1', () => {
     const totalSamples = sum([...events.values()]);
+    const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
 
-    const graph = createCallerCalleeGraph(events, stackTraces, stackFrames, executables);
+    const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
 
-    expect(graph.root.Samples).toEqual(totalSamples);
-    expect(graph.root.CountInclusive).toEqual(totalSamples);
-    expect(graph.root.CountExclusive).toEqual(0);
+    expect(tree.Samples[0]).toEqual(totalSamples);
+    expect(tree.CountInclusive[0]).toEqual(totalSamples);
+    expect(tree.CountExclusive[0]).toEqual(0);
   });
 });

@@ -18,6 +18,8 @@ import {
   ProfilingStackTrace,
 } from '../../common/elasticsearch';
 import {
+  emptyExecutable,
+  emptyStackFrame,
   Executable,
   FileID,
   StackFrame,
@@ -310,7 +312,7 @@ export async function mgetStackTraces({
     );
   }
 
-  return { stackTraces, stackFrameDocIDs, executableDocIDs };
+  return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
 export async function mgetStackFrames({
@@ -352,13 +354,7 @@ export async function mgetStackFrames({
       });
       framesFound++;
     } else {
-      stackFrames.set(frame._id, {
-        FileName: '',
-        FunctionName: '',
-        FunctionOffset: 0,
-        LineNumber: 0,
-        SourceType: 0,
-      });
+      stackFrames.set(frame._id, emptyStackFrame);
     }
   }
   logger.info(`processing data took ${Date.now() - t0} ms`);
@@ -403,9 +399,7 @@ export async function mgetExecutables({
       });
       exeFound++;
     } else {
-      executables.set(exe._id, {
-        FileName: '',
-      });
+      executables.set(exe._id, emptyExecutable);
     }
   }
   logger.info(`processing data took ${Date.now() - t0} ms`);

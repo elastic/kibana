@@ -28,18 +28,20 @@ export enum FrameType {
   JavaScript,
 }
 
+const frameTypeDescriptions = {
+  [FrameType.Unsymbolized]: '<unsymbolized frame>',
+  [FrameType.Python]: 'Python',
+  [FrameType.PHP]: 'PHP',
+  [FrameType.Native]: 'Native',
+  [FrameType.Kernel]: 'Kernel',
+  [FrameType.JVM]: 'JVM/Hotspot',
+  [FrameType.Ruby]: 'Ruby',
+  [FrameType.Perl]: 'Perl',
+  [FrameType.JavaScript]: 'JavaScript',
+};
+
 export function describeFrameType(ft: FrameType): string {
-  return {
-    [FrameType.Unsymbolized]: '<unsymbolized frame>',
-    [FrameType.Python]: 'Python',
-    [FrameType.PHP]: 'PHP',
-    [FrameType.Native]: 'Native',
-    [FrameType.Kernel]: 'Kernel',
-    [FrameType.JVM]: 'JVM/Hotspot',
-    [FrameType.Ruby]: 'Ruby',
-    [FrameType.Perl]: 'Perl',
-    [FrameType.JavaScript]: 'JavaScript',
-  }[ft];
+  return frameTypeDescriptions[ft];
 }
 
 export interface StackTraceEvent {
@@ -69,9 +71,21 @@ export interface StackFrame {
   SourceType: number;
 }
 
+export const emptyStackFrame: StackFrame = {
+  FileName: '',
+  FunctionName: '',
+  FunctionOffset: 0,
+  LineNumber: 0,
+  SourceType: 0,
+};
+
 export interface Executable {
   FileName: string;
 }
+
+export const emptyExecutable: Executable = {
+  FileName: '',
+};
 
 export interface StackFrameMetadata {
   // StackTrace.FrameID
@@ -221,8 +235,8 @@ export function groupStackFrameMetadataByStackTrace(
       const frameID = trace.FrameIDs[i];
       const fileID = trace.FileIDs[i];
       const addressOrLine = trace.AddressOrLines[i];
-      const frame = stackFrames.get(frameID)!;
-      const executable = executables.get(fileID)!;
+      const frame = stackFrames.get(frameID) ?? emptyStackFrame;
+      const executable = executables.get(fileID) ?? emptyExecutable;
 
       frameMetadata[i] = createStackFrameMetadata({
         FrameID: frameID,
