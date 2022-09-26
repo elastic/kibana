@@ -85,7 +85,14 @@ export const NotificationsIndicator: FC = () => {
               />
             }
           >
-            <EuiNotificationBadge>{errorsAndWarningCount}</EuiNotificationBadge>
+            <EuiNotificationBadge
+              aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadErrors', {
+                defaultMessage: 'Unread errors or warnings indicator.',
+              })}
+              data-test-subj={'mlNotificationErrorsIndicator'}
+            >
+              {errorsAndWarningCount}
+            </EuiNotificationBadge>
           </EuiToolTip>
         </EuiFlexItem>
       ) : null}
@@ -106,6 +113,7 @@ export const NotificationsIndicator: FC = () => {
               aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadIcon', {
                 defaultMessage: 'Unread notifications indicator.',
               })}
+              data-test-subj={'mlNotificationsIndicator'}
             />
           </EuiToolTip>
         </EuiFlexItem>
