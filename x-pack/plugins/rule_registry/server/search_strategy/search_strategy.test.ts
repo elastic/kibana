@@ -385,48 +385,6 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     ).toStrictEqual([{ test: { order: 'desc' } }]);
   });
 
-  it('should reject, to the best of our ability, public requests', async () => {
-    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
-      return false;
-    });
-    const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
-      sort: [
-        {
-          test: {
-            order: 'desc',
-          },
-        },
-      ],
-    };
-    const options = {};
-    const deps = {
-      request: {},
-    };
-
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
-
-    let err = null;
-    try {
-      await strategy
-        .search(request, options, deps as unknown as SearchStrategyDependencies)
-        .toPromise();
-    } catch (e) {
-      err = e;
-    }
-    expect(err).not.toBeNull();
-    expect(err.message).toBe(
-      `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
-    );
-  });
-
   it('passes the query ids if provided', async () => {
     const request: RuleRegistrySearchRequest = {
       featureIds: [AlertConsumers.SIEM],
