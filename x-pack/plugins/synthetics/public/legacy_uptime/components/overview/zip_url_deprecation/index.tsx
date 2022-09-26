@@ -11,9 +11,12 @@ import { EuiCallOut, EuiLink, EuiButton, EuiFlexItem, EuiFlexGroup, EuiSpacer } 
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { getHasZipUrlMonitors } from '../../../state/api/has_zip_url_monitors';
 
+export const ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY =
+  'SYNTHETICS_ZIP_URL_DEPRECATION_HAS_BEEN_DISMISSED';
+
 export const ZipUrlDeprecation = () => {
-  const sessionStorageKey = 'SYNTHETICS_ZIP_URL_DEPRECATION_HAS_BEEN_DISMISSED';
-  const noticeHasBeenDismissed = window.sessionStorage.getItem(sessionStorageKey) === 'true';
+  const noticeHasBeenDismissed =
+    window.sessionStorage.getItem(ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY) === 'true';
   const { data, loading } = useFetcher(() => {
     return getHasZipUrlMonitors();
   }, []);
@@ -23,7 +26,7 @@ export const ZipUrlDeprecation = () => {
   );
 
   const handleDismissDeprecationNotice = () => {
-    window.sessionStorage.setItem(sessionStorageKey, 'true');
+    window.sessionStorage.setItem(ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY, 'true');
     setShouldShowNotice(false);
   };
 
