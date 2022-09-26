@@ -64,6 +64,8 @@ export {
   DEFAULT_DOWNLOAD_SOURCE_URI,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from '../../common/constants';
 
 export {
