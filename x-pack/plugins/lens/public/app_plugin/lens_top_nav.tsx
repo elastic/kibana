@@ -644,7 +644,7 @@ export const LensTopNavMenu = ({
         if (!isEqual(newQuery, query)) {
           dispatchSetState({ query: newQuery });
           // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
-          if (isOfAggregateQueryType(newQuery)) {
+          if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
@@ -663,6 +663,7 @@ export const LensTopNavMenu = ({
       data.search.session,
       dispatch,
       dispatchSetState,
+      isOnTextBasedMode,
       query,
       visualization?.activeId,
     ]

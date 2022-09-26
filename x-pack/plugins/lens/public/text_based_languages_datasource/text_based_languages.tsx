@@ -281,16 +281,23 @@ export function getTextBasedLanguagesDatasource({
       props: DatasourceDimensionTriggerProps<TextBasedLanguagesPrivateState>
     ) => {
       const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(props.state);
+      const layer = props.state.layers[props.layerId];
+      const selectedField = layer?.allColumns?.find(
+        (column) => column.columnId === props.columnId
+      )!;
       let customLabel = columnLabelMap[props.columnId];
       if (!customLabel) {
-        const layer = props.state.layers[props.layerId];
-        const selectedField = layer?.allColumns?.find(
-          (column) => column.columnId === props.columnId
-        )!;
         customLabel = selectedField.fieldName;
       }
 
-      render(<EuiButtonEmpty onClick={() => {}}>{customLabel}</EuiButtonEmpty>, domElement);
+      const columnExists = props.state.fieldList.some((f) => f.name === selectedField.fieldName);
+
+      render(
+        <EuiButtonEmpty color={columnExists ? 'primary' : 'danger'} onClick={() => {}}>
+          {customLabel}
+        </EuiButtonEmpty>,
+        domElement
+      );
     },
 
     getRenderEventCounters(state: TextBasedLanguagesPrivateState): string[] {
