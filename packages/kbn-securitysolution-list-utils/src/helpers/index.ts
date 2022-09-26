@@ -140,11 +140,11 @@ export const getNewExceptionItem = ({
 }: {
   listId: string;
   namespaceType: NamespaceType;
-  ruleName: string;
+  ruleName?: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `${ruleName} - exception list item`,
+    description: ruleName ? `${ruleName} - exception list item` : 'exception list item',
     entries: addIdToEntries([
       {
         field: '',
@@ -158,7 +158,7 @@ export const getNewExceptionItem = ({
     meta: {
       temporaryUuid: uuid.v4(),
     },
-    name: `${ruleName} - exception list item`,
+    name: ruleName ? `${ruleName} - exception list item` : 'exception list item',
     namespace_type: namespaceType,
     tags: [],
     type: 'simple',
