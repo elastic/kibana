@@ -244,6 +244,7 @@ export const FilterList = ({
                 defaultMessage: 'Remove a filter',
               })}
               isNotRemovable={localFilters.length === 1}
+              isNotDraggable={localFilters.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"

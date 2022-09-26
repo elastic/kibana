@@ -7,7 +7,7 @@
 
 import './advanced_editor.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -220,7 +220,7 @@ export const AdvancedRangeEditor = ({
     [localRanges]
   );
 
-  const addNewRange = () => {
+  const addNewRange = useCallback(() => {
     const newRangeId = generateId();
 
     setLocalRanges([
@@ -228,13 +228,13 @@ export const AdvancedRangeEditor = ({
       {
         id: newRangeId,
         from: localRanges[localRanges.length - 1].to,
-        to: Infinity,
+        to: Number.POSITIVE_INFINITY,
         label: '',
       },
     ]);
 
     setActiveRangeId(newRangeId);
-  };
+  }, [localRanges]);
 
   const changeActiveRange = (rangeId: string) => {
     let newActiveRangeId = rangeId;
@@ -285,6 +285,7 @@ export const AdvancedRangeEditor = ({
                 defaultMessage: 'Delete range',
               })}
               isNotRemovable={localRanges.length === 1}
+              isNotDraggable={localRanges.length === 1}
             >
               <RangePopover
                 range={range}
@@ -320,9 +321,7 @@ export const AdvancedRangeEditor = ({
           ))}
         </DragDropBuckets>
         <NewBucketButton
-          onClick={() => {
-            addNewRange();
-          }}
+          onClick={addNewRange}
           label={i18n.translate('xpack.lens.indexPattern.ranges.addRange', {
             defaultMessage: 'Add range',
           })}

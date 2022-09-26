@@ -34,9 +34,14 @@ export const DraggableBucketContainer = ({
       spacing="none"
       index={idx}
       draggableId={id}
+      customDragHandle={true}
       disableInteractiveElementBlocking
     >
-      {(provided) => <Container {...bucketContainerProps}>{children}</Container>}
+      {(provided) => (
+        <Container draggableProvided={provided} {...bucketContainerProps}>
+          {children}
+        </Container>
+      )}
     </EuiDraggable>
   );
 };
