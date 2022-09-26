@@ -368,4 +368,40 @@ export class ConsolePageObject extends FtrService {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
   }
+
+  public async clickContextMenu() {
+    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
+    await contextMenu.click();
+  }
+
+  public async isContextMenuOpen() {
+    return await this.testSubjects.exists('consoleMenu');
+  }
+
+  public async isCopyAsCurlButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyAsCurl');
+  }
+
+  public async isOpenDocumentationButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuOpenDocs');
+  }
+
+  public async isAutoIndentButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuAutoIndent');
+  }
+
+  public async clickCopyAsCurlButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
+    await button.click();
+  }
+
+  public async clickOpenDocumentationButton() {
+    const button = await this.testSubjects.find('consoleMenuOpenDocs');
+    await button.click();
+  }
+
+  public async clickAutoIndentButton() {
+    const button = await this.testSubjects.find('consoleMenuAutoIndent');
+    await button.click();
+  }
 }
