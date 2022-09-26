@@ -682,7 +682,7 @@ describe('#updateObjectsSpaces', () => {
         await expect(updateObjectsSpaces(params)).rejects.toThrow(error);
       });
 
-      test(`propogates decorated errror when checkAuthorization rejects promise`, async () => {
+      test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
         mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
 
         await expect(updateObjectsSpaces(params)).rejects.toThrow(checkAuthError);
