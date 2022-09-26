@@ -43,6 +43,7 @@ import {
   CASE_STATUSES,
   CASE_VIEW_CACHE_KEY,
   DELETE_CASES_CACHE_KEY,
+  UPDATE_CASES_CACHE_KEY,
   USER_PROFILES_BULK_GET_CACHE_KEY,
   USER_PROFILES_CACHE_KEY,
 } from '../../containers/constants';
@@ -74,8 +75,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
     const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
-    const isMutatingCases = useIsMutating([DELETE_CASES_CACHE_KEY]);
-    const isLoading = Boolean(isMutatingCases);
+    const isDeletingCases = useIsMutating([DELETE_CASES_CACHE_KEY]);
+    const isUpdatingCases = useIsMutating([UPDATE_CASES_CACHE_KEY]);
+    const isLoading = Boolean(isDeletingCases) || Boolean(isUpdatingCases);
 
     const hasOwner = !!owner.length;
 
