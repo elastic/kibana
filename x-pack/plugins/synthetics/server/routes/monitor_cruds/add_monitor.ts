@@ -161,8 +161,6 @@ export const syncNewMonitor = async ({
     string,
     { preserve_namespace?: boolean }
   >;
-  // console.warn('monitor', monitor);
-  // console.warn('normalizedMonitor', normalizedMonitor);
 
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
   const monitorWithNamespace = {
