@@ -12,12 +12,15 @@ import { withSpan } from '@kbn/apm-utils';
 
 import { isResponseError } from '@kbn/es-errors';
 
+import moment from 'moment';
+
 import type { Agent, BulkActionResult } from '../../types';
 import { appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
+import type { BulkActionsResolver } from './bulk_actions_resolver';
 
 export interface ActionParams {
   kuery: string;
@@ -42,6 +45,9 @@ export abstract class ActionRunner {
 
   protected actionParams: ActionParams;
   protected retryParams: RetryParams;
+
+  private bulkActionsResolver?: BulkActionsResolver;
+  private checkTaskId?: string;
 
   constructor(
     esClient: ElasticsearchClient,
@@ -74,44 +80,70 @@ export abstract class ActionRunner {
         `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.total}`
       );
 
-    withSpan({ name: this.getActionType(), type: 'action' }, () =>
-      this.processAgentsInBatches().catch(async (error) => {
-        // 404 error comes when PIT query is closed
-        if (isResponseError(error) && error.statusCode === 404) {
-          const errorMessage =
-            '404 error from elasticsearch, not retrying. Error: ' + error.message;
-          appContextService.getLogger().warn(errorMessage);
-          return;
-        }
-        if (this.retryParams.retryCount) {
-          appContextService
-            .getLogger()
-            .error(
-              `Retry #${this.retryParams.retryCount} of task ${this.retryParams.taskId} failed: ${error.message}`
-            );
+    if (!this.bulkActionsResolver) {
+      this.bulkActionsResolver = await appContextService.getBulkActionsResolver();
+    }
 
-          if (this.retryParams.retryCount === 3) {
-            const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
+    // create task to check result with some delay, this runs in case of kibana crash too
+    this.checkTaskId = await this.createCheckResultTask();
+
+    withSpan({ name: this.getActionType(), type: 'action' }, () =>
+      this.processAgentsInBatches()
+        .then(() => {
+          if (this.checkTaskId) {
+            // no need for check task, action succeeded
+            this.bulkActionsResolver!.removeIfExists(this.checkTaskId);
+          }
+        })
+        .catch(async (error) => {
+          // 404 error comes when PIT query is closed
+          if (isResponseError(error) && error.statusCode === 404) {
+            const errorMessage =
+              '404 error from elasticsearch, not retrying. Error: ' + error.message;
             appContextService.getLogger().warn(errorMessage);
             return;
           }
-        } else {
-          appContextService.getLogger().error(`Action failed: ${error.message}`);
-        }
-        const taskId = await appContextService.getBulkActionsResolver()!.run(
-          this.actionParams,
-          {
-            ...this.retryParams,
-            retryCount: (this.retryParams.retryCount ?? 0) + 1,
-          },
-          this.getTaskType()
-        );
+          if (this.retryParams.retryCount) {
+            appContextService
+              .getLogger()
+              .error(
+                `Retry #${this.retryParams.retryCount} of task ${this.retryParams.taskId} failed: ${error.message}`
+              );
 
-        appContextService.getLogger().info(`Retrying in task: ${taskId}`);
-      })
+            if (this.retryParams.retryCount === 3) {
+              const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
+              appContextService.getLogger().warn(errorMessage);
+              return;
+            }
+          } else {
+            appContextService.getLogger().error(`Action failed: ${error.message}`);
+          }
+          const taskId = await this.bulkActionsResolver!.run(
+            this.actionParams,
+            {
+              ...this.retryParams,
+              retryCount: (this.retryParams.retryCount ?? 0) + 1,
+            },
+            this.getTaskType()
+          );
+
+          appContextService.getLogger().info(`Retrying in task: ${taskId}`);
+        })
     );
 
     return { items: [], actionId: this.actionParams.actionId! };
+  }
+
+  private async createCheckResultTask() {
+    return await this.bulkActionsResolver!.run(
+      this.actionParams,
+      {
+        ...this.retryParams,
+        retryCount: 1,
+      },
+      this.getTaskType(),
+      moment(new Date()).add(5, 'm').toDate()
+    );
   }
 
   private async processBatch(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
@@ -176,6 +208,11 @@ export abstract class ActionRunner {
       const currentResults = await this.processBatch(currentAgents);
       results = { items: results.items.concat(currentResults.items) };
       allAgentsProcessed += currentAgents.length;
+      if (this.checkTaskId) {
+        // updating check task with latest checkpoint (this.retryParams.searchAfter)
+        this.bulkActionsResolver?.removeIfExists(this.checkTaskId);
+        this.checkTaskId = await this.createCheckResultTask();
+      }
     }
 
     await closePointInTime(this.esClient, pitId!);

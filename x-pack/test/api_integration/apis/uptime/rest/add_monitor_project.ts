@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -18,7 +19,7 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[PUT] /api/uptime/service/monitors', function () {
+  describe('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -30,6 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
     const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT;
 
     let projectMonitors: ProjectMonitorsRequest;
+    let httpProjectMonitors: ProjectMonitorsRequest;
+    let tcpProjectMonitors: ProjectMonitorsRequest;
+    let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -87,6 +91,272 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(() => {
       projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
+      httpProjectMonitors = setUniqueIds(getFixtureJson('project_http_monitor'));
+      tcpProjectMonitors = setUniqueIds(getFixtureJson('project_tcp_monitor'));
+      icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
+    });
+
+    it('project monitors - handles http monitors', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const successfulMonitors = [httpProjectMonitors.monitors[1]];
+
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(httpProjectMonitors)
+        );
+
+        expect(messages).to.have.length(3);
+        expect(messages[2].updatedMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[2].failedMonitors).eql([
+          {
+            id: httpProjectMonitors.monitors[0].id,
+            details: `The following Heartbeat options are not supported for ${httpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey`,
+            reason: 'Unsupported Heartbeat option',
+          },
+        ]);
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+            __ui: {
+              is_tls_enabled: false,
+            },
+            'check.request.method': 'POST',
+            'check.response.status': ['200'],
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-test-suite-default`,
+            enabled: false,
+            form_monitor_type: 'http',
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+            ],
+            max_redirects: '0',
+            name: monitor.name,
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            project_id: 'test-suite',
+            proxy_url: '',
+            'response.include_body': 'always',
+            'response.include_headers': false,
+            revision: 1,
+            schedule: {
+              number: '60',
+              unit: 'm',
+            },
+            'service.name': '',
+            'ssl.certificate': '',
+            'ssl.certificate_authorities': '',
+            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.verification_mode': 'full',
+            tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
+            timeout: '80',
+            type: 'http',
+            urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
+          });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, httpProjectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - handles tcp monitors', async () => {
+      const successfulMonitors = [tcpProjectMonitors.monitors[0], tcpProjectMonitors.monitors[1]];
+      const kibanaVersion = await kibanaServer.version.get();
+
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(tcpProjectMonitors)
+        );
+
+        expect(messages).to.have.length(3);
+        expect(messages[2].updatedMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[2].failedMonitors).eql([
+          {
+            id: tcpProjectMonitors.monitors[2].id,
+            details: `The following Heartbeat options are not supported for ${tcpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: ports|unsupportedKey.nestedUnsupportedKey`,
+            reason: 'Unsupported Heartbeat option',
+          },
+        ]);
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+            __ui: {
+              is_tls_enabled: false,
+            },
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-test-suite-default`,
+            enabled: true,
+            form_monitor_type: 'tcp',
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+            ],
+            name: monitor.name,
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            project_id: 'test-suite',
+            revision: 1,
+            schedule: {
+              number: '1',
+              unit: 'm',
+            },
+            proxy_url: '',
+            proxy_use_local_resolver: false,
+            'service.name': '',
+            'ssl.certificate': '',
+            'ssl.certificate_authorities': '',
+            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.verification_mode': 'full',
+            tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
+            timeout: '16',
+            type: 'tcp',
+            hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
+          });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, tcpProjectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - handles icmp monitors', async () => {
+      const successfulMonitors = [icmpProjectMonitors.monitors[0], icmpProjectMonitors.monitors[1]];
+      const kibanaVersion = await kibanaServer.version.get();
+
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(icmpProjectMonitors)
+        );
+
+        expect(messages).to.have.length(3);
+        expect(messages[2].updatedMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[2].failedMonitors).eql([
+          {
+            id: icmpProjectMonitors.monitors[2].id,
+            details: `The following Heartbeat options are not supported for ${icmpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: unsupportedKey.nestedUnsupportedKey`,
+            reason: 'Unsupported Heartbeat option',
+          },
+        ]);
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-test-suite-default`,
+            enabled: true,
+            form_monitor_type: 'icmp',
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+              {
+                agentPolicyId: testPolicyId,
+                concurrentMonitors: 1,
+                geo: {
+                  lat: '',
+                  lon: '',
+                },
+                id: testPolicyId,
+                isInvalid: false,
+                isServiceManaged: false,
+                label: 'Test private location 0',
+              },
+            ],
+            name: monitor.name,
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            project_id: 'test-suite',
+            revision: 1,
+            schedule: {
+              number: '1',
+              unit: 'm',
+            },
+            'service.name': '',
+            tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
+            timeout: '16',
+            type: 'icmp',
+            hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
+            wait:
+              monitor.wait?.slice(-1) === 's'
+                ? monitor.wait?.slice(0, -1)
+                : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
+          });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, icmpProjectMonitors.project);
+          }),
+        ]);
+      }
     });
 
     it('project monitors - returns a list of successfully created monitors', async () => {
@@ -124,6 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(2);
+        expect(messages[0]).eql(' 1 monitor found with no changes.');
         expect(messages[1].createdMonitors).eql([]);
         expect(messages[1].failedMonitors).eql([]);
         expect(messages[1].updatedMonitors).eql(
@@ -187,10 +458,10 @@ export default function ({ getService }: FtrProviderContext) {
           })),
         };
 
-        await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(editedMonitors);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(editedMonitors)
+        );
 
         const updatedMonitorsResponse = await Promise.all(
           projectMonitors.monitors.map((monitor) => {
@@ -205,6 +476,7 @@ export default function ({ getService }: FtrProviderContext) {
         updatedMonitorsResponse.forEach((response) => {
           expect(response.body.monitors[0].attributes.revision).eql(2);
         });
+        expect(messages[0]).eql('1 monitor updated successfully. ');
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
@@ -233,6 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(2);
+        expect(messages[0]).eql(' 1 monitor found with no changes.');
         expect(messages[1].createdMonitors).eql([]);
         expect(messages[1].failedMonitors).eql([]);
         expect(messages[1].deletedMonitors).eql([]);
@@ -280,6 +553,7 @@ export default function ({ getService }: FtrProviderContext) {
             keep_stale: false,
           })
         );
+
         expect(messages).to.have.length(3);
 
         // expect monitor to have been deleted
@@ -293,6 +567,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { monitors } = getResponse.body;
         expect(monitors[0]).eql(undefined);
+        expect(messages[0]).eql(` 1 monitor found with no changes.`);
         expect(messages[1]).eql(`Monitor ${secondMonitor.id} deleted successfully`);
         expect(messages[2].createdMonitors).eql([]);
         expect(messages[2].failedMonitors).eql([]);
@@ -464,8 +739,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[0].updatedMonitors).eql([]);
         expect(messages[0].failedMonitors).eql([
           {
-            details:
-              'Invalid value "3m" supplied to "schedule" | Invalid value "" supplied to "tags"',
+            details: 'Invalid value "3m" supplied to "schedule"',
             id: projectMonitors.monitors[0].id,
             payload: {
               content:
@@ -488,6 +762,7 @@ export default function ({ getService }: FtrProviderContext) {
                 latency: 20,
                 upload: 3,
               },
+              type: 'browser',
             },
             reason: 'Failed to save or update monitor. Configuration is not valid',
           },
@@ -542,7 +817,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(SPACE_ID);
+        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
       } finally {
         await deleteMonitor(
           projectMonitors.monitors[0].id,
@@ -649,6 +924,7 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(projectMonitors)
         );
         expect(messages).to.have.length(2);
+        expect(messages[0]).eql('1 monitor updated successfully. ');
         expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
 
         // ensure that monitor can still be decrypted
@@ -744,8 +1020,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(3);
-        expect(messages[0]).to.eql(`${testMonitors[0].id}: monitor created successfully`);
-        expect(messages[1]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[0]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[1]).to.eql(`1 monitor created successfully.`);
         expect(messages[2]).to.eql({
           createdMonitors: [testMonitors[0].id],
           updatedMonitors: [],
@@ -808,9 +1084,9 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const username = 'admin';
+      const username = 'test-username';
       const roleName = 'uptime read only';
-      const password = `${username}-password`;
+      const password = `test-password`;
       try {
         await security.role.create(roleName, {
           kibana: [
@@ -945,10 +1221,9 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: testMonitors,
           })
         );
-        expect(messages).to.have.length(3);
+        expect(messages).to.have.length(2);
         expect(messages).to.eql([
-          `${testMonitors[0].id}: monitor created successfully`,
-          'test-id-2: monitor created successfully',
+          `2 monitors created successfully.`,
           {
             createdMonitors: [testMonitors[0].id, 'test-id-2'],
             updatedMonitors: [],
@@ -1002,9 +1277,9 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${projectMonitors.project}-default-Test private location 0`
@@ -1026,10 +1301,71 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
 
+        const packagesResponse = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(packagesResponse.body.items.length).eql(0);
+      }
+    });
+
+    it('deletes integration policies for project monitors when private location is removed from the monitor - lightweight', async () => {
+      const monitorRequest = {
+        ...httpProjectMonitors,
+        monitors: [
+          { ...httpProjectMonitors.monitors[1], privateLocations: ['Test private location 0'] },
+        ],
+      };
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send(monitorRequest);
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
+
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...monitorRequest,
+            monitors: [{ ...monitorRequest.monitors[0], privateLocations: [] }],
+          });
+
         const apiResponsePolicy2 = await supertest.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
-        expect(apiResponsePolicy2.body.items.length).eql(0);
+
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
+
+        expect(packagePolicy2).eql(undefined);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
       }
     });
 
@@ -1060,9 +1396,9 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1095,9 +1431,9 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1192,6 +1528,169 @@ export default function ({ getService }: FtrProviderContext) {
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
               testPolicyId
+        );
+
+        expect(packagePolicy2).eql(undefined);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
+      }
+    });
+
+    it('deletes integration policies when project monitors are deleted - lightweight', async () => {
+      const monitorRequest = {
+        ...httpProjectMonitors,
+        monitors: [
+          { ...httpProjectMonitors.monitors[1], privateLocations: ['Test private location 0'] },
+        ],
+      };
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send(monitorRequest);
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
+        );
+
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+        const httpInput = packagePolicy.inputs.find(
+          (input: any) => input.type === 'synthetics/http'
+        );
+        expect(httpInput).to.eql({
+          type: 'synthetics/http',
+          policy_template: 'synthetics',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'synthetics', dataset: 'http' },
+              release: 'experimental',
+              vars: {
+                __ui: { value: '{"is_tls_enabled":false}', type: 'yaml' },
+                enabled: { value: false, type: 'bool' },
+                type: { value: 'http', type: 'text' },
+                name: { value: 'My Monitor 3', type: 'text' },
+                schedule: { value: '"@every 60m"', type: 'text' },
+                urls: { value: 'http://localhost:9200', type: 'text' },
+                'service.name': { value: '', type: 'text' },
+                timeout: { value: '80s', type: 'text' },
+                max_redirects: { value: '0', type: 'integer' },
+                proxy_url: { value: '', type: 'text' },
+                tags: { value: '["tag2","tag2"]', type: 'yaml' },
+                username: { value: '', type: 'text' },
+                password: { value: '', type: 'password' },
+                'response.include_headers': { value: false, type: 'bool' },
+                'response.include_body': { value: 'always', type: 'text' },
+                'check.request.method': { value: 'POST', type: 'text' },
+                'check.request.headers': {
+                  value: '{"Content-Type":"application/x-www-form-urlencoded"}',
+                  type: 'yaml',
+                },
+                'check.request.body': { value: null, type: 'yaml' },
+                'check.response.status': { value: '["200"]', type: 'yaml' },
+                'check.response.headers': { value: null, type: 'yaml' },
+                'check.response.body.positive': { value: '["Saved","saved"]', type: 'yaml' },
+                'check.response.body.negative': { value: null, type: 'yaml' },
+                'ssl.certificate_authorities': { value: null, type: 'yaml' },
+                'ssl.certificate': { value: null, type: 'yaml' },
+                'ssl.key': { value: null, type: 'yaml' },
+                'ssl.key_passphrase': { value: null, type: 'text' },
+                'ssl.verification_mode': { value: 'full', type: 'text' },
+                'ssl.supported_protocols': {
+                  value: '["TLSv1.1","TLSv1.2","TLSv1.3"]',
+                  type: 'yaml',
+                },
+                location_name: { value: 'Test private location 0', type: 'text' },
+                id: {
+                  value: id,
+                  type: 'text',
+                },
+                config_id: { value: configId, type: 'text' },
+                run_once: { value: false, type: 'bool' },
+                origin: { value: 'project', type: 'text' },
+              },
+              id: `synthetics/http-http-${id}-${testPolicyId}`,
+              compiled_stream: {
+                __ui: { is_tls_enabled: false },
+                type: 'http',
+                name: 'My Monitor 3',
+                id,
+                origin: 'project',
+                enabled: false,
+                urls: 'http://localhost:9200',
+                schedule: '@every 60m',
+                timeout: '80s',
+                max_redirects: 0,
+                tags: ['tag2', 'tag2'],
+                'response.include_headers': false,
+                'response.include_body': 'always',
+                'check.request.method': 'POST',
+                'check.request.headers': { 'Content-Type': 'application/x-www-form-urlencoded' },
+                'check.response.status': ['200'],
+                'check.response.body.positive': ['Saved', 'saved'],
+                'ssl.verification_mode': 'full',
+                'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                processors: [
+                  { add_observer_metadata: { geo: { name: 'Test private location 0' } } },
+                  {
+                    add_fields: {
+                      target: '',
+                      fields: {
+                        'monitor.fleet_managed': true,
+                        config_id: configId,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        });
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...monitorRequest,
+            monitors: [],
+          });
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            } - ${testPolicyId}`
         );
 
         expect(packagePolicy2).eql(undefined);

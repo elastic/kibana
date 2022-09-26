@@ -139,6 +139,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
   dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: [],
   historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

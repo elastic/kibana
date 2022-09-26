@@ -199,7 +199,8 @@ export function getVisualizeFieldSuggestions({
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === visualizeTriggerFieldContext.type
     );
-    return activeVisualization?.getVisualizationSuggestionFromContext?.({
+    const visualization = visualizationMap[visualizeTriggerFieldContext.type] || null;
+    return visualization?.getSuggestionFromConvertToLensContext?.({
       suggestions: allSuggestions,
       context: visualizeTriggerFieldContext,
     });

@@ -1,6 +1,7 @@
 {
   "type": "tcp",
   "locations": [],
+  "journey_id": "",
   "enabled": true,
   "schedule": {
     "number": "3",

@@ -50,6 +50,8 @@ import {
 import { StatusBadge } from './components/status_badge';
 import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
+import { ManagementPageLoader } from '../management_page_loader';
+import { ActionsLogEmptyState } from './components/actions_log_empty_state';
 
 const emptyValue = getEmptyValue();
 
@@ -111,15 +113,21 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsLog = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds'> & { showHostNames?: boolean; isFlyout?: boolean }
->(({ agentIds, showHostNames = false, isFlyout = true }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds'> & {
+    showHostNames?: boolean;
+    isFlyout?: boolean;
+    setIsDataInResponse?: (isData: boolean) => void;
+  }
+>(({ agentIds, showHostNames = false, isFlyout = true, setIsDataInResponse }) => {
   const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
     useUrlPagination();
   const {
     commands: commandsFromUrl,
+    hosts: agentIdsFromUrl,
     statuses: statusesFromUrl,
     startDate: startDateFromUrl,
     endDate: endDateFromUrl,
+    users: usersFromUrl,
   } = useActionHistoryUrlParams();
 
   const getTestId = useTestIdGenerator('response-actions-list');
@@ -127,10 +135,13 @@ export const ResponseActionsLog = memo<
     [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
 
+  // Used to decide if display global loader or not (only the fist time tha page loads)
+  const [isFirstAttempt, setIsFirstAttempt] = useState(true);
+
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
     page: isFlyout ? 1 : paginationFromUrlParams.page,
     pageSize: isFlyout ? 10 : paginationFromUrlParams.pageSize,
-    agentIds,
+    agentIds: isFlyout ? agentIds : agentIdsFromUrl?.length ? agentIdsFromUrl : agentIds,
     commands: [],
     statuses: [],
     userIds: [],
@@ -144,12 +155,14 @@ export const ResponseActionsLog = memo<
         commands: commandsFromUrl?.length
           ? commandsFromUrl.map((commandFromUrl) => getCommandKey(commandFromUrl))
           : prevState.commands,
+        hosts: agentIdsFromUrl?.length ? agentIdsFromUrl : prevState.agentIds,
         statuses: statusesFromUrl?.length
           ? (statusesFromUrl as ResponseActionStatus[])
           : prevState.statuses,
+        userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
       }));
     }
-  }, [commandsFromUrl, isFlyout, statusesFromUrl, setQueryParams]);
+  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams, usersFromUrl]);
 
   // date range picker state and handlers
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
@@ -161,11 +174,34 @@ export const ResponseActionsLog = memo<
     isFetching,
     isFetched,
     refetch: reFetchEndpointActionList,
-  } = useGetEndpointActionList({
-    ...queryParams,
-    startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-    endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
-  });
+  } = useGetEndpointActionList(
+    {
+      ...queryParams,
+      startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
+      endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+    },
+    { retry: false }
+  );
+
+  // Hide page header when there is no actions index calling the setIsDataInResponse with false value.
+  // Otherwise, it shows the page header calling the setIsDataInResponse with true value and it also keeps track
+  // if the API request was done for the first time.
+  useEffect(() => {
+    if (
+      !isFetching &&
+      error?.body?.statusCode === 404 &&
+      error?.body?.message === 'index_not_found_exception'
+    ) {
+      if (setIsDataInResponse) {
+        setIsDataInResponse(false);
+      }
+    } else if (!isFetching && actionList) {
+      setIsFirstAttempt(false);
+      if (setIsDataInResponse) {
+        setIsDataInResponse(true);
+      }
+    }
+  }, [actionList, error, isFetching, setIsDataInResponse]);
 
   // handle auto refresh data
   const onRefresh = useCallback(() => {
@@ -192,6 +228,22 @@ export const ResponseActionsLog = memo<
         ...prevState,
         statuses: selectedStatuses as ResponseActionStatus[],
       }));
+    },
+    [setQueryParams]
+  );
+
+  // handle on change hosts filter
+  const onChangeHostsFilter = useCallback(
+    (selectedAgentIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, agentIds: selectedAgentIds }));
+    },
+    [setQueryParams]
+  );
+
+  // handle on change users filter
+  const onChangeUsersFilter = useCallback(
+    (selectedUserIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, userIds: selectedUserIds }));
     },
     [setQueryParams]
   );
@@ -566,6 +618,11 @@ export const ResponseActionsLog = memo<
     [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
   );
 
+  if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
+    return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
+  } else if (isFetching && isFirstAttempt) {
+    return <ManagementPageLoader data-test-subj={getTestId('global-loader')} />;
+  }
   return (
     <>
       <ActionsLogFilters
@@ -573,11 +630,14 @@ export const ResponseActionsLog = memo<
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
         onClick={reFetchEndpointActionList}
+        onChangeHostsFilter={onChangeHostsFilter}
         onChangeCommandsFilter={onChangeCommandsFilter}
         onChangeStatusesFilter={onChangeStatusesFilter}
+        onChangeUsersFilter={onChangeUsersFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
+        showHostsFilter={showHostNames}
       />
       {isFetched && !totalItemCount ? (
         <ManagementEmptyStateWrapper>

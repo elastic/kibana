@@ -607,7 +607,7 @@
         "label": "AvailableAnnotationIcon",
         "description": [],
         "signature": [
-          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\""
+          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\""
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
@@ -872,7 +872,7 @@
             "section": "def-common.KibanaQueryOutput",
             "text": "KibanaQueryOutput"
           },
-          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; } & StyleSharedProps & { icon?: ",
+          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; } & StyleSharedProps & { icon?: ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
@@ -905,7 +905,7 @@
             "section": "def-common.KibanaQueryOutput",
             "text": "KibanaQueryOutput"
           },
-          "; timeField?: string | undefined; textField?: string | undefined; extraFields?: string[] | undefined; key: { type: \"point_in_time\"; }; } & StyleSharedProps & { icon?: ",
+          "; timeField?: string | undefined; textField?: string | undefined; extraFields?: string[] | undefined; ignoreGlobalFilters?: boolean | undefined; key: { type: \"point_in_time\"; }; } & StyleSharedProps & { icon?: ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
@@ -938,7 +938,7 @@
             "section": "def-common.KibanaQueryOutput",
             "text": "KibanaQueryOutput"
           },
-          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; } & StyleSharedProps & { icon?: ",
+          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; } & StyleSharedProps & { icon?: ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
@@ -1361,7 +1361,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\")[]"
+                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -2471,7 +2471,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\")[]"
+                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
@@ -2606,6 +2606,58 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters",
+                "type": "Object",
+                "tags": [],
+                "label": "ignoreGlobalFilters",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters.default",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "default",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ]
           },
@@ -2633,7 +2685,7 @@
                 "section": "def-common.KibanaQueryOutput",
                 "text": "KibanaQueryOutput"
               },
-              "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; label: string; color?: string | undefined; isHidden?: boolean | undefined; icon?: ",
+              "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; label: string; color?: string | undefined; isHidden?: boolean | undefined; icon?: ",
               {
                 "pluginId": "eventAnnotation",
                 "scope": "common",
@@ -2680,7 +2732,7 @@
                     "section": "def-common.KibanaQueryOutput",
                     "text": "KibanaQueryOutput"
                   },
-                  "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; } & StyleSharedProps & { icon?: ",
+                  "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; } & StyleSharedProps & { icon?: ",
                   {
                     "pluginId": "eventAnnotation",
                     "scope": "common",

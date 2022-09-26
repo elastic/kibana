@@ -27,7 +27,7 @@ import {
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
-  commonExplicitAnnotationType,
+  commonEnrichAnnotationLayer,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
@@ -141,7 +141,7 @@ export const makeLensEmbeddableFactory =
                 };
 
                 let migratedLensState = commonMigrateMetricIds(lensState.attributes);
-                migratedLensState = commonExplicitAnnotationType(
+                migratedLensState = commonEnrichAnnotationLayer(
                   migratedLensState as LensDocShape850<XYVisState850>
                 );
                 migratedLensState = commonMigratePartitionChartGroups(

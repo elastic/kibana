@@ -77,6 +77,7 @@ import {
   newTermsFields,
   historyWindowStart,
 } from '../common';
+import { ResponseActionArray } from '../../rule_response_actions/schemas';
 
 export const createSchema = <
   Required extends t.Props,
@@ -295,6 +296,7 @@ const queryRuleParams = {
     data_view_id,
     filters,
     saved_id,
+    response_actions: ResponseActionArray,
   },
   defaultable: {
     query,
@@ -321,6 +323,7 @@ const savedQueryRuleParams = {
     data_view_id,
     query,
     filters,
+    response_actions: ResponseActionArray,
   },
   defaultable: {
     language: t.keyof({ kuery: null, lucene: null }),

@@ -17,7 +17,7 @@ import type {
   PostBulkAgentUnenrollRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
@@ -36,7 +36,7 @@ export const postAgentUnenrollHandler: RequestHandler<
     const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -69,6 +69,6 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
 
     return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

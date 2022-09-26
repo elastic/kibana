@@ -9,10 +9,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import {
+  TableListViewKibanaDependencies,
+  TableListViewKibanaProvider,
+} from '@kbn/content-management-table-list';
 
 import { DashboardAppServices } from '../../types';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
@@ -39,13 +43,33 @@ function mountWith({
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
-    const DashboardServicesProvider = pluginServices.getContextProvider();
+    const { application, notifications, savedObjectsTagging } = pluginServices.getServices();
 
     return (
       <I18nProvider>
         {/* Can't get rid of KibanaContextProvider here yet because of 'call to action when no dashboards exist' tests below */}
         <KibanaContextProvider services={services}>
-          <DashboardServicesProvider>{children}</DashboardServicesProvider>
+          <TableListViewKibanaProvider
+            core={{
+              application:
+                application as unknown as TableListViewKibanaDependencies['core']['application'],
+              notifications,
+            }}
+            savedObjectsTagging={
+              {
+                ui: {
+                  ...savedObjectsTagging,
+                  components: {
+                    TagList: () => null,
+                  },
+                },
+              } as unknown as TableListViewKibanaDependencies['savedObjectsTagging']
+            }
+            FormattedRelative={FormattedRelative}
+            toMountPoint={() => () => () => undefined}
+          >
+            {children}
+          </TableListViewKibanaProvider>
         </KibanaContextProvider>
       </I18nProvider>
     );

@@ -87,6 +87,8 @@ export const addConnector = async (
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
+    description: null,
+    error: null,
     index_name: input.index_name,
     is_native: input.is_native,
     language: input.language,

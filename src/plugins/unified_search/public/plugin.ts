@@ -53,6 +53,7 @@ export class UnifiedSearchPublicPlugin
     );
 
     uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));
+    this.usageCollection = usageCollection;
 
     return {
       autocomplete: this.autocomplete.setup(core, {

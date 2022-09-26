@@ -67,6 +67,10 @@ export interface ThresholdRule extends CustomRule {
   threshold: string;
 }
 
+export interface SavedQueryRule extends CustomRule {
+  savedId: string;
+}
+
 export interface OverrideRule extends CustomRule {
   severityOverride: SeverityOverride[];
   riskOverride: string;

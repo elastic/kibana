@@ -1864,14 +1864,6 @@
             "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_filter_state.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
           },

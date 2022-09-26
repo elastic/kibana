@@ -23,7 +23,7 @@ export const FLYOUT_TITLE = `[data-test-subj="tiIndicatorFlyoutTitle"]`;
 
 export const FLYOUT_TABS = `[data-test-subj="tiIndicatorFlyoutTabs"]`;
 
-export const FLYOUT_TABLE = `[data-test-subj="tiFlyoutTableMemoryTable"]`;
+export const FLYOUT_TABLE = `[data-test-subj="tiFlyoutTableTabRow"]`;
 
 export const FLYOUT_JSON = `[data-test-subj="tiFlyoutJsonCodeBlock"]`;
 
@@ -40,6 +40,13 @@ export const TABLE_CONTROLS = '[data-test-sub="dataGridControls"]';
 export const INDICATOR_TYPE_CELL = '[data-gridcell-column-id="threat.indicator.type"]';
 
 export const FIELD_SELECTOR = '[data-test-subj="tiIndicatorFieldSelectorDropdown"]';
+
+export const FIELD_SELECTOR_INPUT = '[data-test-subj="comboBoxInput"]';
+
+export const FIELD_SELECTOR_TOGGLE_BUTTON = '[data-test-subj="comboBoxToggleListButton"]';
+
+export const FIELD_SELECTOR_LIST =
+  '[data-test-subj="comboBoxOptionsList tiIndicatorFieldSelectorDropdown-optionsList"]';
 
 export const FIELD_BROWSER = `[data-test-subj="show-field-browser"]`;
 
@@ -101,3 +108,12 @@ export const UNTITLED_TIMELINE_BUTTON = '[data-test-subj="flyoutOverlay"]';
 export const TIMELINE_DRAGGABLE_ITEM = '[data-test-subj="providerContainer"]';
 
 export const KQL_FILTER = '[id="popoverFor_filter0"]';
+
+export const INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON =
+  '[data-test-subj="tiIndicatorTableInvestigateInTimelineButtonIcon"]';
+
+export const INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON =
+  '[data-test-subj="tiIndicatorFlyoutInvestigateInTimelineButton"]';
+export const INSPECTOR_BUTTON = '[data-test-subj="tiIndicatorsGridInspect"]';
+
+export const INSPECTOR_PANEL = '[data-test-subj="inspectorPanel"]';

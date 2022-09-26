@@ -971,3 +971,14 @@ export const getField = (event: SimpleHit, field: string): SearchTypes | undefin
     return get(event._source, field) as SearchTypes | undefined;
   }
 };
+
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
+  if (unprocessedExceptions.length > 0) {
+    const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
+  }
+};

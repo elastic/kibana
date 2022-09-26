@@ -286,6 +286,7 @@ const newLayerFn = {
     layerType: layerTypes.ANNOTATIONS,
     annotations: [],
     indexPatternId,
+    ignoreGlobalFilters: true,
   }),
 };
 

@@ -24,13 +24,11 @@ import {
   BaseIndexPatternColumn,
   ValueFormatConfig,
 } from './column_types';
-import {
-  adjustTimeScaleLabelSuffix,
-  adjustTimeScaleOnOtherColumnChange,
-} from '../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -117,10 +115,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (layer, thisColumnId) =>
-      optionalTimeScaling
-        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId) as T)
-        : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
@@ -205,6 +199,14 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         ...aggConfigParams,
       }).toAst();
     },
+    getGroupByKey: (agg) => {
+      return getGroupByKey(
+        agg,
+        [typeToFn[type]],
+        [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+      );
+    },
+
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
         getInvalidFieldMessage(

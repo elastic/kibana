@@ -190,6 +190,7 @@ export const buildExpression = (
         annotations: layer.annotations.map((c) => ({
           ...c,
           label: uniqueLabels[c.id],
+          ignoreGlobalFilters: layer.ignoreGlobalFilters,
         })),
       };
     });

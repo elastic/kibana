@@ -10,6 +10,7 @@ import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { KueryNode } from '@kbn/es-query';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CaseSeverity, CaseStatuses, User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -47,6 +48,7 @@ export interface CasesClientArgs {
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  readonly securityStartPlugin: SecurityPluginStart;
 }
 
 export interface ConstructQueryParams {
