@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiRadioGroup,
-} from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiButtonEmpty, EuiPopover, EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';
 
@@ -77,7 +74,7 @@ export class SetViewForm extends Component<Props, State> {
   _renderForm() {
     if (this.state.coordinateSystem === MGRS) {
       return (
-        <MgrsForm 
+        <MgrsForm
           settings={this.props.settings}
           zoom={this.props.zoom}
           center={this.props.center}
@@ -86,7 +83,7 @@ export class SetViewForm extends Component<Props, State> {
       );
     }
     return (
-      <DecimalDegreesForm 
+      <DecimalDegreesForm
         settings={this.props.settings}
         zoom={this.props.zoom}
         center={this.props.center}
@@ -103,11 +100,7 @@ export class SetViewForm extends Component<Props, State> {
           isOpen={this.state.isPopoverOpen}
           closePopover={this._closePopover}
           button={
-            <EuiButtonEmpty
-              iconType="controlsHorizontal"
-              size="xs"
-              onClick={this._togglePopover}
-            >
+            <EuiButtonEmpty iconType="controlsHorizontal" size="xs" onClick={this._togglePopover}>
               <FormattedMessage
                 id="xpack.maps.setViewControl.changeCoordinateSystemButtonLabel"
                 defaultMessage="Coordinate system"
@@ -126,4 +119,3 @@ export class SetViewForm extends Component<Props, State> {
     );
   }
 }
-

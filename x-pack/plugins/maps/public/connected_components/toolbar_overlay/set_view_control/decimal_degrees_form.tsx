@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { withinRange } from './utils';
 
 interface Props {
@@ -41,14 +42,14 @@ export class DecimalDegreesForm extends Component<Props, State> {
   _onLatChange = (evt: ChangeEvent<HTMLInputElement>) => {
     const sanitizedValue = parseFloat(evt.target.value);
     this.setState({
-      lat: isNaN(sanitizedValue) ? '' : sanitizedValue
+      lat: isNaN(sanitizedValue) ? '' : sanitizedValue,
     });
   };
 
   _onLonChange = (evt: ChangeEvent<HTMLInputElement>) => {
     const sanitizedValue = parseFloat(evt.target.value);
     this.setState({
-      lon: isNaN(sanitizedValue) ? '' : sanitizedValue
+      lon: isNaN(sanitizedValue) ? '' : sanitizedValue,
     });
   };
 
@@ -67,16 +68,20 @@ export class DecimalDegreesForm extends Component<Props, State> {
   render() {
     const { isInvalid: isLatInvalid, error: latError } = withinRange(this.state.lat, -90, 90);
     const { isInvalid: isLonInvalid, error: lonError } = withinRange(this.state.lat, -180, 180);
-    const { isInvalid: isZoomInvalid, error: zoomError } = withinRange(this.state.zoom, this.props.settings.minZoom, this.props.settings.maxZoom);
+    const { isInvalid: isZoomInvalid, error: zoomError } = withinRange(
+      this.state.zoom,
+      this.props.settings.minZoom,
+      this.props.settings.maxZoom
+    );
 
     return (
       <EuiForm>
-        <EuiFormRow 
+        <EuiFormRow
           label={i18n.translate('xpack.maps.setViewControl.latitudeLabel', {
             defaultMessage: 'Latitude',
-          })} 
-          isInvalid={isLatInvalid} 
-          error={latError} 
+          })}
+          isInvalid={isLatInvalid}
+          error={latError}
           display="columnCompressed"
         >
           <EuiFieldNumber
@@ -88,11 +93,11 @@ export class DecimalDegreesForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiFormRow 
+        <EuiFormRow
           label={i18n.translate('xpack.maps.setViewControl.longitudeLabel', {
             defaultMessage: 'Longitude',
-          })} 
-          isInvalid={isLonInvalid} 
+          })}
+          isInvalid={isLonInvalid}
           error={lonError}
           display="columnCompressed"
         >
@@ -105,11 +110,11 @@ export class DecimalDegreesForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiFormRow 
+        <EuiFormRow
           label={i18n.translate('xpack.maps.setViewControl.zoomLabel', {
             defaultMessage: 'Zoom',
-          })} 
-          isInvalid={isZoomInvalid} 
+          })}
+          isInvalid={isZoomInvalid}
           error={zoomError}
           display="columnCompressed"
         >
@@ -128,11 +133,7 @@ export class DecimalDegreesForm extends Component<Props, State> {
           <EuiButton
             size="s"
             fill
-            disabled={
-              isLatInvalid ||
-              isLonInvalid ||
-              isZoomInvalid
-            }
+            disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
             onClick={this._onSubmit}
             data-test-subj="submitViewButton"
           >
@@ -143,6 +144,6 @@ export class DecimalDegreesForm extends Component<Props, State> {
           </EuiButton>
         </EuiTextAlign>
       </EuiForm>
-    )
+    );
   }
 }

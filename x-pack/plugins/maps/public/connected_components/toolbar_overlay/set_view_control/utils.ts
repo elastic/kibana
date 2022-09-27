@@ -13,17 +13,16 @@ const converter = new usng.Converter();
 
 export function withinRange(value: string | number, min: number, max: number) {
   const isInvalid = value === '' || value > max || value < min;
-  const error = isInvalid 
-  	? 
-  	  i18n.translate('xpack.maps.setViewControl.outOfRangeErrorMsg', {
+  const error = isInvalid
+    ? i18n.translate('xpack.maps.setViewControl.outOfRangeErrorMsg', {
         defaultMessage: `Must be between ${min} and ${max}`,
-        values: { min, max }
-      }) 
-  	: null;
-  return { isInvalid, error }
+        values: { min, max },
+      })
+    : null;
+  return { isInvalid, error };
 }
 
-export function convertDDToUTM(lat: string | number, lon: string | number) {
+export function ddToUTM(lat: number, lon: number) {
   try {
     const utmCoord = converter.LLtoUTM(lat, lon);
 
@@ -56,7 +55,15 @@ export function convertDDToUTM(lat: string | number, lon: string | number) {
   }
 }
 
-export function ddToMGRS(lat: string | number, lon: string | number) {
+export function utmToDD(northing: string, easting: string, zoneNumber: string) {
+  try {
+    return converter.UTMtoLL(northing, easting, zoneNumber);
+  } catch (e) {
+    return undefined;
+  }
+}
+
+export function ddToMGRS(lat: number, lon: number) {
   try {
     const mgrsCoord = converter.LLtoMGRS(lat, lon, 5);
     return mgrsCoord;
@@ -65,15 +72,11 @@ export function ddToMGRS(lat: string | number, lon: string | number) {
   }
 }
 
-export function getViewString(lat: number, lon: number, zoom: number) {
-  return `${lat},${lon},${zoom}`;
-}
-
-function convertMGRStoUSNG(mgrs: string) {
+function mgrstoUSNG(mgrs: string) {
   let squareIdEastSpace = 0;
   for (let i = mgrs.length - 1; i > -1; i--) {
     // check if we have hit letters yet
-    if (isNaN(mgrs.substr(i, 1))) {
+    if (isNaN(parseInt(mgrs.substr(i, 1), 10))) {
       squareIdEastSpace = i + 1;
       break;
     }
@@ -93,5 +96,9 @@ function convertMGRStoUSNG(mgrs: string) {
 }
 
 export function mgrsToDD(mgrs: string) {
-  return mgrs ? converter.USNGtoLL(convertMGRStoUSNG(mgrs)) : '';
+  try {
+    return converter.USNGtoLL(mgrstoUSNG(mgrs));
+  } catch (e) {
+    return undefined;
+  }
 }

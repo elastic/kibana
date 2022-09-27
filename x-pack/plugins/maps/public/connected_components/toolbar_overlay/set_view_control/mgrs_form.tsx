@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { ddToMGRS, mgrsToDD, withinRange } from './utils';
 
 interface Props {
@@ -38,33 +39,29 @@ export class MgrsForm extends Component<Props, State> {
     zoom: this.props.zoom,
   };
 
-  _isMgrsInvalid() {
-    if (this.state.mgrs === '') {
-      return true;
-    }
+  _toPoint() {
+    return this.state.mgrs === '' ? undefined : mgrsToDD(this.state.mgrs);
+  }
 
-    try {
-      const point = mgrsToDD(this.state.mgrs);
-      return point === undefined ||
-        !point.north ||
-        _.isNaN(point.north) ||
-        !point.south ||
-        _.isNaN(point.south) ||
-        !point.east ||
-        _.isNaN(point.east) ||
-        !point.west ||
-        _.isNaN(point.west);
-    } catch (err) {
-      return true;
-    }
+  _isMgrsInvalid() {
+    const point = this._toPoint();
+    return (
+      point === undefined ||
+      !point.north ||
+      _.isNaN(point.north) ||
+      !point.south ||
+      _.isNaN(point.south) ||
+      !point.east ||
+      _.isNaN(point.east) ||
+      !point.west ||
+      _.isNaN(point.west)
+    );
   }
 
   _onMGRSChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    this.setState(
-      {
-        mgrs: _.isNull(evt.target.value) ? '' : evt.target.value,
-      }
-    );
+    this.setState({
+      mgrs: _.isNull(evt.target.value) ? '' : evt.target.value,
+    });
   };
 
   _onZoomChange = (evt: ChangeEvent<HTMLInputElement>) => {
@@ -75,15 +72,9 @@ export class MgrsForm extends Component<Props, State> {
   };
 
   _onSubmit = () => {
-    if (this.state.mgrs === '') {
-      return;
-    }
-
-    try {
-      const { north: lat, east: lon } = mgrsToDD(this.state.mgrs);
-      this.props.onSubmit(lat, lon, this.state.zoom as number);
-    } catch (err) {
-      return;
+    const point = this._toPoint();
+    if (point) {
+      this.props.onSubmit(point.north, point.east, this.state.zoom as number);
     }
   };
 
@@ -94,16 +85,20 @@ export class MgrsForm extends Component<Props, State> {
           defaultMessage: 'MGRS is invalid',
         })
       : null;
-    const { isInvalid: isZoomInvalid, error: zoomError } = withinRange(this.state.zoom, this.props.settings.minZoom, this.props.settings.maxZoom);
+    const { isInvalid: isZoomInvalid, error: zoomError } = withinRange(
+      this.state.zoom,
+      this.props.settings.minZoom,
+      this.props.settings.maxZoom
+    );
 
     return (
       <EuiForm>
-        <EuiFormRow 
+        <EuiFormRow
           label={i18n.translate('xpack.maps.setViewControl.mgrsLabel', {
             defaultMessage: 'MGRS',
           })}
-          isInvalid={isMgrsInvalid} 
-          error={mgrsError} 
+          isInvalid={isMgrsInvalid}
+          error={mgrsError}
           display="columnCompressed"
         >
           <EuiFieldText
@@ -115,11 +110,11 @@ export class MgrsForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiFormRow 
+        <EuiFormRow
           label={i18n.translate('xpack.maps.setViewControl.zoomLabel', {
             defaultMessage: 'Zoom',
-          })} 
-          isInvalid={isZoomInvalid} 
+          })}
+          isInvalid={isZoomInvalid}
           error={zoomError}
           display="columnCompressed"
         >
@@ -138,10 +133,7 @@ export class MgrsForm extends Component<Props, State> {
           <EuiButton
             size="s"
             fill
-            disabled={
-              isMgrsInvalid ||
-              isZoomInvalid
-            }
+            disabled={isMgrsInvalid || isZoomInvalid}
             onClick={this._onSubmit}
             data-test-subj="submitViewButton"
           >
@@ -152,6 +144,6 @@ export class MgrsForm extends Component<Props, State> {
           </EuiButton>
         </EuiTextAlign>
       </EuiForm>
-    )
+    );
   }
 }
