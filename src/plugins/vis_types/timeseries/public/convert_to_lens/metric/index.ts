@@ -71,12 +71,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(
-      series,
-      currentIndexPattern!,
-      seriesNum,
-      reducedTimeRange
-    );
+    const metricsColumns = getMetricsColumns(series, currentIndexPattern!, seriesNum, {
+      reducedTimeRange,
+    });
     if (metricsColumns === null) {
       return null;
     }
