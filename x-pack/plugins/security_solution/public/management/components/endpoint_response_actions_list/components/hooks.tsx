@@ -159,7 +159,6 @@ export const getCommandKey = (
   }
 };
 
-// TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = ({
   filterName,

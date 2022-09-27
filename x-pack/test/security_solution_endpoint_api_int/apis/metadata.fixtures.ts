@@ -247,8 +247,8 @@ export function generateMetadataDocs(timestamp: number) {
         dataset: 'endpoint.metadata',
       },
       host: {
-        hostname: 'rezzani-7.example.com',
-        name: 'rezzani-7.example.com',
+        hostname: 'Example-host-name-XYZ',
+        name: 'Example-host-name-XYZ',
         id: 'fc0ff548-feba-41b6-8367-65e8790d0eaf',
         ip: ['10.101.149.26', '2606:a000:ffc0:39:11ef:37b9:3371:578c'],
         mac: ['e2-6d-f9-0-46-2e'],
@@ -399,8 +399,8 @@ export function generateMetadataDocs(timestamp: number) {
       },
       host: {
         architecture: 'x86',
-        hostname: 'rezzani-7.example.com',
-        name: 'rezzani-7.example.com',
+        hostname: 'Example-host-name-XYZ',
+        name: 'Example-host-name-XYZ',
         id: 'fc0ff548-feba-41b6-8367-65e8790d0eaf',
         ip: ['10.101.149.26', '2606:a000:ffc0:39:11ef:37b9:3371:578c'],
         mac: ['e2-6d-f9-0-46-2e'],
@@ -550,8 +550,8 @@ export function generateMetadataDocs(timestamp: number) {
       },
       host: {
         architecture: 'x86',
-        hostname: 'rezzani-7.example.com',
-        name: 'rezzani-7.example.com',
+        hostname: 'Example-host-name-XYZ',
+        name: 'Example-host-name-XYZ',
         id: 'fc0ff548-feba-41b6-8367-65e8790d0eaf',
         ip: ['10.101.149.26', '2606:a000:ffc0:39:11ef:37b9:3371:578c'],
         mac: ['e2-6d-f9-0-46-2e'],
