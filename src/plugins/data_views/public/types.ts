@@ -11,6 +11,11 @@ import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/
 import { DataViewsServicePublicMethods } from './data_views';
 import { HasDataService } from '../common';
 
+export enum INDEX_PATTERN_TYPE {
+  ROLLUP = 'rollup',
+  DEFAULT = 'default',
+}
+
 export enum IndicesResponseItemIndexAttrs {
   OPEN = 'open',
   CLOSED = 'closed',

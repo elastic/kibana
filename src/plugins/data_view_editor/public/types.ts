@@ -20,6 +20,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type {
   DataView,
   DataViewsPublicPluginStart,
+  INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
@@ -100,11 +101,6 @@ export interface RollupIndiciesCapability {
 }
 
 export type RollupIndicesCapsResponse = Record<string, RollupIndiciesCapability>;
-
-export enum INDEX_PATTERN_TYPE {
-  ROLLUP = 'rollup',
-  DEFAULT = 'default',
-}
 
 export interface IndexPatternConfig {
   title: string;
