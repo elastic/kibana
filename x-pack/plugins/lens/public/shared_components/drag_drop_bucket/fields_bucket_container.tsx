@@ -19,13 +19,14 @@ import { TooltipWrapper } from '..';
 import type { BucketContainerProps } from './types';
 
 export const FieldsBucketContainer = ({
+  idx,
   onRemoveClick,
   removeTitle,
   children,
   draggableProvided,
   isNotRemovable,
   isNotDraggable,
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = 'lns-fieldsBucketContainer',
 }: BucketContainerProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -34,7 +35,7 @@ export const FieldsBucketContainer = ({
       paddingSize="none"
       hasShadow={false}
       hasBorder={false}
-      color="transparent"
+      color="subdued"
       data-test-subj={dataTestSubj}
     >
       <EuiFlexGroup direction={'row'} gutterSize="s" alignItems="center" responsive={false}>
@@ -42,16 +43,17 @@ export const FieldsBucketContainer = ({
           <EuiPanel
             paddingSize="none"
             color="transparent"
+            style={isNotDraggable ? { cursor: 'no-drop' } : {}}
             {...(draggableProvided?.dragHandleProps ?? {})}
           >
             <EuiIcon
               size="s"
-              color={isNotDraggable ? euiTheme.colors.disabled : 'subdued'}
+              color={euiTheme.colors[isNotDraggable ? 'disabled' : 'subduedText']}
               type="grab"
               title={i18n.translate('xpack.lens.fieldsBucketContainer.dragToReorder', {
                 defaultMessage: 'Drag to reorder',
               })}
-              data-test-subj={`${dataTestSubj}-dragToReorder`}
+              data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -74,7 +76,7 @@ export const FieldsBucketContainer = ({
               aria-label={removeTitle}
               title={removeTitle}
               onClick={onRemoveClick}
-              data-test-subj={`${dataTestSubj}-remove`}
+              data-test-subj={`${dataTestSubj}-removeField-${idx}`}
               isDisabled={isNotRemovable}
             />
           </TooltipWrapper>

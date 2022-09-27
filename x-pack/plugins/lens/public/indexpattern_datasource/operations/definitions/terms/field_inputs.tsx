@@ -147,7 +147,7 @@ export function FieldInputs({
               })}
               isNotRemovable={disableActions && !isNew}
               isNotDraggable={arrayRef.length < 2}
-              data-test-subj={`indexPattern-terms-${index}`}
+              data-test-subj={`indexPattern-terms`}
               Container={FieldsBucketContainer}
               isInsidePanel={true}
             >
@@ -163,7 +163,9 @@ export function FieldInputs({
                   onFieldSelectChange(choice, index);
                 }}
                 isInvalid={shouldShowError}
-                data-test-subj={`indexPattern-terms-${index}-dimension-field`}
+                data-test-subj={
+                  localValues.length !== 1 ? `indexPattern-dimension-field-${index}` : undefined
+                }
               />
             </DraggableBucketContainer>
           );

@@ -8,19 +8,21 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-export const NewBucketButton = ({
-  label,
-  onClick,
-  isDisabled,
-  className,
-  ['data-test-subj']: dataTestSubj = 'lns-newBucket-add',
-}: {
+interface NewBucketButtonProps {
   label: string;
   onClick: () => void;
   isDisabled?: boolean;
   className?: string;
   'data-test-subj'?: string;
-}) => (
+}
+
+export const NewBucketButton = ({
+  label,
+  onClick,
+  isDisabled,
+  className,
+  'data-test-subj': dataTestSubj = 'lns-newBucket-add',
+}: NewBucketButtonProps) => (
   <EuiButtonEmpty
     data-test-subj={dataTestSubj}
     size="xs"

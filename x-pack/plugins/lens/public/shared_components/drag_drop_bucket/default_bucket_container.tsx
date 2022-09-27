@@ -18,6 +18,7 @@ import {
 import type { BucketContainerProps } from './types';
 
 export const DefaultBucketContainer = ({
+  idx,
   isInvalid,
   invalidMessage,
   onRemoveClick,
@@ -26,7 +27,7 @@ export const DefaultBucketContainer = ({
   draggableProvided,
   isNotRemovable,
   isNotDraggable,
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = 'lns-customBucketContainer',
 }: BucketContainerProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -36,6 +37,7 @@ export const DefaultBucketContainer = ({
         <EuiFlexItem grow={false}>
           <EuiPanel
             paddingSize="xs"
+            style={isNotDraggable ? { cursor: 'no-drop' } : {}}
             color="transparent"
             {...(draggableProvided?.dragHandleProps ?? {})}
           >
@@ -52,7 +54,7 @@ export const DefaultBucketContainer = ({
                       defaultMessage: 'Drag to reorder',
                     })
               }
-              data-test-subj={`${dataTestSubj}-dragToReorder`}
+              data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -66,7 +68,7 @@ export const DefaultBucketContainer = ({
             aria-label={removeTitle}
             title={removeTitle}
             disabled={isNotRemovable}
-            data-test-subj={`${dataTestSubj}-remove`}
+            data-test-subj={`${dataTestSubj}-remove-${idx}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

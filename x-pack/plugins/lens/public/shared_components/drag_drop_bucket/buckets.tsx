@@ -8,13 +8,13 @@
 import React, { useCallback } from 'react';
 import type { Assign } from '@kbn/utility-types';
 import {
-  EuiDragDropContext,
-  euiDragDropReorder,
+  EuiPanel,
   EuiDraggable,
   EuiDroppable,
-  DragDropContextProps,
   EuiPanelProps,
-  EuiPanel,
+  EuiDragDropContext,
+  DragDropContextProps,
+  euiDragDropReorder,
   useEuiTheme,
 } from '@elastic/eui';
 import { DefaultBucketContainer } from './default_bucket_container';
@@ -22,7 +22,6 @@ import type { BucketContainerProps } from './types';
 
 export const DraggableBucketContainer = ({
   id,
-  idx,
   children,
   isInsidePanel,
   Container = DefaultBucketContainer,
@@ -31,7 +30,6 @@ export const DraggableBucketContainer = ({
   Omit<BucketContainerProps, 'draggableProvided'>,
   {
     id: string;
-    idx: number;
     children: React.ReactNode;
     isInsidePanel?: boolean;
     Container?: React.FunctionComponent<BucketContainerProps>;
@@ -40,24 +38,22 @@ export const DraggableBucketContainer = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div>
-      <EuiDraggable
-        index={idx}
-        draggableId={id}
-        customDragHandle={true}
-        isDragDisabled={bucketContainerProps.isNotDraggable}
-        style={{
-          [isInsidePanel ? 'margin' : 'marginBottom']: euiTheme.size.xs,
-        }}
-        disableInteractiveElementBlocking
-      >
-        {(provided) => (
-          <Container draggableProvided={provided} {...bucketContainerProps}>
-            {children}
-          </Container>
-        )}
-      </EuiDraggable>
-    </div>
+    <EuiDraggable
+      draggableId={id}
+      customDragHandle={true}
+      index={bucketContainerProps.idx}
+      isDragDisabled={bucketContainerProps.isNotDraggable}
+      style={{
+        [isInsidePanel ? 'margin' : 'marginBottom']: euiTheme.size.xs,
+      }}
+      disableInteractiveElementBlocking
+    >
+      {(provided) => (
+        <Container draggableProvided={provided} {...bucketContainerProps}>
+          {children}
+        </Container>
+      )}
+    </EuiDraggable>
   );
 };
 
@@ -79,8 +75,7 @@ export function DragDropBuckets<T = unknown>({
   const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
     ({ source, destination }) => {
       if (source && destination) {
-        const newItems = euiDragDropReorder(items, source.index, destination.index);
-        onDragEnd?.(newItems);
+        onDragEnd?.(euiDragDropReorder(items, source.index, destination.index));
       }
     },
     [items, onDragEnd]
