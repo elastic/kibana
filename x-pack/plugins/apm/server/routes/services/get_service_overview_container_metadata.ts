@@ -50,10 +50,6 @@ export const getServiceOverviewContainerMetadata = async ({
   start: number;
   end: number;
 }): Promise<ServiceOverviewContainerMetadataDetails> => {
-  if (!infraMetricsClient) {
-    return undefined;
-  }
-
   const should = [
     { exists: { field: KUBERNETES } },
     { exists: { field: CONTAINER_IMAGE } },

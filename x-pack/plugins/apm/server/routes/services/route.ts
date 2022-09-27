@@ -55,7 +55,7 @@ import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { setupInfraMetricsRequest } from '../../lib/helpers/setup_infra_metrics_request';
+import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -275,7 +275,11 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     import('./get_service_metadata_details').ServiceMetadataDetails
   > => {
     const setup = await setupRequest(resources);
-    const infraMetricsSetup = await setupInfraMetricsRequest(resources);
+    const { plugins, context } = resources;
+    const infraMetricsClient = await createInfraMetricsClient({
+      infraPlugin: plugins.infra,
+      context,
+    });
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -297,8 +301,6 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     });
 
     if (serviceMetadataDetails?.container?.ids) {
-      const { infraMetricsClient } = infraMetricsSetup;
-
       const containerMetadata = await getServiceOverviewContainerMetadata({
         infraMetricsClient,
         containerIds: serviceMetadataDetails.container.ids,
@@ -904,7 +906,11 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       | undefined;
   }> => {
     const setup = await setupRequest(resources);
-    const infraMetricsSetup = await setupInfraMetricsRequest(resources);
+    const { plugins, context } = resources;
+    const infraMetricsClient = await createInfraMetricsClient({
+      infraPlugin: plugins.infra,
+      context,
+    });
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
@@ -919,7 +925,6 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       });
 
     if (serviceInstanceMetadataDetails?.container?.id) {
-      const { infraMetricsClient } = infraMetricsSetup;
       const containerMetadata = await getServiceInstanceContainerMetadata({
         infraMetricsClient,
         containerId: serviceInstanceMetadataDetails.container.id,
