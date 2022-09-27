@@ -26,7 +26,7 @@ interface StateToDashboardContainerInputProps {
 }
 
 interface StateToRawDashboardStateProps {
-  state: DashboardState;
+  state: Partial<DashboardState>;
 }
 
 /**
@@ -102,20 +102,7 @@ const filtersAreEqual = (first: Filter, second: Filter) =>
  */
 export const stateToRawDashboardState = ({
   state,
-}: StateToRawDashboardStateProps): RawDashboardState => {
-  const {
-    initializerContext: { kibanaVersion },
-  } = pluginServices.getServices();
-
-  const savedDashboardPanels = Object.values(state.panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
-  );
-  return { ...omit(state, 'panels'), panels: savedDashboardPanels };
-};
-
-export const unsavedStateToRawDashboardState = (
-  state?: Partial<DashboardState>
-): Partial<RawDashboardState> => {
+}: StateToRawDashboardStateProps): Partial<RawDashboardState> => {
   const {
     initializerContext: { kibanaVersion },
   } = pluginServices.getServices();

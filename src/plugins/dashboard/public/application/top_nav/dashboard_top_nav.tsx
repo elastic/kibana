@@ -418,7 +418,6 @@ export function DashboardTopNav({
   const showShare = useCallback(
     (anchorElement: HTMLElement) => {
       const currentState = dashboardAppState.getLatestDashboardState();
-      // console.log('current state', currentState);
       ShowShareModal({
         anchorElement,
         currentDashboardState: currentState,

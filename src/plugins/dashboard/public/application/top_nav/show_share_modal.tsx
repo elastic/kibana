@@ -24,8 +24,8 @@ import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
 import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
-import { unsavedStateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -58,9 +58,7 @@ export function ShowShareModal({
         },
       },
     },
-    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
-    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
   if (!toggleShareContextMenu) return; // TODO: Make this logic cleaner once share is an optional service
@@ -155,33 +153,21 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
-  // console.log('currentDashboardState', currentDashboardState);
-  // console.log('unsavedDashboardState', unsavedStateForLocator);
-  // console.log('saved dashboard', savedDashboard);
-
-  // const test = {
-  //   ...currentDashboardState,
-  //   panels: unsavedDashboardState?.panels ? currentDashboardState.panels : undefined,
-  //   filters: unsavedDashboardState?.filters ? currentDashboardState.filters : undefined,
-  // };
-
-  // for (const unsavedDashboardStateKey of Object.keys(unsavedDashboardState ?? {})) {
-  //   console.log(unsavedDashboardStateKey);
-  // }
-
-  let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
-  // console.log('before - ', window.location.href);
+  const _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
+  const dropFromGlobalUrlState: string[] = [];
   if (_g?.filters && _g.filters.length === 0) {
-    _g = _.omit(_g, 'filters');
+    dropFromGlobalUrlState.push('filters');
   }
   if (_g?.time && !unsavedDashboardState?.timeRange) {
-    _g = _.omit(_g, 'time');
+    // note that, if `timeRestore` is false, then `timeRange` will not end up in `unsavedDashboardState`
+    dropFromGlobalUrlState.push('time');
   }
-  const baseUrl = setStateToKbnUrl('_g', _g);
-  // console.log('after - ', baseUrl);
+  // TODO: Address refreshInterval
+  const baseUrl = setStateToKbnUrl('_g', _.omit(_g, dropFromGlobalUrlState));
+
   const shareableUrl = setStateToKbnUrl(
     '_a',
-    unsavedStateToRawDashboardState(unsavedDashboardState),
+    stateToRawDashboardState({ state: unsavedDashboardState ?? {} }),
     { useHash: false, storeInHashQuery: true },
     unhashUrl(baseUrl)
   );
