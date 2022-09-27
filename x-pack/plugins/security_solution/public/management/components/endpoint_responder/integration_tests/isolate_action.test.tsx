@@ -16,19 +16,17 @@ import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import { getDeferred } from '../../mocks';
 import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
+import { getDeferred } from '../../../mocks/utils';
 
 describe('When using isolate action from response actions console', () => {
   let render: (
-    capabilities?: ResponderCapabilities[]
+    capabilities?: ResponderCapabilities[],
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
-  let consoleManagerMockAccess: ReturnType<
-    typeof getConsoleManagerMockRenderResultQueriesAndActions
-  >;
+  let consoleManagerMockAccess: ReturnType<typeof getConsoleManagerMockRenderResultQueriesAndActions>;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -49,7 +47,7 @@ describe('When using isolate action from response actions console', () => {
               },
             };
           }}
-        />
+        />,
       );
 
       consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
@@ -66,7 +64,7 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
     );
   });
 
@@ -87,7 +85,7 @@ describe('When using isolate action from response actions console', () => {
       expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('This is a comment'),
-        })
+        }),
       );
     });
   });
@@ -97,7 +95,7 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Argument can only be used once: --comment'
+      'Argument can only be used once: --comment',
     );
   });
 
@@ -115,7 +113,7 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('isolateSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('isolate-success')).toBeTruthy();
     });
   });
 
@@ -130,8 +128,8 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
-        /error one \| error two/
+      expect(renderResult.getByTestId('isolate-actionFailure').textContent).toMatch(
+        /error one \| error two/,
       );
     });
   });
