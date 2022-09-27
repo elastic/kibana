@@ -16,5 +16,5 @@ export interface RasterTileSourceData {
 export interface ITMSSource extends ISource {
   getUrlTemplate(dataFilters: DataFilters): Promise<string>;
   canSkipSourceUpdate(dataRequest:DataRequest,nextRequestMeta:DataRequestMeta): Promise<boolean>;
-  isSourceStale(mbSource:RasterTileSource,sourceDataRequest:RasterTileSourceData):boolean;
+  isSourceStale(mbSource:RasterTileSource,sourceData:RasterTileSourceData):boolean;
 }
