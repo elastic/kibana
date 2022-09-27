@@ -360,7 +360,7 @@ export function registerIndexRoutes({
           pipelineName,
           modelId,
           sourceField,
-          destinationField || modelId,
+          destinationField,
           client.asCurrentUser
         );
       } catch (error) {

@@ -13,7 +13,7 @@ export const getPrefixedInferencePipelineProcessorName = (pipelineName: string) 
     ? formatPipelineName(pipelineName)
     : `ml-inference-${formatPipelineName(pipelineName)}`;
 
-const formatPipelineName = (rawName: string) =>
+export const formatPipelineName = (rawName: string) =>
   rawName
     .trim()
     .replace(/\s+/g, '_') // Convert whitespaces to underscores
