@@ -44,6 +44,6 @@ function createRenderingService() {
 
 export const renderingServiceMock = {
   create: createRenderingService,
-  createPreboot: createRenderingPreboot,
-  createSetup: createRenderingSetup,
+  createPrebootContract: createRenderingPreboot,
+  createSetupContract: createRenderingSetup,
 };
