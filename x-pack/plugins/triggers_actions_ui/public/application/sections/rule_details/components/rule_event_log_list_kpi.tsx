@@ -42,14 +42,14 @@ const RESPONSE_TOOLTIP = i18n.translate(
 const ALERTS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.alertsTooltip',
   {
-    defaultMessage: 'Alert status of recent rule runs.',
+    defaultMessage: 'The alert statuses for the latest rule runs.',
   }
 );
 
 const ACTIONS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.actionsTooltip',
   {
-    defaultMessage: 'Action status of recent rule runs.',
+    defaultMessage: 'The action statuses for the latest rule runs.',
   }
 );
 
