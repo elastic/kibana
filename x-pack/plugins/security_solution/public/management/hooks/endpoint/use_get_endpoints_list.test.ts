@@ -145,14 +145,6 @@ describe('useGetEndpointsList hook', () => {
       throw new Error('some error');
     });
 
-    // verify metadata list does indeed have inactive agents
-    expect(
-      apiMocks.responseProvider
-        .metadataList()
-        .data.map((item) => item.host_status)
-        .filter((status) => status === 'inactive').length
-    ).toEqual(3);
-
     // verify useGetEndpointsList hook returns the same inactive agents
     const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: 'inactive' }));
     expect(
@@ -191,9 +183,6 @@ describe('useGetEndpointsList hook', () => {
       throw new Error('some error');
     });
 
-    // verify metadata list does indeed show that it has more than 50 agents
-    expect(apiMocks.responseProvider.metadataList().data?.length).toEqual(60);
-
     // verify useGetEndpointsList hook returns all 50 agents in the list
     const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: '' }));
     expect(res.data?.length).toEqual(50);
@@ -229,9 +218,6 @@ describe('useGetEndpointsList hook', () => {
       }
       throw new Error('some error');
     });
-
-    // verify metadata list does indeed have all 61 agents
-    expect(apiMocks.responseProvider.metadataList().data?.length).toEqual(61);
 
     // get the first 50 agents to select
     const agentIdsToSelect = apiMocks.responseProvider
