@@ -21,6 +21,7 @@ import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import type { TGridModel } from '../../timelines/store/data_table/model';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -2010,11 +2011,9 @@ export const mockTimelineModel: TimelineModel = {
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: 'ef579e40-jibber-jabber',
-  selectAll: false,
   selectedEventIds: {},
   sessionViewConfig: null,
   show: false,
-  showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
@@ -2029,6 +2028,65 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
+};
+
+export const mockTGridModel: TGridModel = {
+  columns: mockTimelineModelColumns,
+  defaultColumns: mockTimelineModelColumns,
+  dataProviders: [],
+  dataViewId: null,
+  dateRange: {
+    end: '2020-03-18T13:52:38.929Z',
+    start: '2020-03-18T13:46:38.929Z',
+  },
+  deletedEventIds: [],
+  documentType: '',
+  excludedRowRendererIds: [],
+  expandedDetail: {},
+  filters: [
+    {
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+      meta: {
+        alias: null,
+        disabled: true,
+        key: 'host.name',
+        negate: false,
+        params: '"{"query":"placeholder"}"',
+        type: 'phrase',
+      },
+      query: { match_phrase: { 'host.name': 'placeholder' } },
+    },
+  ],
+  id: 'ef579e40-jibber-jabber',
+  indexNames: [],
+  isLoading: false,
+  isSelectAllChecked: false,
+  kqlMode: 'filter',
+  kqlQuery: {
+    filterQuery: null,
+  },
+  queryFields: [],
+  itemsPerPage: 25,
+  itemsPerPageOptions: [10, 25, 50, 100],
+  loadingEventIds: [],
+  savedObjectId: 'ef579e40-jibber-jabber',
+  selectedEventIds: {},
+  sessionViewConfig: null,
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: Direction.desc,
+    },
+  ],
+  title: 'Test rule',
+  timelineType: TimelineType.default,
+  version: '1',
+  showCheckboxes: false,
+  selectAll: false,
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {
@@ -2139,11 +2197,9 @@ export const defaultTimelineProps: CreateTimelineProps = {
     pinnedEventsSaveObject: {},
     queryFields: [],
     savedObjectId: null,
-    selectAll: false,
     selectedEventIds: {},
     sessionViewConfig: null,
     show: false,
-    showCheckboxes: false,
     sort: [
       {
         columnId: '@timestamp',

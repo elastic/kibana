@@ -7,25 +7,25 @@
 
 import { cloneDeep } from 'lodash/fp';
 import {
-  LOCAL_STORAGE_TIMELINE_KEY,
   migrateColumnWidthToInitialWidth,
   migrateColumnLabelToDisplayAsText,
-  useTimelinesStorage,
-  getTimelinesInStorageByIds,
-  getAllTimelinesInStorage,
-  addTimelineInStorage,
+  LOCAL_STORAGE_TABLE_KEY,
+  useDataTablesStorage,
+  getDataTablesInStorageByIds,
+  getAllDataTablesInStorage,
+  addTableInStorage,
 } from '.';
 
-import { TimelineId } from '../../../../common/types/timeline';
-import { mockTimelineModel, createSecuritySolutionStorageMock } from '../../../common/mock';
+import { TableId } from '../../../../common/types/timeline';
+import { mockTGridModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { TimelineModel } from '../../store/timeline/model';
+import type { TGridModel } from '../../store/data_table/model';
 
 jest.mock('../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const getExpectedColumns = (model: TimelineModel) =>
+const getExpectedColumns = (model: TGridModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);
 
 const {
@@ -36,7 +36,7 @@ const {
   queryFields,
   unit,
   ...timelineToStore
-} = mockTimelineModel;
+} = mockTGridModel;
 
 describe('SiemLocalStorage', () => {
   const { localStorage, storage } = createSecuritySolutionStorageMock();
@@ -46,122 +46,122 @@ describe('SiemLocalStorage', () => {
     localStorage.clear();
   });
 
-  describe('addTimeline', () => {
+  describe('addDataTable', () => {
     it('adds a timeline when storage is empty', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
   });
 
-  describe('getAllTimelines', () => {
+  describe('getAllDataTables', () => {
     it('gets all timelines correctly', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = timelineStorage.getAllTimelines();
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = timelineStorage.getAllDataTables();
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
 
     it('returns an empty object if there is no timelines', () => {
-      const timelineStorage = useTimelinesStorage();
-      const timelines = timelineStorage.getAllTimelines();
+      const timelineStorage = useDataTablesStorage();
+      const timelines = timelineStorage.getAllDataTables();
       expect(timelines).toEqual({});
     });
   });
 
-  describe('getTimelineById', () => {
+  describe('getDataTablesById', () => {
     it('gets a timeline by id', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timeline = timelineStorage.getTimelineById(TimelineId.hostsPageEvents);
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const timeline = timelineStorage.getDataTablesById(TableId.hostsPageEvents);
       expect(timeline).toEqual(timelineToStore);
     });
   });
 
-  describe('getTimelinesInStorageByIds', () => {
+  describe('getDataTablesInStorageByIds', () => {
     it('gets timelines correctly', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
 
     it('gets an empty timelime when there is no timelines', () => {
-      const timelines = getTimelinesInStorageByIds(storage, [TimelineId.hostsPageEvents]);
+      const timelines = getDataTablesInStorageByIds(storage, [TableId.hostsPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when there is no ids', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, []);
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, []);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when a specific timeline does not exists', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [TimelineId.usersPageEvents]);
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [TableId.usersPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns timelines correctly when one exist and another not', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('migrates columns saved to localstorage with a `width` to `initialWidth`', () => {
-      const timelineStorage = useTimelinesStorage();
+      const timelineStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c) => ({
+      const unmigratedmockTGridModel = {
+        ...cloneDeep(mockTGridModel),
+        columns: mockTGridModel.columns.map((c) => ({
           ...c,
           width: 98765, // create a legacy `width` column
           initialWidth: undefined, // `initialWidth` must be undefined, otherwise the migration will not occur
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       // all legacy `width` values are migrated to `initialWidth`:
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c) => ({
             ...c,
@@ -170,33 +170,33 @@ describe('SiemLocalStorage', () => {
             width: 98765,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockTGridModel),
         },
       });
     });
 
     it('does NOT migrate columns saved to localstorage with a `width` to `initialWidth` when `initialWidth` is valid', () => {
-      const timelineStorage = useTimelinesStorage();
+      const timelineStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c) => ({
+      const unmigratedmockTGridModel = {
+        ...cloneDeep(mockTGridModel),
+        columns: mockTGridModel.columns.map((c) => ({
           ...c,
           width: 98765, // create a legacy `width` column
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c) => ({
             ...c,
@@ -205,34 +205,34 @@ describe('SiemLocalStorage', () => {
             width: 98765,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockTGridModel),
         },
       });
     });
 
     it('migrates columns saved to localstorage with a `label` to `displayAsText`', () => {
-      const timelineStorage = useTimelinesStorage();
+      const timelineStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c, i) => ({
+      const unmigratedmockTGridModel = {
+        ...cloneDeep(mockTGridModel),
+        columns: mockTGridModel.columns.map((c, i) => ({
           ...c,
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       // all legacy `label` values are migrated to `displayAsText`:
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c, i) => ({
             ...c,
@@ -240,35 +240,35 @@ describe('SiemLocalStorage', () => {
             label: `A legacy label ${i}`,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockTGridModel),
         },
       });
     });
 
     it('does NOT migrate columns saved to localstorage with a `label` to `displayAsText` when `displayAsText` is valid', () => {
-      const timelineStorage = useTimelinesStorage();
+      const timelineStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c, i) => ({
+      const unmigratedmockTGridModel = {
+        ...cloneDeep(mockTGridModel),
+        columns: mockTGridModel.columns.map((c, i) => ({
           ...c,
           displayAsText:
             'Label will NOT be migrated to displayAsText, because displayAsText already has a value',
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c, i) => ({
             ...c,
@@ -277,75 +277,75 @@ describe('SiemLocalStorage', () => {
             label: `A legacy label ${i}`,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockTGridModel),
         },
       });
     });
 
     it('does NOT migrate `columns` when `columns` is not an array', () => {
-      const timelineStorage = useTimelinesStorage();
+      const timelineStorage = useDataTablesStorage();
 
-      const invalidColumnsMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
+      const invalidColumnsmockTGridModel = {
+        ...cloneDeep(mockTGridModel),
         columns: 'this is NOT an array',
       };
-      timelineStorage.addTimeline(
-        TimelineId.hostsPageEvents,
-        invalidColumnsMockTimelineModel as unknown as TimelineModel
+      timelineStorage.addDataTable(
+        TableId.hostsPageEvents,
+        invalidColumnsmockTGridModel as unknown as TGridModel
       );
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: 'this is NOT an array',
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockTGridModel),
         },
       });
     });
   });
 
-  describe('getAllTimelinesInStorage', () => {
+  describe('getAllDataTablesInStorage', () => {
     it('gets timelines correctly', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getAllTimelinesInStorage(storage);
+      const timelineStorage = useDataTablesStorage();
+      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = getAllDataTablesInStorage(storage);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
 
     it('gets an empty timeline when there is no timelines', () => {
-      const timelines = getAllTimelinesInStorage(storage);
+      const timelines = getAllDataTablesInStorage(storage);
       expect(timelines).toEqual({});
     });
   });
 
-  describe('addTimelineInStorage', () => {
+  describe('addTableInStorage', () => {
     it('adds a timeline when storage is empty', () => {
-      addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
+      addTableInStorage(storage, TableId.hostsPageEvents, mockTGridModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
-      addTimelineInStorage(storage, TimelineId.usersPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+      addTableInStorage(storage, TableId.hostsPageEvents, mockTGridModel);
+      addTableInStorage(storage, TableId.usersPageEvents, mockTGridModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
   });
@@ -353,7 +353,7 @@ describe('SiemLocalStorage', () => {
   describe('migrateColumnWidthToInitialWidth', () => {
     it('migrates the `width` property to `initialWidth` for older columns saved to localstorage', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockTGridModel.columns[0]),
         width: 1234, // the column `width` was saved to localstorage before the `initialWidth` property existed
         initialWidth: undefined, // `initialWidth` did not exist when this column was saved to localstorage
       };
@@ -367,7 +367,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it("leaves `initialWidth` unchanged when the column read from localstorage doesn't have a `width`", () => {
-      const column = cloneDeep(mockTimelineModel.columns[0]); // `column.width` does not exist
+      const column = cloneDeep(mockTGridModel.columns[0]); // `column.width` does not exist
 
       expect(migrateColumnWidthToInitialWidth(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
@@ -378,7 +378,7 @@ describe('SiemLocalStorage', () => {
 
     it('does NOT migrate the `width` property to `initialWidth` when the column read from localstorage already has a valid `initialWidth`', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]), // `column.initialWidth` already exists
+        ...cloneDeep(mockTGridModel.columns[0]), // `column.initialWidth` already exists
         width: 1234,
       };
 
@@ -394,7 +394,7 @@ describe('SiemLocalStorage', () => {
   describe('migrateColumnLabelToDisplayAsText', () => {
     it('migrates the `label` property to `displayAsText` for older columns saved to localstorage', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockTGridModel.columns[0]),
         label: 'A legacy label', // the column `label` was saved to localstorage before the `displayAsText` property existed
       };
 
@@ -408,7 +408,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it("leaves `displayAsText` undefined when the column read from localstorage doesn't have a `label`", () => {
-      const column = cloneDeep(mockTimelineModel.columns[0]); // `column.label` does not exist
+      const column = cloneDeep(mockTGridModel.columns[0]); // `column.label` does not exist
 
       expect(migrateColumnLabelToDisplayAsText(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
@@ -420,7 +420,7 @@ describe('SiemLocalStorage', () => {
 
     it("leaves `displayAsText` unchanged when the column read from localstorage doesn't have a `label`", () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockTGridModel.columns[0]),
         displayAsText: 'Do NOT update this',
       };
 
@@ -434,7 +434,7 @@ describe('SiemLocalStorage', () => {
 
     it('does NOT migrate the `label` property to `displayAsText` when the column read from localstorage already has a valid `displayAsText`', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockTGridModel.columns[0]),
         displayAsText: 'Already valid',
         label: 'A legacy label',
       };

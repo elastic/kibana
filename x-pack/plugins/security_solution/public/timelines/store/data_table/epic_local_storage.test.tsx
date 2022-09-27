@@ -116,7 +116,9 @@ describe('epicLocalStorage', () => {
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
-    store.dispatch(applyDeltaToColumnWidth({ id: 'test', columnId: '@timestamp', delta: 80 }));
+    store.dispatch(
+      applyDeltaToColumnWidth({ id: TableId.test, columnId: '@timestamp', delta: 80 })
+    );
     await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
   });
 

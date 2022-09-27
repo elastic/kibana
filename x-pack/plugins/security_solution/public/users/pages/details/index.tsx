@@ -17,6 +17,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { TableId } from '../../../../common/types';
 import { dataTableSelectors } from '../../../timelines/store/data_table';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';

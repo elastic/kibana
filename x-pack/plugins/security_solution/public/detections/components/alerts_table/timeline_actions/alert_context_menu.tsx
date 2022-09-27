@@ -26,7 +26,7 @@ import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { TimelineId } from '../../../../../common/types';
+import { TableId, TimelineId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -74,12 +74,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   }, []);
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
-
+  const isInDetections = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage].includes(
+    timelineId as TableId
+  );
+  const isInTimeline = timelineId === TimelineId.active;
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
     onMenuItemClick,
-    timelineId,
+    isInTimeline,
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+    isInDetections,
   });
 
   const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
@@ -96,7 +100,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
   const timelineIdAllowsAddEndpointEventFilter = useMemo(
-    () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,
+    () => timelineId === TableId.hostsPageEvents || timelineId === TableId.usersPageEvents,
     [timelineId]
   );
 
@@ -150,7 +154,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   } = useExceptionFlyout({
     ruleIndex,
     refetch: refetchAll,
-    timelineId,
+    isInTimeline,
   });
 
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
@@ -160,7 +164,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     alertStatus,
     eventId: ecsRowData?._id,
     indexName: ecsRowData?._index ?? '',
-    timelineId,
+    scopeId: timelineId,
     refetch: refetchAll,
     closePopover,
   });

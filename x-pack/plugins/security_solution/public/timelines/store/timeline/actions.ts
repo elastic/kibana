@@ -272,3 +272,17 @@ export const updateItemsPerPageOptions = actionCreator<{
   id: string;
   itemsPerPageOptions: number[];
 }>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
+
+export const applyDeltaToColumnWidth = actionCreator<{
+  id: string;
+  columnId: string;
+  delta: number;
+}>('APPLY_DELTA_TO_COLUMN_WIDTH');
+
+export const clearEventsLoading = actionCreator<{
+  id: string;
+}>('CLEAR_TGRID_EVENTS_LOADING');
+
+export const clearEventsDeleted = actionCreator<{
+  id: string;
+}>('CLEAR_TGRID_EVENTS_DELETED');

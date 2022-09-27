@@ -61,6 +61,9 @@ import {
   initializeTimelineSettings,
   updateItemsPerPage,
   updateItemsPerPageOptions,
+  applyDeltaToColumnWidth,
+  clearEventsDeleted,
+  clearEventsLoading,
 } from './actions';
 import {
   addNewTimeline,
@@ -103,6 +106,7 @@ import {
   setInitializeTimelineSettings,
   updateTableItemsPerPage,
   updateTablePerPageOptions,
+  applyDeltaToTableColumnWidth,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -538,5 +542,34 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       itemsPerPageOptions,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
+    ...state,
+    timelineById: applyDeltaToTableColumnWidth({
+      id,
+      columnId,
+      delta,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(clearEventsDeleted, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        deletedEventIds: [],
+      },
+    },
+  }))
+  .case(clearEventsLoading, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        loadingEventIds: [],
+      },
+    },
   }))
   .build();

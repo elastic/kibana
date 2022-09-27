@@ -21,7 +21,7 @@ interface Props {
   isAggregatable?: boolean;
   isDraggable: boolean;
   showSeparator: boolean;
-  timelineId: string;
+  scopeId: string;
   value: string | number | null | undefined;
 }
 
@@ -33,13 +33,13 @@ const AlertFieldBadgeComponent: React.FC<Props> = ({
   isAggregatable = true,
   isDraggable,
   showSeparator,
-  timelineId,
+  scopeId,
   value,
 }) => (
   <AlertFieldFlexGroup
     alignItems="center"
     data-test-subj="alertFieldBadge"
-    $timelineId={timelineId}
+    $scopeId={scopeId}
     gutterSize="none"
   >
     <EuiFlexItem grow={false}>
@@ -50,7 +50,7 @@ const AlertFieldBadgeComponent: React.FC<Props> = ({
         fieldType={fieldType}
         isAggregatable={isAggregatable}
         isDraggable={isDraggable}
-        timelineId={timelineId}
+        scopeId={scopeId}
         value={value}
       />
     </EuiFlexItem>

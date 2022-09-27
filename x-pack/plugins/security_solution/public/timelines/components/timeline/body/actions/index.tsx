@@ -35,7 +35,7 @@ import type {
   OnPinEvent,
   TimelineEventsType,
 } from '../../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TableId, TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
@@ -290,7 +290,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </div>
         ) : null}
         {sessionViewConfig !== null &&
-        (isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions) ? (
+        (isEnterprisePlus || timelineId === TableId.kubernetesPageSessions) ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
