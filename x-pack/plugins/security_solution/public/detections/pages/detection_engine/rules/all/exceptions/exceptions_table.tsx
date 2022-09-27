@@ -7,10 +7,13 @@
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlyoutFooter,
   EuiPopover,
   EuiSearchBarProps,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import {
@@ -428,58 +431,17 @@ export const ExceptionListsTable = React.memo(() => {
             {'Import exception list'}
           </EuiButton>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            isOpen={isCreateExceptionsFlyoutOpen}
-            closePopover={() => setIsCreateExceptionsFlyoutOpen(false)}
-            button={
-              <EuiButton
-                iconType={'arrowDown'}
-                onClick={() => setIsCreateExceptionsFlyoutOpen(true)}
-              >
-                {'Create'}
-              </EuiButton>
-            }
-          >
-            <EuiContextMenuPanel
-              size="s"
-              items={[
-                <EuiContextMenuItem
-                  key={'ruleException'}
-                  onClick={() => setOpenAddExceptionFlyout(true)}
-                >
-                  {'New Rule Exception'}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
       </EuiFlexGroup>
 
-      {openAddExceptionFlyout && (
-        <AddExceptionFlyout
-          ruleName={rule.name}
-          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
-          dataViewId={rule.data_view_id}
-          ruleId={rule.id}
-          exceptionListType={listType}
-          onCancel={handleCancelExceptionItemFlyout}
-          onConfirm={handleConfirmExceptionFlyout}
-          onRuleChange={onRuleChange}
-          data-test-subj="addExceptionItemFlyout"
-        />
-      )}
-
       {displayImportListFlyout && (
-        <EuiFlyout onClose={() => setDisplayImportListFlyout(false)}>
+        <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>{'A typical flyout'}</h2>
+              <h2>{'Import shared exception list'}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiText>{'hello world!'}</EuiText>
+            <EuiText>{'Select shared exception lists to import'}</EuiText>
             <EuiFilePicker
               id={filePickerId}
               multiple
@@ -489,31 +451,57 @@ export const ExceptionListsTable = React.memo(() => {
               display={'large'}
               aria-label="Use aria labels when no actual label is in use"
             />
-            <EuiButton
-              data-test-subj="exception-lists-form-import-action"
-              onClick={handleImportExceptionList}
-              disabled={file == null || importExceptionListState.loading}
-            >
-              {i18n.UPLOAD_BUTTON}
-            </EuiButton>
+
             {alreadyExistingItem && (
               <>
-                {'We found an existing list'}
+                <EuiSpacer />
+                <EuiTextColor color={'danger'}>
+                  {'We found a pre-existing list with that id'}
+                </EuiTextColor>
+                <EuiSpacer />
                 <EuiCheckbox
                   id={'basicCheckboxId'}
-                  label="Overwrite the existing list [list name]"
+                  label="Overwrite the existing list"
                   checked={overwrite}
-                  onChange={(e) => setOverwrite(!overwrite)}
+                  onChange={(e) => {
+                    setOverwrite(!overwrite);
+                    setAsNewList(false);
+                  }}
                 />
                 <EuiCheckbox
                   id={'createNewListCheckbox'}
                   label="Create new list"
                   checked={asNewList}
-                  onChange={(e) => setAsNewList(!asNewList)}
+                  onChange={(e) => {
+                    setAsNewList(!asNewList);
+                    setOverwrite(false);
+                  }}
                 />
               </>
             )}
           </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  onClick={() => setDisplayImportListFlyout(false)}
+                  flush="left"
+                >
+                  {'Close'}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="exception-lists-form-import-action"
+                  onClick={handleImportExceptionList}
+                  disabled={file == null || importExceptionListState.loading}
+                >
+                  {i18n.UPLOAD_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
         </EuiFlyout>
       )}
 
