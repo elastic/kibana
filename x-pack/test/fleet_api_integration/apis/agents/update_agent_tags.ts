@@ -88,27 +88,46 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should bulk update tags of multiple agents by kuery in batches', async () => {
-        await supertest
+        const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: 'active: true',
             tagsToAdd: ['newTag'],
             tagsToRemove: ['existingTag'],
-            batchSize: 2,
+            batchSize: 3,
           })
           .expect(200);
 
+        const actionId = actionBody.actionId;
+
+        const verifyActionResult = async () => {
+          const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+          expect(body.total).to.eql(4);
+          body.items.forEach((agent: any) => {
+            expect(agent.tags.includes('newTag')).to.be(true);
+            expect(agent.tags.includes('existingTag')).to.be(false);
+          });
+        };
+
         await new Promise((resolve, reject) => {
-          setTimeout(async () => {
-            const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-            expect(body.total).to.eql(4);
-            body.items.forEach((agent: any) => {
-              expect(agent.tags.includes('newTag')).to.be(true);
-              expect(agent.tags.includes('existingTag')).to.be(false);
-            });
-            resolve({});
-          }, 2000);
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 4) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            if (action && action.nbAgentsAck === 4) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
         }).catch((e) => {
           throw e;
         });
