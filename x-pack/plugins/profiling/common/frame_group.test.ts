@@ -5,40 +5,116 @@
  * 2.0.
  */
 
-import { createFrameGroup, createFrameGroupID } from './frame_group';
+import { createFrameGroupID } from './frame_group';
 
-const nonSymbolizedFrameGroups = [
-  createFrameGroup('0x0123456789ABCDEF', 102938, '', '', ''),
-  createFrameGroup('0x0123456789ABCDEF', 1234, '', '', ''),
-  createFrameGroup('0x0102030405060708', 1234, '', '', ''),
+const nonSymbolizedTests = [
+  {
+    params: {
+      fileID: '0x0123456789ABCDEF',
+      addressOrLine: 102938,
+      exeFilename: '',
+      sourceFilename: '',
+      functionName: '',
+    },
+    expected: 'empty;0x0123456789ABCDEF;102938',
+  },
+  {
+    params: {
+      fileID: '0x0123456789ABCDEF',
+      addressOrLine: 1234,
+      exeFilename: 'libpthread',
+      sourceFilename: '',
+      functionName: '',
+    },
+    expected: 'empty;0x0123456789ABCDEF;1234',
+  },
 ];
 
-const elfSymbolizedFrameGroups = [
-  createFrameGroup('0x0123456789ABCDEF', 0, 'libc', '', 'strlen()'),
-  createFrameGroup('0xFEDCBA9876543210', 0, 'libc', '', 'strtok()'),
-  createFrameGroup('0xFEDCBA9876543210', 0, 'myapp', '', 'main()'),
+const elfSymbolizedTests = [
+  {
+    params: {
+      fileID: '0x0123456789ABCDEF',
+      addressOrLine: 0,
+      exeFilename: 'libc',
+      sourceFilename: '',
+      functionName: 'strlen()',
+    },
+    expected: 'elf;libc;strlen()',
+  },
+  {
+    params: {
+      fileID: '0xFEDCBA9876543210',
+      addressOrLine: 8888,
+      exeFilename: 'libc',
+      sourceFilename: '',
+      functionName: 'strtok()',
+    },
+    expected: 'elf;libc;strtok()',
+  },
 ];
 
-const symbolizedFrameGroups = [
-  createFrameGroup('', 0, 'chrome', 'strlen()', 'strlen()'),
-  createFrameGroup('', 0, 'dockerd', 'main()', 'createTask()'),
-  createFrameGroup('', 0, 'oom_reaper', 'main()', 'crash()'),
+const symbolizedTests = [
+  {
+    params: {
+      fileID: '',
+      addressOrLine: 0,
+      exeFilename: 'chrome',
+      sourceFilename: 'strlen()',
+      functionName: 'strlen()',
+    },
+    expected: 'full;chrome;strlen();strlen()',
+  },
+  {
+    params: {
+      fileID: '',
+      addressOrLine: 0,
+      exeFilename: 'oom_reaper',
+      sourceFilename: 'main()',
+      functionName: 'crash()',
+    },
+    expected: 'full;oom_reaper;crash();main()',
+  },
 ];
 
 describe('Frame group operations', () => {
   describe('check serialization for', () => {
     test('non-symbolized frame', () => {
-      expect(createFrameGroupID(nonSymbolizedFrameGroups[0])).toEqual(
-        'empty;0x0123456789ABCDEF;102938'
-      );
+      for (const test of nonSymbolizedTests) {
+        const frameGroupID = createFrameGroupID(
+          test.params.fileID,
+          test.params.addressOrLine,
+          test.params.exeFilename,
+          test.params.sourceFilename,
+          test.params.functionName
+        );
+        expect(frameGroupID).toEqual(test.expected);
+      }
     });
 
     test('non-symbolized ELF frame', () => {
-      expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual('elf;libc;strlen()');
+      for (const test of elfSymbolizedTests) {
+        const frameGroupID = createFrameGroupID(
+          test.params.fileID,
+          test.params.addressOrLine,
+          test.params.exeFilename,
+          test.params.sourceFilename,
+          test.params.functionName
+        );
+        expect(frameGroupID).toEqual(test.expected);
+      }
     });
 
     test('symbolized frame', () => {
-      expect(createFrameGroupID(symbolizedFrameGroups[0])).toEqual('full;chrome;strlen();strlen()');
+      for (const test of symbolizedTests) {
+        const frameGroupID = createFrameGroupID(
+          test.params.fileID,
+          test.params.addressOrLine,
+          test.params.exeFilename,
+          test.params.sourceFilename,
+          test.params.functionName
+        );
+        expect(frameGroupID).toEqual(test.expected);
+      }
     });
   });
 });
