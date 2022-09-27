@@ -226,7 +226,10 @@ export function OverviewPage() {
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id="statusVisualizationFlyoutTitle">
+              <h2
+                id="statusVisualizationFlyoutTitle"
+                data-test-subj="statusVisualizationFlyoutTitle"
+              >
                 <FormattedMessage
                   id="xpack.observability.overview.statusVisualizationFlyoutTitle"
                   defaultMessage="Data assistant"

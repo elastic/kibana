@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { services as xpackFunctionalServices } from '../../functional/services';
-import { EsArchiverProvider } from './es_archiver';
+import { i18n } from '@kbn/i18n';
 
-export const services = {
-  ...xpackFunctionalServices,
-  esArchiver: EsArchiverProvider,
-};
+export const FAIL_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.kpi.failSearchDescription',
+  {
+    defaultMessage: `Failed to run search on risk score`,
+  }
+);

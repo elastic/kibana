@@ -86,10 +86,17 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
     const { from, to } = useGlobalTime();
 
+    const timerange = useMemo(
+      () => ({
+        from,
+        to,
+      }),
+      [from, to]
+    );
     const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,
-      timerange: { to, from },
+      timerange,
     });
 
     const getDefaultRenderer = useCallback(
