@@ -35,6 +35,10 @@ export async function getServicesCounts({
 
   const params = {
     apm: {
+      // We're limiting the service count to only metrics documents. If a user
+      // actively disables system/app metrics and a service only ingests error
+      // events, that service will not be included in the service groups count.
+      // This is an edge case that only effects the count preview label.
       events: [ProcessorEvent.metric],
     },
     body: {
