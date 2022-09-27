@@ -41,7 +41,6 @@ export const getAlertingSectionBreadcrumb = (
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
           defaultMessage: 'Rules and Connectors',
         }),
-        href: `${routeToHome}`,
         ...(returnHref
           ? {
               href: `${routeToHome}`,
