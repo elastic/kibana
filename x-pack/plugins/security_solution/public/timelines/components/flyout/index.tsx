@@ -10,11 +10,11 @@ import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react'
 
 import type { AppLeaveHandler } from '@kbn/core/public';
 import type { TimelineId } from '../../../../common/types/timeline';
-import {} from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
+import { useTimelineSavePrompt } from '../use_timeline_save_prompt';
 
 interface OwnProps {
   timelineId: TimelineId;
@@ -50,6 +50,8 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       }, 0);
     }
   }, []);
+
+  useTimelineSavePrompt(timelineId, onAppLeave);
 
   useEffect(() => {
     if (searchRef.current != null) {

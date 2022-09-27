@@ -9,7 +9,6 @@
 
 import React from 'react';
 import type { EuiBottomBarProps } from '@elastic/eui';
-import { useTimelineSavePrompt } from '../../../../timelines/components/use_timeline_save_prompt';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
@@ -23,7 +22,6 @@ export const SecuritySolutionBottomBar = React.memo(() => {
 
   const { onAppLeave } = useKibana().services;
 
-  useTimelineSavePrompt(TimelineId.active, onAppLeave);
   return (
     <>
       <AutoSaveWarningMsg />

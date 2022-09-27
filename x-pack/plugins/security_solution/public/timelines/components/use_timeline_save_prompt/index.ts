@@ -10,7 +10,8 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
-import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types';
+import type { TimelineId } from '../../../../common/types';
+import { TimelineStatus, TimelineTabs } from '../../../../common/types';
 import { timelineActions } from '../../store/timeline';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -47,20 +48,20 @@ export const useTimelineSavePrompt = (
   );
 
   const showSaveTimelineModal = useCallback(() => {
-    dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
+    dispatch(timelineActions.showTimeline({ id: timelineId, show: true }));
     dispatch(
       timelineActions.setActiveTabTimeline({
-        id: TimelineId.active,
+        id: timelineId,
         activeTab: TimelineTabs.query,
       })
     );
     dispatch(
       timelineActions.toggleModalSaveTimeline({
-        id: TimelineId.active,
+        id: timelineId,
         showModalSaveTimeline: true,
       })
     );
-  }, [dispatch]);
+  }, [dispatch, timelineId]);
 
   useEffect(() => {
     const unblock = history.block((location) => {
