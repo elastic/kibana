@@ -182,7 +182,13 @@ export const ConfigurePipeline: React.FC = () => {
                 formErrors.destinationField === undefined &&
                 i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.destinationField.helpText',
-                  { defaultMessage: 'Your field name will be prefixed with "ml.inference."' }
+                  {
+                    defaultMessage:
+                      'Your field name will be prefixed with "ml.inference.", if not set it will be defaulted to "ml.inference.{pipelineName}"',
+                    values: {
+                      pipelineName,
+                    },
+                  }
                 )
               }
               error={formErrors.destinationField}
