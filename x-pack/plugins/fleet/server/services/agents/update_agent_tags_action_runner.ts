@@ -9,19 +9,19 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import uuid from 'uuid';
 import { difference, uniq } from 'lodash';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
+import { bulkUpdateAgents } from './crud';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
       this.soClient,
       this.esClient,
@@ -32,9 +32,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         tagsToRemove: this.actionParams?.tagsToRemove,
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
-      },
-      undefined,
-      true
+      }
     );
   }
 
@@ -57,10 +55,8 @@ export async function updateTagsBatch(
     tagsToRemove: string[];
     actionId?: string;
     total?: number;
-  },
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  }
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const filteredAgents = await filterHostedPolicies(
@@ -135,5 +131,5 @@ export async function updateTagsBatch(
     );
   }
 
-  return { items: errorsToResults(filteredAgents, errors, agentIds, skipSuccess) };
+  return { actionId };
 }

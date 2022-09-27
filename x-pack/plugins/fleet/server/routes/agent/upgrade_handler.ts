@@ -11,11 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
 
-import type {
-  PostAgentUpgradeResponse,
-  PostBulkAgentUpgradeResponse,
-  GetCurrentUpgradesResponse,
-} from '../../../common/types';
+import type { PostAgentUpgradeResponse, GetCurrentUpgradesResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
@@ -142,15 +138,8 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       batchSize,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
-    const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
 
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

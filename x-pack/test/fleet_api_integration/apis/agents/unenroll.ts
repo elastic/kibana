@@ -120,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       // try to unenroll
-      const { body: unenrolledBody } = await supertest
+      await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
@@ -129,18 +129,6 @@ export default function (providerContext: FtrProviderContext) {
         // http request succeeds
         .expect(200);
 
-      expect(unenrolledBody).to.eql({
-        agent2: {
-          success: false,
-          error:
-            'Cannot unenroll agent2 from a hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-        },
-        agent3: {
-          success: false,
-          error:
-            'Cannot unenroll agent3 from a hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-        },
-      });
       // but agents are still enrolled
       const [agent2data, agent3data] = await Promise.all([
         supertest.get(`/api/fleet/agents/agent2`),
@@ -161,17 +149,12 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({ name: 'Test policy', namespace: 'default', is_managed: false })
         .expect(200);
-      const { body: unenrolledBody } = await supertest
+      await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: ['agent2', 'agent3'],
         });
-
-      expect(unenrolledBody).to.eql({
-        agent2: { success: true },
-        agent3: { success: true },
-      });
 
       const [agent2data, agent3data] = await Promise.all([
         supertest.get(`/api/fleet/agents/agent2`),

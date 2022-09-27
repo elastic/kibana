@@ -223,21 +223,7 @@ describe('unenrollAgents (plural)', () => {
       agentIds: idsToUnenroll,
       revoke: true,
     });
-
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: false,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDefined();
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -301,20 +287,7 @@ describe('unenrollAgents (plural)', () => {
       force: true,
     });
 
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDefined();
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];

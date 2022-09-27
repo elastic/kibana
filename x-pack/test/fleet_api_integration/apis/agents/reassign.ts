@@ -107,30 +107,13 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should allow to reassign multiple agents by id -- mix valid & invalid', async () => {
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: ['agent2', 'INVALID_ID', 'agent3', 'MISSING_ID', 'etc'],
             policy_id: 'policy2',
           });
-
-        expect(body).to.eql({
-          agent2: { success: true },
-          INVALID_ID: {
-            success: false,
-            error: 'Cannot find agent INVALID_ID',
-          },
-          agent3: { success: true },
-          MISSING_ID: {
-            success: false,
-            error: 'Cannot find agent MISSING_ID',
-          },
-          etc: {
-            success: false,
-            error: 'Cannot find agent etc',
-          },
-        });
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
@@ -148,30 +131,13 @@ export default function (providerContext: FtrProviderContext) {
           .send({ name: 'Test policy', namespace: 'default', is_managed: true })
           .expect(200);
 
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: ['agent2', 'INVALID_ID', 'agent3'],
             policy_id: 'policy2',
           });
-
-        expect(body).to.eql({
-          agent2: {
-            success: false,
-            error:
-              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-          },
-          INVALID_ID: {
-            success: false,
-            error: 'Cannot find agent INVALID_ID',
-          },
-          agent3: {
-            success: false,
-            error:
-              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-          },
-        });
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),

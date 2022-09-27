@@ -8,7 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -89,7 +89,7 @@ export async function reassignAgents(
     batchSize?: number;
   },
   newAgentPolicyId: string
-): Promise<{ items: BulkActionResult[]; actionId?: string }> {
+): Promise<{ actionId: string }> {
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
@@ -141,12 +141,5 @@ export async function reassignAgents(
     }
   }
 
-  return await reassignBatch(
-    soClient,
-    esClient,
-    { newAgentPolicyId },
-    givenAgents,
-    outgoingErrors,
-    'agentIds' in options ? options.agentIds : undefined
-  );
+  return await reassignBatch(soClient, esClient, { newAgentPolicyId }, givenAgents, outgoingErrors);
 }

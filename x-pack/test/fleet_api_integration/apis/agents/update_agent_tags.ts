@@ -140,7 +140,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         // attempt to update tags of agent in hosted agent policy
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -148,14 +148,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent1', 'agent2'],
           })
           .expect(200);
-
-        expect(body).to.eql({
-          agent1: {
-            success: false,
-            error: `Cannot modify tags on a hosted agent in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`,
-          },
-          agent2: { success: true },
-        });
 
         const [agent1data, agent2data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent1`),

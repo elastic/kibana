@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import uuid from 'uuid';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -74,7 +74,7 @@ export async function unenrollAgents(
     revoke?: boolean;
     batchSize?: number;
   }
-): Promise<{ items: BulkActionResult[]; actionId?: string }> {
+): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
