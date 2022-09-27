@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type moment from 'moment';
-import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   RuleTypeState,
@@ -39,6 +39,8 @@ import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import type { buildGroupByFieldAggregation } from './alert_grouping/build_group_by_field_aggregation';
 import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import type { EnrichEvents } from './enrichments/types';
+import { QueryRuleState } from '../rule_types/query/create_query_alert_type';
+import { BucketHistory } from './alert_grouping/group_and_bulk_create';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -294,6 +296,12 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
+}
+
+export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
+  state: {
+    throttleGroupHistory: BucketHistory[];
+  };
 }
 
 export interface MultiAggBucket {

@@ -36,6 +36,7 @@ interface SingleSearchAfterParams {
   secondaryTimestamp: TimestampOverrideOrUndefined;
   trackTotalHits?: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 // utilize search_after for paging results into bulk.
@@ -56,6 +57,7 @@ export const singleSearchAfter = async <
   primaryTimestamp,
   secondaryTimestamp,
   trackTotalHits,
+  additionalFilters,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;

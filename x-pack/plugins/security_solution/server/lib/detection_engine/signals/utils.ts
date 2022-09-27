@@ -48,6 +48,7 @@ import type {
   SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
+  GroupAndBulkCreateReturnType,
 } from './types';
 import type { ShardError } from '../../types';
 import type {

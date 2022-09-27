@@ -114,10 +114,17 @@ export const queryExecutor = async ({
       spaceId,
       mergeStrategy,
       bucketHistory,
+      completeRule,
     };
 
-    if (experimentalFeatures.alertGroupingEnabled) {
-      return groupAndBulkCreate(searchParams);
+    if (
+      experimentalFeatures.alertGroupingEnabled &&
+      completeRule.ruleParams.alertGrouping?.groupBy != null
+    ) {
+      return groupAndBulkCreate({
+        ...searchParams,
+        groupByFields: completeRule.ruleParams.alertGrouping.groupBy,
+      });
     } else {
       const result = await searchAfterAndBulkCreate(searchParams);
 
