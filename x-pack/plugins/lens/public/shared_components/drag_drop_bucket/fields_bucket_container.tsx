@@ -15,6 +15,7 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
+import { TooltipWrapper } from '..';
 import type { BucketContainerProps } from './types';
 
 export const FieldsBucketContainer = ({
@@ -45,15 +46,25 @@ export const FieldsBucketContainer = ({
         </EuiFlexItem>
         <EuiFlexItem grow={true}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={removeTitle}
-            title={removeTitle}
-            onClick={onRemoveClick}
-            data-test-subj={`${dataTestSubj}-remove`}
-            isDisabled={isNotRemovable}
-          />
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.fieldsBucketContainer.deleteButtonDisabled',
+              {
+                defaultMessage: 'This function requires a minimum of one field defined',
+              }
+            )}
+            condition={isNotRemovable ?? false}
+          >
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              aria-label={removeTitle}
+              title={removeTitle}
+              onClick={onRemoveClick}
+              data-test-subj={`${dataTestSubj}-remove`}
+              isDisabled={isNotRemovable}
+            />
+          </TooltipWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

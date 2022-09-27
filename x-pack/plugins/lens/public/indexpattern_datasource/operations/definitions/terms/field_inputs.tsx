@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiDraggable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  htmlIdGenerator,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExistingFieldsMap, IndexPattern } from '../../../../types';
 import {
   DragDropBuckets,
+  FieldsBucketContainer,
   NewBucketButton,
-  TooltipWrapper,
   useDebouncedValue,
+  DraggableBucketContainer,
 } from '../../../../shared_components';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
@@ -61,9 +53,6 @@ export function FieldInputs({
   operationSupportMatrix,
   invalidFields,
 }: FieldInputsProps) {
-  const { euiTheme } = useEuiTheme();
-  const [isDragging, setIsDragging] = useState(false);
-
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
       onChange(values.filter(removeNewEmptyField).map(({ value }) => value)),
@@ -105,17 +94,13 @@ export function FieldInputs({
       <DragDropBuckets
         onDragEnd={(updatedValues: WrappedValue[]) => {
           handleInputChange(updatedValues);
-          setIsDragging(false);
         }}
         className="lnsIndexPatternDimensionEditor__droppable"
-        onDragStart={() => {
-          setIsDragging(true);
-        }}
         droppableId="TOP_TERMS_DROPPABLE_AREA"
         items={localValues}
         color="subdued"
       >
-        {localValues.map(({ id, value, isNew }, index) => {
+        {localValues.map(({ id, value, isNew }, index, arrayRef) => {
           // need to filter the available fields for multiple terms
           // * a scripted field should be removed
           // * a field of unsupported type should be removed
@@ -149,88 +134,38 @@ export function FieldInputs({
                 invalidFields?.includes(value))
           );
           return (
-            <EuiDraggable
-              spacing="none"
-              index={index}
-              draggableId={value || 'newField'}
-              key={id}
-              disableInteractiveElementBlocking
+            <DraggableBucketContainer
+              id={(value ?? 'newField') + id}
+              key={(value ?? 'newField') + id}
+              idx={index}
+              onRemoveClick={() => {
+                handleInputChange(arrayRef.filter((_, i) => i !== index));
+              }}
+              removeTitle={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonAriaLabel', {
+                defaultMessage: 'Delete',
+              })}
+              isNotRemovable={disableActions && !isNew}
+              isNotDraggable={false}
+              data-test-subj={`indexPattern-terms-${index}`}
+              Container={FieldsBucketContainer}
             >
-              {(provided) => (
-                <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
-                  <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-                    <EuiFlexItem
-                      grow={false}
-                      className="lnsIndexPatternDimensionEditor__droppableItem"
-                    >
-                      <EuiIcon
-                        size="s"
-                        color="text"
-                        type="grab"
-                        title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
-                          defaultMessage: 'Drag to reorder',
-                        })}
-                        data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      grow={true}
-                      style={{ minWidth: 0 }}
-                      className="lnsIndexPatternDimensionEditor__droppableItem"
-                    >
-                      <FieldSelect
-                        fieldIsInvalid={shouldShowError}
-                        currentIndexPattern={indexPattern}
-                        existingFields={existingFields[indexPattern.title]}
-                        operationByField={filteredOperationByField}
-                        selectedOperationType={column.operationType}
-                        selectedField={value}
-                        autoFocus={isNew}
-                        onChoose={(choice) => {
-                          onFieldSelectChange(choice, index);
-                        }}
-                        isInvalid={shouldShowError}
-                        data-test-subj={
-                          localValues.length !== 1
-                            ? `indexPattern-dimension-field-${index}`
-                            : undefined
-                        }
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TooltipWrapper
-                        tooltipContent={i18n.translate(
-                          'xpack.lens.indexPattern.terms.deleteButtonDisabled',
-                          {
-                            defaultMessage: 'This function requires a minimum of one field defined',
-                          }
-                        )}
-                        condition={disableActions}
-                      >
-                        <EuiButtonIcon
-                          iconType="trash"
-                          color="danger"
-                          aria-label={i18n.translate(
-                            'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
-                            {
-                              defaultMessage: 'Delete',
-                            }
-                          )}
-                          title={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonLabel', {
-                            defaultMessage: 'Delete',
-                          })}
-                          onClick={() => {
-                            handleInputChange(localValues.filter((_, i) => i !== index));
-                          }}
-                          data-test-subj={`indexPattern-terms-removeField-${index}`}
-                          isDisabled={disableActions && !isNew}
-                        />
-                      </TooltipWrapper>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              )}
-            </EuiDraggable>
+              <FieldSelect
+                fieldIsInvalid={shouldShowError}
+                currentIndexPattern={indexPattern}
+                existingFields={existingFields[indexPattern.title]}
+                operationByField={filteredOperationByField}
+                selectedOperationType={column.operationType}
+                selectedField={value}
+                autoFocus={isNew}
+                onChoose={(choice) => {
+                  onFieldSelectChange(choice, index);
+                }}
+                isInvalid={shouldShowError}
+                data-test-subj={
+                  localValues.length !== 1 ? `indexPattern-dimension-field-${index}` : undefined
+                }
+              />
+            </DraggableBucketContainer>
           );
         })}
       </DragDropBuckets>
