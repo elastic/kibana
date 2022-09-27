@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Notifications list', function () {
     before(async () => {
@@ -27,9 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           { jobId: 'fq_002', spaceId: 'space1' },
         ].map(async (v) => {
           const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(v.jobId);
-
-          // Set small frequency to fail faster
-          datafeedConfig.frequency = '5s';
 
           await ml.api.createAnomalyDetectionJob(
             ml.commonConfig.getADFqSingleMetricJobConfig(v.jobId),
@@ -68,16 +64,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.table.filterWithSearchString('Job created', 1);
     });
 
-    it.skip('display a number of errors in the notification indicator', async () => {
+    it('display a number of errors in the notification indicator', async () => {
       await ml.navigation.navigateToOverview();
-      // triggers an error
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esDeleteAllIndices('ft_farequote');
-      await PageObjects.common.sleep(10000);
-      await browser.refresh();
+
+      const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig('fq_fail');
+      jobConfig.analysis_config = {
+        bucket_span: '15m',
+        influencers: ['airline'],
+        detectors: [
+          { function: 'mean', field_name: 'responsetime', partition_field_name: 'airline' },
+          { function: 'min', field_name: 'responsetime', partition_field_name: 'airline' },
+          { function: 'max', field_name: 'responsetime', partition_field_name: 'airline' },
+        ],
+      };
+      // Set extremely low memory limit to trigger an error
+      jobConfig.analysis_limits!.model_memory_limit = '1024kb';
+
+      const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(jobConfig.job_id);
+
+      await ml.api.createAnomalyDetectionJob(jobConfig);
+      await ml.api.openAnomalyDetectionJob(jobConfig.job_id);
+      await ml.api.createDatafeed(datafeedConfig);
+      await ml.api.startDatafeed(datafeedConfig.datafeed_id);
+      await ml.api.waitForJobMemoryState(jobConfig.job_id, 'hard_limit');
+
       // refresh the page to avoid 1m wait
-      await ml.notifications.assertNotificationErrorsCount(1);
+      await browser.refresh();
+      await ml.notifications.assertNotificationErrorsCount(2);
     });
   });
 }

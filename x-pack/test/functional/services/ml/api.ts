@@ -273,6 +273,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
+    async getJobMemoryState(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.length}')`
+      );
+      return jobStats.jobs[0].model_size_stats.memory_status;
+    },
+
     async getADJobStats(jobId: string): Promise<any> {
       log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
       const { body: jobStats, status } = await esSupertest.get(
@@ -297,6 +307,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
         }
       });
+    },
+
+    async waitForJobMemoryState(
+      jobId: string,
+      expectedMemoryState: 'hard_limit' | 'soft_limit' | 'ok',
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job memory status to be ${expectedMemoryState}`,
+        timeout,
+        async () => {
+          const state = await this.getJobMemoryState(jobId);
+          if (state === expectedMemoryState) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job memory status to be ${expectedMemoryState} but got ${state}`
+            );
+          }
+        }
+      );
     },
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
