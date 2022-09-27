@@ -16,6 +16,8 @@ interface LinkAnchorProps {
   referenceName: string;
   referenceId: string;
 }
+// This component should be removed and moved to @kbn/securitysolution-exception-list-components
+// once all the building components get moved
 
 const LinkAnchor: FC<LinkAnchorProps> = ({ referenceName, referenceId }) => {
   return (

@@ -8,11 +8,12 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { Pagination as PaginationType } from '@elastic/eui';
 
 import type {
+  CommentsArray,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -46,7 +47,9 @@ interface ExceptionItemsProps {
   listType: ExceptionListTypeEnum;
   ruleReferences: RuleReferences;
   pagination: PaginationType;
-  securityLinkAnchorComponent: React.ElementType;
+  securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  getFormattedComments: (comments: CommentsArray) => EuiCommentProps[]; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onCreateExceptionListItem?: () => void;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
@@ -65,6 +68,8 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   emptyViewerButtonText,
   pagination,
   securityLinkAnchorComponent,
+  formattedDateComponent,
+  getFormattedComments,
   onPaginationChange,
   onDeleteException,
   onEditExceptionItem,
@@ -105,6 +110,8 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
                   onEditException={onEditExceptionItem}
                   dataTestSubj="exceptionItemsViewerItem"
                   securityLinkAnchorComponent={securityLinkAnchorComponent}
+                  formattedDateComponent={formattedDateComponent}
+                  getFormattedComments={getFormattedComments}
                 />
               </EuiFlexItem>
             ))}

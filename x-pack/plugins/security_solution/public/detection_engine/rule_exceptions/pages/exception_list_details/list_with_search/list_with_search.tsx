@@ -20,10 +20,13 @@ import {
   EmptyViewerState,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
+import { FormattedDate } from '../../../../../common/components/formatted_date';
+
 import * as i18n from '../translations';
 
 import { useListWithSearchComponent } from './use_list_with_search';
 import { ListDetailsLinkAnchor } from '../link_anchor/link_anchor';
+import { getFormattedComments } from '../../../utils/helpers';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListSchema;
@@ -78,10 +81,12 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
           emptyViewerBody={emptyViewerBody}
           pagination={pagination}
           lastUpdated={lastUpdated}
-          securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onPaginationChange={onPaginationChange}
           onEditExceptionItem={onEditExceptionItem}
           onDeleteException={onDeleteException}
+          getFormattedComments={getFormattedComments}
+          securityLinkAnchorComponent={ListDetailsLinkAnchor}
+          formattedDateComponent={FormattedDate}
         />
       </>
     </EuiPanel>

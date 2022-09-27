@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, ReactElement, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
   EuiContextMenuItem,
@@ -22,7 +22,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { css } from '@emotion/css';
 import * as i18n from '../translations';
 import type { RuleReference } from '../../types';
-// import { MetaInfoDetails } from './details_info/details_info';
+import { MetaInfoDetails } from './details_info/details_info';
 
 const itemCss = css`
   border-right: 1px solid #d3dae6;
@@ -33,17 +33,18 @@ export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
   references: RuleReference[];
   dataTestSubj: string;
-  DateComponent?: ReactElement;
+  formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
 }
 
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
-  ({ item, references, dataTestSubj, securityLinkAnchorComponent }) => {
+  ({ item, references, dataTestSubj, securityLinkAnchorComponent, formattedDateComponent }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);
     const onClosePopover = () => setIsPopoverOpen(false);
 
+    const FormattedDateComponent = formattedDateComponent;
     const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
       if (references == null || securityLinkAnchorComponent === null) {
         return [];
@@ -57,7 +58,6 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         >
           <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
             <SecurityLinkAnchor referenceName={reference.name} referenceId={reference.id} />
-            {/* {securityLinkAnchorComponent({referenceName:reference.name, referenceId:reference.id})} */}
           </EuiToolTip>
         </EuiContextMenuItem>
       ));
@@ -70,24 +70,33 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         gutterSize="s"
         data-test-subj={dataTestSubj}
       >
-        <EuiFlexItem css={itemCss} grow={false}>
-          {/* <MetaInfoDetails
-            fieldName="created_by"
-            label={i18n.EXCEPTION_ITEM_CARD_CREATED_LABEL}
-            lastUpdate={<DateComponent fieldName="created_at" value={item.created_at} />}
-            lastUpdateValue={item.created_by}
-            dataTestSubj={`${dataTestSubj}CreatedBy`}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemCss} grow={false}>
-          <MetaInfoDetails
-            fieldName="updated_by"
-            label={i18n.EXCEPTION_ITEM_CARD_UPDATED_LABEL}
-            lastUpdate={<DateComponent fieldName="updated_at" value={item.updated_at} />}
-            lastUpdateValue={item.updated_by}
-            dataTestSubj={`${dataTestSubj}UpdatedBy`}
-          /> */}
-        </EuiFlexItem>
+        {FormattedDateComponent !== null && (
+          <>
+            <EuiFlexItem css={itemCss} grow={false}>
+              <MetaInfoDetails
+                fieldName="created_by"
+                label={i18n.EXCEPTION_ITEM_CARD_CREATED_LABEL}
+                lastUpdate={
+                  <FormattedDateComponent fieldName="created_at" value={item.created_at} />
+                }
+                lastUpdateValue={item.created_by}
+                dataTestSubj={`${dataTestSubj}CreatedBy`}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem css={itemCss} grow={false}>
+              <MetaInfoDetails
+                fieldName="updated_by"
+                label={i18n.EXCEPTION_ITEM_CARD_UPDATED_LABEL}
+                lastUpdate={
+                  <FormattedDateComponent fieldName="updated_at" value={item.updated_at} />
+                }
+                lastUpdateValue={item.updated_by}
+                dataTestSubj={`${dataTestSubj}UpdatedBy`}
+              />
+            </EuiFlexItem>
+          </>
+        )}
         <EuiFlexItem css={itemCss} grow={false}>
           <EuiPopover
             button={

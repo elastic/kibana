@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-// import type { EuiCommentProps } from '@elastic/eui';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useCallback, FC } from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiCommentProps } from '@elastic/eui';
 import type {
+  CommentsArray,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-// import { getFormattedComments } from '../../../../../x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/utils/helpers';
 import * as i18n from './translations';
 import {
   ExceptionItemCardHeader,
   ExceptionItemCardConditions,
   ExceptionItemCardMetaInfo,
-  // ExceptionItemCardComments,
+  ExceptionItemCardComments,
 } from '.';
 
 import type { ExceptionListItemIdentifiers } from '../types';
@@ -34,6 +33,8 @@ export interface ExceptionItemProps {
   editActionLabel?: string;
   deleteActionLabel?: string;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  getFormattedComments: (comments: CommentsArray) => EuiCommentProps[]; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
 }
@@ -47,6 +48,8 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   editActionLabel,
   deleteActionLabel,
   securityLinkAnchorComponent,
+  formattedDateComponent,
+  getFormattedComments,
   onDeleteException,
   onEditException,
 }) => {
@@ -62,9 +65,9 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
     onEditException(exceptionItem);
   }, [onEditException, exceptionItem]);
 
-  // const formattedComments = useMemo((): EuiCommentProps[] => {
-  //   return getFormattedComments(exceptionItem.comments);
-  // }, [exceptionItem.comments]);
+  const formattedComments = useMemo((): EuiCommentProps[] => {
+    return getFormattedComments(exceptionItem.comments);
+  }, [exceptionItem.comments, getFormattedComments]);
 
   const actions: Array<{
     key: string;
@@ -105,6 +108,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
             references={ruleReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
             securityLinkAnchorComponent={securityLinkAnchorComponent}
+            formattedDateComponent={formattedDateComponent}
           />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="exceptionItemCardCondition">
@@ -114,12 +118,12 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
             dataTestSubj="exceptionItemCardConditions"
           />
         </EuiFlexItem>
-        {/* {formattedComments.length > 0 && (
+        {formattedComments.length > 0 && (
           <ExceptionItemCardComments
             data-test-subj="exceptionItemCard-comment"
             comments={formattedComments}
           />
-        )} */}
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
