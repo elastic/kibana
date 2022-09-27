@@ -21,7 +21,7 @@ export const useRiskScoreToastContent = (riskScoreEntity: RiskScoreEntity) => {
   const renderDocLink = useCallback(
     (message: string) => (
       <>
-        {message} <RiskScoreDocLink external={false} riskScoreEntity={riskScoreEntity} />
+        {message} <RiskScoreDocLink riskScoreEntity={riskScoreEntity} />
       </>
     ),
     [riskScoreEntity]

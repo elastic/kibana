@@ -42,7 +42,6 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
                   <>
                     {i18n.LEARN_MORE}{' '}
                     <RiskScoreDocLink
-                      external={false}
                       riskScoreEntity={RiskScoreEntity.host}
                       title={i18n.HOST_RISK_DATA}
                     />
