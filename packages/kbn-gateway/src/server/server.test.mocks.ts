@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-
-export type ServerConfigType = TypeOf<typeof config.schema>;
-
-export const config = {
-  path: 'server',
-  schema: schema.object({
-    host: schema.string({ defaultValue: 'localhost', hostname: true }),
-    port: schema.number({ defaultValue: 3000 }),
-  }),
-};
+export const hapiStartMock = jest.fn();
+export const hapiStopMock = jest.fn();
+export const hapiRouteMock = jest.fn();
+jest.doMock('@hapi/hapi', () => ({
+  server: jest.fn().mockImplementation(() => ({
+    info: { uri: 'http://localhost:3000' },
+    start: hapiStartMock,
+    stop: hapiStopMock,
+    route: hapiRouteMock,
+  })),
+}));

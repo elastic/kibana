@@ -14,7 +14,7 @@ import { Type } from '@kbn/config-schema';
 import { getArgValues } from './read_argv';
 
 const CONFIG_CLI_FLAGS = ['-c', '--config'];
-const DEFAULT_CONFIG_PATH = fromRoot(`config/gateway.yml`);
+const DEFAULT_CONFIG_PATH = fromRoot('config/gateway.yml');
 
 const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.') : path);
 

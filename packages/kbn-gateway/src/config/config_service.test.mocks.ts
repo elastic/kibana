@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { rawConfigServiceMock as rawMock } from '@kbn/config-mocks';
 
-export type ServerConfigType = TypeOf<typeof config.schema>;
-
-export const config = {
-  path: 'server',
-  schema: schema.object({
-    host: schema.string({ defaultValue: 'localhost', hostname: true }),
-    port: schema.number({ defaultValue: 3000 }),
-  }),
-};
+export const rawConfigServiceMock = jest.fn().mockImplementation(() => rawMock.create());
+jest.doMock('@kbn/config', () => ({
+  RawConfigService: rawConfigServiceMock,
+}));

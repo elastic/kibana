@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Hapi from '@hapi/hapi';
+import { server } from '@hapi/hapi';
+import type { Server as HapiServer, ServerRoute as HapiServerRoute } from '@hapi/hapi';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigStart } from '../config';
 import type { ServerConfigType } from './server_config';
@@ -16,7 +17,7 @@ interface ServerDeps {
   config: ConfigStart;
 }
 
-type RouteDefinition = Hapi.ServerRoute;
+type RouteDefinition = HapiServerRoute;
 
 export interface ServerStart {
   addRoute: (routeDefinition: RouteDefinition) => void;
@@ -29,7 +30,7 @@ export interface ServerStart {
 export class Server {
   private readonly log: Logger;
   private readonly config: ConfigStart;
-  private server?: Hapi.Server;
+  private server?: HapiServer;
 
   constructor({ logger, config }: ServerDeps) {
     this.log = logger.get('server');
@@ -38,10 +39,10 @@ export class Server {
 
   async start(): Promise<ServerStart> {
     const { port, host } = this.config.atPathSync<ServerConfigType>('server');
-    this.server = Hapi.server({ port, host });
+    this.server = server({ port, host });
 
     await this.server.start();
-    this.log.info(`Server running on %s ${this.server.info.uri}`);
+    this.log.info(`Server running on ${this.server.info.uri}`);
 
     return {
       addRoute: (definition) => {
