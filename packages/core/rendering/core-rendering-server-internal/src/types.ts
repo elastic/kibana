@@ -46,7 +46,7 @@ export interface RenderingSetupDeps {
   uiPlugins: UiPlugins;
 }
 
-/** @public */
+/** @internal */
 export interface IRenderOptions {
   /**
    * Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.
