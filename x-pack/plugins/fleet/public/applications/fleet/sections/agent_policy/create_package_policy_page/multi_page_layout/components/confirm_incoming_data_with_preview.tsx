@@ -75,7 +75,8 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
   const listItems = Object.entries(hitForDisplay).map(([key, value]) => ({
     title: `${key}:`,
-    description: value,
+    // Ensures arrays and collections of nested objects are displayed correctly
+    description: JSON.stringify(value),
   }));
 
   return (
