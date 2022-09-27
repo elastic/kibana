@@ -20,20 +20,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
-      const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig('fg_001');
+      // Prepare jobs to generate notifications
+      await Promise.all(
+        [
+          { jobId: 'fq_001', spaceId: undefined },
+          { jobId: 'fq_002', spaceId: 'space1' },
+        ].map(async (v) => {
+          const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(v.jobId);
 
-      // Set small frequency to fail faster
-      datafeedConfig.frequency = '5s';
+          // Set small frequency to fail faster
+          datafeedConfig.frequency = '5s';
 
-      await ml.api.createAnomalyDetectionJob(
-        ml.commonConfig.getADFqSingleMetricJobConfig('fg_001')
+          await ml.api.createAnomalyDetectionJob(
+            ml.commonConfig.getADFqSingleMetricJobConfig(v.jobId),
+            v.spaceId
+          );
+          await ml.api.openAnomalyDetectionJob(v.jobId);
+          await ml.api.createDatafeed(datafeedConfig, v.spaceId);
+          await ml.api.startDatafeed(datafeedConfig.datafeed_id);
+        })
       );
-      await ml.api.openAnomalyDetectionJob('fg_001');
-      await ml.api.createDatafeed(datafeedConfig);
-      await ml.api.startDatafeed(datafeedConfig.datafeed_id);
 
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.navigation.navigateToMl();
+      await PageObjects.common.navigateToApp('ml', {
+        basePath: '',
+      });
     });
 
     after(async () => {
