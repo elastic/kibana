@@ -6,15 +6,13 @@
  */
 
 import { Ast } from '@kbn/interpreter';
-import type { TimeRange } from '@kbn/es-query';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../common/types';
 import { TextBasedLanguagesPrivateState, TextBasedLanguagesLayer, IndexPatternRef } from './types';
 
 function getExpressionForLayer(
   layer: TextBasedLanguagesLayer,
-  refs: IndexPatternRef[],
-  timeRange?: TimeRange
+  refs: IndexPatternRef[]
 ): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {
     return null;
@@ -39,11 +37,9 @@ function getExpressionForLayer(
       };
     }
   });
-
   const timeFieldName = refs.find((r) => r.id === layer.index)?.timeField;
   const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
     query: layer.query,
-    time: timeRange,
     timeFieldName,
   });
 
@@ -57,13 +53,9 @@ function getExpressionForLayer(
   return textBasedQueryToAst;
 }
 
-export function toExpression(
-  state: TextBasedLanguagesPrivateState,
-  layerId: string,
-  timeRange?: TimeRange
-) {
+export function toExpression(state: TextBasedLanguagesPrivateState, layerId: string) {
   if (state.layers[layerId]) {
-    return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs, timeRange);
+    return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs);
   }
 
   return null;

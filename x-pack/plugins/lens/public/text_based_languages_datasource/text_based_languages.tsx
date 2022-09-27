@@ -184,12 +184,27 @@ export function getTextBasedLanguagesDatasource({
       });
       return errors;
     },
-    initialize(state?: TextBasedLanguagesPersistedState, ref?, context?) {
+    initialize(
+      state?: TextBasedLanguagesPersistedState,
+      savedObjectReferences?,
+      context?,
+      indexPatternRefs?,
+      indexPatterns?
+    ) {
+      const patterns = indexPatterns ? Object.values(indexPatterns) : [];
+      const refs = patterns.map((p) => {
+        return {
+          id: p.id,
+          title: p.title,
+          timeField: p.timeFieldName,
+        };
+      });
+
       const initState = state || { layers: {} };
       return {
         ...initState,
         fieldList: [],
-        indexPatternRefs: [],
+        indexPatternRefs: refs,
         initialContext: context,
       };
     },
@@ -309,8 +324,8 @@ export function getTextBasedLanguagesDatasource({
       };
     },
 
-    toExpression: (state, layerId, indexPatterns, timeRange) => {
-      return toExpression(state, layerId, timeRange);
+    toExpression: (state, layerId, indexPatterns) => {
+      return toExpression(state, layerId);
     },
 
     renderDataPanel(
@@ -335,16 +350,24 @@ export function getTextBasedLanguagesDatasource({
       props: DatasourceDimensionTriggerProps<TextBasedLanguagesPrivateState>
     ) => {
       const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(props.state);
-      let customLabel = columnLabelMap[props.columnId];
+      const layer = props.state.layers[props.layerId];
+      const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
+      let customLabel: string | undefined = columnLabelMap[props.columnId];
       if (!customLabel) {
-        const layer = props.state.layers[props.layerId];
-        const selectedField = layer?.allColumns?.find(
-          (column) => column.columnId === props.columnId
-        )!;
-        customLabel = selectedField.fieldName;
+        customLabel = selectedField?.fieldName;
       }
 
-      render(<EuiButtonEmpty onClick={() => {}}>{customLabel}</EuiButtonEmpty>, domElement);
+      const columnExists = props.state.fieldList.some((f) => f.name === selectedField?.fieldName);
+
+      render(
+        <EuiButtonEmpty color={columnExists ? 'primary' : 'danger'} onClick={() => {}}>
+          {customLabel ??
+            i18n.translate('xpack.lens.textBasedLanguages.missingField', {
+              defaultMessage: 'Missing field',
+            })}
+        </EuiButtonEmpty>,
+        domElement
+      );
     },
 
     getRenderEventCounters(state: TextBasedLanguagesPrivateState): string[] {
