@@ -57,12 +57,13 @@ describe('getDownloadHeadersForFile', () => {
     );
   });
   test('mime type, name and blurhash', () => {
-    const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
+    const fileWithMimeAndHash = {
+      data: { ...file.data, mimeType: 'application/pdf', blurhash: 'blurhash' },
+    } as File;
     expect(
       getDownloadHeadersForFile({
-        file: fileWithMime,
+        file: fileWithMimeAndHash,
         fileName: 'a cool file.pdf',
-        blurhash: 'blurhash',
       })
     ).toEqual(
       expectHeaders({

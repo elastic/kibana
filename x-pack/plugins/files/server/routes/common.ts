@@ -11,10 +11,9 @@ import type { File } from '../../common/types';
 interface Args {
   file: File;
   fileName?: string;
-  blurhash?: string;
 }
 
-export function getDownloadHeadersForFile({ file, blurhash, fileName }: Args): ResponseHeaders {
+export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHeaders {
   return {
     'content-type':
       (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
@@ -23,7 +22,7 @@ export function getDownloadHeadersForFile({ file, blurhash, fileName }: Args): R
     'cache-control': 'max-age=31536000, immutable',
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
     'x-content-type-options': 'nosniff',
-    ...(blurhash ? { 'x-kbn-blurhash': blurhash } : undefined),
+    ...(file.data.blurhash ? { 'x-kbn-blurhash': file.data.blurhash } : undefined),
   };
 }
 
