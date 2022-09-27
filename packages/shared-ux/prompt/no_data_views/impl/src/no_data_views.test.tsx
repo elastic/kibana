@@ -36,7 +36,7 @@ describe('<NoDataViewsPromptTest />', () => {
     const component = mount(<NoDataViewsPrompt onDataViewCreated={jest.fn()} />);
 
     expect(services.openDataViewEditor).not.toHaveBeenCalled();
-    component.find(EuiButton).simulate('click');
+    component.find('button').simulate('click');
 
     component.unmount();
 
