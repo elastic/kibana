@@ -1,5 +1,12 @@
-@import '@elastic/eui/src/components/call_out/variables';
 @import '@elastic/eui/src/components/call_out/mixins';
+
+// EUI CallOut var
+$euiCallOutTypes: (
+  primary: $euiColorPrimary,
+  success: $euiColorSuccess,
+  warning: $euiColorWarning,
+  danger: $euiColorDanger,
+);
 
 .upgStepProgress__step {
   display: flex;
