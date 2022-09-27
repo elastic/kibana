@@ -27,8 +27,8 @@ export default ({ getService }: FtrProviderContext) => {
   const trainedModelIdSpace1s1 = 'trained_model_space1s1';
   const trainedModelIdSpace2s1 = 'trained_model_space2s1';
   const trainedModelIdSpace3s2 = 'trained_model_space3s2';
-  const idSpace1 = 'space1';
-  const idSpace2 = 'space2';
+  const idSpace1 = `space1-${Date.now()}`;
+  const idSpace2 = `space2-${Date.now()}`;
 
   async function runRequest(listType: MlSavedObjectType, space?: string) {
     const { body, status } = await supertest

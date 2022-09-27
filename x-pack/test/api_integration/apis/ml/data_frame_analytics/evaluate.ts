@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
       log.info(JSON.stringify(tm4, null, 2));
       const tm42 = await getModels('space1');
       log.info(JSON.stringify(tm42, null, 2));
-      throw new Error('debug');
+      // throw new Error('debug');
     });
 
     testJobConfigs.forEach((testConfig) => {
