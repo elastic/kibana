@@ -227,7 +227,7 @@
         "label": "Language",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\""
+          "\"eql\" | \"lucene\" | \"kuery\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -242,7 +242,7 @@
         "label": "LanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
+          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -660,7 +660,7 @@
         "label": "ThreatLanguage",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
+          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -675,7 +675,7 @@
         "label": "ThreatLanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
+          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
