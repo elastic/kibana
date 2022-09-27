@@ -21,7 +21,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 
 import type { IBasePath } from '@kbn/core/server';
-import { Fonts } from '@kbn/core/server/rendering/views/fonts';
+import { Fonts } from '@kbn/core-rendering-server-internal';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';

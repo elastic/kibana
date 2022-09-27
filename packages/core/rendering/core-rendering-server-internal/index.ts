@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { RenderingService } from './src';
+export { RenderingService, Fonts } from './src';
 export type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
