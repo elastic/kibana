@@ -93,7 +93,7 @@ if (server) {
 }
 
 const cmd = [
-  'node',
+  '/home/mpdreamz/.config/nvm/versions/node/v16.17.1/bin/node',
   ...(inspect ? ['--inspect-brk'] : []),
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),

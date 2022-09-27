@@ -24,6 +24,7 @@ export type ServiceMetricsFields = Fields &
     | 'service.version'
     | 'service.environment'
   > &
+  Partial<Pick<ApmFields, 'agent.name'>> &
   Partial<{
     _doc_count: number;
     transaction: {

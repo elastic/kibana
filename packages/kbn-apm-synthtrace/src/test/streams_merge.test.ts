@@ -9,6 +9,7 @@
 import { timerange } from '../dsl/timerange';
 import { Fields } from '../dsl/fields';
 import { Signal } from '../dsl/signal';
+import { dataStream, WriteTarget } from '../dsl/write_target';
 
 export type DocFields = Fields & Partial<{ type: string }>;
 
@@ -17,6 +18,10 @@ class Doc extends Signal<DocFields> {
     super({
       type,
     });
+  }
+
+  getWriteTarget(): WriteTarget | undefined {
+    return dataStream('type.dataset.default');
   }
 }
 
@@ -41,7 +46,7 @@ describe('Merging streams', () => {
           .generator(() => new Doc('transaction'))
       );
 
-    events = iterable.toArray();
+    events = iterable.toArray().map((e) => e.fields);
     types = events.map((e) => e.type!);
   });
   it('metrics yields before transaction event hough it has less weight', () => {

@@ -5,12 +5,15 @@
  * 2.0.
  */
 import {
-  apm,
+  apmDefaults,
   createLogger,
-  SignalArrayIterable,
+  SignalArray,
   LogLevel,
   StreamProcessor,
   ApmFields,
+  SynthtraceEsClient,
+  SerializedSignal,
+  SignalTransferObject,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 import { some } from 'lodash';
@@ -29,10 +32,10 @@ export function setupNodeEvents(
   const logger = createLogger(LogLevel.info);
   const streamProcessor = new StreamProcessor<ApmFields>({
     logger,
-    processors: apm.defaults.processors,
-    streamAggregators: apm.defaults.streamAggregators,
+    processors: apmDefaults.processors,
+    streamAggregators: apmDefaults.streamAggregators,
   });
-  const synthtraceEsClient = new apm.SynthtraceEsClient(client, logger, {
+  const synthtraceEsClient = new SynthtraceEsClient(client, logger, {
     refreshAfterIndex: true,
     streamProcessor,
   });
@@ -44,13 +47,16 @@ export function setupNodeEvents(
       console.log(message);
       return null;
     },
-
-    'synthtrace:index': async (events: Array<Record<string, any>>) => {
-      await synthtraceEsClient.index(new SignalArrayIterable(events));
+    'synthtrace:index': async (events: SerializedSignal[]) => {
+      // eslint-disable-next-line no-console
+      console.log(events);
+      await synthtraceEsClient.index(
+        new SignalArray(events.map((e) => new SignalTransferObject(e)))
+      );
       return null;
     },
     'synthtrace:clean': async () => {
-      await synthtraceEsClient.clean();
+      await synthtraceEsClient.clean(apmDefaults.writeTargets);
       return null;
     },
   });

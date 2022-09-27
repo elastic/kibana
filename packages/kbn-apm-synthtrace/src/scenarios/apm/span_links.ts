@@ -7,12 +7,13 @@
  */
 
 import { compact, shuffle } from 'lodash';
-import { apm, SignalArrayIterable, timerange } from '../../..';
+import { apm, SignalArray, timerange } from '../../..';
 import { generateLongId, generateShortId } from '../../lib/utils/generate_id';
 import { Scenario } from '../../cli/scenario';
 import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
 import { ApmScenarioDefaults } from '../../lib/apm/apm_scenario_defaults';
 import { ApmFields } from '../../lib/apm';
+import { Signal } from '../../dsl/signal';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -23,11 +24,13 @@ function generateExternalSpanLinks() {
     .map(() => ({ span: { id: generateLongId() }, trace: { id: generateShortId() } }));
 }
 
-function getSpanLinksFromEvents(events: ApmFields[]) {
+function getSpanLinksFromEvents(signals: Array<Signal<ApmFields>>) {
   return compact(
-    events.map((event) => {
-      const spanId = event['span.id'];
-      return spanId ? { span: { id: spanId }, trace: { id: event['trace.id']! } } : undefined;
+    signals.map((signal) => {
+      const spanId = signal.fields['span.id'];
+      return spanId
+        ? { span: { id: spanId }, trace: { id: signal.fields['trace.id']! } }
+        : undefined;
     })
   );
 }
@@ -114,9 +117,9 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      return new SignalArrayIterable(producerInternalOnlyApmFields)
+      return new SignalArray(producerInternalOnlyApmFields)
         .merge(consumerEvents)
-        .merge(new SignalArrayIterable(producerConsumerApmFields));
+        .merge(new SignalArray(producerConsumerApmFields));
     },
   };
 };

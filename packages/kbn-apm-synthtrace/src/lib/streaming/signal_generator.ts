@@ -43,8 +43,8 @@ export class SignalGenerator<TField> implements SignalIterable<TField> {
     return this._order;
   }
 
-  toArray(): TField[] {
-    return Array.from(this).map((s) => s.fields);
+  toArray(): Array<Signal<TField>> {
+    return Array.from(this);
   }
 
   merge(...iterables: Array<SignalIterable<TField>>): MergedSignalsStream<TField> {

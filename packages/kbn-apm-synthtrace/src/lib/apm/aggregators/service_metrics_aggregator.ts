@@ -21,7 +21,8 @@ type AggregationState = {
   timestamp: number;
   failure_count: number;
   success_count: number;
-} & Pick<ApmFields, 'service.name' | 'service.environment' | 'transaction.type'>;
+} & Partial<Pick<ApmFields, 'agent.name'>> &
+  Pick<ApmFields, 'service.name' | 'service.environment' | 'transaction.type'>;
 
 export class ServiceMetricsAggregator implements StreamAggregator<ApmFields, ServiceMetricsFields> {
   public readonly name;
@@ -85,9 +86,11 @@ export class ServiceMetricsAggregator implements StreamAggregator<ApmFields, Ser
 
   process(event: ApmFields): Array<Signal<ServiceMetricsFields>> | null {
     if (!event['@timestamp']) return null;
+    if (event['processor.event'] !== 'transaction') return null;
     const service = event['service.name']!;
     const environment = event['service.environment'] ?? 'production';
     const transactionType = event['transaction.type'] ?? 'request';
+    const agentName = event['agent.name'];
     const key = `${service}-${environment}-${transactionType}`;
     const addToState = (timestamp: number) => {
       if (!this.state[key]) {
@@ -100,6 +103,7 @@ export class ServiceMetricsAggregator implements StreamAggregator<ApmFields, Ser
           'service.name': service,
           'service.environment': environment,
           'transaction.type': transactionType,
+          'agent.name': agentName,
           failure_count: 0,
           success_count: 0,
         };
@@ -175,6 +179,7 @@ export class ServiceMetricsAggregator implements StreamAggregator<ApmFields, Ser
         failure_count: state.failure_count,
         type: state['transaction.type'] ?? 'request',
       },
+      'agent.name': state['agent.name'],
     };
   }
 

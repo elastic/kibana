@@ -8,17 +8,19 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import { apm, timerange } from '../..';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Scenario } from '../cli/scenario';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { DistributedTrace } from '../lib/dsl/distributed_trace_client';
+import { apm, timerange } from '../../..';
+import { ApmFields } from '../../dsl/apm/apm_fields';
+import { Scenario } from '../../cli/scenario';
+import { ScenarioOptions } from '../../cli/utils/get_scenario_options';
+import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
+import { DistributedTrace } from '../../dsl/apm/distributed_trace_client';
+import { ApmScenarioDefaults } from '../../lib/apm/apm_scenario_defaults';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
+const scenario: Scenario<ApmFields> = async (options: ScenarioOptions) => {
   return {
+    ...ApmScenarioDefaults,
     generate: ({ from, to }) => {
       const ratePerMinute = 1;
       const traceDuration = 1100;

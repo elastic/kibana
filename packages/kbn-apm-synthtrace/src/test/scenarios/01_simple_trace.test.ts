@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SignalIterable } from '../../..';
+import { Signal, SignalIterable } from '../../..';
 import { apm } from '../../lib/apm';
 import { ApmFields } from '../../dsl/apm/apm_fields';
 import { timerange } from '../../dsl/timerange';
 
 describe('simple trace', () => {
   let iterable: SignalIterable<ApmFields>;
-  let events: Array<Record<string, any>>;
+  let events: Array<Signal<ApmFields>>;
 
   beforeEach(() => {
     const javaService = apm.service({
@@ -50,30 +50,32 @@ describe('simple trace', () => {
 
   // TODO this is not entirely factual, since id's are generated of a global sequence number
   it('generates the same data every time', () => {
-    expect(events).toMatchSnapshot();
+    expect(events.map((e) => e.fields)).toMatchSnapshot();
   });
 
   it('generates 15 transaction events', () => {
-    expect(events.filter((event) => event['processor.event'] === 'transaction').length).toEqual(15);
+    expect(
+      events.filter((event) => event.fields['processor.event'] === 'transaction').length
+    ).toEqual(15);
   });
 
   it('generates 15 span events', () => {
-    expect(events.filter((event) => event['processor.event'] === 'span').length).toEqual(15);
+    expect(events.filter((event) => event.fields['processor.event'] === 'span').length).toEqual(15);
   });
 
   it('correctly sets the trace/transaction id of children', () => {
     const [transaction, span] = events;
 
-    expect(span['transaction.id']).toEqual(transaction['transaction.id']);
-    expect(span['parent.id']).toEqual(transaction['transaction.id']);
+    expect(span.fields['transaction.id']).toEqual(transaction.fields['transaction.id']);
+    expect(span.fields['parent.id']).toEqual(transaction.fields['transaction.id']);
 
-    expect(span['trace.id']).toEqual(transaction['trace.id']);
+    expect(span.fields['trace.id']).toEqual(transaction.fields['trace.id']);
   });
 
   it('outputs transaction events', () => {
     const [transaction] = events;
 
-    expect(transaction).toEqual({
+    expect(transaction.fields).toEqual({
       '@timestamp': 1609459200000,
       'agent.name': 'java',
       'container.id': 'instance-1',
@@ -96,7 +98,7 @@ describe('simple trace', () => {
   it('outputs span events', () => {
     const [, span] = events;
 
-    expect(span).toEqual({
+    expect(span.fields).toEqual({
       '@timestamp': 1609459200050,
       'agent.name': 'java',
       'container.id': 'instance-1',

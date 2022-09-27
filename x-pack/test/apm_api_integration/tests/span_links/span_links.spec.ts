@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SignalArrayIterable } from '@kbn/apm-synthtrace';
+import { SignalArray } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -26,13 +26,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       ids = spanLinksData.ids;
 
-      await synthtraceEsClient.index(
-        new SignalArrayIterable(spanLinksData.apmFields.producerInternalOnly).merge(
-          new SignalArrayIterable(spanLinksData.apmFields.producerExternalOnly),
-          new SignalArrayIterable(spanLinksData.apmFields.producerConsumer),
-          new SignalArrayIterable(spanLinksData.apmFields.producerMultiple)
-        )
+      const spans = new SignalArray(spanLinksData.signals.producerInternalOnly).merge(
+        new SignalArray(spanLinksData.signals.producerExternalOnly),
+        new SignalArray(spanLinksData.signals.producerConsumer),
+        new SignalArray(spanLinksData.signals.producerMultiple)
       );
+
+      await synthtraceEsClient.index(spans);
     });
 
     after(() => synthtraceEsClient.clean());

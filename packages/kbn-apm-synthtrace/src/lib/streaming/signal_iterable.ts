@@ -18,13 +18,14 @@ export interface SignalIterable<TFields extends Fields>
 
   estimatedRatePerMinute(): number;
 
-  toArray(): ApmFields[];
+  toArray(): Array<Signal<ApmFields>>;
 
   merge(...iterables: Array<SignalIterable<TFields>>): MergedSignalsStream<TFields>;
 }
 
-export class SignalArrayIterable<TFields extends Fields> implements SignalIterable<TFields> {
-  constructor(private fields: TFields[]) {
+export class SignalArray<TFields extends Fields> implements SignalIterable<TFields> {
+  constructor(private signals: Array<Signal<TFields>>) {
+    const fields = this.signals.map((s) => s.fields);
     const timestamps = fields.filter((f) => f['@timestamp']).map((f) => f['@timestamp']!);
     this._order = timestamps.length > 1 ? (timestamps[0] > timestamps[1] ? 'desc' : 'asc') : 'asc';
     const sorted = timestamps.sort();
@@ -44,18 +45,18 @@ export class SignalArrayIterable<TFields extends Fields> implements SignalIterab
   }
 
   async *[Symbol.asyncIterator](): AsyncIterator<Signal<TFields>> {
-    return this[Symbol.iterator]();
+    return this.signals[Symbol.iterator]();
   }
 
   [Symbol.iterator](): Iterator<Signal<TFields>> {
-    return this[Symbol.iterator]();
+    return this.signals[Symbol.iterator]();
   }
 
   merge(...iterables: Array<SignalIterable<TFields>>): MergedSignalsStream<TFields> {
     return new MergedSignalsStream<TFields>([this, ...iterables]);
   }
 
-  toArray(): TFields[] {
-    return this.fields;
+  toArray(): Array<Signal<TFields>> {
+    return this.signals;
   }
 }

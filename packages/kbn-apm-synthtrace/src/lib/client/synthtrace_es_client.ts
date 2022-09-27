@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { Client, ClientOptions } from '@elastic/elasticsearch';
 import { Logger } from '../utils/create_logger';
 import { SignalIterable } from '../streaming/signal_iterable';
 import { StreamProcessor } from '../streaming/stream_processor';
@@ -15,8 +15,8 @@ import { MergedSignalsStream } from '../streaming/merged_signals_stream';
 import { StreamAggregator } from '../streaming/stream_aggregator';
 import { Fields } from '../../dsl/fields';
 import { Signal } from '../../dsl/signal';
-import { SignalSerializer } from './signal_serializer';
 import { WriteTarget } from '../../dsl/write_target';
+import { createSignalSerializer } from './signal_serializer';
 
 export interface StreamToBulkOptions<TFields extends Fields> {
   concurrency?: number;
@@ -47,16 +47,27 @@ export class SynthtraceEsClient {
     this.refreshAfterIndex = options?.refreshAfterIndex ?? true;
     this.streamProcessor = options?.streamProcessor;
 
-    // hack because child() does not allow Serializer to be overridden
+    this.client = SynthtraceEsClient.createPatchedEsClient(client);
+  }
+
+  // hack because child() does not allow Serializer to be overridden
+  public static createPatchedEsClient(client: Client): Client {
     const initialOptions = Reflect.ownKeys(client)
       .map((k) => (client as any)[k])
       .filter((o) => o != null)
       .find((o) => o.Serializer != null && o.sniffEndpoint != null) as ClientOptions;
 
-    const clientOptions: ClientOptions = Object.assign({}, initialOptions, {
-      Serializer: SignalSerializer,
+    const serializer = initialOptions.Serializer;
+    const clientOptions = Object.assign({}, initialOptions, {
+      Connection: client.connectionPool.Connection,
+      Serializer: createSignalSerializer(serializer),
     });
-    this.client = new Client(clientOptions);
+    // because e2e tests imports this package in public (client side) code
+    // we need to shade the @elastic/elasticsearch import so that webpack
+    // does not eagerly try to compile it on the client side which is explicitly
+    // not supported the nodejs Elasticsearch client
+    // @ts-ignore
+    return new client.constructor(clientOptions);
   }
 
   async runningVersion() {

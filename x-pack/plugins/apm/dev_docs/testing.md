@@ -83,7 +83,7 @@ node x-pack/plugins/apm/scripts/test/e2e.js --server
 ### Run tests
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e.js --runner --open
+`node x-pack/plugins/apm/scripts/test/e2e.js --runner --open`
 ```
 
 ### A11y checks

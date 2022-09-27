@@ -7,30 +7,27 @@
  */
 import { service } from '../../dsl/apm/service';
 import { browser } from '../../dsl/apm/browser';
-import { SynthtraceEsClient } from '../client/synthtrace_es_client';
-import { SynthtraceKibanaClient } from '../client/synthtrace_kibana_client';
 import { serverlessFunction } from '../../dsl/apm/serverless/serverless_function';
-
+import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
 import type { ApmException, ApmFields } from '../../dsl/apm/apm_fields';
 import { ApmScenarioDefaults } from './apm_scenario_defaults';
 import { ScenarioDescriptor } from '../../cli/scenario';
 
-// explicitly typed because ApmScenarioDefaults because type definition file eats the generics
-// e.g. Omit<ScenarioDescriptorApmFields>, 'generate' | 'mapToIndex'>
-export const apm: {
-  defaults: Omit<ScenarioDescriptor<ApmFields>, 'generate' | 'mapToIndex'>;
-  service: typeof service;
-  browser: typeof browser;
-  SynthtraceEsClient: typeof SynthtraceEsClient;
-  SynthtraceKibanaClient: typeof SynthtraceKibanaClient;
-  serverlessFunction: typeof serverlessFunction;
-} = {
-  defaults: ApmScenarioDefaults,
+export const apm = {
   service,
   browser,
-  SynthtraceEsClient,
-  SynthtraceKibanaClient,
   serverlessFunction,
+  getChromeUserAgentDefaults,
 };
 
-export type { ApmFields, SynthtraceEsClient, ApmException };
+// explicitly typed because ApmScenarioDefaults because type definition file eats the generics
+// e.g. Omit<ScenarioDescriptorApmFields>, 'generate' | 'mapToIndex'>
+// separate export since `apm` gets imported client side during cyprus e2e tests.
+// Scenario defaults exposes StreamAggregator which has a bootstrap method taking Client
+// which is not safe to export to the client side
+export const apmDefaults: Omit<
+  ScenarioDescriptor<ApmFields>,
+  'generate' | 'mapToIndex'
+> = ApmScenarioDefaults;
+
+export type { ApmFields, ApmException };

@@ -8,7 +8,11 @@
 import Url from 'url';
 import cypress from 'cypress';
 import { esTestConfig } from '@kbn/test';
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import {
+  createLogger,
+  LogLevel,
+  SynthtraceKibanaClient,
+} from '@kbn/apm-synthtrace';
 import path from 'path';
 import { FtrProviderContext } from './ftr_provider_context';
 import { createApmUsers } from '../server/test_helpers/create_apm_users/create_apm_users';
@@ -40,9 +44,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const kibanaClient = new apm.SynthtraceKibanaClient(
-    createLogger(LogLevel.info)
-  );
+  const kibanaClient = new SynthtraceKibanaClient(createLogger(LogLevel.info));
 
   await kibanaClient.installApmPackage(
     kibanaUrl,

@@ -9,13 +9,14 @@
 import { partition } from 'lodash';
 import { getScenario } from './get_scenario';
 import { ScenarioOptions } from './get_scenario_options';
-import { SynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
-import { SignalArrayIterable } from '../../lib/streaming/signal_iterable';
+import { SignalArray } from '../../lib/streaming/signal_iterable';
 import { StreamProcessor } from '../../lib/streaming/stream_processor';
 import { ApmSynthtraceApmClient } from '../../lib/apm/client/apm_synthtrace_apm_client';
 import { Fields } from '../../dsl/fields';
 import { getStreamProcessorOptions } from './get_stream_processor_options';
+import { Signal } from '../../dsl/signal';
+import { SynthtraceEsClient } from '../../lib/client/synthtrace_es_client';
 
 export async function startLiveDataUpload(
   esClient: SynthtraceEsClient,
@@ -28,7 +29,7 @@ export async function startLiveDataUpload(
   const scenario = await getScenario({ logger, options });
   const { generate, mapToIndex } = scenario;
 
-  let queuedEvents: Fields[] = [];
+  let queuedEvents: Array<Signal<Fields>> = [];
   let requestedUntil: Date = start;
   const bucketSizeInMs = 1000 * 60;
 
@@ -53,7 +54,8 @@ export async function startLiveDataUpload(
 
     const [eventsToUpload, eventsToRemainInQueue] = partition(
       queuedEvents,
-      (event) => event['@timestamp'] !== undefined && event['@timestamp'] <= end.getTime()
+      (signal) =>
+        signal.fields['@timestamp'] !== undefined && signal.fields['@timestamp'] <= end.getTime()
     );
 
     logger.info(`Uploading until ${new Date(end).toISOString()}, events: ${eventsToUpload.length}`);
@@ -68,7 +70,7 @@ export async function startLiveDataUpload(
     );
     const streamProcessor = new StreamProcessor(streamProcessorOptions);
     await logger.perf('index_live_scenario', async () => {
-      const events = new SignalArrayIterable(eventsToUpload);
+      const events = new SignalArray(eventsToUpload);
       const streamToBulkOptions = {
         concurrency: options.workers,
         maxDocs: options.maxDocs,

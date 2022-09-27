@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { SignalArrayIterable, SignalIterable } from '../lib/streaming/signal_iterable';
+import { SignalArray, SignalIterable } from '../lib/streaming/signal_iterable';
 import { apm } from '../lib/apm';
 import { timerange } from '../dsl/timerange';
 import { ApmFields } from '../dsl/apm/apm_fields';
+import { Signal } from '../dsl/signal';
+import { Fields } from '../dsl/fields';
 
 const range = timerange(new Date('2021-01-01T00:00:00.000Z'), new Date('2021-01-01T00:15:00.000Z'));
 
 describe('rate per minute calculations', () => {
   let iterable: SignalIterable<ApmFields>;
-  let arrayIterable: SignalArrayIterable<ApmFields>;
-  let events: Array<Record<string, any>>;
+  let arrayIterable: SignalArray<ApmFields>;
+  let signals: Array<Signal<Fields>>;
 
   beforeEach(() => {
     const javaService = apm.service({
@@ -43,8 +45,8 @@ describe('rate per minute calculations', () => {
               .timestamp(timestamp + 50)
           )
       );
-    events = iterable.toArray();
-    arrayIterable = new SignalArrayIterable(events);
+    signals = iterable.toArray();
+    arrayIterable = new SignalArray(signals);
   });
 
   it('array iterable returns exact rate per minute', () => {

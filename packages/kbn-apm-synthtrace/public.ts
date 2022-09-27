@@ -7,5 +7,3 @@
  */
 
 export * from './common';
-export { SynthtraceEsClient } from './src/lib/client/synthtrace_es_client';
-export { SynthtraceKibanaClient } from './src/lib/client/synthtrace_kibana_client';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, SignalArrayIterable, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -61,8 +61,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const events = timerange(start, end)
         .interval('1m')
         .rate(1)
-        .generator((timestamp) => {
-          return [
+        .generator((timestamp, index) => {
+          const spans = [
             instanceJava
               .transaction({ transactionName: 'GET /apple 🍏' })
               .timestamp(timestamp)
@@ -85,11 +85,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
               ),
           ];
-        });
-      const entities = events.toArray();
-      serviceATraceId = entities.slice(0, 1)[0]['trace.id']!;
+          if (index === 0) {
+            serviceATraceId = spans[0].fields['trace.id'] ?? 'undefined';
+          }
 
-      await synthtraceEsClient.index(new SignalArrayIterable(entities));
+          return spans;
+        });
+
+      await synthtraceEsClient.index(events);
     });
 
     after(() => synthtraceEsClient.clean());

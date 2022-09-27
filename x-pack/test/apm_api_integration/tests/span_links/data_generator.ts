@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, ApmFields, timerange, Signal } from '@kbn/apm-synthtrace';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import uuid from 'uuid';
 
@@ -13,7 +13,7 @@ function getProducerInternalOnly() {
     .service({ name: 'producer-internal-only', environment: 'production', agentName: 'go' })
     .instance('instance a');
 
-  const events = timerange(
+  const generator = timerange(
     new Date('2022-01-01T00:00:00.000Z'),
     new Date('2022-01-01T00:01:00.000Z')
   )
@@ -34,24 +34,24 @@ function getProducerInternalOnly() {
         );
     });
 
-  const apmFields = events.toArray();
-  const transactionA = apmFields.find((item) => item['processor.event'] === 'transaction');
-  const spanA = apmFields.find((item) => item['processor.event'] === 'span');
+  const signals = generator.toArray();
+  const transactionA = signals.find((item) => item.fields['processor.event'] === 'transaction');
+  const spanA = signals.find((item) => item.fields['processor.event'] === 'span');
 
   const ids = {
-    transactionAId: transactionA?.['transaction.id']!,
-    traceId: spanA?.['trace.id']!,
-    spanAId: spanA?.['span.id']!,
+    transactionAId: transactionA?.fields['transaction.id']!,
+    traceId: spanA?.fields['trace.id']!,
+    spanAId: spanA?.fields['span.id']!,
   };
   const spanASpanLink = {
-    trace: { id: spanA?.['trace.id']! },
-    span: { id: spanA?.['span.id']! },
+    trace: { id: spanA?.fields['trace.id']! },
+    span: { id: spanA?.fields['span.id']! },
   };
 
   return {
     ids,
     spanASpanLink,
-    apmFields,
+    signals,
   };
 }
 
@@ -60,7 +60,7 @@ function getProducerExternalOnly() {
     .service({ name: 'producer-external-only', environment: 'production', agentName: 'java' })
     .instance('instance b');
 
-  const events = timerange(
+  const generator = timerange(
     new Date('2022-01-01T00:02:00.000Z'),
     new Date('2022-01-01T00:03:00.000Z')
   )
@@ -89,32 +89,32 @@ function getProducerExternalOnly() {
         );
     });
 
-  const apmFields = events.toArray();
-  const transactionB = apmFields.find((item) => item['processor.event'] === 'transaction');
-  const spanB = apmFields.find(
-    (item) => item['processor.event'] === 'span' && item['span.name'] === 'Span B'
+  const signals = generator.toArray();
+  const transactionB = signals.find((item) => item.fields['processor.event'] === 'transaction');
+  const spanB = signals.find(
+    (item) => item.fields['processor.event'] === 'span' && item.fields['span.name'] === 'Span B'
   );
   const ids = {
-    traceId: spanB?.['trace.id']!,
-    transactionBId: transactionB?.['transaction.id']!,
-    spanBId: spanB?.['span.id']!,
+    traceId: spanB?.fields['trace.id']!,
+    transactionBId: transactionB?.fields['transaction.id']!,
+    spanBId: spanB?.fields['span.id']!,
   };
 
   const spanBSpanLink = {
-    trace: { id: spanB?.['trace.id']! },
-    span: { id: spanB?.['span.id']! },
+    trace: { id: spanB?.fields['trace.id']! },
+    span: { id: spanB?.fields['span.id']! },
   };
 
   const transactionBSpanLink = {
-    trace: { id: transactionB?.['trace.id']! },
-    span: { id: transactionB?.['transaction.id']! },
+    trace: { id: transactionB?.fields['trace.id']! },
+    span: { id: transactionB?.fields['transaction.id']! },
   };
 
   return {
     ids,
     spanBSpanLink,
     transactionBSpanLink,
-    apmFields,
+    signals,
   };
 }
 
@@ -133,7 +133,7 @@ function getProducerConsumer({
     .service({ name: 'producer-consumer', environment: 'production', agentName: 'ruby' })
     .instance('instance c');
 
-  const events = timerange(
+  const generator = timerange(
     new Date('2022-01-01T00:04:00.000Z'),
     new Date('2022-01-01T00:05:00.000Z')
   )
@@ -161,30 +161,30 @@ function getProducerConsumer({
         );
     });
 
-  const apmFields = events.toArray();
-  const transactionC = apmFields.find((item) => item['processor.event'] === 'transaction');
+  const signals = generator.toArray();
+  const transactionC = signals.find((item) => item.fields['processor.event'] === 'transaction');
   const transactionCSpanLink = {
-    trace: { id: transactionC?.['trace.id']! },
-    span: { id: transactionC?.['transaction.id']! },
+    trace: { id: transactionC?.fields['trace.id']! },
+    span: { id: transactionC?.fields['transaction.id']! },
   };
-  const spanC = apmFields.find(
-    (item) => item['processor.event'] === 'span' || item['span.name'] === 'Span C'
+  const spanC = signals.find(
+    (item) => item.fields['processor.event'] === 'span' || item.fields['span.name'] === 'Span C'
   );
   const spanCSpanLink = {
-    trace: { id: spanC?.['trace.id']! },
-    span: { id: spanC?.['span.id']! },
+    trace: { id: spanC?.fields['trace.id']! },
+    span: { id: spanC?.fields['span.id']! },
   };
   const ids = {
-    traceId: transactionC?.['trace.id']!,
-    transactionCId: transactionC?.['transaction.id']!,
-    spanCId: spanC?.['span.id']!,
+    traceId: transactionC?.fields['trace.id']!,
+    transactionCId: transactionC?.fields['transaction.id']!,
+    spanCId: spanC?.fields['span.id']!,
     externalTraceId,
   };
   return {
     transactionCSpanLink,
     spanCSpanLink,
     ids,
-    apmFields,
+    signals,
   };
 }
 
@@ -203,7 +203,7 @@ function getConsumerMultiple({
     .service({ name: 'consumer-multiple', environment: 'production', agentName: 'nodejs' })
     .instance('instance d');
 
-  const events = timerange(
+  const generator = timerange(
     new Date('2022-01-01T00:06:00.000Z'),
     new Date('2022-01-01T00:07:00.000Z')
   )
@@ -227,19 +227,19 @@ function getConsumerMultiple({
             .success()
         );
     });
-  const apmFields = events.toArray();
-  const transactionD = apmFields.find((item) => item['processor.event'] === 'transaction');
-  const spanE = apmFields.find((item) => item['processor.event'] === 'span');
+  const signals = generator.toArray();
+  const transactionD = signals.find((item) => item.fields['processor.event'] === 'transaction');
+  const spanE = signals.find((item) => item.fields['processor.event'] === 'span');
 
   const ids = {
-    traceId: transactionD?.['trace.id']!,
-    transactionDId: transactionD?.['transaction.id']!,
-    spanEId: spanE?.['span.id']!,
+    traceId: transactionD?.fields['trace.id']!,
+    transactionDId: transactionD?.fields['transaction.id']!,
+    spanEId: spanE?.fields['span.id']!,
   };
 
   return {
     ids,
-    apmFields,
+    signals,
   };
 }
 
@@ -269,7 +269,25 @@ function getConsumerMultiple({
  * ----Span E
  * ------span.links= Service B / Span B | Service C / Transaction C
  */
-export function generateSpanLinksData() {
+export function generateSpanLinksData(): {
+  signals: {
+    producerMultiple: Array<Signal<ApmFields>>;
+    producerInternalOnly: Array<Signal<ApmFields>>;
+    producerExternalOnly: Array<Signal<ApmFields>>;
+    producerConsumer: Array<Signal<ApmFields>>;
+  };
+  ids: {
+    producerMultiple: { traceId: string; spanEId: string; transactionDId: string };
+    producerInternalOnly: { traceId: string; transactionAId: string; spanAId: string };
+    producerExternalOnly: { traceId: string; transactionBId: string; spanBId: string };
+    producerConsumer: {
+      traceId: string;
+      spanCId: string;
+      transactionCId: string;
+      externalTraceId: string;
+    };
+  };
+} {
   const producerInternalOnly = getProducerInternalOnly();
   const producerExternalOnly = getProducerExternalOnly();
   const producerConsumer = getProducerConsumer({
@@ -284,11 +302,11 @@ export function generateSpanLinksData() {
     producerConsumerTransactionCLink: producerConsumer.transactionCSpanLink,
   });
   return {
-    apmFields: {
-      producerInternalOnly: producerInternalOnly.apmFields,
-      producerExternalOnly: producerExternalOnly.apmFields,
-      producerConsumer: producerConsumer.apmFields,
-      producerMultiple: producerMultiple.apmFields,
+    signals: {
+      producerInternalOnly: producerInternalOnly.signals,
+      producerExternalOnly: producerExternalOnly.signals,
+      producerConsumer: producerConsumer.signals,
+      producerMultiple: producerMultiple.signals,
     },
     ids: {
       producerInternalOnly: producerInternalOnly.ids,

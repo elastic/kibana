@@ -31,8 +31,8 @@ export class MergedSignalsStream<TFields> implements SignalIterable<TFields> {
     return this._ratePerMinute;
   }
 
-  toArray(): TFields[] {
-    return Array.from(this).map((s) => s.fields);
+  toArray(): Array<Signal<TFields>> {
+    return Array.from(this);
   }
 
   merge(...iterables: Array<SignalIterable<TFields>>): MergedSignalsStream<TFields> {

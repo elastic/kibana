@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, SignalArrayIterable, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange, SignalArray } from '@kbn/apm-synthtrace';
 import { synthtrace } from '../../../../synthtrace';
 import { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_links';
 
@@ -17,7 +17,7 @@ function getProducerInternalOnly() {
     })
     .instance('instance a');
 
-  const events = timerange(
+  const signals = timerange(
     new Date('2022-01-01T00:00:00.000Z'),
     new Date('2022-01-01T00:01:00.000Z')
   )
@@ -42,28 +42,33 @@ function getProducerInternalOnly() {
         );
     });
 
-  const apmFields = events.toArray();
+  const apmFields = signals.toArray();
   const transactionA = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
+    (item) => item.fields['processor.event'] === 'transaction'
   );
-  const spanA = apmFields.find((item) => item['processor.event'] === 'span');
+  const spanA = apmFields.find(
+    (item) => item.fields['processor.event'] === 'span'
+  );
 
   const ids =
     spanA && transactionA
       ? {
-          transactionAId: transactionA['transaction.id']!,
-          traceId: spanA['trace.id']!,
-          spanAId: spanA['span.id']!,
+          transactionAId: transactionA.fields['transaction.id']!,
+          traceId: spanA.fields['trace.id']!,
+          spanAId: spanA.fields['span.id']!,
         }
       : {};
   const spanASpanLink = spanA
-    ? { trace: { id: spanA['trace.id']! }, span: { id: spanA['span.id']! } }
+    ? {
+        trace: { id: spanA.fields['trace.id']! },
+        span: { id: spanA.fields['span.id']! },
+      }
     : undefined;
 
   return {
     ids,
     spanASpanLink,
-    apmFields,
+    signals,
   };
 }
 
@@ -76,7 +81,7 @@ function getProducerExternalOnly() {
     })
     .instance('instance b');
 
-  const events = timerange(
+  const signals = timerange(
     new Date('2022-01-01T00:02:00.000Z'),
     new Date('2022-01-01T00:03:00.000Z')
   )
@@ -115,34 +120,35 @@ function getProducerExternalOnly() {
         );
     });
 
-  const apmFields = events.toArray();
+  const apmFields = signals.toArray();
   const transactionB = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
+    (item) => item.fields['processor.event'] === 'transaction'
   );
   const spanB = apmFields.find(
     (item) =>
-      item['processor.event'] === 'span' && item['span.name'] === 'Span B'
+      item.fields['processor.event'] === 'span' &&
+      item.fields['span.name'] === 'Span B'
   );
   const ids =
     spanB && transactionB
       ? {
-          traceId: spanB['trace.id']!,
-          transactionBId: transactionB['transaction.id']!,
-          spanBId: spanB['span.id']!,
+          traceId: spanB.fields['trace.id']!,
+          transactionBId: transactionB.fields['transaction.id']!,
+          spanBId: spanB.fields['span.id']!,
         }
       : {};
 
   const spanBSpanLink = spanB
     ? {
-        trace: { id: spanB['trace.id']! },
-        span: { id: spanB['span.id']! },
+        trace: { id: spanB.fields['trace.id']! },
+        span: { id: spanB.fields['span.id']! },
       }
     : undefined;
 
   return {
     ids,
     spanBSpanLink,
-    apmFields,
+    signals,
   };
 }
 
@@ -159,7 +165,7 @@ function getProducerConsumer({
     })
     .instance('instance c');
 
-  const events = timerange(
+  const signals = timerange(
     new Date('2022-01-01T00:04:00.000Z'),
     new Date('2022-01-01T00:05:00.000Z')
   )
@@ -189,39 +195,40 @@ function getProducerConsumer({
         );
     });
 
-  const apmFields = events.toArray();
+  const apmFields = signals.toArray();
   const transactionC = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
+    (item) => item.fields['processor.event'] === 'transaction'
   );
   const transactionCSpanLink = transactionC
     ? {
-        trace: { id: transactionC['trace.id']! },
-        span: { id: transactionC['transaction.id']! },
+        trace: { id: transactionC.fields['trace.id']! },
+        span: { id: transactionC.fields['transaction.id']! },
       }
     : undefined;
   const spanC = apmFields.find(
     (item) =>
-      item['processor.event'] === 'span' || item['span.name'] === 'Span C'
+      item.fields['processor.event'] === 'span' ||
+      item.fields['span.name'] === 'Span C'
   );
   const spanCSpanLink = spanC
     ? {
-        trace: { id: spanC['trace.id']! },
-        span: { id: spanC['span.id']! },
+        trace: { id: spanC.fields['trace.id']! },
+        span: { id: spanC.fields['span.id']! },
       }
     : undefined;
   const ids =
     spanC && transactionC
       ? {
-          traceId: transactionC['trace.id']!,
-          transactionCId: transactionC['transaction.id']!,
-          spanCId: spanC['span.id']!,
+          traceId: transactionC.fields['trace.id']!,
+          transactionCId: transactionC.fields['transaction.id']!,
+          spanCId: spanC.fields['span.id']!,
         }
       : {};
   return {
     transactionCSpanLink,
     spanCSpanLink,
     ids,
-    apmFields,
+    signals,
   };
 }
 
@@ -244,7 +251,7 @@ function getConsumerMultiple({
     })
     .instance('instance d');
 
-  const events = timerange(
+  const signals = timerange(
     new Date('2022-01-01T00:06:00.000Z'),
     new Date('2022-01-01T00:07:00.000Z')
   )
@@ -287,24 +294,26 @@ function getConsumerMultiple({
             .success()
         );
     });
-  const apmFields = events.toArray();
+  const apmFields = signals.toArray();
   const transactionD = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
+    (item) => item.fields['processor.event'] === 'transaction'
   );
-  const spanE = apmFields.find((item) => item['processor.event'] === 'span');
+  const spanE = apmFields.find(
+    (item) => item.fields['processor.event'] === 'span'
+  );
 
   const ids =
     transactionD && spanE
       ? {
-          traceId: transactionD['trace.id']!,
-          transactionDId: transactionD['transaction.id']!,
-          spanEId: spanE['span.id']!,
+          traceId: transactionD.fields['trace.id']!,
+          transactionDId: transactionD.fields['transaction.id']!,
+          spanEId: spanE.fields['span.id']!,
         }
       : {};
 
   return {
     ids,
-    apmFields,
+    signals,
   };
 }
 
@@ -344,14 +353,12 @@ export function generateSpanLinksData() {
     producerConsumerTransactionCSpanLink: producerConsumer.transactionCSpanLink,
     producerExternalOnlySpanBSpanLink: producerExternalOnly.spanBSpanLink,
   });
-
-  synthtrace.index(
-    new SignalArrayIterable(producerInternalOnly.apmFields).merge(
-      new SignalArrayIterable(producerExternalOnly.apmFields),
-      new SignalArrayIterable(producerConsumer.apmFields),
-      new SignalArrayIterable(producerMultiple.apmFields)
-    )
+  const events = new SignalArray(producerInternalOnly.signals.toArray()).merge(
+    new SignalArray(producerExternalOnly.signals.toArray()),
+    new SignalArray(producerConsumer.signals.toArray()),
+    new SignalArray(producerMultiple.signals.toArray())
   );
+  synthtrace.index(events);
 
   return {
     producerInternalOnlyIds: producerInternalOnly.ids,
