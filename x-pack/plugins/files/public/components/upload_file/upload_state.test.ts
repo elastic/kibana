@@ -35,7 +35,7 @@ describe('UploadState', () => {
 
   it('calls file client with expected arguments', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
-      const file1 = { name: 'test.png', size: 1 } as File;
+      const file1 = { name: 'test.png', size: 1, type: 'image/png' } as File;
 
       uploadState.setFiles([file1]);
 
@@ -113,7 +113,7 @@ describe('UploadState', () => {
       filesClient.delete.mockReturnValue(of(undefined) as any);
 
       const file1 = { name: 'test' } as File;
-      const file2 = { name: 'test 2.png' } as File;
+      const file2 = { name: 'test 2.png', type: 'image/png' } as File;
 
       uploadState.setFiles([file1, file2]);
 

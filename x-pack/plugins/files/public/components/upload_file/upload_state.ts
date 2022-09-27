@@ -169,7 +169,8 @@ export class UploadState {
 
     file$.setState({ status: 'uploading', error: undefined });
 
-    const { name, mime } = parseFileName(file.name);
+    const { name } = parseFileName(file.name);
+    const mime = file.type || undefined;
 
     return from(
       this.client.create({
