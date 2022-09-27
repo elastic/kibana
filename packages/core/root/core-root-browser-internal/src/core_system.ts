@@ -26,7 +26,6 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
@@ -35,6 +34,7 @@ import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 import {
@@ -47,7 +47,12 @@ import {
   LOAD_START,
 } from './events';
 
-interface Params {
+import './core_system.scss';
+
+/**
+ * @internal
+ */
+export interface CoreSystemParams {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
@@ -96,7 +101,7 @@ export class CoreSystem {
   private readonly executionContext: ExecutionContextService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
-  constructor(params: Params) {
+  constructor(params: CoreSystemParams) {
     const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;

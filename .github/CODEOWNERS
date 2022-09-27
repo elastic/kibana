@@ -786,6 +786,7 @@ packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
+packages/core/root/core-root-browser-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-browser @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-internal @elastic/kibana-core

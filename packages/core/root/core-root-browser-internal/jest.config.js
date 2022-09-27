@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { MountWrapper, mountReactNode } from './src/mount';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/root/core-root-browser-internal'],
+};
