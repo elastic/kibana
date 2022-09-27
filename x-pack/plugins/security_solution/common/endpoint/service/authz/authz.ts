@@ -28,6 +28,10 @@ export const calculateEndpointAuthz = (
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
+  // will be updated once BE RBAC pr goes in
+  const canIsolateHost = isPlatinumPlusLicense && hasEndpointManagementAccess;
+  // will be updated once BE RBAC pr goes in
+  const canOperateProcesses = hasEndpointManagementAccess && isEnterpriseLicense;
 
   return {
     canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
@@ -39,7 +43,8 @@ export const calculateEndpointAuthz = (
     canKillProcess: hasEndpointManagementAccess && isEnterpriseLicense,
     canSuspendProcess: hasEndpointManagementAccess && isEnterpriseLicense,
     canGetRunningProcesses: hasEndpointManagementAccess && isEnterpriseLicense,
-    canAccessResponseConsole: hasEndpointManagementAccess && isEnterpriseLicense,
+    canAccessResponseConsole:
+      hasEndpointManagementAccess && isEnterpriseLicense && (canIsolateHost || canOperateProcesses),
   };
 };
 
