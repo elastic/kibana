@@ -28,6 +28,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
 import { IndexPattern } from '../../../types';
+import faker from 'faker';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -234,7 +235,7 @@ describe('percentile', () => {
       const aggs = [
         // group 1
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 1,
+          id: '1',
           enabled: true,
           schema: 'metric',
           field: field1,
@@ -242,7 +243,7 @@ describe('percentile', () => {
           timeShift: undefined,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 2,
+          id: '2',
           enabled: true,
           schema: 'metric',
           field: field1,
@@ -250,7 +251,7 @@ describe('percentile', () => {
           timeShift: undefined,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 3,
+          id: '3',
           enabled: true,
           schema: 'metric',
           field: field1,
@@ -259,7 +260,7 @@ describe('percentile', () => {
         }),
         // group 2
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 4,
+          id: '4',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -267,7 +268,7 @@ describe('percentile', () => {
           timeShift: undefined,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 5,
+          id: '5',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -276,7 +277,7 @@ describe('percentile', () => {
         }),
         // group 3
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 6,
+          id: '6',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -284,7 +285,7 @@ describe('percentile', () => {
           timeShift: timeShift1,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 7,
+          id: '7',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -293,7 +294,7 @@ describe('percentile', () => {
         }),
         // group 4
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 8,
+          id: '8',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -301,7 +302,7 @@ describe('percentile', () => {
           timeShift: timeShift2,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 9,
+          id: '9',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -344,7 +345,7 @@ describe('percentile', () => {
                     "foo",
                   ],
                   "id": Array [
-                    1,
+                    "1",
                   ],
                   "percents": Array [
                     10,
@@ -381,7 +382,7 @@ describe('percentile', () => {
                     "bar",
                   ],
                   "id": Array [
-                    4,
+                    "4",
                   ],
                   "percents": Array [
                     10,
@@ -417,7 +418,7 @@ describe('percentile', () => {
                     "bar",
                   ],
                   "id": Array [
-                    6,
+                    "6",
                   ],
                   "percents": Array [
                     50,
@@ -456,7 +457,7 @@ describe('percentile', () => {
                     "bar",
                   ],
                   "id": Array [
-                    8,
+                    "8",
                   ],
                   "percents": Array [
                     70,
@@ -544,7 +545,7 @@ describe('percentile', () => {
       const aggs = [
         // group 1
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 1,
+          id: '1',
           enabled: true,
           schema: 'metric',
           field: field1,
@@ -552,7 +553,7 @@ describe('percentile', () => {
           timeShift: undefined,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 2,
+          id: '2',
           enabled: true,
           schema: 'metric',
           field: field1,
@@ -560,7 +561,7 @@ describe('percentile', () => {
           timeShift: undefined,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 4,
+          id: '4',
           enabled: true,
           schema: 'metric',
           field: field2,
@@ -568,7 +569,7 @@ describe('percentile', () => {
           timeShift: undefined,
         }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 3,
+          id: '3',
           enabled: true,
           schema: 'metric',
           field: field1,
@@ -609,17 +610,87 @@ describe('percentile', () => {
       `);
     });
 
+    it('should update order-by references for any terms columns', () => {
+      const field1 = 'foo';
+      const field2 = 'bar';
+      const percentile = faker.random.number(100);
+
+      const aggs = [
+        makeEsAggBuilder('aggTerms', {
+          id: '1',
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          orderBy: '4',
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggTerms', {
+          id: '2',
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          orderBy: '6',
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: '3',
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: '4',
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: '5',
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: '6',
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile,
+          timeShift: undefined,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs.length).toBe(4);
+
+      expect(newAggs[0].functions[0].getArgument('orderBy')?.[0]).toBe(`3.${percentile}`);
+      expect(newAggs[1].functions[0].getArgument('orderBy')?.[0]).toBe(`5.${percentile}`);
+    });
+
     it("shouldn't touch non-percentile aggs or single percentiles with no siblings", () => {
       const aggs = [
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 1,
+          id: '1',
           enabled: true,
           schema: 'metric',
           field: 'foo',
           percentile: 30,
         }),
         makeEsAggBuilder('aggMax', {
-          id: 1,
+          id: '1',
           enabled: true,
           schema: 'metric',
           field: 'bar',
