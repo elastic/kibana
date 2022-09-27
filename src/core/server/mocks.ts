@@ -31,7 +31,7 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { renderingMock } from '@kbn/core-rendering-server-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -57,7 +57,7 @@ export {
 export { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
 export { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-export { renderingMock } from '@kbn/core-rendering-server-mocks';
+export { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 export { statusServiceMock } from '@kbn/core-status-server-mocks';
 export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 export { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
@@ -237,7 +237,7 @@ function createInternalCoreSetupMock() {
     environment: environmentServiceMock.createSetupContract(),
     i18n: i18nServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
-    rendering: renderingMock.createSetupContract(),
+    rendering: renderingServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
