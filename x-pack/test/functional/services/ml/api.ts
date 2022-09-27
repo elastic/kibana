@@ -607,6 +607,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async hasNotifications(query: object) {
+      const body = await es.search({
+        index: '.ml-notifications*',
+        body: {
+          size: 10000,
+          query,
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
     async adJobExist(jobId: string) {
       this.validateJobId(jobId);
       try {
@@ -635,6 +647,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
+    async waitForJobNotificationsToIndex(jobId: string, timeout: number = 60 * 1000) {
+      await retry.waitForWithTimeout(`Notifications for '${jobId}' to exist`, timeout, async () => {
+        if (
+          await this.hasNotifications({
+            term: {
+              job_id: {
+                value: jobId,
+              },
+            },
+          })
+        ) {
+          return true;
+        } else {
+          throw new Error(`expected '${jobId}' notifications to exist`);
         }
       });
     },
