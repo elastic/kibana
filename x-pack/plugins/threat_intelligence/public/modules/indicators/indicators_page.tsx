@@ -6,6 +6,7 @@
  */
 
 import React, { FC, VFC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndicatorsFilters } from './containers/indicators_filters/indicators_filters';
 import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
@@ -19,10 +20,14 @@ import { FieldTypesProvider } from '../../containers/field_types_provider';
 import { InspectorProvider } from '../../containers/inspector';
 import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
 
+const queryClient = new QueryClient();
+
 const IndicatorsPageProviders: FC = ({ children }) => (
-  <FieldTypesProvider>
-    <InspectorProvider>{children}</InspectorProvider>
-  </FieldTypesProvider>
+  <QueryClientProvider client={queryClient}>
+    <FieldTypesProvider>
+      <InspectorProvider>{children}</InspectorProvider>
+    </FieldTypesProvider>
+  </QueryClientProvider>
 );
 
 const IndicatorsPageContent: VFC = () => {
@@ -49,36 +54,35 @@ const IndicatorsPageContent: VFC = () => {
   });
 
   return (
-    <FieldTypesProvider>
-      <DefaultPageLayout pageTitle="Indicators">
-        <FiltersGlobal>
-          <QueryBar
-            dateRangeFrom={timeRange?.from}
-            dateRangeTo={timeRange?.to}
-            indexPattern={indexPattern}
-            filterQuery={filterQuery}
-            filterManager={filterManager}
-            filters={filters}
-            dataTestSubj="iocListPageQueryInput"
-            displayStyle="detached"
-            savedQuery={savedQuery}
-            onRefresh={handleRefresh}
-            onSubmitQuery={handleSubmitQuery}
-            onSavedQuery={handleSavedQuery}
-            onSubmitDateRange={handleSubmitTimeRange}
-          />
-        </FiltersGlobal>
-        <IndicatorsFilters filterManager={filterManager}>
-          <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
-          <IndicatorsTable
-            browserFields={browserFields}
-            indexPattern={indexPattern}
-            columnSettings={columnSettings}
-            {...indicators}
-          />
-        </IndicatorsFilters>
-      </DefaultPageLayout>
-    </FieldTypesProvider>
+    <DefaultPageLayout pageTitle="Indicators">
+      <FiltersGlobal>
+        <QueryBar
+          dateRangeFrom={timeRange?.from}
+          dateRangeTo={timeRange?.to}
+          isLoading={indicators.isFetching}
+          indexPattern={indexPattern}
+          filterQuery={filterQuery}
+          filterManager={filterManager}
+          filters={filters}
+          dataTestSubj="iocListPageQueryInput"
+          displayStyle="detached"
+          savedQuery={savedQuery}
+          onSubmitQuery={handleSubmitQuery}
+          onSavedQuery={handleSavedQuery}
+          onSubmitDateRange={handleSubmitTimeRange}
+          onRefresh={handleRefresh}
+        />
+      </FiltersGlobal>
+      <IndicatorsFilters filterManager={filterManager}>
+        <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
+        <IndicatorsTable
+          browserFields={browserFields}
+          indexPattern={indexPattern}
+          columnSettings={columnSettings}
+          {...indicators}
+        />
+      </IndicatorsFilters>
+    </DefaultPageLayout>
   );
 };
 

@@ -11,8 +11,8 @@ import { Story } from '@storybook/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { ChartSeries } from '../../hooks/use_aggregated_indicators';
 import { IndicatorsBarChart } from './indicators_barchart';
+import { ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 const mockIndicators: ChartSeries[] = [
   {
