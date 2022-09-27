@@ -14,10 +14,6 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-// import type { RuleReferenceSchema } from '../types';
-
-// jest.mock('../../../../../common/lib/kibana');
-
 const ruleReferences: unknown[] = [
   {
     exception_lists: [
@@ -52,6 +48,8 @@ describe('ExceptionItemCard', () => {
         onDeleteException={jest.fn()}
         onEditException={jest.fn()}
         securityLinkAnchorComponent={() => null}
+        formattedDateComponent={() => null}
+        getFormattedComments={() => []}
       />
     );
 
@@ -73,6 +71,8 @@ describe('ExceptionItemCard', () => {
         onDeleteException={jest.fn()}
         onEditException={jest.fn()}
         securityLinkAnchorComponent={() => null}
+        formattedDateComponent={() => null}
+        getFormattedComments={() => []}
       />
     );
 
@@ -95,6 +95,8 @@ describe('ExceptionItemCard', () => {
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={ruleReferences}
         securityLinkAnchorComponent={() => null}
+        formattedDateComponent={() => null}
+        getFormattedComments={() => []}
       />
     );
     expect(wrapper.queryByTestId('itemActionButton')).not.toBeInTheDocument();
@@ -113,6 +115,8 @@ describe('ExceptionItemCard', () => {
         onDeleteException={jest.fn()}
         onEditException={mockOnEditException}
         securityLinkAnchorComponent={() => null}
+        formattedDateComponent={() => null}
+        getFormattedComments={() => []}
       />
     );
 
@@ -134,6 +138,8 @@ describe('ExceptionItemCard', () => {
         onEditException={jest.fn()}
         onDeleteException={mockOnDeleteException}
         securityLinkAnchorComponent={() => null}
+        formattedDateComponent={() => null}
+        getFormattedComments={() => []}
       />
     );
     fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionButton'));

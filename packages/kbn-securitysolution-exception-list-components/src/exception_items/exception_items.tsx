@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -19,8 +20,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/css';
-import { EmptyViewerState, ExceptionItemCard, ExceptionsUtility, Pagination } from '../..';
+import { EmptyViewerState, ExceptionItemCard, Pagination } from '../..';
 
 import type {
   RuleReferences,
@@ -31,8 +31,8 @@ import type {
 
 const exceptionItemCss = css`
   margin: ${euiThemeVars.euiSize} 0;
-  &:first-child {
-    margin: ${euiThemeVars.euiSizeS}0 ${euiThemeVars.euiSize};
+  &div:first-child {
+    margin: ${euiThemeVars.euiSizeXS} 0 ${euiThemeVars.euiSize};
   }
 `;
 
@@ -49,6 +49,7 @@ interface ExceptionItemsProps {
   pagination: PaginationType;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  exceptionsUtilityComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   getFormattedComments: (comments: CommentsArray) => EuiCommentProps[]; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onCreateExceptionListItem?: () => void;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
@@ -68,6 +69,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   emptyViewerButtonText,
   pagination,
   securityLinkAnchorComponent,
+  exceptionsUtilityComponent,
   formattedDateComponent,
   getFormattedComments,
   onPaginationChange,
@@ -75,6 +77,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   onEditExceptionItem,
   onCreateExceptionListItem,
 }) => {
+  const ExceptionsUtility = exceptionsUtilityComponent;
   if (!exceptions.length || viewerStatus)
     return (
       <EmptyViewerState
@@ -89,13 +92,13 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   return (
     <>
       <ExceptionsUtility pagination={pagination} lastUpdated={lastUpdated} />
-      <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
-        <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
+      <EuiFlexGroup direction="column" gutterSize="none" className="eui-yScrollWithShadows">
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup
             css={exceptionItemCss}
             data-test-subj="exceptionsContainer"
-            gutterSize="none"
             direction="column"
+            gutterSize="m"
           >
             {exceptions.map((exception) => (
               <EuiFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>

@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const illustrationImageURL =
-  './assets/images/illustration_product_no_results_magnifying_glass.svg';
+declare module '*.svg' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}

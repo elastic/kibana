@@ -9,12 +9,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "src/custom.d.ts"
+    "**/*.d.ts"
   ]
 }

@@ -9,7 +9,11 @@
 import React, { memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { nestedGroupSpaceCss, valueContainerCss } from '../conditions.styles';
+import {
+  nestedGroupSpaceCss,
+  valueContainerCss,
+  expressionContainerCss,
+} from '../conditions.styles';
 import type { Entry } from '../types';
 import * as i18n from '../../translations';
 import { getValue, getValueExpression } from './entry_content.helper';
@@ -33,7 +37,7 @@ export const EntryContent = memo(
     const entryKey = `${field}${type}${value}${index}`;
     return (
       <div data-test-subj={`${dataTestSubj}${entryKey}Condition`} key={entryKey}>
-        <div className="expressionContainerCss">
+        <div css={expressionContainerCss}>
           {isNestedEntry ? (
             <EuiFlexGroup
               css={nestedGroupSpaceCss}
@@ -43,7 +47,7 @@ export const EntryContent = memo(
             >
               <EuiToken iconType="tokenNested" size="s" />
 
-              <div className={valueContainerCss}>
+              <div css={valueContainerCss}>
                 <EuiExpression description="" value={field} color="subdued" />
                 {getValueExpression(type as ListOperatorTypeEnum, operator, value)}
               </div>

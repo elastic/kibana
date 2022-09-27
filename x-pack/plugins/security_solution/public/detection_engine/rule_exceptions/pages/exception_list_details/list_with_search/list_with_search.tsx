@@ -27,6 +27,7 @@ import * as i18n from '../translations';
 import { useListWithSearchComponent } from './use_list_with_search';
 import { ListDetailsLinkAnchor } from '../link_anchor/link_anchor';
 import { getFormattedComments } from '../../../utils/helpers';
+import { ExceptionsUtility } from '../exceptions_utility/exceptions_utility';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListSchema;
@@ -85,6 +86,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
           onEditExceptionItem={onEditExceptionItem}
           onDeleteException={onDeleteException}
           getFormattedComments={getFormattedComments}
+          exceptionsUtilityComponent={ExceptionsUtility}
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           formattedDateComponent={FormattedDate}
         />

@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiLoadingContent,
   EuiImage,
@@ -22,7 +22,7 @@ import type { EuiFacetGroupLayout } from '@elastic/eui/src/components/facet/face
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ListTypeText, ViewerStatus } from '../types';
 import * as i18n from '../translations';
-import { illustrationImageURL } from '../constants';
+import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
 
 interface EmptyViewerStateProps {
   title?: string;
@@ -47,7 +47,6 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
   viewerStatus,
   onCreateExceptionListItem,
 }) => {
-  // console.log(viewerStatus);
   const { euiTheme } = useEuiTheme();
 
   const euiEmptyPromptProps = useMemo(() => {
@@ -92,7 +91,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
           layout: 'horizontal' as EuiFacetGroupLayout,
           hasBorder: true,
           hasShadow: false,
-          icon: <EuiImage size="fullWidth" alt="" url={illustrationImageURL} />,
+          icon: <EuiImage size="fullWidth" alt="" src={illustration} />,
           title: (
             <h3 data-test-subj="emptySearchTitle">
               {title || i18n.EMPTY_VIEWER_STATE_EMPTY_SEARCH_TITLE}

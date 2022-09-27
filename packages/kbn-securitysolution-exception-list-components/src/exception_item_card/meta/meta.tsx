@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import type { RuleReference } from '../../types';
 import { MetaInfoDetails } from './details_info/details_info';

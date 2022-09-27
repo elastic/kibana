@@ -9,7 +9,7 @@
 import React, { memo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAccordion, EuiCommentList, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../translations';
 

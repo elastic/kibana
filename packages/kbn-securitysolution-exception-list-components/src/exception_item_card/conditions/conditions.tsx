@@ -18,15 +18,13 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
   ({ os, entries, dataTestSubj }) => {
     return (
       <EuiPanel
-        css={borderCss}
         color="subdued"
         hasBorder={true}
         hasShadow={false}
         data-test-subj={dataTestSubj}
-        className="eui-xScroll"
+        className={borderCss}
       >
-        <OsCondition os={os} dataTestSubj={dataTestSubj} />
-
+        {os?.length ? <OsCondition os={os} dataTestSubj={dataTestSubj} /> : null}
         {entries.map((entry: Entry, index: number) => {
           const nestedEntries = 'entries' in entry ? entry.entries : [];
           return (
@@ -37,16 +35,17 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 index={index}
                 dataTestSubj={dataTestSubj}
               />
-              {nestedEntries?.length &&
-                nestedEntries.map((nestedEntry: Entry, nestedIndex: number) => (
-                  <EntryContent
-                    key={`nestedEntry-${index}-${nestedIndex}`}
-                    entry={nestedEntry}
-                    index={nestedIndex}
-                    isNestedEntry={true}
-                    dataTestSubj={dataTestSubj}
-                  />
-                ))}
+              {nestedEntries?.length
+                ? nestedEntries.map((nestedEntry: Entry, nestedIndex: number) => (
+                    <EntryContent
+                      key={`nestedEntry-${index}-${nestedIndex}`}
+                      entry={nestedEntry}
+                      index={nestedIndex}
+                      isNestedEntry={true}
+                      dataTestSubj={dataTestSubj}
+                    />
+                  ))
+                : null}
             </div>
           );
         })}

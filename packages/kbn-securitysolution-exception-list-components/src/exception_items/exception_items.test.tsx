@@ -12,21 +12,9 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionItems } from './exception_items';
-// import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
-// import { TestProviders } from '../../../../../common/mock';
+
 import { ViewerStatus } from '../types';
 import { render } from '@testing-library/react';
-
-// const mockTheme = getMockTheme({
-//   eui: {
-//     euiSize: '10px',
-//     euiColorPrimary: '#ece',
-//     euiColorDanger: '#ece',
-//     euiBreakpoints: {
-//       l: '400px',
-//     },
-//   },
-// });
 
 const onCreateExceptionListItem = jest.fn();
 const onDeleteException = jest.fn();
@@ -52,6 +40,9 @@ describe('ExceptionsViewerItems', () => {
           onEditExceptionItem={onEditExceptionItem}
           onPaginationChange={onPaginationChange}
           securityLinkAnchorComponent={() => null}
+          formattedDateComponent={() => null}
+          exceptionsUtilityComponent={() => null}
+          getFormattedComments={() => []}
         />
       );
       // expect(wrapper).toMatchSnapshot();
@@ -61,8 +52,6 @@ describe('ExceptionsViewerItems', () => {
 
     it('it renders no search results found prompt if "viewerStatus" is "empty_search"', () => {
       const wrapper = render(
-        // <TestProviders>
-        //   <ThemeProvider theme={mockTheme}>
         <ExceptionItems
           viewerStatus={ViewerStatus.EMPTY_SEARCH}
           exceptions={[]}
@@ -76,9 +65,10 @@ describe('ExceptionsViewerItems', () => {
           onEditExceptionItem={onEditExceptionItem}
           onPaginationChange={onPaginationChange}
           securityLinkAnchorComponent={() => null}
+          formattedDateComponent={() => null}
+          exceptionsUtilityComponent={() => null}
+          getFormattedComments={() => []}
         />
-        //   </ThemeProvider>
-        // </TestProviders>
       );
       // expect(wrapper).toMatchSnapshot();
       expect(wrapper.getByTestId('emptySearchViewerState')).toBeInTheDocument();
@@ -87,8 +77,6 @@ describe('ExceptionsViewerItems', () => {
 
     it('it renders exceptions if "viewerStatus" and "null"', () => {
       const wrapper = render(
-        // <TestProviders>
-        //   <ThemeProvider theme={mockTheme}>
         <ExceptionItems
           viewerStatus={'' as ViewerStatus}
           exceptions={[getExceptionListItemSchemaMock()]}
@@ -102,9 +90,10 @@ describe('ExceptionsViewerItems', () => {
           onEditExceptionItem={onEditExceptionItem}
           onPaginationChange={onPaginationChange}
           securityLinkAnchorComponent={() => null}
+          formattedDateComponent={() => null}
+          exceptionsUtilityComponent={() => null}
+          getFormattedComments={() => []}
         />
-        //   </ThemeProvider>
-        // </TestProviders>
       );
       // expect(wrapper).toMatchSnapshot();
       expect(wrapper.getByTestId('exceptionsContainer')).toBeTruthy();

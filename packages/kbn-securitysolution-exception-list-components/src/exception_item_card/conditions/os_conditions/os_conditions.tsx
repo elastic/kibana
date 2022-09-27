@@ -15,19 +15,15 @@ import * as i18n from '../../translations';
 
 export interface OsConditionsProps {
   dataTestSubj: string;
-  os?: ExceptionListItemSchema['os_types'];
+  os: ExceptionListItemSchema['os_types'];
 }
 
 export const OsCondition = memo<OsConditionsProps>(({ os, dataTestSubj }) => {
   const osLabel = useMemo(() => {
-    if (os?.length) {
-      return os.map((osValue) => OS_LABELS[osValue] ?? osValue).join(', ');
-    }
-
-    return null;
+    return os.map((osValue) => OS_LABELS[osValue] ?? osValue).join(', ');
   }, [os]);
   return osLabel ? (
-    <div data-test-subj={`${dataTestSubj}-os`}>
+    <div data-test-subj={`${dataTestSubj}Os`}>
       <strong>
         <EuiExpression description="" value={i18n.CONDITION_OS} />
         <EuiExpression description={i18n.CONDITION_OPERATOR_TYPE_MATCH} value={osLabel} />
