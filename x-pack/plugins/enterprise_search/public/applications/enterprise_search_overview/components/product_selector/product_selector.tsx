@@ -71,7 +71,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     <>
       <AddContentEmptyPrompt
         title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
-          defaultMessage: 'Add data and get searching',
+          defaultMessage: 'Add data and start searching',
         })}
         buttonLabel={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptButtonLabel', {
           defaultMessage: 'Create an Elasticsearch index',
