@@ -163,6 +163,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -265,6 +266,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -335,6 +337,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -378,6 +381,7 @@ describe('Sourcerer Hooks', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
+          { dataTable: tGridReducer },
           kibanaObservable,
           storage
         );
