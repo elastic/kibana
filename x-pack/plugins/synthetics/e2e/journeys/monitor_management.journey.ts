@@ -225,3 +225,72 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
     expect(isSuccessful).toBeTruthy();
   });
 });
+
+journey(
+  'MonitorManagement-case-insensitive sort',
+  async ({ page, params }: { page: Page; params: any }) => {
+    const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
+
+    const sortedMonitors = [
+      Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
+        name: `A ${uuid.v4()}`,
+      }),
+      Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
+        name: `B ${uuid.v4()}`,
+      }),
+      Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
+        name: `aa ${uuid.v4()}`,
+      }),
+    ];
+
+    before(async () => {
+      await uptime.waitForLoadingToFinish();
+    });
+
+    after(async () => {
+      await uptime.navigateToMonitorManagement();
+      await uptime.deleteMonitors();
+      await uptime.enableMonitorManagement(false);
+    });
+
+    step('Go to monitor-management', async () => {
+      await uptime.navigateToMonitorManagement();
+    });
+
+    step('login to Kibana', async () => {
+      await uptime.loginToKibana();
+      const invalid = await page.locator(
+        `text=Username or password is incorrect. Please try again.`
+      );
+      expect(await invalid.isVisible()).toBeFalsy();
+    });
+
+    for (const monitorConfig of sortedMonitors) {
+      step(`create monitor ${monitorConfig.name}`, async () => {
+        await uptime.enableMonitorManagement();
+        await uptime.clickAddMonitor();
+        await uptime.createMonitor({ monitorConfig, monitorType: DataStream.ICMP });
+        const isSuccessful = await uptime.confirmAndSave();
+        expect(isSuccessful).toBeTruthy();
+      });
+    }
+
+    step(`list monitors in Monitor Management UI`, async () => {
+      await uptime.navigateToMonitorManagement();
+      await Promise.all(
+        sortedMonitors.map((monitor) =>
+          page.waitForSelector(`text=${monitor.name}`, { timeout: 160 * 1000 })
+        )
+      );
+
+      // Get first cell value from monitor table -> monitor name
+      const rows = page.locator('tbody tr td:first-child div.euiTableCellContent');
+      expect(await rows.count()).toEqual(sortedMonitors.length);
+
+      const expectedSort = sortedMonitors
+        .map((mn) => mn.name)
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+      expect(await rows.allTextContents()).toEqual(expectedSort);
+    });
+  }
+);
