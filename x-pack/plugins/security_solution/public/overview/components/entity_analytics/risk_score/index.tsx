@@ -38,7 +38,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
+import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
@@ -47,8 +47,8 @@ import { usersActions } from '../../../../users/store';
 
 const TABLE_QUERY_ID = (riskEntity: RiskScoreEntity) =>
   riskEntity === RiskScoreEntity.host ? 'hostRiskDashboardTable' : 'userRiskDashboardTable';
-const TABLE_QUERY_ID = 'hostRiskDashboardTable';
-const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
+const RISK_KPI_QUERY_ID = (riskEntity: RiskScoreEntity) =>
+  riskEntity === RiskScoreEntity.host ? 'headerHostRiskScoreKpiQuery' : 'headerUserRiskScoreKpiQuery';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -59,7 +59,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     () =>
       riskEntity === RiskScoreEntity.host
         ? {
-            docLink: RISKY_HOSTS_EXTERNAL_DOC_LINK,
+            docLink: RISKY_HOSTS_DOC_LINK,
             kpiHook: useHostRiskScoreKpi,
             riskScoreHook: useHostRiskScore,
             linkProps: {
@@ -76,7 +76,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
             },
           }
         : {
-            docLink: RISKY_USERS_EXTERNAL_DOC_LINK,
+            docLink: RISKY_USERS_DOC_LINK,
             kpiHook: useUserRiskScoreKpi,
             riskScoreHook: useUserRiskScore,
             linkProps: {
@@ -124,9 +124,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     timerange,
   });
 
-  // TODO: Steph update to generic
   useQueryInspector({
-    queryId: HOST_RISK_KPI_QUERY_ID,
+    queryId: RISK_KPI_QUERY_ID(riskEntity),
     loading: isKpiLoading,
     refetch: refetchKpi,
     setQuery,
@@ -238,11 +237,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <RiskScoreDonutChart
-                severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-                onClick={goToEntityRiskTab}
-                href={entityRiskTabUrl}
-              />
+              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
               <BasicTableWithoutBorderBottom
