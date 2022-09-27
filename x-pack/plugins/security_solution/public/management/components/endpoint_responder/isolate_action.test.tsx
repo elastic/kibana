@@ -203,8 +203,7 @@ describe('When using isolate action from response actions console', () => {
       });
     });
 
-    // SKIP: https://github.com/elastic/kibana/issues/139586
-    it.skip('should display completion output if done (no additional API calls)', async () => {
+    it('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);

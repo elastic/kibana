@@ -283,8 +283,7 @@ describe('When using the kill-process action from response actions console', () 
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139962
-    it.skip('should display completion output if done (no additional API calls)', async () => {
+    it('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
