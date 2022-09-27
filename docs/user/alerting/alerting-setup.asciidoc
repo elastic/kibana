@@ -101,7 +101,7 @@ modifies the rule, it will begin running with increased privileges.
 
 [float]
 [[alerting-ccs-setup]]
-=== CCS
+=== {ccs-cap}
 
-If you want to use alerting rules in a cross-cluster setup, you must configure 
-{ref}/remote-clusters-privileges.html#clusters-privileges-ccs-kibana[privileges for cross-cluster search and Kibana]
+If you want to use alerting rules with {ccs}, you must configure 
+{ref}/remote-clusters-privileges.html#clusters-privileges-ccs-kibana[privileges for {ccs-init} and {kib}].
