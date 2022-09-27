@@ -40,3 +40,11 @@ export const USER_WARNING_BODY = i18n.translate(
     defaultMessage: `We haven't detected any user risk score data from the users in your environment.`,
   }
 );
+
+export const RESTART_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.riskScore.usersDashboardRestartTooltip',
+  {
+    defaultMessage:
+      'The risk score calculation might take a while to run. However, by pressing restart, you can force it to run immediately.',
+  }
+);
