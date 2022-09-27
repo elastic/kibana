@@ -51,6 +51,21 @@ interface IActionExecution
   buckets: Array<{ key: string; doc_count: number }>;
 }
 
+interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBucketKeys {
+  actionExecution: {
+    doc_count: number;
+    actionOutcomes: IActionExecution;
+  };
+  ruleExecution: {
+    doc_count: number;
+    numTriggeredActions: estypes.AggregationsSumAggregate;
+    numGeneratedActions: estypes.AggregationsSumAggregate;
+    numActiveAlerts: estypes.AggregationsSumAggregate;
+    numRecoveredAlerts: estypes.AggregationsSumAggregate;
+    numNewAlerts: estypes.AggregationsSumAggregate;
+    ruleExecutionOutcomes: IActionExecution;
+  };
+}
 interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   timeoutMessage: estypes.AggregationsMultiBucketBase;
   ruleExecution: {
@@ -76,6 +91,11 @@ export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
   buckets: TBucket[];
 }
 
+export interface ExecutionUuidKPIAggResult<TBucket = IExecutionUuidKpiAggBucket>
+  extends estypes.AggregationsAggregateBase {
+  buckets: TBucket[];
+}
+
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
   executionUuidCardinality: {
@@ -84,20 +104,9 @@ interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase
 }
 
 interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
-  actionExecution: {
-    doc_count: number;
-    actionOutcomes: IActionExecution;
-  };
-  ruleExecution: {
-    doc_count: number;
-    numTriggeredActions: estypes.AggregationsSumAggregate;
-    numGeneratedActions: estypes.AggregationsSumAggregate;
-    numActiveAlerts: estypes.AggregationsSumAggregate;
-    numRecoveredAlerts: estypes.AggregationsSumAggregate;
-    numNewAlerts: estypes.AggregationsSumAggregate;
-    ruleExecutionOutcomes: IActionExecution;
-  };
+  executionUuid: ExecutionUuidKPIAggResult;
 }
+
 export interface IExecutionLogAggOptions {
   filter?: string | KueryNode;
   page: number;
@@ -135,64 +144,89 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
         },
       },
       aggs: {
-        actionExecution: {
-          filter: {
-            bool: {
-              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('actions', 'execute')],
-            },
+        executionUuid: {
+          // Bucket by execution UUID
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
           },
           aggs: {
-            actionOutcomes: {
-              terms: {
-                field: 'event.outcome',
-                size: 2,
+            executionUuidSorted: {
+              bucket_sort: {
+                from: 0,
+                size: 1000,
+                gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
-          },
-        },
-        ruleExecution: {
-          filter: {
-            bool: {
-              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('alerting', 'execute')],
-            },
-          },
-          aggs: {
-            numTriggeredActions: {
-              sum: {
-                field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-                missing: 0,
+            actionExecution: {
+              filter: {
+                bool: {
+                  must: [getProviderAndActionFilter('actions', 'execute')],
+                },
+              },
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: 'event.outcome',
+                    size: 2,
+                  },
+                },
               },
             },
-            numGeneratedActions: {
-              sum: {
-                field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-                missing: 0,
+            ruleExecution: {
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
+              aggs: {
+                numTriggeredActions: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                    missing: 0,
+                  },
+                },
+                numGeneratedActions: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    missing: 0,
+                  },
+                },
+                numActiveAlerts: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    missing: 0,
+                  },
+                },
+                numRecoveredAlerts: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    missing: 0,
+                  },
+                },
+                numNewAlerts: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                    missing: 0,
+                  },
+                },
+                ruleExecutionOutcomes: {
+                  terms: {
+                    field: 'event.outcome',
+                    size: 2,
+                  },
+                },
               },
             },
-            numActiveAlerts: {
-              sum: {
-                field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
-                missing: 0,
-              },
-            },
-            numRecoveredAlerts: {
-              sum: {
-                field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
-                missing: 0,
-              },
-            },
-            numNewAlerts: {
-              sum: {
-                field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
-                missing: 0,
-              },
-            },
-            ruleExecutionOutcomes: {
-              terms: {
-                field: 'event.outcome',
-                size: 2,
+            minExecutionUuidBucket: {
+              bucket_selector: {
+                buckets_path: {
+                  count: 'ruleExecution._count',
+                },
+                script: {
+                  source: 'params.count > 0',
+                },
               },
             },
           },
@@ -465,26 +499,40 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   };
 }
 
-function formatExecutionKPIAggBuckets(aggs: ExcludeExecuteStartKpiAggResult) {
-  const ruleExecutionOutcomes = aggs?.ruleExecution?.ruleExecutionOutcomes?.buckets ?? [];
-  const actionExecutionOutcomes = aggs?.actionExecution?.actionOutcomes?.buckets ?? [];
-
-  const ruleExecutionCount = aggs?.ruleExecution?.doc_count ?? 0;
-  const successRuleExecution =
-    ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'success')?.doc_count ?? 0;
-  const failureRuleExecution =
-    ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
-  return {
-    success: successRuleExecution,
-    unknown: ruleExecutionCount - (successRuleExecution + failureRuleExecution),
-    failure: failureRuleExecution,
-    activeAlerts: aggs?.ruleExecution?.numActiveAlerts.value ?? 0,
-    newAlerts: aggs?.ruleExecution?.numNewAlerts.value ?? 0,
-    recoveredAlerts: aggs?.ruleExecution?.numRecoveredAlerts.value ?? 0,
-    erroredActions:
-      actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0,
-    triggeredActions: aggs?.ruleExecution?.numTriggeredActions.value ?? 0,
+function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
+  const objToReturn = {
+    success: 0,
+    unknown: 0,
+    failure: 0,
+    activeAlerts: 0,
+    newAlerts: 0,
+    recoveredAlerts: 0,
+    erroredActions: 0,
+    triggeredActions: 0,
   };
+
+  buckets.forEach((bucket) => {
+    const ruleExecutionOutcomes = bucket?.ruleExecution?.ruleExecutionOutcomes?.buckets ?? [];
+    const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
+
+    const ruleExecutionCount = bucket?.ruleExecution?.doc_count ?? 0;
+    const successRuleExecution =
+      ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'success')?.doc_count ?? 0;
+    const failureRuleExecution =
+      ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+
+    objToReturn.success += successRuleExecution;
+    objToReturn.unknown += ruleExecutionCount - (successRuleExecution + failureRuleExecution);
+    objToReturn.failure += failureRuleExecution;
+    objToReturn.activeAlerts += bucket?.ruleExecution?.numActiveAlerts.value ?? 0;
+    objToReturn.newAlerts += bucket?.ruleExecution?.numNewAlerts.value ?? 0;
+    objToReturn.recoveredAlerts += bucket?.ruleExecution?.numRecoveredAlerts.value ?? 0;
+    objToReturn.erroredActions +=
+      actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+    objToReturn.triggeredActions += bucket?.ruleExecution?.numTriggeredActions.value ?? 0;
+  });
+
+  return objToReturn;
 }
 
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
@@ -493,8 +541,8 @@ export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectRe
     return EMPTY_EXECUTION_KPI_RESULT;
   }
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult;
-
-  return formatExecutionKPIAggBuckets(aggs);
+  const buckets = aggs.executionUuid.buckets;
+  return formatExecutionKPIAggBuckets(buckets);
 }
 
 export function formatExecutionLogResult(
