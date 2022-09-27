@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -268,7 +269,15 @@ export const useDashboardAppState = ({
                 setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
                 unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
-                dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
+
+                /**
+                 * Current behaviour expects time range not to be backed up.
+                 * TODO: Revisit this. It seems like we should treat all state the same.
+                 */
+                dashboardSessionStorage.setState(
+                  savedDashboardId,
+                  omit(unsavedChanges, ['timeRange', 'refreshInterval'])
+                );
               });
             });
           })
