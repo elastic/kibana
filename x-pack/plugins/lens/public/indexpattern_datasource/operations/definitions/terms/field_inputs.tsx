@@ -145,7 +145,7 @@ export function FieldInputs({
                 defaultMessage: 'Delete',
               })}
               isNotRemovable={disableActions && !isNew}
-              isNotDraggable={false}
+              isNotDraggable={arrayRef.length < 2}
               data-test-subj={`indexPattern-terms-${index}`}
               Container={FieldsBucketContainer}
             >

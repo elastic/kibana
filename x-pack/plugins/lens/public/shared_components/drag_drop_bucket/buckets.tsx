@@ -35,7 +35,7 @@ export const DraggableBucketContainer = ({
   }
 >) => (
   <EuiDraggable
-    spacing="none"
+    spacing="s"
     index={idx}
     draggableId={id}
     isDragDisabled={bucketContainerProps.isNotDraggable}

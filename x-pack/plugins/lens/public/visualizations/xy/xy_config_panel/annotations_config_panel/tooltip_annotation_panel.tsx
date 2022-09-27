@@ -144,8 +144,6 @@ export function TooltipSection({
     )
     .sort((a, b) => a.label.localeCompare(b.label));
 
-  const isDragDisabled = localValues.length < 2;
-
   return (
     <>
       <DragDropBuckets
@@ -172,7 +170,7 @@ export function TooltipSection({
                 defaultMessage: 'Delete',
               })}
               isNotRemovable={disableActions && !isNew}
-              isNotDraggable={isDragDisabled}
+              isNotDraggable={arrayRef.length < 2}
               data-test-subj={`lnsXY-annotation-tooltip-${index}`}
               Container={FieldsBucketContainer}
             >

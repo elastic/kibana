@@ -267,7 +267,7 @@ export const AdvancedRangeEditor = ({
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
-          {localRanges.map((range: LocalRangeType, idx: number) => (
+          {localRanges.map((range, idx, arrayRef) => (
             <DraggableBucketContainer
               key={range.id}
               idx={idx}
@@ -277,21 +277,21 @@ export const AdvancedRangeEditor = ({
                 defaultMessage: 'This range is invalid',
               })}
               onRemoveClick={() => {
-                const newRanges = localRanges.filter((_, i) => i !== idx);
+                const newRanges = arrayRef.filter((_, i) => i !== idx);
                 setLocalRanges(newRanges);
               }}
               removeTitle={i18n.translate('xpack.lens.indexPattern.ranges.deleteRange', {
                 defaultMessage: 'Delete range',
               })}
-              isNotRemovable={localRanges.length === 1}
-              isNotDraggable={localRanges.length === 1}
+              isNotRemovable={arrayRef.length === 1}
+              isNotDraggable={arrayRef.length < 2}
             >
               <RangePopover
                 range={range}
                 isOpen={range.id === activeRangeId}
                 triggerClose={() => changeActiveRange('')}
                 setRange={(newRange: LocalRangeType) => {
-                  const newRanges = [...localRanges];
+                  const newRanges = [...arrayRef];
                   if (newRange.id === newRanges[idx].id) {
                     newRanges[idx] = newRange;
                   } else {
