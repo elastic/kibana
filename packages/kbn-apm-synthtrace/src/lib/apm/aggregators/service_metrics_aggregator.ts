@@ -12,12 +12,14 @@ import { ApmFields } from '../apm_fields';
 import { Fields } from '../../entity';
 import { StreamAggregator } from '../../stream_aggregator';
 
-type LatencyState = {
+type AggregationState = {
   count: number;
   min: number;
   max: number;
   sum: number;
   timestamp: number;
+  failure_count: number;
+  success_count: number;
 } & Pick<ApmFields, 'service.name' | 'service.environment' | 'transaction.type'>;
 
 export type ServiceFields = Fields &
@@ -35,15 +37,22 @@ export type ServiceFields = Fields &
     | 'transaction.type'
   > &
   Partial<{
-    'transaction.duration.aggregate': {
-      min: number;
-      max: number;
-      sum: number;
-      value_count: number;
+    _doc_count: number;
+    transaction: {
+      duration: {
+        summary: {
+          min: number;
+          max: number;
+          sum: number;
+          value_count: number;
+        };
+      };
+      failure_count: number;
+      success_count: number;
     };
   }>;
 
-export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
+export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
   public readonly name;
 
   constructor() {
@@ -68,13 +77,19 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
             duration: {
               type: 'object',
               properties: {
-                aggregate: {
+                summary: {
                   type: 'aggregate_metric_double',
                   metrics: ['min', 'max', 'sum', 'value_count'],
                   default_metric: 'sum',
                   time_series_metric: 'gauge',
                 },
               },
+            },
+            failure_count: {
+              type: { type: 'long' },
+            },
+            success_count: {
+              type: { type: 'long' },
             },
           },
         },
@@ -99,7 +114,7 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
     return null;
   }
 
-  private state: Record<string, LatencyState> = {};
+  private state: Record<string, AggregationState> = {};
 
   private processedComponent: number = 0;
 
@@ -120,13 +135,25 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
           'service.name': service,
           'service.environment': environment,
           'transaction.type': transactionType,
+          failure_count: 0,
+          success_count: 0,
         };
       }
+
+      const state = this.state[key];
+      state.count++;
+
+      switch (event['event.outcome']) {
+        case 'failure':
+          state.failure_count++;
+          break;
+        case 'success':
+          state.success_count++;
+          break;
+      }
+
       const duration = Number(event['transaction.duration.us']);
       if (duration >= 0) {
-        const state = this.state[key];
-
-        state.count++;
         state.sum += duration;
         if (duration > state.max) state.max = duration;
         if (duration < state.min) state.min = Math.min(0, duration);
@@ -164,17 +191,24 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
     const component = Date.now() % 100;
     const state = this.state[key];
     return {
+      _doc_count: state.count,
       '@timestamp': state.timestamp + random(0, 100) + component + this.processedComponent,
       'metricset.name': 'service',
       'processor.event': 'metric',
       'service.name': state['service.name'],
       'service.environment': state['service.environment'],
       'transaction.type': state['transaction.type'],
-      'transaction.duration.aggregate': {
-        min: state.min,
-        max: state.max,
-        sum: state.sum,
-        value_count: state.count,
+      transaction: {
+        duration: {
+          summary: {
+            min: state.min,
+            max: state.max,
+            sum: state.sum,
+            value_count: state.count,
+          },
+        },
+        failure_count: state.failure_count,
+        success_count: state.success_count,
       },
     };
   }
