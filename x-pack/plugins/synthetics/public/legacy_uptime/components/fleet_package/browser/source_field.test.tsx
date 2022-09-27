@@ -137,6 +137,6 @@ describe('<SourceField />', () => {
     const zip = getByTestId('syntheticsSourceTab__zipUrl');
     fireEvent.click(zip);
 
-    expect(getByText('Deprecated')).toBeInTheDocument();
+    expect(getByText('Zip URL is deprecated')).toBeInTheDocument();
   });
 });
