@@ -15,7 +15,10 @@ import { ENDPOINT_PRIVILEGES } from './constants';
 
 const SECURITY_SOLUTION_ID = DEFAULT_APP_CATEGORIES.security.id;
 
-function generateActions(privileges: string[] = [], overrides: Record<string, boolean> = {}) {
+function generateActions(
+  privileges: typeof ENDPOINT_PRIVILEGES,
+  overrides: Record<string, boolean> = {}
+) {
   return privileges.reduce((acc, privilege) => {
     const executePackageAction = overrides[privilege] || false;
 

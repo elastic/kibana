@@ -107,6 +107,40 @@ describe('Endpoint Authz service', () => {
         );
       });
     });
+
+    describe('endpoint rbac is enabled', () => {
+      describe('canIsolateHost', () => {
+        it('should be true if packagePrivilege.writeHostIsolation is true', () => {
+          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
+            true;
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+          expect(authz.canIsolateHost).toBe(true);
+        });
+
+        it('should be false if packagePrivilege.writeHostIsolation is false', () => {
+          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
+            false;
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+          expect(authz.canIsolateHost).toBe(false);
+        });
+      });
+
+      describe('canUnIsolateHost', () => {
+        it('should be true if packagePrivilege.writeHostIsolation is true', () => {
+          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
+            true;
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+          expect(authz.canUnIsolateHost).toBe(true);
+        });
+
+        it('should be false if packagePrivilege.writeHostIsolation is false', () => {
+          fleetAuthz.packagePrivileges!.endpoint.actions.writeHostIsolation.executePackageAction =
+            false;
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+          expect(authz.canUnIsolateHost).toBe(false);
+        });
+      });
+    });
   });
 
   describe('getEndpointAuthzInitialState()', () => {

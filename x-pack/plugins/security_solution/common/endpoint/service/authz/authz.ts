@@ -28,14 +28,18 @@ export const calculateEndpointAuthz = (
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
+  const canIsolateHost = isEndpointRbacEnabled
+    ? fleetAuthz.packagePrivileges?.endpoint?.actions?.writeHostIsolation?.executePackageAction ||
+      false
+    : hasEndpointManagementAccess;
 
   return {
     canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
     canAccessEndpointManagement: hasEndpointManagementAccess,
     canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
     // Response Actions
-    canIsolateHost: isPlatinumPlusLicense && hasEndpointManagementAccess,
-    canUnIsolateHost: hasEndpointManagementAccess,
+    canIsolateHost: isPlatinumPlusLicense && canIsolateHost,
+    canUnIsolateHost: canIsolateHost,
     canKillProcess: hasEndpointManagementAccess && isEnterpriseLicense,
     canSuspendProcess: hasEndpointManagementAccess && isEnterpriseLicense,
     canGetRunningProcesses: hasEndpointManagementAccess && isEnterpriseLicense,
