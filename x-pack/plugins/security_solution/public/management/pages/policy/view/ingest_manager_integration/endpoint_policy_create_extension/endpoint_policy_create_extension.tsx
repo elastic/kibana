@@ -196,7 +196,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   <strong>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.environments"
-                      defaultMessage="protect your transitional endpoints or dynamic cloud environments"
+                      defaultMessage="protect your tranditional endpoints or dynamic cloud environments"
                     />
                   </strong>
                 ),
