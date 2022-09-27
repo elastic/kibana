@@ -17,15 +17,10 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import {
-  DiscoveredPlugin,
-  InternalPluginInfo,
-  PluginConfigDescriptor,
-  PluginDependencies,
-  PluginType,
-} from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginDependencies, PluginType } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
+  RenderingService,
 } from '@kbn/core-rendering-server-internal';
+
+export type RenderingServiceMock = jest.Mocked<PublicMethodsOf<RenderingService>>;
 
 function createRenderingPreboot() {
   const mocked: jest.Mocked<InternalRenderingServicePreboot> = {
@@ -25,7 +29,21 @@ function createRenderingSetup() {
   return mocked;
 }
 
-export const renderingMock = {
-  createPrebootContract: createRenderingPreboot,
-  createSetupContract: createRenderingSetup,
+function createRenderingService() {
+  const mock: RenderingServiceMock = {
+    preboot: jest.fn(),
+    setup: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  mock.preboot.mockResolvedValue(createRenderingPreboot());
+  mock.setup.mockResolvedValue(createRenderingSetup());
+
+  return mock;
+}
+
+export const renderingServiceMock = {
+  create: createRenderingService,
+  createPreboot: createRenderingPreboot,
+  createSetup: createRenderingSetup,
 };

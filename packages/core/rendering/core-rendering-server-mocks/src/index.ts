@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { renderingMock } from './rendering_service.mock';
+export { renderingServiceMock } from './rendering_service.mock';
