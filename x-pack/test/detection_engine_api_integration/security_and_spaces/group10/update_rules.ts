@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         ];
-        outputRule.throttle = '1m';
+        outputRule.throttle = '1d';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
