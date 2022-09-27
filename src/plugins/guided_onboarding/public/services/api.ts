@@ -9,10 +9,10 @@
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
-import { API_BASE_PATH, getDefaultStepsStatus } from '../../common/constants';
-import type { GuidesConfig, StepStatus, UseCase } from '../../common/types';
+import { API_BASE_PATH } from '../../common/constants';
+import type { GuidesConfig, UseCase } from '../../common/types';
 import { GuidedOnboardingState } from '../types';
-import { getNextStep, isLastStep } from './helpers';
+import { isLastStep } from './helpers';
 
 export class ApiService {
   private client: HttpSetup | undefined;
