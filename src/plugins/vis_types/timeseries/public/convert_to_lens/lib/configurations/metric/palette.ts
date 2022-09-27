@@ -155,9 +155,11 @@ const getCustomPalette = (
   };
 };
 
-export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | null | undefined => {
+export const getPalette = (
+  rules: Exclude<Panel['background_color_rules'], undefined>
+): PaletteOutput<CustomPaletteParams> | null | undefined => {
   const validRules =
-    model.background_color_rules?.filter(
+    rules.filter(
       ({ operator, color: textColor, value, background_color: bColor }) =>
         operator && (bColor ?? textColor) && value !== undefined
     ) ?? [];
