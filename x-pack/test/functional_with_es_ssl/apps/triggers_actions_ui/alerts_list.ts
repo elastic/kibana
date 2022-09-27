@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function refreshAlertsList() {
     await testSubjects.click('rulesTab');
   }
-  
+
   describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
