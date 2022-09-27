@@ -282,15 +282,13 @@ export function getTextBasedLanguagesDatasource({
     ) => {
       const columnLabelMap = TextBasedLanguagesDatasource.uniqueLabels(props.state);
       const layer = props.state.layers[props.layerId];
-      const selectedField = layer?.allColumns?.find(
-        (column) => column.columnId === props.columnId
-      )!;
-      let customLabel = columnLabelMap[props.columnId];
+      const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
+      let customLabel: string | undefined = columnLabelMap[props.columnId];
       if (!customLabel) {
-        customLabel = selectedField.fieldName;
+        customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === selectedField.fieldName);
+      const columnExists = props.state.fieldList.some((f) => f.name === selectedField?.fieldName);
 
       render(
         <EuiButtonEmpty color={columnExists ? 'primary' : 'danger'} onClick={() => {}}>
