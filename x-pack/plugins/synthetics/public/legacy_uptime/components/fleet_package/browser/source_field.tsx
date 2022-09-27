@@ -250,7 +250,7 @@ export const SourceField = ({
             title={
               <FormattedMessage
                 id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.title"
-                defaultMessage="Deprecated"
+                defaultMessage="Zip URL is deprecated"
               />
             }
             size="s"
