@@ -6,7 +6,16 @@
  */
 
 export interface InferencePipeline {
-  isDeployed: boolean;
+  modelState: TrainedModelState;
+  modelStateReason?: string;
   pipelineName: string;
   types: string[];
+}
+
+export enum TrainedModelState {
+  NotDeployed = '',
+  Starting = 'starting',
+  Stopping = 'stopping',
+  Started = 'started',
+  Failed = 'failed',
 }

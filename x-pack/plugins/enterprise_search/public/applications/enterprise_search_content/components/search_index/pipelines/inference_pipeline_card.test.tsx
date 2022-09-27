@@ -11,14 +11,16 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiHealth, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiTitle } from '@elastic/eui';
+
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
+import { TrainedModelHealth } from './ml_model_health';
 
-export const DEFAULT_VALUES = {
-  isDeployed: true,
+export const DEFAULT_VALUES: InferencePipeline = {
+  modelState: TrainedModelState.Started,
   pipelineName: 'Sample Processor',
-  trainedModelName: 'example_trained_model',
   types: ['pytorch'],
 };
 
@@ -34,8 +36,6 @@ describe('InferencePipelineCard', () => {
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     expect(wrapper.find(EuiBadge)).toHaveLength(1);
-
-    const health = wrapper.find(EuiHealth);
-    expect(health.prop('children')).toEqual('Deployed');
+    expect(wrapper.find(TrainedModelHealth)).toHaveLength(1);
   });
 });
