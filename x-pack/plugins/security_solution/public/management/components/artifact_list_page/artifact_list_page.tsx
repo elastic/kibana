@@ -11,6 +11,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
@@ -45,7 +46,6 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
-import { useIsMounted } from '../../hooks/use_is_mounted';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -221,7 +221,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
-      if (isMounted) {
+      if (isMounted()) {
         setSelectedItemForDelete(undefined);
         refetchListData();
       }

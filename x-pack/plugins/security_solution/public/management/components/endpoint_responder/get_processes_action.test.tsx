@@ -129,7 +129,7 @@ describe('When using processes action from response actions console', () => {
     enterConsoleCommand(renderResult, 'processes');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getProcessesErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('getProcesses-actionFailure').textContent).toMatch(
         /error one \| error two/
       );
     });
@@ -145,7 +145,7 @@ describe('When using processes action from response actions console', () => {
     enterConsoleCommand(renderResult, 'processes');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('performGetProcessesErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('getProcesses-apiFailure').textContent).toMatch(
         /this is an error/
       );
     });

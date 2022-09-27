@@ -28,6 +28,8 @@ export const NoParametersRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
 
+export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+
 export const KillOrSuspendProcessRequestSchema = {
   body: schema.object({
     ...BaseActionRequestSchema,

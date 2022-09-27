@@ -11,7 +11,7 @@ import type { ArtifactListPageRenderingSetup } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getDeferred } from '../../mocks';
+import { getDeferred } from '../../../mocks/utils';
 
 describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;

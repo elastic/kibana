@@ -195,7 +195,7 @@ describe('When using the kill-process action from response actions console', () 
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('killProcess-success')).toBeTruthy();
     });
   });
 
@@ -204,7 +204,7 @@ describe('When using the kill-process action from response actions console', () 
     enterConsoleCommand(renderResult, 'kill-process --entityId 123wer');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('killProcess-success')).toBeTruthy();
     });
   });
 
@@ -219,7 +219,7 @@ describe('When using the kill-process action from response actions console', () 
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('killProcess-actionFailure').textContent).toMatch(
         /error one \| error two/
       );
     });
@@ -234,7 +234,7 @@ describe('When using the kill-process action from response actions console', () 
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessAPIErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('killProcess-apiFailure').textContent).toMatch(
         /this is an error/
       );
     });
