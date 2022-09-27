@@ -3296,19 +3296,20 @@ function getBulkUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) 
   // Bulk removing snooze schedules, don't touch the current snooze/indefinite snooze
   if (scheduleIds) {
     const newSchedules = clearScheduledSnoozesById(attributes, scheduleIds);
+    // Unscheduled snooze is also known as snooze now
     const unscheduledSnooze =
       attributes.snoozeSchedule?.filter((s) => typeof s.id === 'undefined') || [];
 
     return {
       snoozeSchedule: [...unscheduledSnooze, ...newSchedules],
-      ...(!scheduleIds ? { muteAll: false } : {}),
+      muteAll: attributes.muteAll,
     };
   }
 
   // Bulk unsnoozing, don't touch current snooze schedules that are NOT active
   return {
     snoozeSchedule: clearCurrentActiveSnooze(attributes),
-    ...(!scheduleIds ? { muteAll: false } : {}),
+    muteAll: false,
   };
 }
 
