@@ -19,10 +19,10 @@ export interface SubFeatureConfig {
   /** Collection of privilege groups */
   privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
 
-    /**
+  /**
    * Help text
    */
-   helpText?: string;
+  helpText?: string;
 }
 
 /**
