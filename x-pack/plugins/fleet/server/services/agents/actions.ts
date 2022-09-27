@@ -134,6 +134,7 @@ export async function bulkCreateAgentActionResults(
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
     body: bulkBody,
+    refresh: 'wait_for',
   });
 }
 

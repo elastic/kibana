@@ -1032,6 +1032,13 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
 
       it('enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {

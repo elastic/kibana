@@ -121,6 +121,15 @@ export default function (providerContext: FtrProviderContext) {
         ]);
         expect(agent2data.body.item.policy_id).to.eql('policy2');
         expect(agent3data.body.item.policy_id).to.eql('policy2');
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsActionCreated).to.eql(2);
+        expect(actionStatus.nbAgentsFailed).to.eql(3);
       });
 
       it('should allow to reassign multiple agents by id -- mixed invalid, hosted, etc', async () => {
@@ -145,6 +154,15 @@ export default function (providerContext: FtrProviderContext) {
         ]);
         expect(agent2data.body.item.policy_id).to.eql('policy1');
         expect(agent3data.body.item.policy_id).to.eql('policy1');
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsActionCreated).to.eql(2);
+        expect(actionStatus.nbAgentsFailed).to.eql(3);
       });
 
       it('should allow to reassign multiple agents by kuery', async () => {

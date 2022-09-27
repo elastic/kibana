@@ -156,6 +156,13 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(agent1data.body.item.tags.includes('newTag')).to.be(false);
         expect(agent2data.body.item.tags.includes('newTag')).to.be(true);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
     });
   });
