@@ -792,7 +792,7 @@
             "signature": [
               "(step: ",
               "AnyStep",
-              ", screenshot: Buffer) => Promise<void>"
+              ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
             ],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
@@ -827,6 +827,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-server.JourneyScreenshots.addError.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "fullscreenScreenshot",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -841,7 +856,7 @@
             "signature": [
               "(step: ",
               "AnyStep",
-              ", screenshot: Buffer) => Promise<void>"
+              ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
             ],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
@@ -876,6 +891,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-server.JourneyScreenshots.addSuccess.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "fullscreenScreenshot",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -888,7 +918,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "() => { path: string; type: \"success\" | \"failure\"; title: string; filename: string; }[]"
+              "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
             ],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,

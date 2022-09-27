@@ -9086,6 +9086,20 @@
             "path": "x-pack/plugins/fleet/common/authz.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetAuthz.packagePrivileges",
+            "type": "Object",
+            "tags": [],
+            "label": "packagePrivileges",
+            "description": [],
+            "signature": [
+              "{ [packageName: string]: { actions: { [key: string]: { executePackageAction: boolean; }; }; }; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -14184,6 +14198,21 @@
           "[]; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.ENDPOINT_PRIVILEGES",
+        "type": "Array",
+        "tags": [],
+        "label": "ENDPOINT_PRIVILEGES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/authz.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
