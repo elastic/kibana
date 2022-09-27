@@ -307,7 +307,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const timeRange = plugins.data.query.timefilter.timefilter.getTime();
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
@@ -319,7 +318,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
-          timeRange,
         });
 
         if (ast) {
@@ -362,7 +360,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     unknownVisError,
     visualization.activeId,
     dataViews.indexPatterns,
-    timeRange,
   ]);
 
   useEffect(() => {

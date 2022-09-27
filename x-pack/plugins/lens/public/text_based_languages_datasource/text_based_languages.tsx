@@ -95,7 +95,10 @@ export function getTextBasedLanguagesDatasource({
 
       const contextualFields = context.contextualFields;
       const newColumns = contextualFields?.map((c) => {
-        const field = indexPattern?.getFieldByName(c);
+        let field = indexPattern?.getFieldByName(c);
+        if (!field) {
+          field = indexPattern?.fields.find((f) => f.name.includes(c));
+        }
         const newId = generateId();
         const type = field?.type ?? 'number';
         return {
