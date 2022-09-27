@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Assign } from '@kbn/utility-types';
 import {
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
-  EuiPanel,
   DragDropContextProps,
   EuiPanelProps,
+  EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { DefaultBucketContainer } from './default_bucket_container';
 import type { BucketContainerProps } from './types';
 
@@ -35,7 +37,6 @@ export const DraggableBucketContainer = ({
   }
 >) => (
   <EuiDraggable
-    spacing="s"
     index={idx}
     draggableId={id}
     customDragHandle={true}
@@ -56,7 +57,6 @@ export function DragDropBuckets<T = unknown>({
   onDragEnd,
   droppableId,
   children,
-  className,
   color,
 }: {
   items: T[];
@@ -65,7 +65,6 @@ export function DragDropBuckets<T = unknown>({
   onDragStart?: () => void;
   onDragEnd?: (items: T[]) => void;
   color?: EuiPanelProps['color'];
-  className?: string;
 }) {
   const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
     ({ source, destination }) => {
@@ -76,14 +75,28 @@ export function DragDropBuckets<T = unknown>({
     },
     [items, onDragEnd]
   );
+  const { euiTheme } = useEuiTheme();
+
+  const styles = useMemo(
+    () => css`
+      padding: ${color ? euiTheme.size.xs : 0};
+    `,
+    [color, euiTheme.size.xs]
+  );
 
   return (
-    <EuiPanel color={color} hasBorder={false} hasShadow={false} paddingSize={color ? 'xs' : 'none'}>
-      <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
-        <EuiDroppable droppableId={droppableId} spacing="none" className={className}>
-          {children}
+    <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
+      <EuiPanel
+        paddingSize="none"
+        color={color}
+        style={{ overflow: 'hidden' }}
+        hasShadow={false}
+        hasBorder={false}
+      >
+        <EuiDroppable droppableId={droppableId} spacing="s">
+          <div className={styles}>{children}</div>
         </EuiDroppable>
-      </EuiDragDropContext>
-    </EuiPanel>
+      </EuiPanel>
+    </EuiDragDropContext>
   );
 }

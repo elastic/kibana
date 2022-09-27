@@ -31,12 +31,13 @@ export const FieldsBucketContainer = ({
 
   return (
     <EuiPanel
-      paddingSize="none"
+      paddingSize="xs"
       hasShadow={false}
+      hasBorder={false}
       color="transparent"
       data-test-subj={dataTestSubj}
     >
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup direction={'row'} gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="none" color="transparent" {...draggableProvided.dragHandleProps}>
             <EuiIcon
@@ -50,7 +51,9 @@ export const FieldsBucketContainer = ({
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>{children}</EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <div>{children}</div>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TooltipWrapper
             tooltipContent={i18n.translate(

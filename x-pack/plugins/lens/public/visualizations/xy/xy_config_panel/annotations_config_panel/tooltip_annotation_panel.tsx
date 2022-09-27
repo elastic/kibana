@@ -152,7 +152,6 @@ export function TooltipSection({
         }}
         droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
         items={localValues}
-        className="lnsConfigPanelAnnotations__droppable"
         color="subdued"
       >
         {localValues.map(({ id, value, isNew }, index, arrayRef) => {
