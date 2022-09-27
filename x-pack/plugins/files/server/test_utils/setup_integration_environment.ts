@@ -36,6 +36,7 @@ export async function setupIntegrationEnvironment() {
       alt: string;
       meta: Record<string, any>;
       mimeType: string;
+      blurhash: string;
     }> = {}
   ): Promise<FileJSON> => {
     const result = await request
