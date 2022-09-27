@@ -71,46 +71,46 @@ export const updateDataView = async ({
     name,
   } = spec;
 
-  let changeCount = 0;
+  let isChanged = false;
   let doRefreshFields = false;
 
   if (title !== undefined && title !== dataView.title) {
-    changeCount++;
+    isChanged = true;
     dataView.title = title;
   }
 
   if (timeFieldName !== undefined && timeFieldName !== dataView.timeFieldName) {
-    changeCount++;
+    isChanged = true;
     dataView.timeFieldName = timeFieldName;
   }
 
   if (sourceFilters !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.sourceFilters = sourceFilters;
   }
 
   if (fieldFormats !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.fieldFormatMap = fieldFormats;
   }
 
   if (type !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.type = type;
   }
 
   if (typeMeta !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.typeMeta = typeMeta;
   }
 
   if (name !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.name = name;
   }
 
   if (fields !== undefined) {
-    changeCount++;
+    isChanged = true;
     doRefreshFields = true;
     dataView.fields.replaceAll(
       Object.values(fields || {}).map((field) => ({
@@ -122,11 +122,11 @@ export const updateDataView = async ({
   }
 
   if (runtimeFieldMap !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
-  if (changeCount > 1) {
+  if (isChanged) {
     const result = (await dataViewsService.updateSavedObject(dataView)) as DataView;
 
     if (doRefreshFields && refreshFields) {
