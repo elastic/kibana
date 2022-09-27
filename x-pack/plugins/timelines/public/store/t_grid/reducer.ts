@@ -7,7 +7,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addProviderToTimeline,
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
@@ -19,7 +18,6 @@ import {
   setEventsLoading,
   setTGridSelectAll,
   setSelected,
-  setTimelineUpdatedAt,
   toggleDetailPanel,
   updateColumnOrder,
   updateColumns,
@@ -34,7 +32,6 @@ import {
 } from './actions';
 
 import {
-  addProviderToTableHelper,
   applyDeltaToTableColumnWidth,
   createInitTGrid,
   setInitializeTgridSettings,
@@ -234,20 +231,6 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       [id]: {
         ...state.tableById[id],
         selectAll,
-      },
-    },
-  }))
-  .case(addProviderToTimeline, (state, { id, dataProvider }) => ({
-    ...state,
-    tableById: addProviderToTableHelper(id, dataProvider, state.tableById),
-  }))
-  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
-    ...state,
-    tableById: {
-      ...state.tableById,
-      [id]: {
-        ...state.tableById[id],
-        updated,
       },
     },
   }))

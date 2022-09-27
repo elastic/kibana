@@ -39,7 +39,6 @@ export {
   updateTableGraphEventId,
   updateTableSessionViewConfig,
   createTGrid,
-  addProviderToTimeline,
 } from './store/t_grid/actions';
 
 export { getManageDataTableById, getTGridByIdSelector } from './store/t_grid/selectors';
