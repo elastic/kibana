@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { css } from '@emotion/react';
 import { NodeItem } from './nodes_list';
 import { useListItemsFormatter } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
@@ -44,10 +45,12 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   attributes['ml.max_jvm_size'] = bytesFormatter(attributes['ml.max_jvm_size']);
 
   return (
-    <>
-      <EuiSpacer size={'m'} />
-
-      <EuiFlexGrid columns={2} gutterSize={'m'}>
+    <div
+      css={css`
+        width: 100%;
+      `}
+    >
+      <EuiFlexGrid columns={2} gutterSize={'s'}>
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size={'xs'}>
@@ -85,25 +88,26 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             />
           </EuiPanel>
         </EuiFlexItem>
-
-        {allocatedModels.length > 0 ? (
-          <EuiFlexItem grow={2}>
-            <EuiPanel>
-              <EuiTitle size={'xs'}>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
-                    defaultMessage="Allocated models"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size={'m'} />
-
-              <AllocatedModels models={allocatedModels} />
-            </EuiPanel>
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGrid>
-    </>
+
+      {allocatedModels.length > 0 ? (
+        <>
+          <EuiSpacer size={'s'} />
+          <EuiPanel>
+            <EuiTitle size={'xs'}>
+              <h5>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
+                  defaultMessage="Allocated models"
+                />
+              </h5>
+            </EuiTitle>
+            <EuiSpacer size={'m'} />
+
+            <AllocatedModels models={allocatedModels} />
+          </EuiPanel>
+        </>
+      ) : null}
+    </div>
   );
 };

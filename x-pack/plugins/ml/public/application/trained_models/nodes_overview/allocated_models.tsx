@@ -190,6 +190,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       })}
       onTableChange={() => {}}
       data-test-subj={'mlNodesAllocatedModels'}
+      css={{ overflow: 'auto' }}
     />
   );
 };
