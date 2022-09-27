@@ -38,11 +38,11 @@ export type Endpoint = CreateRouteDefinition<typeof rt, { file: FileJSON }>;
 export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req, res) => {
   const { fileService } = await files;
   const {
-    body: { name, alt, meta, mimeType },
+    body: { name, alt, meta, mimeType, blurhash },
   } = req;
   const file = await fileService
     .asCurrentUser()
-    .create({ fileKind, name, alt, meta, mime: mimeType });
+    .create({ fileKind, name, alt, meta, mime: mimeType, blurhash });
   const body: Endpoint['output'] = {
     file: file.toJSON(),
   };

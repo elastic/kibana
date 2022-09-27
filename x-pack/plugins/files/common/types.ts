@@ -154,6 +154,11 @@ export type FileMetadata<Meta = unknown> = Required<
      * User-defined metadata
      */
     Meta?: Meta;
+
+    /**
+     * Blurhash of the file, only applies if the file is an image.
+     */
+    Blurhash?: string;
   };
 
 /**
@@ -220,6 +225,11 @@ export interface FileJSON<Meta = unknown> {
    * See {@link FileStatus} for more details.
    */
   status: FileMetadata['Status'];
+
+  /**
+   * See {@link FileMetadata} for more details.
+   */
+  blurhash?: FileMetadata['Blurhash'];
 }
 
 /**

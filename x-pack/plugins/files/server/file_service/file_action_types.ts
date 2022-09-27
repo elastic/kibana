@@ -31,6 +31,10 @@ export interface CreateFileArgs<Meta = unknown> {
    * The MIME type of the file.
    */
   mime?: string;
+  /**
+   * The blurhash of the file, only applies if the file is an image.
+   */
+  blurhash?: string;
 }
 
 /**
