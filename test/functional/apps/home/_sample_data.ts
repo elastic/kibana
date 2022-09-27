@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(17);
+        expect(panelCount).to.be(16);
       });
 
       it('should render visualizations', async () => {
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(13);
+        expect(panelCount).to.be(12);
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(15);
+        expect(panelCount).to.be(14);
       });
     });
 
