@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FileJSON } from '../common';
 import type {
   FindFilesHttpEndpoint,
   FileShareHttpEndpoint,
@@ -119,16 +120,7 @@ export interface FilesClient extends GlobalEndpoints {
    *
    * @param args - get download URL args
    */
-  getDownloadHref: (args: {
-    /**
-     * ID of the file
-     */
-    id: string;
-    /**
-     * Kind of the file
-     */
-    kind: string;
-  }) => string;
+  getDownloadHref: (args: Pick<FileJSON, 'id' | 'fileKind'>) => string;
   /**
    * Share a file by creating a new file share instance.
    *

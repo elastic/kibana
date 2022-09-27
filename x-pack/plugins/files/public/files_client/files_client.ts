@@ -123,7 +123,7 @@ export function createFilesClient({
         body: args.body as BodyInit,
       });
     },
-    getDownloadHref: ({ kind, id }) => {
+    getDownloadHref: ({ fileKind: kind, id }) => {
       return `${http.basePath.prepend(apiRoutes.getDownloadRoute(scopedFileKind ?? kind, id))}`;
     },
     share: ({ kind, fileId, name, validUntil }) => {
