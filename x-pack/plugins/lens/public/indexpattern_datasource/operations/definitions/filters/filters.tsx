@@ -229,11 +229,12 @@ export const FilterList = ({
       >
         {localFilters?.map((filter, idx, arrayRef) => {
           const isInvalid = !isQueryValid(filter.input, indexPattern);
+          const id = filter.id;
 
           return (
             <DraggableBucketContainer
-              id={filter.id}
-              key={filter.id}
+              id={id}
+              key={id}
               idx={idx}
               isInvalid={isInvalid}
               invalidMessage={i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {

@@ -132,21 +132,24 @@ export function FieldInputs({
               ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
                 invalidFields?.includes(value))
           );
+          const itemId = (value ?? 'newField') + id;
+
           return (
             <DraggableBucketContainer
-              id={(value ?? 'newField') + id}
-              key={(value ?? 'newField') + id}
+              id={itemId}
+              key={itemId}
               idx={index}
               onRemoveClick={() => {
                 handleInputChange(arrayRef.filter((_, i) => i !== index));
               }}
-              removeTitle={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonAriaLabel', {
+              removeTitle={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonLabel', {
                 defaultMessage: 'Delete',
               })}
               isNotRemovable={disableActions && !isNew}
               isNotDraggable={arrayRef.length < 2}
               data-test-subj={`indexPattern-terms-${index}`}
               Container={FieldsBucketContainer}
+              isInsidePanel={true}
             >
               <FieldSelect
                 fieldIsInvalid={shouldShowError}

@@ -165,13 +165,17 @@ export function TooltipSection({
               onRemoveClick={() => {
                 handleInputChange(arrayRef.filter((_, i) => i !== index));
               }}
-              removeTitle={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonAriaLabel', {
-                defaultMessage: 'Delete',
-              })}
+              removeTitle={i18n.translate(
+                'xpack.lens.xyChart.annotation.tooltip.deleteButtonLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
               isNotRemovable={disableActions && !isNew}
               isNotDraggable={arrayRef.length < 2}
-              data-test-subj={`lnsXY-annotation-tooltip-${index}`}
               Container={FieldsBucketContainer}
+              isInsidePanel={true}
+              data-test-subj={`lnsXY-annotation-tooltip-${index}`}
             >
               <FieldPicker
                 selectedOptions={

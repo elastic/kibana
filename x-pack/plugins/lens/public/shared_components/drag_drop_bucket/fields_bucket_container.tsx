@@ -31,7 +31,7 @@ export const FieldsBucketContainer = ({
 
   return (
     <EuiPanel
-      paddingSize="xs"
+      paddingSize="none"
       hasShadow={false}
       hasBorder={false}
       color="transparent"
@@ -39,7 +39,11 @@ export const FieldsBucketContainer = ({
     >
       <EuiFlexGroup direction={'row'} gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="none" color="transparent" {...draggableProvided.dragHandleProps}>
+          <EuiPanel
+            paddingSize="none"
+            color="transparent"
+            {...(draggableProvided?.dragHandleProps ?? {})}
+          >
             <EuiIcon
               size="s"
               color={isNotDraggable ? euiTheme.colors.disabled : 'subdued'}
@@ -51,8 +55,8 @@ export const FieldsBucketContainer = ({
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <div>{children}</div>
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+          {children}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TooltipWrapper

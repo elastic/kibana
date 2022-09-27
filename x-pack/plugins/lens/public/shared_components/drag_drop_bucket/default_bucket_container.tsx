@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -31,24 +30,15 @@ export const DefaultBucketContainer = ({
 }: BucketContainerProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const styles = useMemo(
-    () => css`
-      margin-bottom: ${euiTheme.size.xs};
-    `,
-    [euiTheme.size.xs]
-  );
-
   return (
-    <EuiPanel
-      paddingSize="none"
-      className={styles}
-      data-test-subj={dataTestSubj}
-      hasShadow={false}
-      hasBorder={true}
-    >
+    <EuiPanel paddingSize="none" hasShadow={false} hasBorder={true} data-test-subj={dataTestSubj}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="xs" color="transparent" {...draggableProvided.dragHandleProps}>
+          <EuiPanel
+            paddingSize="xs"
+            color="transparent"
+            {...(draggableProvided?.dragHandleProps ?? {})}
+          >
             <EuiIcon
               size="s"
               color={

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import type { Assign } from '@kbn/utility-types';
 import {
   EuiDragDropContext,
@@ -17,7 +17,6 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { DefaultBucketContainer } from './default_bucket_container';
 import type { BucketContainerProps } from './types';
 
@@ -25,6 +24,7 @@ export const DraggableBucketContainer = ({
   id,
   idx,
   children,
+  isInsidePanel,
   Container = DefaultBucketContainer,
   ...bucketContainerProps
 }: Assign<
@@ -33,23 +33,33 @@ export const DraggableBucketContainer = ({
     id: string;
     idx: number;
     children: React.ReactNode;
+    isInsidePanel?: boolean;
     Container?: React.FunctionComponent<BucketContainerProps>;
   }
->) => (
-  <EuiDraggable
-    index={idx}
-    draggableId={id}
-    customDragHandle={true}
-    isDragDisabled={bucketContainerProps.isNotDraggable}
-    disableInteractiveElementBlocking
-  >
-    {(provided) => (
-      <Container draggableProvided={provided} {...bucketContainerProps}>
-        {children}
-      </Container>
-    )}
-  </EuiDraggable>
-);
+>) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div>
+      <EuiDraggable
+        index={idx}
+        draggableId={id}
+        customDragHandle={true}
+        isDragDisabled={bucketContainerProps.isNotDraggable}
+        style={{
+          [isInsidePanel ? 'margin' : 'marginBottom']: euiTheme.size.xs,
+        }}
+        disableInteractiveElementBlocking
+      >
+        {(provided) => (
+          <Container draggableProvided={provided} {...bucketContainerProps}>
+            {children}
+          </Container>
+        )}
+      </EuiDraggable>
+    </div>
+  );
+};
 
 export function DragDropBuckets<T = unknown>({
   items,
@@ -75,14 +85,6 @@ export function DragDropBuckets<T = unknown>({
     },
     [items, onDragEnd]
   );
-  const { euiTheme } = useEuiTheme();
-
-  const styles = useMemo(
-    () => css`
-      padding: ${color ? euiTheme.size.xs : 0};
-    `,
-    [color, euiTheme.size.xs]
-  );
 
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
@@ -93,8 +95,8 @@ export function DragDropBuckets<T = unknown>({
         hasShadow={false}
         hasBorder={false}
       >
-        <EuiDroppable droppableId={droppableId} spacing="s">
-          <div className={styles}>{children}</div>
+        <EuiDroppable droppableId={droppableId} spacing={color ? 'm' : 'none'}>
+          {children}
         </EuiDroppable>
       </EuiPanel>
     </EuiDragDropContext>

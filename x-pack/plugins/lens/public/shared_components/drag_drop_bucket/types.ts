@@ -12,8 +12,8 @@ export interface BucketContainerProps {
   onRemoveClick: () => void;
   children: React.ReactNode;
   removeTitle: string;
-  draggableProvided: DraggableProvided;
 
+  draggableProvided?: DraggableProvided;
   isInvalid?: boolean;
   invalidMessage?: string;
   isNotRemovable?: boolean;
