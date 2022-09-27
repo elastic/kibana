@@ -25,8 +25,8 @@ interface Props {
     exeFileName: string;
     functionName: string;
     sourceFileName: string;
-    samples: number;
-    childSamples: number;
+    countInclusive: number;
+    countExclusive: number;
   };
   sampledTraces: number;
   totalTraces: number;
@@ -122,14 +122,14 @@ export function FlamegraphInformationWindow({
     );
   }
 
-  const { childSamples, exeFileName, samples, functionName, sourceFileName } = frame;
+  const { exeFileName, functionName, sourceFileName, countInclusive, countExclusive } = frame;
 
   const impactRows = getImpactRows({
-    samples,
-    childSamples,
-    sampledTraces,
+    countInclusive,
+    countExclusive,
+    samples: sampledTraces,
+    totalSamples: totalTraces,
     totalSeconds,
-    totalTraces,
   });
 
   return (

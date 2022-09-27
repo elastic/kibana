@@ -226,10 +226,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
           exeFileName: highlightedFrame.ExeFileName,
           sourceFileName: highlightedFrame.SourceFilename,
           functionName: highlightedFrame.FunctionName,
-          samples: primaryFlamegraph.Value[highlightedVmIndex],
-          childSamples:
-            primaryFlamegraph.Value[highlightedVmIndex] -
-            primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
+          countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
       : undefined;
 
