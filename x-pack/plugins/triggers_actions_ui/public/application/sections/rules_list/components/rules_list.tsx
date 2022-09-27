@@ -210,14 +210,22 @@ export const RulesList = ({
   const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
   const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<KueryNode | void>();
 
+  const [rulesToUnsnooze, setRulesToUnsnooze] = useState<RuleTableItem[]>([]);
+  const [rulesToUnsnoozeFilter, setRulesToUnsnoozeFilter] = useState<KueryNode | void>();
+
   const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
   const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<KueryNode | void>();
+
+  const [rulesToUnschedule, setRulesToUnschedule] = useState<RuleTableItem[]>([]);
+  const [rulesToUnscheduleFilter, setRulesToUnscheduleFilter] = useState<KueryNode | void>();
 
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<KueryNode | void>();
 
   const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
   const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
+  const [isUnsnoozingRules, setIsUnsnoozingRules] = useState<boolean>(false);
+  const [isUnschedulingRules, setIsUnschedulingRules] = useState<boolean>(false);
   const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
@@ -604,9 +612,19 @@ export const RulesList = ({
     setRulesToSnoozeFilter();
   };
 
+  const clearRulesToUnsnooze = () => {
+    setRulesToUnsnooze([]);
+    setRulesToUnsnoozeFilter();
+  };
+
   const clearRulesToSchedule = () => {
     setRulesToSchedule([]);
     setRulesToScheduleFilter();
+  };
+
+  const clearRulesToUnschedule = () => {
+    setRulesToUnschedule([]);
+    setRulesToUnscheduleFilter();
   };
 
   const clearRulesToUpdateAPIKey = () => {
@@ -620,7 +638,9 @@ export const RulesList = ({
       ruleTypesState.isLoading ||
       isPerformingAction ||
       isSnoozingRules ||
+      isUnsnoozingRules ||
       isSchedulingRules ||
+      isUnschedulingRules ||
       isUpdatingRuleAPIKeys
     );
   }, [
@@ -628,7 +648,9 @@ export const RulesList = ({
     ruleTypesState,
     isPerformingAction,
     isSnoozingRules,
+    isUnsnoozingRules,
     isSchedulingRules,
+    isUnschedulingRules,
     isUpdatingRuleAPIKeys,
   ]);
 
@@ -910,14 +932,20 @@ export const RulesList = ({
                   setIsPerformingAction(false);
                 }}
                 isSnoozingRules={isSnoozingRules}
+                isUnsnoozingRules={isUnsnoozingRules}
                 isSchedulingRules={isSchedulingRules}
+                isUnschedulingRules={isUnschedulingRules}
                 isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
                 setRulesToDelete={setRulesToDelete}
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
+                setRulesToUnsnooze={setRulesToUnsnooze}
                 setRulesToSchedule={setRulesToSchedule}
+                setRulesToUnschedule={setRulesToUnschedule}
                 setRulesToSnoozeFilter={setRulesToSnoozeFilter}
+                setRulesToUnsnoozeFilter={setRulesToUnsnoozeFilter}
                 setRulesToScheduleFilter={setRulesToScheduleFilter}
+                setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
                 setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
               />
             </BulkOperationPopover>
@@ -990,13 +1018,19 @@ export const RulesList = ({
       />
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
+        rulesToUnsnooze={rulesToUnsnooze}
         rulesToSnoozeFilter={rulesToSnoozeFilter}
-        setIsLoading={setIsSnoozingRules}
+        rulesToUnsnoozeFilter={rulesToUnsnoozeFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
+        setIsSnoozingRule={setIsSnoozingRules}
+        setIsUnsnoozingRule={setIsUnsnoozingRules}
         onClose={() => {
           clearRulesToSnooze();
+          clearRulesToUnsnooze();
         }}
         onSave={async () => {
           clearRulesToSnooze();
+          clearRulesToUnsnooze();
           onClearSelection();
           await loadData();
         }}
@@ -1004,14 +1038,19 @@ export const RulesList = ({
       />
       <BulkSnoozeScheduleModal
         rulesToSchedule={rulesToSchedule}
+        rulesToUnschedule={rulesToUnschedule}
         rulesToScheduleFilter={rulesToScheduleFilter}
+        rulesToUnscheduleFilter={rulesToUnscheduleFilter}
         numberOfSelectedRules={numberOfSelectedItems}
-        setIsLoading={setIsSchedulingRules}
+        setIsSchedulingRule={setIsSchedulingRules}
+        setIsUnschedulingRule={setIsUnschedulingRules}
         onClose={() => {
           clearRulesToSchedule();
+          clearRulesToUnschedule();
         }}
         onSave={async () => {
           clearRulesToSchedule();
+          clearRulesToUnschedule();
           onClearSelection();
           await loadData();
         }}
