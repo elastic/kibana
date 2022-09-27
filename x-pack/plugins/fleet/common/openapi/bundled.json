@@ -616,7 +616,6 @@
           "in": "query"
         }
       ],
-      "required": true,
       "post": {
         "summary": "Packages - Install",
         "tags": [],
@@ -1253,19 +1252,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1842,19 +1832,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1918,19 +1899,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -2001,19 +1973,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }

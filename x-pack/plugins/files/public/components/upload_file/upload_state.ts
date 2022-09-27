@@ -25,6 +25,7 @@ import {
   type Observable,
   combineLatest,
   distinctUntilChanged,
+  Subscription,
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
@@ -62,38 +63,41 @@ export class UploadState {
   public readonly uploading$ = new BehaviorSubject(false);
   public readonly done$ = new Subject<undefined | DoneNotification[]>();
 
+  private subscriptions: Subscription[];
+
   constructor(
     private readonly fileKind: FileKind,
     private readonly client: FilesClient,
     private readonly opts: UploadOptions = { allowRepeatedUploads: false }
   ) {
     const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
+    this.subscriptions = [
+      latestFiles$
+        .pipe(
+          map((files) => files.some((file) => file.status === 'uploading')),
+          distinctUntilChanged()
+        )
+        .subscribe(this.uploading$),
 
-    latestFiles$
-      .pipe(
-        map((files) => files.some((file) => file.status === 'uploading')),
-        distinctUntilChanged()
-      )
-      .subscribe(this.uploading$);
+      latestFiles$
+        .pipe(
+          map((files) => {
+            const errorFile = files.find((file) => Boolean(file.error));
+            return errorFile ? errorFile.error : undefined;
+          }),
+          filter(Boolean)
+        )
+        .subscribe(this.error$),
 
-    latestFiles$
-      .pipe(
-        map((files) => {
-          const errorFile = files.find((file) => Boolean(file.error));
-          return errorFile ? errorFile.error : undefined;
-        }),
-        filter(Boolean)
-      )
-      .subscribe(this.error$);
-
-    latestFiles$
-      .pipe(
-        filter(
-          (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
-        ),
-        map((files) => files.map((file) => ({ id: file.id!, kind: this.fileKind.id })))
-      )
-      .subscribe(this.done$);
+      latestFiles$
+        .pipe(
+          filter(
+            (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
+          ),
+          map((files) => files.map((file) => ({ id: file.id!, kind: this.fileKind.id })))
+        )
+        .subscribe(this.done$),
+    ];
   }
 
   public isUploading(): boolean {
@@ -162,11 +166,11 @@ export class UploadState {
     }
 
     let uploadTarget: undefined | FileJSON;
-    let erroredOrAborted = false;
 
     file$.setState({ status: 'uploading', error: undefined });
 
-    const { name, mime } = parseFileName(file.name);
+    const { name } = parseFileName(file.name);
+    const mime = file.type || undefined;
 
     return from(
       this.client.create({
@@ -190,6 +194,7 @@ export class UploadState {
             id: uploadTarget.id,
             kind: this.fileKind.id,
             abortSignal,
+            selfDestructOnAbort: true,
             contentType: mime,
           })
         );
@@ -198,15 +203,9 @@ export class UploadState {
         file$.setState({ status: 'uploaded', id: uploadTarget?.id });
       }),
       catchError((e) => {
-        erroredOrAborted = true;
         const isAbortError = e.message === 'Abort!';
         file$.setState({ status: 'upload_failed', error: isAbortError ? undefined : e });
         return of(isAbortError ? undefined : e);
-      }),
-      finalize(() => {
-        if (erroredOrAborted && uploadTarget) {
-          this.client.delete({ id: uploadTarget.id, kind: this.fileKind.id });
-        }
       })
     );
   };
@@ -219,9 +218,7 @@ export class UploadState {
     const sub = this.abort$.subscribe(abort$);
     const upload$ = this.files$$.pipe(
       take(1),
-      switchMap((files$) => {
-        return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)));
-      }),
+      switchMap((files$) => forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)))),
       map(() => undefined),
       finalize(() => {
         if (this.opts.allowRepeatedUploads) this.clear();
@@ -230,9 +227,13 @@ export class UploadState {
       shareReplay()
     );
 
-    upload$.subscribe();
+    upload$.subscribe(); // Kick off the upload
 
     return upload$;
+  };
+
+  public dispose = (): void => {
+    for (const sub of this.subscriptions) sub.unsubscribe();
   };
 }
 

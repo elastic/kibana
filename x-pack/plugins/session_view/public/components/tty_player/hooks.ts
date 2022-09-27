@@ -81,49 +81,49 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
       return { lines: processedLines, processStartMarkers: processedMarkers };
     }
 
-    const pagesToProcess = pages.slice(cursor);
+    const events = pages.reduce(
+      (previous, current) => previous.concat(current.events || []),
+      [] as ProcessEvent[]
+    );
+    const eventsToProcess = events.slice(cursor);
     const newMarkers: ProcessStartMarker[] = [];
     let newLines: IOLine[] = [];
 
-    newLines = pagesToProcess.reduce((previous, current) => {
-      if (current.events) {
-        current.events.forEach((event) => {
-          const { process } = event;
-          if (process?.io?.text !== undefined && process.entity_id !== undefined) {
-            const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
-            const combinedLines = [splitLines[0]];
-            const previousProcessId =
-              previous[previous.length - 1]?.event.process?.entity_id ||
-              processedLines[processedLines.length - 1]?.event.process?.entity_id;
+    eventsToProcess.forEach((event, index) => {
+      const { process } = event;
+      if (process?.io?.text !== undefined && process.entity_id !== undefined) {
+        const previousProcessId =
+          newLines[newLines.length - 1]?.event?.process?.entity_id ||
+          processedLines[processedLines.length - 1]?.event.process?.entity_id;
 
-            if (previousProcessId !== process.entity_id) {
-              const processLineInfo: ProcessStartMarker = {
-                line: processedLines.length + previous.length,
-                event,
-              };
-              newMarkers.push(processLineInfo);
-            }
+        if (previousProcessId !== process.entity_id) {
+          const processLineInfo: ProcessStartMarker = {
+            line: processedLines.length + newLines.length,
+            event,
+          };
+          newMarkers.push(processLineInfo);
+        }
 
-            // delimiters e.g \r\n or cursor movements are merged with their line text
-            // we start on an odd number so that cursor movements happen at the start of each line
-            // this is needed for the search to work accurately
-            for (let i = 1; i < splitLines.length - 1; i = i + 2) {
-              combinedLines.push(splitLines[i] + splitLines[i + 1]);
-            }
+        const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
+        const combinedLines = [splitLines[0]];
 
-            const data: IOLine[] = combinedLines.map((line) => {
-              return {
-                event, // pointer to the event so it's easy to look up other details for the line
-                value: line,
-              };
-            });
+        // delimiters e.g \r\n or cursor movements are merged with their line text
+        // we start on an odd number so that cursor movements happen at the start of each line
+        // this is needed for the search to work accurately
+        for (let i = 1; i < splitLines.length - 1; i = i + 2) {
+          combinedLines.push(splitLines[i] + splitLines[i + 1]);
+        }
 
-            previous = previous.concat(data);
-          }
+        const data: IOLine[] = combinedLines.map((line) => {
+          return {
+            event, // pointer to the event so it's easy to look up other details for the line
+            value: line,
+          };
         });
+
+        newLines = newLines.concat(data);
       }
-      return previous;
-    }, newLines);
+    });
 
     const lines = processedLines.concat(newLines);
     const processStartMarkers = processedMarkers.concat(newMarkers);
@@ -136,8 +136,10 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
       setProcessedMarkers(processStartMarkers);
     }
 
-    if (pages.length > cursor) {
-      setCursor(pages.length);
+    const newCursor = cursor + eventsToProcess.length;
+
+    if (newCursor > cursor) {
+      setCursor(newCursor);
     }
 
     return {
@@ -279,13 +281,14 @@ export const useXtermPlayer = ({
   useEffect(() => {
     if (isPlaying) {
       const timer = setTimeout(() => {
-        if (currentLine < lines.length - 1) {
-          setCurrentLine(Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME));
-        } else {
-          setIsPlaying(false);
-        }
-
         render(currentLine, false);
+
+        if (currentLine === lines.length - 1) {
+          setIsPlaying(false);
+        } else {
+          const nextLine = Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME);
+          setCurrentLine(nextLine);
+        }
       }, playSpeed);
 
       return () => {
