@@ -7,7 +7,6 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
-  CONTAINER,
   CONTAINER_ID,
   CONTAINER_IMAGE,
   KUBERNETES,
@@ -31,14 +30,6 @@ type ServiceOverviewContainerMetadataDetails =
     }
   | undefined;
 
-interface ResponseAggregations {
-  [key: string]: {
-    buckets: Array<{
-      key: string;
-    }>;
-  };
-}
-
 export const getServiceOverviewContainerMetadata = async ({
   infraMetricsClient,
   containerIds,
@@ -61,11 +52,7 @@ export const getServiceOverviewContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await infraMetricsClient.search<
-    unknown,
-    ResponseAggregations
-  >({
-    _source: [KUBERNETES, CONTAINER],
+  const response = await infraMetricsClient.search({
     size: 0,
     query: {
       bool: {
@@ -111,16 +98,16 @@ export const getServiceOverviewContainerMetadata = async ({
   return {
     kubernetes: {
       deployments: response.aggregations?.deployments?.buckets.map(
-        (bucket) => bucket.key
+        (bucket: { key: string }) => bucket.key
       ),
       replicasets: response.aggregations?.replicasets?.buckets.map(
-        (bucket) => bucket.key
+        (bucket: { key: string }) => bucket.key
       ),
       namespaces: response.aggregations?.namespaces?.buckets.map(
-        (bucket) => bucket.key
+        (bucket: { key: string }) => bucket.key
       ),
       containerImages: response.aggregations?.containerImages?.buckets.map(
-        (bucket) => bucket.key
+        (bucket: { key: string }) => bucket.key
       ),
     },
   };

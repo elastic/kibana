@@ -15,6 +15,11 @@ interface InfraPlugin {
   start: () => Promise<InfraPluginStart>;
 }
 
+interface InfraMetricsResponse {
+  aggregations?: any;
+  hits?: any;
+}
+
 export type InfraClient = Awaited<ReturnType<typeof createInfraMetricsClient>>;
 
 export async function createInfraMetricsClient({
@@ -43,7 +48,10 @@ export async function createInfraMetricsClient({
         ...opts,
       };
 
-      return esClient.asCurrentUser.search(searchParams);
+      return esClient.asCurrentUser.search(
+        searchParams
+      ) as unknown as Promise<InfraMetricsResponse>;
+      // return unwrapEsResponse(res);
     },
   };
 }

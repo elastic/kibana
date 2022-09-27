@@ -6,19 +6,11 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CONTAINER_ID,
   HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { InfraClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
-
-interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: Array<{
-    key: string;
-    key_as_string?: string;
-  }>;
-}
 
 const getHostNames = async ({
   infraMetricsClient,
@@ -31,10 +23,7 @@ const getHostNames = async ({
   start: number;
   end: number;
 }) => {
-  const response = await infraMetricsClient.search<
-    unknown,
-    { hostNames: Aggs }
-  >({
+  const response = await infraMetricsClient.search({
     body: {
       size: 0,
       query: {
@@ -63,7 +52,7 @@ const getHostNames = async ({
   return {
     hostNames:
       response.aggregations?.hostNames?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket: { key: string }) => bucket.key
       ) ?? [],
   };
 };

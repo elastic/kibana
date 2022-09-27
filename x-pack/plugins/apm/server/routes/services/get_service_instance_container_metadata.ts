@@ -7,7 +7,6 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
-  CONTAINER,
   CONTAINER_ID,
   CONTAINER_IMAGE,
   KUBERNETES,
@@ -39,10 +38,6 @@ export const getServiceInstanceContainerMetadata = async ({
   start: number;
   end: number;
 }): Promise<ServiceInstanceContainerMetadataDetails> => {
-  if (!infraMetricsClient) {
-    return undefined;
-  }
-
   const should = [
     { exists: { field: KUBERNETES } },
     { exists: { field: CONTAINER_IMAGE } },
@@ -54,8 +49,7 @@ export const getServiceInstanceContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await infraMetricsClient.search<unknown>({
-    _source: [KUBERNETES, CONTAINER],
+  const response = await infraMetricsClient.search({
     size: 1,
     query: {
       bool: {
