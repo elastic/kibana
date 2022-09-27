@@ -100,12 +100,10 @@ export class RasterTileLayer extends AbstractLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    let request:object = {};
     if(sourceDataRequest){
       let data = sourceDataRequest.getData()
       if(data){
-        request = data;
-        return source.isSourceStale(mbSource,request as RasterTileSourceData);
+        return source.isSourceStale(mbSource,data as RasterTileSourceData);
       }
     }
     return false;
