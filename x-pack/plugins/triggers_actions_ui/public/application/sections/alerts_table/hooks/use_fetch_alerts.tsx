@@ -173,7 +173,12 @@ const useFetchAlerts = ({
         prevAlertRequest.current = request;
         abortCtrl.current = new AbortController();
         if (data && data.search) {
+          console.log(`=${new Date()}=============>loading: true`);
           dispatch({ type: 'loading', loading: true });
+          console.log(
+            `=${new Date()}=============>abortCtrl.current.signal.aborted`,
+            abortCtrl.current.signal.aborted
+          );
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
               { ...request, featureIds, fields: undefined, query },
