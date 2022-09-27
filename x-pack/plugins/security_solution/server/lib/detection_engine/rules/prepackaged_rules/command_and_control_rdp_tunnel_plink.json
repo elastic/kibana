@@ -38,7 +38,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "has_guide"
   ],
   "threat": [
     {

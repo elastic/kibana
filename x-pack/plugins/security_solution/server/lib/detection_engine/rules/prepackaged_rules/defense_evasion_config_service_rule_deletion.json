@@ -56,7 +56,8 @@
     "AWS",
     "Continuous Monitoring",
     "SecOps",
-    "Monitoring"
+    "Monitoring",
+    "has_guide"
   ],
   "threat": [
     {
@@ -84,5 +85,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 101
 }

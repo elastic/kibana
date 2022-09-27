@@ -51,7 +51,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Defense Evasion",
+    "has_guide"
   ],
   "threat": [
     {
@@ -79,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }

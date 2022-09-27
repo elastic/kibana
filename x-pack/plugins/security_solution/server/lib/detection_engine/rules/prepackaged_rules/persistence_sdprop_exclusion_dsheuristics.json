@@ -49,7 +49,8 @@
     "Windows",
     "Threat Detection",
     "Persistence",
-    "Active Directory"
+    "Active Directory",
+    "has_guide"
   ],
   "threat": [
     {
@@ -64,5 +65,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }

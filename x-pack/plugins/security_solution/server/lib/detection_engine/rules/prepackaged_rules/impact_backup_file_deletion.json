@@ -46,7 +46,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Impact"
+    "Impact",
+    "has_guide"
   ],
   "threat": [
     {
@@ -67,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }
