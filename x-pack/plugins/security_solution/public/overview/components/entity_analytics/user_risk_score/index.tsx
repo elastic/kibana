@@ -13,7 +13,7 @@ import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -30,12 +30,14 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 
-import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
+const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
 
 const EntityAnalyticsUserRiskScoresComponent = () => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -52,11 +54,6 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
 
-  const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-  });
-
   const timerange = useMemo(
     () => ({
       from,
@@ -64,6 +61,17 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     }),
     [from, to]
   );
+
+  const {
+    severityCount,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    inspect: inspectKpi,
+  } = useUserRiskScoreKpi({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    timerange,
+  });
 
   const [
     isTableLoading,
@@ -87,6 +95,15 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     inspect,
   });
 
+  useQueryInspector({
+    queryId: USER_RISK_KPI_QUERY_ID,
+    loading: isKpiLoading,
+    refetch: refetchKpi,
+    setQuery,
+    deleteQuery,
+    inspect: inspectKpi,
+  });
+
   useEffect(() => {
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
@@ -106,26 +123,28 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const refreshPage = useRefetchQueries();
+
   if (!isLicenseValid) {
     return null;
   }
 
-  if (!isModuleEnabled) {
-    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  if (!isModuleEnabled && !isTableLoading) {
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refreshPage} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !isTableLoading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.user}
-        refetch={refetch}
+        refetch={refreshPage}
         timerange={timerange}
       />
     );
   }
 
   if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refreshPage} />;
   }
 
   return (
@@ -146,7 +165,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
               <EuiFlexItem>
                 <EuiButtonEmpty
                   rel="noopener nofollow noreferrer"
-                  href={RISKY_USERS_EXTERNAL_DOC_LINK}
+                  href={RISKY_USERS_DOC_LINK}
                   target="_blank"
                 >
                   {i18n.LEARN_MORE}
@@ -155,7 +174,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
               <EuiFlexItem grow={false}>
                 <SeverityFilterGroup
                   selectedSeverities={selectedSeverity}
-                  severityCount={severityCount}
+                  severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
                   title={i18n.USER_RISK}
                   onSelect={setSelectedSeverity}
                 />
@@ -175,11 +194,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <RiskScoreDonutChart
-                severityCount={severityCount}
-                onClick={goToUserRiskTab}
-                href={userRiskTabUrl}
-              />
+              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
               <BasicTableWithoutBorderBottom

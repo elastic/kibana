@@ -10,8 +10,8 @@ import React from 'react';
 import { IndicatorsTable, IndicatorsTableProps } from './indicators_table';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { BUTTON_TEST_ID } from '../open_indicator_flyout_button/open_indicator_flyout_button';
-import { TITLE_TEST_ID } from '../indicators_flyout/indicators_flyout';
+import { BUTTON_TEST_ID } from '../open_indicator_flyout_button';
+import { TITLE_TEST_ID } from '../flyout';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 
 const stub = () => {};
@@ -22,7 +22,7 @@ const tableProps: IndicatorsTableProps = {
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
-  loading: false,
+  isLoading: false,
   browserFields: {},
   indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
   columnSettings: {
@@ -60,7 +60,7 @@ describe('<IndicatorsTable />', () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
-          <IndicatorsTable {...tableProps} loading={true} />
+          <IndicatorsTable {...tableProps} isLoading={true} />
         </TestProvidersComponent>
       );
     });
@@ -74,7 +74,7 @@ describe('<IndicatorsTable />', () => {
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
-            loading={false}
+            isLoading={false}
             indicatorCount={indicatorsFixture.length}
             indicators={indicatorsFixture}
           />

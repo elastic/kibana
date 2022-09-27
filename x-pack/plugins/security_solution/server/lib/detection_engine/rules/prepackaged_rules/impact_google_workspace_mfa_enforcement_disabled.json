@@ -64,7 +64,8 @@
     "Continuous Monitoring",
     "SecOps",
     "Configuration Audit",
-    "Impact"
+    "Impact",
+    "has_guide"
   ],
   "threat": [
     {
@@ -85,5 +86,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 101
 }
