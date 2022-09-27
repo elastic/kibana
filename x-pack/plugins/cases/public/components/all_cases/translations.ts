@@ -167,9 +167,3 @@ export const MARK_IN_PROGRESS_CASES = ({
     defaultMessage:
       'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
   });
-
-export const DELETED_CASES = (totalCases: number) =>
-  i18n.translate('xpack.cases.containers.deletedCases', {
-    values: { totalCases },
-    defaultMessage: 'Deleted {totalCases, plural, =1 {case} other {{totalCases} cases}}',
-  });

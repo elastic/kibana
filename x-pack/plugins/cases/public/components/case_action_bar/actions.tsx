@@ -23,7 +23,6 @@ interface CaseViewActions {
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
-  // Delete case
   const { mutate: deleteCases } = useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { permissions } = useCasesContext();
@@ -63,7 +62,10 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
 
   const onConfirmDeletion = useCallback(() => {
     setIsModalVisible(false);
-    deleteCases([caseData.id], { onSuccess: navigateToAllCases });
+    deleteCases(
+      { caseIds: [caseData.id], successToasterTitle: i18n.DELETED_CASES(1) },
+      { onSuccess: navigateToAllCases }
+    );
   }, [caseData.id, deleteCases, navigateToAllCases]);
 
   if (propertyActions.length === 0) {
@@ -75,7 +77,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
       <PropertyActions propertyActions={propertyActions} />
       {isModalVisible ? (
         <ConfirmDeleteCaseModal
-          caseTitle={caseData.title}
+          totalCasesToBeDeleted={1}
           onCancel={closeModal}
           onConfirm={onConfirmDeletion}
         />
