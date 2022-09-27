@@ -9,34 +9,33 @@ import { getNewRule } from '../../objects/rule';
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
   ENABLE_USER_RISK_SCORE_BUTTON,
+  getRiskScoreLatestTransformId,
+  getRiskScorePivotTransformId,
+  RiskScoreEntity,
+  RISK_SCORE_INSTALLATION_SUCCESS_TOAST,
 } from '../../screens/entity_analytics';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import {
-  deleteRiskScore,
-  RiskScoreEntity,
-  getTransformState,
-  getRiskScorePivotTransformId,
-  getRiskScoreLatestTransformId,
-  findSavedObject,
-} from '../../tasks/risk_scores';
+import { deleteRiskScore, getTransformState, findSavedObjects } from '../../tasks/risk_scores';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
 
-describe('Enable hosts risk score', () => {
+const spaceId = 'default';
+
+describe('Enable risk scores', () => {
   before(() => {
     cleanKibana();
     login();
     createCustomRuleEnabled(getNewRule(), 'rule1');
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default', deleteAll: true });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId: 'default', deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
 
     visit(ENTITY_ANALYTICS_URL);
   });
 
   after(() => {
-    // deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default', deleteAll: true });
-    // deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId: 'default', deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
   });
 
   it('shows enable host risk button', () => {
@@ -49,68 +48,58 @@ describe('Enable hosts risk score', () => {
   });
 
   it('should install host risk score successfully', () => {
+    cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('not.exist');
-    getTransformState(getRiskScorePivotTransformId(RiskScoreEntity.host, 'default')).then((res) => {
+    getTransformState(getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId)).then((res) => {
       expect(res.status).to.eq(200);
       expect(res.body.transforms[0].id).to.eq(
-        getRiskScorePivotTransformId(RiskScoreEntity.host, 'default')
+        getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId)
       );
       expect(res.body.transforms[0].state).to.eq('started');
     });
-    getTransformState(getRiskScoreLatestTransformId(RiskScoreEntity.host, 'default')).then(
-      (res) => {
-        expect(res.status).to.eq(200);
-        expect(res.body.transforms[0].id).to.eq(
-          getRiskScoreLatestTransformId(RiskScoreEntity.host, 'default')
-        );
-        expect(res.body.transforms[0].state).to.eq('started');
-      }
-    );
+    getTransformState(getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId)).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.transforms[0].id).to.eq(
+        getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId)
+      );
+      expect(res.body.transforms[0].state).to.eq('started');
+    });
+    findSavedObjects(RiskScoreEntity.host, spaceId).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.saved_objects.length).to.eq(11);
+    });
   });
 
-  it.only('shows enable user risk button', () => {
+  it('shows enable user risk button', () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).click();
   });
 
-  it.only('starts installing user risk score', () => {
+  it('starts installing user risk score', () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.disabled');
   });
 
-  it.only('should install user risk score successfully', (done) => {
-    // cy.intercept({
-    //   method: 'POST',
-    //   url: `/internal/risk_score/prebuilt_content/saved_objects/_bulk_create/${RiskScoreEntity.user}RiskScoreDashboards`,
-    // }).as('createSavedObjects');
-
-    // cy.wait(['@createSavedObjects'], { timeout: 500000 });
-    cy.get(`[data-test-subj="${RiskScoreEntity.user}RiskScoreDashboardsSuccessToast"]`).should(
-      'exist'
-    );
+  it('should install user risk score successfully', () => {
+    cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('not.exist');
-    getTransformState(getRiskScorePivotTransformId(RiskScoreEntity.user, 'default')).then((res) => {
+    getTransformState(getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId)).then((res) => {
       expect(res.status).to.eq(200);
       expect(res.body.transforms[0].id).to.eq(
-        getRiskScorePivotTransformId(RiskScoreEntity.user, 'default')
+        getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId)
       );
       expect(res.body.transforms[0].state).to.eq('started');
     });
-    getTransformState(getRiskScoreLatestTransformId(RiskScoreEntity.user, 'default')).then(
-      (res) => {
-        expect(res.status).to.eq(200);
-        expect(res.body.transforms[0].id).to.eq(
-          getRiskScoreLatestTransformId(RiskScoreEntity.user, 'default')
-        );
-        expect(res.body.transforms[0].state).to.eq('started');
-      }
-    );
-
-    findSavedObject(RiskScoreEntity.user, 'default').then((res) => {
+    getTransformState(getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId)).then((res) => {
       expect(res.status).to.eq(200);
-      console.log('----2---', res);
+      expect(res.body.transforms[0].id).to.eq(
+        getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId)
+      );
+      expect(res.body.transforms[0].state).to.eq('started');
+    });
 
+    findSavedObjects(RiskScoreEntity.user, spaceId).then((res) => {
+      expect(res.status).to.eq(200);
       expect(res.body.saved_objects.length).to.eq(11);
-      done();
     });
   });
 });
