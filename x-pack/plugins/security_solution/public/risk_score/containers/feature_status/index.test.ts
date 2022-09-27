@@ -8,10 +8,9 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 
 import { useRiskScoreFeatureStatus } from '.';
-import { RiskQueries } from '../../../../common/search_strategy';
+import { RiskQueries, RiskScoreEntity } from '../../../../common/search_strategy';
 import { useFetch } from '../../../common/hooks/use_fetch';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { RiskEntity } from './api';
 jest.mock('../../../common/hooks/use_fetch');
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');
 
@@ -38,7 +37,7 @@ describe(`risk score feature status`, () => {
     isDeprecated: true,
     isLicenseValid: true,
     isEnabled: true,
-    isLoading: false,
+    isLoading: true,
   };
 
   test('does not search if license is not valid, and initial isDeprecated state is false', () => {
@@ -67,7 +66,7 @@ describe(`risk score feature status`, () => {
       }
     );
     expect(mockFetch).toHaveBeenCalledWith({
-      query: { entity: RiskEntity.host, indexName: 'the_right_one' },
+      query: { entity: RiskScoreEntity.host, indexName: 'the_right_one' },
     });
     expect(result.current).toEqual({
       ...defaultResult,

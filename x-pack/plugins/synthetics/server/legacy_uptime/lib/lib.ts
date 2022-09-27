@@ -8,7 +8,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { getInspectResponse } from '@kbn/observability-plugin/server';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';

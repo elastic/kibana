@@ -7,7 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewListItem,
+  DataViewsContract,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 interface DataViewData {
@@ -75,12 +80,33 @@ export function getDataViewId(
 export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient,
-  id?: string
+  id?: string,
+  dataViewSpec?: DataViewSpec
 ): Promise<DataViewData> {
   const dataViewList = await dataViews.getIdsWithTitle();
+  let fetchId: string | undefined = id;
 
+  /**
+   * Handle redirect with data view spec provided via history location state
+   */
+  if (dataViewSpec) {
+    const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
+    if (!isPersisted) {
+      const createdAdHocDataView = await dataViews.create(dataViewSpec);
+      return {
+        list: dataViewList || [],
+        loaded: createdAdHocDataView,
+        stateVal: createdAdHocDataView.id,
+        stateValFound: true,
+      };
+    }
+    // reassign fetchId in case of persisted data view spec provided
+    fetchId = dataViewSpec.id!;
+  }
+
+  // try to fetch adhoc data view first
   try {
-    const fetchedDataView = id ? await dataViews.get(id) : undefined;
+    const fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -95,12 +121,13 @@ export async function loadDataView(
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
-  const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
+  // fetch persisted data view
+  const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
     loaded: await dataViews.get(actualId),
-    stateVal: id,
-    stateValFound: !!id && actualId === id,
+    stateVal: fetchId,
+    stateValFound: !!fetchId && actualId === fetchId,
   };
 }
 
@@ -139,6 +166,7 @@ export function resolveDataView(
             ownDataViewId: ownDataView.id,
           },
         }),
+        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
       return ownDataView;
     }
@@ -153,6 +181,7 @@ export function resolveDataView(
           loadedDataViewId: loadedDataView.id,
         },
       }),
+      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
     });
   }
 

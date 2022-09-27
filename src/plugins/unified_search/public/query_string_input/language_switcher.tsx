@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 export interface QueryLanguageSwitcherProps {
   language: string;
@@ -27,6 +27,9 @@ export interface QueryLanguageSwitcherProps {
   nonKqlMode?: 'lucene' | 'text';
   isOnTopBarMenu?: boolean;
   isDisabled?: boolean;
+  deps: {
+    docLinks: DocLinksStart;
+  };
 }
 
 export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
@@ -36,9 +39,9 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   nonKqlMode = 'lucene',
   isOnTopBarMenu,
   isDisabled,
+  deps: { docLinks },
 }: QueryLanguageSwitcherProps) {
-  const kibana = useKibana();
-  const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
+  const kueryQuerySyntaxDocs = docLinks.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (

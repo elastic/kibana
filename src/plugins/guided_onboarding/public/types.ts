@@ -26,7 +26,7 @@ export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
 export interface StepConfig {
   id: string;
   title: string;
-  description: string;
+  descriptionList: string[];
   location?: {
     appID: string;
     path: string;
@@ -44,9 +44,13 @@ export interface GuideConfig {
   steps: StepConfig[];
 }
 
+export type GuidesConfig = {
+  [key in UseCase]: GuideConfig;
+};
+
 export interface GuidedOnboardingState {
   activeGuide: UseCase | 'unset';
-  activeStep: string | 'unset';
+  activeStep: string | 'unset' | 'completed';
 }
 
 export interface ClientConfigType {

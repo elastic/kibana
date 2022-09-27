@@ -27,23 +27,15 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
 
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   return (
     <>
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage
-              title={ENTITY_ANALYTICS}
-              badgeOptions={{
-                text: i18n.TECHNICAL_PREVIEW,
-                color: 'white',
-                size: 's',
-                beta: true,
-              }}
-            >
-              {isPlatinumOrTrialLicense && (
+            <HeaderPage title={ENTITY_ANALYTICS}>
+              {isPlatinumOrTrialLicense && capabilitiesFetched && (
                 <SiemSearchBar
                   id={InputsModelId.global}
                   indexPattern={indexPattern}
@@ -52,30 +44,28 @@ const EntityAnalyticsComponent = () => {
                 />
               )}
             </HeaderPage>
-            {isPlatinumOrTrialLicense ? (
-              isSourcererLoading ? (
-                <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
-              ) : (
-                <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-                  <EuiFlexItem>
-                    <EntityAnalyticsHeader />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EntityAnalyticsHostRiskScores />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EntityAnalyticsUserRiskScores />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EntityAnalyticsAnomalies />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )
-            ) : (
+            {!isPlatinumOrTrialLicense && capabilitiesFetched ? (
               <Paywall featureDescription={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
+            ) : isSourcererLoading ? (
+              <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
+            ) : (
+              <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
+                <EuiFlexItem>
+                  <EntityAnalyticsHeader />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EntityAnalyticsHostRiskScores />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EntityAnalyticsUserRiskScores />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EntityAnalyticsAnomalies />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </SecuritySolutionPageWrapper>
         </>

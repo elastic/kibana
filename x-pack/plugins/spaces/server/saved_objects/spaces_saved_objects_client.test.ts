@@ -586,6 +586,41 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
     });
 
+    describe('#bulkDelete', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(
+          // @ts-expect-error
+          client.bulkDelete(null, { namespace: 'bar' })
+        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { statuses: [{ id: 'id', type: 'type', success: true }] };
+        baseClient.bulkDelete.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const actualReturnValue = await client.bulkDelete([{ id: 'id', type: 'foo' }], {
+          force: true,
+        });
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.bulkDelete).toHaveBeenCalledWith(
+          [
+            {
+              id: 'id',
+              type: 'foo',
+            },
+          ],
+          {
+            namespace: currentSpace.expectedNamespace,
+            force: true,
+          }
+        );
+      });
+    });
+
     describe('#removeReferencesTo', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const { client } = createSpacesSavedObjectsClient();

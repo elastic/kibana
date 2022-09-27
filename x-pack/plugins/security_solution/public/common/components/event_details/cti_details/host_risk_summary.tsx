@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiPanel, EuiLink } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
@@ -14,7 +14,9 @@ import { RiskScore } from '../../severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { HostRisk } from '../../../../risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
+import { RiskScoreDocLink } from '../../risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreHeaderTitle } from '../../risk_score/risk_score_onboarding/risk_score_header_title';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
@@ -25,19 +27,28 @@ const HostRiskSummaryComponent: React.FC<{
     <>
       <EuiPanel hasBorder paddingSize="s" grow={false}>
         <ThreatSummaryPanelHeader
-          title={i18n.HOST_RISK_DATA_TITLE}
+          title={
+            <RiskScoreHeaderTitle
+              title={i18n.HOST_RISK_DATA_TITLE}
+              riskScoreEntity={RiskScoreEntity.host}
+              showTooltip={false}
+            />
+          }
           toolTipContent={
             <FormattedMessage
               id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
               defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
               values={{
                 hostRiskScoreDocumentationLink: (
-                  <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
-                      defaultMessage="Host Risk Score"
-                    />
-                  </EuiLink>
+                  <RiskScoreDocLink
+                    riskScoreEntity={RiskScoreEntity.host}
+                    title={
+                      <FormattedMessage
+                        id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
+                        defaultMessage="Host Risk Score"
+                      />
+                    }
+                  />
                 ),
               }}
             />

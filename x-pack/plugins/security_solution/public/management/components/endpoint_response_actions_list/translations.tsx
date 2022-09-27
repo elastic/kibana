@@ -92,7 +92,7 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
 export const UX_MESSAGES = Object.freeze({
   flyoutTitle: (hostname: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.flyout.title', {
-      defaultMessage: `Actions log : {hostname}`,
+      defaultMessage: `Response actions history : {hostname}`,
       values: { hostname },
     }),
   pageSubTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.pageSubTitle', {
@@ -160,7 +160,6 @@ export const UX_MESSAGES = Object.freeze({
     }),
 });
 
-// TODO: Add more filter names here (hosts, statuses) etc
 export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
@@ -170,5 +169,8 @@ export const FILTER_NAMES = Object.freeze({
   }),
   statuses: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.statuses', {
     defaultMessage: 'Statuses',
+  }),
+  users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
+    defaultMessage: 'Filter by user or comma separated list of users',
   }),
 });
