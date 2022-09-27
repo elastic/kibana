@@ -115,5 +115,36 @@ describe('toPackagePolicy', () => {
         'nginx-nginx/metrics': ['nginx.stubstatus'],
       });
     });
+
+    it('should to pass experimental_data_stream_features', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          description: 'Test description',
+        },
+        nginxPackageInfo as unknown as PackageInfo,
+        {
+          experimental_data_stream_features: [
+            {
+              data_stream: 'logs-nginx.access',
+              features: {
+                synthetic_source: true,
+              },
+            },
+          ],
+        }
+      );
+
+      expect(res.package?.experimental_data_stream_features).toEqual([
+        {
+          data_stream: 'logs-nginx.access',
+          features: {
+            synthetic_source: true,
+          },
+        },
+      ]);
+    });
   });
 });
