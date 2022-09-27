@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-/** @internal */
-export const KBN_LOAD_MARKS = 'kbnLoad';
+export { CoreSystem, __kbnBootstrap__ } from './src';
+export type { CoreSystemParams } from './src';
