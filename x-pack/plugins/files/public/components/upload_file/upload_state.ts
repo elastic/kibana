@@ -169,13 +169,13 @@ export class UploadState {
 
     file$.setState({ status: 'uploading', error: undefined });
 
-    const { name, mime } = parseFileName(file.name);
+    const { name } = parseFileName(file.name);
 
     return from(
       this.client.create({
         kind: this.fileKind.id,
         name,
-        mimeType: mime,
+        mimeType: file.type,
         meta: meta as Record<string, unknown>,
       })
     ).pipe(
@@ -194,7 +194,7 @@ export class UploadState {
             kind: this.fileKind.id,
             abortSignal,
             selfDestructOnAbort: true,
-            contentType: mime,
+            contentType: file.type,
           })
         );
       }),
