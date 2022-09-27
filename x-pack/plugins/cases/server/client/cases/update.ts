@@ -49,6 +49,8 @@ import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { LicensingService } from '../../services/licensing';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -103,6 +105,19 @@ function throwIfUpdateAssigneesWithoutValidLicense(
         ', '
       )}]`
     );
+  }
+}
+
+function notifyPlatinumUsage(
+  licensingService: LicensingService,
+  requests: UpdateRequestWithOriginalCase[]
+) {
+  const requestsUpdatingAssignees = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined
+  );
+
+  if (requestsUpdatingAssignees.length > 0) {
+    licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
   }
 }
 
@@ -356,6 +371,8 @@ export const update = async (
     throwIfTitleIsInvalid(updateCases);
     throwIfUpdateAssigneesWithoutValidLicense(updateCases, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(updateCases);
+
+    notifyPlatinumUsage(licensingService, updateCases);
 
     const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
 

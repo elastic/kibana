@@ -24,15 +24,17 @@ export const configureClient = (
     scoped = false,
     getExecutionContext = noop,
     agentFactoryProvider,
+    kibanaVersion,
   }: {
     logger: Logger;
     type: string;
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
     agentFactoryProvider: AgentFactoryProvider;
+    kibanaVersion: string;
   }
 ): Client => {
-  const clientOptions = parseClientOptions(config, scoped);
+  const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
   const KibanaTransport = createTransport({ getExecutionContext });
   const client = new Client({
     ...clientOptions,

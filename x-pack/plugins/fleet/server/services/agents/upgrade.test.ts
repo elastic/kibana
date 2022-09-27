@@ -38,7 +38,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     expect(ids).toEqual(idsToAction);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('upgrade_started_at');
-      expect(doc.upgrade_status).toEqual('started');
+      expect(doc.upgraded_at).toEqual(null);
     }
   });
   it('cannot upgrade from a hosted agent policy by default', async () => {
@@ -60,7 +60,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     expect(ids).toEqual(onlyRegular);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('upgrade_started_at');
-      expect(doc.upgrade_status).toEqual('started');
+      expect(doc.upgraded_at).toEqual(null);
     }
 
     // hosted policy is updated in action results with error
@@ -98,7 +98,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     expect(ids).toEqual(idsToAction);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('upgrade_started_at');
-      expect(doc.upgrade_status).toEqual('started');
+      expect(doc.upgraded_at).toEqual(null);
     }
   });
 });
