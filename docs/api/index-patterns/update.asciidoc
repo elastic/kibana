@@ -38,6 +38,7 @@ the index pattern is updated. The default is `false`.
 You can partially update the following fields:
 
 * `title`
+* `name`
 * `timeFieldName`
 * `fields`
 * `sourceFilters`
@@ -90,6 +91,7 @@ $ curl -X POST api/index_patterns/index-pattern/my-pattern
 {
   "index_pattern": {
     "title": "...",
+    "name": "...",
     "timeFieldName": "...",
     "sourceFilters": [],
     "fieldFormats": {},

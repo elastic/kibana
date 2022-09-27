@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
-        it('can update index_pattern title', async () => {
+        it('can update data view title', async () => {
           const title1 = `foo-${Date.now()}-${Math.random()}*`;
           const title2 = `bar-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
@@ -41,7 +41,34 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response3.body[config.serviceKey].title).to.be(title2);
         });
 
-        it('can update index_pattern timeFieldName', async () => {
+        it('can update data view name', async () => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
+          const name1 = 'good data view name';
+          const name2 = 'better data view name';
+          const response1 = await supertest.post(config.path).send({
+            [config.serviceKey]: {
+              title,
+              name: name1,
+            },
+          });
+
+          expect(response1.body[config.serviceKey].name).to.be(name1);
+
+          const id = response1.body[config.serviceKey].id;
+          const response2 = await supertest.post(`${config.path}/${id}`).send({
+            [config.serviceKey]: {
+              name: name2,
+            },
+          });
+
+          expect(response2.body[config.serviceKey].name).to.be(name2);
+
+          const response3 = await supertest.get(`${config.path}/${id}`);
+
+          expect(response3.body[config.serviceKey].name).to.be(name2);
+        });
+
+        it('can update data view timeFieldName', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
@@ -66,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response3.body[config.serviceKey].timeFieldName).to.be('timeFieldName2');
         });
 
-        it('can update index_pattern sourceFilters', async () => {
+        it('can update data view sourceFilters', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
@@ -120,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('can update index_pattern fieldFormats', async () => {
+        it('can update data view fieldFormats', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
@@ -180,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        it('can update index_pattern type', async () => {
+        it('can update data view type', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
@@ -205,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response3.body[config.serviceKey].type).to.be('bar');
         });
 
-        it('can update index_pattern typeMeta', async () => {
+        it('can update data view typeMeta', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
@@ -230,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response3.body[config.serviceKey].typeMeta).to.eql({ foo: 'baz' });
         });
 
-        it('can update multiple index pattern fields at once', async () => {
+        it('can update multiple data view fields at once', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
             [config.serviceKey]: {
