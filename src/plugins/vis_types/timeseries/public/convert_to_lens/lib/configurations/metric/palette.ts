@@ -9,6 +9,7 @@ import color from 'color';
 import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
 import { Panel } from '../../../../../common/types';
+import { Column } from '../../convert';
 
 const Operators = {
   GTE: 'gte',
@@ -22,15 +23,57 @@ type ColorStopsWithMinMax = Pick<
   'colorStops' | 'stops' | 'steps' | 'rangeMax' | 'rangeMin' | 'continuity'
 >;
 
+type MetricColorRule = Exclude<Panel['background_color_rules'], undefined>[number];
+type GaugeColorRule = Exclude<Panel['gauge_color_rules'], undefined>[number];
+
+type ValidMetricColorRule = Omit<MetricColorRule, 'background_color' | 'color'> &
+  (
+    | {
+        background_color: Exclude<MetricColorRule['background_color'], undefined>;
+        color: MetricColorRule['color'];
+      }
+    | {
+        background_color: MetricColorRule['background_color'];
+        color: Exclude<MetricColorRule['color'], undefined>;
+      }
+  );
+
+type ValidGaugeColorRule = Omit<GaugeColorRule, 'gauge'> & {
+  gauge: Exclude<GaugeColorRule['gauge'], undefined>;
+};
+
+const isValidColorRule = (
+  rule: MetricColorRule | GaugeColorRule
+): rule is ValidMetricColorRule | ValidGaugeColorRule => {
+  const { background_color: bColor, color: textColor } = rule as MetricColorRule;
+  const { gauge } = rule as GaugeColorRule;
+
+  return rule.operator && (bColor ?? textColor ?? gauge) && rule.value !== undefined ? true : false;
+};
+
+const isMetricColorRule = (
+  rule: ValidMetricColorRule | ValidGaugeColorRule
+): rule is ValidMetricColorRule => {
+  const metricRule = rule as ValidMetricColorRule;
+  return metricRule.background_color ?? metricRule.color ? true : false;
+};
+
+const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule) => {
+  if (isMetricColorRule(rule)) {
+    return rule.background_color ?? rule.color;
+  }
+  return rule.gauge;
+};
+
 const getColorStopsWithMinMaxForAllGteOrWithLte = (
-  rules: Exclude<Panel['background_color_rules'], undefined>,
+  rules: Array<ValidMetricColorRule | ValidGaugeColorRule>,
   tailOperator: string
 ): ColorStopsWithMinMax => {
   const lastRule = rules[rules.length - 1];
-  const lastRuleColor = (lastRule.background_color ?? lastRule.color)!;
+  const lastRuleColor = getColor(lastRule);
 
   const colorStops = rules.reduce<ColorStop[]>((colors, rule, index, rulesArr) => {
-    const rgbColor = (rule.background_color ?? rule.color)!;
+    const rgbColor = getColor(rule);
     if (index === rulesArr.length - 1 && tailOperator === Operators.LTE) {
       return colors;
     }
@@ -78,14 +121,14 @@ const getColorStopsWithMinMaxForAllGteOrWithLte = (
 };
 
 const getColorStopsWithMinMaxForLtWithLte = (
-  rules: Exclude<Panel['background_color_rules'], undefined>
+  rules: Array<ValidMetricColorRule | ValidGaugeColorRule>
 ): ColorStopsWithMinMax => {
   const lastRule = rules[rules.length - 1];
   const colorStops = rules.reduce<ColorStop[]>((colors, rule, index, rulesArr) => {
     if (index === 0) {
-      return [{ color: color((rule.background_color ?? rule.color)!).hex(), stop: -Infinity }];
+      return [{ color: color(getColor(rule)).hex(), stop: -Infinity }];
     }
-    const rgbColor = (rule.background_color ?? rule.color)!;
+    const rgbColor = getColor(rule);
     return [
       ...colors,
       {
@@ -119,10 +162,10 @@ const getColorStopsWithMinMaxForLtWithLte = (
 };
 
 const getColorStopWithMinMaxForLte = (
-  rule: Exclude<Panel['background_color_rules'], undefined>[number]
+  rule: ValidMetricColorRule | ValidGaugeColorRule
 ): ColorStopsWithMinMax => {
   const colorStop = {
-    color: color((rule.background_color ?? rule.color)!).hex(),
+    color: color(getColor(rule)).hex(),
     stop: rule.value!,
   };
   return {
@@ -155,12 +198,12 @@ const getCustomPalette = (
   };
 };
 
-export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | null | undefined => {
-  const validRules =
-    model.background_color_rules?.filter(
-      ({ operator, color: textColor, value, background_color: bColor }) =>
-        operator && (bColor ?? textColor) && value !== undefined
-    ) ?? [];
+export const getPalette = (
+  rules: Exclude<Panel['background_color_rules'] | Panel['gauge_color_rules'], undefined>
+): PaletteOutput<CustomPaletteParams> | null | undefined => {
+  const validRules = (rules as Array<MetricColorRule | GaugeColorRule>).filter<
+    ValidMetricColorRule | ValidGaugeColorRule
+  >((rule): rule is ValidMetricColorRule | ValidGaugeColorRule => isValidColorRule(rule));
 
   validRules.sort((rule1, rule2) => {
     return rule1.value! - rule2.value!;
@@ -209,4 +252,21 @@ export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | n
       getColorStopsWithMinMaxForAllGteOrWithLte(validRules, tailRule.operator!)
     );
   }
+};
+
+export const getGaugePalette = (
+  model: Panel,
+  bucket?: Column
+): PaletteOutput<CustomPaletteParams> | null | undefined => {
+  const palette = getPalette(model.gauge_color_rules ?? []);
+  if (palette === null) {
+    return null;
+  }
+
+  // const gaugePalette = (
+  //   bucket ? { type: 'palette', name: 'status' } : undefined
+  // ) as PaletteOutput<CustomPaletteParams> | undefined;
+
+  // return palette ?? gaugePalette;
+  return palette;
 };

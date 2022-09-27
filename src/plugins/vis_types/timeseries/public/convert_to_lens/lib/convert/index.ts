@@ -9,7 +9,11 @@
 export { isColumnWithMeta, excludeMetaFromColumn } from './column';
 export { convertToPercentileColumns, isPercentileColumnWithMeta } from './percentile';
 export { convertToPercentileRankColumns, isPercentileRanksColumnWithMeta } from './percentile_rank';
-export { convertMathToFormulaColumn, convertOtherAggsToFormulaColumn } from './formula';
+export {
+  convertMathToFormulaColumn,
+  convertOtherAggsToFormulaColumn,
+  createFormulaColumnWithoutMeta,
+} from './formula';
 export {
   convertParentPipelineAggToColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
@@ -17,7 +21,7 @@ export {
 export { convertToCumulativeSumColumns } from './cumulative_sum';
 export { convertFilterRatioToFormulaColumn } from './filter_ratio';
 export { convertToLastValueColumn } from './last_value';
-export { convertToStaticValueColumn } from './static_value';
+export { convertToStaticValueColumn, createStaticValueColumn } from './static_value';
 export { convertToFiltersColumn } from './filters';
 export { convertToDateHistogramColumn } from './date_histogram';
 export { convertToTermsColumn } from './terms';
