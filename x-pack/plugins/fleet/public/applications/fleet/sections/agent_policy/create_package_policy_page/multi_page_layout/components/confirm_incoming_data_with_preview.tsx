@@ -54,7 +54,7 @@ const DATA_PREVIEW_OMIT_KEYS = [
 ];
 
 const CleanOverflowDescriptionList = styled(EuiDescriptionList)`
-  overflow: scroll;
+  overflow: hidden;
   max-height: 125px;
   word-break: break-all;
   white-space: pre-wrap;
