@@ -160,7 +160,7 @@ export const checkOverwriteIndexPatternsCheckbox = () => {
     .should('be.checked');
 };
 
-export const checkOverwriteDataViewsCheckbox = () => {
+export const checkOverwriteDataViewCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
     .should('have.text', 'Apply changes to rules configured with data views')
     .click()

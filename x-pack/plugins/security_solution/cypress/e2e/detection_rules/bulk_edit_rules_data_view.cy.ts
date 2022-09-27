@@ -22,7 +22,7 @@ import {
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
   submitBulkEditForm,
-  checkOverwriteDataViewsCheckbox,
+  checkOverwriteDataViewCheckbox,
   checkOverwriteIndexPatternsCheckbox,
   openBulkEditAddIndexPatternsForm,
   openBulkEditDeleteIndexPatternsForm,
@@ -64,7 +64,7 @@ const defaultRuleData = {
   dataSource: indexDataSource,
 };
 
-describe('Detection rules, bulk edit, data views', () => {
+describe('Detection rules, bulk edit, data view', () => {
   before(() => {
     cleanKibana();
     login();
@@ -74,13 +74,8 @@ describe('Detection rules, bulk edit, data views', () => {
     esArchiverResetKibana();
 
     postDataView(DATA_VIEW_ID);
-    createCustomRule(
-      {
-        ...getNewRule(),
-        ...defaultRuleData,
-      },
-      '1'
-    );
+
+    createCustomRule({ ...getNewRule(), ...defaultRuleData }, '1');
     createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
     createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '3');
     createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '4');
@@ -115,7 +110,7 @@ describe('Detection rules, bulk edit, data views', () => {
 
     // click on data view overwrite checkbox, ensure warning is displayed
     cy.get(RULES_BULK_EDIT_DATA_VIEWS_WARNING).should('not.exist');
-    checkOverwriteDataViewsCheckbox();
+    checkOverwriteDataViewCheckbox();
     cy.get(RULES_BULK_EDIT_DATA_VIEWS_WARNING).should('be.visible');
 
     submitBulkEditForm();
@@ -150,7 +145,7 @@ describe('Detection rules, bulk edit, data views', () => {
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns(expectedIndexPatterns);
     checkOverwriteIndexPatternsCheckbox();
-    checkOverwriteDataViewsCheckbox();
+    checkOverwriteDataViewCheckbox();
 
     submitBulkEditForm();
 
