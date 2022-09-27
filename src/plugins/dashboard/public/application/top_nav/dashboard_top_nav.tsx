@@ -32,25 +32,6 @@ import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { TopNavIds } from './top_nav_ids';
-import { EditorMenu } from './editor_menu';
-import { UI_SETTINGS } from '../../../common';
-import { DashboardSaveModal } from './save_modal';
-import { showCloneModal } from './show_clone_modal';
-import { ShowShareModal } from './show_share_modal';
-import { getTopNavConfig } from './get_top_nav_config';
-import { showOptionsPopover } from './show_options_popover';
-import { DashboardConstants, getFullEditPath } from '../../dashboard_constants';
-import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
-import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-
-import { DashboardEmbedSettings, DashboardRedirect } from '../../types';
-
-import {
-  dashboardSavedObjectErrorStrings,
-  getCreateVisualizationButtonTitle,
-  unsavedChangesBadge,
-} from '../../dashboard_strings';
 import {
   setFullScreenMode,
   setHidePanelTitles,
@@ -63,8 +44,21 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
+import { TopNavIds } from './top_nav_ids';
+import { EditorMenu } from './editor_menu';
+import { UI_SETTINGS } from '../../../common';
+import { DashboardSaveModal } from './save_modal';
+import { showCloneModal } from './show_clone_modal';
+import { ShowShareModal } from './show_share_modal';
+import { getTopNavConfig } from './get_top_nav_config';
+import { showOptionsPopover } from './show_options_popover';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardEmbedSettings, DashboardRedirect, DashboardState } from '../../types';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
+import { DashboardConstants, getFullEditPath } from '../../dashboard_constants';
+import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
+import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -256,42 +250,44 @@ export function DashboardTopNav({
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
     }: DashboardSaveOptions): Promise<SaveResult> => {
+      const {
+        timefilter: { timefilter },
+      } = query;
+
       const saveOptions = {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         saveAsCopy: newCopyOnSave,
       };
-      const stateFromSaveModal = {
+      const stateFromSaveModal: Pick<
+        DashboardState,
+        'title' | 'description' | 'timeRestore' | 'timeRange' | 'refreshInterval' | 'tags'
+      > = {
         title: newTitle,
+        tags: [] as string[],
         description: newDescription,
         timeRestore: newTimeRestore,
-        tags: [] as string[],
+        timeRange: newTimeRestore ? timefilter.getTime() : undefined,
+        refreshInterval: newTimeRestore ? timefilter.getRefreshInterval() : undefined,
       };
       if (hasSavedObjectsTagging && newTags) {
         // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
         stateFromSaveModal.tags = newTags;
       }
 
-      /**
-       * Check for duplicate title
-       */
-      try {
-        await checkForDuplicateDashboardTitle({
+      if (
+        newCopyOnSave &&
+        !(await checkForDuplicateDashboardTitle({
           title: newTitle,
           onTitleDuplicate,
           lastSavedTitle: currentState.title,
-          copyOnSave: newCopyOnSave,
+          copyOnSave: true,
           isTitleDuplicateConfirmed,
-        });
-      } catch (error) {
-        if (
-          error &&
-          dashboardSavedObjectErrorStrings.getSaveDuplicateTitleRejected() === error.message
-        ) {
-          return { id: '' };
-        }
-        return { error };
+        }))
+      ) {
+        // do not save if title is duplicate and is unconfirmed
+        return {};
       }
 
       const saveResult = await saveDashboardStateToSavedObject({
@@ -338,6 +334,7 @@ export function DashboardTopNav({
     i18nContext,
     redirectTo,
     docTitle,
+    query,
   ]);
 
   const runQuickSave = useCallback(async () => {
@@ -365,25 +362,17 @@ export function DashboardTopNav({
       isTitleDuplicateConfirmed: boolean,
       onTitleDuplicate: () => void
     ) => {
-      /**
-       * Check for duplicate title
-       */
-      try {
-        await checkForDuplicateDashboardTitle({
+      if (
+        !(await checkForDuplicateDashboardTitle({
           title: newTitle,
           onTitleDuplicate,
           lastSavedTitle: currentState.title,
           copyOnSave: true,
           isTitleDuplicateConfirmed,
-        });
-      } catch (error) {
-        if (
-          error &&
-          dashboardSavedObjectErrorStrings.getSaveDuplicateTitleRejected() === error.message
-        ) {
-          return { id: '' };
-        }
-        return { error };
+        }))
+      ) {
+        // do not clone if title is duplicate and is unconfirmed
+        return {};
       }
 
       const saveResult = await saveDashboardStateToSavedObject({

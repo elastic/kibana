@@ -122,9 +122,9 @@ export function ShowShareModal({
     DashboardAppLocatorParams,
     'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(
-    currentDashboardState.savedObjectId
-  );
+  const { savedObjectId, title } = currentDashboardState;
+  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
+
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
@@ -140,8 +140,6 @@ export function ShowShareModal({
         : undefined,
     };
   }
-
-  const { savedObjectId, title } = currentDashboardState;
 
   const locatorParams: DashboardAppLocatorParams = {
     dashboardId: savedObjectId,

@@ -10,7 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/public';
 
 import { DashboardConstants } from '../../..';
 import type { DashboardAttributes } from '../../../application';
-import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;
@@ -58,9 +57,6 @@ export async function checkForDuplicateDashboardTitle(
   if (!duplicate) {
     return true;
   }
-
   onTitleDuplicate?.();
-  return Promise.reject(
-    new Error(dashboardSavedObjectErrorStrings.getSaveDuplicateTitleRejected())
-  );
+  return false;
 }

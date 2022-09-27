@@ -16,12 +16,10 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   diffDashboardState,
-  areTimeRangesEqual,
   syncDashboardUrlState,
   syncDashboardDataViews,
   buildDashboardContainer,
   syncDashboardFilterState,
-  areRefreshIntervalsEqual,
   syncDashboardContainerInput,
   tryDestroyDashboardContainer,
   loadDashboardHistoryLocationState,
@@ -244,7 +242,7 @@ export const useDashboardAppState = ({
        * Any time the redux state, or the last saved state changes, compare them, set the unsaved
        * changes state, and and push the unsaved changes to session storage.
        */
-      const { timefilter } = query.timefilter;
+
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
@@ -261,22 +259,12 @@ export const useDashboardAppState = ({
                 newState: current,
               }).then((unsavedChanges) => {
                 if (observer.closed) return;
-                const savedTimeChanged =
-                  lastSaved.timeRestore &&
-                  lastSaved.timeRange &&
-                  (!areTimeRangesEqual(lastSaved.timeRange, timefilter.getTime()) ||
-                    !areRefreshIntervalsEqual(
-                      lastSaved?.refreshInterval,
-                      timefilter.getRefreshInterval()
-                    ));
-
                 /**
                  * changes to the dashboard should only be considered 'unsaved changes' when
                  * editing the dashboard
                  */
                 const hasUnsavedChanges =
-                  current.viewMode === ViewMode.EDIT &&
-                  (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
+                  current.viewMode === ViewMode.EDIT && Object.keys(unsavedChanges).length > 0;
                 setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
                 unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.

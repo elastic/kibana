@@ -393,17 +393,13 @@ export const dashboardSavedObjectErrorStrings = {
       defaultMessage: 'Unable to load dashboard: {message}',
       values: { message },
     }),
-  getSaveDuplicateTitleRejected: () =>
-    i18n.translate('dashboard.saveError.saveDuplicateRejectedDescription', {
-      defaultMessage: 'Save with duplicate title confirmation was rejected',
-    }),
   getErrorDeletingDashboardToast: () =>
     i18n.translate('dashboard.deleteError.toastDescription', {
       defaultMessage: 'Error encountered while deleting dashboard',
     }),
   getPanelTooOldError: () =>
     i18n.translate('dashboard.loadURLError.PanelTooOld', {
-      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3.',
+      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
     }),
 };
 
