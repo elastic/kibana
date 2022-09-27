@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { MutableRefObject } from 'react';
+import React from 'react';
 import type { ImgHTMLAttributes } from 'react';
 import { useViewportObserver } from './use_viewport_observer';
+import { MyImage } from './components/my_img';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -31,19 +32,15 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
   ({ src, alt, onFirstVisible, ...rest }, ref) => {
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
     return (
-      <img
-        {...rest}
-        ref={(element) => {
-          observerRef(element);
-          if (ref) {
-            if (typeof ref === 'function') ref(element);
-            else (ref as MutableRefObject<HTMLImageElement | null>).current = element;
-          }
-        }}
-        // TODO: We should have a lower resolution alternative to display
-        src={isVisible ? src : undefined}
-        alt={alt}
-      />
+      <div>
+        <MyImage
+          observerRef={observerRef}
+          ref={ref}
+          src={isVisible ? src : undefined}
+          alt={alt}
+          {...rest}
+        />
+      </div>
     );
   }
 );

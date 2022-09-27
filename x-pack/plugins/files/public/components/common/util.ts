@@ -7,7 +7,7 @@
 
 import * as bh from 'blurhash';
 
-function isImage(file: File): boolean {
+function isImage(file: Blob | File): boolean {
   return file.type?.startsWith('image/');
 }
 

@@ -8,11 +8,22 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
+import * as bh from 'blurhash';
 
 import { Image, Props } from './image';
 import { base64dLogo } from './image.constants.stories';
 
-const defaultArgs = { alt: 'my alt text', src: `data:image/png;base64,${base64dLogo}` };
+const defaultSrc = `data:image/png;base64,${base64dLogo}`;
+const blurhash = (function encodeImageToBlurhash() {
+  const image = new window.Image(900, 500);
+  image.src = defaultSrc;
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d')!;
+  context.drawImage(image, 0, 0);
+  const imageData = context.getImageData(0, 0, image.width, image.height);
+  return bh.encode(imageData.data, imageData.width, imageData.height, 4, 4);
+})();
+const defaultArgs: Props = { alt: 'test', src: defaultSrc };
 
 export default {
   title: 'components/Image',
