@@ -112,24 +112,46 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
+  async function getModels(space?: string) {
+    const { body, status } = await supertest
+      .get(`${space ? `/s/${space}` : ''}/api/ml/management/list/trained-model`)
+      .auth(
+        USER.ML_POWERUSER_ALL_SPACES,
+        ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
+      )
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(200, status, body);
+
+    return body;
+  }
+
   describe('POST data_frame/_evaluate', () => {
     before(async () => {
       const tm1 = await ml.api.getTrainedModelsES();
       log.info(JSON.stringify(tm1, null, 2));
+      const tm12 = await getModels('space1');
+      log.info(JSON.stringify(tm12, null, 2));
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createJobs(testJobConfigs);
       const tm2 = await ml.api.getTrainedModelsES();
       log.info(JSON.stringify(tm2, null, 2));
+      const tm22 = await getModels('space1');
+      log.info(JSON.stringify(tm22, null, 2));
     });
 
     after(async () => {
       const tm3 = await ml.api.getTrainedModelsES();
       log.info(JSON.stringify(tm3, null, 2));
+      const tm32 = await getModels('space1');
+      log.info(JSON.stringify(tm32, null, 2));
       await ml.api.cleanMlIndices();
       const tm4 = await ml.api.getTrainedModelsES();
       log.info(JSON.stringify(tm4, null, 2));
+      const tm42 = await getModels('space1');
+      log.info(JSON.stringify(tm42, null, 2));
+      throw new Error('debug');
     });
 
     testJobConfigs.forEach((testConfig) => {
