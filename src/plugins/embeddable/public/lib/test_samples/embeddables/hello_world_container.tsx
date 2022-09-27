@@ -73,7 +73,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
         ) : (
           <div>Panel component not provided.</div>
         )}
-      </I18nProvider>,
+      </I18nProvider>
     );
   }
 }

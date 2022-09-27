@@ -82,7 +82,7 @@ export const renderApp = (
         http={http}
         triggersActionsUi={deps.triggersActionsUi}
       />
-    </KibanaContextProvider>,
+    </KibanaContextProvider>
   );
 
   return () => root.unmount();

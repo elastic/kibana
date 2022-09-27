@@ -100,7 +100,7 @@ export function redirectWhenMissing({
         root.render(
           <KibanaThemeProvider theme$={theme.theme$}>
             <ErrorRenderer>{error.message}</ErrorRenderer>
-          </KibanaThemeProvider>,
+          </KibanaThemeProvider>
         );
         return () => root.unmount();
       },

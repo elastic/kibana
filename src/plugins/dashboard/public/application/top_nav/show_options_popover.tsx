@@ -16,7 +16,6 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { OptionsMenu } from './options';
 import { pluginServices } from '../../services/plugin_services';
 
-
 export interface ShowOptionsPopoverProps {
   anchorElement: HTMLElement;
   useMargins: boolean;

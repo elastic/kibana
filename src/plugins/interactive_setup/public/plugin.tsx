@@ -39,7 +39,7 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
         root.render(
           <Providers defaultCode={defaultCode} services={services} theme$={theme$}>
             <App onSuccess={onSuccess} />
-          </Providers>,
+          </Providers>
         );
         return () => root.unmount();
       },

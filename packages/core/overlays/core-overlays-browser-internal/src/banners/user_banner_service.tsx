@@ -83,7 +83,7 @@ export class UserBannerService {
                   />
                 </EuiButton>
               </EuiCallOut>
-            </i18n.Context>,
+            </i18n.Context>
           );
 
           timeout = setTimeout(dismiss, lifetime);

@@ -105,7 +105,7 @@ export async function mountManagementSection(
           </Router>
         </I18nProvider>
       </KibanaThemeProvider>
-    </KibanaContextProvider>,
+    </KibanaContextProvider>
   );
 
   return () => {

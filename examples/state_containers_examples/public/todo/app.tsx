@@ -39,7 +39,7 @@ export const renderApp = (
   root.render(
     <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
       <TodoAppPage history={history} appTitle={appTitle} appBasePath={appBasePath} />
-    </StateContainersExamplesPage>,
+    </StateContainersExamplesPage>
   );
 
   return () => root.unmount();

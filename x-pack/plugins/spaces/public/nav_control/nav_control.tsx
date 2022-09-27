@@ -46,7 +46,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
               />
             </Suspense>
           </KibanaThemeProvider>
-        </I18nContext>,
+        </I18nContext>
       );
 
       return () => {

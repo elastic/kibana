@@ -6,11 +6,12 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { createRoot } from 'react-dom/client';
+
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 
 import { getContext, resetContext } from 'kea';
+import { createRoot } from 'react-dom/client';
 import { Store } from 'redux';
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -94,7 +95,7 @@ export const renderApp = (
           </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>
-    </I18nProvider>,
+    </I18nProvider>
   );
   return () => {
     root.unmount();
@@ -121,7 +122,7 @@ export const renderHeaderActions = (
   root.render(
     <Provider store={store}>
       <HeaderActions />
-    </Provider>,
+    </Provider>
   );
   return () => root.unmount();
 };

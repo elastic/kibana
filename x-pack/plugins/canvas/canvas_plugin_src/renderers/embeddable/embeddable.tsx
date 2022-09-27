@@ -146,8 +146,9 @@ export const embeddableRendererFactory = (
           }
         });
 
-        root.render(renderEmbeddable(embeddableObject),
-        //  () => handlers.done()
+        root.render(
+          renderEmbeddable(embeddableObject)
+          //  () => handlers.done()
         );
 
         handlers.onDestroy(() => {

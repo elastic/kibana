@@ -63,7 +63,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   }, [indexFields, oldIndexFields, setAlertParamsEntity, entity]);
 
   const indexPopover = (
-    <EuiFormRow id="entitySelect" fullWidth  error={<>{errors.index}</>}>
+    <EuiFormRow id="entitySelect" fullWidth error={<>{errors.index}</>}>
       <SingleFieldSelect
         placeholder={i18n.translate(
           'xpack.stackAlerts.geoContainment.topHitsSplitFieldSelectPlaceholder',

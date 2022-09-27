@@ -79,7 +79,7 @@ export const gaugeRenderer: (
             uiState={handlers.uiState as PersistedState}
           />
         </div>
-      </KibanaThemeProvider>,
+      </KibanaThemeProvider>
     );
   },
 });

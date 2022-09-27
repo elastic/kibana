@@ -50,7 +50,7 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
       this.root?.unmount();
     }
     this.node = node;
-    this.root = createRoot(node)
+    this.root = createRoot(node);
     this.root.render(
       <SearchableListContainerComponent
         embeddable={this}

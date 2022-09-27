@@ -329,7 +329,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
             onDataLoaded={this.onDataLoaded.bind(this)}
           />
         </KibanaThemeProvider>
-      </I18nProvider>,
+      </I18nProvider>
     );
   }
 

@@ -227,7 +227,7 @@ export const renderSpaceSelectorApp = (
       <KibanaThemeProvider theme$={theme$}>
         <SpaceSelector {...props} />
       </KibanaThemeProvider>
-    </i18nStart.Context>,
+    </i18nStart.Context>
   );
   return () => root.unmount();
 };

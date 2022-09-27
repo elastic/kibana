@@ -33,7 +33,7 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
         root.render(
           <HttpContext.Provider value={http}>
             <App />
-          </HttpContext.Provider>,
+          </HttpContext.Provider>
         );
 
         return () => root.unmount();

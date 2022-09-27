@@ -25,9 +25,11 @@ interface MountSectionParams {
   title: string;
 }
 
-const RedirectToHomeIfUnauthorized: FC<PropsWithChildren<{
-  applications: ApplicationStart;
-}>> = ({ applications, children }) => {
+const RedirectToHomeIfUnauthorized: FC<
+  PropsWithChildren<{
+    applications: ApplicationStart;
+  }>
+> = ({ applications, children }) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {
     applications.navigateToApp('home');
@@ -67,7 +69,7 @@ export const mountSection = async ({
           />
         </RedirectToHomeIfUnauthorized>
       </KibanaThemeProvider>
-    </I18nProvider>,
+    </I18nProvider>
   );
 
   return () => {

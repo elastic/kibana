@@ -392,7 +392,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         <OptionsListReduxWrapper>
           <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
         </OptionsListReduxWrapper>
-      </KibanaThemeProvider>,
+      </KibanaThemeProvider>
     );
   };
 

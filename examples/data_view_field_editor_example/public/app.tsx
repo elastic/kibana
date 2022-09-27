@@ -159,7 +159,7 @@ export const renderApp = async (
   const dataView = (await data.dataViews.getDefault()) || undefined;
   const root = createRoot(element);
   root.render(
-    <DataViewFieldEditorExample dataView={dataView} dataViewFieldEditor={dataViewFieldEditor} />,
+    <DataViewFieldEditorExample dataView={dataView} dataViewFieldEditor={dataViewFieldEditor} />
   );
 
   return () => root.unmount();

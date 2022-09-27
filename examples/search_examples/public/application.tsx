@@ -76,7 +76,7 @@ export const renderApp = (
           </Router>
         </SearchExamplePage>
       </RedirectAppLinks>
-    </I18nProvider>,
+    </I18nProvider>
   );
 
   return () => {

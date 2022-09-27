@@ -38,7 +38,11 @@ emotionCache.compat = true;
 /**
  * Copied from the `kibana_react` plugin, to avoid cyclical dependency
  */
-export const KibanaThemeProvider: FC<PropsWithChildren<KibanaThemeProviderProps>> = ({ theme$, modify, children }) => {
+export const KibanaThemeProvider: FC<PropsWithChildren<KibanaThemeProviderProps>> = ({
+  theme$,
+  modify,
+  children,
+}) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
   return (

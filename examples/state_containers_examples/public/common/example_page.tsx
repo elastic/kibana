@@ -51,7 +51,7 @@ export const StateContainersExamplesPage: FC<PropsWithChildren<Props>> = ({
   navigateToApp,
   children,
   exampleLinks,
-} ) => {
+}) => {
   return (
     <EuiPage>
       <EuiPageSideBar>

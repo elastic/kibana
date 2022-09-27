@@ -37,7 +37,7 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
         root.render(
           <ScreenshotModeContext.Provider value={screenshotMode}>
             <App />
-          </ScreenshotModeContext.Provider>,
+          </ScreenshotModeContext.Provider>
         );
 
         return () => root.unmount();

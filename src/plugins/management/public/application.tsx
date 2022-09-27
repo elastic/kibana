@@ -23,7 +23,7 @@ export const renderApp = async (
       appBasePath={appBasePath}
       history={history}
       theme$={theme$}
-    />,
+    />
   );
 
   return () => root.unmount();

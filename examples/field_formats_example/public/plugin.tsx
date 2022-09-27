@@ -83,7 +83,7 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
         const root = createRoot(element);
 
         root.render(
-          <App deps={{ fieldFormats: plugins.fieldFormats, openDateViewNumberFieldEditor }} />,
+          <App deps={{ fieldFormats: plugins.fieldFormats, openDateViewNumberFieldEditor }} />
         );
         return () => root.unmount();
       },

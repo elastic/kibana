@@ -98,7 +98,7 @@ export class NewsfeedPublicPlugin
         <I18nProvider>
           <NewsfeedNavButton newsfeedApi={api} />
         </I18nProvider>
-      </KibanaThemeProvider>,
+      </KibanaThemeProvider>
     );
     return () => root.unmount();
   }

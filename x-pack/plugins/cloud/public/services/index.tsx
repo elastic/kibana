@@ -29,9 +29,10 @@ export interface CloudServices {
 
 const ServicesContext = createContext<CloudServices>({ chat: { enabled: false } });
 
-export const ServicesProvider: FC<PropsWithChildren<CloudServices>> = ({ children, ...services }) => (
-  <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
-);
+export const ServicesProvider: FC<PropsWithChildren<CloudServices>> = ({
+  children,
+  ...services
+}) => <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>;
 
 /**
  * React hook for accessing the pre-wired `CloudServices`.
