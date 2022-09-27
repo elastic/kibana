@@ -146,8 +146,8 @@ export async function upgradeBatch(
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
       data: {
+        upgraded_at: null,
         upgrade_started_at: now,
-        upgrade_status: 'started',
       },
     }))
   );
