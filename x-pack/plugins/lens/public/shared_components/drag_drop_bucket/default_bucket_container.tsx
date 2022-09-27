@@ -23,6 +23,7 @@ export const DefaultBucketContainer = ({
   onRemoveClick,
   removeTitle,
   children,
+  draggableProvided,
   isNotRemovable,
   isNotDraggable,
   'data-test-subj': dataTestSubj,
@@ -40,7 +41,7 @@ export const DefaultBucketContainer = ({
     <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasShadow={false} hasBorder>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="xs" color="transparent">
+          <EuiPanel paddingSize="xs" color="transparent" {...draggableProvided.dragHandleProps}>
             <EuiIcon
               size="s"
               color={color}

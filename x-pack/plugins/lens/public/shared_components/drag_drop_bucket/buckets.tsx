@@ -26,7 +26,7 @@ export const DraggableBucketContainer = ({
   Container = DefaultBucketContainer,
   ...bucketContainerProps
 }: Assign<
-  BucketContainerProps,
+  Omit<BucketContainerProps, 'draggableProvided'>,
   {
     id: string;
     idx: number;
@@ -38,10 +38,15 @@ export const DraggableBucketContainer = ({
     spacing="s"
     index={idx}
     draggableId={id}
+    customDragHandle={true}
     isDragDisabled={bucketContainerProps.isNotDraggable}
     disableInteractiveElementBlocking
   >
-    {() => <Container {...bucketContainerProps}>{children}</Container>}
+    {(provided) => (
+      <Container draggableProvided={provided} {...bucketContainerProps}>
+        {children}
+      </Container>
+    )}
   </EuiDraggable>
 );
 
@@ -73,7 +78,7 @@ export function DragDropBuckets<T = unknown>({
   );
 
   return (
-    <EuiPanel color={color} hasBorder={false} hasShadow={false} paddingSize="none">
+    <EuiPanel color={color} hasBorder={false} hasShadow={false} paddingSize={color ? 'xs' : 'none'}>
       <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
         <EuiDroppable droppableId={droppableId} spacing="none" className={className}>
           {children}

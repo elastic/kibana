@@ -95,7 +95,6 @@ export function FieldInputs({
         onDragEnd={(updatedValues: WrappedValue[]) => {
           handleInputChange(updatedValues);
         }}
-        className="lnsIndexPatternDimensionEditor__droppable"
         droppableId="TOP_TERMS_DROPPABLE_AREA"
         items={localValues}
         color="subdued"
@@ -161,9 +160,7 @@ export function FieldInputs({
                   onFieldSelectChange(choice, index);
                 }}
                 isInvalid={shouldShowError}
-                data-test-subj={
-                  localValues.length !== 1 ? `indexPattern-dimension-field-${index}` : undefined
-                }
+                data-test-subj={`indexPattern-terms-${index}-dimension-field`}
               />
             </DraggableBucketContainer>
           );

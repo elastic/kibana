@@ -22,6 +22,7 @@ export const FieldsBucketContainer = ({
   onRemoveClick,
   removeTitle,
   children,
+  draggableProvided,
   isNotRemovable,
   isNotDraggable,
   'data-test-subj': dataTestSubj,
@@ -29,10 +30,15 @@ export const FieldsBucketContainer = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      color="transparent"
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="xs" color="transparent">
+          <EuiPanel paddingSize="none" color="transparent" {...draggableProvided.dragHandleProps}>
             <EuiIcon
               size="s"
               color={isNotDraggable ? euiTheme.colors.disabled : 'subdued'}
