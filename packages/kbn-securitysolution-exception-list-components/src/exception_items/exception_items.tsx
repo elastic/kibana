@@ -107,7 +107,9 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
                   exceptionItem={exception}
                   listType={listType}
                   ruleReferences={
-                    Object.keys(ruleReferences).length ? ruleReferences[exception.list_id] : []
+                    Object.keys(ruleReferences).length && ruleReferences[exception.list_id]
+                      ? ruleReferences[exception.list_id]
+                      : []
                   }
                   onDeleteException={onDeleteException}
                   onEditException={onEditExceptionItem}
