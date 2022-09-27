@@ -30,7 +30,7 @@ import {
   ServiceNowExecutorResultData,
   ServiceNowSecretConfigurationType,
   ServiceFactory,
-  ExecutorParams,
+  ExecutorParamsITOM,
   ExecutorSubActionAddEventParams,
   ExternalServiceApiITOM,
   ExternalServiceITOM,
@@ -53,18 +53,18 @@ interface GetConnectorTypeParams {
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams
+  T extends Record<string, unknown> = ExecutorParamsITOM
 > = ConnectorType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowConnectorTypeExecutorOptions<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams
+  T extends Record<string, unknown> = ExecutorParamsITOM
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition
 export function getServiceNowITOMConnectorType(
   params: GetConnectorTypeParams
-): ServiceNowConnectorType<ServiceNowPublicConfigurationBaseType, ExecutorParams> {
+): ServiceNowConnectorType<ServiceNowPublicConfigurationBaseType, ExecutorParamsITOM> {
   const { logger } = params;
   return {
     id: ServiceNowITOMConnectorTypeId,
@@ -110,7 +110,7 @@ async function executorITOM(
   },
   execOptions: ServiceNowConnectorTypeExecutorOptions<
     ServiceNowPublicConfigurationBaseType,
-    ExecutorParams
+    ExecutorParamsITOM
   >
 ): Promise<ConnectorTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets, configurationUtilities } = execOptions;

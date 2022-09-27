@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionAddEventParams } from '../../../../server/connector_types/cases/servicenow/types';
+import type { ExecutorSubActionAddEventParams } from '../../../../server/connector_types/lib/servicenow/types';
 
 export interface ServiceNowITOMActionParams {
   subAction: string;

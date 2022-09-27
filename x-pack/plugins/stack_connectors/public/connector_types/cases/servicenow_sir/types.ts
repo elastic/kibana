@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionPushParamsSIR } from '../../../../server/connector_types/cases/servicenow/types';
+import type { ExecutorSubActionPushParamsSIR } from '../../../../server/connector_types/lib/servicenow/types';
 
 export interface ServiceNowSIRActionParams {
   subAction: string;
