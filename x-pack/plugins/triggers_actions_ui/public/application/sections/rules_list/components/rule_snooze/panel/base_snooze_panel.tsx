@@ -139,10 +139,14 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
     onRemoveAllSchedules(scheduledSnoozes!.filter((s) => s.id).map((s) => s.id as string));
   }, [onRemoveAllSchedules, scheduledSnoozes]);
 
-  const hasSchedules = useMemo(
-    () => scheduledSnoozes && scheduledSnoozes.filter((s) => Boolean(s.id)).length > 0,
-    [scheduledSnoozes]
-  );
+  const numberOfSchedules = useMemo(() => {
+    if (!scheduledSnoozes) {
+      return 0;
+    }
+    return scheduledSnoozes.filter((s) => Boolean(s.id)).length;
+  }, [scheduledSnoozes]);
+
+  const hasSchedules = useMemo(() => numberOfSchedules > 0, [numberOfSchedules]);
 
   const renderSchedule = () => {
     if (!showAddSchedule) {
@@ -236,6 +240,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiButtonEmpty
+                  isDisabled={numberOfSchedules >= 5}
                   data-test-subj="ruleSchedulesListAddButton"
                   iconType="plusInCircleFilled"
                   onClick={onClickAddSchedule}

@@ -82,20 +82,13 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw res.error;
       }
       setIsSubmitting(false);
-      const hasCompleted = isSingleAgent || Object.keys(res.data ?? {}).length > 0;
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
-          defaultMessage: 'Agent policy reassigned',
+          defaultMessage: 'Reassigning agent policy',
         }
       );
-      const submittedMessage = i18n.translate(
-        'xpack.fleet.agentReassignPolicy.submittedNotificationTitle',
-        {
-          defaultMessage: 'Agent policy reassign submitted',
-        }
-      );
-      notifications.toasts.addSuccess(hasCompleted ? successMessage : submittedMessage);
+      notifications.toasts.addSuccess(successMessage);
       onClose();
     } catch (error) {
       setIsSubmitting(false);
