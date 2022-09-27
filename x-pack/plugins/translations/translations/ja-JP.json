@@ -2130,8 +2130,6 @@
     "discover.fieldChooser.detailViews.emptyStringText": "空の文字列",
     "discover.fieldChooser.discoverField.actions": "アクション",
     "discover.fieldChooser.discoverField.addFieldTooltip": "フィールドを列として追加",
-    "discover.fieldChooser.discoverField.deleteFieldLabel": "データビューフィールドを削除",
-    "discover.fieldChooser.discoverField.editFieldLabel": "データビューフィールドを編集",
     "discover.fieldChooser.discoverField.fieldTopValuesLabel": "トップ5の値",
     "discover.fieldChooser.discoverField.multiField": "複数フィールド",
     "discover.fieldChooser.discoverField.multiFields": "マルチフィールド",

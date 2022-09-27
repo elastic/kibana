@@ -85,12 +85,12 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
         </EuiTitle>
       </EuiFlexItem>
       {onAddFieldToWorkspace && (
-        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_useField">
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addField">
           <EuiToolTip
             content={buttonAddFieldToWorkspaceProps?.['aria-label'] ?? addFieldToWorkspaceTooltip}
           >
             <EuiButtonIcon
-              data-test-subj={`fieldPopoverTitle_useField-${field.name}`}
+              data-test-subj={`fieldPopoverTitle_addField-${field.name}`}
               aria-label={addFieldToWorkspaceTooltip}
               {...(buttonAddFieldToWorkspaceProps || {})}
               iconType="plusInCircle"

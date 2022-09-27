@@ -2134,8 +2134,6 @@
     "discover.fieldChooser.detailViews.emptyStringText": "Chaîne vide",
     "discover.fieldChooser.discoverField.actions": "Actions",
     "discover.fieldChooser.discoverField.addFieldTooltip": "Ajouter le champ en tant que colonne",
-    "discover.fieldChooser.discoverField.deleteFieldLabel": "Supprimer le champ de la vue de données",
-    "discover.fieldChooser.discoverField.editFieldLabel": "Modifier le champ de la vue de données",
     "discover.fieldChooser.discoverField.fieldTopValuesLabel": "Top 5 des valeurs",
     "discover.fieldChooser.discoverField.multiField": "champ multiple",
     "discover.fieldChooser.discoverField.multiFields": "Champs multiples",

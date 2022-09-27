@@ -131,7 +131,7 @@ describe('discover sidebar', function () {
 
   it('should render "Edit field" button', () => {
     findTestSubject(comp, 'field-bytes').simulate('click');
-    const editFieldButton = findTestSubject(comp, 'fieldPopoverTitle_editField-bytes');
+    const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');
     expect(props.editField).toHaveBeenCalledWith('bytes');

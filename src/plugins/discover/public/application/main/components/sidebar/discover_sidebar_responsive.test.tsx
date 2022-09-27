@@ -232,7 +232,7 @@ describe('discover responsive sidebar', function () {
     });
 
     await comp.update();
-    findTestSubject(comp, 'fieldPopoverTitle_addExistsFilter-extension').simulate('click');
+    findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {

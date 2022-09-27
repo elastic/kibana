@@ -15,7 +15,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { FieldStats, FieldPopover } from '@kbn/unified-field-list-plugin/public';
+import { FieldStats, FieldPopover, FieldPopoverProps } from '@kbn/unified-field-list-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
@@ -317,6 +317,21 @@ function DiscoverFieldComponent({
 
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
+  const customPopoverProps: Partial<FieldPopoverProps> = useMemo(
+    () => ({
+      buttonAddFilterProps: {
+        'data-test-subj': `discoverFieldListPanelAddExistFilter-${field.name}`,
+      },
+      buttonEditFieldProps: {
+        'data-test-subj': `discoverFieldListPanelEdit-${field.name}`,
+      },
+      buttonDeleteFieldProps: {
+        'data-test-subj': `discoverFieldListPanelDelete-${field.name}`,
+      },
+    }),
+    [field.name]
+  );
+
   if (field.type === '_source') {
     return (
       <FieldButton
@@ -443,10 +458,10 @@ function DiscoverFieldComponent({
       data-test-subj="discoverFieldListPanelPopover"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
       // TODO: introduce Add action but not for selected fields
-      // TODO: should we preserve previous data-test-subj for buttons?
       onAddFilter={onAddFilter}
       onEditField={onEditField}
       onDeleteField={onDeleteField}
+      {...customPopoverProps}
     >
       {infoIsOpen && renderPopover()}
     </FieldPopover>

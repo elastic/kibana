@@ -2134,8 +2134,6 @@
     "discover.fieldChooser.detailViews.emptyStringText": "空字符串",
     "discover.fieldChooser.discoverField.actions": "操作",
     "discover.fieldChooser.discoverField.addFieldTooltip": "将字段添加为列",
-    "discover.fieldChooser.discoverField.deleteFieldLabel": "删除数据视图字段",
-    "discover.fieldChooser.discoverField.editFieldLabel": "编辑数据视图字段",
     "discover.fieldChooser.discoverField.fieldTopValuesLabel": "排名前 5 值",
     "discover.fieldChooser.discoverField.multiField": "多字段",
     "discover.fieldChooser.discoverField.multiFields": "多字段",
