@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
-import { VFC } from 'react';
+import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
+import { ruleRegistryBrowserFieldsMapper } from '@kbn/triggers-actions-ui-plugin/public';
+import { useMemo, VFC } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 export interface IndicatorsFieldBrowserProps {
@@ -24,8 +25,12 @@ export const IndicatorsFieldBrowser: VFC<IndicatorsFieldBrowserProps> = ({
 }) => {
   const { triggersActionsUi } = useKibana().services;
 
+  const triggersActionsUiBrowserFields = useMemo(() => {
+    return ruleRegistryBrowserFieldsMapper(browserFields);
+  }, [browserFields]);
+
   return triggersActionsUi.getFieldBrowser({
-    browserFields,
+    browserFields: triggersActionsUiBrowserFields,
     columnIds,
     onResetColumns,
     onToggleColumn,

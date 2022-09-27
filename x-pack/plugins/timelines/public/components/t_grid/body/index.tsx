@@ -37,7 +37,10 @@ import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  FieldBrowserOptions,
+  ruleRegistryBrowserFieldsMapper,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   TGridCellAction,
@@ -63,7 +66,6 @@ import {
   hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
-  triggersActionsUiBrowserFieldsFactory,
 } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -531,7 +533,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
 
     const triggersActionsUiBrowserFields = useMemo(
-      () => triggersActionsUiBrowserFieldsFactory(browserFields),
+      () => ruleRegistryBrowserFieldsMapper(browserFields),
       [browserFields]
     );
 

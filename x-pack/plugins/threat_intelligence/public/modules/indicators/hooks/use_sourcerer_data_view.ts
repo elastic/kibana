@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
+import { BrowserFields } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 
 /**
  * Inline definition for a runtime field "threat.indicator.name" we are adding for indicators grid
@@ -40,7 +41,7 @@ export const useSourcererDataView = () => {
 
   const indexPatterns = useMemo(() => [updatedPattern], [updatedPattern]);
 
-  const browserFields = useMemo(() => {
+  const browserFields = useMemo((): BrowserFields => {
     const { threat = { fields: {} } } = sourcererDataView.browserFields;
 
     return {

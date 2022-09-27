@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { ruleRegistryBrowserFieldsMapper } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HeaderActionProps, SortDirection } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
@@ -193,6 +194,10 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
+  const triggersActionsUiBrowserFields = useMemo(() => {
+    return ruleRegistryBrowserFieldsMapper(browserFields);
+  }, [browserFields]);
+
   return (
     <ActionsContainer>
       {showSelectAllCheckbox && (
@@ -211,7 +216,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       <EventsTh role="button">
         <FieldBrowserContainer>
           {triggersActionsUi.getFieldBrowser({
-            browserFields,
+            browserFields: triggersActionsUiBrowserFields,
             columnIds: columnHeaders.map(({ id }) => id),
             onResetColumns,
             onToggleColumn,

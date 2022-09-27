@@ -6,7 +6,28 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { IFieldSubType } from '@kbn/es-query';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import { BrowserFields as RuleRegistryBrowserFields } from '@kbn/rule-registry-plugin/common/types';
+
+// legacy BrowserField definition, new one in rule registry
+export interface BrowserField {
+  aggregatable: boolean;
+  category: string;
+  description: string | null;
+  example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  format: string;
+  indexes: string[];
+  name: string;
+  searchable: boolean;
+  type: string;
+  subType?: IFieldSubType;
+  readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
+}
+
+export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 /**
  * An item rendered in the table
@@ -40,7 +61,7 @@ export interface FieldBrowserProps {
   /** The timeline's current column headers */
   columnIds: string[];
   /** A map of categoryId -> metadata about the fields in that category */
-  browserFields: BrowserFields;
+  browserFields: RuleRegistryBrowserFields;
   /** When true, this Fields Browser is being used as an "events viewer" */
   isEventViewer?: boolean;
   /** Callback to reset the default columns */
