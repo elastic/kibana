@@ -13,7 +13,7 @@ const createConfig = (parts: Partial<BannersConfigType> = {}): BannersConfigType
   placement: 'disabled',
   backgroundColor: '#0000',
   textColor: '#FFFFFF',
-  textContent: 'Hello from the banner',
+  textContent: 'some global banner text',
   disableSpaceBanners: false,
   ...parts,
 });
@@ -31,7 +31,9 @@ describe('registerSettings', () => {
     expect(uiSettings.register).toHaveBeenCalledTimes(1);
     expect(uiSettings.register).toHaveBeenCalledWith({
       'banners:placement': expect.any(Object),
-      'banners:textContent': expect.any(Object),
+      'banners:textContent': expect.objectContaining({
+        value: 'some global banner text',
+      }),
       'banners:textColor': expect.any(Object),
       'banners:backgroundColor': expect.any(Object),
     });
