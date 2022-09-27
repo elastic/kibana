@@ -10,4 +10,10 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/index_lifecycle_management'],
   testMatch: ['/**/integration_tests/**/*.test.{js,mjs,ts,tsx}'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/index_lifecycle_management',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/index_lifecycle_management/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };
