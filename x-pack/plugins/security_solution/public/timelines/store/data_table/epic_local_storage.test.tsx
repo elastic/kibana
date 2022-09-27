@@ -78,7 +78,6 @@ describe('epicLocalStorage', () => {
 
     testProps = {
       defaultCellActions,
-      kqlQueryLanguage: 'kuery',
       defaultModel: eventsDefaultModel,
       end: to,
       entityType: EntityType.ALERTS,
@@ -88,14 +87,6 @@ describe('epicLocalStorage', () => {
       rowRenderers: defaultRowRenderers,
       scopeId: SourcererScopeName.default,
       start: from,
-      showCallOutUnauthorizedMsg: false,
-      showExpandedDetails: false,
-      start: startDate,
-      status: TimelineStatus.active,
-      sort,
-      timerangeKind: 'absolute',
-      activeTab: TimelineTabs.query,
-      show: true,
     };
   });
 
