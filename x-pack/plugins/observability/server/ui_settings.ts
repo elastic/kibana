@@ -29,10 +29,15 @@ import {
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
-  {
-    defaultMessage: 'technical preview',
-  }
+  { defaultMessage: 'technical preview' }
 );
+
+function feedbackLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.giveFeedBackLabel',
+    { defaultMessage: 'Give feedback' }
+  )}</a>`;
+}
 
 type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
 
@@ -154,6 +159,7 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
+    showInLabs: true,
   },
   [enableServiceGroups]: {
     category: [observabilityFeatureId],
@@ -162,14 +168,11 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage: 'Enable the Service groups feature on APM UI. {feedbackLink}.',
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the Service groups feature on APM UI. {feedbackLink}.',
       values: {
-        feedbackLink:
-          '<a href="https://ela.st/feedback-service-groups" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate('xpack.observability.enableServiceGroups.feedbackLinkText', {
-            defaultMessage: 'Give feedback',
-          }) +
-          '</a>',
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-service-groups' }),
       },
     }),
     schema: schema.boolean(),
@@ -200,17 +203,10 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          'Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
         values: {
-          feedbackLink:
-            '<a href="https://ela.st/feedback-apm-page-performance" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate(
-              'xpack.observability.apmServiceInventoryOptimizedSorting.feedbackLinkText',
-              {
-                defaultMessage: 'Give feedback',
-              }
-            ) +
-            '</a>',
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+          feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
         },
       }
     ),
@@ -238,14 +234,10 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        'Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
       values: {
-        feedbackLink:
-          '<a href="https://ela.st/feedback-trace-explorer" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate('xpack.observability.apmTraceExplorerTabDescription.feedbackLinkText', {
-            defaultMessage: 'Give feedback',
-          }) +
-          '</a>',
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
       },
     }),
     schema: schema.boolean(),
@@ -261,14 +253,10 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
       defaultMessage:
-        'Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
+        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
       values: {
-        feedbackLink:
-          '<a href="https://ela.st/feedback-operations-breakdown" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate('xpack.observability.apmOperationsBreakdownDescription.feedbackLinkText', {
-            defaultMessage: 'Give feedback',
-          }) +
-          '</a>',
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
       },
     }),
     schema: schema.boolean(),
@@ -308,14 +296,11 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'AWS Lambda Metrics',
     }),
     description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage: 'Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+      defaultMessage:
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
       values: {
-        feedbackLink:
-          '<a href="https://ela.st/feedback-aws-lambda" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate('xpack.observability.awsLambdaDescription', {
-            defaultMessage: 'Send feedback',
-          }) +
-          '</a>',
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-aws-lambda' }),
       },
     }),
     schema: schema.boolean(),
