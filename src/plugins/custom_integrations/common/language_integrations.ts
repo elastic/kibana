@@ -145,4 +145,17 @@ export const languageIntegrations: LanguageIntegration[] = [
     integrationsAppUrl: `/app/integrations/language_clients/java/overview`,
     exportLanguageUiComponent: false,
   },
+  {
+    id: 'sample',
+    title: i18n.translate('customIntegrations.languageclients.SampleTitle', {
+      defaultMessage: 'Sample Language Client',
+    }),
+    icon: 'es.svg',
+    description: i18n.translate('customIntegrations.languageclients.SampleDescription', {
+      defaultMessage: 'Sample language client',
+    }),
+    docUrlTemplate: '',
+    integrationsAppUrl: `/app/integrations/language_clients/sample/overview`,
+    exportLanguageUiComponent: true,
+  },
 ];

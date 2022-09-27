@@ -21,9 +21,7 @@ export const CustomLanguagesOverview = () => {
   const { pkgkey } = useParams<CustomLanguageClientsParams>();
   const { getPath } = useLink();
 
-  const Component = getCustomIntegrationsStart().languageClientsUiComponents.get(
-    `language_client.${pkgkey}`
-  );
+  const Component = getCustomIntegrationsStart().languageClientsUiComponents[pkgkey];
 
   return Component ? <Component /> : <Redirect to={getPath('integrations_all')} />;
 };
