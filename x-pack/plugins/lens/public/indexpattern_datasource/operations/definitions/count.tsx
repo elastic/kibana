@@ -241,7 +241,7 @@ To calculate the number of documents that match a specific filter, use \`count(k
   },
   quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
     defaultMessage: `
-Total number of documents. When you provide a field, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
+The total number of documents. When you provide a field, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
       `,
   }),
   shiftable: true,

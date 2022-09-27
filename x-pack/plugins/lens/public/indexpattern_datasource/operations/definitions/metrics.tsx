@@ -59,6 +59,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   hideZeroOption,
   aggConfigParams,
   documentationDescription,
+  quickFunctionDocumentation,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -70,6 +71,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   hideZeroOption?: boolean;
   aggConfigParams?: Record<string, string | number | boolean>;
   documentationDescription?: string;
+  quickFunctionDocumentation?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -231,17 +233,7 @@ Example: Get the {metric} of price for orders from the UK:
           },
         }),
     },
-    quickFunctionDocumentation: i18n.translate(
-      'xpack.lens.indexPattern.metric.documentation.quick',
-      {
-        defaultMessage: `
-The {metric} of a field. This function only works for number fields.
-      `,
-        values: {
-          metric: displayName,
-        },
-      }
-    ),
+    quickFunctionDocumentation,
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
 }
@@ -267,6 +259,12 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.min.quickFunctionDescription',
+    {
+      defaultMessage: 'The minimum value of a number field.',
+    }
+  ),
   supportsDate: true,
 });
 
@@ -284,6 +282,12 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.max.quickFunctionDescription',
+    {
+      defaultMessage: 'The maximum value of a number field.',
+    }
+  ),
   supportsDate: true,
 });
 
@@ -302,6 +306,12 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
     defaultMessage:
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.avg.quickFunctionDescription',
+    {
+      defaultMessage: 'The average value of a number field.',
+    }
+  ),
 });
 
 export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
@@ -336,6 +346,13 @@ To get the variance of price for orders from the UK, use \`square(standard_devia
       `,
       }
     ),
+    quickFunctionDocumentation: i18n.translate(
+      'xpack.lens.indexPattern.standardDeviation.quickFunctionDescription',
+      {
+        defaultMessage:
+          'The standard deviation of the values of a number field which is the amount of variation of the fields values.',
+      }
+    ),
   }
 );
 
@@ -356,6 +373,12 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
       'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
   }),
   hideZeroOption: true,
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.sum.quickFunctionDescription',
+    {
+      defaultMessage: 'The total amount of the values of a number field.',
+    }
+  ),
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
@@ -373,4 +396,10 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.median.quickFunctionDescription',
+    {
+      defaultMessage: 'The median value of a number field.',
+    }
+  ),
 });

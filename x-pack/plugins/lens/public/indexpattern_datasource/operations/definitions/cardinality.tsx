@@ -214,7 +214,7 @@ Example: Calculate the number of different products from the "clothes" group:
     'xpack.lens.indexPattern.cardinality.documentation.quick',
     {
       defaultMessage: `
-The number of unique values of a specified field. Works for number, string, date and boolean values.
+The number of unique values for a specified number, string, date, or boolean field.
       `,
     }
   ),

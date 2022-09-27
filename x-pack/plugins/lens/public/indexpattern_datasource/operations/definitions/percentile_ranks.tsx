@@ -270,7 +270,7 @@ Example: Get the percentage of values which are below of 100:
     'xpack.lens.indexPattern.percentileRanks.documentation.quick',
     {
       defaultMessage: `
-The percentage of values which are below a certain value. For example, if a value is greater than or equal to 95% of the observed values it is said to be at the 95th percentile rank.
+The percentage of values that are below a specific value. For example, when a value is greater than or equal to 95% of the calculated values, the value is the 95th percentile rank.
       `,
     }
   ),

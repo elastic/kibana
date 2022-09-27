@@ -155,7 +155,7 @@ Example: Visualize the rate of bytes received over time by a memcached server:
     'xpack.lens.indexPattern.counterRate.documentation.quick',
     {
       defaultMessage: `
-    The change rate over time of an ever growing time series metric.
+      The rate of change over time for an ever growing time series metric.
       `,
     }
   ),

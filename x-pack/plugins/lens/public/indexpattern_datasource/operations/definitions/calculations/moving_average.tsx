@@ -170,7 +170,7 @@ Example: Smooth a line of measurements:
     'xpack.lens.indexPattern.movingAverage.documentation.quick',
     {
       defaultMessage: `
-      Smoothing values over time by averaging a moving window of averages.
+      The average of a moving window of values over time.
       `,
     }
   ),

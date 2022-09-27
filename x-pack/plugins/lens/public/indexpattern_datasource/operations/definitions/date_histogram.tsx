@@ -519,7 +519,7 @@ export const dateHistogramOperation: OperationDefinition<
     'xpack.lens.indexPattern.dateHistogram.documentation.quick',
     {
       defaultMessage: `
-Date or date range values distributed into intervals.
+The date or date range values distributed into intervals.
       `,
     }
   ),
