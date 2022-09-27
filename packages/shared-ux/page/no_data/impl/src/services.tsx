@@ -18,7 +18,10 @@ import type {
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataPageProvider: FC<PropsWithChildren<NoDataPageServices>> = ({ children, ...services }) => {
+export const NoDataPageProvider: FC<PropsWithChildren<NoDataPageServices>> = ({
+  children,
+  ...services
+}) => {
   return <NoDataCardProvider {...services}>{children}</NoDataCardProvider>;
 };
 

@@ -23,7 +23,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataCardProvider: FC<PropsWithChildren<NoDataCardServices>> = ({ children, ...services }) => {
+export const NoDataCardProvider: FC<PropsWithChildren<NoDataCardServices>> = ({
+  children,
+  ...services
+}) => {
   const { addBasePath, canAccessFleet } = services;
 
   return (

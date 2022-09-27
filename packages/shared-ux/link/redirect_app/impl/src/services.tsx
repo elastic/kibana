@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {PropsWithChildren, FC, useContext } from 'react';
+import React, { PropsWithChildren, FC, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -34,10 +34,9 @@ export const RedirectAppLinksProvider: FC<PropsWithChildren<RedirectAppLinksServ
 /**
  * Kibana-specific contextual services Provider.
  */
-export const RedirectAppLinksKibanaProvider: FC<PropsWithChildren<RedirectAppLinksKibanaDependencies>> = ({
-  children,
-  coreStart,
-}) => {
+export const RedirectAppLinksKibanaProvider: FC<
+  PropsWithChildren<RedirectAppLinksKibanaDependencies>
+> = ({ children, coreStart }) => {
   const { navigateToUrl, currentAppId$ } = coreStart.application;
   const currentAppId = useObservable(currentAppId$, undefined);
 

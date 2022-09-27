@@ -33,10 +33,9 @@ export const ExitFullScreenButtonProvider: FC<PropsWithChildren<ExitFullScreenBu
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ExitFullScreenButtonKibanaProvider: FC<PropsWithChildren<ExitFullScreenButtonKibanaDependencies>> = ({
-  children,
-  ...services
-}) => {
+export const ExitFullScreenButtonKibanaProvider: FC<
+  PropsWithChildren<ExitFullScreenButtonKibanaDependencies>
+> = ({ children, ...services }) => {
   return (
     <ExitFullScreenButtonContext.Provider
       value={{

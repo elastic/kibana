@@ -43,10 +43,9 @@ export const KibanaNoDataPageProvider: FC<PropsWithChildren<KibanaNoDataPageServ
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaNoDataPageKibanaProvider: FC<PropsWithChildren<KibanaNoDataPageKibanaDependencies>> = ({
-  children,
-  ...dependencies
-}) => {
+export const KibanaNoDataPageKibanaProvider: FC<
+  PropsWithChildren<KibanaNoDataPageKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const { dataViews } = dependencies;
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,

@@ -39,10 +39,9 @@ export const AnalyticsNoDataPageProvider: FC<PropsWithChildren<AnalyticsNoDataPa
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const AnalyticsNoDataPageKibanaProvider: FC<PropsWithChildren<AnalyticsNoDataPageKibanaDependencies>> = ({
-  children,
-  ...dependencies
-}) => {
+export const AnalyticsNoDataPageKibanaProvider: FC<
+  PropsWithChildren<AnalyticsNoDataPageKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
   };
