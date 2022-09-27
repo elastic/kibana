@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import type { DraggableProvided } from 'react-beautiful-dnd';
 
 export interface BucketContainerProps {
-  invalidMessage: string;
   onRemoveClick: () => void;
   children: React.ReactNode;
   removeTitle: string;
-  draggableProvided?: DraggableProvided;
+
   isInvalid?: boolean;
+  invalidMessage?: string;
   isNotRemovable?: boolean;
   isNotDraggable?: boolean;
   'data-test-subj'?: string;

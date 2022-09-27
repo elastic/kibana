@@ -17,9 +17,7 @@ import {
 } from '@elastic/eui';
 import type { BucketContainerProps } from './types';
 
-export const DefaultBucketContainer = ({
-  isInvalid,
-  invalidMessage,
+export const FieldsBucketContainer = ({
   onRemoveClick,
   removeTitle,
   children,
@@ -29,29 +27,18 @@ export const DefaultBucketContainer = ({
 }: BucketContainerProps) => {
   const { euiTheme } = useEuiTheme();
 
-  let color = euiTheme.colors.subduedText;
-  if (isNotDraggable) {
-    color = euiTheme.colors.disabled;
-  } else if (isInvalid) {
-    color = euiTheme.colors.danger;
-  }
-
   return (
-    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasShadow={false} hasBorder>
+    <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="xs" color="transparent">
             <EuiIcon
               size="s"
-              color={color}
-              type={isInvalid ? 'alert' : 'grab'}
-              title={
-                isInvalid
-                  ? invalidMessage
-                  : i18n.translate('xpack.lens.customBucketContainer.dragToReorder', {
-                      defaultMessage: 'Drag to reorder',
-                    })
-              }
+              color={isNotDraggable ? euiTheme.colors.disabled : 'subdued'}
+              type="grab"
+              title={i18n.translate('xpack.lens.fieldsBucketContainer.dragToReorder', {
+                defaultMessage: 'Drag to reorder',
+              })}
               data-test-subj={`${dataTestSubj}-dragToReorder`}
             />
           </EuiPanel>
@@ -59,14 +46,13 @@ export const DefaultBucketContainer = ({
         <EuiFlexItem grow={true}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            iconSize="s"
-            iconType="cross"
+            iconType="trash"
             color="danger"
-            onClick={onRemoveClick}
             aria-label={removeTitle}
             title={removeTitle}
-            disabled={isNotRemovable}
+            onClick={onRemoveClick}
             data-test-subj={`${dataTestSubj}-remove`}
+            isDisabled={isNotRemovable}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

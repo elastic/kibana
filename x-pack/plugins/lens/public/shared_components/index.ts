@@ -13,7 +13,12 @@ export { FieldPicker, LensFieldIcon, TruncatedLabel } from './field_picker';
 export type { FieldOption, FieldOptionValue } from './field_picker';
 export { ChangeIndexPattern, fieldExists, fieldContainsData } from './dataview_picker';
 export { QueryInput, isQueryValid, validateQuery } from './query_input';
-export { NewBucketButton, DraggableBucketContainer, DragDropBuckets } from './drag_drop_bucket';
+export {
+  NewBucketButton,
+  DraggableBucketContainer,
+  DragDropBuckets,
+  FieldsBucketContainer,
+} from './drag_drop_bucket';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,

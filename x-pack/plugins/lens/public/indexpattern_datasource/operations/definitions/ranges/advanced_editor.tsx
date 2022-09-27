@@ -264,7 +264,6 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => {}}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >

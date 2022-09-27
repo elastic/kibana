@@ -227,7 +227,7 @@ export const FilterList = ({
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
-        {localFilters?.map((filter: FilterValue, idx: number) => {
+        {localFilters?.map((filter, idx, arrayRef) => {
           const isInvalid = !isQueryValid(filter.input, indexPattern);
 
           return (
@@ -243,8 +243,8 @@ export const FilterList = ({
               removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeFilter', {
                 defaultMessage: 'Remove a filter',
               })}
-              isNotRemovable={localFilters.length === 1}
-              isNotDraggable={localFilters.length === 1}
+              isNotRemovable={arrayRef.length === 1}
+              isNotDraggable={arrayRef.length === 1}
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"

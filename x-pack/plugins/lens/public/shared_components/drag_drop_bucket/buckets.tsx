@@ -6,12 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
+import type { Assign } from '@kbn/utility-types';
 import {
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
+  EuiPanel,
   DragDropContextProps,
+  EuiPanelProps,
 } from '@elastic/eui';
 import { DefaultBucketContainer } from './default_bucket_container';
 import type { BucketContainerProps } from './types';
@@ -22,29 +25,25 @@ export const DraggableBucketContainer = ({
   children,
   Container = DefaultBucketContainer,
   ...bucketContainerProps
-}: {
-  id: string;
-  idx: number;
-  children: React.ReactNode;
-  Container?: React.FunctionComponent<BucketContainerProps>;
-} & BucketContainerProps) => {
-  return (
-    <EuiDraggable
-      style={{ marginBottom: 4 }}
-      spacing="none"
-      index={idx}
-      draggableId={id}
-      customDragHandle={true}
-      disableInteractiveElementBlocking
-    >
-      {(provided) => (
-        <Container draggableProvided={provided} {...bucketContainerProps}>
-          {children}
-        </Container>
-      )}
-    </EuiDraggable>
-  );
-};
+}: Assign<
+  BucketContainerProps,
+  {
+    id: string;
+    idx: number;
+    children: React.ReactNode;
+    Container?: React.FunctionComponent<BucketContainerProps>;
+  }
+>) => (
+  <EuiDraggable
+    spacing="none"
+    index={idx}
+    draggableId={id}
+    isDragDisabled={bucketContainerProps.isNotDraggable}
+    disableInteractiveElementBlocking
+  >
+    {() => <Container {...bucketContainerProps}>{children}</Container>}
+  </EuiDraggable>
+);
 
 export function DragDropBuckets<T = unknown>({
   items,
@@ -53,29 +52,33 @@ export function DragDropBuckets<T = unknown>({
   droppableId,
   children,
   className,
+  color,
 }: {
   items: T[];
-  onDragStart: () => void;
-  onDragEnd: (items: T[]) => void;
   droppableId: string;
   children: React.ReactElement[];
+  onDragStart?: () => void;
+  onDragEnd?: (items: T[]) => void;
+  color?: EuiPanelProps['color'];
   className?: string;
 }) {
   const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
     ({ source, destination }) => {
       if (source && destination) {
         const newItems = euiDragDropReorder(items, source.index, destination.index);
-        onDragEnd(newItems);
+        onDragEnd?.(newItems);
       }
     },
     [items, onDragEnd]
   );
 
   return (
-    <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
-      <EuiDroppable droppableId={droppableId} spacing="none" className={className}>
-        {children}
-      </EuiDroppable>
-    </EuiDragDropContext>
+    <EuiPanel color={color} hasBorder={false} hasShadow={false} paddingSize="none">
+      <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
+        <EuiDroppable droppableId={droppableId} spacing="none" className={className}>
+          {children}
+        </EuiDroppable>
+      </EuiDragDropContext>
+    </EuiPanel>
   );
 }
