@@ -479,12 +479,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (packagePolicyUpdate.is_managed && !options?.force) {
       throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
     }
-
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
 
-    if (packagePolicy.name !== oldPackagePolicy.name || !options?.skipUniqueNameVerification) {
+    if (!options?.skipUniqueNameVerification) {
       // Check that the name does not exist already but exclude the current package policy
       const existingPoliciesWithName = await this.list(soClient, {
         perPage: SO_SEARCH_LIMIT,
