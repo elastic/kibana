@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiPanel,
   EuiTitle,
@@ -15,9 +15,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHasData } from '../../../hooks/use_has_data';
 import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useGuidedSetupProgress } from '../../../hooks/use_guided_setup_progress';
 
@@ -29,27 +27,8 @@ export function ObservabilityStatusProgress({
   onViewDetailsClick,
   onDismissClick,
 }: ObservabilityStatusProgressProps) {
-  const { hasDataMap, isAllRequestsComplete } = useHasData();
   const trackMetric = useUiTracker({ app: 'observability-overview' });
   const { isGuidedSetupProgressDismissed, dismissGuidedSetupProgress } = useGuidedSetupProgress();
-
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const totalCounts = Object.keys(hasDataMap);
-    if (isAllRequestsComplete) {
-      const hasDataCount = reduce(
-        hasDataMap,
-        (result, value) => {
-          return value?.hasData ? result + 1 : result;
-        },
-        0
-      );
-
-      const percentage = (hasDataCount / totalCounts.length) * 100;
-      setProgress(isFinite(percentage) ? percentage : 0);
-    }
-  }, [isAllRequestsComplete, hasDataMap]);
 
   const dismissGuidedSetup = useCallback(() => {
     dismissGuidedSetupProgress();
