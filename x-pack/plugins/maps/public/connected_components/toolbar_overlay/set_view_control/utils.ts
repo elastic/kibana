@@ -15,7 +15,7 @@ export function withinRange(value: string | number, min: number, max: number) {
   const isInvalid = value === '' || value > max || value < min;
   const error = isInvalid
     ? i18n.translate('xpack.maps.setViewControl.outOfRangeErrorMsg', {
-        defaultMessage: `Must be between ${min} and ${max}`,
+        defaultMessage: `Must be between {min} and {max}`,
         values: { min, max },
       })
     : null;
@@ -24,32 +24,19 @@ export function withinRange(value: string | number, min: number, max: number) {
 
 export function ddToUTM(lat: number, lon: number) {
   try {
-    const utmCoord = converter.LLtoUTM(lat, lon);
-
-    let eastwest = 'E';
-    if (utmCoord.easting < 0) {
-      eastwest = 'W';
-    }
-    let norwest = 'N';
-    if (utmCoord.northing < 0) {
-      norwest = 'S';
-    }
-
-    if (utmCoord !== 'undefined') {
-      utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
-      utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
-      utmCoord.easting = Math.round(utmCoord.easting);
-      utmCoord.northing = Math.round(utmCoord.northing);
-      utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
-    }
-
-    return utmCoord;
+    const utm = converter.LLtoUTM(lat, lon);
+    return {
+      northing: utm === converter.UNDEFINED_STR ? '' : String(Math.round(utm.northing)),
+      easting: utm === converter.UNDEFINED_STR ? '' : String(Math.round(utm.easting)),
+      zone:
+        utm === converter.UNDEFINED_STR
+          ? ''
+          : `${utm.zoneNumber}${converter.UTMLetterDesignator(lat)}`,
+    };
   } catch (e) {
     return {
       northing: '',
       easting: '',
-      zoneNumber: '',
-      zoneLetter: '',
       zone: '',
     };
   }
