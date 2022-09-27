@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { useEffect, useMemo } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -54,6 +52,7 @@ export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TActionOutputContent extends object = object
 > extends Pick<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     CommandExecutionComponentProps<any, CommandResponseActionApiState<TActionOutputContent>>,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
