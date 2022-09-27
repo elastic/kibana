@@ -35,7 +35,7 @@ describe('UTM', () => {
     });
   });
 
-  test('ddToMGRS should return empty string for lat lon that does not translate to MGRS grid', () => {
+  test('ddToUTM should return empty strings for lat lon that does not translate to UTM grid', () => {
     expect(ddToUTM(90, 32.05495)).toEqual({
       northing: '',
       easting: '',
@@ -43,7 +43,7 @@ describe('UTM', () => {
     });
   });
 
-  test('utmToDD should convert utmToDD to lat lon', () => {
+  test('utmToDD should convert UTM to lat lon', () => {
     expect(utmToDD('3241512', '408216', '36R')).toEqual({
       lat: 29.29925770984472,
       lon: 32.05494597943409,
