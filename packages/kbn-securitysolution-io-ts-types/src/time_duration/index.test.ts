@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { TimeDuration } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
@@ -22,7 +21,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
@@ -37,7 +36,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
@@ -52,7 +51,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "24h" supplied to "TimeDuration"',
@@ -68,7 +67,7 @@ describe('TimeDuration', () => {
           [-7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "[[1,"s"],[-7,"d"]]" supplied to "TimeDuration"',
@@ -84,7 +83,7 @@ describe('TimeDuration', () => {
           [-7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "1.5s" supplied to "TimeDuration"',
@@ -100,7 +99,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "[[0,"s"],[7,"d"]]" supplied to "TimeDuration"',
@@ -117,7 +116,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "10000000days" supplied to "TimeDuration"',
@@ -134,7 +133,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "100ff0000w" supplied to "TimeDuration"',
@@ -151,7 +150,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "" supplied to "TimeDuration"',
@@ -168,7 +167,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "100" supplied to "TimeDuration"',
@@ -185,7 +184,7 @@ describe('TimeDuration', () => {
           [7, 'd'],
         ],
       }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         `Invalid value "${Math.pow(2, 53)}h" supplied to "TimeDuration"`,
@@ -197,7 +196,7 @@ describe('TimeDuration', () => {
     test('it should validate a correctly formed TimeDuration with time unit of seconds', () => {
       const payload = '1s';
       const decoded = TimeDuration({ allowedUnits: ['s'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
@@ -206,7 +205,7 @@ describe('TimeDuration', () => {
     test('it should validate a correctly formed TimeDuration with time unit of minutes', () => {
       const payload = '100m';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
@@ -215,7 +214,7 @@ describe('TimeDuration', () => {
     test('it should validate a correctly formed TimeDuration with time unit of hours', () => {
       const payload = '10000000h';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
@@ -224,7 +223,7 @@ describe('TimeDuration', () => {
     test('it should validate a correctly formed TimeDuration with time unit of days', () => {
       const payload = '7d';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h', 'd'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
@@ -233,7 +232,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate a correctly formed TimeDuration with time unit of seconds if it is not an allowed unit', () => {
       const payload = '30s';
       const decoded = TimeDuration({ allowedUnits: ['m', 'h', 'd'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "30s" supplied to "TimeDuration"',
@@ -244,7 +243,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate a negative TimeDuration', () => {
       const payload = '-10s';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h', 'd'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "-10s" supplied to "TimeDuration"',
@@ -255,7 +254,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate a fractional number', () => {
       const payload = '1.5s';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h', 'd'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "1.5s" supplied to "TimeDuration"',
@@ -266,7 +265,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate a TimeDuration with an invalid time unit', () => {
       const payload = '10000000days';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h', 'd'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "10000000days" supplied to "TimeDuration"',
@@ -277,7 +276,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate a TimeDuration with a time interval with incorrect format', () => {
       const payload = '100ff0000w';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "100ff0000w" supplied to "TimeDuration"',
@@ -288,7 +287,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate an empty string', () => {
       const payload = '';
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "" supplied to "TimeDuration"',
@@ -299,7 +298,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate an number', () => {
       const payload = 100;
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "100" supplied to "TimeDuration"',
@@ -310,7 +309,7 @@ describe('TimeDuration', () => {
     test('it should NOT validate an TimeDuration with a valid time unit but unsafe integer', () => {
       const payload = `${Math.pow(2, 53)}h`;
       const decoded = TimeDuration({ allowedUnits: ['s', 'm', 'h'] }).decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const message = foldLeftRight(decoded);
 
       expect(getPaths(left(message.errors))).toEqual([
         `Invalid value "${Math.pow(2, 53)}h" supplied to "TimeDuration"`,
