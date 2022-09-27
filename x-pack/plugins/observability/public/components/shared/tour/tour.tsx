@@ -239,7 +239,7 @@ export function ObservabilityTour({
   }, [activeStep]);
 
   useEffect(() => {
-    // The user must be on the overview page to view the guided setup step in the tour
+    // The user must be on the overview page to view the data assistant step in the tour
     if (isTourActive && isOverviewPage === false && activeStep === guidedSetupStep) {
       navigateToApp(observabilityAppId, {
         path: overviewPath,
