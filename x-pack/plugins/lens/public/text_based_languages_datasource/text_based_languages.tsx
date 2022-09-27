@@ -294,7 +294,10 @@ export function getTextBasedLanguagesDatasource({
 
       render(
         <EuiButtonEmpty color={columnExists ? 'primary' : 'danger'} onClick={() => {}}>
-          {customLabel}
+          {customLabel ??
+            i18n.translate('xpack.lens.textBasedLanguages.missingField', {
+              defaultMessage: 'Missing field',
+            })}
         </EuiButtonEmpty>,
         domElement
       );
