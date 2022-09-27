@@ -80,7 +80,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
     };
   });
 
-  it('should not show the actions log link', async () => {
+  it('should not show the response actions history link', async () => {
     await render();
     expect(renderResult.queryByTestId('actionsLink')).toBeNull();
   });
