@@ -5,20 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { queryStateToExpressionAst } from './to_expression_ast';
+import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 
-describe('queryStateToExpressionAst', () => {
+describe('textBasedQueryStateToExpressionAst', () => {
   it('returns an object with the correct structure', async () => {
-    const dataViewsService = {} as unknown as DataViewsContract;
-    const actual = await queryStateToExpressionAst({
+    const actual = await textBasedQueryStateToExpressionAst({
       filters: [],
       query: { language: 'lucene', query: '' },
       time: {
         from: 'now',
         to: 'now+7d',
       },
-      dataViewsService,
     });
 
     expect(actual).toHaveProperty(
@@ -33,31 +30,13 @@ describe('queryStateToExpressionAst', () => {
   });
 
   it('returns an object with the correct structure for an SQL query', async () => {
-    const dataViewsService = {
-      getIdsWithTitle: jest.fn(() => {
-        return [
-          {
-            title: 'foo',
-            id: 'bar',
-          },
-        ];
-      }),
-      get: jest.fn(() => {
-        return {
-          title: 'foo',
-          id: 'bar',
-          timeFieldName: 'baz',
-        };
-      }),
-    } as unknown as DataViewsContract;
-    const actual = await queryStateToExpressionAst({
+    const actual = await textBasedQueryStateToExpressionAst({
       filters: [],
       query: { sql: 'SELECT * FROM foo' },
       time: {
         from: 'now',
         to: 'now+7d',
       },
-      dataViewsService,
     });
 
     expect(actual).toHaveProperty(

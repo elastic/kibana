@@ -9,6 +9,7 @@ import { EnhancedStore } from '@reduxjs/toolkit';
 import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,
+  switchAndCleanDatasource,
   switchVisualization,
   setState,
   updateState,
@@ -208,6 +209,57 @@ describe('lensSlice', () => {
       expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toBe(
         datasource2State
       );
+    });
+
+    describe('switching to a new datasource and modify the state', () => {
+      it('should switch active datasource and initialize new state', () => {
+        store.dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'testDatasource2',
+            visualizationId: 'testVis',
+            currentIndexPatternId: 'testIndexPatternId',
+          })
+        );
+        expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
+        expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
+        expect(store.getState().lens.visualization.activeId).toEqual('testVis');
+      });
+
+      it('should should switch active datasource and clean the datasource state', () => {
+        const datasource2State = {
+          layers: {},
+        };
+        const { store: customStore } = makeLensStore({
+          preloadedState: {
+            datasourceStates: {
+              testDatasource: {
+                state: {},
+                isLoading: false,
+              },
+              testDatasource2: {
+                state: datasource2State,
+                isLoading: false,
+              },
+            },
+          },
+        });
+
+        customStore.dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'testDatasource2',
+            visualizationId: 'testVis',
+            currentIndexPatternId: 'testIndexPatternId',
+          })
+        );
+
+        expect(customStore.getState().lens.activeDatasourceId).toEqual('testDatasource2');
+        expect(customStore.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(
+          false
+        );
+        expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual(
+          {}
+        );
+      });
     });
 
     describe('adding or removing layer', () => {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';

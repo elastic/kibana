@@ -8,6 +8,7 @@
 import React, { useMemo, memo, useCallback } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -52,7 +53,7 @@ export function LayerPanels(
   }
 ) {
   const { activeVisualization, datasourceMap, indexPatternService } = props;
-  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
+  const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
 
@@ -185,6 +186,8 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews, props.indexPatternService]
   );
 
+  const hideAddLayerButton = query && isOfAggregateQueryType(query);
+
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => (
@@ -264,16 +267,18 @@ export function LayerPanels(
           indexPatternService={indexPatternService}
         />
       ))}
-      <AddLayerButton
-        visualization={activeVisualization}
-        visualizationState={visualization.state}
-        layersMeta={props.framePublicAPI}
-        onAddLayerClick={(layerType) => {
-          const layerId = generateId();
-          dispatchLens(addLayer({ layerId, layerType }));
-          setNextFocusedLayerId(layerId);
-        }}
-      />
+      {!hideAddLayerButton && (
+        <AddLayerButton
+          visualization={activeVisualization}
+          visualizationState={visualization.state}
+          layersMeta={props.framePublicAPI}
+          onAddLayerClick={(layerType) => {
+            const layerId = generateId();
+            dispatchLens(addLayer({ layerId, layerType }));
+            setNextFocusedLayerId(layerId);
+          }}
+        />
+      )}
     </EuiForm>
   );
 }

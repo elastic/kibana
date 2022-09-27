@@ -81,6 +81,7 @@ describe('getLayerMetaInfo', () => {
       getSourceId: jest.fn(),
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(),
+      isTextBasedLanguage: jest.fn(() => false),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -99,6 +100,7 @@ describe('getLayerMetaInfo', () => {
       getSourceId: jest.fn(),
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
+      isTextBasedLanguage: jest.fn(() => false),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -158,6 +160,7 @@ describe('getLayerMetaInfo', () => {
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
       getMaxPossibleNumValues: jest.fn(),
+      isTextBasedLanguage: jest.fn(() => false),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],

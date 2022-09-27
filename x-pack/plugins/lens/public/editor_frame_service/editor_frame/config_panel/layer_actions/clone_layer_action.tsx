@@ -13,6 +13,7 @@ interface CloneLayerAction {
   execute: () => void;
   layerIndex: number;
   activeVisualization: Visualization;
+  isTextBasedLanguage?: boolean;
 }
 
 export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
@@ -23,7 +24,7 @@ export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
   return {
     execute: props.execute,
     displayName,
-    isCompatible: Boolean(props.activeVisualization.cloneLayer),
+    isCompatible: Boolean(props.activeVisualization.cloneLayer && !props.isTextBasedLanguage),
     icon: 'copy',
     'data-test-subj': `lnsLayerClone--${props.layerIndex}`,
   };

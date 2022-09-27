@@ -259,8 +259,10 @@ export interface Datasource<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getCurrentIndexPatternId: (state: T) => string;
+  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string) => T;
+  createEmptyLayer: (indexPatternId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   cloneLayer: (
@@ -466,6 +468,10 @@ export interface DatasourcePublicAPI {
    * Retrieve the specific source id for the current state
    */
   getSourceId: () => string | undefined;
+  /**
+   * Returns true if this is a text based language datasource
+   */
+  isTextBasedLanguage: () => boolean;
   /**
    * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */

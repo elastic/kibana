@@ -190,6 +190,8 @@ export const runSaveLensVisualization = async (
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
     originatingApp?: string;
+    textBasedLanguageSave?: boolean;
+    switchDatasource?: () => void;
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
@@ -211,6 +213,9 @@ export const runSaveLensVisualization = async (
     onAppLeave,
     redirectTo,
     dashboardFeatureFlag,
+    textBasedLanguageSave,
+    switchDatasource,
+    application,
   } = props;
 
   if (!lastKnownDoc) {
@@ -318,8 +323,12 @@ export const runSaveLensVisualization = async (
 
       // remove editor state so the connection is still broken after reload
       stateTransfer.clearEditorState?.(APP_ID);
-
-      redirectTo?.(newInput.savedObjectId);
+      if (textBasedLanguageSave) {
+        switchDatasource?.();
+        application.navigateToApp('lens', { path: '/' });
+      } else {
+        redirectTo?.(newInput.savedObjectId);
+      }
       return { isLinkedToOriginatingApp: false };
     }
 

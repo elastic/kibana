@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import type { Query, AggregateQuery } from '@kbn/es-query';
+
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
@@ -25,6 +27,7 @@ import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
+import { AddLayerButton } from './add_layer';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
@@ -68,7 +71,8 @@ describe('ConfigPanel', () => {
 
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
-    customStoreProps?: Partial<MountStoreProps>
+    customStoreProps?: Partial<MountStoreProps>,
+    query?: Query | AggregateQuery
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
     return mountWithProvider(
@@ -82,6 +86,7 @@ describe('ConfigPanel', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
+          query: query as Query,
         },
         storeDeps: mockStoreDeps({
           datasourceMap: props.datasourceMap,
@@ -464,6 +469,30 @@ describe('ConfigPanel', () => {
         prevState: undefined,
       });
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('text based languages', () => {
+    it('should not allow to add a new layer', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.REFERENCELINE,
+          label: 'Reference layer',
+        },
+      ]);
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      const props = getDefaultProps({ datasourceMap, visualizationMap });
+
+      const { instance } = await prepareAndMountComponent(
+        props,
+        {},
+        { sql: 'SELECT * from "foo"' }
+      );
+      expect(instance.find(AddLayerButton).exists()).toBe(false);
     });
   });
 });

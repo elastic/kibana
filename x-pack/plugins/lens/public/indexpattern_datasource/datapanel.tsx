@@ -310,15 +310,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const existingFieldsForIndexPattern = existingFields[currentIndexPattern?.title];
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
-  const allFields = useMemo(
-    () =>
-      visualizeGeoFieldTrigger
-        ? currentIndexPattern.fields
-        : currentIndexPattern.fields.filter(
-            ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
-          ),
-    [currentIndexPattern.fields, visualizeGeoFieldTrigger]
-  );
+  const allFields = useMemo(() => {
+    if (!currentIndexPattern) return [];
+    return visualizeGeoFieldTrigger
+      ? currentIndexPattern.fields
+      : currentIndexPattern.fields.filter(
+          ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
+        );
+  }, [currentIndexPattern, visualizeGeoFieldTrigger]);
+
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const availableFieldTypes = uniq([
     ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
@@ -327,13 +327,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   ]);
 
   const fieldInfoUnavailable =
-    existenceFetchFailed || existenceFetchTimeout || currentIndexPattern.hasRestrictions;
+    existenceFetchFailed || existenceFetchTimeout || currentIndexPattern?.hasRestrictions;
 
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
-      const overallField = currentIndexPattern.getFieldByName(field.name);
+      const overallField = currentIndexPattern?.getFieldByName(field.name);
       return (
         overallField &&
         existingFieldsForIndexPattern &&
@@ -503,22 +503,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, []);
 
   const refreshFieldList = useCallback(async () => {
-    const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
-      patterns: [currentIndexPattern.id],
-      cache: {},
-      onIndexPatternRefresh,
-    });
-    indexPatternService.updateDataViewsState({
-      indexPatterns: {
-        ...frame.dataViews.indexPatterns,
-        [currentIndexPattern.id]: newlyMappedIndexPattern[currentIndexPattern.id],
-      },
-    });
+    if (currentIndexPattern) {
+      const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
+        patterns: [currentIndexPattern.id],
+        cache: {},
+        onIndexPatternRefresh,
+      });
+      indexPatternService.updateDataViewsState({
+        indexPatterns: {
+          ...frame.dataViews.indexPatterns,
+          [currentIndexPattern.id]: newlyMappedIndexPattern[currentIndexPattern.id],
+        },
+      });
+    }
     // start a new session so all charts are refreshed
     data.search.session.start();
   }, [
     indexPatternService,
-    currentIndexPattern.id,
+    currentIndexPattern,
     onIndexPatternRefresh,
     frame.dataViews.indexPatterns,
     data.search.session,
@@ -528,7 +530,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
@@ -547,7 +549,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [
       editPermission,
       dataViews,
-      currentIndexPattern.id,
+      currentIndexPattern?.id,
       indexPatternFieldEditor,
       refreshFieldList,
       indexPatternService,
@@ -558,7 +560,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () =>
       editPermission
         ? async (fieldName: string) => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
                 dataView: indexPatternInstance,
@@ -575,7 +577,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           }
         : undefined,
     [
-      currentIndexPattern.id,
+      currentIndexPattern?.id,
       dataViews,
       editPermission,
       indexPatternFieldEditor,
