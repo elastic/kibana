@@ -84,6 +84,7 @@ async function getComponent({
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2 })),
     ...(onAddFilterExists && { onAddFilter: jest.fn() }),
     onAddField: jest.fn(),
+    onEditField: jest.fn(),
     onRemoveField: jest.fn(),
     showFieldStats,
     selected,
@@ -254,5 +255,81 @@ describe('discover sidebar field', function () {
     ).toBe('osx');
     expect(comp.find(EuiProgress)).toHaveLength(2);
     expect(findTestSubject(comp, 'dscFieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
+  });
+  it('should include popover actions', async function () {
+    const field = new DataViewField({
+      name: 'extension.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      aggregatable: true,
+      searchable: true,
+    });
+
+    const { comp, props } = await getComponent({ field, onAddFilterExists: true });
+
+    await act(async () => {
+      const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
+      await fieldItem.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
+
+    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(
+      comp.find('[data-test-subj="fieldPopoverTitle_addField-extension.keyword"]').exists()
+    ).toBeTruthy();
+    expect(
+      comp
+        .find('[data-test-subj="discoverFieldListPanelAddExistFilter-extension.keyword"]')
+        .exists()
+    ).toBeTruthy();
+    expect(
+      comp.find('[data-test-subj="discoverFieldListPanelEdit-extension.keyword"]').exists()
+    ).toBeTruthy();
+    expect(
+      comp.find('[data-test-subj="discoverFieldListPanelDelete-extension.keyword"]').exists()
+    ).toBeFalsy();
+
+    await act(async () => {
+      const fieldItem = findTestSubject(comp, 'fieldPopoverTitle_addField-extension.keyword');
+      await fieldItem.simulate('click');
+      await comp.update();
+    });
+
+    expect(props.onAddField).toHaveBeenCalledWith('extension.keyword');
+
+    await comp.update();
+
+    expect(comp.find(EuiPopover).prop('isOpen')).toBe(false);
+  });
+
+  it('should not include + action for selected fields', async function () {
+    const field = new DataViewField({
+      name: 'extension.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      aggregatable: true,
+      searchable: true,
+    });
+
+    const { comp } = await getComponent({
+      field,
+      onAddFilterExists: true,
+      selected: true,
+    });
+
+    await act(async () => {
+      const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
+      await fieldItem.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
+
+    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(
+      comp.find('[data-test-subj="fieldPopoverTitle_addField-extension.keyword"]').exists()
+    ).toBeFalsy();
   });
 });

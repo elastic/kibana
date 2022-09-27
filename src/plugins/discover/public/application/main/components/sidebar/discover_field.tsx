@@ -319,6 +319,11 @@ function DiscoverFieldComponent({
 
   const customPopoverProps: Partial<FieldPopoverProps> = useMemo(
     () => ({
+      buttonAddFieldToWorkspaceProps: {
+        'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+          defaultMessage: 'Add field as column',
+        }),
+      },
       buttonAddFilterProps: {
         'data-test-subj': `discoverFieldListPanelAddExistFilter-${field.name}`,
       },
@@ -457,7 +462,7 @@ function DiscoverFieldComponent({
       closePopover={() => setOpen(false)}
       data-test-subj="discoverFieldListPanelPopover"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
-      // TODO: introduce Add action but not for selected fields
+      onAddFieldToWorkspace={!selected ? toggleDisplay : undefined}
       onAddFilter={onAddFilter}
       onEditField={onEditField}
       onDeleteField={onDeleteField}

@@ -53,7 +53,7 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',
     {
-      defaultMessage: 'Add "{field}"',
+      defaultMessage: 'Add "{field}" field',
       values: {
         field: field.displayName,
       },
@@ -93,7 +93,7 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
               data-test-subj={`fieldPopoverTitle_addField-${field.name}`}
               aria-label={addFieldToWorkspaceTooltip}
               {...(buttonAddFieldToWorkspaceProps || {})}
-              iconType="plusInCircle"
+              iconType="plusInCircleFilled"
               onClick={() => {
                 closePopover();
                 onAddFieldToWorkspace(field);
@@ -102,25 +102,22 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      {onAddFilter &&
-        field.filterable &&
-        // !dataView.metaFields.includes(field.name) && // TODO: disable for meta fields?
-        !field.scripted && (
-          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addExistsFilter">
-            <EuiToolTip content={buttonAddFilterProps?.['aria-label'] ?? addExistsFilterTooltip}>
-              <EuiButtonIcon
-                data-test-subj={`fieldPopoverTitle_addExistsFilter-${field.name}`}
-                aria-label={addExistsFilterTooltip}
-                {...(buttonAddFilterProps || {})}
-                iconType="filter"
-                onClick={() => {
-                  closePopover();
-                  onAddFilter('_exists_', field.name, '+');
-                }}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
+      {onAddFilter && field.filterable && !field.scripted && (
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addExistsFilter">
+          <EuiToolTip content={buttonAddFilterProps?.['aria-label'] ?? addExistsFilterTooltip}>
+            <EuiButtonIcon
+              data-test-subj={`fieldPopoverTitle_addExistsFilter-${field.name}`}
+              aria-label={addExistsFilterTooltip}
+              {...(buttonAddFilterProps || {})}
+              iconType="filter"
+              onClick={() => {
+                closePopover();
+                onAddFilter('_exists_', field.name, '+');
+              }}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       {onEditField &&
         (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_editField">
