@@ -98,3 +98,10 @@ user without those privileges updates the rule, the rule will no longer
 function. Conversely, if a user with greater or administrator privileges 
 modifies the rule, it will begin running with increased privileges.
 ==============================================
+
+[float]
+[[alerting-ccs-setup]]
+=== CCS
+
+If you want to use alerting rules in a cross-cluster setup, you must configure 
+{es-ref}/remote-clusters-privileges.html#clusters-privileges-ccs-kibana[privileges for cross-cluster search and Kibana]
