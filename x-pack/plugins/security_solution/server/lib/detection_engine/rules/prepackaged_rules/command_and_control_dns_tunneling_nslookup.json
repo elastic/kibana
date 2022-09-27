@@ -47,7 +47,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "has_guide"
   ],
   "threat": [
     {
@@ -80,5 +81,5 @@
     "value": 15
   },
   "type": "threshold",
-  "version": 100
+  "version": 101
 }
