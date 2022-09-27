@@ -5,42 +5,24 @@
  * 2.0.
  */
 
-import fnv from 'fnv-plus';
-import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
-import {
-  describeFrameType,
-  Executable,
-  FileID,
-  StackFrame,
-  StackFrameID,
-  StackTrace,
-  StackTraceID,
-} from './profiling';
+import { ColumnarViewModel } from '@elastic/charts';
 
-interface ColumnarCallerCallee {
-  Label: string[];
-  Value: number[];
-  X: number[];
-  Y: number[];
-  Color: number[];
-  CountInclusive: number[];
-  CountExclusive: number[];
-  ID: string[];
-  FrameID: string[];
-  ExecutableID: string[];
-}
+import { CalleeTree } from './callee';
 
 export interface ElasticFlameGraph {
-  Label: string[];
-  Value: number[];
-  Position: number[];
-  Size: number[];
-  Color: number[];
-  CountInclusive: number[];
-  CountExclusive: number[];
+  Size: number;
+  Edges: number[][];
+
   ID: string[];
+  FrameType: number[];
   FrameID: string[];
   ExecutableID: string[];
+  Label: string[];
+
+  Samples: number[];
+  CountInclusive: number[];
+  CountExclusive: number[];
+
   TotalSeconds: number;
   TotalTraces: number;
   SampledTraces: number;
@@ -99,205 +81,119 @@ function normalize(n: number, lower: number, upper: number): number {
   return (n - lower) / (upper - lower);
 }
 
-function checkIfStringHasParentheses(s: string) {
-  return /\(|\)/.test(s);
-}
+// createFlameGraph encapsulates the tree representation into a serialized form.
+export function createFlameGraph(
+  tree: CalleeTree,
+  totalSeconds: number,
+  totalTraces: number,
+  sampledTraces: number
+): ElasticFlameGraph {
+  const graph: ElasticFlameGraph = {
+    Size: tree.Size,
+    Edges: new Array<number[]>(tree.Size),
 
-function getFunctionName(node: CallerCalleeNode) {
-  return node.FunctionName !== '' && !checkIfStringHasParentheses(node.FunctionName)
-    ? `${node.FunctionName}()`
-    : node.FunctionName;
-}
+    ID: tree.ID.slice(0, tree.Size),
+    Label: tree.Label.slice(0, tree.Size),
+    FrameID: tree.FrameID.slice(0, tree.Size),
+    FrameType: tree.FrameType.slice(0, tree.Size),
+    ExecutableID: tree.FileID.slice(0, tree.Size),
 
-function getExeFileName(node: CallerCalleeNode) {
-  if (node?.ExeFileName === undefined) {
-    return '';
-  }
-  if (node.ExeFileName !== '') {
-    return node.ExeFileName;
-  }
-  return describeFrameType(node.FrameType);
-}
+    Samples: tree.Samples.slice(0, tree.Size),
+    CountInclusive: tree.CountInclusive.slice(0, tree.Size),
+    CountExclusive: tree.CountExclusive.slice(0, tree.Size),
 
-function getLabel(node: CallerCalleeNode) {
-  if (node.FunctionName !== '') {
-    const sourceFilename = node.SourceFilename;
-    const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(node)}: ${getFunctionName(node)} in ${sourceURL} #${node.SourceLine}`;
-  }
-  return getExeFileName(node);
-}
+    TotalSeconds: totalSeconds,
+    TotalTraces: totalTraces,
+    SampledTraces: sampledTraces,
+  };
 
-export class FlameGraph {
-  // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.
-  // N=0: full events table (sampleRate is 1)
-  // N=1: downsampled by 5 (sampleRate is 0.2)
-  // ...
-  sampleRate: number;
-
-  // totalCount is the sum(Count) of all events in the filter range in the
-  // downsampled index we were looking at.
-  // To estimate how many events we have in the full events index: totalCount / sampleRate.
-  // Do the same for single entries in the events array.
-  totalCount: number;
-
-  totalSeconds: number;
-
-  events: Map<StackTraceID, number>;
-  stacktraces: Map<StackTraceID, StackTrace>;
-  stackframes: Map<StackFrameID, StackFrame>;
-  executables: Map<FileID, Executable>;
-
-  constructor({
-    sampleRate,
-    totalCount,
-    events,
-    stackTraces,
-    stackFrames,
-    executables,
-    totalSeconds,
-  }: {
-    sampleRate: number;
-    totalCount: number;
-    events: Map<StackTraceID, number>;
-    stackTraces: Map<StackTraceID, StackTrace>;
-    stackFrames: Map<StackFrameID, StackFrame>;
-    executables: Map<FileID, Executable>;
-    totalSeconds: number;
-  }) {
-    this.sampleRate = sampleRate;
-    this.totalCount = totalCount;
-    this.events = events;
-    this.stacktraces = stackTraces;
-    this.stackframes = stackFrames;
-    this.executables = executables;
-    this.totalSeconds = totalSeconds;
-  }
-
-  private countCallees(root: CallerCalleeNode): number {
-    let numCallees = 1;
-    for (const callee of root.Callees) {
-      numCallees += this.countCallees(callee);
+  for (let i = 0; i < tree.Size; i++) {
+    let j = 0;
+    const nodes = new Array<number>(tree.Edges[i].size);
+    for (const [, n] of tree.Edges[i]) {
+      nodes[j] = n;
+      j++;
     }
-    return numCallees;
+    graph.Edges[i] = nodes;
   }
 
-  // createColumnarCallerCallee flattens the intermediate representation of the diagram
-  // into a columnar format that is more compact than JSON. This representation will later
-  // need to be normalized into the response ultimately consumed by the flamegraph.
-  private createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCallerCallee {
-    const numCallees = this.countCallees(root);
-    const columnar: ColumnarCallerCallee = {
-      Label: new Array<string>(numCallees),
-      Value: new Array<number>(numCallees),
-      X: new Array<number>(numCallees),
-      Y: new Array<number>(numCallees),
-      Color: new Array<number>(numCallees * 4),
-      CountInclusive: new Array<number>(numCallees),
-      CountExclusive: new Array<number>(numCallees),
-      ID: new Array<string>(numCallees),
-      FrameID: new Array<string>(numCallees),
-      ExecutableID: new Array<string>(numCallees),
-    };
+  return graph;
+}
 
-    const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
+// createColumnarViewModel normalizes the columnar representation into a form
+// consumed by the flamegraph in the UI.
+export function createColumnarViewModel(
+  flamegraph: ElasticFlameGraph,
+  assignColors: boolean = true
+): ColumnarViewModel {
+  const numNodes = flamegraph.Size;
+  const xs = new Float32Array(numNodes);
+  const ys = new Float32Array(numNodes);
 
-    let idx = 0;
-    while (queue.length > 0) {
-      const { x, depth, node, parentID } = queue.pop()!;
+  const queue = [{ x: 0, depth: 1, node: 0 }];
 
-      if (x === 0 && depth === 1) {
-        columnar.Label[idx] = 'root: Represents 100% of CPU time.';
-      } else {
-        columnar.Label[idx] = getLabel(node);
+  while (queue.length > 0) {
+    const { x, depth, node } = queue.pop()!;
+
+    xs[node] = x;
+    ys[node] = depth;
+
+    // For a deterministic result we have to walk the callees in a deterministic
+    // order. A deterministic result allows deterministic UI views, something
+    // that users expect.
+    const children = flamegraph.Edges[node].sort((n1, n2) => {
+      if (flamegraph.Samples[n1] > flamegraph.Samples[n2]) {
+        return -1;
       }
-      columnar.Value[idx] = node.Samples;
-      columnar.X[idx] = x;
-      columnar.Y[idx] = depth;
-
-      const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameType, x));
-      const j = 4 * idx;
-      columnar.Color[j] = red;
-      columnar.Color[j + 1] = green;
-      columnar.Color[j + 2] = blue;
-      columnar.Color[j + 3] = alpha;
-
-      columnar.CountInclusive[idx] = node.CountInclusive;
-      columnar.CountExclusive[idx] = node.CountExclusive;
-
-      const id = fnv.fast1a64utf(`${parentID}${node.FrameGroupID}`).toString();
-
-      columnar.ID[idx] = id;
-      columnar.FrameID[idx] = node.FrameID;
-      columnar.ExecutableID[idx] = node.FileID;
-
-      node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
-
-      let delta = 0;
-      for (const callee of node.Callees) {
-        delta += callee.Samples;
+      if (flamegraph.Samples[n1] < flamegraph.Samples[n2]) {
+        return 1;
       }
+      return flamegraph.ID[n1].localeCompare(flamegraph.ID[n2]);
+    });
 
-      for (let i = node.Callees.length - 1; i >= 0; i--) {
-        delta -= node.Callees[i].Samples;
-        queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
-      }
-
-      idx++;
+    let delta = 0;
+    for (const child of children) {
+      delta += flamegraph.Samples[child];
     }
 
-    return columnar;
-  }
-
-  // createElasticFlameGraph normalizes the intermediate columnar representation into the
-  // response ultimately consumed by the flamegraph.
-  private createElasticFlameGraph(columnar: ColumnarCallerCallee): ElasticFlameGraph {
-    const graph: ElasticFlameGraph = {
-      Label: [],
-      Value: [],
-      Position: [],
-      Size: [],
-      Color: [],
-      CountInclusive: [],
-      CountExclusive: [],
-      ID: [],
-      FrameID: [],
-      ExecutableID: [],
-      TotalSeconds: this.totalSeconds,
-      TotalTraces: Math.floor(this.totalCount / this.sampleRate),
-      SampledTraces: this.totalCount,
-    };
-
-    graph.Label = columnar.Label;
-    graph.Value = columnar.Value;
-    graph.Color = columnar.Color;
-    graph.CountInclusive = columnar.CountInclusive;
-    graph.CountExclusive = columnar.CountExclusive;
-    graph.ID = columnar.ID;
-    graph.FrameID = columnar.FrameID;
-    graph.ExecutableID = columnar.ExecutableID;
-
-    const maxX = columnar.Value[0];
-    const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
-
-    for (let i = 0; i < columnar.X.length; i++) {
-      const x = normalize(columnar.X[i], 0, maxX);
-      const y = normalize(maxY - columnar.Y[i], 0, maxY);
-      graph.Position.push(x, y);
+    for (let i = children.length - 1; i >= 0; i--) {
+      delta -= flamegraph.Samples[children[i]];
+      queue.push({ x: x + delta, depth: depth + 1, node: children[i] });
     }
-
-    graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
-
-    return graph;
   }
 
-  toElastic(): ElasticFlameGraph {
-    const root = createCallerCalleeDiagram(
-      this.events,
-      this.stacktraces,
-      this.stackframes,
-      this.executables
-    );
-    return this.createElasticFlameGraph(this.createColumnarCallerCallee(root));
+  const colors = new Float32Array(numNodes * 4);
+
+  if (assignColors) {
+    for (let i = 0; i < numNodes; i++) {
+      const rgba = rgbToRGBA(frameTypeToRGB(flamegraph.FrameType[i], xs[i]));
+      colors.set(rgba, 4 * i);
+    }
   }
+
+  const position = new Float32Array(numNodes * 2);
+  const maxX = flamegraph.Samples[0];
+  const maxY = ys.reduce((max, n) => (n > max ? n : max), 0);
+
+  for (let i = 0; i < numNodes; i++) {
+    const j = 2 * i;
+    position[j] = normalize(xs[i], 0, maxX);
+    position[j + 1] = normalize(maxY - ys[i], 0, maxY);
+  }
+
+  const size = new Float32Array(numNodes);
+
+  for (let i = 0; i < numNodes; i++) {
+    size[i] = normalize(flamegraph.Samples[i], 0, maxX);
+  }
+
+  return {
+    label: flamegraph.Label.slice(0, numNodes),
+    value: Float64Array.from(flamegraph.Samples.slice(0, numNodes)),
+    color: colors,
+    position0: position,
+    position1: position,
+    size0: size,
+    size1: size,
+  } as ColumnarViewModel;
 }

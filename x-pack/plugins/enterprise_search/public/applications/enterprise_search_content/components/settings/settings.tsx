@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { SettingsLogic } from './settings_logic';
@@ -75,7 +76,7 @@ export const Settings: React.FC = () => {
           }
         )}
         link={
-          <EuiLink href="TODO TODO TODO TODO" external>
+          <EuiLink href={docLinks.contentExtraction} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.link', {
               defaultMessage: 'Learn more about content extraction',
             })}
@@ -132,7 +133,7 @@ export const Settings: React.FC = () => {
           }
         )}
         link={
-          <EuiLink href="TODO TODO TODO TODO" external>
+          <EuiLink href={docLinks.contentExtraction} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
               defaultMessage: 'Learn more about content extraction',
             })}

@@ -11,7 +11,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { FilterStateStore } from '@kbn/es-query';

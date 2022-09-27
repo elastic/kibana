@@ -31,6 +31,7 @@ export interface LayerActionsProps {
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerType?: LayerType;
+  isTextBasedLanguage?: boolean;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
 }
 
@@ -111,6 +112,7 @@ export const LayerActions = (props: LayerActionsProps) => {
           execute: props.onCloneLayer,
           layerIndex: props.layerIndex,
           activeVisualization: props.activeVisualization,
+          isTextBasedLanguage: props.isTextBasedLanguage,
         }),
         getRemoveLayerAction({
           execute: props.onRemoveLayer,

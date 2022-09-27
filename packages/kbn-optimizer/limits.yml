@@ -71,7 +71,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 36000
+  lens: 36500
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -108,6 +108,7 @@ pageLoadAssetSize:
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 29684
+  stackConnectors: 36314
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586

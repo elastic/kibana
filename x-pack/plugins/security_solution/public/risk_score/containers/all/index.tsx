@@ -163,6 +163,11 @@ const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
     ]
   );
 
+  const requestTimerange = useMemo(
+    () => (timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined),
+    [timerange]
+  );
+
   const riskScoreRequest = useMemo(
     () =>
       defaultIndex
@@ -178,9 +183,19 @@ const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
                   }
                 : undefined,
             sort,
+            timerange: onlyLatest ? undefined : requestTimerange,
           }
         : null,
-    [cursorStart, defaultIndex, factoryQueryType, filterQuery, querySize, sort]
+    [
+      cursorStart,
+      defaultIndex,
+      factoryQueryType,
+      filterQuery,
+      querySize,
+      sort,
+      requestTimerange,
+      onlyLatest,
+    ]
   );
 
   useEffect(() => {
@@ -192,10 +207,25 @@ const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && isLicenseValid && isEnabled && !isDeprecated) {
+    if (
+      !skip &&
+      !isDeprecatedLoading &&
+      riskScoreRequest != null &&
+      isLicenseValid &&
+      isEnabled &&
+      !isDeprecated
+    ) {
       search(riskScoreRequest);
     }
-  }, [isEnabled, isDeprecated, isLicenseValid, riskScoreRequest, search, skip]);
+  }, [
+    isEnabled,
+    isDeprecated,
+    isLicenseValid,
+    isDeprecatedLoading,
+    riskScoreRequest,
+    search,
+    skip,
+  ]);
 
   return [loading || isDeprecatedLoading, riskScoreResponse];
 };

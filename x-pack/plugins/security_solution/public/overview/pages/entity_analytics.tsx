@@ -27,15 +27,15 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
 
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   return (
     <>
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
             <HeaderPage title={ENTITY_ANALYTICS}>
-              {isPlatinumOrTrialLicense && (
+              {isPlatinumOrTrialLicense && capabilitiesFetched && (
                 <SiemSearchBar
                   id={InputsModelId.global}
                   indexPattern={indexPattern}
@@ -44,14 +44,15 @@ const EntityAnalyticsComponent = () => {
                 />
               )}
             </HeaderPage>
-            {isPlatinumOrTrialLicense ? (
-              isSourcererLoading ? (
-                <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
-              ) : (
-                <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-                  <EuiFlexItem>
-                    <EntityAnalyticsHeader />
-                  </EuiFlexItem>
+            {!isPlatinumOrTrialLicense && capabilitiesFetched ? (
+              <Paywall featureDescription={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
+            ) : isSourcererLoading ? (
+              <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
+            ) : (
+              <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
+                <EuiFlexItem>
+                  <EntityAnalyticsHeader />
+                </EuiFlexItem>
 
                   <EuiFlexItem>
                     <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
@@ -61,13 +62,10 @@ const EntityAnalyticsComponent = () => {
                     <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
                   </EuiFlexItem>
 
-                  <EuiFlexItem>
-                    <EntityAnalyticsAnomalies />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )
-            ) : (
-              <Paywall featureDescription={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
+                <EuiFlexItem>
+                  <EntityAnalyticsAnomalies />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </SecuritySolutionPageWrapper>
         </>

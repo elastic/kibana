@@ -27,7 +27,7 @@ export const useRiskScoreFeatureStatus = (
   riskEntity: RiskScoreEntity.host | RiskScoreEntity.user,
   defaultIndex?: string
 ): RiskScoresFeatureStatus => {
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.GET_RISK_SCORE_DEPRECATED,
@@ -61,7 +61,7 @@ export const useRiskScoreFeatureStatus = (
 
   return {
     error,
-    isLoading,
+    isLoading: isLoading || !capabilitiesFetched || defaultIndex == null,
     refetch: searchIndexStatus,
     isLicenseValid: isPlatinumOrTrialLicense,
     ...response,
