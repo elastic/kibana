@@ -53,8 +53,7 @@ interface SearchBarProps {
   // being created when "onAddExceptionClick" is invoked
   listType: ExceptionListTypeEnum;
   isSearching?: boolean;
-  searchBarDataTestSubj?: string;
-  buttonDataTestSubj?: string;
+  dataTestSubj?: string;
   filters?: SearchFilterConfig[]; // TODO about filters
   onSearch: (arg: GetExceptionItemProps) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
@@ -65,8 +64,7 @@ const SearchBarComponent: FC<SearchBarProps> = ({
   canAddException,
   listType,
   isSearching,
-  searchBarDataTestSubj,
-  buttonDataTestSubj,
+  dataTestSubj,
   filters = [],
   onSearch,
   onAddExceptionClick,
@@ -91,7 +89,7 @@ const SearchBarComponent: FC<SearchBarProps> = ({
             placeholder: placeholdertext,
             incremental: false,
             schema: ITEMS_SCHEMA,
-            'data-test-subj': searchBarDataTestSubj,
+            'data-test-subj': `${dataTestSubj || ''}searchBar`,
           }}
           filters={filters}
           onChange={handleOnSearch}
@@ -100,7 +98,7 @@ const SearchBarComponent: FC<SearchBarProps> = ({
       {!canAddException && (
         <EuiFlexItem grow={false}>
           <EuiButton
-            data-test-subj={buttonDataTestSubj}
+            data-test-subj={`${dataTestSubj || ''}Button`}
             onClick={handleAddException}
             isDisabled={isSearching}
             fill

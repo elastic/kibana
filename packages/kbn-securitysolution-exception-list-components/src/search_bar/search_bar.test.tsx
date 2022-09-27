@@ -22,11 +22,11 @@ describe('SearchBar', () => {
         onAddExceptionClick={jest.fn()}
         isSearching={false}
         canAddException
-        buttonDataTestSubj="searchBarAddExceptionBtn"
+        dataTestSubj="searchBar"
       />
     );
 
-    expect(wrapper.queryByTestId('searchBarAddExceptionBtn')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('searchBarButton')).not.toBeInTheDocument();
   });
 
   it('it invokes "onAddExceptionClick" when user selects to add an exception item', () => {
@@ -38,13 +38,12 @@ describe('SearchBar', () => {
         isSearching={false}
         onSearch={jest.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
-        buttonDataTestSubj="searchBarAddExceptionBtn"
-        searchBarDataTestSubj="searchBar"
+        dataTestSubj="searchBar"
         addExceptionButtonText="Add rule exception"
       />
     );
 
-    const searchBtn = wrapper.getByTestId('searchBarAddExceptionBtn');
+    const searchBtn = wrapper.getByTestId('searchBarButton');
 
     fireEvent.click(searchBtn);
     expect(searchBtn).toHaveTextContent('Add rule exception');
@@ -60,13 +59,12 @@ describe('SearchBar', () => {
         isSearching={false}
         onSearch={jest.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
-        buttonDataTestSubj="searchBarAddExceptionBtn"
-        searchBarDataTestSubj="searchBar"
+        dataTestSubj="searchBar"
         addExceptionButtonText="Add endpoint exception"
       />
     );
 
-    const searchBtn = wrapper.getByTestId('searchBarAddExceptionBtn');
+    const searchBtn = wrapper.getByTestId('searchBarButton');
 
     fireEvent.click(searchBtn);
     expect(searchBtn).toHaveTextContent('Add endpoint exception');
@@ -81,8 +79,6 @@ describe('SearchBar', () => {
         isSearching={false}
         onSearch={mockHandleOnSearch}
         onAddExceptionClick={jest.fn()}
-        buttonDataTestSubj="searchBarAddExceptionBtn"
-        searchBarDataTestSubj="searchBar"
         addExceptionButtonText="Add endpoint exception"
       />
     );
