@@ -126,14 +126,15 @@ export const updateDataView = async ({
     dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
-  // if (changeCount > 1) {
+  if (changeCount < 1) {
+    return dataView;
+  }
+
   await dataViewsService.updateSavedObject(dataView);
 
   if (doRefreshFields && refreshFields) {
     await dataViewsService.refreshFields(dataView);
   }
-  //  }
-
   return dataView;
 };
 
