@@ -70,11 +70,11 @@ describe(`installRiskScoreModule - ${RiskScoreEntity.host}`, () => {
   });
 
   it(`Create Index: ml_${RiskScoreEntity.host}_risk_score_${mockSpaceId}`, async () => {
-    expect((api.createIndices as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
+    expect((api.createIndex as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
   it(`Create Index: ml_${RiskScoreEntity.host}_risk_score_latest_${mockSpaceId}`, async () => {
-    expect((api.createIndices as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
+    expect((api.createIndex as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
   it(`Create Transform: ml_${RiskScoreEntity.host}riskscore_pivot_transform_${mockSpaceId}`, async () => {
@@ -132,11 +132,11 @@ describe(`installRiskScoreModule - ${RiskScoreEntity.user}`, () => {
   });
 
   it(`Create Index: ml_${RiskScoreEntity.user}_risk_score_${mockSpaceId}`, async () => {
-    expect((api.createIndices as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
+    expect((api.createIndex as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
   it(`Create Index: ml_${RiskScoreEntity.user}_risk_score_latest_${mockSpaceId}`, async () => {
-    expect((api.createIndices as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
+    expect((api.createIndex as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
   it(`Create Transform: ml_${RiskScoreEntity.user}riskscore_pivot_transform_${mockSpaceId}`, async () => {

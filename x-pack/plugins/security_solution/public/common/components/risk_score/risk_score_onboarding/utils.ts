@@ -12,7 +12,7 @@ import type { inputsModel } from '../../../store';
 
 import {
   createIngestPipeline,
-  createIndices,
+  createIndex,
   createStoredScript,
   createTransform,
   startTransforms,
@@ -125,7 +125,7 @@ const installHostRiskScoreModule = async ({
    * console_templates/enable_host_risk_score.console
    * Step 6 create ml_host_risk_score_{spaceId} index
    */
-  await createIndices({
+  await createIndex({
     http,
     theme,
     renderDocLink,
@@ -154,7 +154,7 @@ const installHostRiskScoreModule = async ({
    * console_templates/enable_host_risk_score.console
    * Step 9 create ml_host_risk_score_latest_{spaceId} index
    */
-  await createIndices({
+  await createIndex({
     http,
     theme,
     renderDocLink,
@@ -291,7 +291,7 @@ const installUserRiskScoreModule = async ({
    * console_templates/enable_user_risk_score.console
    * Step 5 create ml_user_risk_score_{spaceId} index
    */
-  await createIndices({
+  await createIndex({
     http,
     theme,
     renderDocLink,
@@ -320,7 +320,7 @@ const installUserRiskScoreModule = async ({
    * console_templates/enable_user_risk_score.console
    * Step 8 create ml_user_risk_score_latest_{spaceId} index
    */
-  await createIndices({
+  await createIndex({
     http,
     theme,
     renderDocLink,

@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/securitysolution-io-ts-list-types';
-import { createIndices, deleteIndices } from './indices';
+import { createIndex, deleteIndices } from './indices';
 
 const mockRequest = jest.fn();
 const mockHttp = {
@@ -26,12 +26,12 @@ const mockNotification = {
 
 const mockRenderDocLink = jest.fn();
 
-describe('createIndices', () => {
+describe('createIndex', () => {
   const mockOptions = { index: 'test', mappings: {} };
 
   beforeAll(async () => {
     mockRequest.mockRejectedValue({ body: { message: 'test error' } });
-    await createIndices({
+    await createIndex({
       http: mockHttp,
       notifications: mockNotification,
       options: mockOptions,

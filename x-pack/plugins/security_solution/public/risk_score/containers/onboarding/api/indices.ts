@@ -13,7 +13,7 @@ import {
   RISK_SCORE_DELETE_INDICES,
 } from '../../../../../common/constants';
 
-export async function createIndices({
+export async function createIndex({
   errorMessage,
   http,
   notifications,
