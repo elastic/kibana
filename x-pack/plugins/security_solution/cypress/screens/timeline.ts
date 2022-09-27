@@ -215,6 +215,16 @@ export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]'
 
 export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
 
+export const QUERYBAR_MENU_POPOVER = '[data-test-subj="queryBarMenuPopover"]';
+
+export const TIMELINE_SHOWQUERYBARMENU_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="showQueryBarMenu"]`;
+
+export const TIMELINE_SWITCHQUERYLANGUAGE_BUTTON = '[data-test-subj="switchQueryLanguageButton"]';
+
+export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMenuItem"]';
+
+export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
+
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
