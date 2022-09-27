@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../common/data_views';
+import { DataViewsService, DataView } from '../../common/data_views';
 import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
@@ -126,15 +126,15 @@ export const updateDataView = async ({
     dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
-  if (changeCount < 1) {
-    return dataView;
+  if (changeCount > 1) {
+    const result = (await dataViewsService.updateSavedObject(dataView)) as DataView;
+
+    if (doRefreshFields && refreshFields) {
+      await dataViewsService.refreshFields(dataView);
+    }
+    return result;
   }
 
-  await dataViewsService.updateSavedObject(dataView);
-
-  if (doRefreshFields && refreshFields) {
-    await dataViewsService.refreshFields(dataView);
-  }
   return dataView;
 };
 
