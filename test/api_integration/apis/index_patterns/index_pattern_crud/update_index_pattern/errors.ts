@@ -66,7 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           expect(response2.status).to.be(200);
-          expect(response2.body.statusCode).to.be(200);
         });
       });
     });
