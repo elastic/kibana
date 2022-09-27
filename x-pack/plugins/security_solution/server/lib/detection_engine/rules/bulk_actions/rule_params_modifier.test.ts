@@ -367,8 +367,8 @@ describe('ruleParamsModifier', () => {
         },
       ]);
 
-      // @ts-expect-error
-      expect(editedRuleParams.interval).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((editedRuleParams as any).interval).toBeUndefined();
       expect(editedRuleParams.meta).toStrictEqual({
         from: '1m',
       });
