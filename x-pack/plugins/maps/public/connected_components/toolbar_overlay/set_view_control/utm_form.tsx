@@ -183,7 +183,7 @@ export class UtmForm extends Component<Props, State> {
             value={this.state.zoom}
             onChange={this._onZoomChange}
             isInvalid={isZoomInvalid}
-            data-test-subj="latitudeInput"
+            data-test-subj="zoomInput"
           />
         </EuiFormRow>
 
