@@ -106,6 +106,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const button = await testSubjects.exists('visualizeEditInLensButton');
         expect(button).to.eql(true);
       });
+
+      it('should convert to Lens', async () => {
+        const button = await testSubjects.find('visualizeEditInLensButton');
+        await button.click();
+        await lens.waitForVisualization('mtrVis');
+
+        const metricData = await lens.getMetricVisualizationData();
+        expect(metricData[0].title).to.eql('Count of records');
+      });
     });
 
     describe('Dashboard to TSVB to Lens', () => {
