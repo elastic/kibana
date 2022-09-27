@@ -22,7 +22,7 @@ import {
 } from '.';
 import { layerTypes } from '../../common';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
-import { DatasourceMap, VisualizationMap } from '../types';
+import { DatasourceMap, Visualization, VisualizationMap } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
 import { LensAppState } from './types';
 
@@ -226,7 +226,11 @@ describe('lensSlice', () => {
             ),
           removeLayer: (layerIds: unknown, layerId: string) =>
             (layerIds as string[]).filter((id: string) => id !== layerId),
-          insertLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
+          insertLayer: (layerIds: unknown, layerId: string, layersToLinkTo: string[]) => [
+            ...(layerIds as string[]),
+            layerId,
+            ...layersToLinkTo,
+          ],
           getCurrentIndexPatternId: jest.fn(() => 'indexPattern1'),
         };
       };
@@ -253,9 +257,10 @@ describe('lensSlice', () => {
           removeLayer: (layerIds: unknown, layerId: string) =>
             (layerIds as string[]).filter((id: string) => id !== layerId),
           getLayerIds: (layerIds: unknown) => layerIds as string[],
+          getLayersToLinkTo: (state, newLayerId) => ['linked-layer-id'],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
           getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
-        },
+        } as Partial<Visualization>,
       };
 
       let customStore: LensRootStore;
@@ -293,7 +298,11 @@ describe('lensSlice', () => {
         const state = customStore.getState().lens;
 
         expect(state.visualization.state).toEqual(['layer1', 'layer2', 'foo']);
-        expect(state.datasourceStates.testDatasource.state).toEqual(['layer1', 'foo']);
+        expect(state.datasourceStates.testDatasource.state).toEqual([
+          'layer1',
+          'foo',
+          'linked-layer-id',
+        ]);
         expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
         expect(state.stagedPreview).not.toBeDefined();
       });

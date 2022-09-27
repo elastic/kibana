@@ -1551,7 +1551,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
+      expect(indexPatternDatasource.insertLayer(state, 'newLayer', ['link-to-id'])).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -1559,6 +1559,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
+            linkToLayers: ['link-to-id'],
           },
         },
       });

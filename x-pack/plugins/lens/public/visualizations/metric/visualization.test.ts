@@ -655,6 +655,13 @@ describe('metric visualization', () => {
     ]);
   });
 
+  test('getLayersToLinkTo', () => {
+    expect(
+      visualization.getLayersToLinkTo!(fullStateWTrend, fullStateWTrend.trendlineLayerId)
+    ).toEqual([fullStateWTrend.layerId]);
+    expect(visualization.getLayersToLinkTo!(fullStateWTrend, 'foo-id')).toEqual([]);
+  });
+
   it('gives a description', () => {
     expect(visualization.getDescription(fullState)).toMatchInlineSnapshot(`
       Object {

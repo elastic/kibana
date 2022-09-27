@@ -886,11 +886,15 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           .getSupportedLayers(visualizationState, framePublicAPI)
           .find(({ type }) => type === layerType) || {};
 
+      const layersToLinkTo =
+        activeVisualization.getLayersToLinkTo?.(visualizationState, layerId) ?? [];
+
       const datasourceState =
         !noDatasource && activeDatasource
           ? activeDatasource.insertLayer(
               state.datasourceStates[state.activeDatasourceId].state,
-              layerId
+              layerId,
+              layersToLinkTo
             )
           : state.datasourceStates[state.activeDatasourceId].state;
 

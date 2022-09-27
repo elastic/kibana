@@ -260,7 +260,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getCurrentIndexPatternId: (state: T) => string;
 
-  insertLayer: (state: T, newLayerId: string) => T;
+  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   cloneLayer: (
@@ -960,6 +960,10 @@ export interface Visualization<T = unknown, P = unknown> {
     hideFromMenu?: boolean;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
+  /**
+   * Get the layers this one should be linked to (currently that means just keeping the data view in sync)
+   */
+  getLayersToLinkTo?: (state: T, newLayerId: string) => string[];
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 

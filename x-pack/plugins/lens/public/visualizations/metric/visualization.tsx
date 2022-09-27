@@ -447,6 +447,10 @@ export const getMetricVisualization = ({
     return newState;
   },
 
+  getLayersToLinkTo(state, newLayerId: string): string[] {
+    return newLayerId === state.trendlineLayerId ? [state.layerId] : [];
+  },
+
   toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 

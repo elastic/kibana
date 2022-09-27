@@ -89,6 +89,7 @@ import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
+import { IndexPatternLayer } from '..';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -180,12 +181,12 @@ export function getIndexPatternDatasource({
       return state.currentIndexPatternId;
     },
 
-    insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
+    insertLayer(state, newLayerId, linkToLayers) {
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(state.currentIndexPatternId),
+          [newLayerId]: blankLayer(state.currentIndexPatternId, linkToLayers),
         },
       };
     },
@@ -212,7 +213,7 @@ export function getIndexPatternDatasource({
         ...state,
         layers: {
           ...state.layers,
-          [layerId]: blankLayer(state.currentIndexPatternId),
+          [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
         },
       };
     },
@@ -480,9 +481,18 @@ export function getIndexPatternDatasource({
     onRefreshIndexPattern,
     onIndexPatternChange(state, indexPatterns, indexPatternId, layerId) {
       if (layerId) {
+        const layersToChange = [
+          layerId,
+          ...Object.entries(state.layers)
+            .map(([possiblyLinkedId, layer]) =>
+              layer.linkToLayers?.includes(layerId) ? possiblyLinkedId : ''
+            )
+            .filter(Boolean),
+        ];
+
         return changeLayerIndexPattern({
           indexPatternId,
-          layerId,
+          layerIds: layersToChange,
           state,
           replaceIfPossible: true,
           storage,
@@ -778,9 +788,10 @@ export function getIndexPatternDatasource({
   return indexPatternDatasource;
 }
 
-function blankLayer(indexPatternId: string) {
+function blankLayer(indexPatternId: string, linkToLayers?: string[]): IndexPatternLayer {
   return {
     indexPatternId,
+    linkToLayers,
     columns: {},
     columnOrder: [],
   };
