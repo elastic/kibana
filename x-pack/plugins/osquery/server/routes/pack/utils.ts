@@ -57,7 +57,9 @@ export const convertSOQueriesToPack = (
             : { ecs_mapping }
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
-        ...(options?.removeResultType ? resultType : { snapshot, removed }),
+        ...(options?.removeResultType
+          ? resultType
+          : { ...(snapshot ? { snapshot } : {}), ...(removed ? { removed } : {}) }),
       };
 
       return acc;

@@ -12,7 +12,7 @@ import { AddToCaseButton } from './add_to_cases_button';
 
 const CASES_OWNER: string[] = [];
 
-export const AddToCaseWrapper: React.FC<AddToCaseButtonProps> = (props) => {
+export const AddToCaseWrapper: React.FC<AddToCaseButtonProps> = React.memo((props) => {
   const { cases } = useKibana().services;
   const casePermissions = cases.helpers.canUseCases();
   const CasesContext = cases.ui.getCasesContext();
@@ -22,4 +22,6 @@ export const AddToCaseWrapper: React.FC<AddToCaseButtonProps> = (props) => {
       <AddToCaseButton {...props} />{' '}
     </CasesContext>
   );
-};
+});
+
+AddToCaseWrapper.displayName = 'AddToCaseWrapper';
