@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../console/components/console_manager/mocks';
+} from '../../console/components/console_manager/mocks';
 import React from 'react';
-import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../console/mocks';
+import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_actions_console_commands';
+import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import { getDeferred } from '../mocks';
-import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
+import { getDeferred } from '../../mocks';
+import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
 
-describe('When using isolate action from response actions console', () => {
+describe('When using the release action from response actions console', () => {
   let render: (
     capabilities?: ResponderCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -63,28 +63,29 @@ describe('When using isolate action from response actions console', () => {
 
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'isolate');
+    enterConsoleCommand(renderResult, 'release');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
     );
   });
 
-  it('should call `isolate` api when command is entered', async () => {
+  it('should call `release` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
   });
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate --comment "This is a comment"');
+    enterConsoleCommand(renderResult, 'release --comment "This is a comment"');
 
     await waitFor(() => {
-      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledWith(
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('This is a comment'),
         })
@@ -94,32 +95,32 @@ describe('When using isolate action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate --comment "one" --comment "two"');
+    enterConsoleCommand(renderResult, 'release --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
     );
   });
 
-  it('should call the action status api after creating the `isolate` request', async () => {
+  it('should call the action status api after creating the `release` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
   });
 
-  it('should show success when `isolate` action completes with no errors', async () => {
+  it('should show success when `release` action completes with no errors', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('isolateSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('releaseSuccessCallout')).toBeTruthy();
     });
   });
 
-  it('should show error if isolate failed to complete successfully', async () => {
+  it('should show error if release failed to complete successfully', async () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
@@ -127,10 +128,10 @@ describe('When using isolate action from response actions console', () => {
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    enterConsoleCommand(renderResult, 'release');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('releaseErrorCallout').textContent).toMatch(
         /error one \| error two/
       );
     });
@@ -138,18 +139,18 @@ describe('When using isolate action from response actions console', () => {
 
   it('should create action request and store id even if console is closed prior to request api response', async () => {
     const deferrable = getDeferred();
-    apiMocks.responseProvider.isolateHost.mockDelay.mockReturnValue(deferrable.promise);
+    apiMocks.responseProvider.releaseHost.mockDelay.mockReturnValue(deferrable.promise);
     await render();
 
     // enter command
-    enterConsoleCommand(renderResult, 'isolate');
+    enterConsoleCommand(renderResult, 'release');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
     // Release API response
     deferrable.resolve();
     await waitFor(() => {
-      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
     });
 
     // open console
@@ -166,10 +167,10 @@ describe('When using isolate action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, 'isolate');
+        enterConsoleCommand(response, 'release');
 
         await waitFor(() => {
-          expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+          expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
         });
 
         // Hide the console
@@ -179,11 +180,11 @@ describe('When using isolate action from response actions console', () => {
       };
     });
 
-    it('should NOT send the `isolate` request again', async () => {
+    it('should NOT send the `release` request again', async () => {
       await render();
       await consoleManagerMockAccess.openRunningConsole();
 
-      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
     });
 
     it('should continue to check action status when still pending', async () => {

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../console/components/console_manager/mocks';
+} from '../../console/components/console_manager/mocks';
 import React from 'react';
-import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../console/mocks';
+import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_actions_console_commands';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
+import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { getDeferred } from '../../mocks';
+import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
 
-describe('When using processes action from response actions console', () => {
+describe('When using isolate action from response actions console', () => {
   let render: (
     capabilities?: ResponderCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -60,30 +61,30 @@ describe('When using processes action from response actions console', () => {
     };
   });
 
-  it('should show an error if the `running_processes` capability is not present in the endpoint', async () => {
+  it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'isolate');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
     );
   });
 
-  it('should call `running-procs` api when command is entered', async () => {
+  it('should call `isolate` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(apiMocks.responseProvider.processes).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
     });
   });
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes --comment "This is a comment"');
+    enterConsoleCommand(renderResult, 'isolate --comment "This is a comment"');
 
     await waitFor(() => {
-      expect(apiMocks.responseProvider.processes).toHaveBeenCalledWith(
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('This is a comment'),
         })
@@ -93,32 +94,32 @@ describe('When using processes action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes --comment "one" --comment "two"');
+    enterConsoleCommand(renderResult, 'isolate --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
     );
   });
 
-  it('should call the action status api after creating the `processes` request', async () => {
+  it('should call the action status api after creating the `isolate` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
   });
 
-  it('should show success when `processes` action completes with no errors', async () => {
+  it('should show success when `isolate` action completes with no errors', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getProcessesSuccessCallout')).toBeTruthy();
+      expect(renderResult.getByTestId('isolateSuccessCallout')).toBeTruthy();
     });
   });
 
-  it('should show error if get processes failed to complete successfully', async () => {
+  it('should show error if isolate failed to complete successfully', async () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
@@ -126,28 +127,36 @@ describe('When using processes action from response actions console', () => {
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getProcessesErrorCallout').textContent).toMatch(
+      expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
         /error one \| error two/
       );
     });
   });
 
-  it('should show error if get processes request failed', async () => {
-    // FIXME: have to identify this type error
-    apiMocks.responseProvider.processes.mockRejectedValueOnce({
-      status: 500,
-      message: 'this is an error',
-    } as never);
+  it('should create action request and store id even if console is closed prior to request api response', async () => {
+    const deferrable = getDeferred();
+    apiMocks.responseProvider.isolateHost.mockDelay.mockReturnValue(deferrable.promise);
     await render();
-    enterConsoleCommand(renderResult, 'processes');
 
+    // enter command
+    enterConsoleCommand(renderResult, 'isolate');
+    // hide console
+    await consoleManagerMockAccess.hideOpenedConsole();
+
+    // Release API response
+    deferrable.resolve();
     await waitFor(() => {
-      expect(renderResult.getByTestId('performGetProcessesErrorCallout').textContent).toMatch(
-        /this is an error/
-      );
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+    });
+
+    // open console
+    await consoleManagerMockAccess.openRunningConsole();
+    // status should be updating
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails.mock.calls.length).toBeGreaterThan(0);
     });
   });
 
@@ -157,10 +166,10 @@ describe('When using processes action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, 'processes');
+        enterConsoleCommand(response, 'isolate');
 
         await waitFor(() => {
-          expect(apiMocks.responseProvider.processes).toHaveBeenCalledTimes(1);
+          expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
         });
 
         // Hide the console
@@ -170,11 +179,11 @@ describe('When using processes action from response actions console', () => {
       };
     });
 
-    it('should NOT send the `processes` request again', async () => {
+    it('should NOT send the `isolate` request again', async () => {
       await render();
       await consoleManagerMockAccess.openRunningConsole();
 
-      expect(apiMocks.responseProvider.processes).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
     });
 
     it('should continue to check action status when still pending', async () => {
@@ -194,8 +203,7 @@ describe('When using processes action from response actions console', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139707
-    it.skip('should display completion output if done (no additional API calls)', async () => {
+    it('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
