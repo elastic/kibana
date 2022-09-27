@@ -442,6 +442,8 @@ function DiscoverFieldComponent({
       closePopover={() => setOpen(false)}
       data-test-subj="discoverFieldListPanelPopover"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
+      // TODO: introduce Add action but not for selected fields
+      // TODO: should we preserve previous data-test-subj for buttons?
       onAddFilter={onAddFilter}
       onEditField={onEditField}
       onDeleteField={onDeleteField}

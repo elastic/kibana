@@ -7,12 +7,16 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiPopoverProps } from '@elastic/eui';
+import { EuiPopover, EuiPopoverProps, EuiPopoverTitle } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldPopoverTitle, FieldPopoverTitleProps } from './field_popover_title';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   field: DataViewField;
+  buttonAddFieldToWorkspaceProps?: FieldPopoverTitleProps['buttonAddFieldToWorkspaceProps'];
+  buttonAddFilterProps?: FieldPopoverTitleProps['buttonAddFilterProps'];
+  buttonEditFieldProps?: FieldPopoverTitleProps['buttonEditFieldProps'];
+  buttonDeleteFieldProps?: FieldPopoverTitleProps['buttonDeleteFieldProps'];
   onAddFilter?: FieldPopoverTitleProps['onAddFilter'];
   onAddFieldToWorkspace?: FieldPopoverTitleProps['onAddFieldToWorkspace'];
   onEditField?: FieldPopoverTitleProps['onEditField'];
@@ -23,6 +27,10 @@ const FieldPopover: React.FC<FieldPopoverProps> = ({
   isOpen,
   closePopover,
   field,
+  buttonAddFieldToWorkspaceProps,
+  buttonAddFilterProps,
+  buttonEditFieldProps,
+  buttonDeleteFieldProps,
   onAddFilter,
   onAddFieldToWorkspace,
   onEditField,
@@ -30,6 +38,21 @@ const FieldPopover: React.FC<FieldPopoverProps> = ({
   children,
   ...otherPopoverProps
 }) => {
+  const title = (
+    <FieldPopoverTitle
+      field={field}
+      closePopover={closePopover}
+      buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+      buttonAddFilterProps={buttonAddFilterProps}
+      buttonEditFieldProps={buttonEditFieldProps}
+      buttonDeleteFieldProps={buttonDeleteFieldProps}
+      onAddFilter={onAddFilter}
+      onAddFieldToWorkspace={onAddFieldToWorkspace}
+      onEditField={onEditField}
+      onDeleteField={onDeleteField}
+    />
+  );
+
   return (
     <EuiPopover
       ownFocus
@@ -37,18 +60,11 @@ const FieldPopover: React.FC<FieldPopoverProps> = ({
       closePopover={closePopover}
       display="block"
       anchorPosition="rightUp"
-      data-test-subj="unifiedFieldList_fieldPopover"
-      panelClassName="unifiedFieldList_fieldPopoverPanel"
+      data-test-subj="fieldPopover"
+      panelClassName="fieldPopoverPanel"
       {...otherPopoverProps}
     >
-      <FieldPopoverTitle
-        field={field}
-        closePopover={closePopover}
-        onAddFilter={onAddFilter}
-        onAddFieldToWorkspace={onAddFieldToWorkspace}
-        onEditField={onEditField}
-        onDeleteField={onDeleteField}
-      />
+      {children ? <EuiPopoverTitle>{title}</EuiPopoverTitle> : title}
       {isOpen && children}
     </EuiPopover>
   );

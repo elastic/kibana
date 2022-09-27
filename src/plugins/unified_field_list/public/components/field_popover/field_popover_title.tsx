@@ -9,9 +9,9 @@
 import React from 'react';
 import {
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopoverTitle,
   EuiPopoverProps,
   EuiToolTip,
   EuiTitle,
@@ -28,8 +28,12 @@ const titleStyles = css`
 export interface FieldPopoverTitleProps {
   field: DataViewField;
   closePopover: EuiPopoverProps['closePopover'];
-  onAddFilter?: AddFieldFilterHandler;
+  buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
+  buttonAddFilterProps?: Partial<EuiButtonIconProps>;
+  buttonEditFieldProps?: Partial<EuiButtonIconProps>;
+  buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
+  onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
 }
@@ -37,15 +41,19 @@ export interface FieldPopoverTitleProps {
 export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
   field,
   closePopover,
-  onAddFilter,
+  buttonAddFieldToWorkspaceProps,
+  buttonAddFilterProps,
+  buttonEditFieldProps,
+  buttonDeleteFieldProps,
   onAddFieldToWorkspace,
+  onAddFilter,
   onEditField,
   onDeleteField,
 }) => {
-  const addFieldToWorkspace = i18n.translate(
+  const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',
     {
-      defaultMessage: 'Add "{field}" to workspace',
+      defaultMessage: 'Add "{field}"',
       values: {
         field: field.displayName,
       },
@@ -67,85 +75,86 @@ export const FieldPopoverTitle: React.FC<FieldPopoverTitleProps> = ({
     defaultMessage: 'Delete data view field',
   });
 
-  // TODO: should we double check edit/delete access here too?
-  // const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
   return (
-    <EuiPopoverTitle>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={true}>
-          <EuiTitle size="xxs">
-            <h5 className="eui-textBreakWord" css={titleStyles}>
-              {field.displayName}
-            </h5>
-          </EuiTitle>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={true}>
+        <EuiTitle size="xxs">
+          <h5 className="eui-textBreakWord" css={titleStyles}>
+            {field.displayName}
+          </h5>
+        </EuiTitle>
+      </EuiFlexItem>
+      {onAddFieldToWorkspace && (
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_useField">
+          <EuiToolTip
+            content={buttonAddFieldToWorkspaceProps?.['aria-label'] ?? addFieldToWorkspaceTooltip}
+          >
+            <EuiButtonIcon
+              data-test-subj={`fieldPopoverTitle_useField-${field.name}`}
+              aria-label={addFieldToWorkspaceTooltip}
+              {...(buttonAddFieldToWorkspaceProps || {})}
+              iconType="plusInCircle"
+              onClick={() => {
+                closePopover();
+                onAddFieldToWorkspace(field);
+              }}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
-        {onAddFieldToWorkspace && (
-          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_useField">
-            <EuiToolTip content={addFieldToWorkspace}>
+      )}
+      {onAddFilter &&
+        field.filterable &&
+        // !dataView.metaFields.includes(field.name) && // TODO: disable for meta fields?
+        !field.scripted && (
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addExistsFilter">
+            <EuiToolTip content={buttonAddFilterProps?.['aria-label'] ?? addExistsFilterTooltip}>
               <EuiButtonIcon
+                data-test-subj={`fieldPopoverTitle_addExistsFilter-${field.name}`}
+                aria-label={addExistsFilterTooltip}
+                {...(buttonAddFilterProps || {})}
+                iconType="filter"
                 onClick={() => {
                   closePopover();
-                  onAddFieldToWorkspace(field);
+                  onAddFilter('_exists_', field.name, '+');
                 }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      {onEditField &&
+        (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_editField">
+            <EuiToolTip content={buttonEditFieldProps?.['aria-label'] ?? editFieldTooltip}>
+              <EuiButtonIcon
+                data-test-subj={`fieldPopoverTitle_editField-${field.name}`}
+                aria-label={editFieldTooltip}
+                {...(buttonEditFieldProps || {})}
                 iconType="pencil"
-                data-test-subj={`fieldPopoverTitle_useField-${field.name}`}
-                aria-label={addFieldToWorkspace}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {onAddFilter &&
-          field.filterable &&
-          // !dataView.metaFields.includes(field.name) && // TODO: disable for meta fields?
-          !field.scripted && (
-            <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_addExistsFilter">
-              <EuiToolTip content={addExistsFilterTooltip}>
-                <EuiButtonIcon
-                  onClick={() => {
-                    closePopover();
-                    onAddFilter('_exists_', field.name, '+');
-                  }}
-                  iconType="filter"
-                  data-test-subj={`fieldPopoverTitle_addExistsFilter-${field.name}`}
-                  aria-label={addExistsFilterTooltip}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        {onEditField &&
-          (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
-            <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_editField">
-              <EuiToolTip content={editFieldTooltip}>
-                <EuiButtonIcon
-                  onClick={() => {
-                    closePopover();
-                    onEditField(field.name);
-                  }}
-                  iconType="pencil"
-                  data-test-subj={`fieldPopoverTitle_editField-${field.name}`}
-                  aria-label={editFieldTooltip}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        {onDeleteField && field.isRuntimeField && (
-          <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_deleteField">
-            <EuiToolTip content={deleteFieldTooltip}>
-              <EuiButtonIcon
                 onClick={() => {
                   closePopover();
-                  onDeleteField(field.name);
+                  onEditField(field.name);
                 }}
-                iconType="trash"
-                data-test-subj={`fieldPopoverTitle_deleteField-${field.name}`}
-                color="danger"
-                aria-label={deleteFieldTooltip}
               />
             </EuiToolTip>
           </EuiFlexItem>
         )}
-      </EuiFlexGroup>
-    </EuiPopoverTitle>
+      {onDeleteField && field.isRuntimeField && (
+        <EuiFlexItem grow={false} data-test-subj="fieldPopoverTitle_deleteField">
+          <EuiToolTip content={buttonDeleteFieldProps?.['aria-label'] ?? deleteFieldTooltip}>
+            <EuiButtonIcon
+              data-test-subj={`fieldPopoverTitle_deleteField-${field.name}`}
+              aria-label={deleteFieldTooltip}
+              {...(buttonDeleteFieldProps || {})}
+              color="danger"
+              iconType="trash"
+              onClick={() => {
+                closePopover();
+                onDeleteField(field.name);
+              }}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
