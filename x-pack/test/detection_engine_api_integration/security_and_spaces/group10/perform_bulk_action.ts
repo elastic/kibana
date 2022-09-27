@@ -34,6 +34,7 @@ import {
   installPrePackagedRules,
   getSimpleMlRule,
   getWebHookAction,
+  getSlackAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -69,6 +70,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
         .send(getWebHookAction())
+        .expect(200)
+    ).body;
+
+  const createSlackAction = async () =>
+    (
+      await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getSlackAction())
         .expect(200)
     ).body;
 
@@ -1092,12 +1102,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const webHookActionMock = {
           group: 'default',
           params: {
-            body: '{}',
+            body: '{"test":"action to be saved in a rule"}',
           },
         };
 
         describe('set_rule_actions', () => {
-          it('should set action correctly', async () => {
+          it('should set action correctly to existing empty actions list', async () => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
@@ -1125,25 +1135,77 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
+            const expectedRuleActions = [
               {
                 ...webHookActionMock,
                 id: hookAction.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([
+            expect(readRule.actions).to.eql(expectedRuleActions);
+          });
+
+          it('should set action correctly to existing non empty actions list', async () => {
+            const hookAction = await createWebHookAction();
+
+            const existingRuleAction = {
+              id: hookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"an existing action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [existingRuleAction],
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: hookAction.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
               {
                 ...webHookActionMock,
                 id: hookAction.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
           });
 
           it('should set actions to empty list, actions payload is empty list', async () => {
@@ -1221,28 +1283,24 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
+            const expectedRuleActions = [
               {
                 ...webHookActionMock,
                 id: hookAction.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([
-              {
-                ...webHookActionMock,
-                id: hookAction.id,
-                action_type_id: '.webhook',
-              },
-            ]);
+            expect(readRule.actions).to.eql(expectedRuleActions);
           });
 
-          it('should add action correctly to non empty actions list', async () => {
+          it('should add action correctly to non empty actions list of the same type', async () => {
             // create a new action
             const hookAction = await createWebHookAction();
 
@@ -1283,27 +1341,89 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
+            const expectedRuleActions = [
               defaultRuleAction,
               {
                 ...webHookActionMock,
                 id: hookAction.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([
+            expect(readRule.actions).to.eql(expectedRuleActions);
+          });
+
+          it('should add action correctly to non empty actions list of a different type', async () => {
+            // create new actions
+            const webHookAction = await createWebHookAction();
+            const slackAction = await createSlackAction();
+
+            const defaultRuleAction = {
+              id: webHookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const slackActionMockProps = {
+              group: 'default',
+              params: {
+                message: 'test slack message',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '1d',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...slackActionMockProps,
+                          id: slackAction.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
               defaultRuleAction,
               {
-                ...webHookActionMock,
-                id: hookAction.id,
-                action_type_id: '.webhook',
+                ...slackActionMockProps,
+                id: slackAction.id,
+                action_type_id: '.slack',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
           });
 
           it('should not change actions of rule if empty list of actions added', async () => {
