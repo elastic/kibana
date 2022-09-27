@@ -170,20 +170,19 @@ describe('config validation', () => {
 
     validated = configSchema.validate({ proxyUrl });
     expect(validated.proxyUrl).toEqual(proxyUrl);
-    expect(() => getValidatedConfig(mockLogger, validated)).not.toThrowError();
+    expect(getValidatedConfig(mockLogger, validated).proxyUrl).toEqual(proxyUrl);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`Array []`);
 
     validated = configSchema.validate({ proxyUrl: badProxyUrl });
     expect(validated.proxyUrl).toEqual(badProxyUrl);
-    expect(() => getValidatedConfig(mockLogger, validated)).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid URL: bad url"`
-    );
-    expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
-    Array [
+    expect(getValidatedConfig(mockLogger, validated).proxyUrl).toEqual(badProxyUrl);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`
       Array [
-        "The confguration xpack.actions.proxyUrl: bad url is invalid.",
-      ],
-    ]
-  `);
+        Array [
+          "The confguration xpack.actions.proxyUrl: bad url is invalid.",
+        ],
+      ]
+    `);
   });
 
   // Most of the customHostSettings tests are in ./lib/custom_host_settings.test.ts

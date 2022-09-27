@@ -133,8 +133,7 @@ export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig
     try {
       new URL(proxyUrl);
     } catch (err) {
-      logger.error(`The confguration xpack.actions.proxyUrl: ${proxyUrl} is invalid.`);
-      throw err;
+      logger.warn(`The confguration xpack.actions.proxyUrl: ${proxyUrl} is invalid.`);
     }
   }
 
