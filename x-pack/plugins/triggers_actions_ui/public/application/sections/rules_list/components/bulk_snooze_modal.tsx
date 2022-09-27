@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -29,7 +30,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 export type BulkSnoozeModalProps = {
   rulesToSnooze: RuleTableItem[];
-  rulesToSnoozeFilter?: string;
+  rulesToSnoozeFilter?: KueryNode | void;
   onClose: () => void;
   onSave: () => void;
   setIsLoading: (isLoading: boolean) => void;

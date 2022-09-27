@@ -6,6 +6,7 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
+import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
@@ -25,7 +26,7 @@ export const UpdateApiKeyModalConfirmation = ({
 }: {
   onCancel: () => void;
   idsToUpdate: string[];
-  idsToUpdateFilter?: string;
+  idsToUpdateFilter?: KueryNode | void;
   numberOfSelectedRules?: number;
   apiUpdateApiKeyCall: ({
     ids,
@@ -33,7 +34,7 @@ export const UpdateApiKeyModalConfirmation = ({
     filter,
   }: {
     ids?: string[];
-    filter?: string;
+    filter?: KueryNode | void;
     http: HttpSetup;
   }) => Promise<BulkEditResponse>;
   setIsLoadingState: (isLoading: boolean) => void;

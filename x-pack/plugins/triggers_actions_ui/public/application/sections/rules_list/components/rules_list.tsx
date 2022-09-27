@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import {
@@ -207,13 +208,13 @@ export const RulesList = ({
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
 
   const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<string>('');
+  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<KueryNode | void>();
 
   const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
-  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<string>('');
+  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<KueryNode | void>();
 
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
-  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<string>('');
+  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<KueryNode | void>();
 
   const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
   const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
@@ -578,6 +579,12 @@ export const RulesList = ({
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
+    searchText,
+    typesFilter: rulesTypesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
   });
 
   const authorizedToModifySelectedRules = useMemo(() => {
@@ -594,17 +601,17 @@ export const RulesList = ({
 
   const clearRulesToSnooze = () => {
     setRulesToSnooze([]);
-    setRulesToSnoozeFilter('');
+    setRulesToSnoozeFilter();
   };
 
   const clearRulesToSchedule = () => {
     setRulesToSchedule([]);
-    setRulesToScheduleFilter('');
+    setRulesToScheduleFilter();
   };
 
   const clearRulesToUpdateAPIKey = () => {
     setRulesToUpdateAPIKey([]);
-    setRulesToUpdateAPIKeyFilter('');
+    setRulesToUpdateAPIKeyFilter();
   };
 
   const isRulesTableLoading = useMemo(() => {

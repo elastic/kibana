@@ -22,7 +22,7 @@ import {
 } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
@@ -1569,14 +1569,7 @@ export class RulesClient {
       );
     }
 
-    let qNodeQueryFilter: null | KueryNode;
-    if (!queryFilter) {
-      qNodeQueryFilter = null;
-    } else if (typeof queryFilter === 'string') {
-      qNodeQueryFilter = fromKueryExpression(queryFilter);
-    } else {
-      qNodeQueryFilter = queryFilter;
-    }
+    const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
 
     const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
     let authorizationTuple;

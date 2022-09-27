@@ -5,7 +5,9 @@
  * 2.0.
  */
 import { useReducer, useMemo, useCallback } from 'react';
-import { RuleTableItem } from '../../types';
+import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
+import { RuleTableItem, RuleStatus } from '../../types';
 
 interface BulkEditSelectionState {
   selectedIds: Set<string>;
@@ -71,9 +73,26 @@ const reducer = (state: BulkEditSelectionState, action: Action) => {
 interface UseBulkEditSelectProps {
   totalItemCount: number;
   items: RuleTableItem[];
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  tagsFilter?: string[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
+  searchText?: string;
 }
 
-export function useBulkEditSelect({ totalItemCount = 0, items = [] }: UseBulkEditSelectProps) {
+export function useBulkEditSelect(props: UseBulkEditSelectProps) {
+  const {
+    totalItemCount = 0,
+    items = [],
+    typesFilter,
+    actionTypesFilter,
+    tagsFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    searchText,
+  } = props;
+
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const itemIds = useMemo(() => {
@@ -161,18 +180,49 @@ export function useBulkEditSelect({ totalItemCount = 0, items = [] }: UseBulkEdi
     dispatch({ type: ActionTypes.CLEAR_SELECTION });
   }, []);
 
+  const getFilterKueryNode = useCallback(
+    (selectionKueryNode?: KueryNode) => {
+      const ruleFilterKuerNode = mapFiltersToKueryNode({
+        typesFilter,
+        actionTypesFilter,
+        tagsFilter,
+        ruleExecutionStatusesFilter,
+        ruleStatusesFilter,
+        searchText,
+      });
+      if (!ruleFilterKuerNode) {
+        return selectionKueryNode;
+      }
+      if (selectionKueryNode) {
+        return nodeBuilder.and([ruleFilterKuerNode, selectionKueryNode]);
+      }
+    },
+    [
+      typesFilter,
+      actionTypesFilter,
+      tagsFilter,
+      ruleExecutionStatusesFilter,
+      ruleStatusesFilter,
+      searchText,
+    ]
+  );
+
   const getFilter = useCallback(() => {
     const { selectedIds, isAllSelected } = state;
     const idsArray = [...selectedIds];
 
     if (isAllSelected) {
+      // Select all but nothing is selected to exclude
       if (idsArray.length === 0) {
-        return 'alert.id: *';
+        return getFilterKueryNode(nodeBuilder.is('alert.id', nodeTypes.wildcard.buildNode('*')));
       }
-      return `NOT (${idsArray.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`;
+      // Select all, exclude certain alerts
+      const kql = `NOT (${idsArray.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`;
+      return getFilterKueryNode(fromKueryExpression(kql));
     }
-    return '';
-  }, [state]);
+
+    return getFilterKueryNode();
+  }, [state, getFilterKueryNode]);
 
   return useMemo(() => {
     return {

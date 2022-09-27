@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -49,7 +50,7 @@ const deleteConfirmSingle = (ruleName: string) =>
 
 export type BulkSnoozeScheduleModalProps = {
   rulesToSchedule: RuleTableItem[];
-  rulesToScheduleFilter?: string;
+  rulesToScheduleFilter?: KueryNode | void;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
