@@ -63,6 +63,7 @@ import {
   hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
+  triggersActionsUiBrowserFieldsFactory,
 } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -529,6 +530,11 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ]
     );
 
+    const triggersActionsUiBrowserFields = useMemo(
+      () => triggersActionsUiBrowserFieldsFactory(browserFields),
+      [browserFields]
+    );
+
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
         additionalControls: (
@@ -558,7 +564,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               <>
                 {additionalControls ?? null}
                 {triggersActionsUi.getFieldBrowser({
-                  browserFields,
+                  browserFields: triggersActionsUiBrowserFields,
                   options: fieldBrowserOptions,
                   columnIds: columnHeaders.map(({ id: columnId }) => columnId),
                   onResetColumns,
@@ -594,15 +600,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         indexNames,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
-        onResetColumns,
-        onToggleColumn,
-        triggersActionsUi,
         additionalBulkActions,
         refetch,
         additionalControls,
-        browserFields,
+        triggersActionsUi,
+        triggersActionsUiBrowserFields,
         fieldBrowserOptions,
         columnHeaders,
+        onResetColumns,
+        onToggleColumn,
       ]
     );
 

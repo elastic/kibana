@@ -10,9 +10,15 @@ import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import {
+  BrowserField as TriggersActionsUiBrowserField,
+  BrowserFieldCategory as TriggersActionsUiBrowserFieldCategory,
+  BrowserFields as TriggersActionsUiBrowserFields,
+} from '@kbn/rule-registry-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
 import type {
   BrowserField,
+  BrowserFields,
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../common/search_strategy';
@@ -212,3 +218,22 @@ export const hasCellActions = ({
   columnId: string;
   disabledCellActions: string[];
 }) => !disabledCellActions.includes(columnId);
+
+export const triggersActionsUiBrowserFieldsFactory = (
+  browserFields: BrowserFields
+): TriggersActionsUiBrowserFields => {
+  return Object.keys(browserFields).reduce(
+    (acc: TriggersActionsUiBrowserFields, category: string) => {
+      if (!browserFields[category].fields) return acc;
+
+      acc[category] = {
+        fields: browserFields[category].fields as {
+          [fieldName: string]: TriggersActionsUiBrowserField;
+        },
+      };
+
+      return acc;
+    },
+    {}
+  );
+};
