@@ -11,19 +11,19 @@ exports[`should render popover when appLinks is not empty 1`] = `
   >
     <button
       aria-label="View Sample eCommerce orders"
-      class="euiButton euiButton--primary"
+      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
       type="button"
     >
       <span
-        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+        class="emotion-euiButtonDisplayContent-right"
       >
         <span
-          class="euiButtonContent__icon"
+          class="emotion-euiButtonDisplayContent__icon-m"
           color="inherit"
           data-euiicon-type="arrowDown"
         />
         <span
-          class="euiButton__text"
+          class="eui-textTruncate"
         >
           View data
         </span>
@@ -44,19 +44,19 @@ exports[`should render popover with ordered appLinks 1`] = `
   >
     <button
       aria-label="View Sample eCommerce orders"
-      class="euiButton euiButton--primary"
+      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
       type="button"
     >
       <span
-        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+        class="emotion-euiButtonDisplayContent-right"
       >
         <span
-          class="euiButtonContent__icon"
+          class="emotion-euiButtonDisplayContent__icon-m"
           color="inherit"
           data-euiicon-type="arrowDown"
         />
         <span
-          class="euiButton__text"
+          class="eui-textTruncate"
         >
           View data
         </span>
@@ -69,15 +69,15 @@ exports[`should render popover with ordered appLinks 1`] = `
 exports[`should render simple button when appLinks is empty 1`] = `
 <button
   aria-label="View Sample eCommerce orders"
-  class="euiButton euiButton--primary"
+  class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
   data-test-subj="launchSampleDataSetecommerce"
   type="button"
 >
   <span
-    class="euiButtonContent euiButton__content"
+    class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="euiButton__text"
+      class="eui-textTruncate"
     >
       View data
     </span>
