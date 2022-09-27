@@ -9,21 +9,21 @@ import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SLO, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
+import { KibanaSavedObjectsSLORepository, StoredSLO } from './slo_repository';
+import { createSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
+import { SLO } from '../../domain/models';
 
-const SOME_SLO = createSLO(createAPMTransactionDurationIndicator());
+const SOME_SLO = createSLO();
 
 function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   return {
     id: slo.id,
     attributes: {
       ...slo,
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      updated_at: slo.updated_at.toISOString(),
+      created_at: slo.created_at.toISOString(),
     },
     type: SO_SLO_TYPE,
     references: [],

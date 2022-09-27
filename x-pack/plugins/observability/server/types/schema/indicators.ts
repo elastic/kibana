@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { allOrAnyString } from './common';
 
 const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
-
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
   params: t.type({
@@ -17,12 +16,11 @@ const apmTransactionDurationIndicatorSchema = t.type({
     service: allOrAnyString,
     transaction_type: allOrAnyString,
     transaction_name: allOrAnyString,
-    'threshold.us': t.number,
+    threshold: t.number,
   }),
 });
 
 const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
-
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
@@ -40,21 +38,19 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
   ]),
 });
 
-const indicatorTypesSchema = t.union([
-  apmTransactionDurationIndicatorTypeSchema,
-  apmTransactionErrorRateIndicatorTypeSchema,
-]);
-
 const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 ]);
 
+const indicatorTypesSchema = t.union([
+  apmTransactionDurationIndicatorTypeSchema,
+  apmTransactionErrorRateIndicatorTypeSchema,
+]);
+
 export {
   apmTransactionDurationIndicatorSchema,
-  apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,
-  apmTransactionErrorRateIndicatorTypeSchema,
   indicatorSchema,
   indicatorTypesSchema,
 };

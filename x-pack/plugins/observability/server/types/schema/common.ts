@@ -11,4 +11,15 @@ const ALL_VALUE = '*';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
-export { allOrAnyString, ALL_VALUE };
+const timeWindowSchema = t.type({
+  duration: t.string,
+  is_rolling: t.literal<boolean>(true),
+});
+
+const budgetingMethodSchema = t.literal<string>('occurrences');
+
+const objectiveSchema = t.type({
+  target: t.number,
+});
+
+export { allOrAnyString, timeWindowSchema, budgetingMethodSchema, objectiveSchema, ALL_VALUE };

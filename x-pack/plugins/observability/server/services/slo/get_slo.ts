@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { GetSLOResponse } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 

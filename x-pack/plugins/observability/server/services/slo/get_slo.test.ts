@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import { createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
@@ -21,7 +21,7 @@ describe('GetSLO', () => {
 
   describe('happy path', () => {
     it('retrieves the SLO from the repository', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
       const result = await getSLO.execute(slo.id);
@@ -34,11 +34,11 @@ describe('GetSLO', () => {
         budgeting_method: 'occurrences',
         indicator: {
           params: {
-            environment: 'irrelevant',
-            good_status_codes: ['2xx', '3xx', '4xx'],
             service: 'irrelevant',
+            environment: 'irrelevant',
             transaction_name: 'irrelevant',
             transaction_type: 'irrelevant',
+            good_status_codes: ['2xx', '3xx', '4xx'],
           },
           type: 'slo.apm.transaction_error_rate',
         },

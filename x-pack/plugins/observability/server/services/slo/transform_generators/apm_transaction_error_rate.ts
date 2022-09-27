@@ -10,6 +10,7 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
 import { ALL_VALUE } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
@@ -18,65 +19,58 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import {
-  apmTransactionErrorRateSLOSchema,
-  APMTransactionErrorRateSLO,
-  SLO,
-} from '../../../types/models';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
-const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
-const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
 export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
-    if (!apmTransactionErrorRateSLOSchema.is(slo)) {
+    if (slo.indicator.type !== 'slo.apm.transaction_error_rate') {
       throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
-      this.buildSource(slo),
+      this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildGroupBy(),
-      this.buildAggregations(slo)
+      this.buildAggregations(slo.indicator)
     );
   }
 
-  private buildTransformId(slo: APMTransactionErrorRateSLO): string {
+  private buildTransformId(slo: SLO): string {
     return getSLOTransformId(slo.id);
   }
 
-  private buildSource(slo: APMTransactionErrorRateSLO) {
+  private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
     const queryFilter = [];
-    if (slo.indicator.params.service !== ALL_VALUE) {
+    if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'service.name': slo.indicator.params.service,
+          'service.name': indicator.params.service,
         },
       });
     }
 
-    if (slo.indicator.params.environment !== ALL_VALUE) {
+    if (indicator.params.environment !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'service.environment': slo.indicator.params.environment,
+          'service.environment': indicator.params.environment,
         },
       });
     }
 
-    if (slo.indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transaction_name !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': slo.indicator.params.transaction_name,
+          'transaction.name': indicator.params.transaction_name,
         },
       });
     }
 
-    if (slo.indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transaction_type !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': slo.indicator.params.transaction_type,
+          'transaction.type': indicator.params.transaction_type,
         },
       });
     }
@@ -149,16 +143,18 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     };
   }
 
-  private buildAggregations(slo: APMTransactionErrorRateSLO) {
-    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(
-      slo.indicator.params.good_status_codes
-    );
-
+  private buildAggregations(indicator: APMTransactionErrorRateIndicator) {
+    const DEFAULT_STATUS_CODES = ['2xx', '3xx', '4xx'];
+    const goodStatusCodes = indicator.params.good_status_codes ?? DEFAULT_STATUS_CODES;
     return {
       'slo.numerator': {
         filter: {
           bool: {
-            should: goodStatusCodesFilter,
+            should: goodStatusCodes.map((code) => ({
+              match: {
+                'transaction.result': `HTTP ${code}`,
+              },
+            })),
           },
         },
       },
@@ -168,18 +164,5 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
         },
       },
     };
-  }
-
-  private getGoodStatusCodesFilter(goodStatusCodes: string[] | undefined) {
-    let statusCodes = goodStatusCodes?.filter((code) => ALLOWED_STATUS_CODES.includes(code));
-    if (statusCodes === undefined || statusCodes.length === 0) {
-      statusCodes = DEFAULT_GOOD_STATUS_CODES;
-    }
-
-    return statusCodes.map((code) => ({
-      match: {
-        'transaction.result': `HTTP ${code}`,
-      },
-    }));
   }
 }

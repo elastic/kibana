@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
-import { StoredSLO, SLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
+import { SLO } from '../../domain/models';
+import { storedSLOSchema } from '../../types/schema/stored_slo';
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
@@ -18,20 +20,15 @@ export interface SLORepository {
   deleteById(id: string): Promise<void>;
 }
 
+export type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
+
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
   async save(slo: SLO): Promise<SLO> {
-    const now = new Date().toISOString();
-    const savedSLO = await this.soClient.create<StoredSLO>(
-      SO_SLO_TYPE,
-      {
-        ...slo,
-        created_at: now,
-        updated_at: now,
-      },
-      { id: slo.id }
-    );
+    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
+      id: slo.id,
+    });
 
     return toSLOModel(savedSLO.attributes);
   }
@@ -60,7 +57,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 }
 
-function toSLOModel(slo: StoredSLO): SLO {
+function toStoredSLO(slo: SLO): StoredSLO {
   return {
     id: slo.id,
     name: slo.name,
@@ -69,5 +66,21 @@ function toSLOModel(slo: StoredSLO): SLO {
     time_window: slo.time_window,
     budgeting_method: slo.budgeting_method,
     objective: slo.objective,
+    created_at: slo.created_at.toISOString(),
+    updated_at: slo.updated_at.toISOString(),
   };
+}
+
+function toSLOModel(storedSlo: StoredSLO): SLO {
+  return new SLO(
+    storedSlo.id,
+    storedSlo.name,
+    storedSlo.description,
+    storedSlo.indicator,
+    storedSlo.time_window,
+    storedSlo.budgeting_method,
+    storedSlo.objective,
+    new Date(storedSlo.created_at),
+    new Date(storedSlo.updated_at)
+  );
 }

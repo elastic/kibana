@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './slo';
+import * as t from 'io-ts';
+import { timeWindowSchema } from '../../types/schema';
+
+export type TimeWindow = t.TypeOf<typeof timeWindowSchema>;

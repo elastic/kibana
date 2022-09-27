@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { ObservabilityError, SLONotFound } from './errors';
+import { InvalidParameter, ObservabilityError, SLONotFound } from './errors';
 
 export function getHTTPResponseCode(error: ObservabilityError): number {
   if (error instanceof SLONotFound) {
     return 404;
+  }
+  if (error instanceof InvalidParameter) {
+    return 400;
   }
 
   return 400;

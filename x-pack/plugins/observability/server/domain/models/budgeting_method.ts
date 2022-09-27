@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SLO } from '../../../domain/models';
+import * as t from 'io-ts';
+import { budgetingMethodSchema } from '../../types/schema';
 
-export interface TransformGenerator {
-  getTransformParams(slo: SLO): TransformPutTransformRequest;
-}
+export type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;

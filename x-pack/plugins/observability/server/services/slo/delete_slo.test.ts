@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 import { DeleteSLO } from './delete_slo';
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -29,7 +29,7 @@ describe('DeleteSLO', () => {
 
   describe('happy path', () => {
     it('removes the transform, the roll up data and the SLO from the repository', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO();
 
       await deleteSLO.execute(slo.id);
 

@@ -6,27 +6,17 @@
  */
 
 import * as t from 'io-ts';
-
+import { budgetingMethodSchema, objectiveSchema, timeWindowSchema } from './common';
 import { indicatorSchema } from './indicators';
 
-const rollingTimeWindowSchema = t.type({
-  duration: t.string,
-  is_rolling: t.literal(true),
-});
-
-const budgetingMethodSchema = t.literal('occurrences');
-
-const objectiveSchema = t.type({
-  target: t.number,
-});
-
-const commonSLOSchema = t.type({
+export const storedSLOSchema = t.type({
+  id: t.string,
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
-  time_window: rollingTimeWindowSchema,
+  time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  created_at: t.string,
+  updated_at: t.string,
 });
-
-export { commonSLOSchema, rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };

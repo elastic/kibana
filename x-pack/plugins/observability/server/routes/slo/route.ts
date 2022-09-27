@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
   DeleteSLO,
@@ -19,7 +20,7 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { SLITypes } from '../../types/models';
+
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -27,7 +28,7 @@ import {
 } from '../../types/rest_specs';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
-const transformGenerators: Record<SLITypes, TransformGenerator> = {
+const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
   'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
 };

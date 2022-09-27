@@ -6,10 +6,22 @@
  */
 
 import * as t from 'io-ts';
-import { commonSLOSchema } from '../schema';
+import {
+  budgetingMethodSchema,
+  indicatorSchema,
+  objectiveSchema,
+  timeWindowSchema,
+} from '../schema';
 
 const createSLOParamsSchema = t.type({
-  body: commonSLOSchema,
+  body: t.type({
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    time_window: timeWindowSchema,
+    budgeting_method: budgetingMethodSchema,
+    objective: objectiveSchema,
+  }),
 });
 
 const createSLOResponseSchema = t.type({
@@ -28,10 +40,19 @@ const getSLOParamsSchema = t.type({
   }),
 });
 
-const getSLOResponseSchema = t.intersection([t.type({ id: t.string }), commonSLOSchema]);
+const getSLOResponseSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: timeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+});
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+
 type GetSLOResponse = t.TypeOf<typeof getSLOResponseSchema>;
 
 export { createSLOParamsSchema, deleteSLOParamsSchema, getSLOParamsSchema };

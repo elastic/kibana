@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -20,8 +18,8 @@ export class CreateSLO {
     private transformManager: TransformManager
   ) {}
 
-  public async execute(sloParams: CreateSLOParams): Promise<CreateSLOResponse> {
-    const slo = this.toSLO(sloParams);
+  public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
+    const slo = this.toSLO(params);
 
     await this.resourceInstaller.ensureCommonResourcesInstalled();
     await this.repository.save(slo);
@@ -48,11 +46,15 @@ export class CreateSLO {
     return this.toResponse(slo);
   }
 
-  private toSLO(sloParams: CreateSLOParams): SLO {
-    return {
-      ...sloParams,
-      id: uuid.v1(),
-    };
+  private toSLO(params: CreateSLOParams): SLO {
+    return SLO.create(
+      params.name,
+      params.description,
+      params.indicator,
+      params.time_window,
+      params.budgeting_method,
+      params.objective
+    );
   }
 
   private toResponse(slo: SLO): CreateSLOResponse {

@@ -10,6 +10,7 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { APMTransactionDurationIndicator, SLO } from '../../../domain/models';
 import { ALL_VALUE } from '../../../types/schema';
 import {
   SLO_DESTINATION_INDEX_NAME,
@@ -17,64 +18,59 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import {
-  SLO,
-  apmTransactionDurationSLOSchema,
-  APMTransactionDurationSLO,
-} from '../../../types/models';
 import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 
 export class ApmTransactionDurationTransformGenerator implements TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
-    if (!apmTransactionDurationSLOSchema.is(slo)) {
+    if (slo.indicator.type !== 'slo.apm.transaction_duration') {
       throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
-      this.buildSource(slo),
+      this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildGroupBy(),
-      this.buildAggregations(slo)
+      this.buildAggregations(slo.indicator)
     );
   }
 
-  private buildTransformId(slo: APMTransactionDurationSLO): string {
+  private buildTransformId(slo: SLO): string {
     return getSLOTransformId(slo.id);
   }
 
-  private buildSource(slo: APMTransactionDurationSLO) {
+  private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
     const queryFilter = [];
-    if (slo.indicator.params.service !== ALL_VALUE) {
+    if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'service.name': slo.indicator.params.service,
+          'service.name': indicator.params.service,
         },
       });
     }
 
-    if (slo.indicator.params.environment !== ALL_VALUE) {
+    if (indicator.params.environment !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'service.environment': slo.indicator.params.environment,
+          'service.environment': indicator.params.environment,
         },
       });
     }
 
-    if (slo.indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transaction_name !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': slo.indicator.params.transaction_name,
+          'transaction.name': indicator.params.transaction_name,
         },
       });
     }
 
-    if (slo.indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transaction_type !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': slo.indicator.params.transaction_type,
+          'transaction.type': indicator.params.transaction_type,
         },
       });
     }
@@ -147,8 +143,8 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
     };
   }
 
-  private buildAggregations(slo: APMTransactionDurationSLO) {
-    const truncatedThreshold = Math.trunc(slo.indicator.params['threshold.us']);
+  private buildAggregations(indicator: APMTransactionDurationIndicator) {
+    const truncatedThreshold = Math.trunc(indicator.params.threshold);
 
     return {
       _numerator: {

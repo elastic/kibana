@@ -15,3 +15,4 @@ export class ObservabilityError extends Error {
 }
 
 export class SLONotFound extends ObservabilityError {}
+export class InvalidParameter extends ObservabilityError {}
