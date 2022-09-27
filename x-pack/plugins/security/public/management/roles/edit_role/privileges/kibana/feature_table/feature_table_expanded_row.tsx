@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSpacer, EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
@@ -21,6 +21,7 @@ interface Props {
   privilegeIndex: number;
   selectedFeaturePrivileges: string[];
   disabled?: boolean;
+  canCustomizeSubFeaturePrivileges?: boolean;
   onChange: (featureId: string, featurePrivileges: string[]) => void;
 }
 
@@ -31,6 +32,7 @@ export const FeatureTableExpandedRow = ({
   privilegeCalculator,
   selectedFeaturePrivileges,
   disabled,
+  canCustomizeSubFeaturePrivileges,
 }: Props) => {
   const [isCustomizing, setIsCustomizing] = useState(() => {
     return feature
@@ -62,7 +64,7 @@ export const FeatureTableExpandedRow = ({
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
+      {canCustomizeSubFeaturePrivileges?<EuiFlexItem>
         <EuiSwitch
           label={
             <FormattedMessage
@@ -78,22 +80,22 @@ export const FeatureTableExpandedRow = ({
             !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id, privilegeIndex)
           }
         />
-      </EuiFlexItem>
-      {feature.getSubFeatures().map((subFeature) => {
-        return (
-          <EuiFlexItem key={subFeature.name}>
-            <SubFeatureForm
-              privilegeCalculator={privilegeCalculator}
-              privilegeIndex={privilegeIndex}
-              featureId={feature.id}
-              subFeature={subFeature}
-              onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
-              selectedFeaturePrivileges={selectedFeaturePrivileges}
-              disabled={disabled || !isCustomizing}
-            />
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+      </EuiFlexItem> : <EuiSpacer size='s'/>}
+          {feature.getSubFeatures().map((subFeature) => {
+            return (
+              <EuiFlexItem key={subFeature.name}>
+                <SubFeatureForm
+                  privilegeCalculator={privilegeCalculator}
+                  privilegeIndex={privilegeIndex}
+                  featureId={feature.id}
+                  subFeature={subFeature}
+                  onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
+                  selectedFeaturePrivileges={selectedFeaturePrivileges}
+                  disabled={disabled || !isCustomizing}
+                />
+              </EuiFlexItem>
+            );
+          })}
+      </EuiFlexGroup>
   );
 };
