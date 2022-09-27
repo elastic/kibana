@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it(`should get AD jobs for space idSpace1`, async () => {
+    it(`should get AD jobs for space ${idSpace1}`, async () => {
       const resp = await runRequest('anomaly-detector', idSpace1);
 
       const expectedResponse = [
@@ -108,14 +108,14 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
           jobState: 'closed',
           datafeedState: '',
-          spaces: ['space1'],
+          spaces: [idSpace1],
         },
         {
           id: adJobIdSpace2s1,
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
           jobState: 'closed',
           datafeedState: '',
-          spaces: ['space1'],
+          spaces: [idSpace1],
         },
       ];
 
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should get AD jobs for space idSpace2`, async () => {
+    it(`should get AD jobs for space ${idSpace2}`, async () => {
       const resp = await runRequest('anomaly-detector', idSpace2);
 
       const expectedResponse = [
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
           jobState: 'closed',
           datafeedState: '',
-          spaces: ['space2'],
+          spaces: [idSpace2],
         },
       ];
 
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should get DFA jobs for space idSpace1`, async () => {
+    it(`should get DFA jobs for space ${idSpace1}`, async () => {
       const resp = await runRequest('data-frame-analytics', idSpace1);
 
       const expectedResponse = [
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
           dest_index: `user-${dfaJobIdSpace1s1}`,
           job_type: 'classification',
           state: 'stopped',
-          spaces: ['space1'],
+          spaces: [idSpace1],
         },
         {
           id: dfaJobIdSpace2s1,
@@ -168,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
           dest_index: `user-${dfaJobIdSpace2s1}`,
           job_type: 'classification',
           state: 'stopped',
-          spaces: ['space1'],
+          spaces: [idSpace1],
         },
       ];
       expect(resp).to.eql(
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should get DFA jobs for space idSpace2`, async () => {
+    it(`should get DFA jobs for space ${idSpace2}`, async () => {
       const resp = await runRequest('data-frame-analytics', idSpace2);
 
       const expectedResponse = [
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
           dest_index: `user-${dfaJobIdSpace3s2}`,
           job_type: 'classification',
           state: 'stopped',
-          spaces: ['space2'],
+          spaces: [idSpace2],
         },
       ];
       expect(resp).to.eql(
@@ -201,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should get trained models for space idSpace1`, async () => {
+    it(`should get trained models for space ${idSpace1}`, async () => {
       const resp = await runRequest('trained-model', idSpace1);
 
       const expectedResponse = [
@@ -217,14 +217,14 @@ export default ({ getService }: FtrProviderContext) => {
           description: '',
           state: '',
           type: ['tree_ensemble', 'regression'],
-          spaces: ['space1'],
+          spaces: [idSpace1],
         },
         {
           id: trainedModelIdSpace2s1,
           description: '',
           state: '',
           type: ['tree_ensemble', 'regression'],
-          spaces: ['space1'],
+          spaces: [idSpace1],
         },
       ];
       expect(resp).to.eql(
@@ -235,7 +235,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should get trained models for space idSpace2`, async () => {
+    it(`should get trained models for space ${idSpace2}`, async () => {
       const resp = await runRequest('trained-model', idSpace2);
 
       const expectedResponse = [
@@ -251,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: '',
           state: '',
           type: ['tree_ensemble', 'regression'],
-          spaces: ['space2'],
+          spaces: [idSpace2],
         },
       ];
 
