@@ -1625,7 +1625,7 @@ export function updatePackageInputs(
 
       // Ignore any inputs removed from this policy template in the new package version
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
-        ? policyTemplate.type === input.type
+        ? policyTemplate.input === input.type
         : policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
           ) ?? false;
@@ -1688,10 +1688,24 @@ export function updatePackageInputs(
     }
 
     if (update.streams) {
+      const isInputPkgUpdate =
+        packageInfo.type === 'input' &&
+        update.streams.length === 1 &&
+        originalInput?.streams.length === 1;
+
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
+
+        // this handles the input only pkg case where the new stream cannot have a dataset name
+        // so will never match. Input only packages only ever have one stream.
+        if (!originalStream && isInputPkgUpdate) {
+          originalStream = {
+            ...update.streams[0],
+            vars: originalInput?.streams[0].vars,
+          };
+        }
 
         if (originalStream === undefined) {
           originalInput.streams.push(stream);
@@ -1703,7 +1717,10 @@ export function updatePackageInputs(
         }
 
         if (stream.vars) {
-          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          // streams wont match for input pkgs
+          const indexOfStream = isInputPkgUpdate
+            ? 0
+            : originalInput.streams.indexOf(originalStream);
           originalInput.streams[indexOfStream] = deepMergeVars(
             originalStream,
             stream as InputsOverride,

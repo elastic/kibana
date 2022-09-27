@@ -20,7 +20,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       position: 'absolute',
       top: 0,
       opacity: show ? 1 : 0,
-      transition: 'opacity .3s',
+      transition: 'opacity .2s',
       pointerEvents: show ? 'auto' : 'none',
       width: '100%',
       height: '100%',
@@ -38,7 +38,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
     };
 
     const header: CSSObject = {
-      display: show ? 'block' : 'none',
+      visibility: show ? 'visible' : 'hidden',
       backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
       padding: `${size.m} ${size.base}`,
     };
