@@ -273,7 +273,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
-    async getJobMemoryState(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
+    async getJobMemoryStatus(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
       const jobStats = await this.getADJobStats(jobId);
 
       expect(jobStats.jobs).to.have.length(
@@ -309,21 +309,21 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async waitForJobMemoryState(
+    async waitForJobMemoryStatus(
       jobId: string,
-      expectedMemoryState: 'hard_limit' | 'soft_limit' | 'ok',
+      expectedMemoryStatus: 'hard_limit' | 'soft_limit' | 'ok',
       timeout: number = 2 * 60 * 1000
     ) {
       await retry.waitForWithTimeout(
-        `job memory status to be ${expectedMemoryState}`,
+        `job memory status to be ${expectedMemoryStatus}`,
         timeout,
         async () => {
-          const state = await this.getJobMemoryState(jobId);
-          if (state === expectedMemoryState) {
+          const memoryStatus = await this.getJobMemoryStatus(jobId);
+          if (memoryStatus === expectedMemoryStatus) {
             return true;
           } else {
             throw new Error(
-              `expected job memory status to be ${expectedMemoryState} but got ${state}`
+              `expected job memory status to be ${expectedMemoryStatus} but got ${memoryStatus}`
             );
           }
         }

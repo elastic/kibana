@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.api.openAnomalyDetectionJob(jobConfig.job_id);
       await ml.api.createDatafeed(datafeedConfig);
       await ml.api.startDatafeed(datafeedConfig.datafeed_id);
-      await ml.api.waitForJobMemoryState(jobConfig.job_id, 'hard_limit');
+      await ml.api.waitForJobMemoryStatus(jobConfig.job_id, 'hard_limit');
 
       // refresh the page to avoid 1m wait
       await browser.refresh();
