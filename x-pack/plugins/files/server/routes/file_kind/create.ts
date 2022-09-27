@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isBlurhashValid } from 'blurhash';
 import type { FileJSON, FileKind } from '../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
@@ -20,6 +21,15 @@ const rt = {
     alt: commonSchemas.fileAlt,
     meta: commonSchemas.fileMeta,
     mimeType: schema.maybe(schema.string()),
+    blurhash: schema.maybe(
+      schema.string({
+        validate: (v) => {
+          if (!isBlurhashValid(String(v))) {
+            return 'Not a valid blurhash';
+          }
+        },
+      })
+    ),
   }),
 };
 

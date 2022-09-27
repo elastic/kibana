@@ -29,6 +29,7 @@ import {
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
+import { BlurhashFactory, createBlurhash } from '../common/util';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
@@ -68,7 +69,8 @@ export class UploadState {
   constructor(
     private readonly fileKind: FileKind,
     private readonly client: FilesClient,
-    private readonly opts: UploadOptions = { allowRepeatedUploads: false }
+    private readonly opts: UploadOptions = { allowRepeatedUploads: false },
+    private readonly blurhashFactory: BlurhashFactory = createBlurhash
   ) {
     const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
     this.subscriptions = [
@@ -172,14 +174,16 @@ export class UploadState {
     const { name } = parseFileName(file.name);
     const mime = file.type || undefined;
 
-    return from(
-      this.client.create({
-        kind: this.fileKind.id,
-        name,
-        mimeType: mime,
-        meta: meta as Record<string, unknown>,
-      })
-    ).pipe(
+    return from(this.blurhashFactory(file)).pipe(
+      mergeMap((blurhash) =>
+        this.client.create({
+          kind: this.fileKind.id,
+          name,
+          mimeType: mime,
+          meta: meta as Record<string, unknown>,
+          blurhash,
+        })
+      ),
       mergeMap((result) => {
         uploadTarget = result.file;
         return race(
@@ -240,10 +244,12 @@ export class UploadState {
 export const createUploadState = ({
   fileKind,
   client,
+  blurhashFactory,
   ...options
 }: {
   fileKind: FileKind;
   client: FilesClient;
+  blurhashFactory?: BlurhashFactory;
 } & UploadOptions) => {
-  return new UploadState(fileKind, client, options);
+  return new UploadState(fileKind, client, options, blurhashFactory);
 };
