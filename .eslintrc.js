@@ -1314,7 +1314,7 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
-        'x-pack/plugins/{alerting,stack_alerts,stack_connectors,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1322,7 +1322,7 @@ module.exports = {
     },
     {
       // typescript only for back end
-      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
+      files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

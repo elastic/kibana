@@ -23,7 +23,6 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { TypeRegistry } from './application/type_registry';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -245,13 +244,6 @@ export class Plugin
           alertsTableConfigurationRegistry,
           kibanaFeatures,
         });
-      },
-    });
-
-    registerBuiltInActionTypes({
-      actionTypeRegistry: this.actionTypeRegistry,
-      services: {
-        validateEmailAddresses: plugins.actions.validateEmailAddresses,
       },
     });
 
