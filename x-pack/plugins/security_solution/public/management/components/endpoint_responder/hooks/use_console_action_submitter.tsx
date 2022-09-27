@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { BaseActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { ActionSuccess } from '../action_success';
@@ -16,7 +17,6 @@ import { ActionError } from '../action_error';
 import { FormattedError } from '../../formatted_error';
 import { useGetActionDetails } from '../../../hooks/endpoint/use_get_action_details';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from '../constants';
-import { useIsMounted } from '../../../hooks/use_is_mounted';
 import type {
   ActionDetails,
   Immutable,
@@ -130,7 +130,7 @@ export const useConsoleActionSubmitter = <
 
   // Create the action request if not yet done
   useEffect(() => {
-    if (!actionRequestSent && actionRequestBody && isMounted.current) {
+    if (!actionRequestSent && actionRequestBody && isMounted()) {
       const updatedRequestState: Required<
         CommandResponseActionApiState<TActionOutputContent>
       >['actionApiState']['request'] = {
@@ -159,7 +159,7 @@ export const useConsoleActionSubmitter = <
         })
         .finally(() => {
           // If the component is mounted, then set the store with the updated data (causes a rerender)
-          if (isMounted.current) {
+          if (isMounted()) {
             setStore((prevState) => {
               return {
                 ...prevState,
