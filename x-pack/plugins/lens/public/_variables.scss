@@ -9,3 +9,12 @@ $lnsZLevel0: 0;
 $lnsZLevel1: 1;
 $lnsZLevel2: 2;
 $lnsZLevel3: 3;
+
+$euiFlyoutBorder: $euiBorderThin !default;
+
+$euiFlyoutPaddingModifiers: (
+  'paddingNone': 0,
+  'paddingSmall': $euiSizeS,
+  'paddingMedium': $euiSize,
+  'paddingLarge': $euiSizeL
+) !default;

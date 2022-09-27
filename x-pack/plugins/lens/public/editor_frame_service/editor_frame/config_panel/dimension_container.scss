@@ -1,6 +1,3 @@
-@import '@elastic/eui/src/components/flyout/variables';
-@import '@elastic/eui/src/components/flyout/mixins';
-
 .lnsDimensionContainer {
   // Use the EuiFlyout style
   @include euiFlyout;
