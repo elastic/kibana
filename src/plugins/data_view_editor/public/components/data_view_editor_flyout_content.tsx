@@ -13,6 +13,7 @@ import memoizeOne from 'memoize-one';
 import {
   DataViewField,
   DataViewsPublicPluginStart,
+  INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
 
@@ -35,7 +36,6 @@ import { removeSpaces } from '../lib';
 import {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
-  INDEX_PATTERN_TYPE,
   IndexPatternConfig,
   MatchedIndicesSet,
   FormInternal,

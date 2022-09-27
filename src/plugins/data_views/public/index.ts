@@ -36,8 +36,9 @@ export type {
   DataViewsPublicSetupDependencies,
   DataViewsPublicStartDependencies,
   MatchedItem,
-  INDEX_PATTERN_TYPE,
 } from './types';
+
+export { INDEX_PATTERN_TYPE } from './types';
 
 export type {
   DataViewsServicePublic,
