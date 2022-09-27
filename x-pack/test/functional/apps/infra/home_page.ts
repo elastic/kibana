@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
+  const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'infraSavedViews']);
   const kibanaServer = getService('kibanaServer');
 
   describe('Home page', function () {
@@ -46,6 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
         await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Uh oh - Observability - Elastic');
@@ -64,7 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       it('renders the correct page title', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
       });
