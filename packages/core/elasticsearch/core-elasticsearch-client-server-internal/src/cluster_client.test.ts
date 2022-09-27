@@ -43,7 +43,7 @@ describe('ClusterClient', () => {
   let authHeaders: ReturnType<typeof httpServiceMock.createAuthHeaderStorage>;
   let internalClient: jest.Mocked<Client>;
   let scopedClient: jest.Mocked<Client>;
-  let agentManager: AgentManager;
+  let agentFactoryProvider: AgentManager;
 
   const mockTransport = { mockTransport: true };
 
@@ -51,7 +51,7 @@ describe('ClusterClient', () => {
     logger = loggingSystemMock.createLogger();
     internalClient = createClient();
     scopedClient = createClient();
-    agentManager = new AgentManager();
+    agentFactoryProvider = new AgentManager();
 
     authHeaders = httpServiceMock.createAuthHeaderStorage();
     authHeaders.get.mockImplementation(() => ({
@@ -81,19 +81,19 @@ describe('ClusterClient', () => {
       authHeaders,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
-      agentManager,
+      agentFactoryProvider,
     });
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
-      agentManager,
+      agentFactoryProvider,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
-      agentManager,
+      agentFactoryProvider,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
@@ -107,7 +107,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
 
       expect(clusterClient.asInternalUser).toBe(internalClient);
@@ -121,7 +121,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -147,7 +147,7 @@ describe('ClusterClient', () => {
         authHeaders,
         getExecutionContext,
         getUnauthorizedErrorHandler,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -170,7 +170,7 @@ describe('ClusterClient', () => {
         authHeaders,
         getExecutionContext,
         getUnauthorizedErrorHandler,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -202,7 +202,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -226,7 +226,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -259,7 +259,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -292,7 +292,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -330,7 +330,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -358,7 +358,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({
         kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
@@ -394,7 +394,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -428,7 +428,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -463,7 +463,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -492,7 +492,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { [headerKey]: 'foo' },
@@ -524,7 +524,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -555,7 +555,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = {
         headers: {
@@ -587,7 +587,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
       const request = {
         headers: {
@@ -614,7 +614,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
 
       await clusterClient.close();
@@ -631,7 +631,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
 
       let internalClientClosed = false;
@@ -675,7 +675,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
 
       internalClient.close.mockRejectedValue(new Error('error closing client'));
@@ -691,7 +691,7 @@ describe('ClusterClient', () => {
         logger,
         type: 'custom-type',
         authHeaders,
-        agentManager,
+        agentFactoryProvider,
       });
 
       await clusterClient.close();

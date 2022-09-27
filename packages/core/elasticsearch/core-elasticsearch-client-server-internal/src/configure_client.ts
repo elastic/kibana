@@ -12,7 +12,7 @@ import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';
-import { AgentManager } from './agent_manager';
+import { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
 
@@ -23,20 +23,20 @@ export const configureClient = (
     type,
     scoped = false,
     getExecutionContext = noop,
-    agentManager,
+    agentFactoryProvider,
   }: {
     logger: Logger;
     type: string;
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
-    agentManager: AgentManager;
+    agentFactoryProvider: AgentFactoryProvider;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
   const KibanaTransport = createTransport({ getExecutionContext });
   const client = new Client({
     ...clientOptions,
-    agent: agentManager.getAgentFactory(clientOptions.agent),
+    agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),
     Transport: KibanaTransport,
     Connection: HttpConnection,
     // using ClusterConnectionPool until https://github.com/elastic/elasticsearch-js/issues/1714 is addressed

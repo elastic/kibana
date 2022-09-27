@@ -8,43 +8,27 @@
 
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import { sampleEsClientMetrics } from '@kbn/core-metrics-server-mocks';
+import { AgentManagerMock } from './agent_manager.test.mocks';
+import { getAgentsSocketsStatsMock } from './get_agents_sockets_stats.test.mocks';
 import { ElasticsearchClientsMetricsCollector } from './elasticsearch_client';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 jest.mock('@kbn/core-elasticsearch-client-server-internal');
-jest.mock('./get_agents_sockets_stats');
-
-const AgentManagerMock = AgentManager as jest.MockedClass<typeof AgentManager>;
-const getAgentsSocketsStatsMock = getAgentsSocketsStats as jest.MockedFunction<
-  typeof getAgentsSocketsStats
->;
 
 describe('ElasticsearchClientsMetricsCollector', () => {
-  test('#collect calls getAgentsSocketsStats for each of the two sets (Http, Https) of Agents managed by the provided AgentManager', async () => {
-    const httpAgents = new Set<HttpAgent>([new HttpAgent(), new HttpAgent()]);
-    const httpsAgents = new Set<HttpsAgent>([new HttpsAgent(), new HttpsAgent()]);
+  test('#collect calls getAgentsSocketsStats with the Agents managed by the provided AgentManager', async () => {
+    const agents = new Set<HttpAgent>([new HttpAgent(), new HttpsAgent()]);
+    const agentManager = new AgentManagerMock();
+    agentManager.getAgents.mockReturnValueOnce(agents);
+    getAgentsSocketsStatsMock.mockReturnValueOnce(sampleEsClientMetrics);
 
-    AgentManagerMock.mockImplementationOnce(() => ({
-      getHttpAgents: jest.fn(() => httpAgents),
-      getHttpsAgents: jest.fn(() => httpsAgents),
-    }));
-    getAgentsSocketsStatsMock.mockImplementationOnce(() => 'http stats');
-    getAgentsSocketsStatsMock.mockImplementationOnce(() => 'https stats');
-
-    const agentManager = new AgentManager();
     const esClientsMetricsCollector = new ElasticsearchClientsMetricsCollector(agentManager);
     const metrics = await esClientsMetricsCollector.collect();
 
-    expect(agentManager.getHttpAgents).toHaveBeenCalledTimes(1);
-    expect(getAgentsSocketsStats).toHaveBeenCalledTimes(2);
-    expect(getAgentsSocketsStats).toHaveBeenNthCalledWith(1, httpAgents);
-    expect(getAgentsSocketsStats).toHaveBeenNthCalledWith(2, httpsAgents);
-    expect(metrics).toMatchInlineSnapshot(`
-      Object {
-        "http": "http stats",
-        "https": "https stats",
-      }
-    `);
+    expect(agentManager.getAgents).toHaveBeenCalledTimes(1);
+    expect(getAgentsSocketsStats).toHaveBeenCalledTimes(1);
+    expect(getAgentsSocketsStats).toHaveBeenNthCalledWith(1, agents);
+    expect(metrics).toEqual(sampleEsClientMetrics);
   });
 });

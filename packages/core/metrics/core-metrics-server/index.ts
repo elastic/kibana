@@ -14,6 +14,6 @@ export type {
   OpsProcessMetrics,
   OpsOsMetrics,
   OpsServerMetrics,
+  ElasticsearchClientProtocol,
   ElasticsearchClientsMetrics,
-  ElasticsearchClientsMetricsByProtocol,
 } from './src/metrics';

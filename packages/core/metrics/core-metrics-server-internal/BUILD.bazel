@@ -43,6 +43,7 @@ RUNTIME_DEPS = [
   ### test dependencies
   "//packages/kbn-logging-mocks",
   "//packages/core/http/core-http-server-mocks",
+  "//packages/core/metrics/core-metrics-server-mocks",
   "//packages/core/metrics/core-metrics-collectors-server-mocks",
   "//packages/core/elasticsearch/core-elasticsearch-server-mocks",
 

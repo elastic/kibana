@@ -41,13 +41,20 @@ export interface IntervalHistogram {
 }
 
 /**
+ * Protocol(s) used by the Elasticsearch Client
+ * @public
+ */
+
+export type ElasticsearchClientProtocol = 'none' | 'http' | 'https' | 'mixed';
+
+/**
  * Metrics related to the elasticsearch clients
  * @public
  */
 export interface ElasticsearchClientsMetrics {
-  /** Number of HTTP Agents that have are currently being used by the ES-js client */
-  agents: number;
-  /** Number of ES instances (or proxies) that ES-js client is connecting to */
+  /** The protocol (or protocols) that these Agents are using */
+  protocol: ElasticsearchClientProtocol;
+  /** Number of ES nodes that ES-js client is connecting to */
   connectedNodes: number;
   /** Number of nodes with active connections */
   nodesWithActiveSockets: number;
@@ -69,15 +76,6 @@ export interface ElasticsearchClientsMetrics {
   mostIdleNodeSockets: number;
   /** Average of available (idle) sockets per node (all connections) */
   averageIdleSocketsPerNode: number;
-}
-
-/**
- * Metrics related to the elasticsearch clients, by protocol
- * @public
- */
-export interface ElasticsearchClientsMetricsByProtocol {
-  http: ElasticsearchClientsMetrics;
-  https: ElasticsearchClientsMetrics;
 }
 
 /**
@@ -208,7 +206,7 @@ export interface OpsMetrics {
   /**
    * Metrics related to the elasticsearch client
    */
-  elasticsearch_client: ElasticsearchClientsMetricsByProtocol;
+  elasticsearch_client: ElasticsearchClientsMetrics;
   /**
    * Process related metrics.
    * @deprecated use the processes field instead.

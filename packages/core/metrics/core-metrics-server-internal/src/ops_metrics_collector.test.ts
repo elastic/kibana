@@ -8,6 +8,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { sampleEsClientMetrics } from '@kbn/core-metrics-server-mocks';
 import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 import {
   mockEsClientCollector,
@@ -36,18 +37,7 @@ describe('OpsMetricsCollector', () => {
         requests: 'serverRequestsMetrics',
         response_times: 'serverTimingMetrics',
       });
-      mockEsClientCollector.collect.mockResolvedValue({
-        http: {
-          agents: 0,
-          connectedNodes: 0,
-          someOtherMetrics: 'blabla',
-        },
-        https: {
-          agents: 1,
-          connectedNodes: 3,
-          someOtherMetrics: 'blabla',
-        },
-      });
+      mockEsClientCollector.collect.mockResolvedValue(sampleEsClientMetrics);
 
       const metrics = await collector.collect();
 
@@ -63,18 +53,7 @@ describe('OpsMetricsCollector', () => {
         os: 'osMetrics',
         requests: 'serverRequestsMetrics',
         response_times: 'serverTimingMetrics',
-        elasticsearch_client: {
-          http: {
-            agents: 0,
-            connectedNodes: 0,
-            someOtherMetrics: 'blabla',
-          },
-          https: {
-            agents: 1,
-            connectedNodes: 3,
-            someOtherMetrics: 'blabla',
-          },
-        },
+        elasticsearch_client: sampleEsClientMetrics,
       });
     });
   });

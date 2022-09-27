@@ -8,6 +8,7 @@
 
 import { Socket } from 'net';
 import { Agent, IncomingMessage } from 'http';
+import { Agent as HttpsAgent } from 'https';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 jest.mock('net');
@@ -69,20 +70,30 @@ describe('getAgentsSocketsStats()', () => {
     const agents = new Set<Agent>([new Agent(), new Agent()]);
 
     const stats = getAgentsSocketsStats(agents);
-    expect(stats).toMatchInlineSnapshot(`
-      Object {
-        "activeSockets": 8,
-        "activeSocketsPerNode": 2.6666666666666665,
-        "agents": 2,
-        "connectedNodes": 4,
-        "idleSockets": 9,
-        "idleSocketsPerNode": 4.5,
-        "mostActiveNodeSockets": 6,
-        "mostIdleNodeSockets": 8,
-        "nodesWithActiveSockets": 3,
-        "nodesWithIdleSockets": 2,
-        "queuedRequests": 6,
-      }
-    `);
+    expect(stats).toEqual({
+      averageActiveSocketsPerNode: 2.6666666666666665,
+      averageIdleSocketsPerNode: 4.5,
+      connectedNodes: 4,
+      mostActiveNodeSockets: 6,
+      mostIdleNodeSockets: 8,
+      nodesWithActiveSockets: 3,
+      nodesWithIdleSockets: 2,
+      protocol: 'http',
+      totalActiveSockets: 8,
+      totalIdleSockets: 9,
+      totalQueuedRequests: 6,
+    });
+  });
+
+  it('takes into account Agent types to determine the `protocol`', () => {
+    const noAgents = new Set<Agent>();
+    const httpAgents = new Set<Agent>([new Agent(), new Agent()]);
+    const httpsAgents = new Set<Agent>([new HttpsAgent(), new HttpsAgent()]);
+    const mixedAgents = new Set<Agent>([new Agent(), new HttpsAgent()]);
+
+    expect(getAgentsSocketsStats(noAgents).protocol).toEqual('none');
+    expect(getAgentsSocketsStats(httpAgents).protocol).toEqual('http');
+    expect(getAgentsSocketsStats(httpsAgents).protocol).toEqual('https');
+    expect(getAgentsSocketsStats(mixedAgents).protocol).toEqual('mixed');
   });
 });

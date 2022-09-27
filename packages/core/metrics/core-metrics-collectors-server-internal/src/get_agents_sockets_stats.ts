@@ -7,41 +7,58 @@
  */
 
 import type { Agent } from 'http';
+import { Agent as HttpsAgent } from 'https';
 import { mean } from 'lodash';
-import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
+import type {
+  ElasticsearchClientProtocol,
+  ElasticsearchClientsMetrics,
+} from '@kbn/core-metrics-server';
 
 export const getAgentsSocketsStats = (agents: Set<Agent>): ElasticsearchClientsMetrics => {
   const nodes = new Set<string>();
   let totalActiveSockets = 0;
   let totalIdleSockets = 0;
   let totalQueuedRequests = 0;
+  let http: boolean = false;
+  let https: boolean = false;
 
   const nodesWithActiveSockets: Record<string, number> = {};
   const nodesWithIdleSockets: Record<string, number> = {};
 
   agents.forEach((agent) => {
+    if (agent instanceof HttpsAgent) https = true;
+    else http = true;
+
     Object.values(agent.requests ?? []).forEach(
       (queue) => (totalQueuedRequests += queue?.length ?? 0)
     );
 
     Object.entries(agent.sockets ?? []).forEach(([node, sockets]) => {
       nodes.add(node);
-      totalActiveSockets += sockets?.length ?? 0;
-      nodesWithActiveSockets[node] = (nodesWithActiveSockets[node] ?? 0) + (sockets?.length ?? 0);
+      const activeSockets = sockets?.length ?? 0;
+      totalActiveSockets += activeSockets;
+      nodesWithActiveSockets[node] = (nodesWithActiveSockets[node] ?? 0) + activeSockets;
     });
 
     Object.entries(agent.freeSockets ?? []).forEach(([node, freeSockets]) => {
       nodes.add(node);
-      totalIdleSockets += freeSockets?.length ?? 0;
-      nodesWithIdleSockets[node] = (nodesWithIdleSockets[node] ?? 0) + (freeSockets?.length ?? 0);
+      const idleSockets = freeSockets?.length ?? 0;
+      totalIdleSockets += idleSockets;
+      nodesWithIdleSockets[node] = (nodesWithIdleSockets[node] ?? 0) + idleSockets;
     });
   });
 
   const activeSocketCounters = Object.values(nodesWithActiveSockets);
   const idleSocketCounters = Object.values(nodesWithIdleSockets);
+  let protocol: ElasticsearchClientProtocol;
+
+  if (http && https) protocol = 'mixed';
+  else if (https) protocol = 'https';
+  else if (http) protocol = 'http';
+  else protocol = 'none';
 
   return {
-    agents: agents.size,
+    protocol,
     connectedNodes: nodes.size,
     nodesWithActiveSockets: activeSocketCounters.length,
     nodesWithIdleSockets: idleSocketCounters.length,
