@@ -86,11 +86,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Graph settings drilldown tab - add new drilldown', async function () {
+      await testSubjects.click('graphSettingsButton');
       await testSubjects.click('drillDowns');
       await testSubjects.click('graphAddNewTemplate');
       await a11y.testAppSnapshot();
-      await testSubjects.click('graphRemoveUrlTemplate');
-      await testSubjects.click('euiFlyoutCloseButton');
       await browser.pressKeys(browser.keys.ESCAPE);
     });
 
