@@ -19,6 +19,7 @@ import {
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -41,17 +42,26 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
   const fleetServices = fleetServicesFromUseKibana ?? fleetServicesFromPluginStart;
+  const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading: !fleetCheckDone || !userRolesCheckDone || !user,
       ...(fleetAuthz
-        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, isEndpointRbacEnabled)
         : getEndpointAuthzInitialState()),
     });
 
     return privilegeList;
-  }, [fleetCheckDone, userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
+  }, [
+    fleetCheckDone,
+    userRolesCheckDone,
+    user,
+    fleetAuthz,
+    licenseService,
+    userRoles,
+    isEndpointRbacEnabled,
+  ]);
 
   // Check if user can access fleet
   useEffect(() => {

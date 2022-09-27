@@ -597,7 +597,7 @@ export const ResponseActionsLog = memo<
   // create range label to display
   const recordRangeLabel = useMemo(
     () => (
-      <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
+      <EuiText color="default" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
         <FormattedMessage
           id="xpack.securitySolution.responseActionsList.list.recordRange"
           defaultMessage="Showing {range} of {total} {recordsLabel}"
