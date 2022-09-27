@@ -1932,11 +1932,10 @@ export class RulesClient {
                   }
                   if (operation.operation === 'set') {
                     const snoozeAttributes = getSnoozeAttributes(attributes, operation.value);
-                    const schedules = snoozeAttributes.snoozeSchedule.filter((snooze) => snooze.id);
-                    if (schedules.length > 5) {
-                      throw Error(
-                        `Error updating rule: rule cannot have more than 5 snooze schedules`
-                      );
+                    try {
+                      verifySnoozeScheduleLimit(snoozeAttributes);
+                    } catch (error) {
+                      throw Error(`Error updating rule: could not add snooze - ${error.message}`);
                     }
                     attributes = {
                       ...attributes,
@@ -2566,6 +2565,12 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const newAttrs = getSnoozeAttributes(attributes, snoozeSchedule);
+
+    try {
+      verifySnoozeScheduleLimit(newAttrs);
+    } catch (error) {
+      throw Boom.badRequest(error.message);
+    }
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
@@ -3432,4 +3437,15 @@ function clearCurrentActiveSnooze(attributes: RawRule) {
     };
   });
   return clearedSnoozesAndSkippedRecurringSnoozes;
+}
+
+function verifySnoozeScheduleLimit(attributes: Partial<RawRule>) {
+  const schedules = attributes.snoozeSchedule?.filter((snooze) => snooze.id);
+  if (schedules && schedules.length > 5) {
+    throw Error(
+      i18n.translate('xpack.alerting.rulesClient.snoozeSchedule.limitReached', {
+        defaultMessage: 'Rule cannot have more than 5 snooze schedules',
+      })
+    );
+  }
 }
