@@ -17119,7 +17119,6 @@
     "xpack.lens.configure.invalidReferenceLineDimension": "La ligne de référence est affectée à un axe qui n’existe plus. Vous pouvez déplacer cette ligne de référence vers un autre axe disponible ou la supprimer.",
     "xpack.lens.confirmModal.cancelButtonLabel": "Annuler",
     "xpack.lens.customBucketContainer.dragToReorder": "Faire glisser pour réorganiser",
-    "xpack.lens.dataPanelWrapper.switchDatasource": "Basculer vers la source de données",
     "xpack.lens.datatable.addLayer": "Visualisation",
     "xpack.lens.datatable.breakdownColumns": "Colonnes",
     "xpack.lens.datatable.breakdownColumns.description": "Divisez les colonnes d'indicateurs par champ. Il est recommandé de conserver un faible nombre de colonnes pour éviter le défilement horizontal.",

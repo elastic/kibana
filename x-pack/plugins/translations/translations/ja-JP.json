@@ -17102,7 +17102,6 @@
     "xpack.lens.configure.invalidReferenceLineDimension": "この基準線は存在しない軸に割り当てられています。この基準線を別の使用可能な軸に移動するか、削除することができます。",
     "xpack.lens.confirmModal.cancelButtonLabel": "キャンセル",
     "xpack.lens.customBucketContainer.dragToReorder": "ドラッグして並べ替え",
-    "xpack.lens.dataPanelWrapper.switchDatasource": "データソースに切り替える",
     "xpack.lens.datatable.addLayer": "ビジュアライゼーション",
     "xpack.lens.datatable.breakdownColumns": "列",
     "xpack.lens.datatable.breakdownColumns.description": "フィールドでメトリックを列に分割します。列数を少なくし、横スクロールを避けることをお勧めします。",
