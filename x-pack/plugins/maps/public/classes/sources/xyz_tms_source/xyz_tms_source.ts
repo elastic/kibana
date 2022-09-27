@@ -53,8 +53,8 @@ export class XYZTMSSource extends AbstractSource implements ITMSSource {
     return this._descriptor.urlTemplate;
   }
 
-  isSourceStale(mbSource: RasterTileSource, sourceDataRequest: object): boolean {
-    const sourceData = sourceDataRequest as RasterTileSourceData;
+  isSourceStale(mbSource: RasterTileSource, sourceDataRequest: RasterTileSourceData): boolean {
+    const sourceData = sourceDataRequest;
     if (!sourceData.url) {
       return false;
     }

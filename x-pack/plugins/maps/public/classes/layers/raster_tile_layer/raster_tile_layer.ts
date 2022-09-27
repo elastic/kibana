@@ -105,10 +105,10 @@ export class RasterTileLayer extends AbstractLayer {
       let data = sourceDataRequest.getData()
       if(data){
         request = data;
+        return source.isSourceStale(mbSource,request as RasterTileSourceData);
       }
     }
-
-    return source.isSourceStale(mbSource,request);
+    return false;
   }
 
   syncLayerWithMB(mbMap: MbMap) {
@@ -125,7 +125,7 @@ export class RasterTileLayer extends AbstractLayer {
         return;
       }
 
-      const tmsSourceData = sourceDataRequest.getData() as { url?: string };
+      const tmsSourceData = sourceDataRequest.getData() as RasterTileSourceData;
       if (!tmsSourceData || !tmsSourceData.url) {
         return;
       }
