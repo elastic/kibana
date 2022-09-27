@@ -258,6 +258,16 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
+                  // go to dataview mode
+                  if (isTextBasedLangSelected) {
+                    setIsTextBasedLangSelected(false);
+                    // clean up the Text based language query
+                    onTextLangQuerySubmit?.({
+                      language: 'kuery',
+                      query: '',
+                    });
+                    setTriggerLabel(trigger.label);
+                  }
                 }}
                 size="xs"
                 iconType="plusInCircleFilled"
@@ -285,7 +295,7 @@ export function ChangeDataView({
               setIsTextBasedLangSelected(false);
               // clean up the Text based language query
               onTextLangQuerySubmit?.({
-                language: 'kql',
+                language: 'kuery',
                 query: '',
               });
               onChangeDataView(newId);
@@ -405,7 +415,7 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(false);
       // clean up the Text based language query
       onTextLangQuerySubmit?.({
-        language: 'kql',
+        language: 'kuery',
         query: '',
       });
       if (selectedDataViewId) {
