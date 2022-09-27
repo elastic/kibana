@@ -17,7 +17,9 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import { deleteRiskScore, getTransformState, findSavedObjects } from '../../tasks/risk_scores';
+import { deleteRiskScore } from '../../tasks/risk_scores';
+import { findSavedObjects } from '../../tasks/risk_scores/saved_objects';
+import { getTransformState } from '../../tasks/risk_scores/transforms';
 import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
 
 const spaceId = 'default';

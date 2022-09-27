@@ -21,211 +21,15 @@ import {
   getRiskScoreMapScriptId,
   getRiskScorePivotTransformId,
   getRiskScoreReduceScriptId,
-  getRiskScoreTagName,
   RiskScoreEntity,
-} from '../screens/entity_analytics';
-import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
-import {
-  INDICES_URL,
-  INGEST_PIPELINES_URL,
-  RISK_SCORE_SAVED_OBJECTS_URL,
-  SAVED_OBJECTS_URL,
-  STORED_SCRIPTS_URL,
-  TRANSFORMS_URL,
-} from '../urls/risk_score';
-import { visit } from './login';
-
-const createIndex = (options: { index: string; mappings: string | Record<string, unknown> }) => {
-  return cy.request({
-    method: 'put',
-    url: `${INDICES_URL}/create`,
-    body: options,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
-export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
-  return cy.request({
-    method: 'post',
-    url: `${INDICES_URL}/delete`,
-    body: JSON.stringify({
-      indices: [
-        getPivotTransformIndex(riskScoreEntity, spaceId),
-        getLatestTransformIndex(riskScoreEntity, spaceId),
-      ],
-    }),
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    failOnStatusCode: false,
-  });
-};
-
-export const createIngestPipeline = (options: { name: string; processors: Array<{}> }) => {
-  return cy.request({
-    method: 'post',
-    url: `${INGEST_PIPELINES_URL}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    body: options,
-  });
-};
-
-export const deleteRiskScoreIngestPipelines = (names: string[]) => {
-  return cy.request({
-    method: 'delete',
-    url: `${INGEST_PIPELINES_URL}/${names.join(',')}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    failOnStatusCode: false,
-  });
-};
-
-export const getTransformState = (transformId: string) => {
-  return cy.request<{ transforms: Array<{ id: string; state: string }>; count: number }>({
-    method: 'get',
-    url: `${TRANSFORMS_URL}/transforms/${transformId}/_stats`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
-const startTransforms = (transformIds: string[]) => {
-  return cy.request({
-    method: 'post',
-    url: `${TRANSFORMS_URL}/start_transforms`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    body: transformIds.map((id) => ({
-      id,
-    })),
-  });
-};
-
-const stopTransform = (state: {
-  transforms: Array<{ id: string; state: string }>;
-  count: number;
-}) => {
-  return cy.request({
-    method: 'post',
-    url: `${TRANSFORMS_URL}/stop_transforms`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    body:
-      state != null && state.transforms.length > 0
-        ? [
-            {
-              id: state.transforms[0].id,
-              state: state.transforms[0].state,
-            },
-          ]
-        : ([] as Array<{ id: string; state: string }>),
-  });
-};
-
-export const createTransform = (transformId: string, options: string | Record<string, unknown>) => {
-  return cy.request({
-    method: 'put',
-    url: `${TRANSFORMS_URL}/transforms/${transformId}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    body: options,
-  });
-};
-
-export const deleteTransform = (transformId: string) => {
-  return cy.request({
-    method: 'post',
-    url: `${TRANSFORMS_URL}/delete_transforms`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    failOnStatusCode: false,
-    body: {
-      transformsInfo: [
-        {
-          id: transformId,
-          state: 'stopped',
-        },
-      ],
-      deleteDestIndex: true,
-      deleteDestDataView: true,
-      forceDelete: false,
-    },
-  });
-};
-
-const deleteTransforms = async (transformIds: string[]) => {
-  const deleteSingleTransform = (transformId: string) =>
-    getTransformState(transformId)
-      .then(({ body: result }) => {
-        return stopTransform(result);
-      })
-      .then(() => {
-        deleteTransform(transformId);
-      });
-
-  await Promise.all(transformIds.map((transformId) => deleteSingleTransform(transformId)));
-};
-
-export const createStoredScript = (options: { id: string; script: {} }) => {
-  return cy.request({
-    method: 'put',
-    url: `${STORED_SCRIPTS_URL}/create`,
-    body: options,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
-const deleteStoredScript = (id: string) => {
-  return cy.request({
-    method: 'delete',
-    url: `${STORED_SCRIPTS_URL}/delete`,
-    body: { id },
-    failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
-export const deleteStoredScripts = async (scriptIds: string[]) => {
-  await Promise.all(scriptIds.map((scriptId) => deleteStoredScript(scriptId)));
-};
-
-export const deleteSavedObjects = (
-  templateName: `${RiskScoreEntity}RiskScoreDashboards`,
-  deleteAll: boolean
-) => {
-  return cy.request({
-    method: 'post',
-    url: `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${templateName}`,
-    failOnStatusCode: false,
-    body: {
-      deleteAll,
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
-export const createSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDashboards`) => {
-  return cy.request({
-    method: 'post',
-    url: `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_create/${templateName}`,
-    failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
-export const findSavedObjects = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
-  const search = getRiskScoreTagName(riskScoreEntity, spaceId);
-
-  const getReference = (tagId: string) => encodeURIComponent(`[{"type":"tag","id":"${tagId}"}]`);
-
-  return cy
-    .request({
-      method: 'get',
-      url: `${SAVED_OBJECTS_URL}/_find?fields=id&type=tag&sort_field=updated_at&search=${search}&search_fields=name`,
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    })
-    .then((res) =>
-      cy.request({
-        method: 'get',
-        url: `${SAVED_OBJECTS_URL}/_find?fields=id&type=index-pattern&type=tag&type=visualization&type=dashboard&type=lens&sort_field=updated_at&has_reference=${getReference(
-          res.body.saved_objects[0].id
-        )}`,
-        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      })
-    );
-};
+} from '../../screens/entity_analytics';
+import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
+import { visit } from '../login';
+import { createIndex, deleteRiskScoreIndicies } from './indices';
+import { createIngestPipeline, deleteRiskScoreIngestPipelines } from './ingest_pipelines';
+import { deleteSavedObjects } from './saved_objects';
+import { createStoredScript, deleteStoredScripts } from './stored_scripts';
+import { createTransform, deleteTransforms, startTransforms } from './transforms';
 
 /**
  * @deleteAll: If set to true, it deletes both old and new version.
@@ -685,10 +489,8 @@ const getLegacyRiskUserCreateReduceScriptOptions = () => {
 
 const getCreateLegacyMLUserPivotTransformOptions = ({
   spaceId = 'default',
-  stringifyScript,
 }: {
   spaceId?: string;
-  stringifyScript?: boolean;
 }) => {
   const options = {
     dest: {
@@ -762,34 +564,29 @@ const getCreateLegacyMLUserPivotTransformOptions = ({
 
 const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
   /**
-   * console_templates/enable_user_risk_score.console
    * Step 1 Upload script: ml_userriskscore_levels_script
    */
   createStoredScript(getLegacyRiskUserCreateLevelScriptOptions())
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
        * Step 2 Upload script: ml_userriskscore_map_script
        */
       return createStoredScript(getLegacyRiskUserCreateMapScriptOptions());
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
        * Step 3 Upload script: ml_userriskscore_reduce_script
        */
       return createStoredScript(getLegacyRiskUserCreateReduceScriptOptions());
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
        * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline
        */
       return createIngestPipeline(getLegacyRiskScoreIngestPipelineOptions(RiskScoreEntity.user));
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
        * Step 5 create ml_user_risk_score_{spaceId} index
        */
       return createIndex(
@@ -801,7 +598,6 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
        * Step 6 create Transform: ml_userriskscore_pivot_transform_{spaceId}
        */
       return createTransform(
@@ -811,8 +607,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
-       * Step 8 create ml_user_risk_score_latest_{spaceId} index
+       * Step 7 create ml_user_risk_score_latest_{spaceId} index
        */
       return createIndex(
         getCreateLegacyRiskScoreLatestIndicesOptions({
@@ -823,8 +618,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
-       * Step 9 create Transform: ml_userriskscore_latest_transform_{spaceId}
+       * Step 8 create Transform: ml_userriskscore_latest_transform_{spaceId}
        */
       return createTransform(
         getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId),
@@ -836,8 +630,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
     })
     .then(() => {
       /**
-       * console_templates/enable_user_risk_score.console
-       * Step 7 Start the pivot transform
+       * Step 9 Start the pivot transform
        * Step 10 Start the latest transform
        */
       const transformIds = [
