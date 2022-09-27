@@ -279,12 +279,14 @@ interface Props {
   timeRange: TimeRange;
   query: Query;
   searchSessionId: string;
+  onRefetch: () => void;
 }
 export const HostsTable: React.FunctionComponent<Props> = ({
   dataView,
   timeRange,
   query,
   searchSessionId,
+  onRefetch,
 }) => {
   const {
     services: { lens },
@@ -304,8 +306,7 @@ export const HostsTable: React.FunctionComponent<Props> = ({
         refetchText={i18n.translate('xpack.infra.metrics.refetchButtonLabel', {
           defaultMessage: 'Check for new data',
         })}
-        // TODO implement refetch
-        onRefetch={() => {}}
+        onRefetch={onRefetch}
         testString="metricsEmptyViewState"
       />
     );

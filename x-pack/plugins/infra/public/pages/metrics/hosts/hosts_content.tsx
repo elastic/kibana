@@ -39,6 +39,10 @@ export const HostsContent: React.FunctionComponent = () => {
     [setDateRange, setQuery, data.search.session]
   );
 
+  const onRefetch = () => {
+    setSearchSessionId(data.search.session.start());
+  };
+
   return (
     <div>
       {metricsDataView ? (
@@ -61,6 +65,7 @@ export const HostsContent: React.FunctionComponent = () => {
             timeRange={dateRange}
             query={query}
             searchSessionId={searchSessionId}
+            onRefetch={onRefetch}
           />
         </>
       ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (
