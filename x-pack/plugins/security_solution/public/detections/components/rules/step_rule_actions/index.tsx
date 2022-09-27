@@ -33,7 +33,7 @@ import { Form, UseField, useForm, useFormData } from '../../../../shared_imports
 import { StepContentWrapper } from '../step_content_wrapper';
 import {
   ThrottleSelectField,
-  THROTTLE_OPTIONS,
+  THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING,
   DEFAULT_THROTTLE_OPTION,
 } from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
@@ -62,11 +62,14 @@ const GhostFormField = () => <></>;
 
 const getThrottleOptions = (throttle?: string | null) => {
   // Add support for throttle options set by the API
-  if (throttle && findIndex(['value', throttle], THROTTLE_OPTIONS) < 0) {
-    return [...THROTTLE_OPTIONS, { value: throttle, text: throttle }];
+  if (
+    throttle &&
+    findIndex(['value', throttle], THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING) < 0
+  ) {
+    return [...THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING, { value: throttle, text: throttle }];
   }
 
-  return THROTTLE_OPTIONS;
+  return THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING;
 };
 
 const DisplayActionsHeader = () => {

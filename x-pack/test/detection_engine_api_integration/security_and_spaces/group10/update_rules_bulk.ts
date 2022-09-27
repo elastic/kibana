@@ -150,12 +150,12 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
-        updatedRule1.throttle = '1m';
+        updatedRule1.throttle = '1d';
 
         const updatedRule2 = getSimpleRuleUpdate('rule-2');
         updatedRule2.name = 'some other name';
         updatedRule2.actions = [action1];
-        updatedRule2.throttle = '1m';
+        updatedRule2.throttle = '1d';
 
         // update both rule names
         const { body }: { body: FullResponseSchema[] } = await supertest
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ];
-          outputRule.throttle = '1m';
+          outputRule.throttle = '1d';
           const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
