@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PageError component renders correctly for error status 500 and set title 1`] = `
+exports[`PageError component renders correctly and set title 1`] = `
 <div
   class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
 >
