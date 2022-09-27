@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.table.filterWithSearchString('Job created', 1);
     });
 
-    it('display a number of errors in the notification indicator', async () => {
+    it.skip('display a number of errors in the notification indicator', async () => {
       await ml.navigation.navigateToOverview();
       // triggers an error
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
