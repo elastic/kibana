@@ -7,12 +7,13 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { useSavedQueryServices } from '../utils/saved_query_services';
-import type { DefineStepRule } from '../../detections/pages/detection_engine/rules/types';
+import { useSavedQueryServices } from '../../../../../common/utils/saved_query_services';
+import type { DefineStepRule } from '../types';
 
-import { useFetch, REQUEST_NAMES } from './use_fetch';
+import { useFetch, REQUEST_NAMES } from '../../../../../common/hooks/use_fetch';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+
 import { SAVED_QUERY_LOAD_ERROR_TOAST } from './translations';
-import { useAppToasts } from './use_app_toasts';
 
 export const useGetSavedQuery = (savedQueryId: string | undefined) => {
   const savedQueryServices = useSavedQueryServices();
