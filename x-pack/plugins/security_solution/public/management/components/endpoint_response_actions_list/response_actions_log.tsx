@@ -649,7 +649,7 @@ export const ResponseActionsLog = memo<
                 <h2>
                   <FormattedMessage
                     id="xpack.securitySolution.responseActionsList.empty.title"
-                    defaultMessage="No response actions log"
+                    defaultMessage="No results match your search criteria"
                   />
                 </h2>
               }
@@ -657,7 +657,7 @@ export const ResponseActionsLog = memo<
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.responseActionsList.empty.body"
-                    defaultMessage="Try a different set of filters"
+                    defaultMessage="Try modifying your search or filter set"
                   />
                 </p>
               }
