@@ -112,3 +112,18 @@ export const stateToRawDashboardState = ({
   );
   return { ...omit(state, 'panels'), panels: savedDashboardPanels };
 };
+
+export const unsavedStateToRawDashboardState = (
+  state?: Partial<DashboardState>
+): Partial<RawDashboardState> => {
+  const {
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
+
+  const savedDashboardPanels = state?.panels
+    ? Object.values(state.panels).map((panel) =>
+        convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
+      )
+    : undefined;
+  return { ...state, panels: savedDashboardPanels };
+};

@@ -8,11 +8,14 @@
 
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
+import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
+import { QueryState } from '@kbn/data-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
@@ -21,7 +24,7 @@ import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
 import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { unsavedStateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
 
 const showFilterBarId = 'showFilterBar';
@@ -55,6 +58,7 @@ export function ShowShareModal({
         },
       },
     },
+    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
     initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
@@ -151,20 +155,44 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
+  // console.log('currentDashboardState', currentDashboardState);
+  // console.log('unsavedDashboardState', unsavedStateForLocator);
+  // console.log('saved dashboard', savedDashboard);
+
+  // const test = {
+  //   ...currentDashboardState,
+  //   panels: unsavedDashboardState?.panels ? currentDashboardState.panels : undefined,
+  //   filters: unsavedDashboardState?.filters ? currentDashboardState.filters : undefined,
+  // };
+
+  // for (const unsavedDashboardStateKey of Object.keys(unsavedDashboardState ?? {})) {
+  //   console.log(unsavedDashboardStateKey);
+  // }
+
+  let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
+  // console.log('before - ', window.location.href);
+  if (_g?.filters && _g.filters.length === 0) {
+    _g = _.omit(_g, 'filters');
+  }
+  if (_g?.time && !unsavedDashboardState?.timeRange) {
+    _g = _.omit(_g, 'time');
+  }
+  const baseUrl = setStateToKbnUrl('_g', _g);
+  // console.log('after - ', baseUrl);
+  const shareableUrl = setStateToKbnUrl(
+    '_a',
+    unsavedStateToRawDashboardState(unsavedDashboardState),
+    { useHash: false, storeInHashQuery: true },
+    unhashUrl(baseUrl)
+  );
+
   toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl,
-    shareableUrl: setStateToKbnUrl(
-      '_a',
-      stateToRawDashboardState({
-        state: currentDashboardState,
-      }),
-      { useHash: false, storeInHashQuery: true },
-      unhashUrl(window.location.href)
-    ),
-    objectId: savedObjectId,
+    shareableUrl,
+    objectId: savedDashboard.id,
     objectType: 'dashboard',
     sharingData: {
       title:

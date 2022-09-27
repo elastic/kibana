@@ -57,7 +57,6 @@ export interface DashboardState {
  * RawDashboardState is the dashboard state as directly loaded from the panelJSON
  */
 export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: SavedDashboardPanel[] };
-
 export interface DashboardContainerInput extends ContainerInput {
   controlGroupInput?: PersistableControlGroupInput;
   refreshConfig?: RefreshInterval;
