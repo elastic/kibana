@@ -7,10 +7,14 @@
 
 import { getIndexConnector } from '../../objects/connector';
 import { getSimpleRule } from '../../objects/rule';
-import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createEmptyDocument, createIndex, deleteIndex } from '../../tasks/api_calls';
+import {
+  createDocument,
+  createIndex,
+  deleteIndex,
+  waitForNewDocumentToBeIndexed,
+} from '../../tasks/api_calls/elasticsearch';
 import {
   cleanKibana,
   deleteAlertsAndRules,
@@ -37,9 +41,11 @@ describe('Rule actions', () => {
   before(() => {
     cleanKibana();
     login();
+
+    /* For later being able to create an index connector, we need to a dataview with at least one document ingested */
     createIndex(INDEX_CONNECTOR.index);
-    createEmptyDocument(INDEX_CONNECTOR.index);
     postDataView(INDEX_CONNECTOR.index);
+    createDocument(INDEX_CONNECTOR.index, '{}');
   });
 
   beforeEach(() => {
@@ -56,6 +62,9 @@ describe('Rule actions', () => {
     ...getSimpleRule(),
     actions: { interval: 'rule', connectors: [INDEX_CONNECTOR] },
   };
+  const index = rule.actions.connectors[0].index;
+  const initialNumberofDocuments = 1;
+  const expectedJson = JSON.parse(rule.actions.connectors[0].document);
 
   it('Creates a custom query rule with an index action ', function () {
     visit(RULE_CREATION);
@@ -66,17 +75,17 @@ describe('Rule actions', () => {
     createAndEnableRule();
     goToRuleDetails();
     waitForTheRuleToBeExecuted();
+
+    /* We wait for the alerts to be populated first because is when the action is going to be triggered */
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .should('match', /^[1-9].+$/);
-    cy.get(ALERT_GRID_CELL).contains(rule.name);
+    /* Once the action is triggered we wait for the new document to be indexed */
+    waitForNewDocumentToBeIndexed(index, initialNumberofDocuments);
 
-    const expectedJson = JSON.parse(rule.actions.connectors[0].document);
+    /* We assert that the new indexed document is the one set on the index action */
     cy.request({
       method: 'GET',
-      url: `${Cypress.env('ELASTICSEARCH_URL')}/${rule.actions.connectors[0].index}/_search`,
+      url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
       headers: { 'kbn-xsrf': 'cypress-creds' },
     }).then((response) => {
       expect(response.body.hits.hits[1]._source).to.have.property(

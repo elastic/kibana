@@ -6,7 +6,6 @@
  */
 
 interface Connector {
-  type: string;
   name: string;
 }
 
@@ -17,11 +16,13 @@ export interface EmailConnector extends Connector {
   user: string;
   password: string;
   service: string;
+  type: 'email';
 }
 
 export interface IndexConnector extends Connector {
   index: string;
   document: string;
+  type: 'index';
 }
 
 export type Connectors = IndexConnector | EmailConnector;

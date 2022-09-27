@@ -296,13 +296,13 @@ export const fillRuleAction = (rule: CustomRule) => {
   rule.actions?.connectors.forEach((connector) => {
     switch (connector.type) {
       case 'index':
-        const indexConnector = connector as IndexConnector;
+        const indexConnector = connector;
         cy.get(INDEX_SELECTOR).click();
         cy.get(CREATE_CONNECTOR_BTN).click();
         fillIndexConnectorForm(indexConnector);
         break;
       case 'email':
-        const emailConnector = connector as EmailConnector;
+        const emailConnector = connector;
         cy.get(EMAIL_ACTION_BTN).click();
         cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
         fillEmailConnectorForm(emailConnector);

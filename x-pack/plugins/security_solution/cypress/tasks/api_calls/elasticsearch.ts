@@ -14,12 +14,12 @@ export const createIndex = (index: string) => {
   });
 };
 
-export const createEmptyDocument = (index: string) => {
+export const createDocument = (index: string, document: string) => {
   cy.request({
     method: 'POST',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
-    body: {},
+    body: JSON.parse(document),
   });
 };
 
@@ -30,4 +30,21 @@ export const deleteIndex = (index: string) => {
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
+};
+
+export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocuments: number) => {
+  cy.waitUntil(
+    () => {
+      return cy
+        .request({
+          method: 'GET',
+          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
+          headers: { 'kbn-xsrf': 'cypress-creds' },
+        })
+        .then((response) => {
+          return response.body.hits.hits.length > initialNumberOfDocuments;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
 };
