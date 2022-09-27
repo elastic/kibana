@@ -30,7 +30,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
@@ -165,7 +165,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
               <EuiFlexItem>
                 <EuiButtonEmpty
                   rel="noopener nofollow noreferrer"
-                  href={RISKY_HOSTS_EXTERNAL_DOC_LINK}
+                  href={RISKY_HOSTS_DOC_LINK}
                   target="_blank"
                 >
                   {i18n.LEARN_MORE}
