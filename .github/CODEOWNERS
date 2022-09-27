@@ -331,7 +331,9 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/event_log/ @elastic/response-ops
 /x-pack/plugins/task_manager/ @elastic/response-ops
 /x-pack/plugins/stack_connectors/ @elastic/response-ops
+/x-pack/plugins/stack_connectors/public/connector_types/stack/ @elastic/response-ops-execution
 /x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/public/connector_types/cases/ @elastic/response-ops-cases
 /x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops-cases
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
