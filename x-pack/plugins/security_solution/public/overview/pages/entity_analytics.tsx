@@ -54,13 +54,13 @@ const EntityAnalyticsComponent = () => {
                   <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
-                  <EuiFlexItem>
-                    <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-                  </EuiFlexItem>
+                <EuiFlexItem>
+                  <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+                </EuiFlexItem>
 
-                  <EuiFlexItem>
-                    <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-                  </EuiFlexItem>
+                <EuiFlexItem>
+                  <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+                </EuiFlexItem>
 
                 <EuiFlexItem>
                   <EntityAnalyticsAnomalies />
