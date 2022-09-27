@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
+import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
 
