@@ -297,10 +297,6 @@ export const READ_ACTIONS_PERMISSIONS_ERROR_MSG = i18n.translate(
   }
 );
 
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
-});
-
 export const DELETED_CASES = (totalCases: number) =>
   i18n.translate('xpack.cases.containers.deletedCases', {
     values: { totalCases },

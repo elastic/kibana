@@ -41,6 +41,7 @@ interface CasesTableProps {
   sorting: EuiBasicTableProps<Case>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
+  deselectCases: () => void;
 }
 
 const Div = styled.div`
@@ -64,6 +65,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   sorting,
   tableRef,
   tableRowProps,
+  deselectCases,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
@@ -90,6 +92,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         enableBulkActions={showActions}
         filterOptions={filterOptions}
         selectedCases={selectedCases}
+        deselectCases={deselectCases}
       />
       <EuiBasicTable
         className={classnames({ isSelectorView })}

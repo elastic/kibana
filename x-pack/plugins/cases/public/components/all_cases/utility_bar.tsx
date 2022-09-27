@@ -23,14 +23,13 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useRefreshCases } from './use_on_refresh_cases';
 
-interface OwnProps {
+interface Props {
   data: Cases;
   enableBulkActions: boolean;
   filterOptions: FilterOptions;
   selectedCases: Case[];
+  deselectCases: () => void;
 }
-
-type Props = OwnProps;
 
 export const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
   const totalCases = cases.length;
@@ -52,6 +51,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   enableBulkActions = false,
   filterOptions,
   selectedCases,
+  deselectCases,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
@@ -104,6 +104,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     });
   }, [deleteCases, selectedCases]);
 
+  const onRefresh = useCallback(() => {
+    deselectCases();
+    refreshCases();
+  }, [deselectCases, refreshCases]);
+
   return (
     <UtilityBar border>
       <UtilityBarSection>
@@ -132,7 +137,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
           <UtilityBarAction
             iconSide="left"
             iconType="refresh"
-            onClick={refreshCases}
+            onClick={onRefresh}
             dataTestSubj="all-cases-refresh"
           >
             {i18n.REFRESH}

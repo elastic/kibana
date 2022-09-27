@@ -731,8 +731,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  // TODO: Fix
-  it.skip('should deselect cases when refreshing', async () => {
+  it('should deselect cases when refreshing', async () => {
     render(
       <TestProviders>
         <AllCasesList />

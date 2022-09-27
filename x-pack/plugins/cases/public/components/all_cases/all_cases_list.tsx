@@ -38,7 +38,7 @@ import {
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
-import { useIsLoadingCases } from './use_is_loading';
+import { useIsLoadingCases } from './use_is_loading_cases';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -286,6 +286,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           sorting={sorting}
           tableRef={tableRef}
           tableRowProps={tableRowProps}
+          deselectCases={deselectCases}
         />
       </>
     );

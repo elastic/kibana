@@ -8,7 +8,6 @@
 import {
   ActionLicense,
   Cases,
-  BulkUpdateStatus,
   Case,
   CasesStatus,
   CaseUserActions,
@@ -28,7 +27,7 @@ import {
   pushedCase,
   tags,
 } from '../mock';
-import { ResolvedCase, SeverityAll } from '../../../common/ui/types';
+import { CaseUpdateRequest, ResolvedCase, SeverityAll } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
@@ -100,7 +99,7 @@ export const patchCase = async (
 ): Promise<Case[]> => Promise.resolve([basicCase]);
 
 export const updateCases = async (
-  cases: BulkUpdateStatus[],
+  cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve(allCases.cases);
 

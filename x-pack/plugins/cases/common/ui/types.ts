@@ -134,23 +134,12 @@ export interface ApiProps {
   signal: AbortSignal;
 }
 
-export interface BulkUpdateStatus {
-  status: string;
-  id: string;
-  version: string;
-}
-
 export interface ActionLicense {
   id: string;
   name: string;
   enabled: boolean;
   enabledInConfig: boolean;
   enabledInLicense: boolean;
-}
-
-export interface DeleteCase {
-  id: string;
-  title: string;
 }
 
 export interface FieldMappings {

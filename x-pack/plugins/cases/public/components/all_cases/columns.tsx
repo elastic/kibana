@@ -24,7 +24,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
+import { Case, UpdateByKey } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -126,27 +126,26 @@ export const useCasesColumns = ({
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const { permissions } = useCasesContext();
 
-  const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
-    id: '',
-    title: '',
-  });
+  const [caseToBeDeleted, setCaseToBeDeleted] = useState<string>();
 
   const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
-  const onDeleteAction = useCallback((deleteCase: Case) => {
+  const onDeleteAction = useCallback((theCase: Case) => {
     setIsModalVisible(true);
-    setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title });
+    setCaseToBeDeleted(theCase.id);
   }, []);
 
   const closeModal = useCallback(() => setIsModalVisible(false), []);
 
   const onConfirmDeletion = useCallback(() => {
     setIsModalVisible(false);
-    deleteCases({
-      caseIds: [deleteThisCase.id],
-      successToasterTitle: i18n.DELETED_CASES(1),
-    });
-  }, [deleteCases, deleteThisCase.id]);
+    if (caseToBeDeleted) {
+      deleteCases({
+        caseIds: [caseToBeDeleted],
+        successToasterTitle: i18n.DELETED_CASES(1),
+      });
+    }
+  }, [caseToBeDeleted, deleteCases]);
 
   const handleDispatchUpdate = useCallback(
     ({ updateKey, updateValue, caseData }: UpdateByKey) => {
