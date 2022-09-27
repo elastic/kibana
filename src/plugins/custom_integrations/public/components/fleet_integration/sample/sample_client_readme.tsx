@@ -36,7 +36,7 @@ export const SampleClientReadme = () => {
             pageTitle={
               <h1>
                 <FormattedMessage
-                  id="plugins.custom_integrations.language_clients.sample.readme.title"
+                  id="customIntegrations.languageClients.sample.readme.title"
                   defaultMessage="ElasticSearch Sample Client"
                 />
               </h1>
@@ -44,7 +44,7 @@ export const SampleClientReadme = () => {
           />
           <EuiText>
             <FormattedMessage
-              id="plugins.custom_integrations.language_clients.sample.readme.intro"
+              id="customIntegrations.languageClients.sample.readme.intro"
               defaultMessage="Getting started with the Sample Language Client requires a few steps."
             />
           </EuiText>
@@ -54,7 +54,7 @@ export const SampleClientReadme = () => {
           <EuiTitle>
             <h2>
               <FormattedMessage
-                id="plugins.custom_integrations.language_clients.sample.readme.install"
+                id="customIntegrations.languageClients.sample.readme.install"
                 defaultMessage="Install the Sample Language Client"
               />
             </h2>
@@ -72,7 +72,7 @@ export const SampleClientReadme = () => {
           <EuiTitle>
             <h2>
               <FormattedMessage
-                id="plugins.custom_integrations.language_clients.sample.readme.install"
+                id="customIntegrations.languageClients.sample.readme.createApiKey"
                 defaultMessage="Create an API key"
               />
             </h2>
@@ -80,7 +80,7 @@ export const SampleClientReadme = () => {
 
           <EuiText>
             <FormattedMessage
-              id="plugins.custom_integrations.language_clients.sample.readme.apiKey"
+              id="customIntegrations.languageClients.sample.readme.apiKey"
               defaultMessage="Use the button bellow to generate an API key. You'll need this set up your client in the next step."
             />
           </EuiText>
@@ -108,7 +108,7 @@ export const SampleClientReadme = () => {
           <EuiTitle>
             <h2>
               <FormattedMessage
-                id="plugins.custom_integrations.language_clients.sample.readme.configure"
+                id="customIntegrations.languageClients.sample.readme.configure"
                 defaultMessage="Configure the Sample Language Client"
               />
             </h2>
@@ -116,7 +116,7 @@ export const SampleClientReadme = () => {
 
           <EuiText>
             <FormattedMessage
-              id="plugins.custom_integrations.language_clients.sample.readme.configureText"
+              id="customIntegrations.languageClients.sample.readme.configureText"
               defaultMessage="Create an {filename} file in the root of your project, and add the following options."
               values={{
                 filename: <EuiCode>elastic.config.json</EuiCode>,
