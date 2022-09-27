@@ -3107,7 +3107,10 @@ paths:
         - $ref: '#/components/parameters/space_id'
       requestBody:
         content:
-          application/json: {}
+          application/json:
+            schema:
+              type: object
+              nullable: true
       responses:
         '200':
           description: Indicates a successful call.

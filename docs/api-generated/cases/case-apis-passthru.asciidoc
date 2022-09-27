@@ -35,6 +35,7 @@ Any modifications made to this file will be overwritten.
   <li><a href="#getCaseTags"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/tags</code></a></li>
   <li><a href="#getCases"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/_find</code></a></li>
   <li><a href="#getCasesByAlert"><code><span class="http-method">get</span> /s/{spaceId}/api/cases/alerts/{alertId}</code></a></li>
+  <li><a href="#pushCase"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push</code></a></li>
   <li><a href="#setCaseConfiguration"><code><span class="http-method">post</span> /s/{spaceId}/api/cases/configure</code></a></li>
   <li><a href="#updateCase"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases</code></a></li>
   <li><a href="#updateCaseComment"><code><span class="http-method">patch</span> /s/{spaceId}/api/cases/{caseId}/comments</code></a></li>
@@ -55,7 +56,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
@@ -189,7 +190,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
@@ -323,7 +324,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -370,7 +371,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -409,7 +410,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -448,7 +449,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -498,7 +499,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -621,7 +622,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -681,7 +682,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -733,7 +734,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -777,7 +778,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -876,7 +877,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -932,7 +933,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -987,7 +988,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -1041,7 +1042,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -1091,7 +1092,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -1321,7 +1322,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
 
@@ -1363,6 +1364,144 @@ Any modifications made to this file will be overwritten.
         
   </div> <!-- method -->
   <hr/>
+  <div class="method"><a name="pushCase"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push</code></pre></div>
+    <div class="method-summary">Pushes a case to an external service. (<span class="nickname">pushCase</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges. You must also have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're pushing.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">caseId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">connectorId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the connector. To retrieve connector IDs, use the find connectors API. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#object">object</a> (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#createCase_200_response">createCase_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <pre class="example"><code>{
+  "owner" : "cases",
+  "totalComment" : 0,
+  "settings" : {
+    "syncAlerts" : true
+  },
+  "totalAlerts" : 0,
+  "closed_at" : "2000-01-23T04:56:07.000+00:00",
+  "comments" : [ ],
+  "created_at" : "2022-05-13T09:16:17.416Z",
+  "description" : "A case description.",
+  "title" : "Case title 1",
+  "created_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "version" : "WzUzMiwxXQ==",
+  "closed_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "tags" : [ "tag-1" ],
+  "duration" : 120,
+  "connector" : {
+    "name" : "none",
+    "id" : "none",
+    "fields" : {
+      "destIp" : "destIp",
+      "severity" : "severity",
+      "parent" : "parent",
+      "impact" : "impact",
+      "malwareUrl" : "malwareUrl",
+      "priority" : "priority",
+      "issueTypes" : [ 0.8008281904610115, 0.8008281904610115 ],
+      "issueType" : "issueType",
+      "sourceIp" : "sourceIp",
+      "urgency" : "urgency",
+      "malwareHash" : "malwareHash",
+      "caseId" : "caseId",
+      "severityCode" : 6.027456183070403,
+      "category" : "category",
+      "subcategory" : "subcategory"
+    },
+    "type" : ".none"
+  },
+  "updated_at" : "2000-01-23T04:56:07.000+00:00",
+  "updated_by" : {
+    "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+    "email" : "email",
+    "username" : "elastic"
+  },
+  "id" : "66b9aa00-94fa-11ea-9f74-e7e108796192",
+  "external_service" : {
+    "external_title" : "external_title",
+    "pushed_by" : {
+      "full_name" : "full_name",
+      "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+      "email" : "email",
+      "username" : "elastic"
+    },
+    "external_url" : "external_url",
+    "pushed_at" : "2000-01-23T04:56:07.000+00:00",
+    "connector_id" : "connector_id",
+    "external_id" : "external_id",
+    "connector_name" : "connector_name"
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json; charset=utf-8</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#createCase_200_response">createCase_200_response</a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="setCaseConfiguration"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -1374,7 +1513,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
@@ -1486,7 +1625,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
@@ -1622,7 +1761,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
@@ -1758,7 +1897,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the configuration. default: null </div><div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. default: null </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>

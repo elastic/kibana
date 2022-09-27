@@ -3788,7 +3788,12 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "nullable": true
+              }
+            }
           }
         },
         "responses": {
