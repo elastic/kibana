@@ -92,6 +92,9 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files"
+  ],
 )
 
 jsts_transpiler(
@@ -99,6 +102,9 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files"
+  ],
 )
 
 ts_config(
