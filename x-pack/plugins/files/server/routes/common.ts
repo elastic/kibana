@@ -6,6 +6,7 @@
  */
 import mime from 'mime';
 import type { ResponseHeaders } from '@kbn/core/server';
+import { CUSTOM_BLURHASH_HEADER } from '../../common/constants';
 import type { File } from '../../common/types';
 
 interface Args {
@@ -22,7 +23,7 @@ export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHea
     'cache-control': 'max-age=31536000, immutable',
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
     'x-content-type-options': 'nosniff',
-    ...(file.data.blurhash ? { 'x-kbn-blurhash': file.data.blurhash } : undefined),
+    ...(file.data.blurhash ? { [CUSTOM_BLURHASH_HEADER]: file.data.blurhash } : undefined),
   };
 }
 
