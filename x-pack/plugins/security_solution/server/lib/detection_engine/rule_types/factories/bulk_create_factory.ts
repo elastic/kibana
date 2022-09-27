@@ -56,18 +56,20 @@ export const bulkCreateFactory =
 
     const start = performance.now();
 
-    let enrichmentsTimeStart: number = 0;
-    let enrichmentsTimeFinish: number = 0;
+    let enrichmentsTimeStart = 0;
+    let enrichmentsTimeFinish = 0;
     let enrichAlertsWrapper: typeof enrichAlerts;
     if (enrichAlerts) {
       enrichAlertsWrapper = async (alerts, params) => {
+        enrichmentsTimeStart = performance.now();
         try {
-          enrichmentsTimeStart = performance.now();
-          const enrichedEvents = await enrichAlerts(alerts, params);
+          const enrichedAlerts = await enrichAlerts(alerts, params);
+          return enrichedAlerts;
+        } catch (error) {
+          ruleExecutionLogger.error(`Enrichments failed ${error}`);
+          throw error;
+        } finally {
           enrichmentsTimeFinish = performance.now();
-          return enrichedEvents;
-        } catch {
-          return alerts;
         }
       };
     }

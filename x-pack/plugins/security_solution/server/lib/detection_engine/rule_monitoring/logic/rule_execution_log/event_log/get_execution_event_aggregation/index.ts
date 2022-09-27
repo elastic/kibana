@@ -44,8 +44,6 @@ const TOTAL_ACTIONS_TRIGGERED_FIELD =
 const GAP_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.execution_gap_duration_s';
 const INDEXING_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms';
 const SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
-const ENRICHMENT_DURATION_FIELD =
-  'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms';
 const STATUS_FIELD = 'kibana.alert.rule.execution.status';
 
 const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
@@ -197,11 +195,6 @@ export const getExecutionEventAggregation = ({
             searchDuration: {
               min: {
                 field: SEARCH_DURATION_FIELD,
-              },
-            },
-            enrichmentDuration: {
-              min: {
-                field: ENRICHMENT_DURATION_FIELD,
               },
             },
           },
