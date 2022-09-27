@@ -23,7 +23,6 @@ import { isFilterPinned } from '@kbn/es-query';
 import { getFiltersForDSLQuery } from '../../../components/anomalies_table/get_filters_for_datafeed_query';
 
 export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
-  console.log('getNewCustomUrlDefaults -- job', job);
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
   const kibanaSettings = {
