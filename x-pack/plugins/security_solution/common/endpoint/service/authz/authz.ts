@@ -20,8 +20,10 @@ import type { MaybeImmutable } from '../../types';
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz | undefined, // TODO: Remove `undefined` type when `fleetAuthz` is needed and used.
-  userRoles: MaybeImmutable<string[]>
+  fleetAuthz: FleetAuthz,
+  userRoles: MaybeImmutable<string[]>,
+  // to be used in follow-up PRs
+  isEndpointRbacEnabled: boolean = false
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
