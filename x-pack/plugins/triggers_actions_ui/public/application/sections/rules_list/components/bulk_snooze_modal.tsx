@@ -31,8 +31,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 export type BulkSnoozeModalProps = {
   rulesToSnooze: RuleTableItem[];
   rulesToUnsnooze: RuleTableItem[];
-  rulesToSnoozeFilter?: KueryNode | void;
-  rulesToUnsnoozeFilter?: KueryNode | void;
+  rulesToSnoozeFilter?: KueryNode | null | undefined;
+  rulesToUnsnoozeFilter?: KueryNode | null | undefined;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
@@ -83,14 +83,14 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   const isSnoozeModalOpen = useMemo(() => {
-    if (rulesToSnoozeFilter) {
+    if (typeof rulesToSnoozeFilter !== 'undefined') {
       return true;
     }
     return rulesToSnooze.length > 0;
   }, [rulesToSnooze, rulesToSnoozeFilter]);
 
   const isUnsnoozeModalOpen = useMemo(() => {
-    if (rulesToUnsnoozeFilter) {
+    if (typeof rulesToUnsnoozeFilter !== 'undefined') {
       return true;
     }
     return rulesToUnsnooze.length > 0;

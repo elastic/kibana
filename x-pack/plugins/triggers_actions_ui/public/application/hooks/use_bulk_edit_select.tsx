@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useReducer, useMemo, useCallback } from 'react';
-import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
 import { RuleTableItem, RuleStatus } from '../../types';
 
@@ -181,8 +181,8 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
   }, []);
 
   const getFilterKueryNode = useCallback(
-    (selectionKueryNode?: KueryNode) => {
-      const ruleFilterKuerNode = mapFiltersToKueryNode({
+    (idsToExclude?: string[]) => {
+      const ruleFilterKueryNode = mapFiltersToKueryNode({
         typesFilter,
         actionTypesFilter,
         tagsFilter,
@@ -190,12 +190,19 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
         ruleStatusesFilter,
         searchText,
       });
-      if (!ruleFilterKuerNode) {
-        return selectionKueryNode;
+
+      if (idsToExclude && idsToExclude.length) {
+        if (ruleFilterKueryNode) {
+          return nodeBuilder.and([
+            ruleFilterKueryNode,
+            fromKueryExpression(
+              `NOT (${idsToExclude.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`
+            ),
+          ]);
+        }
       }
-      if (selectionKueryNode) {
-        return nodeBuilder.and([ruleFilterKuerNode, selectionKueryNode]);
-      }
+
+      return ruleFilterKueryNode;
     },
     [
       typesFilter,
@@ -214,11 +221,10 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     if (isAllSelected) {
       // Select all but nothing is selected to exclude
       if (idsArray.length === 0) {
-        return getFilterKueryNode(nodeBuilder.is('alert.id', nodeTypes.wildcard.buildNode('*')));
+        return getFilterKueryNode();
       }
       // Select all, exclude certain alerts
-      const kql = `NOT (${idsArray.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`;
-      return getFilterKueryNode(fromKueryExpression(kql));
+      return getFilterKueryNode(idsArray);
     }
 
     return getFilterKueryNode();

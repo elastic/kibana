@@ -38,7 +38,7 @@ export async function snoozeRule({
 
 export interface BulkSnoozeRulesProps {
   ids?: string[];
-  filter?: KueryNode | void;
+  filter?: KueryNode | null | undefined;
   snoozeSchedule: SnoozeSchedule;
 }
 

@@ -17,7 +17,7 @@ export async function updateAPIKey({ id, http }: { id: string; http: HttpSetup }
 
 export interface BulkUpdateAPIKeyProps {
   ids?: string[];
-  filter?: KueryNode | void;
+  filter?: KueryNode | null | undefined;
 }
 
 export function bulkUpdateAPIKey({

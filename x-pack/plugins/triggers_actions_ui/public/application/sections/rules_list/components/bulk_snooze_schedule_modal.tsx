@@ -51,8 +51,8 @@ const deleteConfirmSingle = (ruleName: string) =>
 export type BulkSnoozeScheduleModalProps = {
   rulesToSchedule: RuleTableItem[];
   rulesToUnschedule: RuleTableItem[];
-  rulesToScheduleFilter?: KueryNode | void;
-  rulesToUnscheduleFilter?: KueryNode | void;
+  rulesToScheduleFilter?: KueryNode | null | undefined;
+  rulesToUnscheduleFilter?: KueryNode | null | undefined;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
@@ -84,14 +84,14 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   const isScheduleModalOpen = useMemo(() => {
-    if (rulesToScheduleFilter) {
+    if (typeof rulesToScheduleFilter !== 'undefined') {
       return true;
     }
     return rulesToSchedule.length > 0;
   }, [rulesToSchedule, rulesToScheduleFilter]);
 
   const isUnscheduleModalOpen = useMemo(() => {
-    if (rulesToUnscheduleFilter) {
+    if (typeof rulesToUnscheduleFilter !== 'undefined') {
       return true;
     }
     return rulesToUnschedule.length > 0;

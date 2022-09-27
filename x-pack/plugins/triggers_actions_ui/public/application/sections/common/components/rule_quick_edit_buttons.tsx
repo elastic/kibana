@@ -22,7 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 export type ComponentOpts = {
   selectedItems: RuleTableItem[];
   isAllSelected?: boolean;
-  getFilter: () => KueryNode | void;
+  getFilter: () => KueryNode | null;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
   isSnoozingRules?: boolean;
@@ -36,11 +36,11 @@ export type ComponentOpts = {
   setRulesToUnsnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
   setRulesToSchedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
   setRulesToUnschedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
-  setRulesToSnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | void>>;
-  setRulesToUnsnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | void>>;
-  setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | void>>;
-  setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | void>>;
-  setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<KueryNode | void>>;
+  setRulesToSnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUnsnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
 } & BulkOperationsComponentOpts;
 
 const ButtonWithTooltip = ({

@@ -26,7 +26,7 @@ export const UpdateApiKeyModalConfirmation = ({
 }: {
   onCancel: () => void;
   idsToUpdate: string[];
-  idsToUpdateFilter?: KueryNode | void;
+  idsToUpdateFilter?: KueryNode | null | undefined;
   numberOfSelectedRules?: number;
   apiUpdateApiKeyCall: ({
     ids,
@@ -34,7 +34,7 @@ export const UpdateApiKeyModalConfirmation = ({
     filter,
   }: {
     ids?: string[];
-    filter?: KueryNode | void;
+    filter?: KueryNode | null | undefined;
     http: HttpSetup;
   }) => Promise<BulkEditResponse>;
   setIsLoadingState: (isLoading: boolean) => void;
@@ -51,7 +51,7 @@ export const UpdateApiKeyModalConfirmation = ({
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   useEffect(() => {
-    if (idsToUpdateFilter) {
+    if (typeof idsToUpdateFilter !== 'undefined') {
       setUpdateModalVisibility(true);
     } else {
       setUpdateModalVisibility(idsToUpdate.length > 0);
@@ -59,7 +59,7 @@ export const UpdateApiKeyModalConfirmation = ({
   }, [idsToUpdate, idsToUpdateFilter]);
 
   const numberOfIdsToUpdate = useMemo(() => {
-    if (idsToUpdateFilter) {
+    if (typeof idsToUpdateFilter !== 'undefined') {
       return numberOfSelectedRules;
     }
     return idsToUpdate.length;
