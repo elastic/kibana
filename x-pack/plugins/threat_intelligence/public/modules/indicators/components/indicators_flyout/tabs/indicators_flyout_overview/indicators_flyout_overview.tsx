@@ -19,7 +19,7 @@ import React, { useMemo } from 'react';
 import { VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
-import { unwrapValue } from '../../../../lib/unwrap_value';
+import { unwrapValue } from '../../../../utils/unwrap_value';
 import { IndicatorEmptyPrompt } from '../../components/indicator_empty_prompt';
 import { IndicatorBlock } from './components/block';
 import { HighlightedValuesTable } from './components/highlighted_values_table';
