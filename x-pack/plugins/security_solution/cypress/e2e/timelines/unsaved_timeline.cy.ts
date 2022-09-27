@@ -11,11 +11,13 @@ import {
   MODAL_CONFIRMATION_CANCEL_BTN,
 } from '../../screens/alerts_detection_rules';
 import {
+  ALERTS_PAGE,
   APP_LEAVE_CONFIRM_MODAL,
   CASES_PAGE,
   MANAGE_PAGE,
   OBSERVABILITY_ALERTS_PAGE,
 } from '../../screens/kibana_navigation';
+import { TIMELINE_SAVE_MODAL } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 import {
   navigateFromKibanaCollapsibleTo,
@@ -125,5 +127,22 @@ describe('Save Timeline Prompts', () => {
     openKibanaNavigation();
     cy.get(MANAGE_PAGE).click();
     cy.url().should('not.contain', HOSTS_URL);
+  });
+
+  it('When user navigates to the page where timeline is present, Time save modal shold not exists.', () => {
+    populateTimeline();
+    waitForTimelineChanges();
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    cy.get(MANAGE_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+
+    // Navigate back to HOSTS_URL and ensure that
+    // timeline save modal is NOT present
+
+    openKibanaNavigation();
+    cy.get(ALERTS_PAGE).click();
+    cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
   });
 });

@@ -77,8 +77,9 @@ export const useTimelineSavePrompt = (
           application.navigateToUrl(location.pathname + location.hash + location.search, {
             state: location.state,
           });
+        } else {
+          showSaveTimelineModal();
         }
-        showSaveTimelineModal();
       }
 
       if (
