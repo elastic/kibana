@@ -22,7 +22,7 @@ const COORDINATE_SYSTEM_OPTIONS = [
   {
     id: DEGREES_DECIMAL,
     label: i18n.translate('xpack.maps.setViewControl.decimalDegreesLabel', {
-      defaultMessage: 'Degrees Decimal',
+      defaultMessage: 'Decimal degrees',
     }),
   },
   {
