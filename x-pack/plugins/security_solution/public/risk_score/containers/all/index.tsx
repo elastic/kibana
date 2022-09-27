@@ -12,8 +12,8 @@ import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
-  RiskQueries,
   getUserRiskIndex,
+  RiskQueries,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
@@ -64,7 +64,14 @@ export const initialResult: Omit<
 };
 
 export const useHostRiskScore = (params?: UseRiskScoreParams) => {
-  const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
+  const {
+    timerange,
+    onlyLatest = true,
+    filterQuery,
+    sort,
+    skip = false,
+    pagination,
+  } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
 
@@ -81,7 +88,14 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
 };
 
 export const useUserRiskScore = (params?: UseRiskScoreParams) => {
-  const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
+  const {
+    timerange,
+    onlyLatest = true,
+    filterQuery,
+    sort,
+    skip = false,
+    pagination,
+  } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
 
@@ -99,6 +113,7 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
 
 const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
   timerange,
+  onlyLatest,
   filterQuery,
   sort,
   skip = false,
@@ -167,6 +182,11 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     ]
   );
 
+  const requestTimerange = useMemo(
+    () => (timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined),
+    [timerange]
+  );
+
   const riskScoreRequest = useMemo(
     () =>
       defaultIndex
@@ -182,9 +202,19 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
                   }
                 : undefined,
             sort,
+            timerange: onlyLatest ? undefined : requestTimerange,
           }
         : null,
-    [cursorStart, defaultIndex, factoryQueryType, filterQuery, querySize, sort]
+    [
+      cursorStart,
+      defaultIndex,
+      factoryQueryType,
+      filterQuery,
+      querySize,
+      sort,
+      requestTimerange,
+      onlyLatest,
+    ]
   );
 
   useEffect(() => {
@@ -196,10 +226,25 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && isLicenseValid && isEnabled && !isDeprecated) {
+    if (
+      !skip &&
+      !isDeprecatedLoading &&
+      riskScoreRequest != null &&
+      isLicenseValid &&
+      isEnabled &&
+      !isDeprecated
+    ) {
       search(riskScoreRequest);
     }
-  }, [isEnabled, isDeprecated, isLicenseValid, riskScoreRequest, search, skip]);
+  }, [
+    isEnabled,
+    isDeprecated,
+    isLicenseValid,
+    isDeprecatedLoading,
+    riskScoreRequest,
+    search,
+    skip,
+  ]);
 
   return [loading || isDeprecatedLoading, riskScoreResponse];
 };

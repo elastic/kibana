@@ -226,7 +226,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
           exeFileName: highlightedFrame.ExeFileName,
           sourceFileName: highlightedFrame.SourceFilename,
           functionName: highlightedFrame.FunctionName,
-          countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
+          countInclusive: primaryFlamegraph.Samples[highlightedVmIndex],
           countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
       : undefined;
@@ -273,7 +273,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       const valueIndex = props.values[0].valueAccessor as number;
                       const label = primaryFlamegraph.Label[valueIndex];
-                      const samples = primaryFlamegraph.Value[valueIndex];
+                      const samples = primaryFlamegraph.Samples[valueIndex];
                       const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const nodeID = primaryFlamegraph.ID[valueIndex];
@@ -289,8 +289,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           totalSamples={totalSamples}
-                          comparisonTotalSamples={comparisonFlamegraph?.Value[0]}
-                          comparisonSamples={comparisonNode?.Value}
+                          comparisonTotalSamples={comparisonFlamegraph?.Samples[0]}
+                          comparisonSamples={comparisonNode?.Samples}
                         />
                       );
                     },

@@ -11,11 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
 
-import type {
-  PostAgentUpgradeResponse,
-  PostBulkAgentUpgradeResponse,
-  GetCurrentUpgradesResponse,
-} from '../../../common/types';
+import type { PostAgentUpgradeResponse, GetCurrentUpgradesResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
@@ -47,26 +43,43 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await getAgentById(esClient, request.params.agentId);
-
-  if (agent.unenrollment_started_at || agent.unenrolled_at) {
-    return response.customError({
-      statusCode: 400,
-      body: {
-        message: 'cannot upgrade an unenrolling or unenrolled agent',
-      },
-    });
-  }
-  if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
-    return response.customError({
-      statusCode: 400,
-      body: {
-        message: `agent ${request.params.agentId} is not upgradeable`,
-      },
-    });
-  }
-
   try {
+    const agent = await getAgentById(esClient, request.params.agentId);
+
+    const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
+    const agentIsFleetServer = fleetServerAgents.some(
+      (fleetServerAgent) => fleetServerAgent.id === agent.id
+    );
+    if (!agentIsFleetServer) {
+      try {
+        checkFleetServerVersion(version, fleetServerAgents);
+      } catch (err) {
+        return response.customError({
+          statusCode: 400,
+          body: {
+            message: err.message,
+          },
+        });
+      }
+    }
+
+    if (agent.unenrollment_started_at || agent.unenrolled_at) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: 'cannot upgrade an unenrolling or unenrolled agent',
+        },
+      });
+    }
+    if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: `agent ${request.params.agentId} is not upgradeable`,
+        },
+      });
+    }
+
     await AgentService.sendUpgradeAgentAction({
       soClient,
       esClient,
@@ -125,15 +138,8 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       batchSize,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
-    const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
 
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

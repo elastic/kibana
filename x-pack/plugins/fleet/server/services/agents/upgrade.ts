@@ -7,7 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -73,7 +73,7 @@ export async function sendUpgradeAgentsActions(
     startTime?: string;
     batchSize?: number;
   }
-): Promise<{ items: BulkActionResult[]; actionId?: string }> {
+): Promise<{ actionId: string }> {
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
