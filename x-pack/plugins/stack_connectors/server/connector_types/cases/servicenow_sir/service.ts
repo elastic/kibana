@@ -6,10 +6,15 @@
  */
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { Observable, ExternalServiceSIR, ObservableResponse, ServiceFactory } from './types';
+import {
+  Observable,
+  ExternalServiceSIR,
+  ObservableResponse,
+  ServiceFactory,
+} from '../../lib/servicenow/types';
 
-import { createExternalService } from './service';
-import { createServiceError } from './utils';
+import { createExternalService as createExternalServiceCommon } from '../../lib/servicenow/service';
+import { createServiceError } from '../../lib/servicenow/utils';
 
 const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables`;
@@ -17,14 +22,14 @@ const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
 const getBulkAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables/bulk`;
 
-export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = ({
+export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
   credentials,
   logger,
   configurationUtilities,
   serviceConfig,
   axiosInstance,
 }): ExternalServiceSIR => {
-  const snService = createExternalService({
+  const snService = createExternalServiceCommon({
     credentials,
     logger,
     configurationUtilities,

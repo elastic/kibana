@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { api } from './api';
+import { api as commonApi } from '../../lib/servicenow/api';
 import {
   ExecutorSubActionAddEventParams,
   AddEventApiHandlerArgs,
   ExternalServiceApiITOM,
-} from './types';
+} from '../../lib/servicenow/types';
 
 const isValidDate = (d: Date) => !isNaN(d.valueOf());
 
@@ -64,7 +64,7 @@ const addEventServiceHandler = async ({
   await itomExternalService.addEvent(preparedParams);
 };
 
-export const apiITOM: ExternalServiceApiITOM = {
-  getChoices: api.getChoices,
+export const api: ExternalServiceApiITOM = {
+  getChoices: commonApi.getChoices,
   addEvent: addEventServiceHandler,
 };

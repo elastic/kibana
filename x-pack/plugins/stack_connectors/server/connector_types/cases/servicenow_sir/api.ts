@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, isString } from 'lodash';
-
+import { api as commonApi } from '../../lib/servicenow/api';
 import {
   ExecutorSubActionPushParamsSIR,
   ExternalServiceAPI,
@@ -15,9 +15,7 @@ import {
   PushToServiceApiHandlerArgs,
   PushToServiceApiParamsSIR,
   PushToServiceResponse,
-} from './types';
-
-import { api } from './api';
+} from '../../lib/servicenow/types';
 
 const SPLIT_REGEX = /[ ,|\r\n\t]+/;
 
@@ -106,7 +104,7 @@ const pushToServiceHandler = async ({
   commentFieldKey,
   logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const res = await api.pushToService({
+  const res = await commonApi.pushToService({
     externalService,
     params: prepareParams(!!config.usesTableApi, params as PushToServiceApiParamsSIR),
     config,
@@ -148,7 +146,7 @@ const pushToServiceHandler = async ({
   return res;
 };
 
-export const apiSIR: ExternalServiceAPI = {
-  ...api,
+export const api: ExternalServiceAPI = {
+  ...commonApi,
   pushToService: pushToServiceHandler,
 };

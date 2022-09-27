@@ -22,14 +22,9 @@ export {
 } from './resilient';
 export type { ActionParamsType as ResilientActionParams } from './resilient';
 
-export {
-  getServiceNowITSMConnectorType,
-  getServiceNowSIRConnectorType,
-  getServiceNowITOMConnectorType,
-  ServiceNowITSMConnectorTypeId,
-  ServiceNowSIRConnectorTypeId,
-  ServiceNowITOMConnectorTypeId,
-} from './servicenow';
+export { getServiceNowITSMConnectorType, ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
+export { getServiceNowSIRConnectorType, ServiceNowSIRConnectorTypeId } from './servicenow_sir';
+export { getServiceNowITOMConnectorType, ServiceNowITOMConnectorTypeId } from './servicenow';
 export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';

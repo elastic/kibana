@@ -8,11 +8,10 @@
 import { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ExecutorParams, ServiceNowPublicConfigurationType } from './types';
+import { ExecutorParams, ServiceNowPublicConfigurationType } from '../../lib/servicenow/types';
 import {
   ServiceNowConnectorType,
   ServiceNowConnectorTypeExecutorOptions,
-  getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
 } from '.';
 import { api } from './api';
@@ -45,39 +44,6 @@ describe('ServiceNow', () => {
 
   beforeEach(() => {
     (api.pushToService as jest.Mock).mockResolvedValue({ id: 'some-id' });
-  });
-
-  describe('ServiceNow ITSM', () => {
-    let connectorType: ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams>;
-    beforeAll(() => {
-      connectorType = getServiceNowITSMConnectorType({
-        logger: mockedLogger,
-      });
-    });
-
-    describe('execute()', () => {
-      beforeEach(() => {
-        jest.clearAllMocks();
-      });
-
-      test('it pass the correct comment field key', async () => {
-        const actionId = 'some-action-id';
-        const executorOptions = {
-          actionId,
-          config,
-          secrets,
-          params,
-          services,
-        } as unknown as ServiceNowConnectorTypeExecutorOptions<
-          ServiceNowPublicConfigurationType,
-          ExecutorParams
-        >;
-        await connectorType.executor(executorOptions);
-        expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
-          'work_notes'
-        );
-      });
-    });
   });
 
   describe('ServiceNow SIR', () => {

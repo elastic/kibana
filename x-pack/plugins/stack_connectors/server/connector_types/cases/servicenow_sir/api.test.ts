@@ -6,9 +6,9 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { externalServiceSIRMock, sirParams } from './mocks';
-import { ExternalServiceSIR, ObservableTypes } from './types';
-import { apiSIR, combineObservables, formatObservables, prepareParams } from './api_sir';
+import { externalServiceSIRMock, sirParams } from '../../lib/servicenow/mocks';
+import { ExternalServiceSIR, ObservableTypes } from '../../lib/servicenow/types';
+import { api, combineObservables, formatObservables, prepareParams } from './api';
 let mockedLogger: jest.Mocked<Logger>;
 
 describe('api_sir', () => {
@@ -189,7 +189,7 @@ describe('api_sir', () => {
   describe('pushToService', () => {
     test('it creates an incident correctly', async () => {
       const params = { ...sirParams, incident: { ...sirParams.incident, externalId: null } };
-      const res = await apiSIR.pushToService({
+      const res = await api.pushToService({
         externalService,
         params,
         config: { usesTableApi: false },
@@ -218,7 +218,7 @@ describe('api_sir', () => {
 
     test('it adds observables correctly', async () => {
       const params = { ...sirParams, incident: { ...sirParams.incident, externalId: null } };
-      await apiSIR.pushToService({
+      await api.pushToService({
         externalService,
         params,
         config: { usesTableApi: false },
@@ -246,7 +246,7 @@ describe('api_sir', () => {
 
     test('it does not call bulkAddObservableToIncident if the connector uses the old API', async () => {
       const params = { ...sirParams, incident: { ...sirParams.incident, externalId: null } };
-      await apiSIR.pushToService({
+      await api.pushToService({
         externalService,
         params,
         config: { usesTableApi: true },
@@ -271,7 +271,7 @@ describe('api_sir', () => {
         },
       };
 
-      await apiSIR.pushToService({
+      await api.pushToService({
         externalService,
         params,
         config: { usesTableApi: false },

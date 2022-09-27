@@ -6,21 +6,25 @@
  */
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ServiceFactory, ExternalServiceITOM, ExecutorSubActionAddEventParams } from './types';
+import {
+  ServiceFactory,
+  ExternalServiceITOM,
+  ExecutorSubActionAddEventParams,
+} from '../../lib/servicenow/types';
 
-import { createExternalService } from './service';
-import { createServiceError } from './utils';
+import { createExternalService as createExternalServiceCommon } from '../../lib/servicenow/service';
+import { createServiceError } from '../../lib/servicenow/utils';
 
 const getAddEventURL = (url: string) => `${url}/api/global/em/jsonv2`;
 
-export const createExternalServiceITOM: ServiceFactory<ExternalServiceITOM> = ({
+export const createExternalService: ServiceFactory<ExternalServiceITOM> = ({
   credentials,
   logger,
   configurationUtilities,
   serviceConfig,
   axiosInstance,
 }): ExternalServiceITOM => {
-  const snService = createExternalService({
+  const snService = createExternalServiceCommon({
     credentials,
     logger,
     configurationUtilities,

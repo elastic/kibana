@@ -7,14 +7,14 @@
 
 import axios from 'axios';
 
-import { createExternalServiceITOM } from './service_itom';
+import { createExternalService } from './service';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ExternalServiceITOM } from './types';
+import { ExternalServiceITOM } from '../../lib/servicenow/types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { snExternalServiceConfig } from './config';
-import { itomEventParams, serviceNowChoices } from './mocks';
+import { snExternalServiceConfig } from '../../lib/servicenow/config';
+import { itomEventParams, serviceNowChoices } from '../../lib/servicenow/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -35,7 +35,7 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceITOM;
 
   beforeEach(() => {
-    service = createExternalServiceITOM({
+    service = createExternalService({
       credentials: {
         config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },

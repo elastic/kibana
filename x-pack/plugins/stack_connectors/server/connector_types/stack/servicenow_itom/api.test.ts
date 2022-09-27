@@ -6,9 +6,9 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { externalServiceITOMMock, itomEventParams } from './mocks';
-import { ExternalServiceITOM } from './types';
-import { apiITOM, prepareParams } from './api_itom';
+import { externalServiceITOMMock, itomEventParams } from '../../lib/servicenow/mocks';
+import { ExternalServiceITOM } from '../../lib/servicenow/types';
+import { api, prepareParams } from './api';
 let mockedLogger: jest.Mocked<Logger>;
 
 describe('api_itom', () => {
@@ -41,7 +41,7 @@ describe('api_itom', () => {
 
   describe('addEvent', () => {
     test('it adds an event correctly', async () => {
-      await apiITOM.addEvent({
+      await api.addEvent({
         externalService,
         params: itomEventParams,
         logger: mockedLogger,
