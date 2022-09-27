@@ -120,3 +120,7 @@ export const updateTableSessionViewConfig = actionCreator<{
   id: string;
   sessionViewConfig: SessionViewConfig | null;
 }>('UPDATE_TGRID_SESSION_VIEW_CONFIG');
+
+export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
+  'SET_TABLE_UPDATED_AT'
+);

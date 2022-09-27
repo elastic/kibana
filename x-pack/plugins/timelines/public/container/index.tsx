@@ -16,11 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
-  clearEventsLoading,
-  clearEventsDeleted,
-  setTimelineUpdatedAt,
-} from '../store/t_grid/actions';
+import { clearEventsLoading, clearEventsDeleted, setTableUpdatedAt } from '../store/t_grid/actions';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -195,7 +191,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTableUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );

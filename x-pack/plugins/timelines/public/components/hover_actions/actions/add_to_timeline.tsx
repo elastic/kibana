@@ -10,6 +10,9 @@ import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@
 import { DraggableId } from 'react-beautiful-dnd';
 import { isEmpty } from 'lodash';
 
+import { useDispatch } from 'react-redux';
+import { TimelineId } from '../../../types';
+import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { DataProvider } from '../../../../common/types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
@@ -64,6 +67,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     value,
     timelineType = 'default',
   }) => {
+    const dispatch = useDispatch();
     const { addSuccess } = useAppToasts();
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
 
@@ -74,6 +78,12 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
         const addDataProvider = Array.isArray(dataProvider) ? dataProvider : [dataProvider];
         addDataProvider.forEach((provider) => {
           if (provider) {
+            dispatch(
+              addProviderToTimeline({
+                id: TimelineId.active,
+                dataProvider: provider,
+              })
+            );
             addSuccess(
               i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(provider.name, timelineType === 'default')
             );
@@ -84,7 +94,15 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       if (onClick != null) {
         onClick();
       }
-    }, [addSuccess, dataProvider, draggableId, onClick, startDragToTimeline, timelineType]);
+    }, [
+      addSuccess,
+      dataProvider,
+      dispatch,
+      draggableId,
+      onClick,
+      startDragToTimeline,
+      timelineType,
+    ]);
 
     useEffect(() => {
       if (!ownFocus) {

@@ -73,7 +73,6 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, type, as, 
     dataProvider,
     field: key,
     ownFocus: false,
-    onClick: () => {},
   };
 
   // Use case is for the barchart legend (for example).

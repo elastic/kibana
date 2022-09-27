@@ -32,6 +32,8 @@ export interface TimelinesUIStart {
   ) => ReactElement<GetTGridProps<T>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTGridReducer: () => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getTimelineReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;

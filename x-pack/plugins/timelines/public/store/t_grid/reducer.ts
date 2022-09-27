@@ -29,6 +29,7 @@ import {
   upsertColumn,
   updateTableGraphEventId,
   updateTableSessionViewConfig,
+  setTableUpdatedAt,
 } from './actions';
 
 import {
@@ -245,5 +246,15 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       sessionViewConfig,
       tableById: state.tableById,
     }),
+  }))
+  .case(setTableUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        updated,
+      },
+    },
   }))
   .build();

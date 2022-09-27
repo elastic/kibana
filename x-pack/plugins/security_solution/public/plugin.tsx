@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import reduceReducers from 'reduce-reducers';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith, pluck } from 'rxjs/operators';
@@ -19,6 +20,7 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { AnyAction, Reducer } from 'redux';
 import type {
   PluginSetup,
   PluginStart,
@@ -66,6 +68,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { initDataView } from './common/store/sourcerer/model';
 import type { SecurityDataView } from './common/containers/sourcerer/api';
+import type { TimelineState } from './timelines/store/timeline/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -444,6 +447,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
+      const timelineReducer = reduceReducers(
+        timelineInitialState.timeline,
+        startPlugins.timelines?.getTimelineReducer() ?? {},
+        subPlugins.timelines.store.reducer.timeline
+      ) as unknown as Reducer<TimelineState, AnyAction>;
       this._store = createStore(
         createInitialState(
           {
@@ -465,8 +473,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.users.store.reducer,
           ...subPlugins.network.store.reducer,
+          timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
-          ...subPlugins.timelines.store.reducer,
           ...tGridReducer,
         },
         { dataTable: tGridReducer },

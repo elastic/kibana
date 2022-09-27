@@ -15,7 +15,6 @@ import type { TGridModelSettings } from './model';
 
 import {
   ColumnHeaderOptions,
-  DataProvider,
   SortColumnTable,
   DataExpandedDetail,
   DataExpandedDetailType,
@@ -459,38 +458,6 @@ export const updateTableDetailsPanel = (action: TableToggleDetailPanel): DataExp
     [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
       ? newExpandDetails
       : {},
-  };
-};
-
-export const addProviderToTableHelper = (
-  id: string,
-  provider: DataProvider,
-  tableById: TableById
-): TableById => {
-  const dataTable = tableById[id];
-  const alreadyExistsAtIndex = dataTable.dataProviders.findIndex((p) => p.id === provider.id);
-
-  if (alreadyExistsAtIndex > -1 && !isEmpty(dataTable.dataProviders[alreadyExistsAtIndex].and)) {
-    provider.id = `${provider.id}-${
-      dataTable.dataProviders.filter((p) => p.id === provider.id).length
-    }`;
-  }
-
-  const dataProviders =
-    alreadyExistsAtIndex > -1 && isEmpty(dataTable.dataProviders[alreadyExistsAtIndex].and)
-      ? [
-          ...dataTable.dataProviders.slice(0, alreadyExistsAtIndex),
-          provider,
-          ...dataTable.dataProviders.slice(alreadyExistsAtIndex + 1),
-        ]
-      : [...dataTable.dataProviders, provider];
-
-  return {
-    ...tableById,
-    [id]: {
-      ...dataTable,
-      dataProviders,
-    },
   };
 };
 
