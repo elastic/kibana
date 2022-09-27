@@ -61,7 +61,7 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
 }));
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-const data: TimelineEventsDetailsItem[] = [
+const dataWithoutAgentType: TimelineEventsDetailsItem[] = [
   {
     category: 'process',
     field: 'process.entity_id',
@@ -79,6 +79,16 @@ const data: TimelineEventsDetailsItem[] = [
     field: 'kibana.alert.rule.parameters.index',
     isObjectArray: false,
     values: ['fakeindex'],
+  },
+];
+
+const data: TimelineEventsDetailsItem[] = [
+  ...dataWithoutAgentType,
+  {
+    category: 'agent',
+    field: 'agent.type',
+    isObjectArray: false,
+    values: ['endpoint'],
   },
 ];
 
@@ -123,9 +133,11 @@ describe('Insights', () => {
 
   describe('with feature flag enabled', () => {
     describe('with platinum license', () => {
-      it('should show insights for related alerts by process ancestry', () => {
+      beforeAll(() => {
         licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+      });
 
+      it('should show insights for related alerts by process ancestry', () => {
         render(
           <TestProviders>
             <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
@@ -136,6 +148,23 @@ describe('Insights', () => {
         expect(
           screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
         ).not.toBeInTheDocument();
+      });
+
+      describe('without process ancestry info', () => {
+        it('should not show the related alerts by process ancestry insights module', () => {
+          render(
+            <TestProviders>
+              <Insights
+                browserFields={{}}
+                eventId="test"
+                data={dataWithoutAgentType}
+                timelineId=""
+              />
+            </TestProviders>
+          );
+
+          expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
+        });
       });
     });
 
