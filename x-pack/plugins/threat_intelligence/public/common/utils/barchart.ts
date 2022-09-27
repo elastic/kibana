@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   Aggregation,
   AggregationValue,
   ChartSeries,
-} from '../../modules/indicators/hooks/use_aggregated_indicators';
+} from '../../modules/indicators/services/fetch_aggregated_indicators';
 
 /**
  * Converts data received from an Elastic search with date_histogram aggregation enabled to something usable in the "@elastic/chart" BarChart component
