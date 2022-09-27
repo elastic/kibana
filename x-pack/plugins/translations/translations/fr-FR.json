@@ -25493,7 +25493,6 @@
     "xpack.securitySolution.usersTable.rows": "{numRows} {numRows, plural, =0 {ligne} =1 {ligne} other {lignes}}",
     "xpack.securitySolution.usersTable.unit": "{totalCount, plural, =1 {utilisateur} other {utilisateurs}}",
     "xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel": "Appuyer",
-    "xpack.securitySolution.actionLogButton.label": "Log des actions",
     "xpack.securitySolution.actionsContextMenu.label": "Ouvrir",
     "xpack.securitySolution.administration.os.linux": "Linux",
     "xpack.securitySolution.administration.os.macos": "Mac",

@@ -25468,7 +25468,6 @@
     "xpack.securitySolution.usersTable.rows": "{numRows} {numRows, plural, other  {行}}",
     "xpack.securitySolution.usersTable.unit": "{totalCount, plural, other  {ユーザー}}",
     "xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel": "プレス",
-    "xpack.securitySolution.actionLogButton.label": "アクションログ",
     "xpack.securitySolution.actionsContextMenu.label": "開く",
     "xpack.securitySolution.administration.os.linux": "Linux",
     "xpack.securitySolution.administration.os.macos": "Mac",

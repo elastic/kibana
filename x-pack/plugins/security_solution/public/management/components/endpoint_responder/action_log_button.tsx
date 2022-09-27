@@ -29,7 +29,7 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
         data-test-subj="responderShowActionLogButton"
       >
         <FormattedMessage
-          id="xpack.securitySolution.actionLogButton.label"
+          id="xpack.securitySolution.responseActionsHistoryButton.label"
           defaultMessage="Response actions history"
         />
       </EuiButton>
