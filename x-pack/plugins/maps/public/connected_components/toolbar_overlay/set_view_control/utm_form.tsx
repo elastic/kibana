@@ -87,7 +87,7 @@ export class UtmForm extends Component<Props, State> {
   _onSubmit = () => {
     const point = this._toPoint();
     if (point) {
-      this.props.onSubmit(point.north, point.east, this.state.zoom as number);
+      this.props.onSubmit(point.lat, point.lon, this.state.zoom as number);
     }
   };
 

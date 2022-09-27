@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';
+import { UtmForm } from './utm_form';
 
 const DEGREES_DECIMAL = 'dd';
 const MGRS = 'mgrs';
@@ -82,6 +83,18 @@ export class SetViewForm extends Component<Props, State> {
         />
       );
     }
+
+    if (this.state.coordinateSystem === UTM) {
+      return (
+        <UtmForm
+          settings={this.props.settings}
+          zoom={this.props.zoom}
+          center={this.props.center}
+          onSubmit={this.props.onSubmit}
+        />
+      );
+    }
+
     return (
       <DecimalDegreesForm
         settings={this.props.settings}
