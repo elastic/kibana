@@ -37,6 +37,7 @@ export type {
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
+  LayerType,
 } from '../common/types';
 
 export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
@@ -79,7 +80,6 @@ export type {
 export type {
   XYArgs,
   XYRender,
-  LayerType,
   LineStyle,
   FillStyle,
   YScaleType,

@@ -336,7 +336,6 @@ export function LayerPanel(
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
-                  // TODO - figure out the layerType types
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                   onRemoveLayer={onRemoveLayer}
                   onCloneLayer={onCloneLayer}
