@@ -31,6 +31,16 @@ const fullStoryConfigSchema = schema.object({
   }),
 });
 
+const gainSightConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  org_id: schema.conditional(
+    schema.siblingRef('enabled'),
+    true,
+    schema.string({ minLength: 1 }),
+    schema.maybe(schema.string())
+  ),
+});
+
 const chatConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   chatURL: schema.maybe(schema.string()),
@@ -44,6 +54,7 @@ const configSchema = schema.object({
   cname: schema.maybe(schema.string()),
   deployment_url: schema.maybe(schema.string()),
   full_story: fullStoryConfigSchema,
+  gain_sight: gainSightConfigSchema,
   id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
@@ -58,6 +69,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     cname: true,
     deployment_url: true,
     full_story: true,
+    gain_sight: true,
     id: true,
     organization_url: true,
     profile_url: true,
