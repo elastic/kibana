@@ -18,6 +18,11 @@ export interface SubFeatureConfig {
 
   /** Collection of privilege groups */
   privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
+
+    /**
+   * Help text
+   */
+   helpText?: string;
 }
 
 /**
@@ -88,6 +93,10 @@ export class SubFeature {
 
   public get privilegeGroups() {
     return this.config.privilegeGroups;
+  }
+
+  public get helpText() {
+    return this.config.helpText;
   }
 
   public toRaw() {

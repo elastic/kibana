@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiIconTip, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -38,12 +38,39 @@ export const SubFeatureForm = (props: Props) => {
   }
 
   return (
+    <>
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiText size="s">{props.subFeature.name}</EuiText>
+        <EuiFlexGroup gutterSize='s'>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{props.subFeature.name}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {  props.subFeature.helpText && <EuiIconTip
+                type="iInCircle"
+                content={props.subFeature.helpText}
+              />
+              }
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {
+         props.subFeature.helpText && <EuiText color={"subdued"} size={"xs"}>
+        {props.subFeature.helpText}
+        </EuiText>
+        }
       </EuiFlexItem>
-      <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>
+    {
+     props.subFeature.helpText && <><EuiSpacer size='xs'/><EuiCallOut
+      size="s"
+      title="Elasticsearch index permissions required"
+      iconType="alert"
+    >
+      {'It is required to add the `read` permission for `logs-*` to use this feature'}
+      </EuiCallOut></>
+    }
+    </> 
   );
 
   function renderPrivilegeGroup(privilegeGroup: SubFeaturePrivilegeGroup, index: number) {
@@ -61,6 +88,8 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
+
+    const helpText = props.subFeature.helpText;
     return (
       <div key={index}>
         {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
@@ -70,6 +99,7 @@ export const SubFeatureForm = (props: Props) => {
             props.privilegeIndex
           );
           return (
+            <>
             <EuiCheckbox
               key={privilege.id}
               id={`${props.featureId}_${privilege.id}`}
@@ -89,6 +119,11 @@ export const SubFeatureForm = (props: Props) => {
               disabled={props.disabled}
               compressed={true}
             />
+            { helpText && <EuiToolTip content={helpText}>
+              <span>{helpText}</span>
+            </EuiToolTip>
+            }   
+            </>
           );
         })}
       </div>

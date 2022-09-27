@@ -188,6 +188,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointList', {
             defaultMessage: 'Endpoint List',
           }),
+          helpText: 'More stuff about Endpoint list.',
           privilegeGroups: [
             {
               groupType: 'mutually_exclusive',
