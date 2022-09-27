@@ -320,21 +320,3 @@ export interface BrowserFieldCategory {
 export interface BrowserFields {
   [category: string]: BrowserFieldCategory;
 }
-
-// export interface BrowserField {
-//   aggregatable: boolean;
-//   category: string;
-//   description?: string | null;
-//   example?: string | number | null;
-//   fields: Readonly<Record<string, Partial<BrowserField>>>;
-//   format?: string;
-//   indexes: string[];
-//   name: string;
-//   searchable: boolean;
-//   type: string;
-//   subType?: IFieldSubType;
-//   readFromDocValues: boolean;
-//   runtimeField?: RuntimeField;
-// }
-
-// export type BrowserFields = Record<string, Partial<BrowserField>>;

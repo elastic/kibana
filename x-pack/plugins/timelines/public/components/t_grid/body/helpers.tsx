@@ -12,7 +12,6 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
   BrowserField as TriggersActionsUiBrowserField,
-  BrowserFieldCategory as TriggersActionsUiBrowserFieldCategory,
   BrowserFields as TriggersActionsUiBrowserFields,
 } from '@kbn/rule-registry-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
