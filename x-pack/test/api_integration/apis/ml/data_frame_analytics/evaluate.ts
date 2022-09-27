@@ -157,29 +157,31 @@ export default ({ getService }: FtrProviderContext) => {
     testJobConfigs.forEach((testConfig) => {
       describe(`EvaluateDataFrameAnalytics ${testConfig.jobType}`, async () => {
         it(`should evaluate ${testConfig.jobType} analytics job`, async () => {
-          const { body, status } = await supertest
-            .post(`/api/ml/data_frame/_evaluate`)
-            .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-            .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.eval);
-          ml.api.assertResponseStatusCode(200, status, body);
+          const tm5 = await ml.api.getTrainedModelsES();
+          log.info(JSON.stringify(tm5, null, 2));
+          // const { body, status } = await supertest
+          //   .post(`/api/ml/data_frame/_evaluate`)
+          //   .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+          //   .set(COMMON_REQUEST_HEADERS)
+          //   .send(testConfig.eval);
+          // ml.api.assertResponseStatusCode(200, status, body);
 
-          if (testConfig.jobType === 'classification') {
-            const { classification } = body;
-            expect(body).to.have.property('classification');
-            expect(classification).to.have.property('recall');
-            expect(classification).to.have.property('accuracy');
-            expect(classification).to.have.property('multiclass_confusion_matrix');
-          } else {
-            const { regression } = body;
-            expect(body).to.have.property('regression');
-            expect(regression).to.have.property('mse');
-            expect(regression).to.have.property('msle');
-            expect(regression).to.have.property('r_squared');
-          }
+          // if (testConfig.jobType === 'classification') {
+          //   const { classification } = body;
+          //   expect(body).to.have.property('classification');
+          //   expect(classification).to.have.property('recall');
+          //   expect(classification).to.have.property('accuracy');
+          //   expect(classification).to.have.property('multiclass_confusion_matrix');
+          // } else {
+          //   const { regression } = body;
+          //   expect(body).to.have.property('regression');
+          //   expect(regression).to.have.property('mse');
+          //   expect(regression).to.have.property('msle');
+          //   expect(regression).to.have.property('r_squared');
+          // }
         });
 
-        it(`should evaluate ${testConfig.jobType} job for the user with only view permission`, async () => {
+        it.skip(`should evaluate ${testConfig.jobType} job for the user with only view permission`, async () => {
           const { body, status } = await supertest
             .post(`/api/ml/data_frame/_evaluate`)
             .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -202,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        it(`should not allow unauthorized user to evaluate ${testConfig.jobType} job`, async () => {
+        it.skip(`should not allow unauthorized user to evaluate ${testConfig.jobType} job`, async () => {
           const { body, status } = await supertest
             .post(`/api/ml/data_frame/_evaluate`)
             .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
