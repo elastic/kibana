@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Aggregation } from '../../modules/indicators/services/fetch_aggregated_indicators';
 import { convertAggregationToChartSeries } from './barchart';
-import { Aggregation } from '../../modules/indicators/hooks/use_aggregated_indicators';
 
 const aggregation1: Aggregation = {
   events: {

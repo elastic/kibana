@@ -22,7 +22,7 @@ const tableProps: IndicatorsTableProps = {
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
-  loading: false,
+  isLoading: false,
   browserFields: {},
   indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
   columnSettings: {
@@ -60,7 +60,7 @@ describe('<IndicatorsTable />', () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
-          <IndicatorsTable {...tableProps} loading={true} />
+          <IndicatorsTable {...tableProps} isLoading={true} />
         </TestProvidersComponent>
       );
     });
@@ -74,7 +74,7 @@ describe('<IndicatorsTable />', () => {
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
-            loading={false}
+            isLoading={false}
             indicatorCount={indicatorsFixture.length}
             indicators={indicatorsFixture}
           />
