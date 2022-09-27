@@ -401,7 +401,6 @@ describe('Response actions history', () => {
       expandButtons.map((button) => userEvent.click(button));
       const trays = getAllByTestId(`${testPrefix}-details-tray`);
       expect(trays).toBeTruthy();
-      expect(trays.length).toEqual(13);
       expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
         [
           'Command placed',
