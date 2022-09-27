@@ -7,7 +7,6 @@
  */
 
 import { DataViewEditorPlugin } from './plugin';
-import { MatchedItem } from './types';
 
 export type Start = jest.Mocked<ReturnType<DataViewEditorPlugin['start']>>;
 
@@ -24,7 +23,6 @@ const createStartContract = (): Start => {
     userPermissions: {
       editDataView: jest.fn(),
     },
-    getIndices: jest.fn((p: string) => Promise.resolve([] as MatchedItem[])),
   };
 };
 

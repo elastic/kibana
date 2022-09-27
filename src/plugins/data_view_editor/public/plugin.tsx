@@ -35,15 +35,6 @@ export class DataViewEditorPlugin
         dataViews,
         searchClient: data.search.search,
       }),
-      getIndices: async (pattern: string) => {
-        const { getIndices } = await import('./lib');
-        return getIndices({
-          http,
-          pattern,
-          showAllIndices: false,
-          isRollupIndex: () => false,
-        });
-      },
       /**
        * Data view editor flyout via react component
        * @param DataViewEditorProps - data view editor config

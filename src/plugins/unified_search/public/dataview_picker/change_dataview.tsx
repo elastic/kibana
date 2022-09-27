@@ -120,7 +120,11 @@ export function ChangeDataView({
   useEffect(() => {
     async function checkIndices() {
       if (dataViewSearchString !== '' && noDataViewMatches) {
-        const matches = await kibana.services.dataViewEditor.getIndices(dataViewSearchString);
+        const matches = await kibana.services.dataViews.getIndices({
+          pattern: dataViewSearchString,
+          isRollupIndex: () => false,
+          showAllIndices: false,
+        });
         setIndexMatches(matches.length);
       }
     }
@@ -128,7 +132,7 @@ export function ChangeDataView({
       clearTimeout(pendingIndexMatch.current);
     }
     pendingIndexMatch.current = setTimeout(checkIndices, 250);
-  }, [dataViewSearchString, kibana.services.dataViewEditor, noDataViewMatches]);
+  }, [dataViewSearchString, kibana.services.dataViews, noDataViewMatches]);
 
   useEffect(() => {
     if (trigger.label) {

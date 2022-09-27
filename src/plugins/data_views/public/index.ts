@@ -32,7 +32,11 @@ export {
   getFieldSubtypeNested,
 } from '../common';
 
-export type { DataViewsPublicSetupDependencies, DataViewsPublicStartDependencies } from './types';
+export type {
+  DataViewsPublicSetupDependencies,
+  DataViewsPublicStartDependencies,
+  MatchedItem,
+} from './types';
 
 export type {
   DataViewsServicePublic,

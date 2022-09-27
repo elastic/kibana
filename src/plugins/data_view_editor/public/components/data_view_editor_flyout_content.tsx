@@ -10,7 +10,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  DataViewField,
+  DataViewsPublicPluginStart,
+  MatchedItem,
+} from '@kbn/data-views-plugin/public';
 
 import {
   DataView,
@@ -23,13 +27,12 @@ import {
   UseField,
 } from '../shared_imports';
 
-import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
+import { ensureMinimumTime, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
 
 import {
-  MatchedItem,
   DataViewEditorContext,
   RollupIndicesCapsResponse,
   INDEX_PATTERN_TYPE,
@@ -176,18 +179,19 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
-    getIndices({
-      http,
-      isRollupIndex: () => false,
-      pattern: '*',
-      showAllIndices: allowHidden,
-    }).then((dataSources) => {
-      setAllSources(dataSources);
-      const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
-      setMatchedIndices(matchedSet);
-      setIsLoadingSources(false);
-    });
-  }, [http, allowHidden]);
+    dataViews
+      .getIndices({
+        isRollupIndex: () => false,
+        pattern: '*',
+        showAllIndices: allowHidden,
+      })
+      .then((dataSources) => {
+        setAllSources(dataSources);
+        const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
+        setMatchedIndices(matchedSet);
+        setIsLoadingSources(false);
+      });
+  }, [allowHidden, dataViews]);
 
   // loading list of index patterns
   useEffect(() => {
@@ -271,7 +275,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         const { matchedIndicesResult, exactMatched } = !isLoadingSources
           ? await loadMatchedIndices(query, allowHidden, allSources, {
               isRollupIndex,
-              http,
+              dataViews,
             })
           : {
               matchedIndicesResult: {
@@ -302,7 +306,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
+    [dataViews, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
   );
 
   // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
@@ -453,10 +457,10 @@ const loadMatchedIndices = memoizeOne(
     allSources: MatchedItem[],
     {
       isRollupIndex,
-      http,
+      dataViews,
     }: {
       isRollupIndex: (index: string) => boolean;
-      http: DataViewEditorContext['http'];
+      dataViews: DataViewsPublicPluginStart;
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
@@ -466,8 +470,7 @@ const loadMatchedIndices = memoizeOne(
     const indexRequests = [];
 
     if (query?.endsWith('*')) {
-      const exactMatchedQuery = getIndices({
-        http,
+      const exactMatchedQuery = dataViews.getIndices({
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
@@ -476,14 +479,12 @@ const loadMatchedIndices = memoizeOne(
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
-      const exactMatchQuery = getIndices({
-        http,
+      const exactMatchQuery = dataViews.getIndices({
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
       });
-      const partialMatchQuery = getIndices({
-        http,
+      const partialMatchQuery = dataViews.getIndices({
         isRollupIndex,
         pattern: `${query}*`,
         showAllIndices: allowHidden,

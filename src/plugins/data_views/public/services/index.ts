@@ -7,3 +7,4 @@
  */
 
 export * from './has_data';
+export * from './get_indices';
