@@ -49,7 +49,7 @@ const ALERTS_TOOLTIP = i18n.translate(
 const ACTIONS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.actionsTooltip',
   {
-    defaultMessage: 'Action status of recent rule runs.',
+    defaultMessage: 'The action statuses for the latest rule runs.',
   }
 );
 
