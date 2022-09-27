@@ -21,28 +21,44 @@ import { eventID } from '../../../../common/endpoint/models/event';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { AlertDetailsLoadingPage } from './components/loading-page';
 import { AlertDetailsErrorPage } from './components/error-page';
+import { AlertDetailsHeader } from './components/header';
+import { useGetFieldsData } from './utils/use-get-fields-data';
 
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
   const currentSpaceId = useSpaceId();
+  // TODO: We should update useTimelineEventDetails to use useQuery and have a refetching tracker
   const { runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
-  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
-    {
-      indexName: `${DEFAULT_ALERTS_INDEX}-${currentSpaceId}`,
-      eventId,
-      runtimeMappings,
-      skip: !eventID,
-    }
-  );
+  const spaceAlertsIndexAlias = `${DEFAULT_ALERTS_INDEX}-${currentSpaceId}`;
+  const [
+    loading,
+    detailsData,
+    rawEventData,
+    ecsData,
+    refetchEventData,
+    eventDetailsFieldsResponse,
+  ] = useTimelineEventsDetails({
+    indexName: spaceAlertsIndexAlias,
+    eventId,
+    runtimeMappings,
+    skip: !eventID,
+  });
   const dataNotFound = !loading && !detailsData;
   const hasData = !loading && detailsData;
-  const ruleName = ecsData?.kibana?.alert?.rule?.name ? ecsData?.kibana?.alert?.rule?.name[0] : '';
+
+  const getFieldsData = useGetFieldsData(eventDetailsFieldsResponse);
+  if (!eventDetailsFieldsResponse) return null;
+
+  const timestamp = getFieldsData('@timestamp');
+  const ruleName = getFieldsData('kibana.alert.rule.name');
+
   return (
     <>
       {loading && <AlertDetailsLoadingPage eventId={eventId} />}
       {dataNotFound && <AlertDetailsErrorPage eventId={eventId} />}
       {hasData && (
         <>
+          <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <SecuritySolutionTabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <Switch>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>

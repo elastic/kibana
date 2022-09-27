@@ -14,6 +14,13 @@ export const SUMMARY_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const BACK_TO_ALERTS_LINK = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.header.backToAlerts',
+  {
+    defaultMessage: 'Back to alerts',
+  }
+);
+
 export const LOADING_PAGE_MESSAGE = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.loadingPage.message',
   {

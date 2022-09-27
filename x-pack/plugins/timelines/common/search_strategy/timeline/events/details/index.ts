@@ -25,6 +25,7 @@ export interface TimelineEventsDetailsItem {
 export interface TimelineEventsDetailsStrategyResponse extends IEsSearchResponse {
   data?: Maybe<TimelineEventsDetailsItem[]>;
   ecs?: Maybe<Ecs>;
+  fields?: Record<string, string[]>;
   inspect?: Maybe<Inspect>;
   rawEventData?: Maybe<object>;
 }

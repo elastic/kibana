@@ -49,7 +49,8 @@ export const useTimelineEventsDetails = ({
   EventsArgs['detailsData'],
   object | undefined,
   EventsArgs['ecs'],
-  () => Promise<void>
+  () => Promise<void>,
+  Record<string, string[]> | null
 ] => {
   const asyncNoop = () => Promise.resolve();
   const { data } = useKibana().services;
@@ -59,6 +60,10 @@ export const useTimelineEventsDetails = ({
   const [loading, setLoading] = useState(false);
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
     useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [eventDetailsFieldsRepsonse, setEventDetailsFieldsRepsonse] = useState<Record<
+    string,
+    string[]
+  > | null>(null);
   const { addError, addWarning } = useAppToasts();
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
@@ -90,6 +95,7 @@ export const useTimelineEventsDetails = ({
                 Promise.resolve().then(() => {
                   ReactDOM.unstable_batchedUpdates(() => {
                     setLoading(false);
+                    setEventDetailsFieldsRepsonse(response.fields || null);
                     setTimelineDetailsResponse(response.data || []);
                     setRawEventData(response.rawResponse.hits.hits[0]);
                     setEcsData(response.ecs || null);
@@ -142,5 +148,12 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse, rawEventData, ecsData, refetch.current];
+  return [
+    loading,
+    timelineDetailsResponse,
+    rawEventData,
+    ecsData,
+    refetch.current,
+    eventDetailsFieldsRepsonse,
+  ];
 };
