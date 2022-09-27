@@ -5,14 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  isOfAggregateQueryType,
-  getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  Query,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType, getAggregateQueryMode, Query } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
@@ -24,7 +18,7 @@ import {
 } from '..';
 
 interface Args extends QueryState {
-  dataViewsService: DataViewsContract;
+  timeFieldName?: string;
   inputQuery?: Query;
 }
 
@@ -34,12 +28,12 @@ interface Args extends QueryState {
  * @param query kibana query or aggregate query
  * @param time kibana time range
  */
-export async function queryStateToExpressionAst({
+export function textBasedQueryStateToExpressionAst({
   filters,
   query,
   inputQuery,
   time,
-  dataViewsService,
+  timeFieldName,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -52,24 +46,15 @@ export async function queryStateToExpressionAst({
     filters: filters && filtersToAst(filters),
   });
   const ast = buildExpression([kibana, kibanaContext]).toAst();
+
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
     // sql query
     if (mode === 'sql' && 'sql' in query) {
-      const idxPattern = getIndexPatternFromSQLQuery(query.sql);
-      const idsTitles = await dataViewsService.getIdsWithTitle();
-      const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
+      const essql = aggregateQueryToAst(query, timeFieldName);
 
-      if (dataViewIdTitle) {
-        const dataView = await dataViewsService.get(dataViewIdTitle.id);
-        const timeFieldName = dataView.timeFieldName;
-        const essql = aggregateQueryToAst(query, timeFieldName);
-
-        if (essql) {
-          ast.chain.push(essql);
-        }
-      } else {
-        throw new Error(`No data view found for index pattern ${idxPattern}`);
+      if (essql) {
+        ast.chain.push(essql);
       }
     }
   }
