@@ -17124,7 +17124,6 @@
     "xpack.lens.configure.invalidReferenceLineDimension": "此参考线分配给了不再存在的轴。您可以将此参考线移到其他可用的轴，或将其移除。",
     "xpack.lens.confirmModal.cancelButtonLabel": "取消",
     "xpack.lens.customBucketContainer.dragToReorder": "拖动以重新排序",
-    "xpack.lens.dataPanelWrapper.switchDatasource": "切换到数据源",
     "xpack.lens.datatable.addLayer": "可视化",
     "xpack.lens.datatable.breakdownColumns": "列",
     "xpack.lens.datatable.breakdownColumns.description": "按字段拆分指标列。建议减少列数目以避免水平滚动。",
