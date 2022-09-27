@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-/* eslint-disable @kbn/eslint/module_migration */
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { ThemeProvider } from 'styled-components';
 
 import { ValueWithSpaceWarning } from '.';
 
@@ -26,7 +24,7 @@ describe('ValueWithSpaceWarning', () => {
   });
   it('should not render if value is falsy', () => {
     const container = render(<ValueWithSpaceWarning value="" />);
-    expect(container).toMatchSnapshot();
+    expect(container.queryByTestId('valueWithSpaceWarningTooltip')).toBeFalsy();
   });
   it('should not render if showSpaceWarning is falsy', () => {
     // @ts-ignore
@@ -35,24 +33,16 @@ describe('ValueWithSpaceWarning', () => {
       .mockReturnValue({ showSpaceWarningIcon: false, warningText: '' });
 
     const container = render(<ValueWithSpaceWarning value="Test" />);
-    expect(container).toMatchSnapshot();
+    expect(container.queryByTestId('valueWithSpaceWarningTooltip')).toBeFalsy();
   });
   it('should render if showSpaceWarning is truthy', () => {
-    const container = render(
-      <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
-        <ValueWithSpaceWarning value="Test" />
-      </ThemeProvider>
-    );
-    expect(container).toMatchSnapshot();
+    const container = render(<ValueWithSpaceWarning value="Test" />);
+    expect(container.getByTestId('valueWithSpaceWarningTooltip')).toBeInTheDocument();
   });
   it('should show the tooltip when the icon is clicked', async () => {
-    const container = render(
-      <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
-        <ValueWithSpaceWarning value="Test" />
-      </ThemeProvider>
-    );
+    const container = render(<ValueWithSpaceWarning value="Test" />);
 
-    fireEvent.mouseOver(container.getByTestId('value_with_space_warning_tooltip'));
+    fireEvent.mouseOver(container.getByTestId('valueWithSpaceWarningTooltip'));
     expect(await container.findByText('Warning Text')).toBeInTheDocument();
   });
 });

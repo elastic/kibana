@@ -15,8 +15,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionListsItemsByListIds } from '@kbn/securitysolution-list-api';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
+import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
 import { findRuleExceptionReferences } from '../../../../detections/containers/detection_engine/rules';
-import type { GetExceptionItemProps } from '../../components/list_common';
 
 interface FetchItemsProps {
   http: HttpSetup | undefined;

@@ -37,7 +37,7 @@ export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
     <div className={containerCss}>
       <EuiToolTip position="top" content={warningText}>
         <EuiIcon
-          data-test-subj="value_with_space_warning_tooltip"
+          data-test-subj="valueWithSpaceWarningTooltip"
           type={tooltipIconType}
           color="warning"
         />
