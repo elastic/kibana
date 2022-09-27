@@ -32,6 +32,7 @@ interface State {
   isPopoverOpen: boolean;
   curlCode: string;
   curlError: Error | null;
+  documentationUrl: string | null;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -42,6 +43,7 @@ export class ConsoleMenu extends Component<Props, State> {
       curlCode: '',
       isPopoverOpen: false,
       curlError: null,
+      documentationUrl: null,
     };
   }
 
@@ -55,6 +57,10 @@ export class ConsoleMenu extends Component<Props, State> {
       .catch((e) => {
         this.setState({ curlError: e });
       });
+
+    this.props.getDocumentation().then((url) => {
+      this.setState({ documentationUrl: url });
+    });
   };
 
   async copyAsCurl() {
@@ -100,11 +106,11 @@ export class ConsoleMenu extends Component<Props, State> {
 
   openDocs = async () => {
     this.closePopover();
-    const documentation = await this.props.getDocumentation();
-    if (!documentation) {
+    const { documentationUrl } = await this.state;
+    if (!documentationUrl) {
       return;
     }
-    window.open(documentation, '_blank');
+    window.open(documentationUrl, '_blank');
   };
 
   autoIndent = (event: React.MouseEvent) => {
@@ -143,6 +149,7 @@ export class ConsoleMenu extends Component<Props, State> {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="Open documentation"
+        disabled={!this.state.documentationUrl}
         data-test-subj="consoleMenuOpenDocs"
         onClick={() => {
           this.openDocs();
