@@ -1797,7 +1797,7 @@ export class RulesClient {
                     break;
                   }
                   if (operation.operation === 'set') {
-                    const snoozeAttributes = getSnoozeAttributes(attributes, operation.value);
+                    const snoozeAttributes = getBulkSnoozeAttributes(attributes, operation.value);
                     try {
                       verifySnoozeScheduleLimit(snoozeAttributes);
                     } catch (error) {
@@ -1819,7 +1819,7 @@ export class RulesClient {
                     }
                     attributes = {
                       ...attributes,
-                      ...getUnsnoozeAttributes(attributes, idsToDelete),
+                      ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
                     };
                   }
                   break;
@@ -3254,6 +3254,33 @@ function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSche
   };
 }
 
+function getBulkSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
+  // If duration is -1, instead mute all
+  const { id: snoozeId, duration } = snoozeSchedule;
+
+  if (duration === -1) {
+    return {
+      muteAll: true,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
+    };
+  }
+
+  // Bulk adding snooze schedule, don't touch the existing snooze/indefinite snooze
+  if (snoozeId) {
+    const existingSnoozeSchedules = attributes.snoozeSchedule || [];
+    return {
+      muteAll: attributes.muteAll,
+      snoozeSchedule: [...existingSnoozeSchedules, snoozeSchedule],
+    };
+  }
+
+  // Bulk snoozing, don't touch the existing snooze schedules
+  return {
+    muteAll: false,
+    snoozeSchedule: [...clearUnscheduledSnooze(attributes), snoozeSchedule],
+  };
+}
+
 function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
   const snoozeSchedule = scheduleIds
     ? clearScheduledSnoozesById(attributes, scheduleIds)
@@ -3261,6 +3288,26 @@ function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
 
   return {
     snoozeSchedule,
+    ...(!scheduleIds ? { muteAll: false } : {}),
+  };
+}
+
+function getBulkUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
+  // Bulk removing snooze schedules, don't touch the current snooze/indefinite snooze
+  if (scheduleIds) {
+    const newSchedules = clearScheduledSnoozesById(attributes, scheduleIds);
+    const unscheduledSnooze =
+      attributes.snoozeSchedule?.filter((s) => typeof s.id === 'undefined') || [];
+
+    return {
+      snoozeSchedule: [...unscheduledSnooze, ...newSchedules],
+      ...(!scheduleIds ? { muteAll: false } : {}),
+    };
+  }
+
+  // Bulk unsnoozing, don't touch current snooze schedules that are NOT active
+  return {
+    snoozeSchedule: clearCurrentActiveSnooze(attributes),
     ...(!scheduleIds ? { muteAll: false } : {}),
   };
 }
