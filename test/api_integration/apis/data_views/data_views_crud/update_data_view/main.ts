@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          expect(response2.body[config.serviceKey].name).to.be(name1);
+          expect(response2.body[config.serviceKey].name).to.be(name2);
 
           const response3 = await supertest.get(`${config.path}/${id}`);
 
