@@ -4644,6 +4644,18 @@
           "properties": {
             "all": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4656,18 +4668,6 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 },
                 "status": {
                   "properties": {
@@ -4720,6 +4720,18 @@
             },
             "sec": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4732,23 +4744,23 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 }
               }
             },
             "obs": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4761,23 +4773,23 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 }
               }
             },
             "main": {
               "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4790,18 +4802,6 @@
                       "type": "long"
                     }
                   }
-                },
-                "total": {
-                  "type": "long"
-                },
-                "monthly": {
-                  "type": "long"
-                },
-                "weekly": {
-                  "type": "long"
-                },
-                "daily": {
-                  "type": "long"
                 }
               }
             }
@@ -10536,6 +10536,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
