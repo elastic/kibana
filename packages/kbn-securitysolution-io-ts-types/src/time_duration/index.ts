@@ -21,8 +21,12 @@ export const TimeDuration = new t.Type<string, string, unknown>(
     if (typeof input === 'string' && input.trim() !== '') {
       try {
         const inputLength = input.length;
-        const time = parseInt(input.trim().substring(0, inputLength - 1), 10);
         const unit = input.trim().at(-1);
+        const time = parseFloat(input.trim().substring(0, inputLength - 1));
+
+        if (!Number.isInteger(time)) {
+          return t.failure(input, context);
+        }
         if (
           time >= 1 &&
           Number.isSafeInteger(time) &&

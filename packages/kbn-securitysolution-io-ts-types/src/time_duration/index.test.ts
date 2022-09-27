@@ -11,7 +11,7 @@ import { left } from 'fp-ts/lib/Either';
 import { TimeDuration } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-describe('time_unit', () => {
+describe('TimeDuration', () => {
   test('it should validate a correctly formed TimeDuration with time unit of seconds', () => {
     const payload = '1s';
     const decoded = TimeDuration.decode(payload);
@@ -39,6 +39,17 @@ describe('time_unit', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should NOT validate a TimeDuration of 0 length', () => {
+    const payload = '0s';
+    const decoded = TimeDuration.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0s" supplied to "TimeDuration"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
   test('it should NOT validate a negative TimeDuration', () => {
     const payload = '-10s';
     const decoded = TimeDuration.decode(payload);
@@ -46,6 +57,17 @@ describe('time_unit', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "-10s" supplied to "TimeDuration"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should NOT validate a decimal TimeDuration', () => {
+    const payload = '1.5s';
+    const decoded = TimeDuration.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "1.5s" supplied to "TimeDuration"',
     ]);
     expect(message.schema).toEqual({});
   });

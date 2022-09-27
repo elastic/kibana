@@ -93,8 +93,6 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'schedule',
           operation: 'set',
-          // We need to pass a pure Interval object
-          // i.e. get rid of the meta property
           value: {
             interval: action.value.interval,
           },

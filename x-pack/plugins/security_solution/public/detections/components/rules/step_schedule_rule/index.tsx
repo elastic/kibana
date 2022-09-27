@@ -95,6 +95,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               idAria: 'detectionEngineStepScheduleRuleInterval',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+              minimumValue: 1,
             }}
           />
           <UseField

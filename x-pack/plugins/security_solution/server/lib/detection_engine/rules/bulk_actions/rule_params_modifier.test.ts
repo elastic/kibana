@@ -353,7 +353,7 @@ describe('ruleParamsModifier', () => {
   });
 
   describe('schedule', () => {
-    test('should set timeline', () => {
+    test('should set schedule', () => {
       const INTERVAL_IN_MINUTES = 5;
       const LOOKBACK_IN_MINUTES = 1;
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
@@ -367,8 +367,8 @@ describe('ruleParamsModifier', () => {
         },
       ]);
 
-      // @ts-expect-error
-      expect(editedRuleParams.interval).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((editedRuleParams as any).interval).toBeUndefined();
       expect(editedRuleParams.meta).toStrictEqual({
         from: '1m',
       });

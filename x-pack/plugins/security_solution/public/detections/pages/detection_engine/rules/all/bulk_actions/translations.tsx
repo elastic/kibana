@@ -129,7 +129,7 @@ export const bulkSetSchedule = {
   warningCalloutMessage: (rulesCount: number): JSX.Element => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.warningCalloutMessage"
-      defaultMessage="You're about to apply changes to {rulesCount, plural, one {# selected rule} other {# selected rules}}. The changes you made will be overwritten to the existing Rule schedules and additional look-back time (if any)."
+      defaultMessage="You're about to apply changes to {rulesCount, plural, one {# selected rule} other {# selected rules}}. The changes you make will overwrite the existing rule schedules and additional look-back time (if any)."
       values={{ rulesCount }}
     />
   ),
