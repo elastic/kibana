@@ -23,7 +23,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
-import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
+import { IndicatorsFlyout } from '../flyout';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
 import { ColumnSettingsValue } from './hooks/use_column_settings';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
