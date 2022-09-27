@@ -801,7 +801,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: packagePolicy!.package!.name,
         pkgVersion: pkgVersion ?? '',
-        skipArchive: true,
       });
     }
 

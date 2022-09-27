@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-/** @internal */
 export const KBN_LOAD_MARKS = 'kbnLoad';
-
 export const KIBANA_LOADED_EVENT = 'kibana_loaded';
-
 export const LOAD_START = 'load_started';
 export const LOAD_BOOTSTRAP_START = 'bootstrap_started';
 export const LOAD_CORE_CREATED = 'core_created';
