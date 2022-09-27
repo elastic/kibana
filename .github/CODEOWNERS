@@ -132,6 +132,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
+/src/dev/build/tasks/bundle_fleet_packages.ts
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
