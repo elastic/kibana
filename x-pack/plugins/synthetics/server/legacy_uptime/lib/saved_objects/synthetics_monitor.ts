@@ -23,6 +23,7 @@ export const syntheticsMonitor: SavedObjectsType = {
           keyword: {
             type: 'keyword',
             ignore_above: 256,
+            normalizer: 'lowercase',
           },
         },
       },

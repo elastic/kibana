@@ -41,7 +41,6 @@ const HostRiskSummaryComponent: React.FC<{
               values={{
                 hostRiskScoreDocumentationLink: (
                   <RiskScoreDocLink
-                    external={false}
                     riskScoreEntity={RiskScoreEntity.host}
                     title={
                       <FormattedMessage
