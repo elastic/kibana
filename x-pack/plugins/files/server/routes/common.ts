@@ -8,7 +8,13 @@ import mime from 'mime';
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
-export function getDownloadHeadersForFile(file: File, fileName?: string): ResponseHeaders {
+interface Args {
+  file: File;
+  fileName?: string;
+  blurhash?: string;
+}
+
+export function getDownloadHeadersForFile({ file, blurhash, fileName }: Args): ResponseHeaders {
   return {
     'content-type':
       (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
@@ -17,6 +23,7 @@ export function getDownloadHeadersForFile(file: File, fileName?: string): Respon
     'cache-control': 'max-age=31536000, immutable',
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
     'x-content-type-options': 'nosniff',
+    ...(blurhash ? { 'x-kbn-blurhash': blurhash } : undefined),
   };
 }
 
