@@ -21,12 +21,12 @@ import {
   convertFilterRatioToFormulaColumn,
   convertToLastValueColumn,
   convertToStaticValueColumn,
+  convertStaticValueToFormulaColumn,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToCounterRateColumn,
   convertToStandartDeviationColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
-import { convertStaticValueToFormulaColumn } from '../convert/static_value';
 
 export const getMetricsColumns = (
   series: Series,
