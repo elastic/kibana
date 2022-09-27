@@ -48,7 +48,9 @@ import { usersActions } from '../../../../users/store';
 const TABLE_QUERY_ID = (riskEntity: RiskScoreEntity) =>
   riskEntity === RiskScoreEntity.host ? 'hostRiskDashboardTable' : 'userRiskDashboardTable';
 const RISK_KPI_QUERY_ID = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host ? 'headerHostRiskScoreKpiQuery' : 'headerUserRiskScoreKpiQuery';
+  riskEntity === RiskScoreEntity.host
+    ? 'headerHostRiskScoreKpiQuery'
+    : 'headerUserRiskScoreKpiQuery';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -175,19 +177,16 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     ) : (
       <EntityAnalyticsUserRiskScoreDisable refetch={refreshPage} timerange={timerange} />
     );
-
   }
 
   if (isDeprecated && !isTableLoading) {
     return (
-      <RiskScoresDeprecated
-        entityType={riskEntity}
-        refetch={refreshPage}
-        timerange={timerange} />;
+      <RiskScoresDeprecated entityType={riskEntity} refetch={refreshPage} timerange={timerange} />
+    );
   }
 
   if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={riskEntity}  refetch={refreshPage} />;
+    return <RiskScoresNoDataDetected entityType={riskEntity} refetch={refreshPage} />;
   }
 
   return (
