@@ -84,6 +84,8 @@ describe('Text based languages utils', () => {
             index: '',
           },
         },
+        indexPatternRefs: [],
+        fieldList: [],
       };
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const dataMock = dataPluginMock.createStartContract();
@@ -113,6 +115,7 @@ describe('Text based languages utils', () => {
       );
 
       expect(updatedState).toStrictEqual({
+        initialContext: undefined,
         fieldList: [
           {
             name: 'timestamp',
