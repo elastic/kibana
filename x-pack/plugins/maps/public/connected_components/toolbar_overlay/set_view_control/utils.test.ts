@@ -29,8 +29,8 @@ describe('MGRS', () => {
 describe('UTM', () => {
   test('ddToUTM should convert lat lon to UTM', () => {
     expect(ddToUTM(29.29926, 32.05495)).toEqual({
-      easting: 408216,
-      northing: 3241512,
+      easting: '408216',
+      northing: '3241512',
       zone: '36R',
     });
   });
