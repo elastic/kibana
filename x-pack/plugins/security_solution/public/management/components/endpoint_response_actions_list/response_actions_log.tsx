@@ -597,7 +597,7 @@ export const ResponseActionsLog = memo<
   // create range label to display
   const recordRangeLabel = useMemo(
     () => (
-      <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
+      <EuiText color="default" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
         <FormattedMessage
           id="xpack.securitySolution.responseActionsList.list.recordRange"
           defaultMessage="Showing {range} of {total} {recordsLabel}"
@@ -649,7 +649,7 @@ export const ResponseActionsLog = memo<
                 <h2>
                   <FormattedMessage
                     id="xpack.securitySolution.responseActionsList.empty.title"
-                    defaultMessage="No response actions log"
+                    defaultMessage="No results match your search criteria"
                   />
                 </h2>
               }
@@ -657,7 +657,7 @@ export const ResponseActionsLog = memo<
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.responseActionsList.empty.body"
-                    defaultMessage="Try a different set of filters"
+                    defaultMessage="Try modifying your search or filter set"
                   />
                 </p>
               }
