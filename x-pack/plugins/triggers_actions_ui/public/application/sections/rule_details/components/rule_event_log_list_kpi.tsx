@@ -35,7 +35,7 @@ const API_FAILED_MESSAGE = i18n.translate(
 const RESPONSE_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip',
   {
-    defaultMessage: 'Response of the latest rule runs.',
+    defaultMessage: 'The responses for the latest rule runs.',
   }
 );
 
