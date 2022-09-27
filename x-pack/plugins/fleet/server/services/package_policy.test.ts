@@ -666,6 +666,158 @@ describe('Package policy service', () => {
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });
 
+    it('should fail to update if the name already exists on another policy', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 1,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'existing-package-policy',
+            type: 'ingest-package-policies',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: {
+              name: 'endpoint-1',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'policy-id-1',
+              package: {
+                name: 'endpoint',
+                title: 'Elastic Endpoint',
+                version: '0.9.0',
+              },
+              inputs: [],
+            },
+          },
+        ],
+      });
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'the-package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes: {},
+      });
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'the-package-policy-id',
+            type,
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await expect(
+        packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          'the-package-policy-id',
+          {
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.9.0',
+            },
+            inputs: [],
+          }
+        )
+      ).rejects.toThrow(
+        'An integration policy with the name endpoint-1 already exists. Please rename it or choose a different name.'
+      );
+    });
+
+    it('should not fail to update if skipUniqueNameVerification when the name already exists on another policy', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 1,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'existing-package-policy',
+            type: 'ingest-package-policies',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: {
+              name: 'endpoint-1',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'policy-id-1',
+              package: {
+                name: 'endpoint',
+                title: 'Elastic Endpoint',
+                version: '0.9.0',
+              },
+              inputs: [],
+            },
+          },
+        ],
+      });
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'the-package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes: {},
+      });
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'the-package-policy-id',
+            type,
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        {
+          name: 'endpoint-1',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
+          inputs: [],
+        },
+        { skipUniqueNameVerification: true }
+      );
+      expect(result.name).toEqual('endpoint-1');
+    });
+
     it('should throw if the user try to update input vars that are frozen', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
