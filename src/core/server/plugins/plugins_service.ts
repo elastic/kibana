@@ -49,25 +49,6 @@ export interface PluginsServiceSetup {
 }
 
 /** @internal */
-export interface UiPlugins {
-  /**
-   * Paths to all discovered ui plugin entrypoints on the filesystem, even if
-   * disabled.
-   */
-  internal: Map<PluginName, InternalPluginInfo>;
-
-  /**
-   * Information needed by client-side to load plugins and wire dependencies.
-   */
-  public: Map<PluginName, DiscoveredPlugin>;
-
-  /**
-   * Configuration for plugins to be exposed to the client-side.
-   */
-  browserConfigs: Map<PluginName, Observable<unknown>>;
-}
-
-/** @internal */
 export interface PluginsServiceStart {
   /** Start contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;

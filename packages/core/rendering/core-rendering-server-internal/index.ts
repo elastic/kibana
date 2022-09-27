@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { RenderingService } from './src';
+export type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+  IRenderOptions,
+  RenderingMetadata,
+  RenderingPrebootDeps,
+  RenderingSetupDeps,
+} from './src';

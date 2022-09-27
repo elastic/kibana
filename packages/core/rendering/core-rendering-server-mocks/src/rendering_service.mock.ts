@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+} from '@kbn/core-rendering-server-internal';
 
 function createRenderingPreboot() {
   const mocked: jest.Mocked<InternalRenderingServicePreboot> = {

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { UiPlugins, InternalPluginInfo } from './src';
+export type { UiPlugins, InternalPluginInfo } from './types';
