@@ -35,6 +35,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
+
+      it('renders the correct error page title', async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraOps',
+          '/detail/host/test',
+          '',
+          {
+            ensureCurrentUrl: false,
+          }
+        );
+        await pageObjects.infraHome.waitForLoading();
+
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain('Uh oh - Observability - Elastic');
+      });
     });
 
     describe('with metrics present', () => {
