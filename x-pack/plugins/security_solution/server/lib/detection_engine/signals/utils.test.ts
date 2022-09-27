@@ -45,7 +45,7 @@ import {
   isDetectionAlert,
   getField,
   addToSearchAfterReturn,
-  logUnprocessedExceptionsWarnings,
+  getUnprocessedExceptionsWarnings,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1680,14 +1680,13 @@ describe('utils', () => {
 
   describe('logUnprocessedExceptionsWarnings', () => {
     test('does not log anything when the array is empty', () => {
-      logUnprocessedExceptionsWarnings([], ruleExecutionLogger);
-      expect(ruleExecutionLogger.warn).not.toHaveBeenCalled();
+      const result = getUnprocessedExceptionsWarnings([]);
+      expect(result).toBeUndefined();
     });
 
     test('logs the exception names when there are unprocessed exceptions', () => {
-      logUnprocessedExceptionsWarnings([getExceptionListItemSchemaMock()], ruleExecutionLogger);
-      expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-      expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      const result = getUnprocessedExceptionsWarnings([getExceptionListItemSchemaMock()]);
+      expect(result).toEqual(
         `The following exceptions won't be applied to rule execution: ${
           getExceptionListItemSchemaMock().name
         }`

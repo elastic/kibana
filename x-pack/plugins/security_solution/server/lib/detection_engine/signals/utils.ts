@@ -979,14 +979,13 @@ export const getField = (event: SimpleHit, field: string): SearchTypes | undefin
   }
 };
 
-export const logUnprocessedExceptionsWarnings = (
-  unprocessedExceptions: ExceptionListItemSchema[],
-  ruleExecutionLogger: IRuleExecutionLogForExecutors
-) => {
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
   if (unprocessedExceptions.length > 0) {
     const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
-    ruleExecutionLogger.warn(
-      `The following exceptions won't be applied to rule execution: ${exceptionNames.join(', ')}`
-    );
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
   }
 };
