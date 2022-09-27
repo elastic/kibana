@@ -83,8 +83,8 @@ export const useUserRiskScore = (
 
 const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
+  onlyLatest = true,
   filterQuery,
-  onlyLatest,
   sort,
   skip = false,
   pagination,
