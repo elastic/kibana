@@ -61,11 +61,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          expect(response2.body[config.serviceKey].title).to.be(name2);
+          expect(response2.body[config.serviceKey].name).to.be(name1);
 
           const response3 = await supertest.get(`${config.path}/${id}`);
 
-          expect(response3.body[config.serviceKey].title).to.be(name2);
+          expect(response3.body[config.serviceKey].name).to.be(name2);
         });
 
         it('can update data view timeFieldName', async () => {
