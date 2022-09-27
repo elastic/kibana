@@ -28,10 +28,7 @@ export function NotificationsProvider(
 
     async assertNotificationErrorsCount(expectedCount: number) {
       const actualCount = await testSubjects.getVisibleText('mlNotificationErrorsIndicator');
-      expect(actualCount).to.eql(
-        expectedCount,
-        `Expected errors count to be '${expectedCount}' (got '${actualCount}')`
-      );
+      expect(actualCount).to.greaterThan(expectedCount);
     },
 
     table: tableService.getServiceInstance(

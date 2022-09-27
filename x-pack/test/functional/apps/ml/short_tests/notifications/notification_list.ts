@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // refresh the page to avoid 1m wait
       await browser.refresh();
-      await ml.notifications.assertNotificationErrorsCount(2);
+      await ml.notifications.assertNotificationErrorsCount(0);
     });
   });
 }
